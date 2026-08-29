@@ -284,7 +284,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.7.1",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.8",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -325,10 +325,37 @@ function answer(q){
   return `質問を受け取りました。無料版では「今日どう？」「ロック状況」「資金推移」「弱点は？」「精算を開いて」に対応しています。`;
 }
 let speechOn=localStorage.getItem("boatCommand.speech")!=="off";
+let cachedVoices=[];
+function refreshVoices(){cachedVoices=("speechSynthesis" in window&&speechSynthesis.getVoices)?speechSynthesis.getVoices():[]}
+if("speechSynthesis" in window){refreshVoices();speechSynthesis.onvoiceschanged=refreshVoices}
+function spokenJapanese(input){
+  let t=String(input||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
+  t=t.replace(/\b(\d{1,2})R\b/gi,"$1レース");
+  t=t.replace(/\bROI\s*([0-9]+(?:\.[0-9]+)?)%/gi,"回収率 $1パーセント");
+  t=t.replace(/\bROI\b/gi,"回収率").replace(/\bP\/L\b/gi,"損益");
+  t=t.replace(/\bHIT\b/gi,"的中").replace(/\bMISS\b/gi,"不的中");
+  t=t.replace(/\bBACKTEST\b/gi,"バックテスト").replace(/\bLIVE\b/gi,"ライブ");
+  t=t.replace(/\bHARD LOCK\b/gi,"ハードロック").replace(/\bLOCK\b/gi,"ロック");
+  t=t.replace(/\bRESULT MODE\b/gi,"リザルトモード").replace(/\bSTRICT BLIND\b/gi,"ストリクトブラインド");
+  t=t.replace(/\bST\b/g,"スタートタイミング");
+  t=t.replace(/¥\s*([\d,]+)/g,"$1円").replace(/([0-9]+(?:\.[0-9]+)?)%/g,"$1パーセント");
+  t=t.replace(/(\d{1,2})\/12\b/g,"12レース中$1レース");
+  return t;
+}
+function preferredJapaneseVoice(){
+  const jp=cachedVoices.filter(v=>/^ja([-_]|$)/i.test(v.lang||""));
+  const names=["Kyoko","Nanami","Siri","Japanese","Otoya"];
+  for(const n of names){const v=jp.find(x=>(x.name||"").toLowerCase().includes(n.toLowerCase()));if(v)return v}
+  return jp[0]||null;
+}
 function speakText(html){
   if(!speechOn||!("speechSynthesis" in window))return;
-  const text=String(html).replace(/<[^>]+>/g,"");
-  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=1.02;speechSynthesis.speak(u);
+  const text=spokenJapanese(html);if(!text)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";
+  const v=preferredJapaneseVoice();if(v)u.voice=v;
+  u.rate=1.03;u.pitch=1.22;u.volume=1;
+  speechSynthesis.speak(u);
 }
 function updateSpeakBtn(){if($("#speakBtn"))$("#speakBtn").textContent=speechOn?"🔊":"🔇"}
 function send(q){
