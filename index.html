@@ -1,188 +1,185 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#07111f" />
-  <title>BOAT COMMAND v0.1</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#06101c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
+  <title>BOAT COMMAND v0.5</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="orb">◉</div>
-        <div>
-          <div class="brand-title">BOAT COMMAND</div>
-          <div class="brand-sub">PRIVATE AI RACE DESK</div>
-        </div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">◉</div>
+      <div class="brand-copy"><b>BOAT COMMAND</b><small>PRIVATE RACE ANALYTICS</small></div>
+    </div>
+
+    <nav>
+      <button class="nav active" data-view="home"><span>⌂</span><em>HOME</em></button>
+      <button class="nav" data-view="predict"><span>≋</span><em>12R予想</em></button>
+      <button class="nav" data-view="results"><span>✓</span><em>精算</em></button>
+      <button class="nav" data-view="analytics"><span>⌁</span><em>分析</em></button>
+      <button class="nav" data-view="assistant"><span>✦</span><em>AI</em></button>
+      <button class="nav" data-view="data"><span>⇅</span><em>DATA</em></button>
+    </nav>
+
+    <div class="venue-card">
+      <small>担当場</small>
+      <strong>蒲郡</strong>
+      <span><i></i> GAMAGORI-01</span>
+    </div>
+    <div class="version">v0.5 · OFFLINE-FIRST</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">GAMAGORI ANALYST</div>
+        <h1 id="pageTitle">蒲郡コマンドセンター</h1>
       </div>
-
-      <nav class="nav">
-        <button class="nav-btn active" data-view="home">⌂ <span>HOME</span></button>
-        <button class="nav-btn" data-view="today">≋ <span>今日の12R</span></button>
-        <button class="nav-btn" data-view="analytics">⌁ <span>分析</span></button>
-        <button class="nav-btn" data-view="ai">✦ <span>AI分析</span></button>
-      </nav>
-
-      <div class="venue-card">
-        <div class="label">担当場</div>
-        <div class="venue">蒲郡</div>
-        <div class="status"><span class="dot"></span> GAMAGORI-01</div>
+      <div class="top-actions">
+        <label class="date-box"><span>対象日</span><input id="sessionDate" type="date"></label>
+        <div id="modeBadge" class="badge blind">🔒 BLIND MODE</div>
       </div>
+    </header>
 
-      <div class="sidebar-foot">v0.1 prototype · sample data</div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <div class="eyebrow">GAMAGORI ANALYST</div>
-          <h1 id="view-title">おはよう。今日は蒲郡を見ます。</h1>
-        </div>
-        <div class="lock-badge">🔒 BLIND MODE</div>
-      </header>
-
-      <section id="home" class="view active">
-        <div class="grid hero-grid">
-          <section class="panel ai-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-title">AIに聞く</div>
-                <div class="panel-sub">話しかけるか、下に入力</div>
-              </div>
-              <button id="micBtn" class="mic-btn" aria-label="音声入力">🎙</button>
-            </div>
-
-            <div id="chat" class="chat">
-              <div class="bubble ai">蒲郡担当です。<br>「今日どう？」「資金推移」「予想を見せて」「弱点は？」と聞いてみて。</div>
-            </div>
-
-            <div class="prompt-row">
-              <input id="promptInput" placeholder="例：今日の蒲郡どう？" />
-              <button id="sendBtn">送信</button>
-            </div>
-            <div class="quick-row">
-              <button class="quick" data-q="今日どう？">今日どう？</button>
-              <button class="quick" data-q="資金推移">資金推移</button>
-              <button class="quick" data-q="予想を見せて">予想</button>
-              <button class="quick" data-q="弱点は？">弱点</button>
-            </div>
-          </section>
-
-          <section class="panel summary-panel">
-            <div class="panel-title">今日のサマリー</div>
-            <div class="stats">
-              <div class="stat"><span>的中率</span><strong>50.0%</strong><small>2 / 4R</small></div>
-              <div class="stat"><span>回収率</span><strong class="good">128%</strong><small>仮想</small></div>
-              <div class="stat"><span>損益</span><strong class="good">+¥2,240</strong><small>4R終了時点</small></div>
-              <div class="stat"><span>残高</span><strong>¥82,600</strong><small>累計</small></div>
-            </div>
-            <div class="mini-note">※このv0.1は画面確認用のサンプルデータ。実データ接続は次工程。</div>
-          </section>
-        </div>
-
-        <div class="grid dashboard-grid">
-          <section class="panel chart-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-title">仮想資金推移</div>
-                <div class="panel-sub">レース単位</div>
-              </div>
-              <button class="ghost" data-action="focus-balance">詳しく</button>
-            </div>
-            <svg id="balanceChart" viewBox="0 0 720 260" preserveAspectRatio="none"></svg>
-          </section>
-
-          <section class="panel bar-panel">
-            <div class="panel-title">コース別回収率</div>
-            <div id="courseBars" class="bars"></div>
-          </section>
-
-          <section class="panel races-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-title">今日の12R</div>
-                <div class="panel-sub">最大4点 / 1点500円</div>
-              </div>
-              <button class="ghost" data-view-jump="today">12Rを見る</button>
-            </div>
-            <div id="raceStrip" class="race-strip"></div>
-          </section>
-
-          <section class="panel insight-panel">
-            <div class="panel-title">AIメモ</div>
-            <div class="insight">
-              <div class="tag good-bg">強み</div>
-              <p>3コース頭の回収率がサンプル上では高め。展示と進入の整合を重点確認。</p>
-            </div>
-            <div class="insight">
-              <div class="tag warn-bg">弱点</div>
-              <p>3着抜けが目立つ想定。最終候補の圧縮ロジックを改善対象として記録。</p>
-            </div>
-          </section>
-        </div>
-      </section>
-
-      <section id="today" class="view">
-        <div class="panel">
+    <section id="home" class="view active">
+      <div class="hero-grid">
+        <section class="panel assistant-card">
           <div class="panel-head">
-            <div>
-              <div class="panel-title">今日の予想（蒲郡）</div>
-              <div class="panel-sub">HARD LOCK表示サンプル</div>
-            </div>
-            <div class="lock-badge">🔒 LOCKED</div>
+            <div><h2>AIに聞く</h2><p>端末内データを会話形式で説明</p></div>
+            <button id="micBtn" class="mic">🎙</button>
           </div>
-          <div id="raceTable" class="race-table"></div>
-        </div>
-      </section>
-
-      <section id="analytics" class="view">
-        <div class="grid analytics-grid">
-          <section class="panel">
-            <div class="panel-title">決まり手別 回収率</div>
-            <div id="methodBars" class="bars"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-title">直近の失敗要因</div>
-            <div class="donut-wrap">
-              <div class="donut" id="donut"></div>
-              <div class="donut-legend" id="donutLegend"></div>
-            </div>
-          </section>
-          <section class="panel wide">
-            <div class="panel-title">分析コメント</div>
-            <div class="analysis-copy">
-              現在はプロトタイプ用データ。実運用では「風向×風速」「展示順位×コース」「モーター評価×着順」
-              「人気帯×回収率」「3着抜け率」「進入変化」などを場別に完全分離して蓄積します。
-            </div>
-          </section>
-        </div>
-      </section>
-
-      <section id="ai" class="view">
-        <div class="panel ai-report">
-          <div class="panel-title">蒲郡担当AI 分析レポート</div>
-          <div class="report-grid">
-            <article>
-              <h3>強み</h3>
-              <p>サンプルでは3コース起点と差し想定の回収率が高め。候補圧縮に使える可能性。</p>
-            </article>
-            <article>
-              <h3>弱点</h3>
-              <p>3着候補の取りこぼしが多い想定。1着精度とは別に3着評価ロジックを管理する。</p>
-            </article>
-            <article>
-              <h3>次の改善</h3>
-              <p>戦略Versionを固定し、100R単位で比較。日々の勝敗だけでロジックを変更しない。</p>
-            </article>
+          <div id="chat" class="chat">
+            <div class="bubble ai">蒲郡担当です。<br>「今日どう？」「ロック状況」「資金推移」「弱点は？」と聞いてください。</div>
           </div>
-        </div>
-      </section>
-    </main>
-  </div>
+          <div class="input-row">
+            <input id="prompt" placeholder="例：今日の蒲郡どう？">
+            <button id="send">送信</button>
+          </div>
+          <div class="quick">
+            <button data-q="今日どう？">今日どう？</button>
+            <button data-q="ロック状況">ロック状況</button>
+            <button data-q="資金推移">資金推移</button>
+            <button data-q="弱点は？">弱点</button>
+          </div>
+        </section>
 
-  <script src="app.js"></script>
+        <section class="panel">
+          <div class="panel-head"><div><h2>今日のサマリー</h2><p id="summarySub">未開始</p></div><div id="todayStatus" class="status-pill">OPEN</div></div>
+          <div class="kpis">
+            <div class="kpi"><span>LOCK</span><strong id="kLocked">0/12</strong><small>予想固定</small></div>
+            <div class="kpi"><span>的中</span><strong id="kHits">—</strong><small id="kHitRate">—</small></div>
+            <div class="kpi"><span>回収率</span><strong id="kRoi">—</strong><small>当日</small></div>
+            <div class="kpi"><span>損益</span><strong id="kProfit">¥0</strong><small>当日</small></div>
+          </div>
+          <div class="guard-note" id="guardNote">全12RをLOCKするまで、結果入力は開きません。</div>
+        </section>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel chart-card">
+          <div class="panel-head"><div><h2>仮想資金推移</h2><p>精算済みレース単位</p></div><strong id="bankrollNow">¥100,000</strong></div>
+          <svg id="bankrollChart" viewBox="0 0 900 280" preserveAspectRatio="none"></svg>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div><h2>累計</h2><p>保存データ全期間</p></div></div>
+          <div class="stack-stats">
+            <div><span>戦績</span><b id="allRecord">0戦 0的中</b></div>
+            <div><span>的中率</span><b id="allHitRate">—</b></div>
+            <div><span>回収率</span><b id="allRoi">—</b></div>
+            <div><span>最大DD</span><b id="allDd">¥0</b></div>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <div class="panel-head"><div><h2>12Rステータス</h2><p>予想 → LOCK → 結果 → 精算</p></div><button class="ghost" data-jump="predict">予想を開く</button></div>
+          <div id="raceStrip" class="race-strip"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="predict" class="view">
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>蒲郡 1R〜12R 予想</h2><p>3連単 最大4点・1点500円・LOCK後は画面から変更不可</p></div>
+          <button id="lockAllBtn" class="primary">入力済みを一括LOCK</button>
+        </div>
+        <div id="predictionList" class="race-list"></div>
+      </section>
+    </section>
+
+    <section id="results" class="view">
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>結果・精算</h2><p>全12R LOCK後に解禁。3連単払戻は100円あたりを入力</p></div>
+          <div id="resultGateBadge" class="badge blind">LOCK待ち</div>
+        </div>
+        <div id="resultGate" class="gate">
+          <div class="gate-icon">🔒</div>
+          <h3>RESULT MODEはまだ開いていません</h3>
+          <p>対象日の12レースすべての予想をHARD LOCKすると、結果入力が解禁されます。</p>
+        </div>
+        <div id="resultList" class="race-list hidden"></div>
+      </section>
+    </section>
+
+    <section id="analytics" class="view">
+      <div class="analytics-grid">
+        <section class="panel">
+          <div class="panel-head"><div><h2>1着艇別 回収率</h2><p>あなたの買い目の1着艇で集計</p></div></div>
+          <div id="headBoatBars" class="bars"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h2>結果1着艇 分布</h2><p>精算済みレース</p></div></div>
+          <div id="winnerBars" class="bars"></div>
+        </section>
+        <section class="panel wide">
+          <div class="panel-head"><div><h2>日別成績</h2><p>保存済みセッション</p></div></div>
+          <div id="historyTable" class="history-table"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="assistant" class="view">
+      <section class="panel">
+        <div class="panel-head"><div><h2>蒲郡担当AI 分析レポート</h2><p>外部APIを使わない無料のローカル分析</p></div><button id="refreshReport" class="ghost">更新</button></div>
+        <div id="reportCards" class="report-grid"></div>
+        <div class="fineprint">v0.5の「AI」は保存データをルールベースで要約する無料版です。将来、外部AIを接続する場合も有料サービスは自動で有効にしません。</div>
+      </section>
+    </section>
+
+    <section id="data" class="view">
+      <div class="data-grid">
+        <section class="panel">
+          <h2>バックアップ</h2>
+          <p>このアプリの記録はこのiPadのブラウザ領域に保存されます。定期的にJSONを書き出すのがおすすめです。</p>
+          <div class="data-actions">
+            <button id="exportBtn" class="primary">バックアップを書き出す</button>
+            <label class="file-btn">バックアップを読み込む<input id="importFile" type="file" accept="application/json"></label>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>対象日の管理</h2>
+          <p id="sessionInfo"></p>
+          <button id="resetDayBtn" class="danger">この日だけ初期化</button>
+        </section>
+        <section class="panel wide">
+          <h2>監査情報</h2>
+          <p>各レースのLOCK時刻と簡易ハッシュを保存します。結果入力は全12R LOCK後のみ解禁されます。</p>
+          <div id="auditTable" class="audit-table"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
 </body>
 </html>
