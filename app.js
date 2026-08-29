@@ -4,12 +4,17 @@ const PICK_PRICE=500;
 const MAX_PICKS=4;
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const todayISO=()=>new Date().toISOString().slice(0,10);
+function dateISOInTokyo(d=new Date()){
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
+  const get=t=>parts.find(p=>p.type===t)?.value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+const todayISO=()=>dateISOInTokyo();
 const money=n=>(n<0?"-":"")+"¥"+Math.abs(Math.round(n||0)).toLocaleString("ja-JP");
 const pct=n=>Number.isFinite(n)?n.toFixed(1)+"%":"—";
 
 function baseStore(){return {schema:5,venue:"蒲郡",startBankroll:START_BANKROLL,sessions:{}}}
-function baseSession(date){return {date,createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({
+function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",strategyVersion:"GAMAGORI-v0.6",createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({
   race:i+1,picks:["","","",""],locked:false,lockedAt:null,lockHash:null,stake:0,
   result:"",officialPayout100:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false
 }))}}
@@ -185,6 +190,7 @@ function settleRace(n){
   if(!validPick(result)){alert("結果を「1-3-4」の形式で入力してください。");return}
   if(!Number.isFinite(pay)||pay<0){alert("払戻金を確認してください。");return}
   const hit=r.picks.filter(Boolean).includes(result);
+  if(hit && pay<=0){alert("的中買い目なので、3連単の公式払戻（100円あたり）を入力してください。");return}
   r.result=result;r.officialPayout100=pay;r.hit=hit;r.returnAmount=hit?pay*5:0;r.profit=r.returnAmount-r.stake;
   r.settled=true;r.settledAt=new Date().toISOString();r.note=$(`[data-note="${n}"]`).value.trim();saveStore();renderAll();
 }
@@ -244,7 +250,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),app:"BOAT COMMAND",version:"0.5",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.6",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -255,7 +261,7 @@ $("#importFile").onchange=async e=>{
     if(!d||d.schema!==5||!d.sessions)throw new Error();
     if(!confirm("現在の端末データをバックアップ内容で置き換えます。よろしいですか？"))return;
     store=d;saveStore();renderAll();alert("バックアップを読み込みました。");
-  }catch{alert("BOAT COMMAND v0.5のバックアップとして読み込めませんでした。")}
+  }catch{alert("BOAT COMMANDの対応バックアップとして読み込めませんでした。")}
   e.target.value="";
 }
 $("#resetDayBtn").onclick=()=>{

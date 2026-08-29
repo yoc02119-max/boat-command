@@ -1,24 +1,16 @@
-# BOAT COMMAND v0.5
+# BOAT COMMAND v0.6
 
-iPad-first personal BOAT RACE blind-prediction and analytics prototype.
+蒲郡 STRICT-BLIND 仮想予想・精算・分析アプリ。
 
-## v0.5
-- Gamagori 1R–12R prediction entry
-- 1–4 trifecta picks, ¥500 each
-- Per-race HARD LOCK with timestamp and audit ID
-- RESULT MODE stays closed until all 12 races are locked
-- Result + official trifecta payout entry
-- Automatic virtual settlement / hit rate / ROI / P&L / bankroll / max drawdown
-- Dynamic bankroll chart
-- Head-boat ROI and winner distribution
-- Day history
-- Local rule-based analyst and chat commands
-- JSON backup / restore
-- Offline-first browser storage (localStorage)
-- GitHub Pages compatible
-- No paid API or subscription required
+## v0.6
+- 日本時間（Asia/Tokyo）の日付に修正
+- STRICT BLIND / strategy version を日別データに記録
+- 12RすべてHARD LOCKするまでRESULT MODEを遮断
+- HARD LOCK時刻 + 監査ID
+- 的中時、公式3連単払戻が未入力なら精算不可
+- 仮想精算 / 的中率 / ROI / 損益 / 資金 / 最大DD
+- 資金推移 / 日別成績 / 買い目1着艇別ROI
+- JSONバックアップ・復元
+- iPad横向き・GitHub Pages・無課金
 
-## Important limitations
-This version does not automatically fetch BOAT RACE data and does not call an external LLM.
-HARD LOCK is enforced by the UI and stored with a timestamp/hash, but local browser data is not a tamper-proof server ledger.
-Back up your data regularly from the DATA screen.
+外部BOAT RACEデータの自動取得はまだ接続していません。
