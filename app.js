@@ -3,6 +3,29 @@ const START_BANKROLL=100000;
 const PICK_PRICE=500;
 const MAX_PICKS=4;
 
+const BACKTEST_PACKS={
+  "gamagori-2025-12-15":{
+    id:"gamagori-2025-12-15",date:"2025-12-15",venue:"蒲郡",
+    title:"蒲郡柑橘組合 蒲郡みかん杯・最終日",
+    snapshotLevel:"ENTRY_BASELINE",
+    note:"基礎出走情報パック。展示・直前気象・直前オッズはこの版では未収録。",
+    races:[
+      {race:1,type:"一般戦",boats:["清水紀克","加藤高史","村田 敦","宮本裕之","久保原秀人","早川颯太"],result:"1-2-3",pay:880},
+      {race:2,type:"一般戦",boats:["岩橋裕馬","中村駿平","小林一樹","永井亮次","坂口貴彦","中嶋誠一郎"],result:"1-4-2",pay:4430},
+      {race:3,type:"一般戦",boats:["鈴木孝明","小林 泰","菊地敬介","齋藤真之","米本圭佑","中村守成"],result:"3-1-4",pay:21970},
+      {race:4,type:"一般戦",boats:["岡 暢祐","前田聖文","金児隆太","渡邉英児","渡邊伸太郎","櫻井 隼"],result:"1-2-4",pay:920},
+      {race:5,type:"一般戦",boats:["谷津幸宏","鈴木 猛","星野太郎","早川颯太","新出浩司","岡本慎治"],result:"1-3-2",pay:500},
+      {race:6,type:"一般戦",boats:["鳥居塚孝博","宮本裕之","岩橋裕馬","中嶋誠一郎","竹田辰也","岡部 浩"],result:"1-5-2",pay:1090},
+      {race:7,type:"一般戦",boats:["植田太一","久保原秀人","深川真二","小林 泰","永井亮次","米本圭佑"],result:"1-3-2",pay:1030},
+      {race:8,type:"一般戦",boats:["里岡右貴","清水紀克","西舘 健","菊地敬介","櫻井 隼","藤田竜弘"],result:"1-6-4",pay:2750},
+      {race:9,type:"一般特選",boats:["小林一樹","中村守成","山田竜一","加藤高史","星野太郎","前田聖文"],result:"1-4-3",pay:1560},
+      {race:10,type:"選抜戦",boats:["竹田辰也","鈴木孝明","渡邉英児","中村駿平","谷津幸宏","金児隆太"],result:"1-2-6",pay:2010},
+      {race:11,type:"選抜戦",boats:["深川真二","植田太一","里岡右貴","岡 暢祐","鳥居塚孝博","鈴木 猛"],result:"1-2-3",pay:600},
+      {race:12,type:"優勝戦",boats:["重木輝彦","畑 竜生","楠 将太郎","末永由楽","三角哲男","川田正人"],result:"1-2-4",pay:1060}
+    ]
+  }
+};
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function dateISOInTokyo(d=new Date()){
   const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
@@ -31,6 +54,8 @@ function loadStore(){
 }
 function saveStore(){localStorage.setItem(APP_KEY,JSON.stringify(store))}
 function ensureSessionShape(s){
+  if(s.replayPackId===undefined)s.replayPackId="";
+  if(s.replayRevealed===undefined)s.replayRevealed=false;
   if(!s.runType)s.runType="LIVE";
   if(!s.strategyVersion||s.strategyVersion==="GAMAGORI-v0.6")s.strategyVersion="GAMAGORI-V1.0";
   for(const r of s.races){
@@ -100,9 +125,10 @@ $$("[data-jump]").forEach(b=>b.onclick=()=>showView(b.dataset.jump));
 function renderAll(){
   const s=session(),st=sessionStats(s),all=allStats(),lc=lockedCount(s),mode=isResultMode(s);
   const rt=$("#runType"),sv=$("#strategyVersion");
-  if(rt){rt.value=s.runType||"LIVE";rt.disabled=lc>0}
-  if(sv){sv.value=s.strategyVersion||"GAMAGORI-V1.0";sv.disabled=lc>0}
+  if(rt){rt.value=s.runType||"LIVE";rt.disabled=lc>0||!!s.replayPackId}
+  if(sv){sv.value=s.strategyVersion||"GAMAGORI-V1.0";sv.disabled=lc>0||!!s.replayPackId}
   if($("#sessionLockNote"))$("#sessionLockNote").textContent=lc>0?`🔒 ${s.runType} / ${s.strategyVersion} はこの日のLOCK記録として固定済み`:"1RでもLOCKすると区分と戦略バージョンは固定されます。";
+  renderReplayControls(s);
   $("#kLocked").textContent=`${lc}/12`;
   $("#kHits").textContent=st.races?`${st.hits}/${st.races}`:"—";
   $("#kHitRate").textContent=st.races?pct(st.hitRate):"未精算";
@@ -131,6 +157,62 @@ function renderRaceStrip(s){
     return `<div class="${c}"><b>${r.race}R</b><small>${label}</small></div>`
   }).join("");
 }
+
+function activeReplayPack(s=session()){return s.replayPackId?BACKTEST_PACKS[s.replayPackId]||null:null}
+function renderReplayControls(s){
+  const panel=$("#replayPanel");if(!panel)return;
+  const pack=activeReplayPack(s), lc=lockedCount(s);
+  panel.classList.toggle("active",!!pack);
+  $("#loadReplayBtn").disabled=lc>0;
+  $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===12&&!s.replayRevealed));
+  if(!pack){
+    $("#replayStatus").textContent=s.runType==="BACKTEST"?"BACKTEST：パック未読込":"LIVEモード：必要なときだけ実レースパックを使用";
+  }else if(s.replayRevealed){
+    $("#replayStatus").textContent=`RESULT REVEALED · ${pack.date} · 12R一括精算済み`;
+  }else{
+    $("#replayStatus").textContent=`BLIND · ${pack.date} · ${lc}/12 LOCK · ${pack.snapshotLevel}`;
+  }
+}
+function loadReplayPack(id){
+  const pack=BACKTEST_PACKS[id];if(!pack)return;
+  const existing=store.sessions[pack.date];
+  if(existing&&(lockedCount(ensureSessionShape(existing))>0||settledRaces(existing).length>0)){
+    if(!confirm(`${pack.date}には保存済みデータがあります。BACKTESTパックで初期化しますか？`))return;
+  }
+  const s=baseSession(pack.date);
+  s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";
+  s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
+  store.sessions[pack.date]=s;currentDate=pack.date;saveStore();
+  if($("#sessionDate"))$("#sessionDate").value=currentDate;
+  renderAll();
+  alert("実レースBACKTESTパックを読み込みました。公式結果は12RすべてLOCKするまで画面に表示されません。");
+}
+function revealAndSettleReplay(){
+  const s=session(),pack=activeReplayPack(s);
+  if(!pack||lockedCount(s)!==12||s.replayRevealed)return;
+  if(!confirm("12RすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？"))return;
+  for(const pr of pack.races){
+    const r=s.races.find(x=>x.race===pr.race);if(r.settled)continue;
+    r.result=pr.result;r.officialPayout100=pr.pay;r.refundAmount=0;
+    r.hit=r.picks.filter(Boolean).includes(pr.result);
+    r.returnAmount=r.hit?pr.pay*5:0;r.profit=r.returnAmount-r.stake;
+    r.settled=true;r.settledAt=new Date().toISOString();r.note="BACKTEST REPLAY / OFFICIAL RESULT";
+  }
+  s.replayRevealed=true;s.replayRevealedAt=new Date().toISOString();saveStore();renderAll();showView("results");
+}
+$("#loadReplayBtn").onclick=()=>loadReplayPack("gamagori-2025-12-15");
+$("#revealReplayBtn").onclick=revealAndSettleReplay;
+
+function replaySnapshotHtml(s,r){
+  const pack=activeReplayPack(s);if(!pack)return "";
+  const pr=pack.races.find(x=>x.race===r.race);if(!pr)return "";
+  const boats=pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("");
+  return `<div class="replay-snapshot">
+    <div class="snapshot-head"><span>PRE-RACE SNAPSHOT</span><b>${escapeHtml(pr.type)}</b></div>
+    <div class="boat-grid">${boats}</div>
+    <div class="snapshot-note">この版は基礎出走情報のみ。結果・払戻は12R LOCK前は非表示。</div>
+  </div>`;
+}
 function renderPredictions(s){
   const host=$("#predictionList"); if(!host)return;
   host.innerHTML=s.races.map(r=>{
@@ -140,6 +222,7 @@ function renderPredictions(s){
         <div><div class="race-no">${r.race}R</div><div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}</div></div>
         <div class="stake">${r.locked?money(r.stake):"最大 ¥2,000"}</div>
       </div>
+      ${replaySnapshotHtml(s,r)}
       <div class="pick-grid">${picks}</div>
       <div class="reason-box"><label>予想根拠（LOCK時に固定）</label><textarea data-reason="${r.race}" ${r.locked?"disabled":""} placeholder="例：1の展示気配良、3カド攻め想定">${r.rationale||""}</textarea></div>
       <div class="race-actions">${r.locked?`<span class="unlock-note">🔒 HARD LOCK済み</span>`:`<button class="lock-btn" data-lock="${r.race}">HARD LOCK</button>`}</div>
@@ -181,12 +264,17 @@ $("#lockAllBtn").onclick=async()=>{
   for(const r of open)await lockRace(r.race);
 }
 function renderResults(s){
+  const replay=activeReplayPack(s);
   const open=isResultMode(s);
-  $("#resultGate").classList.toggle("hidden",open);
-  $("#resultList").classList.toggle("hidden",!open);
-  $("#resultGateBadge").className="badge "+(open?"result":"blind");
-  $("#resultGateBadge").textContent=open?"✓ RESULT MODE":"LOCK待ち";
-  if(!open)return;
+  const displayOpen=open&&(!replay||s.replayRevealed);
+  $("#resultGate").classList.toggle("hidden",displayOpen);
+  $("#resultList").classList.toggle("hidden",!displayOpen);
+  $("#resultGateBadge").className="badge "+(displayOpen?"result":"blind");
+  $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
+  if(replay&&open&&!s.replayRevealed){
+    $("#resultGate").innerHTML=`<div class="gate-icon">🔐</div><h3>12R HARD LOCK完了</h3><p>公式結果はまだ非表示です。予想画面の「12R結果を解禁・一括精算」で初めて結果を開きます。</p>`;
+  }
+  if(!displayOpen)return;
   $("#resultList").innerHTML=s.races.map(r=>{
     if(r.settled)return `<div class="race-card locked">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">精算 ${fmtTime(r.settledAt)}</div></div><div class="stake">${r.hit?"🎯 HIT":"MISS"}</div></div>
@@ -284,7 +372,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.8.1",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
