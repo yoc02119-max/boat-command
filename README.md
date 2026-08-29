@@ -1,16 +1,15 @@
-# BOAT COMMAND v0.6
+# BOAT COMMAND v0.7
 
 蒲郡 STRICT-BLIND 仮想予想・精算・分析アプリ。
 
-## v0.6
-- 日本時間（Asia/Tokyo）の日付に修正
-- STRICT BLIND / strategy version を日別データに記録
-- 12RすべてHARD LOCKするまでRESULT MODEを遮断
-- HARD LOCK時刻 + 監査ID
-- 的中時、公式3連単払戻が未入力なら精算不可
-- 仮想精算 / 的中率 / ROI / 損益 / 資金 / 最大DD
-- 資金推移 / 日別成績 / 買い目1着艇別ROI
-- JSONバックアップ・復元
-- iPad横向き・GitHub Pages・無課金
+## v0.7
+- BACKTEST（過去検証） / LIVE（本番）を完全に区分して保存
+- 戦略バージョンを日別セッションに固定
+- 予想根拠を各レースのHARD LOCKに含めて保存
+- 外れ原因 A〜H を精算後に分類
+- 欠場・F等の返還額を精算へ反映
+- BACKTEST vs LIVE の比較パネル
+- iPad標準の音声合成でAI回答を読み上げ
+- 日本時間、12R完全LOCK、監査ID、JSONバックアップを継続
 
-外部BOAT RACEデータの自動取得はまだ接続していません。
+外部BOAT RACEデータの自動取得や有料AI APIはまだ接続していません。

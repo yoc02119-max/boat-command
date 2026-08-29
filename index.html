@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.6</title>
+  <title>BOAT COMMAND v0.7</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
@@ -34,7 +34,7 @@
       <strong>蒲郡</strong>
       <span><i></i> GAMAGORI-01</span>
     </div>
-    <div class="version">v0.6 · STRICT BLIND</div>
+    <div class="version">v0.7 · STRICT BLIND</div>
   </aside>
 
   <main>
@@ -54,7 +54,7 @@
         <section class="panel assistant-card">
           <div class="panel-head">
             <div><h2>AIに聞く</h2><p>端末内データを会話形式で説明</p></div>
-            <button id="micBtn" class="mic">🎙</button>
+            <div class="voice-tools"><button id="speakBtn" class="mic" title="音声返答">🔊</button><button id="micBtn" class="mic">🎙</button></div>
           </div>
           <div id="chat" class="chat">
             <div class="bubble ai">蒲郡担当です。<br>「今日どう？」「ロック状況」「資金推移」「弱点は？」と聞いてください。</div>
@@ -68,6 +68,7 @@
             <button data-q="ロック状況">ロック状況</button>
             <button data-q="資金推移">資金推移</button>
             <button data-q="弱点は？">弱点</button>
+            <button data-q="過去と本番">過去 vs 本番</button>
           </div>
         </section>
 
@@ -112,6 +113,11 @@
           <div><h2>蒲郡 1R〜12R 予想</h2><p>3連単 最大4点・1点500円・LOCK後は画面から変更不可</p></div>
           <button id="lockAllBtn" class="primary">入力済みを一括LOCK</button>
         </div>
+        <div class="session-controls">
+          <div class="field"><label>データ区分</label><select id="runType"><option value="LIVE">LIVE（本番）</option><option value="BACKTEST">BACKTEST（過去検証）</option></select></div>
+          <div class="field"><label>戦略バージョン</label><input id="strategyVersion" value="GAMAGORI-V1.0" placeholder="GAMAGORI-V1.0"></div>
+          <div class="session-lock-note" id="sessionLockNote">1RでもLOCKすると区分と戦略バージョンは固定されます。</div>
+        </div>
         <div id="predictionList" class="race-list"></div>
       </section>
     </section>
@@ -142,6 +148,10 @@
           <div id="winnerBars" class="bars"></div>
         </section>
         <section class="panel wide">
+          <div class="panel-head"><div><h2>BACKTEST vs LIVE</h2><p>過去検証と本番成績を混ぜずに比較</p></div></div>
+          <div id="modeCompare" class="compare-grid"></div>
+        </section>
+        <section class="panel wide">
           <div class="panel-head"><div><h2>日別成績</h2><p>保存済みセッション</p></div></div>
           <div id="historyTable" class="history-table"></div>
         </section>
@@ -152,7 +162,7 @@
       <section class="panel">
         <div class="panel-head"><div><h2>蒲郡担当AI 分析レポート</h2><p>外部APIを使わない無料のローカル分析</p></div><button id="refreshReport" class="ghost">更新</button></div>
         <div id="reportCards" class="report-grid"></div>
-        <div class="fineprint">v0.6の「AI」は保存データをルールベースで要約する無料版です。将来、外部AIを接続する場合も有料サービスは自動で有効にしません。</div>
+        <div class="fineprint">v0.7の「AI」は保存データをルールベースで要約する無料版です。音声返答はiPadの標準音声合成を利用します。外部AIや有料APIは自動で有効にしません。</div>
       </section>
     </section>
 

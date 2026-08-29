@@ -14,9 +14,9 @@ const money=n=>(n<0?"-":"")+"¥"+Math.abs(Math.round(n||0)).toLocaleString("ja-J
 const pct=n=>Number.isFinite(n)?n.toFixed(1)+"%":"—";
 
 function baseStore(){return {schema:5,venue:"蒲郡",startBankroll:START_BANKROLL,sessions:{}}}
-function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",strategyVersion:"GAMAGORI-v0.6",createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({
+function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",runType:"LIVE",strategyVersion:"GAMAGORI-V1.0",createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({
   race:i+1,picks:["","","",""],locked:false,lockedAt:null,lockHash:null,stake:0,
-  result:"",officialPayout100:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false
+  result:"",officialPayout100:0,refundAmount:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false,rationale:"",missClass:""
 }))}}
 
 let store=loadStore();
@@ -30,11 +30,21 @@ function loadStore(){
   return baseStore();
 }
 function saveStore(){localStorage.setItem(APP_KEY,JSON.stringify(store))}
+function ensureSessionShape(s){
+  if(!s.runType)s.runType="LIVE";
+  if(!s.strategyVersion||s.strategyVersion==="GAMAGORI-v0.6")s.strategyVersion="GAMAGORI-V1.0";
+  for(const r of s.races){
+    if(r.rationale===undefined)r.rationale="";
+    if(r.missClass===undefined)r.missClass="";
+    if(r.refundAmount===undefined)r.refundAmount=0;
+  }
+  return s;
+}
 function session(date=currentDate){
   if(!store.sessions[date]){store.sessions[date]=baseSession(date);saveStore()}
-  return store.sessions[date];
+  const s=ensureSessionShape(store.sessions[date]);saveStore();return s;
 }
-function allSessions(){return Object.values(store.sessions).sort((a,b)=>a.date.localeCompare(b.date))}
+function allSessions(){return Object.values(store.sessions).map(ensureSessionShape).sort((a,b)=>a.date.localeCompare(b.date))}
 function lockedCount(s=session()){return s.races.filter(r=>r.locked).length}
 function settledRaces(s=session()){return s.races.filter(r=>r.settled)}
 function isResultMode(s=session()){return lockedCount(s)===12}
@@ -68,8 +78,9 @@ function bankrollSeries(){
   }
   return out;
 }
-function allStats(){
-  const all=allSessions().flatMap(s=>s.races.filter(r=>r.settled));
+function allStats(filterType=null){
+  const sessions=filterType?allSessions().filter(s=>s.runType===filterType):allSessions();
+  const all=sessions.flatMap(s=>s.races.filter(r=>r.settled));
   const inv=all.reduce((a,r)=>a+r.stake,0),ret=all.reduce((a,r)=>a+r.returnAmount,0),hits=all.filter(r=>r.hit).length;
   const series=bankrollSeries(); let peak=series[0].value,maxdd=0;
   for(const p of series){peak=Math.max(peak,p.value);maxdd=Math.max(maxdd,peak-p.value)}
@@ -88,6 +99,10 @@ $$("[data-jump]").forEach(b=>b.onclick=()=>showView(b.dataset.jump));
 
 function renderAll(){
   const s=session(),st=sessionStats(s),all=allStats(),lc=lockedCount(s),mode=isResultMode(s);
+  const rt=$("#runType"),sv=$("#strategyVersion");
+  if(rt){rt.value=s.runType||"LIVE";rt.disabled=lc>0}
+  if(sv){sv.value=s.strategyVersion||"GAMAGORI-V1.0";sv.disabled=lc>0}
+  if($("#sessionLockNote"))$("#sessionLockNote").textContent=lc>0?`🔒 ${s.runType} / ${s.strategyVersion} はこの日のLOCK記録として固定済み`:"1RでもLOCKすると区分と戦略バージョンは固定されます。";
   $("#kLocked").textContent=`${lc}/12`;
   $("#kHits").textContent=st.races?`${st.hits}/${st.races}`:"—";
   $("#kHitRate").textContent=st.races?pct(st.hitRate):"未精算";
@@ -99,7 +114,7 @@ function renderAll(){
   $("#todayStatus").classList.toggle("done",st.races===12);
   $("#guardNote").textContent=mode?"全12R LOCK済み。RESULT MODEが解禁されています。":"全12RをLOCKするまで、結果入力は開きません。";
   $("#modeBadge").className="badge "+(mode?"result":"blind");
-  $("#modeBadge").textContent=mode?"✓ RESULT MODE":"🔒 BLIND MODE";
+  $("#modeBadge").textContent=mode?`✓ RESULT · ${s.runType}`:`🔒 ${s.runType} · BLIND`;
   $("#bankrollNow").textContent=money(all.bankroll);
   $("#allRecord").textContent=`${all.races}戦 ${all.hits}的中`;
   $("#allHitRate").textContent=pct(all.hitRate);
@@ -126,6 +141,7 @@ function renderPredictions(s){
         <div class="stake">${r.locked?money(r.stake):"最大 ¥2,000"}</div>
       </div>
       <div class="pick-grid">${picks}</div>
+      <div class="reason-box"><label>予想根拠（LOCK時に固定）</label><textarea data-reason="${r.race}" ${r.locked?"disabled":""} placeholder="例：1の展示気配良、3カド攻め想定">${r.rationale||""}</textarea></div>
       <div class="race-actions">${r.locked?`<span class="unlock-note">🔒 HARD LOCK済み</span>`:`<button class="lock-btn" data-lock="${r.race}">HARD LOCK</button>`}</div>
     </div>`
   }).join("");
@@ -135,6 +151,10 @@ function renderPredictions(s){
       r.picks[+e.target.dataset.i]=normalizePick(e.target.value);saveStore();renderPredictions(s);
     });
   });
+  $$("[data-reason]").forEach(inp=>inp.addEventListener("change",e=>{
+    const r=s.races.find(x=>x.race===+e.target.dataset.reason);if(r.locked)return;
+    r.rationale=e.target.value.trim();saveStore();
+  }));
   $$("[data-lock]").forEach(b=>b.onclick=()=>lockRace(+b.dataset.lock));
   $("#lockAllBtn").disabled=lockedCount(s)===12;
 }
@@ -146,7 +166,7 @@ async function lockRace(n){
   if(new Set(picks).size!==picks.length){alert("同じ買い目が重複しています。");return}
   r.picks=[...picks,...Array(MAX_PICKS-picks.length).fill("")];
   r.stake=picks.length*PICK_PRICE;r.lockedAt=new Date().toISOString();
-  r.lockHash=await digest(`${s.date}|${r.race}|${picks.join(",")}|${r.stake}|${r.lockedAt}`);
+  r.lockHash=await digest(`${s.date}|${s.runType}|${s.strategyVersion}|${r.race}|${picks.join(",")}|${r.rationale||""}|${r.stake}|${r.lockedAt}`);
   r.locked=true;saveStore();renderAll();
 }
 $("#lockAllBtn").onclick=async()=>{
@@ -170,28 +190,35 @@ function renderResults(s){
   $("#resultList").innerHTML=s.races.map(r=>{
     if(r.settled)return `<div class="race-card locked">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">精算 ${fmtTime(r.settledAt)}</div></div><div class="stake">${r.hit?"🎯 HIT":"MISS"}</div></div>
-      <div class="settled-box"><div><span>結果</span><b>${r.result}</b></div><div><span>投資</span><b>${money(r.stake)}</b></div><div><span>払戻</span><b>${money(r.returnAmount)}</b></div><div><span>損益</span><b class="${r.profit>=0?"positive":"negative"}">${money(r.profit)}</b></div></div>
+      <div class="settled-box"><div><span>結果</span><b>${r.result}</b></div><div><span>投資</span><b>${money(r.stake)}</b></div><div><span>払戻+返還</span><b>${money(r.returnAmount)}</b></div><div><span>損益</span><b class="${r.profit>=0?"positive":"negative"}">${money(r.profit)}</b></div></div>
+      ${r.hit?"":`<div class="miss-select"><label>外れ原因</label><select data-miss="${r.race}">${missOptions(r.missClass)}</select></div>`}
+      ${r.rationale?`<div class="refund-note">LOCK根拠：${escapeHtml(r.rationale)}</div>`:""}
     </div>`;
     return `<div class="race-card">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">LOCK買い目 ${r.picks.filter(Boolean).join(" / ")}</div></div><div class="stake">投資 ${money(r.stake)}</div></div>
       <div class="result-fields">
         <div class="field"><label>結果（例 1-3-4）</label><input data-result="${r.race}" placeholder="1-3-4"></div>
         <div class="field"><label>3連単払戻 / 100円</label><input data-pay="${r.race}" type="number" inputmode="numeric" min="0" placeholder="例 2270"></div>
+        <div class="field"><label>返還額（該当時のみ）</label><input data-refund="${r.race}" type="number" inputmode="numeric" min="0" max="${r.stake}" placeholder="0"></div>
         <div class="field"><label>メモ（任意）</label><input data-note="${r.race}" placeholder="例 逃げ / まくり差し"></div>
         <button class="settle-btn" data-settle="${r.race}">精算確定</button>
-      </div>
+      </div><div class="refund-note">欠場・F等で購入買い目が返還対象になった場合だけ返還額を入力。</div>
     </div>`
   }).join("");
   $$("[data-settle]").forEach(b=>b.onclick=()=>settleRace(+b.dataset.settle));
+  $$("[data-miss]").forEach(x=>x.onchange=()=>{
+    const r=s.races.find(r=>r.race===+x.dataset.miss);r.missClass=x.value;saveStore();renderAnalytics();renderReport();
+  });
 }
 function settleRace(n){
   const s=session(),r=s.races.find(x=>x.race===n);if(!isResultMode(s)||r.settled)return;
-  const result=normalizePick($(`[data-result="${n}"]`).value),pay=+$(`[data-pay="${n}"]`).value;
+  const result=normalizePick($(`[data-result="${n}"]`).value),pay=+$(`[data-pay="${n}"]`).value,refund=+$(`[data-refund="${n}"]`).value||0;
   if(!validPick(result)){alert("結果を「1-3-4」の形式で入力してください。");return}
   if(!Number.isFinite(pay)||pay<0){alert("払戻金を確認してください。");return}
+  if(!Number.isFinite(refund)||refund<0||refund>r.stake){alert("返還額を確認してください。");return}
   const hit=r.picks.filter(Boolean).includes(result);
   if(hit && pay<=0){alert("的中買い目なので、3連単の公式払戻（100円あたり）を入力してください。");return}
-  r.result=result;r.officialPayout100=pay;r.hit=hit;r.returnAmount=hit?pay*5:0;r.profit=r.returnAmount-r.stake;
+  r.result=result;r.officialPayout100=pay;r.refundAmount=refund;r.hit=hit;r.returnAmount=(hit?pay*5:0)+refund;r.profit=r.returnAmount-r.stake;
   r.settled=true;r.settledAt=new Date().toISOString();r.note=$(`[data-note="${n}"]`).value.trim();saveStore();renderAll();
 }
 function renderChart(){
@@ -223,15 +250,17 @@ function renderBars(id,rows){
 }
 function renderAnalytics(){
   renderBars("#headBoatBars",aggregateHeadBoat());renderBars("#winnerBars",aggregateWinners());
-  const rows=allSessions().slice().reverse().map(s=>{const x=sessionStats(s);return `<tr><td>${s.date}</td><td>${x.races}/12</td><td>${x.hits}</td><td>${pct(x.hitRate)}</td><td>${pct(x.roi)}</td><td class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</td></tr>`}).join("");
-  $("#historyTable").innerHTML=`<table class="tbl"><thead><tr><th>日付</th><th>精算</th><th>的中</th><th>的中率</th><th>回収率</th><th>損益</th></tr></thead><tbody>${rows||'<tr><td colspan="6">まだ精算データがありません</td></tr>'}</tbody></table>`;
+  const rows=allSessions().slice().reverse().map(s=>{const x=sessionStats(s);return `<tr><td>${s.date}</td><td>${s.runType}</td><td>${s.strategyVersion}</td><td>${x.races}/12</td><td>${x.hits}</td><td>${pct(x.hitRate)}</td><td>${pct(x.roi)}</td><td class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</td></tr>`}).join("");
+  $("#historyTable").innerHTML=`<table class="tbl"><thead><tr><th>日付</th><th>区分</th><th>戦略</th><th>精算</th><th>的中</th><th>的中率</th><th>回収率</th><th>損益</th></tr></thead><tbody>${rows||'<tr><td colspan="8">まだ精算データがありません</td></tr>'}</tbody></table>`;
+  const bt=allStats("BACKTEST"),lv=allStats("LIVE");
+  $("#modeCompare").innerHTML=[["BACKTEST",bt],["LIVE",lv]].map(([name,x])=>`<div class="compare-card"><h3>${name}</h3><div class="mini"><div><span>RACE</span><b>${x.races}</b></div><div><span>HIT</span><b>${pct(x.hitRate)}</b></div><div><span>ROI</span><b>${pct(x.roi)}</b></div><div><span>P/L</span><b class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</b></div></div></div>`).join("");
 }
 function reportData(){
   const all=allStats(),head=aggregateHeadBoat().filter(x=>!x.empty).sort((a,b)=>b.value-a.value),wins=aggregateWinners().filter(x=>!x.empty).sort((a,b)=>b.value-a.value);
   if(!all.races)return [
     ["現在地","まだ精算データがありません。まず1日分をBLIND予想→LOCK→精算すると分析が始まります。"],
     ["運用ルール","結果入力は全12R LOCK後のみ解禁。LOCK時刻と簡易ハッシュを保存します。"],
-    ["次の重点","蒲郡データだけを蓄積し、他場データとは混ぜずに比較できる土台です。"]
+    ["次の重点","BACKTESTとLIVEを混ぜずに蓄積し、過去検証と本番再現性を比較します。"]
   ];
   const best=head[0],winner=wins[0],trend=all.roi>=100?"累計回収率は100%を上回っています。":"累計回収率は100%未満です。サンプルを増やして原因を分解します。";
   return [
@@ -245,12 +274,17 @@ function renderReport(){
 }
 $("#refreshReport").onclick=renderReport;
 function fmtTime(v){if(!v)return"—";try{return new Date(v).toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"})}catch{return v}}
+const MISS_CLASSES=[
+ ["","未分類"],["A","A：1着読み違い"],["B","B：2着読み違い"],["C","C：3着抜け"],["D","D：進入"],["E","E：ST"],["F","F：モーター"],["G","G：展示"],["H","H：荒れ・想定外"]
+];
+function missOptions(v){return MISS_CLASSES.map(([k,n])=>`<option value="${k}" ${v===k?"selected":""}>${n}</option>`).join("")}
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderData(){
-  const s=session();$("#sessionInfo").textContent=`${s.date} / LOCK ${lockedCount(s)}/12 / 精算 ${settledRaces(s).length}/12`;
+  const s=session();$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / LOCK ${lockedCount(s)}/12 / 精算 ${settledRaces(s).length}/12`;
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.6",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.7",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -268,6 +302,8 @@ $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;
   store.sessions[currentDate]=baseSession(currentDate);saveStore();renderAll();
 }
+$("#runType").onchange=e=>{const s=session();if(lockedCount(s))return;s.runType=e.target.value;saveStore();renderAll()}
+$("#strategyVersion").onchange=e=>{const s=session();if(lockedCount(s))return;s.strategyVersion=(e.target.value.trim()||"GAMAGORI-V1.0");saveStore();renderAll()}
 $("#sessionDate").value=currentDate;
 $("#sessionDate").onchange=e=>{currentDate=e.target.value||todayISO();session();renderAll()}
 
@@ -280,13 +316,27 @@ function answer(q){
   }
   if(/ロック|LOCK|予想/.test(t)){showView("predict");return `現在 <strong>${lockedCount(s)}/12R</strong> LOCK済みです。予想画面を開きました。`}
   if(/資金|推移/.test(t)){showView("home");return `現在の累計仮想資金は <strong>${money(all.bankroll)}</strong>。最大ドローダウンは <strong>${money(-all.maxdd)}</strong> です。`}
+  if(/過去|本番|BACKTEST|LIVE|比較/.test(t)){
+    const bt=allStats("BACKTEST"),lv=allStats("LIVE");showView("analytics");
+    return `BACKTESTは <strong>${bt.races}R・ROI ${pct(bt.roi)}・損益 ${money(bt.profit)}</strong>。LIVEは <strong>${lv.races}R・ROI ${pct(lv.roi)}・損益 ${money(lv.profit)}</strong> です。`;
+  }
   if(/弱点|原因|分析|悪/.test(t)){showView("assistant");return reportData()[0][1]+" "+reportData()[1][1]}
   if(/結果|精算/.test(t)){showView("results");return isResultMode(s)?"RESULT MODEを開きました。":"まだ12RすべてLOCKされていないため、結果入力は閉じています。"}
   return `質問を受け取りました。無料版では「今日どう？」「ロック状況」「資金推移」「弱点は？」「精算を開いて」に対応しています。`;
 }
-function send(q){
-  q=(q||$("#prompt").value).trim();if(!q)return;addBubble(q,"user");$("#prompt").value="";setTimeout(()=>addBubble(answer(q),"ai"),180)
+let speechOn=localStorage.getItem("boatCommand.speech")!=="off";
+function speakText(html){
+  if(!speechOn||!("speechSynthesis" in window))return;
+  const text=String(html).replace(/<[^>]+>/g,"");
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=1.02;speechSynthesis.speak(u);
 }
+function updateSpeakBtn(){if($("#speakBtn"))$("#speakBtn").textContent=speechOn?"🔊":"🔇"}
+function send(q){
+  q=(q||$("#prompt").value).trim();if(!q)return;addBubble(q,"user");$("#prompt").value="";
+  setTimeout(()=>{const a=answer(q);addBubble(a,"ai");speakText(a)},180)
+}
+$("#speakBtn").onclick=()=>{speechOn=!speechOn;localStorage.setItem("boatCommand.speech",speechOn?"on":"off");updateSpeakBtn();if(speechOn)speakText("音声返答をオンにしました。")};
+updateSpeakBtn();
 $("#send").onclick=()=>send();$("#prompt").addEventListener("keydown",e=>{if(e.key==="Enter")send()});$$(".quick button").forEach(b=>b.onclick=()=>send(b.dataset.q));
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){
