@@ -284,7 +284,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.8",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.8.1",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -339,8 +339,16 @@ function spokenJapanese(input){
   t=t.replace(/\bRESULT MODE\b/gi,"リザルトモード").replace(/\bSTRICT BLIND\b/gi,"ストリクトブラインド");
   t=t.replace(/\bST\b/g,"スタートタイミング");
   t=t.replace(/¥\s*([\d,]+)/g,"$1円").replace(/([0-9]+(?:\.[0-9]+)?)%/g,"$1パーセント");
-  t=t.replace(/(\d{1,2})\/12\b/g,"12レース中$1レース");
-  return t;
+  t=t.replace(/(\d{1,2})\/12\b/g,"12レース中、$1レース");
+  // Turn dashboard shorthand into a calmer spoken report.
+  t=t.replace(/バックテスト\s*(\d+)レース/g,"バックテストは、$1レース終了。");
+  t=t.replace(/ライブ\s*(\d+)レース/g,"ライブは、$1レース終了。");
+  t=t.replace(/回収率\s*([0-9]+(?:\.[0-9]+)?)パーセント/g,"回収率は、$1パーセント。");
+  t=t.replace(/損益\s*\+\s*([\d,]+)円/g,"損益は、プラス$1円です。");
+  t=t.replace(/損益\s*-\s*([\d,]+)円/g,"損益は、マイナス$1円です。");
+  t=t.replace(/的中率\s*([0-9]+(?:\.[0-9]+)?)パーセント/g,"的中率は、$1パーセント。");
+  t=t.replace(/。\s*/g,"。　").replace(/、\s*/g,"、 ");
+  return t.trim();
 }
 function preferredJapaneseVoice(){
   const jp=cachedVoices.filter(v=>/^ja([-_]|$)/i.test(v.lang||""));
@@ -354,7 +362,7 @@ function speakText(html){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";
   const v=preferredJapaneseVoice();if(v)u.voice=v;
-  u.rate=1.03;u.pitch=1.22;u.volume=1;
+  u.rate=0.91;u.pitch=1.16;u.volume=1;
   speechSynthesis.speak(u);
 }
 function updateSpeakBtn(){if($("#speakBtn"))$("#speakBtn").textContent=speechOn?"🔊":"🔇"}
