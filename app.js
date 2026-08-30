@@ -205,7 +205,7 @@ function sessionStats(s){
 }
 function bankrollSeries(){
   let bal=store.startBankroll, out=[{label:"START",value:bal}];
-  for(const s of allSessions()){
+  for(const s of allSessions().filter(s=>!s.retestMode)){
     for(const r of s.races.filter(x=>x.settled)){
       bal+=r.profit;out.push({label:`${s.date.slice(5)} ${r.race}R`,value:bal});
     }
@@ -213,7 +213,8 @@ function bankrollSeries(){
   return out;
 }
 function allStats(filterType=null){
-  const sessions=filterType?allSessions().filter(s=>s.runType===filterType):allSessions();
+  const formal=allSessions().filter(s=>!s.retestMode);
+  const sessions=filterType?formal.filter(s=>s.runType===filterType):formal;
   const all=sessions.flatMap(s=>s.races.filter(r=>r.settled));
   const inv=all.reduce((a,r)=>a+r.stake,0),ret=all.reduce((a,r)=>a+r.returnAmount,0),hits=all.filter(r=>r.hit).length;
   const series=bankrollSeries(); let peak=series[0].value,maxdd=0;
@@ -250,7 +251,7 @@ function renderAll(){
   $("#todayStatus").classList.toggle("done",st.races===12);
   $("#guardNote").textContent=mode?"全12R LOCK済み。RESULT MODEが解禁されています。":"全12RをLOCKするまで、結果入力は開きません。";
   $("#modeBadge").className="badge "+(mode?"result":"blind");
-  $("#modeBadge").textContent=mode?`✓ RESULT · ${s.runType}`:`🔒 ${s.runType} · BLIND`;
+  $("#modeBadge").textContent=mode?`✓ RESULT · ${s.retestMode?"RETEST":s.runType}`:`🔒 ${testModeLabel(s)}`;
   $("#bankrollNow").textContent=money(all.bankroll);
   $("#allRecord").textContent=`${all.races}戦 ${all.hits}的中`;
   $("#allHitRate").textContent=pct(all.hitRate);
@@ -305,13 +306,7 @@ function loadReplayPack(id){
   try{
     setReplayLoadStatus("① PACK CHECK…","working");
     const pack=BACKTEST_PACKS[id];
-    if(pack&&VERIFIED_BASELINES[pack.date]&&!store.sessions[pack.date]?.replayPackId){
-      setReplayLoadStatus("ARCHIVED · BT-001検証済み。結果既知のため再BLIND生成は禁止","warn");
-      currentDate=pack.date;localStorage.setItem("boatCommand.lastDate",currentDate);
-      if($("#sessionDate"))$("#sessionDate").value=currentDate;
-      renderAll();showView("results");
-      return;
-    }
+    const isRetest=!!VERIFIED_BASELINES[pack?.date];
     const errors=validateReplayPack(pack);
     if(errors.length){setReplayLoadStatus(`LOAD FAILED · ${errors.join(" / ")}`,"error");return;}
 
@@ -324,6 +319,7 @@ function loadReplayPack(id){
     }
     const s=baseSession(pack.date);
     s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";s.mode="STRICT";
+    s.retestMode=isRetest;s.retestOf=isRetest?VERIFIED_BASELINES[pack.date].id:null;
     s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
     store.sessions[pack.date]=s;currentDate=pack.date;
     localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
@@ -346,14 +342,14 @@ function loadReplayPack(id){
       const slots=[...document.querySelectorAll("[data-snapshot-race]")];
       const visible=slots.filter(x=>x.textContent.trim().length>0).length;
       if(visible===12){
-        setReplayLoadStatus("✓ LOAD COMPLETE · 12/12 SNAPSHOT READY","success");
+        setReplayLoadStatus(isRetest?`✓ RETEST PACK READY · ${VERIFIED_BASELINES[pack.date].id}比較用 · 正式BLIND戦績には加算しません`:"✓ LOAD COMPLETE · 12/12 SNAPSHOT READY","success");
       }else{
         setReplayLoadStatus(`DISPLAY CHECK · ${visible}/12 SNAPSHOT · 再描画します`,"warn");
         renderAll();
         requestAnimationFrame(()=>{
           const slots2=[...document.querySelectorAll("[data-snapshot-race]")];
           const v2=slots2.filter(x=>x.textContent.trim().length>0).length;
-          setReplayLoadStatus(v2===12?"✓ LOAD COMPLETE · 12/12 SNAPSHOT READY":`LOAD FAILED · DISPLAY ${v2}/12` ,v2===12?"success":"error");
+          setReplayLoadStatus(v2===12?(isRetest?`✓ RETEST PACK READY · ${VERIFIED_BASELINES[pack.date].id}比較用 · 正式BLIND戦績には加算しません`:"✓ LOAD COMPLETE · 12/12 SNAPSHOT READY"):`LOAD FAILED · DISPLAY ${v2}/12` ,v2===12?"success":"error");
         });
       }
     });
@@ -569,7 +565,7 @@ function generateBlindPredictions(){
     made++;
   });
   saveStore();renderAll();
-  alert(`BLIND予想生成完了\n予想 ${made}R / 見送り ${skipped}R\nまだHARD LOCKはしていません。`);
+  alert(`${s.retestMode?"RETEST":"BLIND"}予想生成完了\n予想 ${made}R / 見送り ${skipped}R\nまだHARD LOCKはしていません。${s.retestMode?"\n正式BLIND戦績には加算しません。":""}`);
 }
 
 
@@ -698,6 +694,21 @@ function renderPredictions(s){
   $$("[data-lock]").forEach(b=>b.onclick=()=>lockRace(+b.dataset.lock));
 }
 
+
+function testModeLabel(s){
+  if(s.retestMode)return `RETEST · ${s.retestOf||"ORIGINAL"}比較`;
+  if(VERIFIED_BASELINES[s.date]&&!activeReplayPack(s))return "BACKTEST · ORIGINAL BLIND";
+  return s.runType==="BACKTEST"?"BACKTEST · ORIGINAL BLIND":"LIVE · BLIND";
+}
+function baselineCompareHtml(s){
+  if(!s.retestMode)return "";
+  const b=VERIFIED_BASELINES[s.date];if(!b)return "";
+  return `<section class="compare-original">
+    <div class="compare-title">ORIGINAL BLIND ${b.id}｜比較基準・上書き禁止</div>
+    <div>${b.races}戦 ${b.hits}的中 · 投資 ${yen(b.invested)} · 払戻 ${yen(b.returned)} · 収支 ${yen(b.profit)} · 的中率 ${b.hitRate.toFixed(1)}% · ROI ${b.roi.toFixed(1)}%</div>
+  </section>`;
+}
+
 function finalScoreHtml({races,hits,skipped,invested,returned,profit,hitRate,roi,kicker="BACKTEST FINAL SCORE｜最終成績",note=""}){
   return `<section class="final-score-card">
     <div class="final-score-kicker">${kicker}</div>
@@ -738,7 +749,7 @@ function renderResults(s){
   const replay=activeReplayPack(s);
   const open=isResultMode(s);
   const displayOpen=open&&(!replay||s.replayRevealed);
-  const recovered=!displayOpen&&VERIFIED_BASELINES[s.date]&&!s.replayRevealed;
+  const recovered=!displayOpen&&VERIFIED_BASELINES[s.date]&&!s.replayRevealed&&!activeReplayPack(s);
 
   $("#resultGate").classList.toggle("hidden",displayOpen);
   $("#resultList").classList.toggle("hidden",!displayOpen);
@@ -746,7 +757,9 @@ function renderResults(s){
   $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":recovered?"✓ ARCHIVED RESULT":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
 
   if(recovered){
-    $("#resultGate").innerHTML=`<div class="recovery-banner"><b>ARCHIVED RESULT｜検証済み履歴</b><span>同一レースは結果既知のため再BLIND予想しません。</span></div>${recoveredBaselineHtml(s)}`;
+    $("#resultGate").classList.remove("hidden");
+    $("#resultList").classList.add("hidden");
+    $("#resultGate").innerHTML=`<div class="recovery-banner"><b>ARCHIVED RESULT｜ORIGINAL BLIND検証済み</b><span>初回成績は固定保存。パック再読込時はRETESTとして別枠扱い。</span></div>${recoveredBaselineHtml(s)}`;
     $("#resultSummary").innerHTML="";
     return;
   }
@@ -780,7 +793,7 @@ function renderResults(s){
       </div><div class="refund-note">欠場・F等で購入買い目が返還対象になった場合だけ返還額を入力。</div>
     </div>`;
   }).join("");
-  $("#resultSummary").innerHTML=currentFinalScoreHtml(s);
+  $("#resultSummary").innerHTML=currentFinalScoreHtml(s)+baselineCompareHtml(s);
   $$("[data-settle]").forEach(b=>b.onclick=()=>settleRace(+b.dataset.settle));
   $$("[data-miss]").forEach(x=>x.onchange=()=>{
     const r=s.races.find(r=>r.race===+x.dataset.miss);r.missClass=x.value;saveStore();renderAnalytics();renderReport();
@@ -971,12 +984,8 @@ async function runBlindGeneratorPipeline(){
     setGeneratorStatus("① GENERATOR START…","working");
     await new Promise(r=>setTimeout(r,0));
     const s=session();
-    if(VERIFIED_BASELINES[s.date]&&!activeReplayPack(s)){
-      setGeneratorStatus("ARCHIVED · BT-001検証済み。結果既知の同一レースは再生成しません","warn");
-      return;
-    }
     if(!s||!activeReplayPack(s)){
-      setGeneratorStatus("FAILED · DATA GATE · 未検証BACKTESTパックを読み込んでください","error");
+      setGeneratorStatus("FAILED · DATA GATE · 先にBACKTESTパックを読み込んでください","error");
       return;
     }
 
@@ -1019,7 +1028,7 @@ async function runBlindGeneratorPipeline(){
       setGeneratorStatus(`FAILED · UI VERIFY · ${filled}/${eligible.length}R`,"error");
       return;
     }
-    setGeneratorStatus(`✓ READY TO LOCK · ${filled}R予想 / ${skipped.length}R見送り · 結果未表示`,"success");
+    setGeneratorStatus(`${s2.retestMode?"✓ RETEST READY TO LOCK":"✓ READY TO LOCK"} · ${filled}R予想 / ${skipped.length}R見送り · 結果未表示${s2.retestMode?" · 正式戦績対象外":""}`,"success");
   }catch(err){
     console.error(err);
     setGeneratorStatus(`FAILED · GENERATOR · ${err?.message||"UNKNOWN ERROR"}`,"error");
