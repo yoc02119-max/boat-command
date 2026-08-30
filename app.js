@@ -1,4 +1,15 @@
 const APP_KEY="boatCommand.v05";
+const MIRROR_KEY="boatCommand.v05.mirror";
+const SESSION_MIRROR_KEY="boatCommand.v05.sessionMirror";
+
+const VERIFIED_BASELINES={
+  "2025-12-15":{
+    id:"BT-001",venue:"蒲郡",strategyVersion:"GAMAGORI-V1.0",
+    races:9,hits:2,skipped:3,invested:18000,returned:9700,profit:-8300,
+    hitRate:22.2,roi:53.9,
+    note:"v0.14.0でSTRICT BACKTESTのHARD LOCK→結果解禁→精算まで完了した確定集計。"
+  }
+};
 const START_BANKROLL=100000;
 const PICK_PRICE=500;
 const MAX_PICKS=4;
@@ -101,14 +112,43 @@ function initialSessionDate(){
 }
 let currentDate=initialSessionDate();
 
-function loadStore(){
+function parseStored(raw){
   try{
-    const x=JSON.parse(localStorage.getItem(APP_KEY));
+    const x=JSON.parse(raw);
     if(x&&x.schema===5&&x.sessions)return x;
   }catch(e){}
-  return baseStore();
+  return null;
 }
-function saveStore(){localStorage.setItem(APP_KEY,JSON.stringify(store))}
+function storeRank(x){
+  const rev=Number(x?._meta?.revision)||0;
+  const t=Date.parse(x?._meta?.updatedAt||"")||0;
+  return rev*10000000000000+t;
+}
+function loadStore(){
+  const candidates=[];
+  try{const x=parseStored(localStorage.getItem(APP_KEY));if(x)candidates.push(x)}catch(e){}
+  try{const x=parseStored(localStorage.getItem(MIRROR_KEY));if(x)candidates.push(x)}catch(e){}
+  try{const x=parseStored(sessionStorage.getItem(SESSION_MIRROR_KEY));if(x)candidates.push(x)}catch(e){}
+  if(!candidates.length)return baseStore();
+  candidates.sort((a,b)=>storeRank(b)-storeRank(a));
+  const chosen=candidates[0];
+  const raw=JSON.stringify(chosen);
+  try{localStorage.setItem(APP_KEY,raw)}catch(e){}
+  try{localStorage.setItem(MIRROR_KEY,raw)}catch(e){}
+  try{sessionStorage.setItem(SESSION_MIRROR_KEY,raw)}catch(e){}
+  return chosen;
+}
+function saveStore(){
+  store._meta=store._meta||{};
+  store._meta.revision=(Number(store._meta.revision)||0)+1;
+  store._meta.updatedAt=new Date().toISOString();
+  const raw=JSON.stringify(store);
+  let ok=0;
+  try{localStorage.setItem(APP_KEY,raw);ok++}catch(e){}
+  try{localStorage.setItem(MIRROR_KEY,raw);ok++}catch(e){}
+  try{sessionStorage.setItem(SESSION_MIRROR_KEY,raw);ok++}catch(e){}
+  return ok>0;
+}
 function ensureSessionShape(s){
   if(s.replayPackId===undefined)s.replayPackId="";
   if(s.replayRevealed===undefined)s.replayRevealed=false;
@@ -265,6 +305,13 @@ function loadReplayPack(id){
   try{
     setReplayLoadStatus("① PACK CHECK…","working");
     const pack=BACKTEST_PACKS[id];
+    if(pack&&VERIFIED_BASELINES[pack.date]&&!store.sessions[pack.date]?.replayPackId){
+      setReplayLoadStatus("ARCHIVED · BT-001検証済み。結果既知のため再BLIND生成は禁止","warn");
+      currentDate=pack.date;localStorage.setItem("boatCommand.lastDate",currentDate);
+      if($("#sessionDate"))$("#sessionDate").value=currentDate;
+      renderAll();showView("results");
+      return;
+    }
     const errors=validateReplayPack(pack);
     if(errors.length){setReplayLoadStatus(`LOAD FAILED · ${errors.join(" / ")}`,"error");return;}
 
@@ -651,39 +698,66 @@ function renderPredictions(s){
   $$("[data-lock]").forEach(b=>b.onclick=()=>lockRace(+b.dataset.lock));
 }
 
-function resultSummaryHtml(s){
-  const settled=settledRaces(s), skipped=skippedReplayRaces(s);
-  if(!s.replayRevealed||!settled.length)return "";
-  const races=settled.length, hits=settled.filter(r=>r.hit).length;
-  const invested=settled.reduce((a,r)=>a+(Number(r.stake)||0),0);
-  const returned=settled.reduce((a,r)=>a+(Number(r.returnAmount)||0),0);
-  const profit=returned-invested, hitRate=races?hits/races*100:0, roi=invested?returned/invested*100:0;
+function finalScoreHtml({races,hits,skipped,invested,returned,profit,hitRate,roi,kicker="BACKTEST FINAL SCORE｜最終成績",note=""}){
   return `<section class="final-score-card">
-    <div class="final-score-kicker">BACKTEST FINAL SCORE｜最終成績</div>
-    <div class="final-score-title">${races}戦 ${hits}的中 <span>／ ${skipped.length}R見送り</span></div>
+    <div class="final-score-kicker">${kicker}</div>
+    <div class="final-score-title">${races}戦 ${hits}的中 <span>／ ${skipped}R見送り</span></div>
     <div class="final-score-grid">
       <div><small>投資</small><b>${yen(invested)}</b></div>
       <div><small>払戻</small><b>${yen(returned)}</b></div>
       <div><small>収支</small><b class="${profit>=0?"plus":"minus"}">${profit>0?"+":""}${yen(profit)}</b></div>
-      <div><small>的中率</small><b>${hitRate.toFixed(1)}%</b></div>
-      <div><small>ROI</small><b>${roi.toFixed(1)}%</b></div>
+      <div><small>的中率</small><b>${Number(hitRate).toFixed(1)}%</b></div>
+      <div><small>ROI</small><b>${Number(roi).toFixed(1)}%</b></div>
     </div>
-    <div class="final-score-note">見送り ${skipped.length}R は投資・的中率・ROI・MISS集計から除外</div>
+    <div class="final-score-note">${note||`見送り ${skipped}R は投資・的中率・ROI・MISS集計から除外`}</div>
   </section>`;
+}
+function currentFinalScoreHtml(s){
+  const settled=settledRaces(s), skipped=skippedReplayRaces(s);
+  if(!s.replayRevealed||!settled.length)return "";
+  const races=settled.length,hits=settled.filter(r=>r.hit).length;
+  const invested=settled.reduce((a,r)=>a+(Number(r.stake)||0),0);
+  const returned=settled.reduce((a,r)=>a+(Number(r.returnAmount)||0),0);
+  const profit=returned-invested;
+  return finalScoreHtml({
+    races,hits,skipped:skipped.length,invested,returned,profit,
+    hitRate:races?hits/races*100:0,roi:invested?returned/invested*100:0
+  });
+}
+function recoveredBaselineHtml(s){
+  const b=VERIFIED_BASELINES[s.date];
+  if(!b)return "";
+  return finalScoreHtml({
+    ...b,
+    kicker:`VERIFIED BACKTEST ${b.id}｜復旧済み最終成績`,
+    note:"SUMMARY-ONLY RECOVERY｜確定済み集計だけを保存。消失したrace-level LOCK IDや個別履歴は捏造して復元しません。"
+  });
 }
 
 function renderResults(s){
   const replay=activeReplayPack(s);
   const open=isResultMode(s);
   const displayOpen=open&&(!replay||s.replayRevealed);
+  const recovered=!displayOpen&&VERIFIED_BASELINES[s.date]&&!s.replayRevealed;
+
   $("#resultGate").classList.toggle("hidden",displayOpen);
   $("#resultList").classList.toggle("hidden",!displayOpen);
-  $("#resultGateBadge").className="badge "+(displayOpen?"result":"blind");
-  $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
+  $("#resultGateBadge").className="badge "+(displayOpen?"result":recovered?"result":"blind");
+  $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":recovered?"✓ ARCHIVED RESULT":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
+
+  if(recovered){
+    $("#resultGate").innerHTML=`<div class="recovery-banner"><b>ARCHIVED RESULT｜検証済み履歴</b><span>同一レースは結果既知のため再BLIND予想しません。</span></div>${recoveredBaselineHtml(s)}`;
+    $("#resultSummary").innerHTML="";
+    return;
+  }
+
   if(replay&&open&&!s.replayRevealed){
     $("#resultGate").innerHTML=`<div class="gate-icon">🔐</div><h3>予想対象全件 HARD LOCK完了</h3><p>公式結果はまだ非表示です。「結果を解禁・一括精算」で初めて結果を開きます。</p>`;
+  }else if(!displayOpen){
+    $("#resultGate").innerHTML=`<div class="gate-icon">🔒</div><h3>RESULT MODEはまだ開いていません</h3><p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p>`;
   }
-  if(!displayOpen)return;
+  if(!displayOpen){$("#resultSummary").innerHTML="";return;}
+
   $("#resultList").innerHTML=s.races.map(r=>{
     if(replay&&replayPredictionGate(s,r).status==="NO_PREDICTION")return `<div class="race-card no-prediction-race">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">BACKTEST監査記録</div></div><div class="stake">SKIPPED</div></div>
@@ -704,8 +778,9 @@ function renderResults(s){
         <div class="field"><label>メモ（任意）</label><input data-note="${r.race}" placeholder="例 逃げ / まくり差し"></div>
         <button class="settle-btn" data-settle="${r.race}">精算確定</button>
       </div><div class="refund-note">欠場・F等で購入買い目が返還対象になった場合だけ返還額を入力。</div>
-    </div>`
+    </div>`;
   }).join("");
+  $("#resultSummary").innerHTML=currentFinalScoreHtml(s);
   $$("[data-settle]").forEach(b=>b.onclick=()=>settleRace(+b.dataset.settle));
   $$("[data-miss]").forEach(x=>x.onchange=()=>{
     const r=s.races.find(r=>r.race===+x.dataset.miss);r.missClass=x.value;saveStore();renderAnalytics();renderReport();
@@ -748,8 +823,6 @@ function aggregateWinners(){
 function renderBars(id,rows){
   const el=$(id);if(!el)return;
   el.innerHTML=rows.map(r=>`<div class="bar-row"><span>${r.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,r.value)}%"></div></div><span class="bar-value">${r.empty?"—":r.value.toFixed(1)+"%"}</span></div>`).join("");
-  $("#resultSummary").innerHTML=resultSummaryHtml(s);
-
 }
 function renderAnalytics(){
   renderBars("#headBoatBars",aggregateHeadBoat());renderBars("#winnerBars",aggregateWinners());
@@ -783,7 +856,7 @@ const MISS_CLASSES=[
 function missOptions(v){return MISS_CLASSES.map(([k,n])=>`<option value="${k}" ${v===k?"selected":""}>${n}</option>`).join("")}
 function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderData(){
-  const s=session(),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target}`;
+  const s=session(),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target} / SAVE REV ${Number(store._meta?.revision)||0}`;
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"?"SKIP":r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
@@ -898,8 +971,12 @@ async function runBlindGeneratorPipeline(){
     setGeneratorStatus("① GENERATOR START…","working");
     await new Promise(r=>setTimeout(r,0));
     const s=session();
+    if(VERIFIED_BASELINES[s.date]&&!activeReplayPack(s)){
+      setGeneratorStatus("ARCHIVED · BT-001検証済み。結果既知の同一レースは再生成しません","warn");
+      return;
+    }
     if(!s||!activeReplayPack(s)){
-      setGeneratorStatus("FAILED · DATA GATE · 先にBACKTESTパックを読み込んでください","error");
+      setGeneratorStatus("FAILED · DATA GATE · 未検証BACKTESTパックを読み込んでください","error");
       return;
     }
 
