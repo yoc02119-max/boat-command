@@ -7,10 +7,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.13.3</title>
+  <title>BOAT COMMAND v0.14.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=133">
+  <link rel="stylesheet" href="styles.css?v=140">
 </head>
 <body>
 <div class="app">
@@ -34,7 +34,7 @@
       <strong>蒲郡</strong>
       <span><i></i> GAMAGORI-01</span>
     </div>
-    <div class="version">v0.13.3 · VERIFIED SESSION FIX</div>
+    <div class="version">v0.14.0 · SELECTIVE STRICT LOCK</div>
   </aside>
 
   <main>
@@ -122,11 +122,11 @@
           <div>
             <div class="replay-kicker">STRICT BACKTEST REPLAY</div>
             <h3>蒲郡・実レース検証パック</h3>
-            <p>事前情報だけを先に表示し、12RすべてHARD LOCKするまで公式結果は画面に出しません。</p>
+            <p>事前情報だけを先に表示し、予想対象レースをすべてHARD LOCKするまで公式結果は画面に出しません。</p>
           </div>
           <div class="replay-actions">
             <button id="loadReplayBtn" class="ghost">2025/12/15 パックを読み込む</button><button id="generateBlindBtn" class="ghost">BLIND予想を自動生成</button><div id="generatorStatus" class="generator-status">READY · 生成待ち</div><div id="replayLoadStatus" class="replay-load-status">READY · 読み込み待ち</div>
-            <button id="revealReplayBtn" class="primary hidden">12R結果を解禁・一括精算</button>
+            <button id="revealReplayBtn" class="primary hidden">結果を解禁・一括精算</button>
           </div>
           <div id="replayStatus" class="replay-status">未読込</div>
         </div>
@@ -137,13 +137,13 @@
     <section id="results" class="view">
       <section class="panel">
         <div class="panel-head">
-          <div><h2>結果・精算</h2><p>全12R LOCK後に解禁。3連単払戻は100円あたりを入力</p></div>
+          <div><h2>結果・精算</h2><p>予想対象全件LOCK後に解禁。見送りレースは成績集計から除外</p></div>
           <div id="resultGateBadge" class="badge blind">LOCK待ち</div>
         </div>
         <div id="resultGate" class="gate">
           <div class="gate-icon">🔒</div>
           <h3>RESULT MODEはまだ開いていません</h3>
-          <p>対象日の12レースすべての予想をHARD LOCKすると、結果入力が解禁されます。</p>
+          <p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p>
         </div>
         <div id="resultList" class="race-list hidden"></div>
       </section>
@@ -202,6 +202,6 @@
     </section>
   </main>
 </div>
-<script src="app.js?v=133"></script>
+<script src="app.js?v=140"></script>
 </body>
 </html>

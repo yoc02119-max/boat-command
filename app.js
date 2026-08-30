@@ -128,7 +128,20 @@ function session(date=currentDate){
 function allSessions(){return Object.values(store.sessions).map(ensureSessionShape).sort((a,b)=>a.date.localeCompare(b.date))}
 function lockedCount(s=session()){return s.races.filter(r=>r.locked).length}
 function settledRaces(s=session()){return s.races.filter(r=>r.settled)}
-function isResultMode(s=session()){return lockedCount(s)===12}
+function eligibleReplayRaces(s=session()){
+  if(!activeReplayPack(s))return s.races;
+  return s.races.filter(r=>replayPredictionGate(s,r).status!=="NO_PREDICTION");
+}
+function skippedReplayRaces(s=session()){
+  if(!activeReplayPack(s))return [];
+  return s.races.filter(r=>replayPredictionGate(s,r).status==="NO_PREDICTION");
+}
+function requiredReplayLocks(s=session()){return activeReplayPack(s)?eligibleReplayRaces(s).length:12}
+function targetLockedCount(s=session()){
+  const eligible=new Set(eligibleReplayRaces(s).map(r=>Number(r.race)));
+  return s.races.filter(r=>r.locked&&eligible.has(Number(r.race))).length;
+}
+function isResultMode(s=session()){return targetLockedCount(s)===requiredReplayLocks(s)}
 function normalizePick(v){
   const nums=(v||"").replace(/[^\d]/g,"").split("").slice(0,3);
   if(nums.length!==3)return v.trim();
@@ -186,7 +199,7 @@ function renderAll(){
   if(sv){sv.value=s.strategyVersion||"GAMAGORI-V1.0";sv.disabled=lc>0||!!s.replayPackId}
   if($("#sessionLockNote"))$("#sessionLockNote").textContent=lc>0?`🔒 ${s.runType} / ${s.strategyVersion} はこの日のLOCK記録として固定済み`:"1RでもLOCKすると区分と戦略バージョンは固定されます。";
   renderReplayControls(s);
-  $("#kLocked").textContent=`${lc}/12`;
+  $("#kLocked").textContent=`${targetLockedCount(s)}/${requiredReplayLocks(s)}`;
   $("#kHits").textContent=st.races?`${st.hits}/${st.races}`:"—";
   $("#kHitRate").textContent=st.races?pct(st.hitRate):"未精算";
   $("#kRoi").textContent=st.races?pct(st.roi):"—";
@@ -210,6 +223,7 @@ function renderRaceStrip(s){
   $("#raceStrip").innerHTML=s.races.map(r=>{
     let c="race-chip",label="OPEN";
     if(r.settled){c+=" settled "+(r.hit?"hit":"miss");label=r.hit?"HIT":"MISS"}
+    else if(activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"){c+=" skipped";label="SKIP"}
     else if(r.locked){c+=" locked";label="LOCK"}
     return `<div class="${c}"><b>${r.race}R</b><small>${label}</small></div>`
   }).join("");
@@ -218,16 +232,16 @@ function renderRaceStrip(s){
 function activeReplayPack(s=session()){return s.replayPackId?BACKTEST_PACKS[s.replayPackId]||null:null}
 function renderReplayControls(s){
   const panel=$("#replayPanel");if(!panel)return;
-  const pack=activeReplayPack(s), lc=lockedCount(s);
+  const pack=activeReplayPack(s), lc=targetLockedCount(s), target=requiredReplayLocks(s), skipped=skippedReplayRaces(s).length;
   panel.classList.toggle("active",!!pack);
-  $("#loadReplayBtn").disabled=lc>0;
-  $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===12&&!s.replayRevealed));
+  $("#loadReplayBtn").disabled=lockedCount(s)>0;
+  $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
   if(!pack){
     $("#replayStatus").textContent=s.runType==="BACKTEST"?"BACKTEST：パック未読込":"LIVEモード：必要なときだけ実レースパックを使用";
   }else if(s.replayRevealed){
-    $("#replayStatus").textContent=`RESULT REVEALED · ${pack.date} · 12R一括精算済み`;
+    $("#replayStatus").textContent=`RESULT REVEALED · ${pack.date} · ${target}R精算 / ${skipped}R見送り`;
   }else{
-    $("#replayStatus").textContent=`BLIND · ${pack.date} · ${lc}/12 LOCK · ${pack.snapshotLevel}`;
+    $("#replayStatus").textContent=`BLIND · ${pack.date} · ${lc}/${target} TARGET LOCK · ${skipped}R SKIP · ${pack.snapshotLevel}`;
   }
 }
 function setReplayLoadStatus(text,kind=""){
@@ -302,11 +316,22 @@ function loadReplayPack(id){
   }
 }
 function revealAndSettleReplay(){
-  const s=session(),pack=activeReplayPack(s);
-  if(!pack||lockedCount(s)!==requiredReplayLocks(s)||s.replayRevealed)return;
-  if(!confirm("予想対象レースをすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？"))return;
+  const s=session(),pack=activeReplayPack(s),target=requiredReplayLocks(s);
+  if(!pack||targetLockedCount(s)!==target||s.replayRevealed)return;
+  if(!confirm(`予想対象${target}RをすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？`))return;
+
+  const eligible=new Set(eligibleReplayRaces(s).map(r=>Number(r.race)));
   for(const pr of pack.races){
-    const r=s.races.find(x=>x.race===pr.race);if(r.settled)continue;
+    const r=s.races.find(x=>Number(x.race)===Number(pr.race));
+    if(!r)continue;
+    if(!eligible.has(Number(r.race))){
+      const gate=replayPredictionGate(s,r);
+      r.predictionStatus="SKIPPED";
+      r.skipReason=gate.reason;
+      r.skipRecordedAt=new Date().toISOString();
+      continue;
+    }
+    if(!r.locked||r.settled)continue;
     r.result=pr.result;r.officialPayout100=pr.pay;r.refundAmount=0;
     r.hit=r.picks.filter(Boolean).includes(pr.result);
     r.returnAmount=r.hit?pr.pay*5:0;r.profit=r.returnAmount-r.stake;
@@ -500,6 +525,53 @@ function generateBlindPredictions(){
   alert(`BLIND予想生成完了\n予想 ${made}R / 見送り ${skipped}R\nまだHARD LOCKはしていません。`);
 }
 
+
+async function lockRace(n){
+  const s=session(),r=s.races.find(x=>Number(x.race)===Number(n));
+  if(!r||r.locked)return false;
+  const gate=replayPredictionGate(s,r);
+  if(gate.status==="NO_PREDICTION"){
+    alert(`${n}RはNO PREDICTIONのためLOCK対象外です。`);
+    return false;
+  }
+  const picks=(r.picks||[]).map(normalizePick).filter(Boolean);
+  if(picks.length<1||picks.length>4||picks.some(p=>!validPick(p))||new Set(picks).size!==picks.length){
+    alert(`${n}Rの買い目を確認してください。1〜4点・重複なし・例 1-3-4`);
+    return false;
+  }
+  if(!(r.rationale||"").trim()){
+    alert(`${n}Rの予想根拠が空です。`);
+    return false;
+  }
+  r.picks=[...picks,...Array(4-picks.length).fill("")];
+  r.stake=picks.length*500;
+  r.locked=true;
+  r.lockedAt=new Date().toISOString();
+  r.predictionStatus=gate.status;
+  r.predictionGateReason=gate.reason;
+  r.lockHash=await digest(JSON.stringify({
+    date:s.date,race:r.race,picks:r.picks,stake:r.stake,rationale:r.rationale,
+    strategyVersion:s.strategyVersion,runType:s.runType,gate:gate.status
+  }));
+  saveStore();renderAll();
+  return true;
+}
+async function lockAllEligible(){
+  const s=session();
+  const eligible=eligibleReplayRaces(s).filter(r=>!r.locked);
+  if(!eligible.length){alert("LOCK対象の未LOCKレースはありません。");return;}
+  for(const r of eligible){
+    const picks=(r.picks||[]).map(normalizePick).filter(Boolean);
+    if(picks.length<1||picks.length>4||picks.some(p=>!validPick(p))||new Set(picks).size!==picks.length||!(r.rationale||"").trim()){
+      alert(`${r.race}Rの予想入力が未完成です。一括LOCKを中止しました。`);
+      return;
+    }
+  }
+  if(!confirm(`予想対象${requiredReplayLocks(s)}RをHARD LOCKします。LOCK後は変更できません。`))return;
+  for(const r of eligible)await lockRace(r.race);
+  renderAll();
+}
+
 function renderPredictions(s){
   const host=$("#predictionList"); if(!host)return;
 
@@ -587,10 +659,14 @@ function renderResults(s){
   $("#resultGateBadge").className="badge "+(displayOpen?"result":"blind");
   $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
   if(replay&&open&&!s.replayRevealed){
-    $("#resultGate").innerHTML=`<div class="gate-icon">🔐</div><h3>12R HARD LOCK完了</h3><p>公式結果はまだ非表示です。予想画面の「12R結果を解禁・一括精算」で初めて結果を開きます。</p>`;
+    $("#resultGate").innerHTML=`<div class="gate-icon">🔐</div><h3>予想対象全件 HARD LOCK完了</h3><p>公式結果はまだ非表示です。「結果を解禁・一括精算」で初めて結果を開きます。</p>`;
   }
   if(!displayOpen)return;
   $("#resultList").innerHTML=s.races.map(r=>{
+    if(replay&&replayPredictionGate(s,r).status==="NO_PREDICTION")return `<div class="race-card no-prediction-race">
+      <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">BACKTEST監査記録</div></div><div class="stake">SKIPPED</div></div>
+      <div class="no-prediction-panel"><b>NO PREDICTION｜予想見送り</b><div class="no-prediction-reason">${escapeHtml(r.skipReason||replayPredictionGate(s,r).reason)}</div><div class="no-prediction-rule">投資・的中率・ROI・MISS集計には含めません。</div></div>
+    </div>`;
     if(r.settled)return `<div class="race-card locked">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">精算 ${fmtTime(r.settledAt)}</div></div><div class="stake">${r.hit?"🎯 HIT":"MISS"}</div></div>
       <div class="settled-box"><div><span>結果</span><b>${r.result}</b></div><div><span>投資</span><b>${money(r.stake)}</b></div><div><span>払戻+返還</span><b>${money(r.returnAmount)}</b></div><div><span>損益</span><b class="${r.profit>=0?"positive":"negative"}">${money(r.profit)}</b></div></div>
@@ -683,8 +759,8 @@ const MISS_CLASSES=[
 function missOptions(v){return MISS_CLASSES.map(([k,n])=>`<option value="${k}" ${v===k?"selected":""}>${n}</option>`).join("")}
 function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderData(){
-  const s=session();$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / LOCK ${lockedCount(s)}/12 / 精算 ${settledRaces(s).length}/12`;
-  $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
+  const s=session(),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target}`;
+  $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"?"SKIP":r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
   const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.10",data:store};
@@ -856,3 +932,5 @@ document.addEventListener("click",(e)=>{
   runBlindGeneratorPipeline();
 });
 
+
+$("#lockAllBtn").onclick=lockAllEligible;

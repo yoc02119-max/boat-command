@@ -1,16 +1,15 @@
-# BOAT COMMAND v0.13.3 — VERIFIED SESSION FIX
+# BOAT COMMAND v0.14.0 — SELECTIVE STRICT LOCK
 
-Screenshot error:
-`FAILED · GENERATOR · Can't find variable: currentSession`
+Critical STRICT BACKTEST pipeline rebuild.
 
-Actual source audit:
-The app's existing session accessor is:
-`function session(date=currentDate)`
-
-Fix:
-- generator uses `session()`
-- post-render verification uses `session()`
-- confirmed no `getSession()` or `currentSession()` remains
-- diagnostics retained
-- HARD LOCK/reveal behavior unchanged
-- cache bust v=133
+- 9R prediction target / 3R skip for 2025-12-15
+- status becomes `0/9 TARGET LOCK`
+- NO PREDICTION races are excluded from HARD LOCK target
+- implemented missing `lockRace()` engine
+- implemented bulk lock for eligible races only
+- each lock stores timestamp, stake, rationale, gate status and hash
+- result reveal remains impossible until all eligible races are locked
+- reveal/settlement processes eligible locked races only
+- skipped races are recorded separately and never counted as MISS, investment, hit rate or ROI
+- result screen and DATA audit show SKIPPED explicitly
+- cache bust v=140
