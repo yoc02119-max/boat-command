@@ -250,8 +250,9 @@ function renderAll(){
   $("#todayStatus").textContent=st.races===12?"COMPLETE":mode?"RESULT MODE":"OPEN";
   $("#todayStatus").classList.toggle("done",st.races===12);
   $("#guardNote").textContent=mode?"全12R LOCK済み。RESULT MODEが解禁されています。":"全12RをLOCKするまで、結果入力は開きません。";
-  $("#modeBadge").className="badge "+(mode?"result":"blind");
-  $("#modeBadge").textContent=mode?`✓ RESULT · ${s.retestMode?"RETEST":s.runType}`:`🔒 ${testModeLabel(s)}`;
+  const state=appState(s);
+  $("#modeBadge").className="badge "+(["RETEST_RESULT","ORIGINAL_RESULT","ARCHIVED_ORIGINAL"].includes(state.kind)?"result":"blind");
+  $("#modeBadge").textContent=(["RETEST_RESULT","ORIGINAL_RESULT"].includes(state.kind)?"✓ ":"🔒 ")+stateLabel(s);
   $("#bankrollNow").textContent=money(all.bankroll);
   $("#allRecord").textContent=`${all.races}戦 ${all.hits}的中`;
   $("#allHitRate").textContent=pct(all.hitRate);
@@ -271,18 +272,55 @@ function renderRaceStrip(s){
 }
 
 function activeReplayPack(s=session()){return s.replayPackId?BACKTEST_PACKS[s.replayPackId]||null:null}
+function appState(s=session()){
+  const pack=activeReplayPack(s);
+  const baseline=VERIFIED_BASELINES[s.date]||null;
+  const target=pack?eligibleReplayRaces(s).length:12;
+  const locked=pack?targetLockedCount(s):lockedCount(s);
+  const revealed=!!s.replayRevealed;
+  const settled=settledRaces(s).length;
+  if(s.retestMode&&pack){
+    if(revealed||settled>0)return {kind:"RETEST_RESULT",pack,baseline,target,locked};
+    if(locked===target)return {kind:"RETEST_LOCKED",pack,baseline,target,locked};
+    return {kind:"RETEST_BLIND",pack,baseline,target,locked};
+  }
+  if(pack){
+    if(revealed||settled>0)return {kind:"ORIGINAL_RESULT",pack,baseline,target,locked};
+    if(locked===target)return {kind:"ORIGINAL_LOCKED",pack,baseline,target,locked};
+    return {kind:"ORIGINAL_BLIND",pack,baseline,target,locked};
+  }
+  if(baseline)return {kind:"ARCHIVED_ORIGINAL",pack:null,baseline,target:baseline.races||0,locked:baseline.races||0};
+  return {kind:s.runType==="BACKTEST"?"BACKTEST_EMPTY":"LIVE_BLIND",pack:null,baseline:null,target,locked};
+}
+function stateLabel(s=session()){
+  const k=appState(s).kind;
+  return ({
+    RETEST_BLIND:"RETEST · BLIND",
+    RETEST_LOCKED:"RETEST · LOCKED",
+    RETEST_RESULT:"RETEST · RESULT",
+    ORIGINAL_BLIND:"BACKTEST · ORIGINAL BLIND",
+    ORIGINAL_LOCKED:"BACKTEST · ORIGINAL LOCKED",
+    ORIGINAL_RESULT:"BACKTEST · ORIGINAL RESULT",
+    ARCHIVED_ORIGINAL:"ARCHIVED · ORIGINAL BLIND",
+    BACKTEST_EMPTY:"BACKTEST · NO PACK",
+    LIVE_BLIND:"LIVE · BLIND"
+  })[k]||k;
+}
 function renderReplayControls(s){
   const panel=$("#replayPanel");if(!panel)return;
   const pack=activeReplayPack(s), lc=targetLockedCount(s), target=requiredReplayLocks(s), skipped=skippedReplayRaces(s).length;
   panel.classList.toggle("active",!!pack);
   $("#loadReplayBtn").disabled=lockedCount(s)>0;
   $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
+  const state=appState(s);
   if(!pack){
-    $("#replayStatus").textContent=s.runType==="BACKTEST"?"BACKTEST：パック未読込":"LIVEモード：必要なときだけ実レースパックを使用";
+    $("#replayStatus").textContent=state.kind==="ARCHIVED_ORIGINAL"
+      ?`ARCHIVED · ${state.baseline.id} ORIGINAL BLIND保存済み · パック再読込でRETEST可能`
+      :s.runType==="BACKTEST"?"BACKTEST：パック未読込":"LIVEモード：必要なときだけ実レースパックを使用";
   }else if(s.replayRevealed){
-    $("#replayStatus").textContent=`RESULT REVEALED · ${pack.date} · ${target}R精算 / ${skipped}R見送り`;
+    $("#replayStatus").textContent=`${s.retestMode?"RETEST RESULT":"RESULT REVEALED"} · ${pack.date} · ${target}R精算 / ${skipped}R見送り`;
   }else{
-    $("#replayStatus").textContent=`BLIND · ${pack.date} · ${lc}/${target} TARGET LOCK · ${skipped}R SKIP · ${pack.snapshotLevel}`;
+    $("#replayStatus").textContent=`${s.retestMode?"RETEST BLIND":"BLIND"} · ${pack.date} · ${lc}/${target} TARGET LOCK · ${skipped}R SKIP · ${pack.snapshotLevel}`;
   }
 }
 function setReplayLoadStatus(text,kind=""){
@@ -746,20 +784,20 @@ function recoveredBaselineHtml(s){
 }
 
 function renderResults(s){
-  const replay=activeReplayPack(s);
+  const state=appState(s), replay=state.pack;
   const open=isResultMode(s);
-  const displayOpen=open&&(!replay||s.replayRevealed);
-  const recovered=!displayOpen&&VERIFIED_BASELINES[s.date]&&!s.replayRevealed&&!activeReplayPack(s);
+  const recovered=state.kind==="ARCHIVED_ORIGINAL";
+  const displayOpen=["RETEST_RESULT","ORIGINAL_RESULT"].includes(state.kind)||(open&&(!replay||s.replayRevealed));
 
   $("#resultGate").classList.toggle("hidden",displayOpen);
   $("#resultList").classList.toggle("hidden",!displayOpen);
   $("#resultGateBadge").className="badge "+(displayOpen?"result":recovered?"result":"blind");
-  $("#resultGateBadge").textContent=displayOpen?"✓ RESULT MODE":recovered?"✓ ARCHIVED RESULT":(replay&&open?"🔐 REVEAL待ち":"LOCK待ち");
+  $("#resultGateBadge").textContent=displayOpen?(s.retestMode?"✓ RETEST RESULT":"✓ RESULT MODE"):recovered?"✓ ARCHIVED RESULT":(replay&&open?"🔐 REVEAL待ち":s.retestMode?"RETEST · LOCK待ち":"LOCK待ち");
 
   if(recovered){
     $("#resultGate").classList.remove("hidden");
     $("#resultList").classList.add("hidden");
-    $("#resultGate").innerHTML=`<div class="recovery-banner"><b>ARCHIVED RESULT｜ORIGINAL BLIND検証済み</b><span>初回成績は固定保存。パック再読込時はRETESTとして別枠扱い。</span></div>${recoveredBaselineHtml(s)}`;
+    $("#resultGate").innerHTML=`<div class="recovery-banner"><b>ARCHIVED RESULT｜ORIGINAL BLIND検証済み</b><span>初回成績は固定保存。再予想はパックを読み込み、RETESTとして別枠比較できます。</span></div>${recoveredBaselineHtml(s)}`;
     $("#resultSummary").innerHTML="";
     return;
   }
@@ -767,7 +805,9 @@ function renderResults(s){
   if(replay&&open&&!s.replayRevealed){
     $("#resultGate").innerHTML=`<div class="gate-icon">🔐</div><h3>予想対象全件 HARD LOCK完了</h3><p>公式結果はまだ非表示です。「結果を解禁・一括精算」で初めて結果を開きます。</p>`;
   }else if(!displayOpen){
-    $("#resultGate").innerHTML=`<div class="gate-icon">🔒</div><h3>RESULT MODEはまだ開いていません</h3><p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p>`;
+    $("#resultGate").innerHTML=s.retestMode
+      ?`<div class="gate-icon">↻</div><h3>RETEST｜再検証中</h3><p>${state.locked}/${state.target} TARGET LOCK。自動予想 → HARD LOCK後に結果比較へ進みます。ORIGINAL BLIND成績は上書きしません。</p>`
+      :`<div class="gate-icon">🔒</div><h3>RESULT MODEはまだ開いていません</h3><p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p>`;
   }
   if(!displayOpen){$("#resultSummary").innerHTML="";return;}
 
@@ -983,9 +1023,13 @@ async function runBlindGeneratorPipeline(){
   try{
     setGeneratorStatus("① GENERATOR START…","working");
     await new Promise(r=>setTimeout(r,0));
-    const s=session();
-    if(!s||!activeReplayPack(s)){
+    const s=session(), state=appState(s);
+    if(!s||!state.pack){
       setGeneratorStatus("FAILED · DATA GATE · 先にBACKTESTパックを読み込んでください","error");
+      return;
+    }
+    if(["RETEST_RESULT","ORIGINAL_RESULT"].includes(state.kind)){
+      setGeneratorStatus("FAILED · RESULT ALREADY REVEALED · 新しいRETESTを開始してください","error");
       return;
     }
 
@@ -1017,6 +1061,7 @@ async function runBlindGeneratorPipeline(){
     setGeneratorStatus(`④ PICKS GENERATED… · ${made}R`,"working");
     saveStore();
     renderAll();
+    setGeneratorStatus(`④ PICKS GENERATED… · ${made}R`,"working");
     await new Promise(r=>requestAnimationFrame(r));
 
     const s2=session();
@@ -1024,8 +1069,13 @@ async function runBlindGeneratorPipeline(){
       if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
       return Array.isArray(r.picks)&&r.picks.filter(Boolean).length>0;
     }).length;
-    if(filled!==eligible.length){
-      setGeneratorStatus(`FAILED · UI VERIFY · ${filled}/${eligible.length}R`,"error");
+    const visibleFilled=s2.races.filter(r=>{
+      if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
+      const inputs=[...document.querySelectorAll(`input.pick[data-r="${r.race}"]`)];
+      return inputs.length===4&&inputs.some(x=>x.value.trim());
+    }).length;
+    if(filled!==eligible.length||visibleFilled!==eligible.length){
+      setGeneratorStatus(`FAILED · UI VERIFY · DATA ${filled}/${eligible.length} · VIEW ${visibleFilled}/${eligible.length}`,"error");
       return;
     }
     setGeneratorStatus(`${s2.retestMode?"✓ RETEST READY TO LOCK":"✓ READY TO LOCK"} · ${filled}R予想 / ${skipped.length}R見送り · 結果未表示${s2.retestMode?" · 正式戦績対象外":""}`,"success");
