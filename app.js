@@ -741,10 +741,11 @@ function testModeLabel(s){
 function baselineCompareHtml(s){
   if(!s.retestMode)return "";
   const b=VERIFIED_BASELINES[s.date];if(!b)return "";
-  return `<section class="compare-original">
-    <div class="compare-title">ORIGINAL BLIND ${b.id}｜比較基準・上書き禁止</div>
-    <div>${b.races}戦 ${b.hits}的中 · 投資 ${yen(b.invested)} · 払戻 ${yen(b.returned)} · 収支 ${yen(b.profit)} · 的中率 ${b.hitRate.toFixed(1)}% · ROI ${b.roi.toFixed(1)}%</div>
-  </section>`;
+  return finalScoreHtml({
+    ...b,
+    kicker:`ORIGINAL BLIND ${b.id}｜正式比較基準・上書き禁止`,
+    note:"初回の完全BLIND検証成績。RETESTを何回行ってもこの基準値は変更しません。"
+  });
 }
 
 function finalScoreHtml({races,hits,skipped,invested,returned,profit,hitRate,roi,kicker="BACKTEST FINAL SCORE｜最終成績",note=""}){
@@ -770,7 +771,11 @@ function currentFinalScoreHtml(s){
   const profit=returned-invested;
   return finalScoreHtml({
     races,hits,skipped:skipped.length,invested,returned,profit,
-    hitRate:races?hits/races*100:0,roi:invested?returned/invested*100:0
+    hitRate:races?hits/races*100:0,roi:invested?returned/invested*100:0,
+    kicker:s.retestMode?"RETEST FINAL SCORE｜今回の再検証成績":"BACKTEST FINAL SCORE｜最終成績",
+    note:s.retestMode
+      ?"RETEST参考成績｜正式BACKTEST/LIVE集計には加算しません。ORIGINAL BLINDは下の比較基準として固定保存。"
+      :`見送り ${skipped.length}R は投資・的中率・ROI・MISS集計から除外`
   });
 }
 function recoveredBaselineHtml(s){
@@ -833,7 +838,9 @@ function renderResults(s){
       </div><div class="refund-note">欠場・F等で購入買い目が返還対象になった場合だけ返還額を入力。</div>
     </div>`;
   }).join("");
-  $("#resultSummary").innerHTML=currentFinalScoreHtml(s)+baselineCompareHtml(s);
+  $("#resultSummary").innerHTML=s.retestMode
+    ?`<div class="score-compare-head"><b>RETEST vs ORIGINAL BLIND</b><span>今回の再検証と初回正式成績を完全分離して比較</span></div>${currentFinalScoreHtml(s)}${baselineCompareHtml(s)}`
+    :currentFinalScoreHtml(s);
   $$("[data-settle]").forEach(b=>b.onclick=()=>settleRace(+b.dataset.settle));
   $$("[data-miss]").forEach(x=>x.onchange=()=>{
     const r=s.races.find(r=>r.race===+x.dataset.miss);r.missClass=x.value;saveStore();renderAnalytics();renderReport();
@@ -862,7 +869,7 @@ function renderChart(){
 }
 function aggregateHeadBoat(){
   const rows=Array.from({length:6},(_,i)=>({name:`${i+1}頭`,inv:0,ret:0}));
-  for(const s of allSessions())for(const r of s.races.filter(x=>x.settled)){
+  for(const s of allSessions().filter(s=>!s.retestMode))for(const r of s.races.filter(x=>x.settled)){
     const picks=r.picks.filter(Boolean), per=PICK_PRICE;
     for(const p of picks){const idx=+p[0]-1;rows[idx].inv+=per;if(r.hit&&p===r.result)rows[idx].ret+=r.returnAmount}
   }
@@ -870,7 +877,7 @@ function aggregateHeadBoat(){
 }
 function aggregateWinners(){
   const counts=Array(6).fill(0);let total=0;
-  for(const s of allSessions())for(const r of s.races.filter(x=>x.settled)){counts[+r.result[0]-1]++;total++}
+  for(const s of allSessions().filter(s=>!s.retestMode))for(const r of s.races.filter(x=>x.settled)){counts[+r.result[0]-1]++;total++}
   return counts.map((c,i)=>({name:`${i+1}号艇`,value:total?c/total*100:0,empty:!total}));
 }
 function renderBars(id,rows){
@@ -879,7 +886,7 @@ function renderBars(id,rows){
 }
 function renderAnalytics(){
   renderBars("#headBoatBars",aggregateHeadBoat());renderBars("#winnerBars",aggregateWinners());
-  const rows=allSessions().slice().reverse().map(s=>{const x=sessionStats(s);return `<tr><td>${s.date}</td><td>${s.runType}</td><td>${s.strategyVersion}</td><td>${x.races}/12</td><td>${x.hits}</td><td>${pct(x.hitRate)}</td><td>${pct(x.roi)}</td><td class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</td></tr>`}).join("");
+  const rows=allSessions().slice().reverse().map(s=>{const x=sessionStats(s),kind=s.retestMode?`RETEST（参考・正式集計外）`:s.runType;return `<tr class="${s.retestMode?"retest-row":""}"><td>${s.date}</td><td>${kind}</td><td>${s.strategyVersion}</td><td>${x.races}/12</td><td>${x.hits}</td><td>${pct(x.hitRate)}</td><td>${pct(x.roi)}</td><td class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</td></tr>`}).join("");
   $("#historyTable").innerHTML=`<table class="tbl"><thead><tr><th>日付</th><th>区分</th><th>戦略</th><th>精算</th><th>的中</th><th>的中率</th><th>回収率</th><th>損益</th></tr></thead><tbody>${rows||'<tr><td colspan="8">まだ精算データがありません</td></tr>'}</tbody></table>`;
   const bt=allStats("BACKTEST"),lv=allStats("LIVE");
   $("#modeCompare").innerHTML=[["BACKTEST",bt],["LIVE",lv]].map(([name,x])=>`<div class="compare-card"><h3>${name}</h3><div class="mini"><div><span>RACE</span><b>${x.races}</b></div><div><span>HIT</span><b>${pct(x.hitRate)}</b></div><div><span>ROI</span><b>${pct(x.roi)}</b></div><div><span>P/L</span><b class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</b></div></div></div>`).join("");

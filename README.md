@@ -1,11 +1,10 @@
-# BOAT COMMAND v0.15.2 — UNIFIED STATE
+# BOAT COMMAND v0.15.3 — RETEST COMPARE
 
-修正:
-- ORIGINAL / ARCHIVED / RETEST / RESULT を appState() で一本化
-- 精算画面と上部モード表示が同じ状態判定を使用
-- RETEST中の精算画面を「RETEST｜再検証中」に変更
-- ARCHIVED ORIGINALは最終成績カードを表示
-- 自動予想の状態引き渡しを修正
-- 自動予想後にDATAと画面の両方を検証
-- RETEST成績は正式集計から除外
-- HTML/JS/CSSキャッシュ対策を強化
+主修正:
+- 精算画面の最上部に最終成績カードを表示
+- RETEST FINAL SCORE と ORIGINAL BLIND BT-001 を別カードで比較
+- ORIGINAL BLIND基準は上書き禁止
+- RETESTは正式BACKTEST/LIVE集計から除外
+- 1着艇回収率・結果1着分布・AIレポート集計からもRETESTを除外
+- 日別履歴ではRETESTを「参考・正式集計外」と明記
+- v0.15.2のパック読込 / 自動予想 / NO PREDICTION / HARD LOCK / 結果解禁 / 精算のコード経路を保持
