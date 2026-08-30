@@ -250,12 +250,34 @@ function replaySnapshotHtml(s,r){
   if(!pack)return "";
   const raceNo=Number(r.race);
   const pr=pack.races.find(x=>Number(x.race)===raceNo);
+  const verified=VERIFIED_BEFOREINFO_20251215[raceNo];
 
+  // 2R / 4R-12R: these snapshots are stored in the verified map.
+  // They must render even when the base replay pack has no detailed race object.
+  if(verified){
+    const baseType=pr?.type||"一般戦";
+    const rows=verified.rows.map((x,i)=>`<div class="verified-row">
+      <div class="full-name"><b>${i+1}</b><span>${escapeHtml(x[0])}</span></div>
+      <span>体重 <strong>${escapeHtml(x[1])}kg</strong></span>
+      <span>展示 <strong>${escapeHtml(x[2])}</strong></span>
+      <span>チルト <strong>${escapeHtml(x[3])}</strong></span>
+      <span>展示ST <strong>${escapeHtml(x[4])}</strong></span>
+    </div>`).join("");
+    const w=verified.weather;
+    return `<div class="replay-snapshot full-snapshot">
+      <div class="snapshot-head"><span>PRE-RACE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(baseType)} · 締切 ${verified.deadline}${verified.fixedEntry?" · 進入固定":""}${verified.stableBoard?" · 安定板":""}</b></div>
+      <div class="weather-strip"><span>${escapeHtml(w.label)}</span><span>${escapeHtml(w.condition)}</span><span>気温 ${escapeHtml(w.temp)}</span><span>水温 ${escapeHtml(w.water)}</span><span>風 ${escapeHtml(w.wind)}</span><span>波 ${escapeHtml(w.wave)}</span></div>
+      <div class="verified-grid">${rows}</div>
+      <div class="snapshot-note">締切前と確認できた公式直前情報のみ表示。「—」は公式アーカイブ上で確認できなかったため欠損扱い。</div>
+    </div>`;
+  }
+
+  // If the race is neither in verified map nor base pack, surface the failure.
   if(!pr){
     return `<div class="replay-snapshot integrity-warning">⚠ SNAPSHOT LINK ERROR · ${raceNo}R のパック情報を参照できません</div>`;
   }
 
-  // 1R: verified FULL snapshot stored directly on race profile.
+  // 1R: detailed verified profile stored directly in replay pack.
   if(pr.profiles&&Array.isArray(pr.profiles)){
     const rows=pr.boats.map((name,i)=>{
       const p=pr.profiles[i];
@@ -281,29 +303,10 @@ function replaySnapshotHtml(s,r){
     </div>`;
   }
 
-  // 2R, 4R-12R: verified before-info map.
-  const verified=VERIFIED_BEFOREINFO_20251215[raceNo];
-  if(verified){
-    const rows=verified.rows.map((x,i)=>`<div class="verified-row">
-      <div class="full-name"><b>${i+1}</b><span>${escapeHtml(x[0])}</span></div>
-      <span>体重 <strong>${escapeHtml(x[1])}kg</strong></span>
-      <span>展示 <strong>${escapeHtml(x[2])}</strong></span>
-      <span>チルト <strong>${escapeHtml(x[3])}</strong></span>
-      <span>展示ST <strong>${escapeHtml(x[4])}</strong></span>
-    </div>`).join("");
-    const w=verified.weather;
-    return `<div class="replay-snapshot full-snapshot">
-      <div class="snapshot-head"><span>PRE-RACE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${verified.deadline}${verified.fixedEntry?" · 進入固定":""}${verified.stableBoard?" · 安定板":""}</b></div>
-      <div class="weather-strip"><span>${escapeHtml(w.label)}</span><span>${escapeHtml(w.condition)}</span><span>気温 ${escapeHtml(w.temp)}</span><span>水温 ${escapeHtml(w.water)}</span><span>風 ${escapeHtml(w.wind)}</span><span>波 ${escapeHtml(w.wave)}</span></div>
-      <div class="verified-grid">${rows}</div>
-      <div class="snapshot-note">締切前と確認できた公式直前情報のみ表示。「—」は確認不能のため欠損扱い。</div>
-    </div>`;
-  }
-
-  // 3R: intentional hold. Do not invent unavailable values.
+  // 3R: intentional integrity hold.
   return `<div class="replay-snapshot hold-snapshot">
-    <div class="snapshot-head"><span>PRE-RACE SNAPSHOT <em class="hold-badge">INTEGRITY HOLD</em></span><b>${escapeHtml(pr.type)}</b></div>
-    <div class="boat-grid">${pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("")}</div>
+    <div class="snapshot-head"><span>PRE-RACE SNAPSHOT <em class="hold-badge">INTEGRITY HOLD</em></span><b>${escapeHtml(pr.type||"一般戦")}</b></div>
+    <div class="boat-grid">${(pr.boats||[]).map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("")}</div>
     <div class="snapshot-note">詳細な公式直前情報を現在のアーカイブ取得経路で確認できていないため、値を推測せずENTRY BASELINEのまま保持。</div>
   </div>`;
 }

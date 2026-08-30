@@ -1,11 +1,14 @@
-# BOAT COMMAND v0.10.4 — SNAPSHOT PIPELINE
+# BOAT COMMAND v0.10.5 — VERIFIED MAP FIX
 
-SNAPSHOTをrace-cardテンプレート内で直接展開する方式をやめ、
-レースカード描画後に専用slotへ明示挿入する2段階描画へ変更。
+## Root cause
+2R以降の検証済み直前データは `VERIFIED_BEFOREINFO_20251215` に保存されているが、
+旧rendererは先に `pack.races` の詳細オブジェクトを要求してreturnしていた。
+そのためPRE-RACE DATA ACTIVEまでは出てもSNAPSHOT本体が空になっていた。
 
-- 各race cardに `data-snapshot-race` slotを作成
-- DOM生成後に raceNo で照合して `replaySnapshotHtml()` を挿入
-- BACKTESTで空なら `SNAPSHOT PIPELINE EMPTY` を必ず表示
-- レース見出しに `PRE-RACE DATA ACTIVE` を表示
-- 1R FULL / 2R・4R〜12R VERIFIED / 3R INTEGRITY HOLD の構成は維持
-- cache bust v=104
+## Fix
+- verified mapを最優先でraceNo照合
+- 2R / 4R〜12Rはbase packの詳細race objectがなくても描画
+- 1R FULL SNAPSHOTは従来どおり
+- 3RはINTEGRITY HOLD
+- 照合不能時はSNAPSHOT LINK ERROR
+- cache bust v=105
