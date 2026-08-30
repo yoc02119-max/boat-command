@@ -1,10 +1,14 @@
-# BOAT COMMAND v0.12.2 — BILINGUAL STATUS
+# BOAT COMMAND v0.12.3 — SELECTIVE CARD UI
 
-予想可否ステータスを英語＋日本語併記へ変更。
+PDF確認で、v0.12.2は判定文言は存在していたものの、実際の `renderPredictions()` が旧UIのままと判明。
 
-- PREDICTION READY｜予想可能
-- LIMITED DATA｜一部データ不足
-- NO PREDICTION｜予想見送り
-
-ロジックやデータ判定条件はv0.12.1から変更なし。
-cache bust: v=122
+## Fix
+- 実際のレースカードrendererへ判定を直接統合
+- 全レース上部に英日ステータスを常時表示
+- 3R NO PREDICTIONは入力欄・根拠欄・HARD LOCKを完全撤去
+- 3R右上は「見送り」
+- 1R/2R/6Rは LIMITED DATA
+- その他は PREDICTION READY
+- 入力イベント側でもNO PREDICTIONを拒否
+- lockRace側の強制ガードも維持
+- cache bust v=123

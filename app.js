@@ -438,22 +438,51 @@ function replaySnapshotHtml(s,r){
 
 function renderPredictions(s){
   const host=$("#predictionList"); if(!host)return;
+
   host.innerHTML=s.races.map(r=>{
-    const picks=r.picks.map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" ${r.locked?"disabled":""} value="${p||""}" placeholder="${i+1}点目 例 1-3-4">`).join("");
-    return `<div class="race-card ${r.locked?"locked":""} ${activeReplayPack(s)?"replay-active":""}">
+    const gate=replayPredictionGate(s,r);
+    const noPrediction=gate.status==="NO_PREDICTION";
+    const picks=r.picks.map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" ${(r.locked||noPrediction)?"disabled":""} value="${escapeHtml(p||"")}" placeholder="${i+1}点目 例 1-3-4">`).join("");
+
+    const editor=noPrediction
+      ? `<div class="no-prediction-panel">
+          <div class="no-prediction-head">
+            <b>NO PREDICTION｜予想見送り</b>
+            <span>このレースは予想対象外</span>
+          </div>
+          <div class="no-prediction-reason">${escapeHtml(gate.reason)}</div>
+          <div class="no-prediction-rule">予想入力・予想根拠・HARD LOCKは無効です。見送った理由はBACKTEST記録に残します。</div>
+        </div>`
+      : `<div class="pick-grid">${picks}</div>
+        <div class="reason-box">
+          <label>予想根拠（LOCK時に固定）</label>
+          <textarea data-reason="${r.race}" ${r.locked?"disabled":""} placeholder="例：1の展示気配良、3カド攻め想定">${escapeHtml(r.rationale||"")}</textarea>
+        </div>
+        <div class="race-actions">
+          ${r.locked
+            ? `<span class="unlock-note">🔒 HARD LOCK済み</span>`
+            : `<button class="lock-btn" data-lock="${r.race}">HARD LOCK</button>`}
+        </div>`;
+
+    return `<div class="race-card ${r.locked?"locked":""} ${activeReplayPack(s)?"replay-active":""} ${noPrediction?"no-prediction-race":""}">
       <div class="race-head">
-        <div><div class="race-no">${r.race}R</div><div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}${activeReplayPack(s)?' · PRE-RACE DATA ACTIVE':''}</div></div>
-        <div class="stake">${r.locked?money(r.stake):"最大 ¥2,000"}</div>
+        <div>
+          <div class="race-no">${r.race}R</div>
+          <div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}${activeReplayPack(s)?' · PRE-RACE DATA ACTIVE':''}</div>
+        </div>
+        <div class="stake">${noPrediction?"見送り":(r.locked?money(r.stake):"最大 ¥2,000")}</div>
       </div>
+
+      <div class="prediction-gate ${gate.status.toLowerCase()} prediction-gate-top">
+        <b>${escapeHtml(gate.label)}</b>
+        <span>${escapeHtml(gate.reason)}</span>
+      </div>
+
       <div class="snapshot-slot" data-snapshot-race="${r.race}"></div>
-      <div class="pick-grid">${picks}</div>
-      <div class="reason-box"><label>予想根拠（LOCK時に固定）</label><textarea data-reason="${r.race}" ${r.locked?"disabled":""} placeholder="例：1の展示気配良、3カド攻め想定">${r.rationale||""}</textarea></div>
-      <div class="race-actions">${r.locked?`<span class="unlock-note">🔒 HARD LOCK済み</span>`:`<button class="lock-btn" data-lock="${r.race}">HARD LOCK</button>`}</div>
-    </div>`
+      ${editor}
+    </div>`;
   }).join("");
 
-  // SNAPSHOT is populated as a second pass after race cards exist in the DOM.
-  // This avoids template/render timing issues and gives us an explicit diagnostic.
   $$("[data-snapshot-race]").forEach(slot=>{
     const raceNo=Number(slot.dataset.snapshotRace);
     const race=s.races.find(x=>Number(x.race)===raceNo);
@@ -473,56 +502,17 @@ function renderPredictions(s){
 
   $$(".pick").forEach(inp=>{
     inp.addEventListener("change",e=>{
-      const r=s.races.find(x=>x.race===+e.target.dataset.r); if(r.locked)return;
+      const r=s.races.find(x=>x.race===+e.target.dataset.r); if(!r||r.locked)return;
+      if(replayPredictionGate(s,r).status==="NO_PREDICTION"){renderPredictions(s);return;}
       r.picks[+e.target.dataset.i]=normalizePick(e.target.value);saveStore();renderPredictions(s);
     });
   });
   $$("[data-reason]").forEach(inp=>inp.addEventListener("change",e=>{
-    const r=s.races.find(x=>x.race===+e.target.dataset.reason);if(r.locked)return;
-    r.rationale=e.target.value.trim();saveStore();
+    const r=s.races.find(x=>x.race===+e.target.dataset.reason); if(!r||r.locked)return;
+    if(replayPredictionGate(s,r).status==="NO_PREDICTION"){renderPredictions(s);return;}
+    r.rationale=e.target.value;saveStore();
   }));
   $$("[data-lock]").forEach(b=>b.onclick=()=>lockRace(+b.dataset.lock));
-  $("#lockAllBtn").disabled=lockedCount(s)===12;
-}
-async function lockRace(n){
-  const sessionForGate=getSession();
-  const raceForGate=sessionForGate?.races?.find(x=>Number(x.race)===Number(raceNo));
-  if(raceForGate){
-    const gateForLock=replayPredictionGate(sessionForGate,raceForGate);
-    if(gateForLock.status==="NO_PREDICTION"){
-      alert(`NO PREDICTION\n${gateForLock.reason}`);
-      renderAll();
-      return;
-    }
-  }
-
-  const s0=getSession();
-  const r0=s0?.races?.find(x=>Number(x.race)===Number(raceNo));
-  if(r0){
-    const g0=replayPredictionGate(s0,r0);
-    if(g0.status==="NO_PREDICTION"){alert(`このレースは予想見送りです。\n理由: ${g0.reason}`);return;}
-  }
-
-  const s=session(),r=s.races.find(x=>x.race===n);if(r.locked)return;
-  let picks=r.picks.map(normalizePick).filter(Boolean);
-  if(!picks.length){alert(`${n}Rの買い目を入力してください。`);return}
-  if(picks.length>MAX_PICKS||!picks.every(validPick)){alert("買い目は最大4点。「1-3-4」の形式で、同じ艇番は重複できません。");return}
-  if(new Set(picks).size!==picks.length){alert("同じ買い目が重複しています。");return}
-  r.picks=[...picks,...Array(MAX_PICKS-picks.length).fill("")];
-  r.stake=picks.length*PICK_PRICE;r.lockedAt=new Date().toISOString();
-  r.lockHash=await digest(`${s.date}|${s.runType}|${s.strategyVersion}|${r.race}|${picks.join(",")}|${r.rationale||""}|${r.stake}|${r.lockedAt}`);
-  r.locked=true;saveStore();renderAll();
-}
-$("#lockAllBtn").onclick=async()=>{
-  const s=session();
-  const open=s.races.filter(r=>!r.locked);
-  if(!open.length)return;
-  for(const r of open){
-    const picks=r.picks.map(normalizePick).filter(Boolean);
-    if(!picks.length||!picks.every(validPick)||new Set(picks).size!==picks.length){alert(`${r.race}Rの買い目を確認してください。一括LOCKを中止しました。`);return}
-  }
-  if(!confirm(`入力済みの${open.length}レースをHARD LOCKします。LOCK後は変更できません。よろしいですか？`))return;
-  for(const r of open)await lockRace(r.race);
 }
 function renderResults(s){
   const replay=activeReplayPack(s);
