@@ -314,15 +314,35 @@ function renderPredictions(s){
     const picks=r.picks.map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" ${r.locked?"disabled":""} value="${p||""}" placeholder="${i+1}点目 例 1-3-4">`).join("");
     return `<div class="race-card ${r.locked?"locked":""} ${activeReplayPack(s)?"replay-active":""}">
       <div class="race-head">
-        <div><div class="race-no">${r.race}R</div><div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}</div></div>
+        <div><div class="race-no">${r.race}R</div><div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}${activeReplayPack(s)?' · PRE-RACE DATA ACTIVE':''}</div></div>
         <div class="stake">${r.locked?money(r.stake):"最大 ¥2,000"}</div>
       </div>
-      ${replaySnapshotHtml(s,r)}
+      <div class="snapshot-slot" data-snapshot-race="${r.race}"></div>
       <div class="pick-grid">${picks}</div>
       <div class="reason-box"><label>予想根拠（LOCK時に固定）</label><textarea data-reason="${r.race}" ${r.locked?"disabled":""} placeholder="例：1の展示気配良、3カド攻め想定">${r.rationale||""}</textarea></div>
       <div class="race-actions">${r.locked?`<span class="unlock-note">🔒 HARD LOCK済み</span>`:`<button class="lock-btn" data-lock="${r.race}">HARD LOCK</button>`}</div>
     </div>`
   }).join("");
+
+  // SNAPSHOT is populated as a second pass after race cards exist in the DOM.
+  // This avoids template/render timing issues and gives us an explicit diagnostic.
+  $$("[data-snapshot-race]").forEach(slot=>{
+    const raceNo=Number(slot.dataset.snapshotRace);
+    const race=s.races.find(x=>Number(x.race)===raceNo);
+    if(!race){
+      slot.innerHTML=`<div class="replay-snapshot integrity-warning">⚠ SNAPSHOT PIPELINE ERROR · ${raceNo}R</div>`;
+      return;
+    }
+    const out=replaySnapshotHtml(s,race);
+    if(activeReplayPack(s)){
+      slot.innerHTML=out||`<div class="replay-snapshot integrity-warning">⚠ SNAPSHOT PIPELINE EMPTY · ${raceNo}R</div>`;
+      slot.dataset.state=out?"ok":"empty";
+    }else{
+      slot.innerHTML="";
+      slot.dataset.state="inactive";
+    }
+  });
+
   $$(".pick").forEach(inp=>{
     inp.addEventListener("change",e=>{
       const r=s.races.find(x=>x.race===+e.target.dataset.r); if(r.locked)return;
