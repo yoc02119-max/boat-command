@@ -484,7 +484,7 @@ function makeBlindPicks(s,r){
   };
 }
 function generateBlindPredictions(){
-  const s=getSession();
+  const s=currentSession();
   if(!activeReplayPack(s)){alert("先にBACKTESTパックを読み込んでください。");return;}
   let made=0,skipped=0;
   s.races.forEach(r=>{
@@ -797,7 +797,7 @@ async function runBlindGeneratorPipeline(){
   try{
     setGeneratorStatus("① GENERATOR START…","working");
     await new Promise(r=>setTimeout(r,0));
-    const s=getSession();
+    const s=currentSession();
     if(!s||!activeReplayPack(s)){
       setGeneratorStatus("FAILED · DATA GATE · 先にBACKTESTパックを読み込んでください","error");
       return;
@@ -833,7 +833,7 @@ async function runBlindGeneratorPipeline(){
     renderAll();
     await new Promise(r=>requestAnimationFrame(r));
 
-    const s2=getSession();
+    const s2=currentSession();
     const filled=s2.races.filter(r=>{
       if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
       return Array.isArray(r.picks)&&r.picks.filter(Boolean).length>0;
