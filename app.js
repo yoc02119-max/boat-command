@@ -303,8 +303,8 @@ function loadReplayPack(id){
 }
 function revealAndSettleReplay(){
   const s=session(),pack=activeReplayPack(s);
-  if(!pack||lockedCount(s)!==12||s.replayRevealed)return;
-  if(!confirm("12RすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？"))return;
+  if(!pack||lockedCount(s)!==requiredReplayLocks(s)||s.replayRevealed)return;
+  if(!confirm("予想対象レースをすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？"))return;
   for(const pr of pack.races){
     const r=s.races.find(x=>x.race===pr.race);if(r.settled)continue;
     r.result=pr.result;r.officialPayout100=pr.pay;r.refundAmount=0;
@@ -316,6 +316,28 @@ function revealAndSettleReplay(){
 }
 $("#loadReplayBtn").onclick=()=>loadReplayPack("gamagori-2025-12-15");
 $("#revealReplayBtn").onclick=revealAndSettleReplay;
+
+
+function replayPredictionGate(s,r){
+  if(s.runType!=="BACKTEST"||!s.replayPackId)return {status:"READY",label:"PREDICTION READY",reason:""};
+  const n=Number(r.race);
+  if(n===3)return {
+    status:"NO_PREDICTION",
+    label:"NO PREDICTION",
+    reason:"締切前の公式直前データを十分に確認できないため見送り"
+  };
+  if(n===2||n===6)return {
+    status:"LIMITED",
+    label:"LIMITED DATA",
+    reason:"公式アーカイブで展示タイム・展示STを確認できないため、確認済み項目のみで判断"
+  };
+  if(n===1)return {
+    status:"LIMITED",
+    label:"LIMITED DATA",
+    reason:"気象情報の時刻整合性を満たさないため気象を除外して判断"
+  };
+  return {status:"READY",label:"PREDICTION READY",reason:"締切前と確認できた直前データで判断可能"};
+}
 
 function replaySnapshotHtml(s,r){
   const pack=activeReplayPack(s);
@@ -432,6 +454,13 @@ function renderPredictions(s){
   $("#lockAllBtn").disabled=lockedCount(s)===12;
 }
 async function lockRace(n){
+  const s0=getSession();
+  const r0=s0?.races?.find(x=>Number(x.race)===Number(raceNo));
+  if(r0){
+    const g0=replayPredictionGate(s0,r0);
+    if(g0.status==="NO_PREDICTION"){alert(`このレースは予想見送りです。\n理由: ${g0.reason}`);return;}
+  }
+
   const s=session(),r=s.races.find(x=>x.race===n);if(r.locked)return;
   let picks=r.picks.map(normalizePick).filter(Boolean);
   if(!picks.length){alert(`${n}Rの買い目を入力してください。`);return}
