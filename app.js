@@ -7,8 +7,8 @@ const BACKTEST_PACKS={
   "gamagori-2025-12-15":{
     id:"gamagori-2025-12-15",date:"2025-12-15",venue:"蒲郡",
     title:"蒲郡柑橘組合 蒲郡みかん杯・最終日",
-    snapshotLevel:"1R TIME-SAFE / 2R-12R ENTRY",
-    note:"1Rは時刻監査済み。締切後に更新された項目は予想入力から除外。2R-12Rは段階的に検証追加。",
+    snapshotLevel:"1R+2R+4R-12R VERIFIED / 3R HOLD",
+    note:"1R・2R・4R-12Rは公式直前情報を時刻監査済み。3Rは詳細取得未確認のため推測せずHOLD。",
     races:[
       {race:1,type:"一般戦",stableBoard:true,deadline:"15:21",
         boats:["清水紀克","加藤高史","村田 敦","宮本裕之","久保原秀人","早川颯太"],
@@ -219,6 +219,23 @@ $("#revealReplayBtn").onclick=revealAndSettleReplay;
 function replaySnapshotHtml(s,r){
   const pack=activeReplayPack(s);if(!pack)return "";
   const pr=pack.races.find(x=>x.race===r.race);if(!pr)return "";
+  const verified=VERIFIED_BEFOREINFO_20251215[r.race];
+  if(!pr.profiles && verified){
+    const rows=verified.rows.map((x,i)=>`<div class="verified-row">
+      <div class="full-name"><b>${i+1}</b><span>${escapeHtml(x[0])}</span></div>
+      <span>体重 <strong>${x[1]}kg</strong></span>
+      <span>展示 <strong>${x[2]}</strong></span>
+      <span>チルト <strong>${x[3]}</strong></span>
+      <span>展示ST <strong>${x[4]}</strong></span>
+    </div>`).join("");
+    const w=verified.weather;
+    return `<div class="replay-snapshot full-snapshot">
+      <div class="snapshot-head"><span>PRE-RACE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${verified.deadline}${verified.fixedEntry?" · 進入固定":""}${verified.stableBoard?" · 安定板":""}</b></div>
+      <div class="weather-strip"><span>${w.label}</span><span>${w.condition}</span><span>気温 ${w.temp}</span><span>水温 ${w.water}</span><span>風 ${w.wind}</span><span>波 ${w.wave}</span></div>
+      <div class="verified-grid">${rows}</div>
+      <div class="snapshot-note">公式直前情報のうち、当該レース締切前と確認できた項目のみ表示。「—」は公式アーカイブ上で確認できなかったため欠損扱い。</div>
+    </div>`;
+  }
   if(pr.profiles){
     const rows=pr.boats.map((name,i)=>{
       const p=pr.profiles[i];
@@ -246,7 +263,7 @@ function replaySnapshotHtml(s,r){
   return `<div class="replay-snapshot">
     <div class="snapshot-head"><span>PRE-RACE SNAPSHOT</span><b>${escapeHtml(pr.type)}</b></div>
     <div class="boat-grid">${boats}</div>
-    <div class="snapshot-note">このレースはまだENTRY BASELINE。詳細データ検証前のため本格予想には使用しません。</div>
+    <div class="snapshot-note">INTEGRITY HOLD：このレースは詳細な公式直前情報を現在の取得経路で確認できていないため、値を推測せずENTRY BASELINEのまま保持。</div>
   </div>`;
 }
 function renderPredictions(s){
@@ -408,7 +425,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9.2",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.10",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
