@@ -785,4 +785,74 @@ if(SR){
 
 renderAll();
 
-$("#generateBlindBtn")?.addEventListener("click",generateBlindPredictions);
+
+
+function setGeneratorStatus(text,kind=""){
+  const el=$("#generatorStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.className="generator-status "+kind;
+}
+async function runBlindGeneratorPipeline(){
+  try{
+    setGeneratorStatus("① GENERATOR START…","working");
+    await new Promise(r=>setTimeout(r,0));
+    const s=getSession();
+    if(!s||!activeReplayPack(s)){
+      setGeneratorStatus("FAILED · DATA GATE · 先にBACKTESTパックを読み込んでください","error");
+      return;
+    }
+
+    setGeneratorStatus("② DATA GATE CHECK…","working");
+    const eligible=s.races.filter(r=>replayPredictionGate(s,r).status!=="NO_PREDICTION");
+    const skipped=s.races.filter(r=>replayPredictionGate(s,r).status==="NO_PREDICTION");
+    if(!eligible.length){
+      setGeneratorStatus("FAILED · DATA GATE · 予想対象レース0件","error");
+      return;
+    }
+
+    setGeneratorStatus(`③ BLIND SCORE… · 対象 ${eligible.length}R / 見送り ${skipped.length}R`,"working");
+    let made=0,failed=[];
+    for(const r of eligible){
+      if(r.locked)continue;
+      const out=makeBlindPicks(s,r);
+      if(!out||!Array.isArray(out.picks)||out.picks.length===0){
+        failed.push(r.race);continue;
+      }
+      r.picks=out.picks;
+      r.rationale=out.rationale;
+      made++;
+    }
+    if(failed.length){
+      setGeneratorStatus(`FAILED · PREDICTOR · ${failed.join(",")}R`,"error");
+      return;
+    }
+
+    setGeneratorStatus(`④ PICKS GENERATED… · ${made}R`,"working");
+    saveStore();
+    renderAll();
+    await new Promise(r=>requestAnimationFrame(r));
+
+    const s2=getSession();
+    const filled=s2.races.filter(r=>{
+      if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
+      return Array.isArray(r.picks)&&r.picks.filter(Boolean).length>0;
+    }).length;
+    if(filled!==eligible.length){
+      setGeneratorStatus(`FAILED · UI VERIFY · ${filled}/${eligible.length}R`,"error");
+      return;
+    }
+    setGeneratorStatus(`✓ READY TO LOCK · ${filled}R予想 / ${skipped.length}R見送り · 結果未表示`,"success");
+  }catch(err){
+    console.error(err);
+    setGeneratorStatus(`FAILED · GENERATOR · ${err?.message||"UNKNOWN ERROR"}`,"error");
+  }
+}
+
+document.addEventListener("click",(e)=>{
+  const btn=e.target.closest?.("#generateBlindBtn");
+  if(!btn)return;
+  e.preventDefault();
+  runBlindGeneratorPipeline();
+});
+
