@@ -327,9 +327,9 @@ function replayPredictionGate(s,r){
     reason:"締切前の公式直前データを十分に確認できないため見送り"
   };
   if(n===2||n===6)return {
-    status:"LIMITED",
-    label:"LIMITED DATA｜一部データ不足",
-    reason:"公式アーカイブで展示タイム・展示STを確認できないため、確認済み項目のみで判断"
+    status:"NO_PREDICTION",
+    label:"NO PREDICTION｜予想見送り",
+    reason:"展示タイム・展示STなど重要な直前比較データを締切前情報として確認できないため見送り"
   };
   if(n===1)return {
     status:"LIMITED",
@@ -434,6 +434,70 @@ function replaySnapshotHtml(s,r){
     <div class="boat-grid">${(pr.boats||[]).map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("")}</div>
     <div class="snapshot-note">詳細な公式直前情報を現在のアーカイブ取得経路で確認できていないため、値を推測せずENTRY BASELINEのまま保持。</div>
   </div>`;
+}
+
+
+function blindScoreRows(s,r){
+  const n=Number(r.race);
+  const pack=activeReplayPack(s);
+  const pr=pack?.races?.find(x=>Number(x.race)===n);
+  const v=VERIFIED_BEFOREINFO_20251215[n];
+
+  if(n===1 && pr?.profiles){
+    return pr.profiles.map((p,i)=>{
+      const lane=i+1;
+      const laneBonus=[2.6,1.45,1.05,.75,.45,.25][i];
+      const exScore=(6.90-Number(p.ex))*8;
+      const stScore=(.30-Number(p.exST))*4;
+      const classScore=p.cls==="A1"?1.4:p.cls==="A2"?.8:0;
+      const winScore=Number(p.natWin)*.28+Number(p.localWin)*.16;
+      const motorScore=Number(p.motor2)*.025;
+      return {lane,score:laneBonus+exScore+stScore+classScore+winScore+motorScore};
+    });
+  }
+
+  if(v){
+    return v.rows.map((x,i)=>{
+      const lane=i+1, ex=Number(x[2]), stRaw=String(x[4]||"");
+      if(!Number.isFinite(ex)||x[2]==="—"||stRaw==="—")return null;
+      const laneBonus=[2.8,1.55,1.1,.8,.5,.3][i];
+      const exScore=(6.95-ex)*8;
+      let st=Number(stRaw.replace("F.","0."));
+      if(!Number.isFinite(st))st=.20;
+      const stScore=stRaw.startsWith("F.") ? Math.max(0,1.0-st*2) : (0.30-st)*4;
+      return {lane,score:laneBonus+exScore+stScore};
+    }).filter(Boolean);
+  }
+  return [];
+}
+function makeBlindPicks(s,r){
+  if(replayPredictionGate(s,r).status==="NO_PREDICTION")return null;
+  const rows=blindScoreRows(s,r).sort((a,b)=>b.score-a.score);
+  if(rows.length<3)return null;
+  const a=rows[0].lane,b=rows[1].lane,c=rows[2].lane,d=rows[3]?.lane||c;
+  const candidates=[`${a}-${b}-${c}`,`${a}-${c}-${b}`,`${b}-${a}-${c}`,`${a}-${b}-${d}`];
+  const picks=[...new Set(candidates)].slice(0,4);
+  return {
+    picks,
+    rank:rows.map(x=>x.lane),
+    rationale:`STRICT BLIND自動生成。表示済みの締切前データのみ使用。評価順位 ${rows.map(x=>x.lane).join("→")}。コース優位・展示タイム・展示ST${Number(r.race)===1?"・全国/当地勝率・モーター2連率":""}を固定ルールで採点。`
+  };
+}
+function generateBlindPredictions(){
+  const s=getSession();
+  if(!activeReplayPack(s)){alert("先にBACKTESTパックを読み込んでください。");return;}
+  let made=0,skipped=0;
+  s.races.forEach(r=>{
+    if(r.locked)return;
+    if(replayPredictionGate(s,r).status==="NO_PREDICTION"){skipped++;return;}
+    const out=makeBlindPicks(s,r);
+    if(!out){skipped++;return;}
+    r.picks=out.picks;
+    r.rationale=out.rationale;
+    made++;
+  });
+  saveStore();renderAll();
+  alert(`BLIND予想生成完了\n予想 ${made}R / 見送り ${skipped}R\nまだHARD LOCKはしていません。`);
 }
 
 function renderPredictions(s){
@@ -720,3 +784,5 @@ if(SR){
 }else{$("#micBtn").onclick=()=>addBubble("このiPad環境ではWeb音声認識が使えません。入力欄でiPad標準のキーボード音声入力を使えます。","ai")}
 
 renderAll();
+
+$("#generateBlindBtn")?.addEventListener("click",generateBlindPredictions);
