@@ -650,6 +650,28 @@ function renderPredictions(s){
   }));
   $$("[data-lock]").forEach(b=>b.onclick=()=>lockRace(+b.dataset.lock));
 }
+
+function resultSummaryHtml(s){
+  const settled=settledRaces(s), skipped=skippedReplayRaces(s);
+  if(!s.replayRevealed||!settled.length)return "";
+  const races=settled.length, hits=settled.filter(r=>r.hit).length;
+  const invested=settled.reduce((a,r)=>a+(Number(r.stake)||0),0);
+  const returned=settled.reduce((a,r)=>a+(Number(r.returnAmount)||0),0);
+  const profit=returned-invested, hitRate=races?hits/races*100:0, roi=invested?returned/invested*100:0;
+  return `<section class="final-score-card">
+    <div class="final-score-kicker">BACKTEST FINAL SCORE｜最終成績</div>
+    <div class="final-score-title">${races}戦 ${hits}的中 <span>／ ${skipped.length}R見送り</span></div>
+    <div class="final-score-grid">
+      <div><small>投資</small><b>${yen(invested)}</b></div>
+      <div><small>払戻</small><b>${yen(returned)}</b></div>
+      <div><small>収支</small><b class="${profit>=0?"plus":"minus"}">${profit>0?"+":""}${yen(profit)}</b></div>
+      <div><small>的中率</small><b>${hitRate.toFixed(1)}%</b></div>
+      <div><small>ROI</small><b>${roi.toFixed(1)}%</b></div>
+    </div>
+    <div class="final-score-note">見送り ${skipped.length}R は投資・的中率・ROI・MISS集計から除外</div>
+  </section>`;
+}
+
 function renderResults(s){
   const replay=activeReplayPack(s);
   const open=isResultMode(s);
@@ -726,6 +748,8 @@ function aggregateWinners(){
 function renderBars(id,rows){
   const el=$(id);if(!el)return;
   el.innerHTML=rows.map(r=>`<div class="bar-row"><span>${r.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,r.value)}%"></div></div><span class="bar-value">${r.empty?"—":r.value.toFixed(1)+"%"}</span></div>`).join("");
+  $("#resultSummary").innerHTML=resultSummaryHtml(s);
+
 }
 function renderAnalytics(){
   renderBars("#headBoatBars",aggregateHeadBoat());renderBars("#winnerBars",aggregateWinners());
