@@ -1,20 +1,11 @@
-# BOAT COMMAND v0.10.1 — REPLAY RESUME
+# BOAT COMMAND v0.10.3 — SNAPSHOT RENDER FIX
 
+BACKTESTパックがBLIND状態になっているのに各レースの事前SNAPSHOTが表示されない問題を修正。
 
-2025/12/15 蒲郡 BACKTESTパックを公式直前情報で拡張。
-
-- 1R: 詳細スナップショット。時刻不整合の気象は除外済み
-- 2R: 体重/チルト/13:00気象。展示・展示STは公式アーカイブ上で確認不能のため欠損
-- 3R: INTEGRITY HOLD。詳細データを推測せず保留
-- 4R〜5R: 展示/チルト/展示ST/締切前気象
-- 6R: 体重/チルト/締切前気象。展示・展示STは欠損
-- 7R〜12R: 展示/チルト/展示ST/締切前気象
-- 7R: 進入固定
-- 欠損値は「—」で明示
-- 結果・払戻は12/12 HARD LOCK前に表示しない
-
-精度優先のため、確認できない値は一切補完しません。
-
-## Fix
-ページ再読込時に日付が当日LIVEへ戻り、読み込み済みBACKTESTのスナップショットが見えなくなる問題を修正。
-未完了BACKTEST、または最後に選択した保存済み日付を復元する。
+- race番号をNumberで正規化してパック照合
+- 1R FULL SNAPSHOTを明示レンダリング
+- 2R / 4R〜12R VERIFIED SNAPSHOTを明示レンダリング
+- 3RはINTEGRITY HOLDを必ず表示
+- パック参照失敗時は無言で消さず、SNAPSHOT LINK ERRORを画面表示
+- replay-active状態をrace cardに付与
+- cache bust v=103

@@ -144,6 +144,26 @@ function showView(id){
 $$(".nav").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $$("[data-jump]").forEach(b=>b.onclick=()=>showView(b.dataset.jump));
 
+
+function loadReplayPack20251215(){
+  const pack=BACKTEST_PACKS["2025-12-15"];
+  if(!pack){alert("BACKTESTパックが見つかりません");return;}
+  const s=freshSession(pack.date);
+  s.runType="BACKTEST";
+  s.strategyVersion=s.strategyVersion||"GAMAGORI-V1.0";
+  s.replayPackId=pack.id;
+  s.replayRevealed=false;
+  s.replayLoadedAt=new Date().toISOString();
+  s.mode="STRICT";
+  s.races=s.races||{};
+  store.sessions[pack.date]=s;
+  currentDate=pack.date;
+  localStorage.setItem("boatCommand.lastDate",currentDate);
+  saveStore();
+  renderAll();
+  setTimeout(()=>{document.getElementById("sessionDate")?.scrollIntoView({behavior:"smooth",block:"start"});},50);
+}
+
 function renderAll(){
   const s=session(),st=sessionStats(s),all=allStats(),lc=lockedCount(s),mode=isResultMode(s);
   const rt=$("#runType"),sv=$("#strategyVersion");
@@ -226,60 +246,73 @@ $("#loadReplayBtn").onclick=()=>loadReplayPack("gamagori-2025-12-15");
 $("#revealReplayBtn").onclick=revealAndSettleReplay;
 
 function replaySnapshotHtml(s,r){
-  const pack=activeReplayPack(s);if(!pack)return "";
-  const pr=pack.races.find(x=>x.race===r.race);if(!pr)return "";
-  const verified=VERIFIED_BEFOREINFO_20251215[r.race];
-  if(!pr.profiles && verified){
-    const rows=verified.rows.map((x,i)=>`<div class="verified-row">
-      <div class="full-name"><b>${i+1}</b><span>${escapeHtml(x[0])}</span></div>
-      <span>体重 <strong>${x[1]}kg</strong></span>
-      <span>展示 <strong>${x[2]}</strong></span>
-      <span>チルト <strong>${x[3]}</strong></span>
-      <span>展示ST <strong>${x[4]}</strong></span>
-    </div>`).join("");
-    const w=verified.weather;
-    return `<div class="replay-snapshot full-snapshot">
-      <div class="snapshot-head"><span>PRE-RACE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${verified.deadline}${verified.fixedEntry?" · 進入固定":""}${verified.stableBoard?" · 安定板":""}</b></div>
-      <div class="weather-strip"><span>${w.label}</span><span>${w.condition}</span><span>気温 ${w.temp}</span><span>水温 ${w.water}</span><span>風 ${w.wind}</span><span>波 ${w.wave}</span></div>
-      <div class="verified-grid">${rows}</div>
-      <div class="snapshot-note">公式直前情報のうち、当該レース締切前と確認できた項目のみ表示。「—」は公式アーカイブ上で確認できなかったため欠損扱い。</div>
-    </div>`;
+  const pack=activeReplayPack(s);
+  if(!pack)return "";
+  const raceNo=Number(r.race);
+  const pr=pack.races.find(x=>Number(x.race)===raceNo);
+
+  if(!pr){
+    return `<div class="replay-snapshot integrity-warning">⚠ SNAPSHOT LINK ERROR · ${raceNo}R のパック情報を参照できません</div>`;
   }
-  if(pr.profiles){
+
+  // 1R: verified FULL snapshot stored directly on race profile.
+  if(pr.profiles&&Array.isArray(pr.profiles)){
     const rows=pr.boats.map((name,i)=>{
       const p=pr.profiles[i];
+      if(!p)return "";
       return `<div class="full-row">
-        <div class="full-name"><b>${i+1}</b><span>${escapeHtml(name)}<small>${p.cls}</small></span></div>
-        <span>平均ST <strong>${p.avgST.toFixed(2)}</strong></span>
-        <span>全国 <strong>${p.natWin.toFixed(2)}</strong></span>
-        <span>当地 <strong>${p.localWin.toFixed(2)}</strong></span>
-        <span>M${p.motor} <strong>${p.motor2.toFixed(2)}%</strong></span>
-        <span>展示 <strong>${p.ex.toFixed(2)}</strong></span>
-        <span>展示ST <strong>${p.exST.toFixed(2)}</strong></span>
+        <div class="full-name"><b>${i+1}</b><span>${escapeHtml(name)}<small>${escapeHtml(p.cls||"")}</small></span></div>
+        <span>平均ST <strong>${Number(p.avgST).toFixed(2)}</strong></span>
+        <span>全国 <strong>${Number(p.natWin).toFixed(2)}</strong></span>
+        <span>当地 <strong>${Number(p.localWin).toFixed(2)}</strong></span>
+        <span>M${p.motor} <strong>${Number(p.motor2).toFixed(2)}%</strong></span>
+        <span>展示 <strong>${Number(p.ex).toFixed(2)}</strong></span>
+        <span>展示ST <strong>${Number(p.exST).toFixed(2)}</strong></span>
       </div>`;
     }).join("");
     const weatherHtml=pr.weather
       ? `<div class="weather-strip"><span>${pr.weather.condition}</span><span>気温 ${pr.weather.temp}</span><span>水温 ${pr.weather.water}</span><span>風 ${pr.weather.wind}</span><span>波 ${pr.weather.wave}</span></div>`
       : `<div class="integrity-warning">⚠ WEATHER EXCLUDED · 時刻整合性を満たさない気象値は予想入力から除外</div>`;
     return `<div class="replay-snapshot full-snapshot">
-      <div class="snapshot-head"><span>PRE-RACE FULL SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${pr.deadline}${pr.stableBoard?" · 安定板":""}</b></div>
+      <div class="snapshot-head"><span>PRE-RACE FULL SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${escapeHtml(pr.deadline||"—")}${pr.stableBoard?" · 安定板":""}</b></div>
       ${weatherHtml}
       <div class="full-grid">${rows}</div>
-      <div class="snapshot-note">出走表・展示・展示STはレース固有の公式直前情報。時刻が締切後の項目は自動的に予想入力から除外。</div>
+      <div class="snapshot-note">出走表・展示・展示STはレース固有の公式直前情報。締切後に更新された項目は予想入力から除外。</div>
     </div>`;
   }
-  const boats=pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("");
-  return `<div class="replay-snapshot">
-    <div class="snapshot-head"><span>PRE-RACE SNAPSHOT</span><b>${escapeHtml(pr.type)}</b></div>
-    <div class="boat-grid">${boats}</div>
-    <div class="snapshot-note">INTEGRITY HOLD：このレースは詳細な公式直前情報を現在の取得経路で確認できていないため、値を推測せずENTRY BASELINEのまま保持。</div>
+
+  // 2R, 4R-12R: verified before-info map.
+  const verified=VERIFIED_BEFOREINFO_20251215[raceNo];
+  if(verified){
+    const rows=verified.rows.map((x,i)=>`<div class="verified-row">
+      <div class="full-name"><b>${i+1}</b><span>${escapeHtml(x[0])}</span></div>
+      <span>体重 <strong>${escapeHtml(x[1])}kg</strong></span>
+      <span>展示 <strong>${escapeHtml(x[2])}</strong></span>
+      <span>チルト <strong>${escapeHtml(x[3])}</strong></span>
+      <span>展示ST <strong>${escapeHtml(x[4])}</strong></span>
+    </div>`).join("");
+    const w=verified.weather;
+    return `<div class="replay-snapshot full-snapshot">
+      <div class="snapshot-head"><span>PRE-RACE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${verified.deadline}${verified.fixedEntry?" · 進入固定":""}${verified.stableBoard?" · 安定板":""}</b></div>
+      <div class="weather-strip"><span>${escapeHtml(w.label)}</span><span>${escapeHtml(w.condition)}</span><span>気温 ${escapeHtml(w.temp)}</span><span>水温 ${escapeHtml(w.water)}</span><span>風 ${escapeHtml(w.wind)}</span><span>波 ${escapeHtml(w.wave)}</span></div>
+      <div class="verified-grid">${rows}</div>
+      <div class="snapshot-note">締切前と確認できた公式直前情報のみ表示。「—」は確認不能のため欠損扱い。</div>
+    </div>`;
+  }
+
+  // 3R: intentional hold. Do not invent unavailable values.
+  return `<div class="replay-snapshot hold-snapshot">
+    <div class="snapshot-head"><span>PRE-RACE SNAPSHOT <em class="hold-badge">INTEGRITY HOLD</em></span><b>${escapeHtml(pr.type)}</b></div>
+    <div class="boat-grid">${pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("")}</div>
+    <div class="snapshot-note">詳細な公式直前情報を現在のアーカイブ取得経路で確認できていないため、値を推測せずENTRY BASELINEのまま保持。</div>
   </div>`;
 }
+
 function renderPredictions(s){
   const host=$("#predictionList"); if(!host)return;
   host.innerHTML=s.races.map(r=>{
     const picks=r.picks.map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" ${r.locked?"disabled":""} value="${p||""}" placeholder="${i+1}点目 例 1-3-4">`).join("");
-    return `<div class="race-card ${r.locked?"locked":""}">
+    return `<div class="race-card ${r.locked?"locked":""} ${activeReplayPack(s)?"replay-active":""}">
       <div class="race-head">
         <div><div class="race-no">${r.race}R</div><div class="race-meta">${r.locked?`LOCK ${fmtTime(r.lockedAt)} / ID ${r.lockHash}`:"未確定"}</div></div>
         <div class="stake">${r.locked?money(r.stake):"最大 ¥2,000"}</div>
@@ -531,3 +564,11 @@ if(SR){
 }else{$("#micBtn").onclick=()=>addBubble("このiPad環境ではWeb音声認識が使えません。入力欄でiPad標準のキーボード音声入力を使えます。","ai")}
 
 renderAll();
+
+
+document.addEventListener("click",(e)=>{
+  const btn=e.target.closest?.("#loadReplayPack,[data-action='load-replay-pack']");
+  if(!btn)return;
+  e.preventDefault();
+  loadReplayPack20251215();
+});
