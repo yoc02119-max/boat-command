@@ -1,16 +1,16 @@
-# BOAT COMMAND v0.13.2 — GENERATOR SESSION FIX
+# BOAT COMMAND v0.13.3 — VERIFIED SESSION FIX
 
-Screenshot diagnostic:
-`FAILED · GENERATOR · Can't find variable: getSession`
+Screenshot error:
+`FAILED · GENERATOR · Can't find variable: currentSession`
 
-Root cause:
-v0.13.x generator called a nonexistent `getSession()` helper.
-The existing app session accessor is `currentSession()`.
+Actual source audit:
+The app's existing session accessor is:
+`function session(date=currentDate)`
 
 Fix:
-- generator session read -> currentSession()
-- post-render verification session read -> currentSession()
-- 5-stage diagnostics retained
-- no HARD LOCK automation
-- no result reveal
-- cache bust v=132
+- generator uses `session()`
+- post-render verification uses `session()`
+- confirmed no `getSession()` or `currentSession()` remains
+- diagnostics retained
+- HARD LOCK/reveal behavior unchanged
+- cache bust v=133
