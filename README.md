@@ -1,4 +1,5 @@
-# BOAT COMMAND v0.10 — VERIFIED SNAPSHOTS
+# BOAT COMMAND v0.10.1 — REPLAY RESUME
+
 
 2025/12/15 蒲郡 BACKTESTパックを公式直前情報で拡張。
 
@@ -13,3 +14,7 @@
 - 結果・払戻は12/12 HARD LOCK前に表示しない
 
 精度優先のため、確認できない値は一切補完しません。
+
+## Fix
+ページ再読込時に日付が当日LIVEへ戻り、読み込み済みBACKTESTのスナップショットが見えなくなる問題を修正。
+未完了BACKTEST、または最後に選択した保存済み日付を復元する。

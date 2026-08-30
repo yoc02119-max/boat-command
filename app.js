@@ -56,7 +56,16 @@ function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",runType:"LI
 }))}}
 
 let store=loadStore();
-let currentDate=todayISO();
+function initialSessionDate(){
+  const last=localStorage.getItem("boatCommand.lastDate");
+  if(last&&store.sessions&&store.sessions[last])return last;
+  const replayDates=Object.values(store.sessions||{})
+    .filter(s=>s&&s.replayPackId&&!s.replayRevealed)
+    .map(s=>s.date)
+    .sort();
+  return replayDates.length?replayDates[replayDates.length-1]:todayISO();
+}
+let currentDate=initialSessionDate();
 
 function loadStore(){
   try{
@@ -195,7 +204,7 @@ function loadReplayPack(id){
   const s=baseSession(pack.date);
   s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";
   s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
-  store.sessions[pack.date]=s;currentDate=pack.date;saveStore();
+  store.sessions[pack.date]=s;currentDate=pack.date;localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
   if($("#sessionDate"))$("#sessionDate").value=currentDate;
   renderAll();
   alert("実レースBACKTESTパックを読み込みました。公式結果は12RすべてLOCKするまで画面に表示されません。");
@@ -446,7 +455,7 @@ $("#resetDayBtn").onclick=()=>{
 $("#runType").onchange=e=>{const s=session();if(lockedCount(s))return;s.runType=e.target.value;saveStore();renderAll()}
 $("#strategyVersion").onchange=e=>{const s=session();if(lockedCount(s))return;s.strategyVersion=(e.target.value.trim()||"GAMAGORI-V1.0");saveStore();renderAll()}
 $("#sessionDate").value=currentDate;
-$("#sessionDate").onchange=e=>{currentDate=e.target.value||todayISO();session();renderAll()}
+$("#sessionDate").onchange=e=>{currentDate=e.target.value||todayISO();localStorage.setItem("boatCommand.lastDate",currentDate);session();renderAll()}
 
 function addBubble(text,type){const b=document.createElement("div");b.className=`bubble ${type}`;b.innerHTML=text;$("#chat").appendChild(b);$("#chat").scrollTop=$("#chat").scrollHeight}
 function answer(q){
