@@ -7,10 +7,21 @@ const BACKTEST_PACKS={
   "gamagori-2025-12-15":{
     id:"gamagori-2025-12-15",date:"2025-12-15",venue:"蒲郡",
     title:"蒲郡柑橘組合 蒲郡みかん杯・最終日",
-    snapshotLevel:"ENTRY_BASELINE",
-    note:"基礎出走情報パック。展示・直前気象・直前オッズはこの版では未収録。",
+    snapshotLevel:"1R FULL / 2R-12R ENTRY",
+    note:"1Rは公式出走表＋直前情報まで収録。2R-12Rは段階的に検証追加。",
     races:[
-      {race:1,type:"一般戦",boats:["清水紀克","加藤高史","村田 敦","宮本裕之","久保原秀人","早川颯太"],result:"1-2-3",pay:880},
+      {race:1,type:"一般戦",stableBoard:true,deadline:"15:21",
+        boats:["清水紀克","加藤高史","村田 敦","宮本裕之","久保原秀人","早川颯太"],
+        profiles:[
+          {cls:"B1",avgST:0.18,natWin:3.97,localWin:3.79,motor:48,motor2:26.67,ex:6.60,tilt:"0.0",weight:"55.5",exST:0.18},
+          {cls:"B2",avgST:0.22,natWin:6.04,localWin:4.31,motor:41,motor2:33.33,ex:6.62,tilt:"0.0",weight:"52.5",exST:0.07},
+          {cls:"B1",avgST:0.15,natWin:3.48,localWin:4.04,motor:16,motor2:34.67,ex:6.71,tilt:"-0.5",weight:"61.0",exST:0.06},
+          {cls:"B1",avgST:0.17,natWin:4.26,localWin:3.42,motor:20,motor2:27.94,ex:6.68,tilt:"0.0",weight:"52.0",exST:0.07},
+          {cls:"B1",avgST:0.16,natWin:3.42,localWin:4.32,motor:45,motor2:20.45,ex:6.73,tilt:"0.0",weight:"54.6",exST:0.19},
+          {cls:"B2",avgST:0.19,natWin:1.59,localWin:1.53,motor:51,motor2:21.28,ex:6.78,tilt:"0.0",weight:"52.2",exST:0.29}
+        ],
+        weather:{temp:"6.0℃",water:"13.0℃",wind:"1m",wave:"0cm",condition:"晴"},
+        result:"1-2-3",pay:880},
       {race:2,type:"一般戦",boats:["岩橋裕馬","中村駿平","小林一樹","永井亮次","坂口貴彦","中嶋誠一郎"],result:"1-4-2",pay:4430},
       {race:3,type:"一般戦",boats:["鈴木孝明","小林 泰","菊地敬介","齋藤真之","米本圭佑","中村守成"],result:"3-1-4",pay:21970},
       {race:4,type:"一般戦",boats:["岡 暢祐","前田聖文","金児隆太","渡邉英児","渡邊伸太郎","櫻井 隼"],result:"1-2-4",pay:920},
@@ -206,11 +217,32 @@ $("#revealReplayBtn").onclick=revealAndSettleReplay;
 function replaySnapshotHtml(s,r){
   const pack=activeReplayPack(s);if(!pack)return "";
   const pr=pack.races.find(x=>x.race===r.race);if(!pr)return "";
+  if(pr.profiles){
+    const rows=pr.boats.map((name,i)=>{
+      const p=pr.profiles[i];
+      return `<div class="full-row">
+        <div class="full-name"><b>${i+1}</b><span>${escapeHtml(name)}<small>${p.cls}</small></span></div>
+        <span>平均ST <strong>${p.avgST.toFixed(2)}</strong></span>
+        <span>全国 <strong>${p.natWin.toFixed(2)}</strong></span>
+        <span>当地 <strong>${p.localWin.toFixed(2)}</strong></span>
+        <span>M${p.motor} <strong>${p.motor2.toFixed(2)}%</strong></span>
+        <span>展示 <strong>${p.ex.toFixed(2)}</strong></span>
+        <span>展示ST <strong>${p.exST.toFixed(2)}</strong></span>
+      </div>`;
+    }).join("");
+    const w=pr.weather;
+    return `<div class="replay-snapshot full-snapshot">
+      <div class="snapshot-head"><span>PRE-RACE FULL SNAPSHOT</span><b>${escapeHtml(pr.type)} · 締切 ${pr.deadline}${pr.stableBoard?" · 安定板":""}</b></div>
+      <div class="weather-strip"><span>${w.condition}</span><span>気温 ${w.temp}</span><span>水温 ${w.water}</span><span>風 ${w.wind}</span><span>波 ${w.wave}</span></div>
+      <div class="full-grid">${rows}</div>
+      <div class="snapshot-note">公式の出走表＋直前情報を固定保存。結果・払戻は12R LOCK前は非表示。</div>
+    </div>`;
+  }
   const boats=pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("");
   return `<div class="replay-snapshot">
     <div class="snapshot-head"><span>PRE-RACE SNAPSHOT</span><b>${escapeHtml(pr.type)}</b></div>
     <div class="boat-grid">${boats}</div>
-    <div class="snapshot-note">この版は基礎出走情報のみ。結果・払戻は12R LOCK前は非表示。</div>
+    <div class="snapshot-note">このレースはまだENTRY BASELINE。詳細データ検証前のため本格予想には使用しません。</div>
   </div>`;
 }
 function renderPredictions(s){
@@ -372,7 +404,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9.1",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
