@@ -39,6 +39,40 @@ const BACKTEST_PACKS={
   }
 };
 
+
+const VERIFIED_BEFOREINFO_20251215={
+  2:{deadline:"15:48",stableBoard:true,weather:{label:"13:00時点",condition:"晴",temp:"10℃",water:"13℃",wind:"6m",wave:"3cm"},rows:[
+    ["岩橋 裕馬","53.0","—","0.0","—"],["中村 駿平","52.0","—","0.0","—"],["小林 一樹","56.0","—","-0.5","—"],
+    ["永井 亮次","52.7","—","-0.5","—"],["坂口 貴彦","55.0","—","-0.5","—"],["中嶋 誠一郎","52.3","—","0.0","—"]]},
+  4:{deadline:"16:46",stableBoard:true,weather:{label:"3R時点",condition:"晴",temp:"9℃",water:"13℃",wind:"5m",wave:"3cm"},rows:[
+    ["岡 暢祐","52.0","6.65","0.0",".06"],["前田 聖文","52.3","6.68","-0.5",".06"],["金児 隆太","52.0","6.67","0.0",".08"],
+    ["渡邉 英児","52.8","6.75","0.0",".08"],["渡邊 伸太郎","52.5","6.70","0.0","F.02"],["櫻井 隼","51.5","6.68","0.0",".04"]]},
+  5:{deadline:"17:15",stableBoard:true,weather:{label:"4R時点",condition:"晴",temp:"9℃",water:"13℃",wind:"4m",wave:"2cm"},rows:[
+    ["谷津 幸宏","52.9","6.79","0.0","F.02"],["鈴木 猛","52.0","6.79","0.0",".11"],["星野 太郎","53.2","6.82","-0.5",".08"],
+    ["早川 颯太","52.2","6.83","0.0",".01"],["新出 浩司","52.7","6.82","-0.5","F.03"],["岡本 慎治","52.0","6.72","-0.5",".00"]]},
+  6:{deadline:"17:44",stableBoard:true,weather:{label:"4R時点",condition:"晴",temp:"9℃",water:"13℃",wind:"4m",wave:"2cm"},rows:[
+    ["鳥居塚 孝博","51.5","—","-0.5","—"],["宮本 裕之","52.0","—","-0.5","—"],["岩橋 裕馬","53.0","—","0.0","—"],
+    ["中嶋 誠一郎","52.3","—","0.0","—"],["竹田 辰也","52.0","—","-0.5","—"],["岡部 浩","52.2","—","-0.5","—"]]},
+  7:{deadline:"18:11",stableBoard:true,fixedEntry:true,weather:{label:"6R時点",condition:"晴",temp:"8℃",water:"13℃",wind:"2m",wave:"1cm"},rows:[
+    ["植田 太一","56.5","6.77","0.0",".14"],["久保原 秀人","54.6","6.85","0.0","F.05"],["深川 真二","51.0","6.83","-0.5","F.13"],
+    ["小林 泰","54.0","6.80","-0.5",".08"],["永井 亮次","52.7","6.86","0.0",".12"],["米本 圭佑","52.0","6.81","-0.5",".12"]]},
+  8:{deadline:"18:39",stableBoard:true,weather:{label:"7R時点",condition:"晴",temp:"8℃",water:"13℃",wind:"3m",wave:"1cm"},rows:[
+    ["里岡 右貴","52.0","6.84","-0.5",".09"],["清水 紀克","55.5","6.82","-0.5",".19"],["西舘 健","53.0","6.87","0.0",".07"],
+    ["菊地 敬介","55.9","6.86","0.0",".23"],["櫻井 隼","51.5","6.78","0.0",".24"],["藤田 竜弘","56.5","6.84","-0.5",".19"]]},
+  9:{deadline:"19:09",stableBoard:true,weather:{label:"8R時点",condition:"晴",temp:"8℃",water:"13℃",wind:"2m",wave:"1cm"},rows:[
+    ["小林 一樹","56.0","6.75","-0.5",".02"],["中村 守成","53.7","6.85","-0.5",".12"],["山田 竜一","52.0","6.78","0.5",".12"],
+    ["加藤 高史","52.5","6.76","0.0",".12"],["星野 太郎","53.2","6.79","-0.5",".13"],["前田 聖文","52.3","6.78","-0.5",".11"]]},
+  10:{deadline:"19:40",stableBoard:true,weather:{label:"9R時点",condition:"晴",temp:"7℃",water:"13℃",wind:"2m",wave:"1cm"},rows:[
+    ["竹田 辰也","52.0","6.80","-0.5","F.03"],["鈴木 孝明","52.5","6.71","-0.5",".07"],["渡邉 英児","52.8","6.81","0.0","F.07"],
+    ["中村 駿平","52.0","6.71","0.0",".13"],["谷津 幸宏","52.9","6.82","0.0",".04"],["金児 隆太","52.0","6.71","-0.5",".15"]]},
+  11:{deadline:"20:10",stableBoard:true,weather:{label:"10R時点",condition:"晴",temp:"7℃",water:"13℃",wind:"2m",wave:"1cm"},rows:[
+    ["深川 真二","51.0","6.79","-0.5",".17"],["植田 太一","56.5","6.76","0.0",".08"],["里岡 右貴","52.0","6.88","-0.5",".44"],
+    ["岡 暢祐","52.0","6.73","0.0",".08"],["鳥居塚 孝博","51.5","6.78","-0.5",".16"],["鈴木 猛","52.0","6.81","0.0",".14"]]},
+  12:{deadline:"20:40",stableBoard:true,weather:{label:"11R時点",condition:"晴",temp:"7℃",water:"13℃",wind:"2m",wave:"1cm"},rows:[
+    ["重木 輝彦","52.0","6.73","0.0","F.10"],["畑 竜生","52.0","6.78","-0.5","F.02"],["楠 将太郎","52.0","6.74","0.0","F.02"],
+    ["末永 由楽","52.0","6.76","-0.5",".05"],["三角 哲男","52.1","6.83","0.0","F.01"],["川田 正人","51.0","6.83","-0.5","F.06"]]}
+};
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function dateISOInTokyo(d=new Date()){
   const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
@@ -145,25 +179,6 @@ $$(".nav").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $$("[data-jump]").forEach(b=>b.onclick=()=>showView(b.dataset.jump));
 
 
-function loadReplayPack20251215(){
-  const pack=BACKTEST_PACKS["2025-12-15"];
-  if(!pack){alert("BACKTESTパックが見つかりません");return;}
-  const s=freshSession(pack.date);
-  s.runType="BACKTEST";
-  s.strategyVersion=s.strategyVersion||"GAMAGORI-V1.0";
-  s.replayPackId=pack.id;
-  s.replayRevealed=false;
-  s.replayLoadedAt=new Date().toISOString();
-  s.mode="STRICT";
-  s.races=s.races||{};
-  store.sessions[pack.date]=s;
-  currentDate=pack.date;
-  localStorage.setItem("boatCommand.lastDate",currentDate);
-  saveStore();
-  renderAll();
-  setTimeout(()=>{document.getElementById("sessionDate")?.scrollIntoView({behavior:"smooth",block:"start"});},50);
-}
-
 function renderAll(){
   const s=session(),st=sessionStats(s),all=allStats(),lc=lockedCount(s),mode=isResultMode(s);
   const rt=$("#runType"),sv=$("#strategyVersion");
@@ -215,19 +230,76 @@ function renderReplayControls(s){
     $("#replayStatus").textContent=`BLIND · ${pack.date} · ${lc}/12 LOCK · ${pack.snapshotLevel}`;
   }
 }
-function loadReplayPack(id){
-  const pack=BACKTEST_PACKS[id];if(!pack)return;
-  const existing=store.sessions[pack.date];
-  if(existing&&(lockedCount(ensureSessionShape(existing))>0||settledRaces(existing).length>0)){
-    if(!confirm(`${pack.date}には保存済みデータがあります。BACKTESTパックで初期化しますか？`))return;
+function setReplayLoadStatus(text,kind=""){
+  const el=$("#replayLoadStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.className="replay-load-status "+kind;
+}
+function validateReplayPack(pack){
+  const errors=[];
+  if(!pack)errors.push("PACK_NOT_FOUND");
+  else{
+    if(!Array.isArray(pack.races)||pack.races.length!==12)errors.push("RACE_COUNT");
+    const nums=(pack.races||[]).map(x=>Number(x.race));
+    for(let i=1;i<=12;i++)if(!nums.includes(i))errors.push(`MISSING_${i}R`);
+    if(!VERIFIED_BEFOREINFO_20251215)errors.push("VERIFIED_MAP");
   }
-  const s=baseSession(pack.date);
-  s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";
-  s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
-  store.sessions[pack.date]=s;currentDate=pack.date;localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
-  if($("#sessionDate"))$("#sessionDate").value=currentDate;
-  renderAll();
-  alert("実レースBACKTESTパックを読み込みました。公式結果は12RすべてLOCKするまで画面に表示されません。");
+  return errors;
+}
+function loadReplayPack(id){
+  try{
+    setReplayLoadStatus("① PACK CHECK…","working");
+    const pack=BACKTEST_PACKS[id];
+    const errors=validateReplayPack(pack);
+    if(errors.length){setReplayLoadStatus(`LOAD FAILED · ${errors.join(" / ")}`,"error");return;}
+
+    setReplayLoadStatus("② BACKTEST SESSION…","working");
+    const existing=store.sessions[pack.date];
+    if(existing&&(lockedCount(ensureSessionShape(existing))>0||settledRaces(existing).length>0)){
+      if(!confirm(`${pack.date}には保存済みデータがあります。BACKTESTパックで初期化しますか？`)){
+        setReplayLoadStatus("CANCELLED · 保存済みデータを維持","warn");return;
+      }
+    }
+    const s=baseSession(pack.date);
+    s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";s.mode="STRICT";
+    s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
+    store.sessions[pack.date]=s;currentDate=pack.date;
+    localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
+    if($("#sessionDate"))$("#sessionDate").value=currentDate;
+
+    setReplayLoadStatus("③ 12R DATA LINK…","working");
+    const expected=[1,2,3,4,5,6,7,8,9,10,11,12];
+    const linkErrors=expected.filter(n=>{
+      const race=s.races.find(x=>Number(x.race)===n);
+      return !race || !replaySnapshotHtml(s,race);
+    });
+    if(linkErrors.length){
+      setReplayLoadStatus(`LOAD FAILED · SNAPSHOT ${linkErrors.join(",")}R`,"error");return;
+    }
+
+    setReplayLoadStatus("④ SNAPSHOT RENDER…","working");
+    renderAll();
+
+    requestAnimationFrame(()=>{
+      const slots=[...document.querySelectorAll("[data-snapshot-race]")];
+      const visible=slots.filter(x=>x.textContent.trim().length>0).length;
+      if(visible===12){
+        setReplayLoadStatus("✓ LOAD COMPLETE · 12/12 SNAPSHOT READY","success");
+      }else{
+        setReplayLoadStatus(`DISPLAY CHECK · ${visible}/12 SNAPSHOT · 再描画します`,"warn");
+        renderAll();
+        requestAnimationFrame(()=>{
+          const slots2=[...document.querySelectorAll("[data-snapshot-race]")];
+          const v2=slots2.filter(x=>x.textContent.trim().length>0).length;
+          setReplayLoadStatus(v2===12?"✓ LOAD COMPLETE · 12/12 SNAPSHOT READY":`LOAD FAILED · DISPLAY ${v2}/12` ,v2===12?"success":"error");
+        });
+      }
+    });
+  }catch(err){
+    console.error(err);
+    setReplayLoadStatus(`LOAD FAILED · ${err?.message||"UNKNOWN ERROR"}`,"error");
+  }
 }
 function revealAndSettleReplay(){
   const s=session(),pack=activeReplayPack(s);
@@ -587,11 +659,3 @@ if(SR){
 }else{$("#micBtn").onclick=()=>addBubble("このiPad環境ではWeb音声認識が使えません。入力欄でiPad標準のキーボード音声入力を使えます。","ai")}
 
 renderAll();
-
-
-document.addEventListener("click",(e)=>{
-  const btn=e.target.closest?.("#loadReplayPack,[data-action='load-replay-pack']");
-  if(!btn)return;
-  e.preventDefault();
-  loadReplayPack20251215();
-});

@@ -1,14 +1,17 @@
-# BOAT COMMAND v0.10.5 — VERIFIED MAP FIX
+# BOAT COMMAND v0.11.0 — REPLAY PIPELINE REBUILD
 
-## Root cause
-2R以降の検証済み直前データは `VERIFIED_BEFOREINFO_20251215` に保存されているが、
-旧rendererは先に `pack.races` の詳細オブジェクトを要求してreturnしていた。
-そのためPRE-RACE DATA ACTIVEまでは出てもSNAPSHOT本体が空になっていた。
+パック読込を4段階に再構築:
+1. PACK CHECK
+2. BACKTEST SESSION
+3. 12R DATA LINK
+4. SNAPSHOT RENDER
 
-## Fix
-- verified mapを最優先でraceNo照合
-- 2R / 4R〜12Rはbase packの詳細race objectがなくても描画
-- 1R FULL SNAPSHOTは従来どおり
-- 3RはINTEGRITY HOLD
-- 照合不能時はSNAPSHOT LINK ERROR
-- cache bust v=105
+成功時は `LOAD COMPLETE · 12/12 SNAPSHOT READY`。
+失敗時は無反応にせず、失敗段階を画面表示。
+
+修正:
+- 欠落していた VERIFIED_BEFOREINFO_20251215 定義を復元
+- 壊れた旧重複loaderを削除
+- 1つのloadReplayPack経路に統一
+- 12R snapshotの事前検証とDOM描画数チェック
+- cache bust v=110
