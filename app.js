@@ -258,7 +258,7 @@ function renderAll(){
   $("#allHitRate").textContent=pct(all.hitRate);
   $("#allRoi").textContent=pct(all.roi);
   $("#allDd").textContent=money(-all.maxdd);
-  renderRaceStrip(s);renderPredictions(s);renderResults(s);renderChart();renderAnalytics();renderReport();renderData();
+  renderRaceStrip(s);renderPredictions(s);renderChart();renderAnalytics();renderReport();renderData();renderResults(s);
 }
 function setSign(el,n){el.classList.remove("positive","negative");if(n>0)el.classList.add("positive");if(n<0)el.classList.add("negative")}
 function renderRaceStrip(s){
@@ -915,8 +915,25 @@ const MISS_CLASSES=[
 ];
 function missOptions(v){return MISS_CLASSES.map(([k,n])=>`<option value="${k}" ${v===k?"selected":""}>${n}</option>`).join("")}
 function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function criticalRegressionCheck(s=session()){
+  const state=appState(s),issues=[];
+  if(state.pack){
+    if(!state.pack.races||state.pack.races.length!==12)issues.push("PACK");
+    const skipped=s.races.filter(r=>replayPredictionGate(s,r).status==="NO_PREDICTION").length;
+    if(skipped!==3)issues.push(`SKIP:${skipped}`);
+    const generated=s.races.filter(r=>replayPredictionGate(s,r).status!=="NO_PREDICTION"&&Array.isArray(r.picks)&&r.picks.filter(Boolean).length).length;
+    if(["RETEST_LOCKED","RETEST_RESULT","ORIGINAL_LOCKED","ORIGINAL_RESULT"].includes(state.kind)&&generated!==9)issues.push(`PICKS:${generated}`);
+    if(["RETEST_LOCKED","RETEST_RESULT","ORIGINAL_LOCKED","ORIGINAL_RESULT"].includes(state.kind)&&state.locked!==state.target)issues.push(`LOCK:${state.locked}/${state.target}`);
+  }
+  if(state.kind==="RETEST_RESULT"){
+    if(settledRaces(s).length!==9)issues.push(`SETTLE:${settledRaces(s).length}`);
+    if(!VERIFIED_BASELINES[s.date])issues.push("BASELINE");
+  }
+  return {ok:issues.length===0,issues};
+}
+
 function renderData(){
-  const s=session(),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${s.runType} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target} / SAVE REV ${Number(store._meta?.revision)||0}`;
+  const s=session(),regression=criticalRegressionCheck(s),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${stateLabel(s)} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target} / CRITICAL CHAIN ${regression.ok?"PASS":"FAIL "+regression.issues.join(",")} / SAVE REV ${Number(store._meta?.revision)||0}`;
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"?"SKIP":r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
@@ -1076,13 +1093,18 @@ async function runBlindGeneratorPipeline(){
       if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
       return Array.isArray(r.picks)&&r.picks.filter(Boolean).length>0;
     }).length;
-    const visibleFilled=s2.races.filter(r=>{
+    const pickInputs=[...document.querySelectorAll("input.pick[data-r]")];
+    const visibleFilled=pickInputs.length?s2.races.filter(r=>{
       if(replayPredictionGate(s2,r).status==="NO_PREDICTION")return false;
       const inputs=[...document.querySelectorAll(`input.pick[data-r="${r.race}"]`)];
       return inputs.length===4&&inputs.some(x=>x.value.trim());
-    }).length;
-    if(filled!==eligible.length||visibleFilled!==eligible.length){
-      setGeneratorStatus(`FAILED · UI VERIFY · DATA ${filled}/${eligible.length} · VIEW ${visibleFilled}/${eligible.length}`,"error");
+    }).length:filled;
+    if(filled!==eligible.length){
+      setGeneratorStatus(`FAILED · DATA VERIFY · ${filled}/${eligible.length}R`,"error");
+      return;
+    }
+    if(pickInputs.length&&visibleFilled!==eligible.length){
+      setGeneratorStatus(`FAILED · VIEW VERIFY · ${visibleFilled}/${eligible.length}R`,"error");
       return;
     }
     setGeneratorStatus(`${s2.retestMode?"✓ RETEST READY TO LOCK":"✓ READY TO LOCK"} · ${filled}R予想 / ${skipped.length}R見送り · 結果未表示${s2.retestMode?" · 正式戦績対象外":""}`,"success");
