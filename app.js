@@ -94,13 +94,14 @@ const todayISO=()=>dateISOInTokyo();
 const money=n=>(n<0?"-":"")+"¥"+Math.abs(Math.round(n||0)).toLocaleString("ja-JP");
 const pct=n=>Number.isFinite(n)?n.toFixed(1)+"%":"—";
 
-function baseStore(){return {schema:5,venue:"蒲郡",startBankroll:START_BANKROLL,sessions:{}}}
+function baseStore(){return {schema:5,venue:"蒲郡",startBankroll:START_BANKROLL,sessions:{},retestArchive:[]}}
 function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",runType:"LIVE",strategyVersion:"GAMAGORI-V1.0",createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({
   race:i+1,picks:["","","",""],locked:false,lockedAt:null,lockHash:null,stake:0,
   result:"",officialPayout100:0,refundAmount:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false,rationale:"",missClass:""
 }))}}
 
 let store=loadStore();
+if(!Array.isArray(store.retestArchive))store.retestArchive=[];
 function initialSessionDate(){
   const last=localStorage.getItem("boatCommand.lastDate");
   if(last&&store.sessions&&store.sessions[last])return last;
@@ -310,7 +311,8 @@ function renderReplayControls(s){
   const panel=$("#replayPanel");if(!panel)return;
   const pack=activeReplayPack(s), lc=targetLockedCount(s), target=requiredReplayLocks(s), skipped=skippedReplayRaces(s).length;
   panel.classList.toggle("active",!!pack);
-  $("#loadReplayBtn").disabled=lockedCount(s)>0;
+  $("#loadReplayBtn").disabled=false;
+  $("#loadReplayBtn").textContent=pack?(s.replayRevealed?"新規RETESTを開始":"RETESTを最初からやり直す"):"2025/12/15 パックを読み込む";
   $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
   const state=appState(s);
   if(!pack){
@@ -340,6 +342,44 @@ function validateReplayPack(pack){
   }
   return errors;
 }
+
+function nextRetestId(){
+  const nums=[
+    ...(store.retestArchive||[]).map(x=>Number(String(x.runId||"").replace(/\D/g,""))||0),
+    ...Object.values(store.sessions||{}).map(x=>Number(String(x?.retestRunId||"").replace(/\D/g,""))||0)
+  ];
+  return `RT-${String(Math.max(0,...nums)+1).padStart(3,"0")}`;
+}
+function archiveCompletedRetest(s){
+  if(!s?.retestMode||!s?.replayRevealed)return;
+  store.retestArchive=Array.isArray(store.retestArchive)?store.retestArchive:[];
+  const runId=s.retestRunId||nextRetestId();
+  if(store.retestArchive.some(x=>x.runId===runId))return;
+  const st=sessionStats(s);
+  store.retestArchive.push({
+    runId,date:s.date,venue:s.venue,strategyVersion:s.strategyVersion,retestOf:s.retestOf,
+    completedAt:new Date().toISOString(),races:st.races,hits:st.hits,investment:st.investment,
+    returns:st.returns,profit:st.profit,hitRate:st.hitRate,roi:st.roi,skipped:skippedReplayRaces(s).length
+  });
+}
+function startFreshReplayRun(id){
+  const pack=BACKTEST_PACKS[id];
+  if(!pack)return {ok:false,error:"PACK_NOT_FOUND"};
+  const errors=validateReplayPack(pack);
+  if(errors.length)return {ok:false,error:errors.join(" / ")};
+  const existing=store.sessions[pack.date];
+  if(existing?.retestMode&&existing?.replayRevealed)archiveCompletedRetest(existing);
+  const isRetest=!!VERIFIED_BASELINES[pack.date],s=baseSession(pack.date);
+  s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";s.mode="STRICT";
+  s.retestMode=isRetest;s.retestOf=isRetest?VERIFIED_BASELINES[pack.date].id:null;
+  s.retestRunId=isRetest?nextRetestId():null;
+  s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
+  store.sessions[pack.date]=s;currentDate=pack.date;
+  localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
+  if($("#sessionDate"))$("#sessionDate").value=currentDate;
+  return {ok:true,s};
+}
+
 function loadReplayPack(id){
   try{
     setReplayLoadStatus("① PACK CHECK…","working");
@@ -348,20 +388,10 @@ function loadReplayPack(id){
     const errors=validateReplayPack(pack);
     if(errors.length){setReplayLoadStatus(`LOAD FAILED · ${errors.join(" / ")}`,"error");return;}
 
-    setReplayLoadStatus("② BACKTEST SESSION…","working");
-    const existing=store.sessions[pack.date];
-    if(existing&&(lockedCount(ensureSessionShape(existing))>0||settledRaces(existing).length>0)){
-      if(!confirm(`${pack.date}には保存済みデータがあります。BACKTESTパックで初期化しますか？`)){
-        setReplayLoadStatus("CANCELLED · 保存済みデータを維持","warn");return;
-      }
-    }
-    const s=baseSession(pack.date);
-    s.runType="BACKTEST";s.strategyVersion="GAMAGORI-V1.0";s.mode="STRICT";
-    s.retestMode=isRetest;s.retestOf=isRetest?VERIFIED_BASELINES[pack.date].id:null;
-    s.replayPackId=pack.id;s.replayRevealed=false;s.replayLoadedAt=new Date().toISOString();
-    store.sessions[pack.date]=s;currentDate=pack.date;
-    localStorage.setItem("boatCommand.lastDate",currentDate);saveStore();
-    if($("#sessionDate"))$("#sessionDate").value=currentDate;
+    setReplayLoadStatus("② FRESH RETEST SESSION…","working");
+    const fresh=startFreshReplayRun(id);
+    if(!fresh.ok){setReplayLoadStatus(`LOAD FAILED · ${fresh.error}`,"error");return;}
+    const s=fresh.s;
 
     setReplayLoadStatus("③ 12R DATA LINK…","working");
     const expected=[1,2,3,4,5,6,7,8,9,10,11,12];
@@ -420,7 +450,16 @@ function revealAndSettleReplay(){
   }
   s.replayRevealed=true;s.replayRevealedAt=new Date().toISOString();saveStore();renderAll();showView("results");
 }
-$("#loadReplayBtn").onclick=()=>loadReplayPack("gamagori-2025-12-15");
+$("#loadReplayBtn").onclick=()=>{
+  const s=session(),pack=activeReplayPack(s);
+  if(pack){
+    const msg=s.replayRevealed
+      ?"新しいRETESTを開始します。今回のRETEST結果は履歴へ保存し、ORIGINAL BLIND BT-001は変更しません。開始しますか？"
+      :"現在のRETEST途中データを破棄して最初からやり直します。ORIGINAL BLIND BT-001は変更しません。よろしいですか？";
+    if(!confirm(msg))return;
+  }
+  loadReplayPack("gamagori-2025-12-15");
+};
 $("#revealReplayBtn").onclick=revealAndSettleReplay;
 
 
@@ -772,7 +811,7 @@ function currentFinalScoreHtml(s){
   return finalScoreHtml({
     races,hits,skipped:skipped.length,invested,returned,profit,
     hitRate:races?hits/races*100:0,roi:invested?returned/invested*100:0,
-    kicker:s.retestMode?"RETEST FINAL SCORE｜今回の再検証成績":"BACKTEST FINAL SCORE｜最終成績",
+    kicker:s.retestMode?`RETEST FINAL SCORE ${s.retestRunId||""}｜今回の再検証成績`:"BACKTEST FINAL SCORE｜最終成績",
     note:s.retestMode
       ?"RETEST参考成績｜正式BACKTEST/LIVE集計には加算しません。ORIGINAL BLINDは下の比較基準として固定保存。"
       :`見送り ${skipped.length}R は投資・的中率・ROI・MISS集計から除外`
@@ -1053,7 +1092,7 @@ async function runBlindGeneratorPipeline(){
       return;
     }
     if(["RETEST_RESULT","ORIGINAL_RESULT"].includes(state.kind)){
-      setGeneratorStatus("FAILED · RESULT ALREADY REVEALED · 新しいRETESTを開始してください","error");
+      setGeneratorStatus("RESULT済み · 先に「新規RETESTを開始」を押してください","warn");
       return;
     }
 
