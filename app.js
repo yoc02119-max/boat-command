@@ -7,8 +7,8 @@ const BACKTEST_PACKS={
   "gamagori-2025-12-15":{
     id:"gamagori-2025-12-15",date:"2025-12-15",venue:"蒲郡",
     title:"蒲郡柑橘組合 蒲郡みかん杯・最終日",
-    snapshotLevel:"1R FULL / 2R-12R ENTRY",
-    note:"1Rは公式出走表＋直前情報まで収録。2R-12Rは段階的に検証追加。",
+    snapshotLevel:"1R TIME-SAFE / 2R-12R ENTRY",
+    note:"1Rは時刻監査済み。締切後に更新された項目は予想入力から除外。2R-12Rは段階的に検証追加。",
     races:[
       {race:1,type:"一般戦",stableBoard:true,deadline:"15:21",
         boats:["清水紀克","加藤高史","村田 敦","宮本裕之","久保原秀人","早川颯太"],
@@ -20,7 +20,9 @@ const BACKTEST_PACKS={
           {cls:"B1",avgST:0.16,natWin:3.42,localWin:4.32,motor:45,motor2:20.45,ex:6.73,tilt:"0.0",weight:"54.6",exST:0.19},
           {cls:"B2",avgST:0.19,natWin:1.59,localWin:1.53,motor:51,motor2:21.28,ex:6.78,tilt:"0.0",weight:"52.2",exST:0.29}
         ],
-        weather:{temp:"6.0℃",water:"13.0℃",wind:"1m",wave:"0cm",condition:"晴"},
+        weather:null,
+        weatherExcluded:{reason:"公式アーカイブの表示時刻が20:44で1R締切15:21より後のため、STRICT BLIND入力から除外",sourceTime:"20:44",deadline:"15:21"},
+        integrity:{entry:"verified",exhibition:"verified",startExhibition:"verified",weather:"excluded_late"},
         result:"1-2-3",pay:880},
       {race:2,type:"一般戦",boats:["岩橋裕馬","中村駿平","小林一樹","永井亮次","坂口貴彦","中嶋誠一郎"],result:"1-4-2",pay:4430},
       {race:3,type:"一般戦",boats:["鈴木孝明","小林 泰","菊地敬介","齋藤真之","米本圭佑","中村守成"],result:"3-1-4",pay:21970},
@@ -230,12 +232,14 @@ function replaySnapshotHtml(s,r){
         <span>展示ST <strong>${p.exST.toFixed(2)}</strong></span>
       </div>`;
     }).join("");
-    const w=pr.weather;
+    const weatherHtml=pr.weather
+      ? `<div class="weather-strip"><span>${pr.weather.condition}</span><span>気温 ${pr.weather.temp}</span><span>水温 ${pr.weather.water}</span><span>風 ${pr.weather.wind}</span><span>波 ${pr.weather.wave}</span></div>`
+      : `<div class="integrity-warning">⚠ WEATHER EXCLUDED · 時刻整合性を満たさない気象値は予想入力から除外</div>`;
     return `<div class="replay-snapshot full-snapshot">
-      <div class="snapshot-head"><span>PRE-RACE FULL SNAPSHOT</span><b>${escapeHtml(pr.type)} · 締切 ${pr.deadline}${pr.stableBoard?" · 安定板":""}</b></div>
-      <div class="weather-strip"><span>${w.condition}</span><span>気温 ${w.temp}</span><span>水温 ${w.water}</span><span>風 ${w.wind}</span><span>波 ${w.wave}</span></div>
+      <div class="snapshot-head"><span>PRE-RACE FULL SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${escapeHtml(pr.type)} · 締切 ${pr.deadline}${pr.stableBoard?" · 安定板":""}</b></div>
+      ${weatherHtml}
       <div class="full-grid">${rows}</div>
-      <div class="snapshot-note">公式の出走表＋直前情報を固定保存。結果・払戻は12R LOCK前は非表示。</div>
+      <div class="snapshot-note">出走表・展示・展示STはレース固有の公式直前情報。時刻が締切後の項目は自動的に予想入力から除外。</div>
     </div>`;
   }
   const boats=pr.boats.map((name,i)=>`<div class="boat-chip"><b>${i+1}</b><span>${escapeHtml(name)}</span></div>`).join("");
@@ -404,7 +408,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9.1",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.9.2",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
