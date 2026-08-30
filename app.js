@@ -319,24 +319,55 @@ $("#revealReplayBtn").onclick=revealAndSettleReplay;
 
 
 function replayPredictionGate(s,r){
-  if(s.runType!=="BACKTEST"||!s.replayPackId)return {status:"READY",label:"PREDICTION READY",reason:""};
+  if(s.runType!=="BACKTEST"||!s.replayPackId)return {status:"READY",label:"PREDICTION READY｜予想可能",reason:""};
   const n=Number(r.race);
   if(n===3)return {
     status:"NO_PREDICTION",
-    label:"NO PREDICTION",
+    label:"NO PREDICTION｜予想見送り",
     reason:"締切前の公式直前データを十分に確認できないため見送り"
   };
   if(n===2||n===6)return {
     status:"LIMITED",
-    label:"LIMITED DATA",
+    label:"LIMITED DATA｜一部データ不足",
     reason:"公式アーカイブで展示タイム・展示STを確認できないため、確認済み項目のみで判断"
   };
   if(n===1)return {
     status:"LIMITED",
-    label:"LIMITED DATA",
+    label:"LIMITED DATA｜一部データ不足",
     reason:"気象情報の時刻整合性を満たさないため気象を除外して判断"
   };
-  return {status:"READY",label:"PREDICTION READY",reason:"締切前と確認できた直前データで判断可能"};
+  return {status:"READY",label:"PREDICTION READY｜予想可能",reason:"締切前と確認できた直前データで判断可能"};
+}
+
+
+function predictionEditorHtml(s,r){
+  const gate=replayPredictionGate(s,r);
+  if(gate.status==="NO_PREDICTION"){
+    return `<div class="no-prediction-panel">
+      <div class="no-prediction-head"><b>NO PREDICTION｜予想見送り</b><span>このレースは見送り</span></div>
+      <div class="no-prediction-reason">${escapeHtml(gate.reason)}</div>
+      <div class="no-prediction-rule">重要な締切前データが不足しているため、予想入力とHARD LOCKを無効化しています。</div>
+    </div>`;
+  }
+
+  const locked=!!r.lockedAt;
+  const inputs=(r.picks||["","","",""]).map((pick,i)=>`
+    <input class="pick-input" data-race="${r.race}" data-pick-index="${i}"
+      value="${escapeHtml(pick||"")}" placeholder="${i+1}点目 例 1-3-4"
+      ${locked?"disabled":""}>`).join("");
+
+  return `<div class="prediction-gate ${gate.status.toLowerCase()}">
+      <b>${gate.label}</b><span>${escapeHtml(gate.reason)}</span>
+    </div>
+    <div class="pick-grid">${inputs}</div>
+    <label class="rationale-label">予想根拠（LOCK時に固定）</label>
+    <textarea class="rationale-input" data-race="${r.race}" ${locked?"disabled":""}
+      placeholder="例：1の展示気配良、3カド攻め想定">${escapeHtml(r.rationale||"")}</textarea>
+    <div class="lock-row">
+      <button class="hard-lock" data-lock-race="${r.race}" ${locked?"disabled":""}>
+        ${locked?"LOCKED":"HARD LOCK"}
+      </button>
+    </div>`;
 }
 
 function replaySnapshotHtml(s,r){
@@ -454,6 +485,17 @@ function renderPredictions(s){
   $("#lockAllBtn").disabled=lockedCount(s)===12;
 }
 async function lockRace(n){
+  const sessionForGate=getSession();
+  const raceForGate=sessionForGate?.races?.find(x=>Number(x.race)===Number(raceNo));
+  if(raceForGate){
+    const gateForLock=replayPredictionGate(sessionForGate,raceForGate);
+    if(gateForLock.status==="NO_PREDICTION"){
+      alert(`NO PREDICTION\n${gateForLock.reason}`);
+      renderAll();
+      return;
+    }
+  }
+
   const s0=getSession();
   const r0=s0?.races?.find(x=>Number(x.race)===Number(raceNo));
   if(r0){
