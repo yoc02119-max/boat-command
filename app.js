@@ -1308,10 +1308,13 @@ async function runRelayProbe(){
     const x=validateRelayPayload(await res.json(),date,race);
     const both=!!x.racelist.ok&&!!x.beforeinfo.ok;
     const partial=!!x.racelist.ok||!!x.beforeinfo.ok;
-    const status=both?"RELAY READY":partial?"RELAY LIMITED":"RELAY BLOCKED";
+    const waitingErrors=new Set(["UNEXPECTED_PRE_RACE_FORMAT","HTTP_404"]);
+    const failed=[x.racelist,x.beforeinfo].filter(v=>!v?.ok);
+    const publicationWaiting=!both&&failed.length>0&&failed.every(v=>waitingErrors.has(String(v?.error||v?.httpStatus||"")));
+    const status=both?"RELAY READY":publicationWaiting?"RELAY WAITING":partial?"RELAY LIMITED":"RELAY BLOCKED";
     const received=new Date(),tm=relayTimingMetrics(date,x.deadline||null,x.fetchedAt||null,received);
-    st.className=`live-gate-status ${both?"ok":partial?"warn":"fail"}`;
-    st.textContent=`${status} · ${date} ${race}R · 結果データなし`;
+    st.className=`live-gate-status ${both?"ok":publicationWaiting?"warn":partial?"warn":"fail"}`;
+    st.textContent=`${status} · ${date} ${race}R · ${publicationWaiting?"公式PRE-RACE公開待ち":"結果データなし"}`;
     const rows=[
       ["JSON",`OK · ${path}`],["GitHub取得",x.fetchedAtJST||jstTimeLabel(tm.source)||"—"],["アプリ受信",jstTimeLabel(received)],
       ["中継遅延",`${tm.delaySec.toFixed(1)}秒`],
@@ -1323,7 +1326,7 @@ async function runRelayProbe(){
     audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
     store.relayMonitor={last:{date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
     const ta=timingAuditState(date);
-    ta.races[race]={status:both?"SAFE":partial?"PARTIAL":"BLOCKED",summary:status,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
+    ta.races[race]={status:both?"SAFE":publicationWaiting?"WAITING":partial?"PARTIAL":"BLOCKED",summary:status,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
     saveStore();renderTimingAudit();
   }catch(e){
     const msg=String(e?.message||e);
@@ -1357,7 +1360,7 @@ async function runLiveProbe(){
 }
 
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.6",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.7",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }

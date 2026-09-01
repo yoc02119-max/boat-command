@@ -64,3 +64,10 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - 日付/レース選択変更時に、旧レースのRELAY/直接監査表示を自動クリア
 - 過去の単一 `liveTimingAudit` は初回だけ日付別領域へ安全移行
 - 結果取得・予想・HARD LOCK は引き続き AUDIT ONLY で無効
+
+
+## v0.17.7 — PUBLICATION WAIT
+- PRE-RACE JSONは届いているが公式ページがまだ本番形式でない場合、`BLOCKED` ではなく `WAITING` と判定。
+- `UNEXPECTED_PRE_RACE_FORMAT` / `HTTP_404` を「公式PRE-RACE公開待ち」として扱う。
+- 真の通信・安全性エラーは従来どおり fail-closed (`LIMITED` / `BLOCKED`)。
+- 結果取得・予想・HARD LOCKは引き続き接続しない。
