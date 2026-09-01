@@ -1,29 +1,13 @@
-# BOAT COMMAND v0.16.2 — AI AUTO UPDATE
+# BOAT COMMAND v0.17.0 — LIVE DATA GATE v1
 
-Free static GitHub Pages build.
+Audit-only first step toward LIVE automation.
 
-## v0.16.2
+- Adds DATA → LIVE DATA GATE v1.
+- Probes only official BOAT RACE pre-race endpoints: `racelist` and `beforeinfo`.
+- No result/resultlist request exists in the LIVE monitor.
+- No prediction and no HARD LOCK can be triggered by the monitor.
+- Records fetched time, deadline when parsable, time margin, CORS/HTTP outcome, and a small audit history.
+- Fails closed: any unavailable/partial data remains BLOCKED/PARTIAL and cannot become a prediction.
+- Existing BACKTEST/RETEST/HARD LOCK/AUTO PREP/AUTO FINISH/AI logic is left intact.
 
-- Adds a second, independent automation boundary after BLIND AUTO PREP.
-- RESULT AUTO FINISH is visible only after every eligible race is HARD LOCKED.
-- Before reveal it re-verifies 9/9 locks and validates the official replay result source for every eligible race.
-- Only after both gates pass: result reveal -> batch settlement -> analytics-ready state.
-- Writes an `autoFinishAudit` record with timestamps, lock count, result-source verification, settled count, skipped count, and post-state.
-- Manual result reveal remains available as a fallback and now uses the same verified settlement core.
-- ORIGINAL BLIND BT-001 and RETEST separation remain unchanged.
-
-## iPad verification
-
-1. Open v0.16.2 and confirm previous RETEST LOCKED state is preserved.
-2. Confirm RESULT AUTO FINISH is visible only at 9/9 LOCK.
-3. Tap RESULT AUTO FINISH and inspect the confirmation text.
-4. Execute it once.
-5. Verify RETEST RESULT, 9/9 settled, 3R skipped, comparison cards, and analytics state.
-6. Verify DATA audit includes lock records and no formal-stat mixing.
-
-
-### v0.16.2
-- RESULT AUTO FINISH now persists AI report update completion (`aiReportUpdatedAt`).
-- AI report shows `AUTO更新済み HH:MM:SS` after AUTO FINISH, including after navigation/reload.
-- Manual 更新 also persists separately as `手動更新済み`.
-- Existing BLIND / HARD LOCK / RETEST exclusion / ORIGINAL baseline behavior is unchanged.
+GitHub Pages static hosting remains free. Browser CORS behavior must be verified on the actual iPad; source checks are not an operational PASS.

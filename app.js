@@ -102,6 +102,7 @@ function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",runType:"LI
 
 let store=loadStore();
 if(!Array.isArray(store.retestArchive))store.retestArchive=[];
+if(!store.liveMonitor)store.liveMonitor={last:null,history:[]};
 function initialSessionDate(){
   const last=localStorage.getItem("boatCommand.lastDate");
   if(last&&store.sessions&&store.sessions[last])return last;
@@ -1175,9 +1176,80 @@ function criticalRegressionCheck(s=session()){
 function renderData(){
   const s=session(),regression=criticalRegressionCheck(s),target=requiredReplayLocks(s),tl=targetLockedCount(s),skips=skippedReplayRaces(s).length;$("#sessionInfo").textContent=`${s.date} / ${stateLabel(s)} / ${s.strategyVersion} / TARGET LOCK ${tl}/${target} / SKIP ${skips} / 精算 ${settledRaces(s).length}/${target} / CRITICAL CHAIN ${regression.ok?"PASS":"FAIL "+regression.issues.join(",")} / SAVE REV ${Number(store._meta?.revision)||0}`;
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"?"SKIP":r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
+  renderLiveGate();
 }
+
+const LIVE_ALLOWED_PATHS=new Set(["racelist","beforeinfo"]);
+function liveOfficialUrl(kind,date,race){
+  if(!LIVE_ALLOWED_PATHS.has(kind))throw new Error("RESULT_ENDPOINT_BLOCKED");
+  const d=String(date||"").replace(/-/g,"");
+  const r=Math.max(1,Math.min(12,Number(race)||1));
+  if(!/^\d{8}$/.test(d))throw new Error("INVALID_DATE");
+  return `https://www.boatrace.jp/owpc/pc/race/${kind}?hd=${d}&jcd=07&rno=${r}`;
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function parseDeadlineFromHtml(html,race){
+  const text=String(html||"").replace(/<script[\s\S]*?<\/script>/gi," ").replace(/<style[\s\S]*?<\/style>/gi," ").replace(/<[^>]+>/g," ").replace(/&nbsp;/g," ").replace(/\s+/g," ");
+  const re=new RegExp(`${Number(race)}R[\\s\\S]{0,500}?締切予定時刻[\\s\\S]{0,80}?(\\d{1,2}:\\d{2})`,`i`);
+  return text.match(re)?.[1]||text.match(/締切予定時刻[\s\S]{0,80}?(\d{1,2}:\d{2})/i)?.[1]||null;
+}
+function preRaceEvidence(html,kind){
+  const text=String(html||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+  if(kind==="racelist")return {ok:/出走表/.test(text)&&/ボートレーサー|レーサー/.test(text),fields:["出走表","全国/当地","モーター"]};
+  return {ok:/直前情報/.test(text)&&/展示タイム/.test(text),fields:["展示タイム","チルト","スタート展示","水面気象"]};
+}
+async function safePreRaceFetch(kind,date,race){
+  const url=liveOfficialUrl(kind,date,race),started=Date.now();
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8000);
+  try{
+    const res=await fetch(url,{method:"GET",mode:"cors",cache:"no-store",credentials:"omit",signal:ctl.signal,headers:{"Accept":"text/html"}});
+    if(!res.ok)throw new Error(`HTTP_${res.status}`);
+    const html=await res.text(),ev=preRaceEvidence(html,kind);
+    if(!ev.ok)throw new Error("UNEXPECTED_PRE_RACE_FORMAT");
+    return {kind,ok:true,url,fetchedAt:new Date().toISOString(),ms:Date.now()-started,bytes:html.length,deadline:parseDeadlineFromHtml(html,race),fields:ev.fields};
+  }catch(e){
+    return {kind,ok:false,url,fetchedAt:new Date().toISOString(),ms:Date.now()-started,error:e?.name==="AbortError"?"TIMEOUT":String(e?.message||e)};
+  }finally{clearTimeout(timer)}
+}
+function renderLiveGate(){
+  const dateEl=$("#liveDate"),raceEl=$("#liveRace"),st=$("#liveGateStatus"),audit=$("#liveGateAudit");if(!dateEl||!raceEl||!st||!audit)return;
+  if(!dateEl.value)dateEl.value=todayISO();
+  const x=store.liveMonitor?.last;
+  if(!x){st.className="live-gate-status";st.textContent="未実行 · 予想/LOCK/結果取得なし";audit.innerHTML="";return;}
+  st.className=`live-gate-status ${x.status==="SAFE"?"ok":x.status==="PARTIAL"?"warn":"fail"}`;
+  st.textContent=`${x.status} · ${x.date} ${x.race}R · ${x.summary}`;
+  const rows=[
+    ["取得時刻",x.fetchedAtJST||"—"],["締切予定",x.deadline||"—"],["購入余裕",x.marginLabel||"未判定"],
+    ["出走表",x.racelist?.ok?`OK · ${x.racelist.bytes} bytes · ${x.racelist.ms}ms`:`BLOCK · ${x.racelist?.error||"—"}`],
+    ["直前情報",x.beforeinfo?.ok?`OK · ${x.beforeinfo.bytes} bytes · ${x.beforeinfo.ms}ms`:`BLOCK · ${x.beforeinfo?.error||"—"}`],
+    ["結果系", "HARD BLOCK · このモニターには結果取得コードなし"],
+    ["予想/LOCK", "DISABLED · AUDIT ONLY"]
+  ];
+  audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
+}
+function jstTimeLabel(iso){try{return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date(iso))}catch{return "—"}}
+function marginToDeadline(date,deadline,now=new Date()){
+  if(!deadline)return {minutes:null,label:"未判定"};
+  const [h,m]=deadline.split(":").map(Number);
+  const target=new Date(`${date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00+09:00`);
+  const min=(target-now)/60000;
+  return {minutes:min,label:Number.isFinite(min)?`${min>=0?"残り":"締切後 "}${Math.abs(min).toFixed(1)}分`:"未判定"};
+}
+async function runLiveProbe(){
+  const btn=$("#liveProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1,st=$("#liveGateStatus");
+  if(btn.disabled)return;btn.disabled=true;btn.textContent="接続監査中…";st.className="live-gate-status warn";st.textContent="CHECKING · 公式PRE-RACEのみ · 結果系HARD BLOCK";
+  const racelist=await safePreRaceFetch("racelist",date,race);
+  const beforeinfo=await safePreRaceFetch("beforeinfo",date,race);
+  const deadline=racelist.deadline||beforeinfo.deadline||null,now=new Date(),margin=marginToDeadline(date,deadline,now);
+  let status="BLOCKED",summary="ブラウザから公式PRE-RACEを安全に読めません";
+  if(racelist.ok&&beforeinfo.ok){status="SAFE";summary="出走表+直前情報を取得。予想/LOCKは未実行"}
+  else if(racelist.ok||beforeinfo.ok){status="PARTIAL";summary="一部のみ取得。予想は禁止"}
+  const rec={status,summary,date,race,deadline,marginMinutes:margin.minutes,marginLabel:margin.label,fetchedAt:now.toISOString(),fetchedAtJST:jstTimeLabel(now),racelist,beforeinfo,resultEndpoint:"BLOCKED",prediction:"DISABLED"};
+  store.liveMonitor=store.liveMonitor||{last:null,history:[]};store.liveMonitor.last=rec;store.liveMonitor.history=(store.liveMonitor.history||[]).concat([rec]).slice(-30);saveStore();renderLiveGate();btn.disabled=false;btn.textContent="公式PRE-RACE接続テスト";
+}
+
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.15.8",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.0",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -1191,6 +1263,7 @@ $("#importFile").onchange=async e=>{
   }catch{alert("BOAT COMMANDの対応バックアップとして読み込めませんでした。")}
   e.target.value="";
 }
+$("#liveProbeBtn").onclick=()=>runLiveProbe();
 $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;
   store.sessions[currentDate]=baseSession(currentDate);saveStore();renderAll();

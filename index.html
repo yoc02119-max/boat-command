@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.16.2</title>
+  <title>BOAT COMMAND v0.17.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css?v=162">
@@ -196,6 +196,17 @@
           <p id="sessionInfo"></p>
           <button id="resetDayBtn" class="danger">この日だけ初期化</button>
         </section>
+        <section class="panel wide live-monitor-panel">
+          <div class="panel-head"><div><h2>LIVE DATA GATE v1</h2><p>公式の事前データだけを監査。予想・LOCK・結果取得は一切しません。</p></div><span class="badge ready">AUDIT ONLY</span></div>
+          <div class="live-monitor-controls">
+            <label>日付<input id="liveDate" type="date"></label>
+            <label>レース<select id="liveRace">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}R</option>`).join("")}</select></label>
+            <button id="liveProbeBtn" class="primary">公式PRE-RACE接続テスト</button>
+          </div>
+          <div id="liveGateStatus" class="live-gate-status">未実行</div>
+          <div id="liveGateAudit" class="live-gate-audit"></div>
+          <div class="fineprint">許可ソースは racelist / beforeinfo のみ。result / resultlist はこのモニターから呼び出せません。取得に失敗した場合は推測せずBLOCKします。</div>
+        </section>
         <section class="panel wide">
           <h2>監査情報</h2>
           <p>各レースのLOCK時刻と簡易ハッシュを保存します。結果入力は全12R LOCK後のみ解禁されます。</p>
@@ -205,6 +216,6 @@
     </section>
   </main>
 </div>
-<script src="app.js?v=162"></script>
+<script src="app.js?v=170"></script>
 </body>
 </html>
