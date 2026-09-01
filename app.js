@@ -1211,10 +1211,16 @@ async function safePreRaceFetch(kind,date,race){
     return {kind,ok:false,url,fetchedAt:new Date().toISOString(),ms:Date.now()-started,error:e?.name==="AbortError"?"TIMEOUT":String(e?.message||e)};
   }finally{clearTimeout(timer)}
 }
-function timingAuditState(){
-  store.liveTimingAudit=store.liveTimingAudit||{date:"2026-09-04",venue:"GAMAGORI",races:{}};
-  store.liveTimingAudit.races=store.liveTimingAudit.races||{};
-  return store.liveTimingAudit;
+function timingAuditState(date){
+  const key=String(date||$("#liveDate")?.value||todayISO());
+  store.liveTimingAudits=store.liveTimingAudits||{};
+  // One-time migration from the legacy single-day audit bucket.
+  if(store.liveTimingAudit?.date&&!store.liveTimingAudits[store.liveTimingAudit.date]){
+    store.liveTimingAudits[store.liveTimingAudit.date]=store.liveTimingAudit;
+  }
+  store.liveTimingAudits[key]=store.liveTimingAudits[key]||{date:key,venue:"GAMAGORI",races:{}};
+  store.liveTimingAudits[key].races=store.liveTimingAudits[key].races||{};
+  return store.liveTimingAudits[key];
 }
 function timingStatus(rec){
   if(!rec)return "WAITING";
@@ -1230,7 +1236,7 @@ function timingStatus(rec){
 function timingStatusClass(x){return ({READY:"ok",LIMITED:"warn",PAST:"warn",LATE:"fail",BLOCKED:"fail",WAITING:""})[x]||""}
 function renderTimingAudit(){
   const box=$("#timingAuditTable"),sum=$("#timingAuditSummary");if(!box||!sum)return;
-  const a=timingAuditState(),rows=[];let ready=0,limited=0,past=0,late=0,blocked=0;
+  const selectedDate=$("#liveDate")?.value||todayISO(),a=timingAuditState(selectedDate),rows=[];let ready=0,limited=0,past=0,late=0,blocked=0;
   for(let r=1;r<=12;r++){
     const x=a.races[r],st=timingStatus(x);if(st==="READY")ready++;if(st==="LIMITED")limited++;if(st==="PAST")past++;if(st==="LATE")late++;if(st==="BLOCKED")blocked++;
     rows.push(`<tr><td>${r}R</td><td><span class="timing-state ${timingStatusClass(st)}">${st}</span></td><td>${esc(x?.fetchedAtJST||"—")}</td><td>${esc(x?.readyAtJST||"—")}</td><td>${esc(x?.deadline||"—")}</td><td>${esc(x?.marginLabel||"—")}</td></tr>`);
@@ -1316,7 +1322,7 @@ async function runRelayProbe(){
     ];
     audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
     store.relayMonitor={last:{date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
-    const ta=timingAuditState();if(ta.date!==date){ta.date=date;ta.races={}};
+    const ta=timingAuditState(date);
     ta.races[race]={status:both?"SAFE":partial?"PARTIAL":"BLOCKED",summary:status,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
     saveStore();renderTimingAudit();
   }catch(e){
@@ -1346,12 +1352,12 @@ async function runLiveProbe(){
   else if(racelist.ok||beforeinfo.ok){status="PARTIAL";summary="一部のみ取得。予想は禁止"}
   const rec={status,summary,date,race,deadline,marginMinutes:margin.minutes,marginLabel:margin.label,fetchedAt:now.toISOString(),fetchedAtJST:jstTimeLabel(now),racelist,beforeinfo,resultEndpoint:"BLOCKED",prediction:"DISABLED"};
   store.liveMonitor=store.liveMonitor||{last:null,history:[]};store.liveMonitor.last=rec;store.liveMonitor.history=(store.liveMonitor.history||[]).concat([rec]).slice(-30);
-  const ta=timingAuditState();if(ta.date!==date){ta.date=date;ta.races={}};ta.races[race]={...rec,readyAtJST:status==="SAFE"?rec.fetchedAtJST:null};
+  const ta=timingAuditState(date);ta.races[race]={...rec,readyAtJST:status==="SAFE"?rec.fetchedAtJST:null};
   saveStore();renderLiveGate();btn.disabled=false;btn.textContent="公式PRE-RACE直接テスト";
 }
 
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.5",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.6",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -1367,7 +1373,17 @@ $("#importFile").onchange=async e=>{
 }
 $("#liveProbeBtn").onclick=()=>runLiveProbe();
 $("#relayProbeBtn").onclick=()=>runRelayProbe();
-$("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;store.liveTimingAudit={date:$("#liveDate")?.value||"2026-09-04",venue:"GAMAGORI",races:{}};saveStore();renderLiveGate();};
+function refreshLiveAuditSelection(){
+  const date=$("#liveDate")?.value||todayISO(),race=Number($("#liveRace")?.value)||1;
+  const direct=store.liveMonitor?.last,relay=store.relayMonitor?.last;
+  const directSt=$("#liveGateStatus"),directAudit=$("#liveGateAudit"),relaySt=$("#relayGateStatus"),relayAudit=$("#relayGateAudit");
+  if(directSt&&(!direct||direct.date!==date||Number(direct.race)!==race)){directSt.className="live-gate-status";directSt.textContent="未実行 · 選択中のレースでは未監査";if(directAudit)directAudit.innerHTML="";}
+  if(relaySt&&(!relay||relay.date!==date||Number(relay.race)!==race)){relaySt.className="live-gate-status";relaySt.textContent="RELAY未実行 · 選択中のレースでは未受信";if(relayAudit)relayAudit.innerHTML="";}
+  renderTimingAudit();
+}
+$("#liveDate").onchange=refreshLiveAuditSelection;
+$("#liveRace").onchange=refreshLiveAuditSelection;
+$("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;const d=$("#liveDate")?.value||todayISO();store.liveTimingAudits=store.liveTimingAudits||{};store.liveTimingAudits[d]={date:d,venue:"GAMAGORI",races:{}};saveStore();renderLiveGate();};
 $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;
   store.sessions[currentDate]=baseSession(currentDate);saveStore();renderAll();

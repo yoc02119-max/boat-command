@@ -56,3 +56,11 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - Keeps the numeric after-deadline audit value, but clearly marks it as historical evidence.
 - Result endpoints, prediction, and HARD LOCK remain disconnected in the LIVE audit monitor.
 - Existing BACKTEST / RETEST / AUTO PREP / AUTO FINISH code paths are retained.
+
+
+## v0.17.6 — DATE-ISOLATED AUDIT
+- 12R LIVE TIMING AUDIT を日付ごとの独立バケットに分離
+- 9/1 の PAST 監査が 9/4 画面へ残る表示混在を解消
+- 日付/レース選択変更時に、旧レースのRELAY/直接監査表示を自動クリア
+- 過去の単一 `liveTimingAudit` は初回だけ日付別領域へ安全移行
+- 結果取得・予想・HARD LOCK は引き続き AUDIT ONLY で無効
