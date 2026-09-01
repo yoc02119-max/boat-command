@@ -43,9 +43,9 @@ jobs:
 
           # IMPORTANT: no result/resultlist URL exists in this workflow.
           curl --fail-with-body --location --max-time 15 --silent --show-error \
-            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2' "$RACELIST" -o /tmp/racelist.html || true
+            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2a' "$RACELIST" -o /tmp/racelist.html || true
           curl --fail-with-body --location --max-time 15 --silent --show-error \
-            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2' "$BEFOREINFO" -o /tmp/beforeinfo.html || true
+            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2a' "$BEFOREINFO" -o /tmp/beforeinfo.html || true
 
           export RACELIST BEFOREINFO
           python3 - <<'PY'
@@ -55,19 +55,43 @@ jobs:
 
           race_date=os.environ['RACE_DATE']; race_no=int(os.environ['RACE_NO'])
           jst=timezone(timedelta(hours=9)); now=datetime.now(jst)
+
+          def decode_html(raw):
+              # BOAT RACE pages may not always arrive as UTF-8. Try common Japanese
+              # encodings and prefer the decode that exposes expected page labels.
+              candidates=[]
+              for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+                  try:
+                      text=raw.decode(enc)
+                  except UnicodeDecodeError:
+                      text=raw.decode(enc,'ignore')
+                  score=sum(k in text for k in ('出走表','直前情報','展示タイム','スタート展示','水面気象情報','締切予定時刻'))
+                  candidates.append((score, enc, text))
+              score, enc, text=max(candidates, key=lambda x:x[0])
+              return text, enc, score
+
           def inspect(path, kind, url):
               p=Path(path)
               if not p.exists():
                   return {'ok':False,'httpStatus':None,'bytes':0,'error':'FETCH_FAILED','sourceUrl':url}
-              raw=p.read_bytes(); text=raw.decode('utf-8','ignore')
-              if kind=='racelist': good=('出走表' in text and ('レーサー' in text or 'ボートレーサー' in text))
-              else: good=('直前情報' in text and '展示タイム' in text)
-              return {'ok':bool(good),'httpStatus':200,'bytes':len(raw),'error':None if good else 'UNEXPECTED_PRE_RACE_FORMAT','sourceUrl':url}
+              raw=p.read_bytes(); text, enc, score=decode_html(raw)
+              if kind=='racelist':
+                  good=('出走表' in text and ('レーサー' in text or 'ボートレーサー' in text or '締切予定時刻' in text))
+              else:
+                  # beforeinfo is already restricted to the allow-listed beforeinfo URL.
+                  # Require multiple race-specific markers instead of one fragile label.
+                  markers=('直前情報','展示タイム','スタート展示','水面気象情報')
+                  good=sum(m in text for m in markers) >= 2
+              return {
+                'ok':bool(good),'httpStatus':200,'bytes':len(raw),
+                'error':None if good else 'UNEXPECTED_PRE_RACE_FORMAT',
+                'sourceUrl':url,'detectedEncoding':enc,'markerScore':score
+              }
           rl=inspect('/tmp/racelist.html','racelist',os.environ['RACELIST'])
           bi=inspect('/tmp/beforeinfo.html','beforeinfo',os.environ['BEFOREINFO'])
           deadline=None
           if Path('/tmp/racelist.html').exists():
-              t=Path('/tmp/racelist.html').read_text(errors='ignore')
+              raw=Path('/tmp/racelist.html').read_bytes(); t,_,_=decode_html(raw)
               plain=re.sub(r'<[^>]+>',' ',t); plain=re.sub(r'\s+',' ',plain)
               m=re.search(r'締切予定時刻.{0,100}?(\d{1,2}:\d{2})',plain)
               if m: deadline=m.group(1)
