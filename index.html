@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.17.0</title>
+  <title>BOAT COMMAND v0.17.1</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css?v=162">
@@ -197,7 +197,7 @@
           <button id="resetDayBtn" class="danger">この日だけ初期化</button>
         </section>
         <section class="panel wide live-monitor-panel">
-          <div class="panel-head"><div><h2>LIVE DATA GATE v1</h2><p>公式の事前データだけを監査。予想・LOCK・結果取得は一切しません。</p></div><span class="badge ready">AUDIT ONLY</span></div>
+          <div class="panel-head"><div><h2>LIVE DATA GATE v1.1 · 12R TIMING AUDIT</h2><p>9/4本番用の受け皿。12Rの取得時刻・READY時刻・締切・購入余裕を監査します。</p></div><span class="badge ready">AUDIT ONLY</span></div>
           <div class="live-monitor-controls">
             <label>日付<input id="liveDate" type="date"></label>
             <label>レース<select id="liveRace">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}R</option>`).join("")}</select></label>
@@ -205,7 +205,9 @@
           </div>
           <div id="liveGateStatus" class="live-gate-status">未実行</div>
           <div id="liveGateAudit" class="live-gate-audit"></div>
-          <div class="fineprint">許可ソースは racelist / beforeinfo のみ。result / resultlist はこのモニターから呼び出せません。取得に失敗した場合は推測せずBLOCKします。</div>
+          <div class="timing-audit-head"><div><b>12R LIVE TIMING AUDIT</b><span id="timingAuditSummary">0/12 READY</span></div><button id="clearTimingAuditBtn" class="secondary">監査ログだけクリア</button></div>
+          <div id="timingAuditTable" class="audit-table"></div>
+          <div class="fineprint">PRE-RACE専用。許可ソースは racelist / beforeinfo と将来の監査済み pre/race-N.json のみ。result / resultlist はこのモニターから呼び出せません。予想・LOCKも接続していません。</div>
         </section>
         <section class="panel wide">
           <h2>監査情報</h2>
@@ -216,6 +218,6 @@
     </section>
   </main>
 </div>
-<script src="app.js?v=170"></script>
+<script src="app.js?v=171"></script>
 </body>
 </html>
