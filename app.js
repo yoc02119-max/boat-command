@@ -806,9 +806,9 @@ function finalScoreHtml({races,hits,skipped,invested,returned,profit,hitRate,roi
     <div class="final-score-kicker">${kicker}</div>
     <div class="final-score-title">${races}戦 ${hits}的中 <span>／ ${skipped}R見送り</span></div>
     <div class="final-score-grid">
-      <div><small>投資</small><b>${yen(invested)}</b></div>
-      <div><small>払戻</small><b>${yen(returned)}</b></div>
-      <div><small>収支</small><b class="${profit>=0?"plus":"minus"}">${profit>0?"+":""}${yen(profit)}</b></div>
+      <div><small>投資</small><b>${money(invested)}</b></div>
+      <div><small>払戻</small><b>${money(returned)}</b></div>
+      <div><small>収支</small><b class="${profit>=0?"plus":"minus"}">${profit>0?"+":""}${money(profit)}</b></div>
       <div><small>的中率</small><b>${Number(hitRate).toFixed(1)}%</b></div>
       <div><small>ROI</small><b>${Number(roi).toFixed(1)}%</b></div>
     </div>
