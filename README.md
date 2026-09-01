@@ -71,3 +71,12 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - `UNEXPECTED_PRE_RACE_FORMAT` / `HTTP_404` を「公式PRE-RACE公開待ち」として扱う。
 - 真の通信・安全性エラーは従来どおり fail-closed (`LIMITED` / `BLOCKED`)。
 - 結果取得・予想・HARD LOCKは引き続き接続しない。
+
+
+## v0.17.8 — READY SAFETY GATE
+- PRE-RACE取得成功だけでは `READY` にしない安全ゲートを追加。
+- FUTURE（開催前）はデータが揃っても `WAITING`。
+- TODAYのみ、締切時刻が判定でき、アプリ受信時点で購入余裕5分以上なら `READY`。
+- 締切不明は `LIMITED`、購入余裕5分未満は `LATE` として予想接続を禁止する前提を固定。
+- PASTは従来どおり監査証跡として `PAST`。
+- 結果取得・予想・HARD LOCKは引き続き AUDIT ONLY で未接続。

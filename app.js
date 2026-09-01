@@ -1225,10 +1225,15 @@ function timingAuditState(date){
 function timingStatus(rec){
   if(!rec)return "WAITING";
   if(rec.status==="BLOCKED")return "BLOCKED";
+  if(rec.status==="WAITING")return "WAITING";
   if(rec.status==="PARTIAL")return "LIMITED";
   if(rec.status==="SAFE"){
     if(rec.auditTemporalState==="PAST")return "PAST";
-    if(Number.isFinite(rec.marginMinutes)&&rec.marginMinutes<0)return "LATE";
+    // A future-day probe is useful evidence, but never LIVE READY.
+    if(rec.auditTemporalState==="FUTURE")return "WAITING";
+    // READY requires a known deadline and at least five minutes of user action time.
+    if(!rec.deadline||!Number.isFinite(rec.marginMinutes))return "LIMITED";
+    if(rec.marginMinutes<5)return "LATE";
     return "READY";
   }
   return "WAITING";
@@ -1296,6 +1301,15 @@ function relayTimingMetrics(date,deadline,sourceIso,received=new Date()){
   const temporalState=date<jstToday?"PAST":date>jstToday?"FUTURE":"TODAY";
   return {source,received,sourceMargin,receiveMargin,delaySec,temporalState};
 }
+function liveReadyDecision(both,publicationWaiting,partial,tm,deadline){
+  if(publicationWaiting)return {auditStatus:"WAITING",label:"公式PRE-RACE公開待ち"};
+  if(!both)return {auditStatus:partial?"PARTIAL":"BLOCKED",label:partial?"PRE-RACE一部不足":"PRE-RACE取得不可"};
+  if(tm.temporalState==="FUTURE")return {auditStatus:"WAITING",label:"開催前 · LIVE READY判定待ち"};
+  if(tm.temporalState==="PAST")return {auditStatus:"SAFE",label:"過去監査 · LIVE判定対象外"};
+  if(!deadline||!Number.isFinite(tm.receiveMargin.minutes))return {auditStatus:"PARTIAL",label:"締切時刻未判定 · 予想禁止"};
+  if(tm.receiveMargin.minutes<5)return {auditStatus:"SAFE",label:"購入時間不足 · 5分未満"};
+  return {auditStatus:"SAFE",label:"LIVE READY · 購入余裕5分以上"};
+}
 async function runRelayProbe(){
   const btn=$("#relayProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1;
   const st=$("#relayGateStatus"),audit=$("#relayGateAudit");
@@ -1311,10 +1325,12 @@ async function runRelayProbe(){
     const waitingErrors=new Set(["UNEXPECTED_PRE_RACE_FORMAT","HTTP_404"]);
     const failed=[x.racelist,x.beforeinfo].filter(v=>!v?.ok);
     const publicationWaiting=!both&&failed.length>0&&failed.every(v=>waitingErrors.has(String(v?.error||v?.httpStatus||"")));
-    const status=both?"RELAY READY":publicationWaiting?"RELAY WAITING":partial?"RELAY LIMITED":"RELAY BLOCKED";
     const received=new Date(),tm=relayTimingMetrics(date,x.deadline||null,x.fetchedAt||null,received);
-    st.className=`live-gate-status ${both?"ok":publicationWaiting?"warn":partial?"warn":"fail"}`;
-    st.textContent=`${status} · ${date} ${race}R · ${publicationWaiting?"公式PRE-RACE公開待ち":"結果データなし"}`;
+    const decision=liveReadyDecision(both,publicationWaiting,partial,tm,x.deadline||null);
+    const visibleState=decision.auditStatus==="BLOCKED"?"RELAY BLOCKED":decision.auditStatus==="PARTIAL"?"RELAY LIMITED":decision.auditStatus==="WAITING"?"RELAY WAITING":"RELAY READY";
+    const status=visibleState;
+    st.className=`live-gate-status ${decision.auditStatus==="SAFE"&&timingStatus({...decision,status:decision.auditStatus,auditTemporalState:tm.temporalState,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes})==="READY"?"ok":decision.auditStatus==="BLOCKED"?"fail":"warn"}`;
+    st.textContent=`${visibleState} · ${date} ${race}R · ${decision.label}`;
     const rows=[
       ["JSON",`OK · ${path}`],["GitHub取得",x.fetchedAtJST||jstTimeLabel(tm.source)||"—"],["アプリ受信",jstTimeLabel(received)],
       ["中継遅延",`${tm.delaySec.toFixed(1)}秒`],
@@ -1326,7 +1342,7 @@ async function runRelayProbe(){
     audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
     store.relayMonitor={last:{date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
     const ta=timingAuditState(date);
-    ta.races[race]={status:both?"SAFE":publicationWaiting?"WAITING":partial?"PARTIAL":"BLOCKED",summary:status,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
+    ta.races[race]={status:decision.auditStatus,summary:`${status} · ${decision.label}`,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
     saveStore();renderTimingAudit();
   }catch(e){
     const msg=String(e?.message||e);
