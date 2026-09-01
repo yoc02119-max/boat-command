@@ -313,6 +313,7 @@ function renderReplayControls(s){
   panel.classList.toggle("active",!!pack);
   $("#loadReplayBtn").disabled=false;
   $("#loadReplayBtn").textContent=pack?(s.replayRevealed?"新規RETESTを開始":"RETESTを最初からやり直す"):"2025/12/15 パックを読み込む";
+  if($("#unloadReplayBtn"))$("#unloadReplayBtn").classList.toggle("hidden",!pack);
   $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
   const state=appState(s);
   if(!pack){
@@ -459,6 +460,19 @@ $("#loadReplayBtn").onclick=()=>{
     if(!confirm(msg))return;
   }
   loadReplayPack("gamagori-2025-12-15");
+};
+if($("#unloadReplayBtn"))$("#unloadReplayBtn").onclick=()=>{
+  const s=session(),pack=activeReplayPack(s);
+  if(!pack)return;
+  if(!confirm("パックを未読込状態に戻します。現在のRETEST途中データは画面から外れます。ORIGINAL BLIND BT-001は保持します。よろしいですか？"))return;
+  if(s.retestMode&&s.replayRevealed)archiveCompletedRetest(s);
+  const clean=baseSession(s.date);
+  clean.runType="BACKTEST";
+  clean.strategyVersion=s.strategyVersion||"GAMAGORI-V1.0";
+  store.sessions[s.date]=clean;
+  saveStore();
+  setReplayLoadStatus("READY · パック未読込","success");
+  renderAll();
 };
 $("#revealReplayBtn").onclick=revealAndSettleReplay;
 
@@ -855,7 +869,11 @@ function renderResults(s){
   }
   if(!displayOpen){$("#resultSummary").innerHTML="";return;}
 
-  $("#resultList").innerHTML=s.races.map(r=>{
+  const summaryHtml=s.retestMode
+    ?`<div class="score-compare-head"><b>RETEST vs ORIGINAL BLIND</b><span>今回の再検証と初回正式成績を完全分離して比較</span></div>${currentFinalScoreHtml(s)}${baselineCompareHtml(s)}`
+    :currentFinalScoreHtml(s);
+  $("#resultSummary").innerHTML="";
+  $("#resultList").innerHTML=summaryHtml+s.races.map(r=>{
     if(replay&&replayPredictionGate(s,r).status==="NO_PREDICTION")return `<div class="race-card no-prediction-race">
       <div class="race-head"><div><div class="race-no">${r.race}R</div><div class="race-meta">BACKTEST監査記録</div></div><div class="stake">SKIPPED</div></div>
       <div class="no-prediction-panel"><b>NO PREDICTION｜予想見送り</b><div class="no-prediction-reason">${escapeHtml(r.skipReason||replayPredictionGate(s,r).reason)}</div><div class="no-prediction-rule">投資・的中率・ROI・MISS集計には含めません。</div></div>
@@ -877,9 +895,6 @@ function renderResults(s){
       </div><div class="refund-note">欠場・F等で購入買い目が返還対象になった場合だけ返還額を入力。</div>
     </div>`;
   }).join("");
-  $("#resultSummary").innerHTML=s.retestMode
-    ?`<div class="score-compare-head"><b>RETEST vs ORIGINAL BLIND</b><span>今回の再検証と初回正式成績を完全分離して比較</span></div>${currentFinalScoreHtml(s)}${baselineCompareHtml(s)}`
-    :currentFinalScoreHtml(s);
   $$("[data-settle]").forEach(b=>b.onclick=()=>settleRace(+b.dataset.settle));
   $$("[data-miss]").forEach(x=>x.onchange=()=>{
     const r=s.races.find(r=>r.race===+x.dataset.miss);r.missClass=x.value;saveStore();renderAnalytics();renderReport();
