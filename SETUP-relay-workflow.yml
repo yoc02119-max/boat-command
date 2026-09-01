@@ -1,0 +1,95 @@
+name: PRE-RACE relay probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'JST race date (YYYY-MM-DD)'
+        required: true
+        default: '2026-09-01'
+      race:
+        description: 'Race number (1-12)'
+        required: true
+        default: '1'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate target
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${{ inputs.date }}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]
+          [[ "${{ inputs.race }}" =~ ^([1-9]|1[0-2])$ ]]
+
+      - name: Probe PRE-RACE only
+        env:
+          RACE_DATE: ${{ inputs.date }}
+          RACE_NO: ${{ inputs.race }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE8="${RACE_DATE//-/}"
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="${BASE}/racelist?hd=${DATE8}&jcd=07&rno=${RACE_NO}"
+          BEFOREINFO="${BASE}/beforeinfo?hd=${DATE8}&jcd=07&rno=${RACE_NO}"
+
+          # IMPORTANT: no result/resultlist URL exists in this workflow.
+          curl --fail-with-body --location --max-time 15 --silent --show-error \
+            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2' "$RACELIST" -o /tmp/racelist.html || true
+          curl --fail-with-body --location --max-time 15 --silent --show-error \
+            --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.17.2' "$BEFOREINFO" -o /tmp/beforeinfo.html || true
+
+          export RACELIST BEFOREINFO
+          python3 - <<'PY'
+          import json, os, re
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          race_date=os.environ['RACE_DATE']; race_no=int(os.environ['RACE_NO'])
+          jst=timezone(timedelta(hours=9)); now=datetime.now(jst)
+          def inspect(path, kind, url):
+              p=Path(path)
+              if not p.exists():
+                  return {'ok':False,'httpStatus':None,'bytes':0,'error':'FETCH_FAILED','sourceUrl':url}
+              raw=p.read_bytes(); text=raw.decode('utf-8','ignore')
+              if kind=='racelist': good=('出走表' in text and ('レーサー' in text or 'ボートレーサー' in text))
+              else: good=('直前情報' in text and '展示タイム' in text)
+              return {'ok':bool(good),'httpStatus':200,'bytes':len(raw),'error':None if good else 'UNEXPECTED_PRE_RACE_FORMAT','sourceUrl':url}
+          rl=inspect('/tmp/racelist.html','racelist',os.environ['RACELIST'])
+          bi=inspect('/tmp/beforeinfo.html','beforeinfo',os.environ['BEFOREINFO'])
+          deadline=None
+          if Path('/tmp/racelist.html').exists():
+              t=Path('/tmp/racelist.html').read_text(errors='ignore')
+              plain=re.sub(r'<[^>]+>',' ',t); plain=re.sub(r'\s+',' ',plain)
+              m=re.search(r'締切予定時刻.{0,100}?(\d{1,2}:\d{2})',plain)
+              if m: deadline=m.group(1)
+          out={
+            'schema':'boat-command-pre-race-probe-v1','venue':'GAMAGORI','venueCode':'07',
+            'date':race_date,'race':race_no,'fetchedAt':now.isoformat(),
+            'fetchedAtJST':now.strftime('%H:%M:%S'),'deadline':deadline,
+            'racelist':rl,'beforeinfo':bi,
+            'safety':{'resultEndpointsIncluded':False,'predictionEnabled':False,'hardLockEnabled':False}
+          }
+          dst=Path(f'live/gamagori/{race_date}/pre/race-{race_no}.json'); dst.parent.mkdir(parents=True,exist_ok=True)
+          dst.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          print(dst)
+          PY
+
+      - name: Commit relay audit JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-relay'
+          git config user.email 'actions@users.noreply.github.com'
+          git add live/gamagori/
+          git diff --cached --quiet && exit 0
+          git commit -m "audit: pre-race relay probe ${{ inputs.date }} ${{ inputs.race }}R"
+          git push

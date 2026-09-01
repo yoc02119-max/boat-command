@@ -1254,6 +1254,52 @@ function renderLiveGate(){
   audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
   renderTimingAudit();
 }
+
+function relayProbePath(date,race){
+  const d=String(date||"");
+  const r=Math.max(1,Math.min(12,Number(race)||1));
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d))throw new Error("INVALID_DATE");
+  return `./live/gamagori/${d}/pre/race-${r}.json`;
+}
+function validateRelayPayload(x,date,race){
+  if(!x||x.schema!=="boat-command-pre-race-probe-v1")throw new Error("INVALID_RELAY_SCHEMA");
+  if(x.venue!=="GAMAGORI"||x.date!==date||Number(x.race)!==Number(race))throw new Error("RELAY_TARGET_MISMATCH");
+  const raw=JSON.stringify(x).toLowerCase();
+  if(/resultlist|\/result\?|resultendpoint|payout|払戻|着順/.test(raw))throw new Error("RESULT_DATA_DETECTED");
+  if(!x.racelist||!x.beforeinfo)throw new Error("PRE_RACE_FIELDS_MISSING");
+  return x;
+}
+async function runRelayProbe(){
+  const btn=$("#relayProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1;
+  const st=$("#relayGateStatus"),audit=$("#relayGateAudit");
+  if(!btn||btn.disabled)return;
+  btn.disabled=true;btn.textContent="RELAY確認中…";st.className="live-gate-status warn";st.textContent="CHECKING · same-origin PRE-RACE JSONのみ";
+  const path=relayProbePath(date,race),started=Date.now();
+  try{
+    const res=await fetch(`${path}?v=${Date.now()}`,{cache:"no-store",credentials:"same-origin"});
+    if(!res.ok)throw new Error(`HTTP_${res.status}`);
+    const x=validateRelayPayload(await res.json(),date,race);
+    const both=!!x.racelist.ok&&!!x.beforeinfo.ok;
+    const partial=!!x.racelist.ok||!!x.beforeinfo.ok;
+    const status=both?"RELAY READY":partial?"RELAY LIMITED":"RELAY BLOCKED";
+    st.className=`live-gate-status ${both?"ok":partial?"warn":"fail"}`;
+    st.textContent=`${status} · ${date} ${race}R · 結果データなし`;
+    const rows=[
+      ["JSON",`OK · ${path}`],["生成時刻",x.fetchedAtJST||x.fetchedAt||"—"],
+      ["出走表",x.racelist.ok?`OK · HTTP ${x.racelist.httpStatus||200} · ${x.racelist.bytes||0} bytes`:`BLOCK · ${x.racelist.error||x.racelist.httpStatus||"—"}`],
+      ["直前情報",x.beforeinfo.ok?`OK · HTTP ${x.beforeinfo.httpStatus||200} · ${x.beforeinfo.bytes||0} bytes`:`BLOCK · ${x.beforeinfo.error||x.beforeinfo.httpStatus||"—"}`],
+      ["締切予定",x.deadline||"—"],["結果系","HARD BLOCK · relay schemaに結果フィールドなし"],["予想/LOCK","DISABLED · AUDIT ONLY"]
+    ];
+    audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
+    store.relayMonitor={last:{date,race,path,status,fetchedAt:new Date().toISOString(),sourceFetchedAt:x.fetchedAt||null,ms:Date.now()-started}};saveStore();
+  }catch(e){
+    const msg=String(e?.message||e);
+    st.className="live-gate-status fail";
+    st.textContent=`RELAY WAITING/BLOCKED · ${date} ${race}R · ${msg}`;
+    audit.innerHTML=[["JSON",path],["状態",msg],["結果系","HARD BLOCK · 取得なし"],["予想/LOCK","DISABLED · AUDIT ONLY"]].map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
+  }finally{btn.disabled=false;btn.textContent="RELAY受信テスト"}
+}
+
 function jstTimeLabel(iso){try{return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date(iso))}catch{return "—"}}
 function marginToDeadline(date,deadline,now=new Date()){
   if(!deadline)return {minutes:null,label:"未判定"};
@@ -1274,11 +1320,11 @@ async function runLiveProbe(){
   const rec={status,summary,date,race,deadline,marginMinutes:margin.minutes,marginLabel:margin.label,fetchedAt:now.toISOString(),fetchedAtJST:jstTimeLabel(now),racelist,beforeinfo,resultEndpoint:"BLOCKED",prediction:"DISABLED"};
   store.liveMonitor=store.liveMonitor||{last:null,history:[]};store.liveMonitor.last=rec;store.liveMonitor.history=(store.liveMonitor.history||[]).concat([rec]).slice(-30);
   const ta=timingAuditState();if(ta.date!==date){ta.date=date;ta.races={}};ta.races[race]={...rec,readyAtJST:status==="SAFE"?rec.fetchedAtJST:null};
-  saveStore();renderLiveGate();btn.disabled=false;btn.textContent="公式PRE-RACE接続テスト";
+  saveStore();renderLiveGate();btn.disabled=false;btn.textContent="公式PRE-RACE直接テスト";
 }
 
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.1",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.2",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
@@ -1293,6 +1339,7 @@ $("#importFile").onchange=async e=>{
   e.target.value="";
 }
 $("#liveProbeBtn").onclick=()=>runLiveProbe();
+$("#relayProbeBtn").onclick=()=>runRelayProbe();
 $("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;store.liveTimingAudit={date:$("#liveDate")?.value||"2026-09-04",venue:"GAMAGORI",races:{}};saveStore();renderLiveGate();};
 $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;

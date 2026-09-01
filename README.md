@@ -19,3 +19,15 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - Statuses: WAITING / READY / LIMITED / LATE / BLOCKED.
 - Audit-only: prediction, HARD LOCK and result endpoints remain disconnected.
 - Clearing the timing audit does not alter BACKTEST/RETEST/LIVE core records.
+
+## v0.17.2 — RELAY PROBE
+- Adds a same-origin `RELAY受信テスト` to DATA.
+- Relay JSON path: `live/gamagori/YYYY-MM-DD/pre/race-N.json`.
+- Includes a **manual-only** GitHub Actions workflow at `.github/workflows/pre-race-relay-probe.yml`.
+- The workflow has no schedule/cron and makes at most two PRE-RACE requests for one user-selected race: `racelist` + `beforeinfo`.
+- No `result` / `resultlist` URL is present in the workflow.
+- The committed relay artifact stores only audit metadata, not copied official HTML.
+- Prediction and HARD LOCK remain disabled in this phase.
+- Browser direct-fetch probe is retained for comparison.
+
+`SETUP-relay-workflow.yml` is a visible duplicate for iPad setup; the active copy must live at `.github/workflows/pre-race-relay-probe.yml`.
