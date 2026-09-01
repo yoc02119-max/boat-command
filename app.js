@@ -1264,9 +1264,20 @@ function relayProbePath(date,race){
 function validateRelayPayload(x,date,race){
   if(!x||x.schema!=="boat-command-pre-race-probe-v1")throw new Error("INVALID_RELAY_SCHEMA");
   if(x.venue!=="GAMAGORI"||x.date!==date||Number(x.race)!==Number(race))throw new Error("RELAY_TARGET_MISMATCH");
-  const raw=JSON.stringify(x).toLowerCase();
-  if(/resultlist|\/result\?|resultendpoint|payout|払戻|着順/.test(raw))throw new Error("RESULT_DATA_DETECTED");
   if(!x.racelist||!x.beforeinfo)throw new Error("PRE_RACE_FIELDS_MISSING");
+
+  // Safety metadata is expected to be false in audit-only relay payloads.
+  // Do not treat the *name* resultEndpointsIncluded as result data.
+  if(!x.safety||x.safety.resultEndpointsIncluded!==false||x.safety.predictionEnabled!==false||x.safety.hardLockEnabled!==false){
+    throw new Error("RELAY_SAFETY_FLAGS_INVALID");
+  }
+
+  // Inspect only PRE-RACE payload branches for forbidden result content/URLs.
+  // This keeps fail-closed behavior while allowing explicit safety metadata.
+  const preRaceRaw=JSON.stringify({racelist:x.racelist,beforeinfo:x.beforeinfo}).toLowerCase();
+  if(/resultlist|\/result(?:\?|[\/"'])|payout|払戻|着順/.test(preRaceRaw))throw new Error("RESULT_DATA_DETECTED");
+  const urls=[x.racelist.sourceUrl,x.beforeinfo.sourceUrl].filter(Boolean).map(v=>String(v).toLowerCase());
+  if(urls.some(u=>/resultlist|\/result(?:\?|$)/.test(u)))throw new Error("RESULT_ENDPOINT_DETECTED");
   return x;
 }
 async function runRelayProbe(){
@@ -1324,7 +1335,7 @@ async function runLiveProbe(){
 }
 
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.2",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.3",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }

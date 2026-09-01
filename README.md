@@ -20,6 +20,14 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - Audit-only: prediction, HARD LOCK and result endpoints remain disconnected.
 - Clearing the timing audit does not alter BACKTEST/RETEST/LIVE core records.
 
+
+## v0.17.3 — RELAY SAFETY FIX
+
+- Fixes false-positive `RESULT_DATA_DETECTED` caused by the safety metadata key `resultEndpointsIncluded: false`.
+- Keeps fail-closed result protection by checking only PRE-RACE payload branches and source URLs for forbidden result content/endpoints.
+- Requires all relay safety flags to remain explicitly `false` during this audit phase.
+- No prediction, HARD LOCK, or result acquisition is enabled by this release.
+
 ## v0.17.2 — RELAY PROBE
 - Adds a same-origin `RELAY受信テスト` to DATA.
 - Relay JSON path: `live/gamagori/YYYY-MM-DD/pre/race-N.json`.
