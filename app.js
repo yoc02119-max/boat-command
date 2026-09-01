@@ -1229,12 +1229,12 @@ function timingStatus(rec){
 function timingStatusClass(x){return ({READY:"ok",LIMITED:"warn",LATE:"fail",BLOCKED:"fail",WAITING:""})[x]||""}
 function renderTimingAudit(){
   const box=$("#timingAuditTable"),sum=$("#timingAuditSummary");if(!box||!sum)return;
-  const a=timingAuditState(),rows=[];let ready=0,limited=0,blocked=0;
+  const a=timingAuditState(),rows=[];let ready=0,limited=0,late=0,blocked=0;
   for(let r=1;r<=12;r++){
-    const x=a.races[r],st=timingStatus(x);if(st==="READY")ready++;if(st==="LIMITED")limited++;if(st==="BLOCKED")blocked++;
-    rows.push(`<tr><td>${r}R</td><td><span class="timing-state ${timingStatusClass(st)}">${st}</span></td><td>${esc(x?.fetchedAtJST||"—")}</td><td>${esc(x?.readyAtJST||(st==="READY"?x?.fetchedAtJST:null)||"—")}</td><td>${esc(x?.deadline||"—")}</td><td>${esc(x?.marginLabel||"—")}</td></tr>`);
+    const x=a.races[r],st=timingStatus(x);if(st==="READY")ready++;if(st==="LIMITED")limited++;if(st==="LATE")late++;if(st==="BLOCKED")blocked++;
+    rows.push(`<tr><td>${r}R</td><td><span class="timing-state ${timingStatusClass(st)}">${st}</span></td><td>${esc(x?.fetchedAtJST||"—")}</td><td>${esc(x?.readyAtJST||"—")}</td><td>${esc(x?.deadline||"—")}</td><td>${esc(x?.marginLabel||"—")}</td></tr>`);
   }
-  sum.textContent=`${ready}/12 READY · ${limited} LIMITED · ${blocked} BLOCKED`;
+  sum.textContent=`${ready}/12 READY · ${limited} LIMITED · ${late} LATE · ${blocked} BLOCKED`;
   box.innerHTML=`<table class="tbl timing-table"><thead><tr><th>R</th><th>状態</th><th>取得</th><th>READY</th><th>締切</th><th>購入余裕</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
 }
 function renderLiveGate(){
@@ -1280,6 +1280,13 @@ function validateRelayPayload(x,date,race){
   if(urls.some(u=>/resultlist|\/result(?:\?|$)/.test(u)))throw new Error("RESULT_ENDPOINT_DETECTED");
   return x;
 }
+function relayTimingMetrics(date,deadline,sourceIso,received=new Date()){
+  const source=sourceIso?new Date(sourceIso):received;
+  const sourceMargin=marginToDeadline(date,deadline,source);
+  const receiveMargin=marginToDeadline(date,deadline,received);
+  const delaySec=Math.max(0,(received-source)/1000);
+  return {source,received,sourceMargin,receiveMargin,delaySec};
+}
 async function runRelayProbe(){
   const btn=$("#relayProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1;
   const st=$("#relayGateStatus"),audit=$("#relayGateAudit");
@@ -1293,16 +1300,22 @@ async function runRelayProbe(){
     const both=!!x.racelist.ok&&!!x.beforeinfo.ok;
     const partial=!!x.racelist.ok||!!x.beforeinfo.ok;
     const status=both?"RELAY READY":partial?"RELAY LIMITED":"RELAY BLOCKED";
+    const received=new Date(),tm=relayTimingMetrics(date,x.deadline||null,x.fetchedAt||null,received);
     st.className=`live-gate-status ${both?"ok":partial?"warn":"fail"}`;
     st.textContent=`${status} · ${date} ${race}R · 結果データなし`;
     const rows=[
-      ["JSON",`OK · ${path}`],["生成時刻",x.fetchedAtJST||x.fetchedAt||"—"],
+      ["JSON",`OK · ${path}`],["GitHub取得",x.fetchedAtJST||jstTimeLabel(tm.source)||"—"],["アプリ受信",jstTimeLabel(received)],
+      ["中継遅延",`${tm.delaySec.toFixed(1)}秒`],
       ["出走表",x.racelist.ok?`OK · HTTP ${x.racelist.httpStatus||200} · ${x.racelist.bytes||0} bytes`:`BLOCK · ${x.racelist.error||x.racelist.httpStatus||"—"}`],
       ["直前情報",x.beforeinfo.ok?`OK · HTTP ${x.beforeinfo.httpStatus||200} · ${x.beforeinfo.bytes||0} bytes`:`BLOCK · ${x.beforeinfo.error||x.beforeinfo.httpStatus||"—"}`],
-      ["締切予定",x.deadline||"—"],["結果系","HARD BLOCK · relay schemaに結果フィールドなし"],["予想/LOCK","DISABLED · AUDIT ONLY"]
+      ["締切予定",x.deadline||"—"],["取得時購入余裕",tm.sourceMargin.label],["受信時購入余裕",tm.receiveMargin.label],
+      ["結果系","HARD BLOCK · relay schemaに結果フィールドなし"],["予想/LOCK","DISABLED · AUDIT ONLY"]
     ];
     audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
-    store.relayMonitor={last:{date,race,path,status,fetchedAt:new Date().toISOString(),sourceFetchedAt:x.fetchedAt||null,ms:Date.now()-started}};saveStore();
+    store.relayMonitor={last:{date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
+    const ta=timingAuditState();if(ta.date!==date){ta.date=date;ta.races={}};
+    ta.races[race]={status:both?"SAFE":partial?"PARTIAL":"BLOCKED",summary:status,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.receiveMargin.label,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
+    saveStore();renderTimingAudit();
   }catch(e){
     const msg=String(e?.message||e);
     st.className="live-gate-status fail";
@@ -1335,7 +1348,7 @@ async function runLiveProbe(){
 }
 
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.3",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.17.4",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }

@@ -21,6 +21,14 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - Clearing the timing audit does not alter BACKTEST/RETEST/LIVE core records.
 
 
+## v0.17.4 — RELAY TIMING INGEST
+
+- Feeds a verified same-origin relay JSON into the 12R LIVE TIMING AUDIT table.
+- Records GitHub fetch time, app receive time, relay delay, deadline, and purchase-time margin.
+- Distinguishes READY from LATE without weakening the PRE-RACE/result boundary.
+- Keeps result acquisition, prediction, and HARD LOCK disabled in this audit phase.
+- Existing BACKTEST/RETEST records and relay safety validation remain unchanged.
+
 ## v0.17.3 — RELAY SAFETY FIX
 
 - Fixes false-positive `RESULT_DATA_DETECTED` caused by the safety metadata key `resultEndpointsIncluded: false`.
