@@ -47,3 +47,12 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - Browser direct-fetch probe is retained for comparison.
 
 `SETUP-relay-workflow.yml` is a visible duplicate for iPad setup; the active copy must live at `.github/workflows/pre-race-relay-probe.yml`.
+
+
+## v0.17.5 — DATE-AWARE TIMING
+
+- Distinguishes TODAY / PAST AUDIT / FUTURE before interpreting deadline margin.
+- Historical relay checks are labeled PAST instead of being confused with a live LATE race.
+- Keeps the numeric after-deadline audit value, but clearly marks it as historical evidence.
+- Result endpoints, prediction, and HARD LOCK remain disconnected in the LIVE audit monitor.
+- Existing BACKTEST / RETEST / AUTO PREP / AUTO FINISH code paths are retained.
