@@ -213,14 +213,29 @@ function bankrollSeries(){
   }
   return out;
 }
+function verifiedBacktestBaselines(){
+  const rawOriginalDates=new Set(allSessions()
+    .filter(s=>!s.retestMode&&s.runType==="BACKTEST"&&settledRaces(s).length)
+    .map(s=>s.date));
+  return Object.entries(VERIFIED_BASELINES)
+    .filter(([date])=>!rawOriginalDates.has(date))
+    .map(([date,b])=>({...b,date}));
+}
 function allStats(filterType=null){
   const formal=allSessions().filter(s=>!s.retestMode);
   const sessions=filterType?formal.filter(s=>s.runType===filterType):formal;
   const all=sessions.flatMap(s=>s.races.filter(r=>r.settled));
-  const inv=all.reduce((a,r)=>a+r.stake,0),ret=all.reduce((a,r)=>a+r.returnAmount,0),hits=all.filter(r=>r.hit).length;
+  let inv=all.reduce((a,r)=>a+r.stake,0),ret=all.reduce((a,r)=>a+r.returnAmount,0),hits=all.filter(r=>r.hit).length,races=all.length;
+  // Lost raw ORIGINAL sessions can be restored from immutable VERIFIED_BASELINES for BACKTEST-only analytics.
+  // Never add these summaries to unfiltered/LIVE totals, and never double count a date that has raw ORIGINAL data.
+  if(filterType==="BACKTEST"){
+    for(const b of verifiedBacktestBaselines()){
+      races+=Number(b.races)||0;hits+=Number(b.hits)||0;inv+=Number(b.invested)||0;ret+=Number(b.returned)||0;
+    }
+  }
   const series=bankrollSeries(); let peak=series[0].value,maxdd=0;
   for(const p of series){peak=Math.max(peak,p.value);maxdd=Math.max(maxdd,peak-p.value)}
-  return {races:all.length,hits,investment:inv,returns:ret,profit:ret-inv,hitRate:all.length?hits/all.length*100:NaN,roi:inv?ret/inv*100:NaN,maxdd,bankroll:series.at(-1).value};
+  return {races,hits,investment:inv,returns:ret,profit:ret-inv,hitRate:races?hits/races*100:NaN,roi:inv?ret/inv*100:NaN,maxdd,bankroll:series.at(-1).value};
 }
 
 const titles={home:"蒲郡コマンドセンター",predict:"蒲郡 12R予想・HARD LOCK",results:"結果・精算",analytics:"蒲郡データ分析",assistant:"蒲郡担当AIレポート",data:"データ管理"};
@@ -946,18 +961,22 @@ function renderAnalytics(){
   $("#modeCompare").innerHTML=[["BACKTEST",bt],["LIVE",lv]].map(([name,x])=>`<div class="compare-card"><h3>${name}</h3><div class="mini"><div><span>RACE</span><b>${x.races}</b></div><div><span>HIT</span><b>${pct(x.hitRate)}</b></div><div><span>ROI</span><b>${pct(x.roi)}</b></div><div><span>P/L</span><b class="${x.profit>=0?"positive":"negative"}">${money(x.profit)}</b></div></div></div>`).join("");
 }
 function reportData(){
-  const all=allStats(),head=aggregateHeadBoat().filter(x=>!x.empty).sort((a,b)=>b.value-a.value),wins=aggregateWinners().filter(x=>!x.empty).sort((a,b)=>b.value-a.value);
-  if(!all.races)return [
-    ["現在地","まだ精算データがありません。まず1日分をBLIND予想→LOCK→精算すると分析が始まります。"],
-    ["運用ルール","結果入力は全12R LOCK後のみ解禁。LOCK時刻と簡易ハッシュを保存します。"],
-    ["次の重点","BACKTESTとLIVEを混ぜずに蓄積し、過去検証と本番再現性を比較します。"]
-  ];
-  const best=head[0],winner=wins[0],trend=all.roi>=100?"累計回収率は100%を上回っています。":"累計回収率は100%未満です。サンプルを増やして原因を分解します。";
-  return [
-    ["現在地",`${all.races}R精算、${all.hits}的中。的中率${pct(all.hitRate)}、回収率${pct(all.roi)}。${trend}`],
-    ["買い目傾向",best?`${best.name}の買い目回収率が現状トップで${best.value.toFixed(1)}%。件数が少ない段階では過信しません。`:"買い目別の比較にはもう少しデータが必要です。"],
-    ["結果傾向",winner?`結果1着は${winner.name}が最も多く、構成比${winner.value.toFixed(1)}%。今後は風・展示・モーターも別軸で追加します。`:"結果分布はまだありません。"]
-  ];
+  const s=session(),st=sessionStats(s),bt=allStats("BACKTEST"),lv=allStats("LIVE"),baseline=VERIFIED_BASELINES[s.date]||null;
+  const cards=[];
+  if(s.retestMode&&st.races){
+    cards.push(["現在地",`RETEST ${st.races}R精算済み・${st.hits}的中。的中率${pct(st.hitRate)}、ROI ${pct(st.roi)}、損益 ${money(st.profit)}。参考成績として扱い、正式BACKTEST/LIVE戦績には加算しません。`]);
+  }else if(st.races){
+    cards.push(["現在地",`${s.runType} ${st.races}R精算済み・${st.hits}的中。的中率${pct(st.hitRate)}、ROI ${pct(st.roi)}、損益 ${money(st.profit)}。`]);
+  }else{
+    cards.push(["現在地","この対象日の精算済みレースはまだありません。"]);
+  }
+  cards.push(["正式成績",`BACKTEST ${bt.races}R・${bt.hits}的中・ROI ${pct(bt.roi)}・損益 ${money(bt.profit)}。LIVE ${lv.races}R・${lv.hits}的中・ROI ${pct(lv.roi)}・損益 ${money(lv.profit)}。RETESTはこの集計から除外します。`]);
+  if(baseline){
+    cards.push(["ORIGINAL基準",`${baseline.id} ORIGINAL BLIND：${baseline.races}R・${baseline.hits}的中・${baseline.skipped}R見送り・ROI ${pct(baseline.roi)}・損益 ${money(baseline.profit)}。正式比較基準として固定し、RETESTで上書きしません。`]);
+  }else{
+    cards.push(["ORIGINAL基準","この対象日には固定済みORIGINAL BLIND基準がありません。"]);
+  }
+  return cards;
 }
 function renderReport(){
   $("#reportCards").innerHTML=reportData().map(x=>`<article class="report-card"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join("");
@@ -991,7 +1010,7 @@ function renderData(){
   $("#auditTable").innerHTML=`<table class="tbl"><thead><tr><th>R</th><th>状態</th><th>LOCK時刻</th><th>LOCK ID</th></tr></thead><tbody>${s.races.map(r=>`<tr><td>${r.race}R</td><td>${activeReplayPack(s)&&replayPredictionGate(s,r).status==="NO_PREDICTION"?"SKIP":r.settled?"精算済":r.locked?"LOCK":"OPEN"}</td><td>${fmtTime(r.lockedAt)}</td><td>${r.lockHash||"—"}</td></tr>`).join("")}</tbody></table>`;
 }
 $("#exportBtn").onclick=()=>{
-  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.10",data:store};
+  const payload={exportedAt:new Date().toISOString(),exportDateJST:todayISO(),app:"BOAT COMMAND",version:"0.15.8",data:store};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`boat-command-backup-${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
