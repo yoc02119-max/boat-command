@@ -578,6 +578,8 @@ async function runResultAutoFinish(){
     performReplayRevealAndSettle(s,pack);
     const settled=settledRaces(s).length, skipped=skippedReplayRaces(s).length;
     if(!s.replayRevealed||settled!==target)throw new Error(`SETTLE_VERIFY_${settled}_${target}`);
+    s.aiReportUpdatedAt=new Date().toISOString();
+    s.aiReportUpdateSource="RESULT_AUTO_FINISH";
     s.autoFinishAudit={
       mode:"RESULT_AUTO_FINISH",
       startedAt,
@@ -591,7 +593,9 @@ async function runResultAutoFinish(){
       settled,
       skipped,
       postState:"RESULT",
-      analytics:"READY"
+      analytics:"READY",
+      aiReport:"UPDATED",
+      aiReportUpdatedAt:s.aiReportUpdatedAt
     };
     saveStore();renderAll();showView("results");
     setAutoFinishStatus(`✓ AUTO FINISH COMPLETE · ${settled}/${target} SETTLED · ${skipped}R SKIP · ANALYTICS READY`,"success");
@@ -1125,14 +1129,23 @@ function reportData(){
 }
 function renderReport(){
   $("#reportCards").innerHTML=reportData().map(x=>`<article class="report-card"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join("");
+  const s=session(),status=$("#reportRefreshStatus");
+  if(status){
+    if(s.aiReportUpdatedAt){
+      const stamp=new Date(s.aiReportUpdatedAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      const source=s.aiReportUpdateSource==="RESULT_AUTO_FINISH"?"AUTO":"手動";
+      status.textContent=`✓ ${source}更新済み ${stamp}`;status.classList.add("done");
+    }else{status.textContent="未更新";status.classList.remove("done");}
+  }
 }
 function refreshReportWithAudit(){
   const btn=$("#refreshReport"),status=$("#reportRefreshStatus");
   if(btn){btn.disabled=true;btn.textContent="更新中…";}
+  const s=session(),now=new Date();
+  s.aiReportUpdatedAt=now.toISOString();s.aiReportUpdateSource="MANUAL";saveStore();
   renderReport();
-  const now=new Date();
   const stamp=now.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  if(status){status.textContent=`✓ 更新済み ${stamp}`;status.classList.add("done");}
+  if(status){status.textContent=`✓ 手動更新済み ${stamp}`;status.classList.add("done");}
   if(btn){btn.textContent="更新完了";setTimeout(()=>{btn.disabled=false;btn.textContent="更新";},650);}
 }
 $("#refreshReport").onclick=refreshReportWithAudit;
