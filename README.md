@@ -1,8 +1,8 @@
-# BOAT COMMAND v0.15.8 — AI 3-LAYER AUDIT
+# BOAT COMMAND v0.15.9 — AI REFRESH AUDIT
 
 Free static GitHub Pages build.
 
-## v0.15.8
+## v0.15.9
 
 - AI report now recognizes a settled RETEST RESULT as reference performance instead of saying no settlement data exists.
 - AI report separates three layers: formal BACKTEST/LIVE, current RETEST reference result, and immutable ORIGINAL BLIND baseline.
@@ -14,3 +14,6 @@ Free static GitHub Pages build.
 ## Regression rule
 
 Source-level checks are not a substitute for iPad state-transition verification.
+
+- AI report refresh now provides visible audit feedback: 更新中… → 更新完了, plus a last-updated timestamp.
+- No prediction, replay, HARD LOCK, settlement, baseline, or aggregation logic changed in this release.

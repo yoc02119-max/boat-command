@@ -981,7 +981,16 @@ function reportData(){
 function renderReport(){
   $("#reportCards").innerHTML=reportData().map(x=>`<article class="report-card"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join("");
 }
-$("#refreshReport").onclick=renderReport;
+function refreshReportWithAudit(){
+  const btn=$("#refreshReport"),status=$("#reportRefreshStatus");
+  if(btn){btn.disabled=true;btn.textContent="更新中…";}
+  renderReport();
+  const now=new Date();
+  const stamp=now.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  if(status){status.textContent=`✓ 更新済み ${stamp}`;status.classList.add("done");}
+  if(btn){btn.textContent="更新完了";setTimeout(()=>{btn.disabled=false;btn.textContent="更新";},650);}
+}
+$("#refreshReport").onclick=refreshReportWithAudit;
 function fmtTime(v){if(!v)return"—";try{return new Date(v).toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"})}catch{return v}}
 const MISS_CLASSES=[
  ["","未分類"],["A","A：1着読み違い"],["B","B：2着読み違い"],["C","C：3着抜け"],["D","D：進入"],["E","E：ST"],["F","F：モーター"],["G","G：展示"],["H","H：荒れ・想定外"]
