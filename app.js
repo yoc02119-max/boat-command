@@ -330,6 +330,7 @@ function renderReplayControls(s){
   $("#loadReplayBtn").textContent=pack?(s.replayRevealed?"新規RETESTを開始":"RETESTを最初からやり直す"):"2025/12/15 パックを読み込む";
   if($("#unloadReplayBtn"))$("#unloadReplayBtn").classList.toggle("hidden",!pack);
   $("#revealReplayBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
+  if($("#autoFinishBtn"))$("#autoFinishBtn").classList.toggle("hidden",!(pack&&lc===target&&!s.replayRevealed));
   const state=appState(s);
   if(!pack){
     $("#replayStatus").textContent=state.kind==="ARCHIVED_ORIGINAL"
@@ -518,12 +519,28 @@ function loadReplayPack(id){
     setReplayLoadStatus(`LOAD FAILED · ${err?.message||"UNKNOWN ERROR"}`,"error");
   }
 }
-function revealAndSettleReplay(){
-  const s=session(),pack=activeReplayPack(s),target=requiredReplayLocks(s);
-  if(!pack||targetLockedCount(s)!==target||s.replayRevealed)return;
-  if(!confirm(`予想対象${target}RをすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？`))return;
-
+function setAutoFinishStatus(text,kind=""){
+  const el=$("#autoFinishStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.className="generator-status "+kind;
+}
+function validateReplayResultSource(s,pack){
+  const errors=[];
+  if(!pack)errors.push("PACK_NOT_FOUND");
   const eligible=new Set(eligibleReplayRaces(s).map(r=>Number(r.race)));
+  for(const pr of (pack?.races||[])){
+    if(!eligible.has(Number(pr.race)))continue;
+    if(!validPick(normalizePick(pr.result)))errors.push(`${pr.race}R_RESULT`);
+    const pay=Number(pr.pay);
+    if(!Number.isFinite(pay)||pay<0)errors.push(`${pr.race}R_PAY`);
+  }
+  if((pack?.races||[]).filter(pr=>eligible.has(Number(pr.race))).length!==eligible.size)errors.push("RESULT_COUNT");
+  return errors;
+}
+function performReplayRevealAndSettle(s,pack){
+  const eligible=new Set(eligibleReplayRaces(s).map(r=>Number(r.race)));
+  const stamp=new Date().toISOString();
   for(const pr of pack.races){
     const r=s.races.find(x=>Number(x.race)===Number(pr.race));
     if(!r)continue;
@@ -531,19 +548,69 @@ function revealAndSettleReplay(){
       const gate=replayPredictionGate(s,r);
       r.predictionStatus="SKIPPED";
       r.skipReason=gate.reason;
-      r.skipRecordedAt=new Date().toISOString();
+      r.skipRecordedAt=stamp;
       continue;
     }
     if(!r.locked||r.settled)continue;
-    r.result=pr.result;r.officialPayout100=pr.pay;r.refundAmount=0;
-    r.hit=r.picks.filter(Boolean).includes(pr.result);
-    r.returnAmount=r.hit?pr.pay*5:0;r.profit=r.returnAmount-r.stake;
-    r.settled=true;r.settledAt=new Date().toISOString();r.note="BACKTEST REPLAY / OFFICIAL RESULT";
+    r.result=normalizePick(pr.result);r.officialPayout100=Number(pr.pay);r.refundAmount=0;
+    r.hit=r.picks.filter(Boolean).includes(r.result);
+    r.returnAmount=r.hit?r.officialPayout100*5:0;r.profit=r.returnAmount-r.stake;
+    r.settled=true;r.settledAt=stamp;r.note="BACKTEST REPLAY / OFFICIAL RESULT";
   }
-  s.replayRevealed=true;s.replayRevealedAt=new Date().toISOString();saveStore();renderAll();showView("results");
+  s.replayRevealed=true;s.replayRevealedAt=stamp;
+}
+async function runResultAutoFinish(){
+  const s=session(),pack=activeReplayPack(s),target=requiredReplayLocks(s),locked=targetLockedCount(s);
+  if(!pack){setAutoFinishStatus("BLOCKED · PACK NOT READY","error");return;}
+  if(s.replayRevealed||settledRaces(s).length>0){setAutoFinishStatus("BLOCKED · RESULT ALREADY OPEN","error");return;}
+  if(locked!==target){setAutoFinishStatus(`BLOCKED · LOCK ${locked}/${target}`,"error");return;}
+  const sourceErrors=validateReplayResultSource(s,pack);
+  if(sourceErrors.length){setAutoFinishStatus(`BLOCKED · RESULT SOURCE ${sourceErrors.join(" / ")}`,"error");return;}
+  if(!confirm(`RESULT AUTO FINISHを実行します。${target}/${target} HARD LOCKを再確認し、公式結果ソースを検証後にのみ、結果解禁 → 一括精算 → 分析更新まで実行します。実行しますか？`))return;
+  const startedAt=new Date().toISOString();
+  try{
+    setAutoFinishStatus("① LOCK GATE VERIFY…","working");
+    if(targetLockedCount(s)!==target||s.replayRevealed)throw new Error("LOCK_GATE");
+    setAutoFinishStatus("② RESULT SOURCE VERIFY…","working");
+    const errors=validateReplayResultSource(s,pack);
+    if(errors.length)throw new Error("RESULT_SOURCE_"+errors.join("_"));
+    setAutoFinishStatus("③ REVEAL / SETTLE…","working");
+    performReplayRevealAndSettle(s,pack);
+    const settled=settledRaces(s).length, skipped=skippedReplayRaces(s).length;
+    if(!s.replayRevealed||settled!==target)throw new Error(`SETTLE_VERIFY_${settled}_${target}`);
+    s.autoFinishAudit={
+      mode:"RESULT_AUTO_FINISH",
+      startedAt,
+      completedAt:new Date().toISOString(),
+      packId:pack.id,
+      preState:"LOCKED",
+      target,
+      locked,
+      resultSource:"VERIFIED",
+      revealedAt:s.replayRevealedAt,
+      settled,
+      skipped,
+      postState:"RESULT",
+      analytics:"READY"
+    };
+    saveStore();renderAll();showView("results");
+    setAutoFinishStatus(`✓ AUTO FINISH COMPLETE · ${settled}/${target} SETTLED · ${skipped}R SKIP · ANALYTICS READY`,"success");
+  }catch(err){
+    console.error(err);
+    setAutoFinishStatus(`CRITICAL FAIL · AUTO FINISH · ${err?.message||"UNKNOWN ERROR"}`,"error");
+  }
+}
+function revealAndSettleReplay(){
+  const s=session(),pack=activeReplayPack(s),target=requiredReplayLocks(s);
+  if(!pack||targetLockedCount(s)!==target||s.replayRevealed)return;
+  const sourceErrors=validateReplayResultSource(s,pack);
+  if(sourceErrors.length){alert(`公式結果ソースを確認できません: ${sourceErrors.join(" / ")}`);return;}
+  if(!confirm(`予想対象${target}RをすべてHARD LOCK済みです。公式結果を解禁して一括精算しますか？`))return;
+  performReplayRevealAndSettle(s,pack);saveStore();renderAll();showView("results");
 }
 
 if($("#autoPrepBtn"))$("#autoPrepBtn").onclick=runBlindAutoPrep;
+if($("#autoFinishBtn"))$("#autoFinishBtn").onclick=runResultAutoFinish;
 $("#loadReplayBtn").onclick=()=>{
   const s=session(),pack=activeReplayPack(s);
   if(pack){
