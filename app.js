@@ -341,6 +341,82 @@ function renderReplayControls(s){
     $("#replayStatus").textContent=`${s.retestMode?"RETEST BLIND":"BLIND"} · ${pack.date} · ${lc}/${target} TARGET LOCK · ${skipped}R SKIP · ${pack.snapshotLevel}`;
   }
 }
+
+function setAutoPrepStatus(text,kind=""){
+  const el=$("#autoPrepStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.className="generator-status "+kind;
+}
+
+async function runBlindAutoPrep(){
+  const pack=BACKTEST_PACKS["gamagori-2025-12-15"];
+  if(!pack){setAutoPrepStatus("FAILED · PACK NOT FOUND","error");return;}
+  if(!confirm("新規RETESTとして、パック読込 → BLIND予想生成 → 予想対象HARD LOCKまで自動実行します。公式結果は解禁せず、LOCKED状態で停止します。実行しますか？"))return;
+  const startedAt=new Date().toISOString();
+  try{
+    setAutoPrepStatus("① PACK / INTEGRITY CHECK…","working");
+    const errors=validateReplayPack(pack);
+    if(errors.length){setAutoPrepStatus(`FAILED · ${errors.join(" / ")}`,"error");return;}
+
+    setAutoPrepStatus("② FRESH RETEST SESSION…","working");
+    const fresh=startFreshReplayRun(pack.id);
+    if(!fresh.ok){setAutoPrepStatus(`FAILED · ${fresh.error}`,"error");return;}
+    let s=fresh.s;
+    const snapshotMissing=s.races.filter(r=>!replaySnapshotHtml(s,r)).map(r=>r.race);
+    if(snapshotMissing.length){setAutoPrepStatus(`FAILED · SNAPSHOT ${snapshotMissing.join(",")}R`,"error");return;}
+
+    setAutoPrepStatus("③ BLIND PREDICTION…","working");
+    const eligible=eligibleReplayRaces(s), skipped=skippedReplayRaces(s);
+    const failed=[];
+    for(const r of eligible){
+      const out=makeBlindPicks(s,r);
+      if(!out||!Array.isArray(out.picks)||!out.picks.length){failed.push(r.race);continue;}
+      r.picks=out.picks;
+      r.rationale=out.rationale;
+    }
+    if(failed.length){setAutoPrepStatus(`FAILED · PREDICTOR ${failed.join(",")}R`,"error");return;}
+    saveStore();
+
+    const invalid=eligible.filter(r=>{
+      const picks=(r.picks||[]).map(normalizePick).filter(Boolean);
+      return picks.length<1||picks.length>4||picks.some(p=>!validPick(p))||new Set(picks).size!==picks.length||!(r.rationale||"").trim();
+    });
+    if(invalid.length){setAutoPrepStatus(`FAILED · PREDICTION VERIFY ${invalid.map(r=>r.race).join(",")}R`,"error");return;}
+
+    setAutoPrepStatus(`④ HARD LOCK… · ${eligible.length}R`,"working");
+    for(const r of eligible){
+      const ok=await lockRace(r.race);
+      if(!ok){setAutoPrepStatus(`FAILED · LOCK ${r.race}R`,"error");return;}
+    }
+
+    s=session();
+    const target=requiredReplayLocks(s), locked=targetLockedCount(s), settled=s.races.filter(r=>r.settled).length;
+    if(locked!==target){setAutoPrepStatus(`FAILED · LOCK VERIFY ${locked}/${target}`,"error");return;}
+    if(s.replayRevealed||settled>0){
+      setAutoPrepStatus("CRITICAL FAIL · RESULT GATE VIOLATION","error");
+      console.error("AUTO PREP RESULT GATE VIOLATION",{replayRevealed:s.replayRevealed,settled});
+      return;
+    }
+
+    s.autoPrepAudit={
+      mode:"BLIND_AUTO_PREP",
+      startedAt,
+      completedAt:new Date().toISOString(),
+      packId:pack.id,
+      eligible:target,
+      skipped:skipped.length,
+      locked,
+      resultGate:"HIDDEN",
+      state:appState(s).kind
+    };
+    saveStore();renderAll();
+    setAutoPrepStatus(`✓ AUTO PREP COMPLETE · ${locked}/${target} LOCK · ${skipped.length}R SKIP · RESULT HIDDEN`,"success");
+  }catch(err){
+    console.error(err);
+    setAutoPrepStatus(`FAILED · AUTO PREP · ${err?.message||"UNKNOWN ERROR"}`,"error");
+  }
+}
 function setReplayLoadStatus(text,kind=""){
   const el=$("#replayLoadStatus");
   if(!el)return;
@@ -466,6 +542,8 @@ function revealAndSettleReplay(){
   }
   s.replayRevealed=true;s.replayRevealedAt=new Date().toISOString();saveStore();renderAll();showView("results");
 }
+
+if($("#autoPrepBtn"))$("#autoPrepBtn").onclick=runBlindAutoPrep;
 $("#loadReplayBtn").onclick=()=>{
   const s=session(),pack=activeReplayPack(s);
   if(pack){
