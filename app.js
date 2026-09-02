@@ -1333,6 +1333,24 @@ function liveGateSelfTest(){
   ];
   return {ok:cases.every(x=>x[1]),cases};
 }
+
+function runLiveGateSelfTestUI(){
+  const st=$("#liveGateSelfTestStatus"), btn=$("#liveGateSelfTestBtn");
+  if(!st||!btn)return;
+  btn.disabled=true;
+  const beforeSession=JSON.stringify(store.sessions||{});
+  const beforeRelay=JSON.stringify(store.relayMonitor||{});
+  const result=liveGateSelfTest();
+  const afterSession=JSON.stringify(store.sessions||{});
+  const afterRelay=JSON.stringify(store.relayMonitor||{});
+  const isolation=beforeSession===afterSession&&beforeRelay===afterRelay;
+  const rows=[...result.cases,["本番保存領域を変更しない",isolation]];
+  const ok=result.ok&&isolation;
+  st.className=`live-gate-status ${ok?"ok":"fail"}`;
+  st.innerHTML=`<b>${ok?"SELF-TEST PASS":"SELF-TEST FAIL"} · ${rows.filter(x=>x[1]).length}/${rows.length}</b><br>${rows.map(([n,v])=>`${v?"✓":"✕"} ${esc(n)}`).join(" · ")}<br>結果取得なし · 予想生成なし · HARD LOCKなし`;
+  btn.disabled=false;
+}
+
 async function runRelayProbe(){
   const btn=$("#relayProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1;
   const st=$("#relayGateStatus"),audit=$("#relayGateAudit");
@@ -1426,6 +1444,7 @@ function refreshLiveAuditSelection(){
 }
 $("#liveDate").onchange=refreshLiveAuditSelection;
 $("#liveRace").onchange=refreshLiveAuditSelection;
+if($("#liveGateSelfTestBtn"))$("#liveGateSelfTestBtn").onclick=runLiveGateSelfTestUI;
 $("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;const d=$("#liveDate")?.value||todayISO();store.liveTimingAudits=store.liveTimingAudits||{};store.liveTimingAudits[d]={date:d,venue:"GAMAGORI",races:{}};saveStore();renderLiveGate();};
 $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;

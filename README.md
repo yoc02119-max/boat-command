@@ -89,3 +89,10 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - READY表記を `TIMING READY` に明確化し、予想可能判定とは分離。
 - 結果取得・予想・HARD LOCKは引き続きAUDIT ONLYで未接続。
 - 内部状態機械セルフテスト（FUTURE/STALE/LIMITED/READY/LATE/PAST）を追加。
+
+
+## v0.18.0 — LIVE GATE SELF-TEST
+- Added an audit-only synthetic self-test for the LIVE safety state machine.
+- Verifies FUTURE→WAITING, stale TODAY→WAITING, missing deadline→LIMITED, >=5 min→READY, <5 min→LATE, PAST→PAST.
+- Verifies the self-test does not mutate session or relay state.
+- Does not fetch results, generate predictions, or HARD LOCK.

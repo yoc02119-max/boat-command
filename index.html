@@ -10,10 +10,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.17.9</title>
+  <title>BOAT COMMAND v0.18.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=179">
+  <link rel="stylesheet" href="styles.css?v=180">
 </head>
 <body>
 <div class="app">
@@ -37,7 +37,7 @@
       <strong>蒲郡</strong>
       <span><i></i> GAMAGORI-01</span>
     </div>
-    <div class="version">v0.17.9 · FRESHNESS GATE</div>
+    <div class="version">v0.18.0 · LIVE GATE SELF-TEST</div>
   </aside>
 
   <main>
@@ -201,9 +201,9 @@
           <div class="live-monitor-controls">
             <label>日付<input id="liveDate" type="date"></label>
             <label>レース<select id="liveRace">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}R</option>`).join("")}</select></label>
-            <button id="liveProbeBtn" class="primary">公式PRE-RACE直接テスト</button><button id="relayProbeBtn" class="secondary">RELAY受信テスト</button>
+            <button id="liveProbeBtn" class="primary">公式PRE-RACE直接テスト</button><button id="relayProbeBtn" class="secondary">RELAY受信テスト</button><button id="liveGateSelfTestBtn" class="secondary">安全ゲート自己診断</button>
           </div>
-          <div id="liveGateStatus" class="live-gate-status">未実行</div>
+          <div id="liveGateSelfTestStatus" class="live-gate-status">SELF-TEST未実行 · 本番データ/予想/LOCKには触れません</div><div id="liveGateStatus" class="live-gate-status">未実行</div>
           <div id="liveGateAudit" class="live-gate-audit"></div><div id="relayGateStatus" class="live-gate-status">RELAY未実行 · same-origin JSONのみ</div><div id="relayGateAudit" class="live-gate-audit"></div>
           <div class="timing-audit-head"><div><b>12R LIVE TIMING AUDIT</b><span id="timingAuditSummary">0/12 READY</span></div><button id="clearTimingAuditBtn" class="secondary">監査ログだけクリア</button></div>
           <div id="timingAuditTable" class="audit-table"></div>
@@ -218,6 +218,6 @@
     </section>
   </main>
 </div>
-<script src="app.js?v=179"></script>
+<script src="app.js?v=180"></script>
 </body>
 </html>
