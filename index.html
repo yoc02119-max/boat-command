@@ -10,10 +10,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.18.0</title>
+  <title>BOAT COMMAND v0.18.1</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=180">
+  <link rel="stylesheet" href="styles.css?v=181">
 </head>
 <body>
 <div class="app">
@@ -37,7 +37,7 @@
       <strong>蒲郡</strong>
       <span><i></i> GAMAGORI-01</span>
     </div>
-    <div class="version">v0.18.0 · LIVE GATE SELF-TEST</div>
+    <div class="version">v0.18.1 · MULTI-VENUE LIVE PROBE</div>
   </aside>
 
   <main>
@@ -197,9 +197,9 @@
           <button id="resetDayBtn" class="danger">この日だけ初期化</button>
         </section>
         <section class="panel wide live-monitor-panel">
-          <div class="panel-head"><div><h2>LIVE DATA GATE v1.1 · 12R TIMING AUDIT</h2><p>9/4本番用の受け皿。12Rの取得時刻・READY時刻・締切・購入余裕を監査します。</p></div><span class="badge ready">AUDIT ONLY</span></div>
+          <div class="panel-head"><div><h2>LIVE DATA GATE v1.1 · 12R TIMING AUDIT</h2><p>蒲郡本体と分離した通信試験。開催中の試験場でも取得時刻・READY時刻・締切・購入余裕を監査します。</p></div><span class="badge ready">AUDIT ONLY</span></div>
           <div class="live-monitor-controls">
-            <label>日付<input id="liveDate" type="date"></label>
+            <label>試験場<select id="liveVenue"><option value="gamagori">蒲郡</option><option value="wakamatsu">若松</option><option value="shimonoseki">下関</option></select></label><label>日付<input id="liveDate" type="date"></label>
             <label>レース<select id="liveRace">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}R</option>`).join("")}</select></label>
             <button id="liveProbeBtn" class="primary">公式PRE-RACE直接テスト</button><button id="relayProbeBtn" class="secondary">RELAY受信テスト</button><button id="liveGateSelfTestBtn" class="secondary">安全ゲート自己診断</button>
           </div>
@@ -218,6 +218,6 @@
     </section>
   </main>
 </div>
-<script src="app.js?v=180"></script>
+<script src="app.js?v=181"></script>
 </body>
 </html>

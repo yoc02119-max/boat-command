@@ -91,8 +91,12 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - 内部状態機械セルフテスト（FUTURE/STALE/LIMITED/READY/LATE/PAST）を追加。
 
 
-## v0.18.0 — LIVE GATE SELF-TEST
+## v0.18.1 — LIVE GATE SELF-TEST
 - Added an audit-only synthetic self-test for the LIVE safety state machine.
 - Verifies FUTURE→WAITING, stale TODAY→WAITING, missing deadline→LIMITED, >=5 min→READY, <5 min→LATE, PAST→PAST.
 - Verifies the self-test does not mutate session or relay state.
 - Does not fetch results, generate predictions, or HARD LOCK.
+
+
+## v0.18.1
+Adds isolated multi-venue LIVE transport probes for Gamagori (07), Wakamatsu (20), and Shimonoseki (19). Test-venue audit data is separated by venue/date and remains disconnected from prediction, HARD LOCK, settlement, and learning.

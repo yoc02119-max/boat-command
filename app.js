@@ -1180,12 +1180,20 @@ function renderData(){
 }
 
 const LIVE_ALLOWED_PATHS=new Set(["racelist","beforeinfo"]);
+const LIVE_VENUES={
+  gamagori:{slug:"gamagori",code:"07",relayVenue:"GAMAGORI",label:"蒲郡"},
+  wakamatsu:{slug:"wakamatsu",code:"20",relayVenue:"WAKAMATSU",label:"若松"},
+  shimonoseki:{slug:"shimonoseki",code:"19",relayVenue:"SHIMONOSEKI",label:"下関"}
+};
+function selectedLiveVenue(){return LIVE_VENUES[$("#liveVenue")?.value]||LIVE_VENUES.gamagori}
+
 function liveOfficialUrl(kind,date,race){
   if(!LIVE_ALLOWED_PATHS.has(kind))throw new Error("RESULT_ENDPOINT_BLOCKED");
   const d=String(date||"").replace(/-/g,"");
   const r=Math.max(1,Math.min(12,Number(race)||1));
   if(!/^\d{8}$/.test(d))throw new Error("INVALID_DATE");
-  return `https://www.boatrace.jp/owpc/pc/race/${kind}?hd=${d}&jcd=07&rno=${r}`;
+  const v=selectedLiveVenue();
+  return `https://www.boatrace.jp/owpc/pc/race/${kind}?hd=${d}&jcd=${v.code}&rno=${r}`;
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function parseDeadlineFromHtml(html,race){
@@ -1212,13 +1220,17 @@ async function safePreRaceFetch(kind,date,race){
   }finally{clearTimeout(timer)}
 }
 function timingAuditState(date){
-  const key=String(date||$("#liveDate")?.value||todayISO());
+  const v=selectedLiveVenue();
+  const key=`${v.slug}:${String(date||$("#liveDate")?.value||todayISO())}`;
   store.liveTimingAudits=store.liveTimingAudits||{};
-  // One-time migration from the legacy single-day audit bucket.
-  if(store.liveTimingAudit?.date&&!store.liveTimingAudits[store.liveTimingAudit.date]){
-    store.liveTimingAudits[store.liveTimingAudit.date]=store.liveTimingAudit;
+  // One-time migration from legacy Gamagori audit buckets.
+  if(v.slug==="gamagori"){
+    const legacyDate=String(date||$("#liveDate")?.value||todayISO());
+    if(store.liveTimingAudit?.date===legacyDate&&!store.liveTimingAudits[key]) store.liveTimingAudits[key]=store.liveTimingAudit;
+    if(store.liveTimingAudits[legacyDate]&&!store.liveTimingAudits[key]) store.liveTimingAudits[key]=store.liveTimingAudits[legacyDate];
   }
-  store.liveTimingAudits[key]=store.liveTimingAudits[key]||{date:key,venue:"GAMAGORI",races:{}};
+  const d=String(date||$("#liveDate")?.value||todayISO());
+  store.liveTimingAudits[key]=store.liveTimingAudits[key]||{date:d,venue:v.relayVenue,races:{}};
   store.liveTimingAudits[key].races=store.liveTimingAudits[key].races||{};
   return store.liveTimingAudits[key];
 }
@@ -1271,11 +1283,13 @@ function relayProbePath(date,race){
   const d=String(date||"");
   const r=Math.max(1,Math.min(12,Number(race)||1));
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d))throw new Error("INVALID_DATE");
-  return `./live/gamagori/${d}/pre/race-${r}.json`;
+  const v=selectedLiveVenue();
+  return `./live/${v.slug}/${d}/pre/race-${r}.json`;
 }
 function validateRelayPayload(x,date,race){
   if(!x||x.schema!=="boat-command-pre-race-probe-v1")throw new Error("INVALID_RELAY_SCHEMA");
-  if(x.venue!=="GAMAGORI"||x.date!==date||Number(x.race)!==Number(race))throw new Error("RELAY_TARGET_MISMATCH");
+  const v=selectedLiveVenue();
+  if(x.venue!==v.relayVenue||x.venueCode!==v.code||x.date!==date||Number(x.race)!==Number(race))throw new Error("RELAY_TARGET_MISMATCH");
   if(!x.racelist||!x.beforeinfo)throw new Error("PRE_RACE_FIELDS_MISSING");
 
   // Safety metadata is expected to be false in audit-only relay payloads.
@@ -1382,7 +1396,7 @@ async function runRelayProbe(){
       ["結果系","HARD BLOCK · relay schemaに結果フィールドなし"],["予想/LOCK","DISABLED · AUDIT ONLY"]
     ];
     audit.innerHTML=rows.map(([a,b])=>`<div class="live-audit-row"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
-    store.relayMonitor={last:{date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
+    store.relayMonitor={last:{venue:selectedLiveVenue().slug,date,race,path,status,fetchedAt:received.toISOString(),sourceFetchedAt:x.fetchedAt||null,deadline:x.deadline||null,sourceMarginMinutes:tm.sourceMargin.minutes,receiveMarginMinutes:tm.receiveMargin.minutes,relayDelaySec:tm.delaySec,ms:Date.now()-started}};
     const ta=timingAuditState(date);
     ta.races[race]={status:decision.auditStatus,summary:`${status} · ${decision.label}`,date,race,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes,marginLabel:tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label,auditTemporalState:tm.temporalState,fetchedAt:x.fetchedAt||received.toISOString(),fetchedAtJST:x.fetchedAtJST||jstTimeLabel(tm.source),readyAtJST:both?(x.fetchedAtJST||jstTimeLabel(tm.source)):null,receivedAt:received.toISOString(),receivedAtJST:jstTimeLabel(received),sourceMarginMinutes:tm.sourceMargin.minutes,sourceMarginLabel:tm.sourceMargin.label,relayDelaySec:tm.delaySec,source:"RELAY"};
     saveStore();renderTimingAudit();
@@ -1412,7 +1426,7 @@ async function runLiveProbe(){
   if(racelist.ok&&beforeinfo.ok){status="SAFE";summary="出走表+直前情報を取得。予想/LOCKは未実行"}
   else if(racelist.ok||beforeinfo.ok){status="PARTIAL";summary="一部のみ取得。予想は禁止"}
   const rec={status,summary,date,race,deadline,marginMinutes:margin.minutes,marginLabel:margin.label,fetchedAt:now.toISOString(),fetchedAtJST:jstTimeLabel(now),racelist,beforeinfo,resultEndpoint:"BLOCKED",prediction:"DISABLED"};
-  store.liveMonitor=store.liveMonitor||{last:null,history:[]};store.liveMonitor.last=rec;store.liveMonitor.history=(store.liveMonitor.history||[]).concat([rec]).slice(-30);
+  store.liveMonitor=store.liveMonitor||{last:null,history:[]};rec.venue=selectedLiveVenue().slug;store.liveMonitor.last=rec;store.liveMonitor.history=(store.liveMonitor.history||[]).concat([rec]).slice(-30);
   const ta=timingAuditState(date);ta.races[race]={...rec,readyAtJST:status==="SAFE"?rec.fetchedAtJST:null};
   saveStore();renderLiveGate();btn.disabled=false;btn.textContent="公式PRE-RACE直接テスト";
 }
@@ -1436,16 +1450,17 @@ $("#liveProbeBtn").onclick=()=>runLiveProbe();
 $("#relayProbeBtn").onclick=()=>runRelayProbe();
 function refreshLiveAuditSelection(){
   const date=$("#liveDate")?.value||todayISO(),race=Number($("#liveRace")?.value)||1;
-  const direct=store.liveMonitor?.last,relay=store.relayMonitor?.last;
+  const direct=store.liveMonitor?.last,relay=store.relayMonitor?.last,v=selectedLiveVenue().slug;
   const directSt=$("#liveGateStatus"),directAudit=$("#liveGateAudit"),relaySt=$("#relayGateStatus"),relayAudit=$("#relayGateAudit");
-  if(directSt&&(!direct||direct.date!==date||Number(direct.race)!==race)){directSt.className="live-gate-status";directSt.textContent="未実行 · 選択中のレースでは未監査";if(directAudit)directAudit.innerHTML="";}
-  if(relaySt&&(!relay||relay.date!==date||Number(relay.race)!==race)){relaySt.className="live-gate-status";relaySt.textContent="RELAY未実行 · 選択中のレースでは未受信";if(relayAudit)relayAudit.innerHTML="";}
+  if(directSt&&(!direct||direct.venue!==v||direct.date!==date||Number(direct.race)!==race)){directSt.className="live-gate-status";directSt.textContent="未実行 · 選択中のレースでは未監査";if(directAudit)directAudit.innerHTML="";}
+  if(relaySt&&(!relay||relay.venue!==v||relay.date!==date||Number(relay.race)!==race)){relaySt.className="live-gate-status";relaySt.textContent="RELAY未実行 · 選択中のレースでは未受信";if(relayAudit)relayAudit.innerHTML="";}
   renderTimingAudit();
 }
+$("#liveVenue").onchange=refreshLiveAuditSelection;
 $("#liveDate").onchange=refreshLiveAuditSelection;
 $("#liveRace").onchange=refreshLiveAuditSelection;
 if($("#liveGateSelfTestBtn"))$("#liveGateSelfTestBtn").onclick=runLiveGateSelfTestUI;
-$("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;const d=$("#liveDate")?.value||todayISO();store.liveTimingAudits=store.liveTimingAudits||{};store.liveTimingAudits[d]={date:d,venue:"GAMAGORI",races:{}};saveStore();renderLiveGate();};
+$("#clearTimingAuditBtn").onclick=()=>{if(!confirm("12R LIVE TIMING AUDITの監査ログだけをクリアします。BACKTEST/RETEST/LIVE本体の記録は変更しません。"))return;const d=$("#liveDate")?.value||todayISO();store.liveTimingAudits=store.liveTimingAudits||{};const v=selectedLiveVenue();store.liveTimingAudits[`${v.slug}:${d}`]={date:d,venue:v.relayVenue,races:{}};saveStore();renderLiveGate();};
 $("#resetDayBtn").onclick=()=>{
   if(!confirm(`${currentDate} の記録を初期化します。この操作は元に戻せません。`))return;
   store.sessions[currentDate]=baseSession(currentDate);saveStore();renderAll();
