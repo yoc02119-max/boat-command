@@ -80,3 +80,12 @@ GitHub Pages static hosting remains free. Browser CORS behavior must be verified
 - 締切不明は `LIMITED`、購入余裕5分未満は `LATE` として予想接続を禁止する前提を固定。
 - PASTは従来どおり監査証跡として `PAST`。
 - 結果取得・予想・HARD LOCKは引き続き AUDIT ONLY で未接続。
+
+
+## v0.17.9 — FRESHNESS GATE
+- TODAYのTIMING READYにPRE-RACE鮮度条件を追加。
+- GitHub取得時刻が対象日当日で、アプリ受信時点から10分以内のJSONだけをTIMING READY候補にする。
+- 古いJSONは `WAITING · PRE-RACE更新待ち`。開催前/FUTUREは従来どおりWAITING。
+- READY表記を `TIMING READY` に明確化し、予想可能判定とは分離。
+- 結果取得・予想・HARD LOCKは引き続きAUDIT ONLYで未接続。
+- 内部状態機械セルフテスト（FUTURE/STALE/LIMITED/READY/LATE/PAST）を追加。

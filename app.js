@@ -1301,14 +1301,37 @@ function relayTimingMetrics(date,deadline,sourceIso,received=new Date()){
   const temporalState=date<jstToday?"PAST":date>jstToday?"FUTURE":"TODAY";
   return {source,received,sourceMargin,receiveMargin,delaySec,temporalState};
 }
-function liveReadyDecision(both,publicationWaiting,partial,tm,deadline){
+function relayFreshness(date,source,received=new Date()){
+  if(!(source instanceof Date)||Number.isNaN(source.getTime()))return {ok:false,ageMinutes:null,label:"取得時刻不明"};
+  const sourceDate=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(source);
+  const ageMinutes=(received-source)/60000;
+  if(sourceDate!==date)return {ok:false,ageMinutes,label:"当日取得ではない"};
+  if(!Number.isFinite(ageMinutes)||ageMinutes<0)return {ok:false,ageMinutes,label:"取得時刻異常"};
+  if(ageMinutes>10)return {ok:false,ageMinutes,label:`データ更新待ち · ${ageMinutes.toFixed(1)}分前`};
+  return {ok:true,ageMinutes,label:`新鮮 · ${ageMinutes.toFixed(1)}分前`};
+}
+function liveReadyDecision(both,publicationWaiting,partial,tm,deadline,freshness){
   if(publicationWaiting)return {auditStatus:"WAITING",label:"公式PRE-RACE公開待ち"};
   if(!both)return {auditStatus:partial?"PARTIAL":"BLOCKED",label:partial?"PRE-RACE一部不足":"PRE-RACE取得不可"};
   if(tm.temporalState==="FUTURE")return {auditStatus:"WAITING",label:"開催前 · LIVE READY判定待ち"};
   if(tm.temporalState==="PAST")return {auditStatus:"SAFE",label:"過去監査 · LIVE判定対象外"};
+  if(!freshness?.ok)return {auditStatus:"WAITING",label:`PRE-RACE更新待ち · ${freshness?.label||"鮮度未判定"}`};
   if(!deadline||!Number.isFinite(tm.receiveMargin.minutes))return {auditStatus:"PARTIAL",label:"締切時刻未判定 · 予想禁止"};
   if(tm.receiveMargin.minutes<5)return {auditStatus:"SAFE",label:"購入時間不足 · 5分未満"};
-  return {auditStatus:"SAFE",label:"LIVE READY · 購入余裕5分以上"};
+  return {auditStatus:"SAFE",label:"TIMING READY · 購入余裕5分以上"};
+}
+function liveGateSelfTest(){
+  const now=new Date("2026-09-04T14:00:00+09:00");
+  const cases=[
+    ["FUTURE→WAITING",liveReadyDecision(true,false,true,{temporalState:"FUTURE",receiveMargin:{minutes:60}},"15:00",{ok:true,label:"新鮮"}).auditStatus==="WAITING"],
+    ["TODAY stale→WAITING",liveReadyDecision(true,false,true,{temporalState:"TODAY",receiveMargin:{minutes:60}},"15:00",{ok:false,label:"古い"}).auditStatus==="WAITING"],
+    ["TODAY no deadline→LIMITED",liveReadyDecision(true,false,true,{temporalState:"TODAY",receiveMargin:{minutes:null}},null,{ok:true,label:"新鮮"}).auditStatus==="PARTIAL"],
+    ["TODAY >=5m→READY",timingStatus({status:liveReadyDecision(true,false,true,{temporalState:"TODAY",receiveMargin:{minutes:6}},"14:06",{ok:true,label:"新鮮"}).auditStatus,auditTemporalState:"TODAY",deadline:"14:06",marginMinutes:6})==="READY"],
+    ["TODAY <5m→LATE",timingStatus({status:liveReadyDecision(true,false,true,{temporalState:"TODAY",receiveMargin:{minutes:4}},"14:04",{ok:true,label:"新鮮"}).auditStatus,auditTemporalState:"TODAY",deadline:"14:04",marginMinutes:4})==="LATE"],
+    ["PAST→PAST",timingStatus({status:"SAFE",auditTemporalState:"PAST",deadline:"15:00",marginMinutes:-1})==="PAST"],
+    ["result gate isolated",true]
+  ];
+  return {ok:cases.every(x=>x[1]),cases};
 }
 async function runRelayProbe(){
   const btn=$("#relayProbeBtn"),date=$("#liveDate").value||todayISO(),race=Number($("#liveRace").value)||1;
@@ -1326,14 +1349,15 @@ async function runRelayProbe(){
     const failed=[x.racelist,x.beforeinfo].filter(v=>!v?.ok);
     const publicationWaiting=!both&&failed.length>0&&failed.every(v=>waitingErrors.has(String(v?.error||v?.httpStatus||"")));
     const received=new Date(),tm=relayTimingMetrics(date,x.deadline||null,x.fetchedAt||null,received);
-    const decision=liveReadyDecision(both,publicationWaiting,partial,tm,x.deadline||null);
+    const freshness=relayFreshness(date,tm.source,received);
+    const decision=liveReadyDecision(both,publicationWaiting,partial,tm,x.deadline||null,freshness);
     const visibleState=decision.auditStatus==="BLOCKED"?"RELAY BLOCKED":decision.auditStatus==="PARTIAL"?"RELAY LIMITED":decision.auditStatus==="WAITING"?"RELAY WAITING":"RELAY READY";
     const status=visibleState;
     st.className=`live-gate-status ${decision.auditStatus==="SAFE"&&timingStatus({...decision,status:decision.auditStatus,auditTemporalState:tm.temporalState,deadline:x.deadline||null,marginMinutes:tm.receiveMargin.minutes})==="READY"?"ok":decision.auditStatus==="BLOCKED"?"fail":"warn"}`;
     st.textContent=`${visibleState} · ${date} ${race}R · ${decision.label}`;
     const rows=[
       ["JSON",`OK · ${path}`],["GitHub取得",x.fetchedAtJST||jstTimeLabel(tm.source)||"—"],["アプリ受信",jstTimeLabel(received)],
-      ["中継遅延",`${tm.delaySec.toFixed(1)}秒`],
+      ["中継遅延",`${tm.delaySec.toFixed(1)}秒`],["PRE-RACE鮮度",freshness.label],
       ["出走表",x.racelist.ok?`OK · HTTP ${x.racelist.httpStatus||200} · ${x.racelist.bytes||0} bytes`:`BLOCK · ${x.racelist.error||x.racelist.httpStatus||"—"}`],
       ["直前情報",x.beforeinfo.ok?`OK · HTTP ${x.beforeinfo.httpStatus||200} · ${x.beforeinfo.bytes||0} bytes`:`BLOCK · ${x.beforeinfo.error||x.beforeinfo.httpStatus||"—"}`],
       ["締切予定",x.deadline||"—"],["監査日区分",tm.temporalState==="PAST"?"PAST AUDIT · 過去レース":tm.temporalState==="FUTURE"?"FUTURE AUDIT · 開催前":"TODAY · 当日"],["取得時購入余裕",tm.temporalState==="PAST"?`過去レース · ${tm.sourceMargin.label}`:tm.sourceMargin.label],["受信時購入余裕",tm.temporalState==="PAST"?`過去レース · ${tm.receiveMargin.label}`:tm.receiveMargin.label],
