@@ -1,0 +1,109 @@
+name: PRE-RACE multi-venue relay probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      venue:
+        description: 'Audit venue only'
+        required: true
+        type: choice
+        options:
+          - wakamatsu
+          - shimonoseki
+          - gamagori
+      date:
+        description: 'YYYY-MM-DD'
+        required: true
+        type: string
+      race:
+        description: '1-12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch PRE-RACE only and write audit JSON
+        env:
+          VENUE: ${{ inputs.venue }}
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          case "$VENUE" in
+            gamagori) CODE=07; RELAY=GAMAGORI ;;
+            wakamatsu) CODE=20; RELAY=WAKAMATSU ;;
+            shimonoseki) CODE=19; RELAY=SHIMONOSEKI ;;
+            *) echo 'INVALID_VENUE'; exit 2 ;;
+          esac
+          [[ "$DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo 'INVALID_DATE'; exit 2; }
+          [[ "$RACE" =~ ^([1-9]|1[0-2])$ ]] || { echo 'INVALID_RACE'; exit 2; }
+          HD="${DATE//-/}"
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=$RACE"
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          mkdir -p tmp_probe "live/$VENUE/$DATE/pre"
+          fetch() {
+            local url="$1" out="$2"
+            local code
+            code=$(curl --silent --show-error --location --max-time 15 --retry 0 \
+              --user-agent 'BOAT-COMMAND-PRE-RACE-AUDIT/0.18.1' \
+              --output "$out" --write-out '%{http_code}' "$url" || true)
+            echo "${code:-000}"
+          }
+          RL_HTTP=$(fetch "$RACELIST" tmp_probe/racelist.bin)
+          BI_HTTP=$(fetch "$BEFOREINFO" tmp_probe/beforeinfo.bin)
+          export CODE RELAY RACELIST BEFOREINFO RL_HTTP BI_HTTP
+          python3 - <<'PY'
+          import os,re,json,datetime,pathlib
+          from zoneinfo import ZoneInfo
+          date=os.environ['DATE']; race=int(os.environ['RACE']); venue=os.environ['VENUE']
+          def decode(path):
+              b=pathlib.Path(path).read_bytes() if pathlib.Path(path).exists() else b''
+              for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+                  try: return b.decode(enc),enc,len(b)
+                  except UnicodeDecodeError: pass
+              return b.decode('utf-8','replace'),'unknown',len(b)
+          rl,rl_enc,rl_bytes=decode('tmp_probe/racelist.bin')
+          bi,bi_enc,bi_bytes=decode('tmp_probe/beforeinfo.bin')
+          def score(text,markers): return sum(1 for m in markers if m in text)
+          rl_score=score(rl,['出走表','ボートレーサー','全国','当地','モーター'])
+          bi_score=score(bi,['直前情報','展示タイム','スタート展示','水面気象情報'])
+          rl_http=int(os.environ.get('RL_HTTP') or 0); bi_http=int(os.environ.get('BI_HTTP') or 0)
+          rl_ok=rl_http==200 and rl_score>=2
+          bi_ok=bi_http==200 and bi_score>=2
+          def err(http,ok):
+              if ok:return None
+              if http==404:return 'HTTP_404'
+              if http!=200:return f'HTTP_{http}'
+              return 'UNEXPECTED_PRE_RACE_FORMAT'
+          # Deadline is schedule metadata only; never inspect result endpoints.
+          plain=re.sub(r'<[^>]+>',' ',rl+' '+bi)
+          times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)
+          deadline=times[race-1] if len(times)>=12 else (times[0] if times else None)
+          now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+          obj={
+            'schema':'boat-command-pre-race-probe-v1','venue':os.environ['RELAY'],'venueCode':os.environ['CODE'],
+            'date':date,'race':race,'fetchedAt':now.isoformat(),'fetchedAtJST':now.strftime('%H:%M:%S'),'deadline':deadline,
+            'racelist':{'ok':rl_ok,'httpStatus':rl_http,'bytes':rl_bytes,'sourceUrl':os.environ['RACELIST'],'detectedEncoding':rl_enc,'markerScore':rl_score,'error':err(rl_http,rl_ok)},
+            'beforeinfo':{'ok':bi_ok,'httpStatus':bi_http,'bytes':bi_bytes,'sourceUrl':os.environ['BEFOREINFO'],'detectedEncoding':bi_enc,'markerScore':bi_score,'error':err(bi_http,bi_ok)},
+            'safety':{'resultEndpointsIncluded':False,'predictionEnabled':False,'hardLockEnabled':False}
+          }
+          out=pathlib.Path(f'live/{venue}/{date}/pre/race-{race}.json')
+          out.write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(out); print(json.dumps(obj,ensure_ascii=False,indent=2))
+          PY
+          rm -rf tmp_probe
+      - name: Commit audit JSON
+        run: |
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add live/
+          git diff --cached --quiet && exit 0
+          git commit -m "relay: ${{ inputs.venue }} ${{ inputs.date }} ${{ inputs.race }}R pre-race audit"
+          git push
