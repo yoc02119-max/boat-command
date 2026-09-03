@@ -1,0 +1,111 @@
+name: PROGRAM HISTORY 2025 segmented year build v1.5.1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  block1:
+    name: block1 0-66
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block1
+        env: {START: "0", COUNT: "67", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2025-block1, path: segment-out/*.json, retention-days: 1}
+
+  block2:
+    name: block2 67-133
+    needs: block1
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block2
+        env: {START: "67", COUNT: "67", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2025-block2, path: segment-out/*.json, retention-days: 1}
+
+  block3:
+    name: block3 134-198
+    needs: block2
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block3
+        env: {START: "134", COUNT: "65", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2025-block3, path: segment-out/*.json, retention-days: 1}
+
+  merge:
+    name: merge and final audit
+    needs: [block1, block2, block3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v5
+        with: {pattern: gamagori-2025-block*, path: blocks}
+      - name: Merge
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from collections import Counter
+
+          m=json.loads(Path("gamagori-2025-schedule-manifest.json").read_text())
+          scheduled=m["dates"]
+          rows=[]; reports=[]
+          for p in Path("blocks").rglob("segment.json"):
+              rows += json.loads(p.read_text())["races"]
+          for p in Path("blocks").rglob("report.json"):
+              reports.append(json.loads(p.read_text()))
+
+          if len(reports)!=3: raise SystemExit("FINAL FAIL · missing block report")
+          ids=[r["id"] for r in rows]
+          if len(ids)!=len(set(ids)): raise SystemExit("FINAL FAIL · duplicate id")
+          by=Counter(r["d"] for r in rows)
+          if any(n!=12 for n in by.values()): raise SystemExit("FINAL FAIL · partial day")
+          exceptions=sum((r.get("exceptions",[]) for r in reports),[])
+          ready=(len(by)==199 and not exceptions)
+
+          if "2025-12-15" in by:
+              gold={1:("1-2-3",880),2:("1-4-2",4430),3:("3-1-4",21970),4:("1-2-4",920),
+              5:("1-3-2",500),6:("1-5-2",1090),7:("1-3-2",1030),8:("1-6-4",2750),
+              9:("1-4-3",1560),10:("1-2-6",2010),11:("1-2-3",600),12:("1-2-4",1060)}
+              got={int(r["r"]):(r["o"],r["p"]) for r in rows if r["d"]=="2025-12-15"}
+              if got!=gold: raise SystemExit("FINAL FAIL · Golden regression")
+              print("GOLDEN REGRESSION PASS · 2025-12-15 · 12/12")
+
+          out=Path("artifact"); out.mkdir(exist_ok=True)
+          shard={"schema":"boat-command-program-history-v1","builder":"PROGRAM-HISTORY-BUILDER-V1.2.1",
+                 "venueCode":"07","year":2025,"races":sorted(rows,key=lambda r:(r["d"],int(r["r"])))}
+          report={"schema":"boat-command-program-history-year-audit-v1","venueCode":"07","year":2025,
+                  "scheduled_dates":199,"complete_dates":len(by),"complete_races":len(rows),
+                  "exceptions":exceptions,"ready_for_program_history":ready}
+          (out/"gamagori-2025.json").write_text(json.dumps(shard,ensure_ascii=False,separators=(",",":")))
+          (out/"gamagori-2025-audit-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(f"YEAR BUILD · scheduled=199 · complete={len(by)} · races={len(rows)}")
+          print(f"EXCEPTIONS · {len(exceptions)}")
+          print("READY FOR PROGRAM HISTORY ·", ready)
+          if not ready: raise SystemExit("FINAL HOLD · review audit report")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gamagori-2025-segmented-year-build
+          path: artifact/*.json
+          retention-days: 1
+          if-no-files-found: warn
