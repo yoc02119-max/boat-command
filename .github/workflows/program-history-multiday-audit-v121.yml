@@ -1,0 +1,179 @@
+name: PROGRAM HISTORY multi-day official audit v1.2.1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Builder identity and self-test
+        run: |
+          set -euo pipefail
+          test -f program-history-builder-v121.py
+          lines="$(wc -l < program-history-builder-v121.py)"
+          echo "BUILDER · ${lines} lines"
+          test "$lines" -eq 370
+          sha256sum program-history-builder-v121.py
+          python3 program-history-builder-v121.py --self-test
+
+      - name: Install LZH extractor
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+          command -v lha
+
+      - name: Download four official B/K sample days
+        env:
+          DAYS: "20230923 20240403 20250515 20251215"
+        run: |
+          set -euo pipefail
+          mkdir -p audit/input audit/B audit/K audit/out
+
+          fetch_one() {
+            kind="$1"
+            day="$2"
+            yyyymm="${day:0:6}"
+            yymmdd="${day:2:6}"
+            lower_kind="$(printf '%s' "$kind" | tr '[:upper:]' '[:lower:]')"
+            file="${lower_kind}${yymmdd}.lzh"
+            https_url="https://www1.mbrace.or.jp/od2/${kind}/${yyyymm}/${file}"
+            http_url="http://www1.mbrace.or.jp/od2/${kind}/${yyyymm}/${file}"
+
+            echo "FETCH ${kind} · ${day} · ${yyyymm}/${file}"
+            if ! curl --fail --location --silent --show-error \
+              --connect-timeout 15 --max-time 60 \
+              --user-agent 'BOAT-COMMAND-HISTORY-MULTIDAY-AUDIT/1.0' \
+              "$https_url" -o "audit/input/${file}"; then
+              echo "HTTPS failed; trying official HTTP endpoint once."
+              curl --fail --location --silent --show-error \
+                --connect-timeout 15 --max-time 60 \
+                --user-agent 'BOAT-COMMAND-HISTORY-MULTIDAY-AUDIT/1.0' \
+                "$http_url" -o "audit/input/${file}"
+            fi
+
+            test -s "audit/input/${file}"
+            bytes="$(wc -c < "audit/input/${file}")"
+            echo "DOWNLOADED ${kind} · ${day} · ${bytes} bytes"
+            sha256sum "audit/input/${file}"
+          }
+
+          for day in $DAYS; do
+            fetch_one B "$day"
+            sleep 3
+            fetch_one K "$day"
+            sleep 5
+          done
+
+          test "$(find audit/input -maxdepth 1 -type f | wc -l)" -eq 8
+
+      - name: Extract all B/K sample archives
+        env:
+          DAYS: "20230923 20240403 20250515 20251215"
+        run: |
+          set -euo pipefail
+          for day in $DAYS; do
+            yymmdd="${day:2:6}"
+            (cd audit/B && lha -x "../input/b${yymmdd}.lzh")
+            (cd audit/K && lha -x "../input/k${yymmdd}.lzh")
+          done
+
+          echo "B extracted files:"
+          find audit/B -maxdepth 1 -type f -printf '%f · %s bytes\n' | sort
+          echo "K extracted files:"
+          find audit/K -maxdepth 1 -type f -printf '%f · %s bytes\n' | sort
+
+          test "$(find audit/B -maxdepth 1 -type f | wc -l)" -eq 4
+          test "$(find audit/K -maxdepth 1 -type f | wc -l)" -eq 4
+
+      - name: Convert Gamagori four-day sample
+        run: |
+          set -euo pipefail
+          python3 program-history-builder-v121.py \
+            --b-dir audit/B \
+            --k-dir audit/K \
+            --out audit/out/history \
+            --venue 07 \
+            --official-audit-20251215
+
+      - name: Fail-closed multi-day output audit
+        env:
+          DAYS: "2023-09-23 2024-04-03 2025-05-15 2025-12-15"
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          expected_days = os.environ['DAYS'].split()
+          valid_classes = {'A1','A2','B1','B2'}
+          result_rx = re.compile(r'^[1-6]-[1-6]-[1-6]$')
+          rows = []
+
+          for year in (2023, 2024, 2025):
+              path = Path(f'audit/out/history/07/{year}.json')
+              if not path.exists():
+                  raise SystemExit(f'AUDIT FAIL · missing {path}')
+              data = json.loads(path.read_text(encoding='utf-8'))
+              if data.get('venue', {}).get('code') != '07':
+                  raise SystemExit(f'AUDIT FAIL · venue mismatch in {path}')
+              if data.get('year') != year:
+                  raise SystemExit(f'AUDIT FAIL · year mismatch in {path}')
+              rows.extend(data.get('races', []))
+
+          keys = [(r.get('d'), r.get('r')) for r in rows]
+          if len(keys) != len(set(keys)):
+              raise SystemExit('AUDIT FAIL · duplicate date/race key detected')
+
+          for day in expected_days:
+              day_rows = sorted((r for r in rows if r.get('d') == day), key=lambda r: r.get('r', 0))
+              if len(day_rows) != 12:
+                  raise SystemExit(f'AUDIT FAIL · {day} expected 12 races, got {len(day_rows)}')
+              if [r.get('r') for r in day_rows] != list(range(1, 13)):
+                  raise SystemExit(f'AUDIT FAIL · {day} race numbers are not exactly 1..12')
+              for r in day_rows:
+                  classes = r.get('c')
+                  if not isinstance(classes, list) or len(classes) != 6 or any(c not in valid_classes for c in classes):
+                      raise SystemExit(f"AUDIT FAIL · {day} R{r.get('r')} invalid six-lane classes: {classes}")
+                  result = r.get('o')
+                  if not isinstance(result, str) or not result_rx.match(result):
+                      raise SystemExit(f"AUDIT FAIL · {day} R{r.get('r')} invalid trifecta: {result}")
+                  lanes = result.split('-')
+                  if len(set(lanes)) != 3:
+                      raise SystemExit(f"AUDIT FAIL · {day} R{r.get('r')} duplicate lane in trifecta: {result}")
+                  payout = r.get('p')
+                  if not isinstance(payout, int) or payout <= 0:
+                      raise SystemExit(f"AUDIT FAIL · {day} R{r.get('r')} invalid payout: {payout}")
+                  if not isinstance(r.get('t'), str) or not r.get('t').strip():
+                      raise SystemExit(f"AUDIT FAIL · {day} R{r.get('r')} missing race type")
+              print(f'DAY PASS · GAMAGORI · {day} · 12/12')
+
+          sample_rows = [r for r in rows if r.get('d') in expected_days]
+          if len(sample_rows) != 48:
+              raise SystemExit(f'AUDIT FAIL · expected 48 sample races, got {len(sample_rows)}')
+
+          race_types = sorted({r['t'] for r in sample_rows})
+          print('MULTI-DAY STRUCTURE PASS · GAMAGORI · 4 days · 48/48')
+          print('YEARS PASS · 2023 / 2024 / 2025')
+          print('RACE TYPES · ' + ' / '.join(race_types))
+          PY
+
+      - name: Upload multi-day audit output
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: program-history-multiday-audit-v121
+          path: audit/out/history/07/*.json
+          if-no-files-found: error
+          retention-days: 1
