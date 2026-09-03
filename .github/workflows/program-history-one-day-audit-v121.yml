@@ -1,0 +1,135 @@
+name: PROGRAM HISTORY one-day official audit v1.2.1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Builder self-test
+        run: |
+          set -euo pipefail
+          test -f program-history-builder-v121.py
+          echo "BUILDER · $(wc -l < program-history-builder-v121.py) lines"
+          sha256sum program-history-builder-v121.py
+          python3 program-history-builder-v121.py --self-test
+
+      - name: Install LZH extractor
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+          command -v lha
+
+      - name: Download exactly one official B/K day
+        env:
+          DAY: "20251215"
+        run: |
+          set -euo pipefail
+          mkdir -p audit/input audit/B audit/K audit/out
+
+          YYYYMM="${DAY:0:6}"
+          YYMMDD="${DAY:2:6}"
+          BFILE="b${YYMMDD}.lzh"
+          KFILE="k${YYMMDD}.lzh"
+
+          fetch_one() {
+            kind="$1"
+            file="$2"
+            lower_kind="$(printf '%s' "$kind" | tr '[:upper:]' '[:lower:]')"
+            https_url="https://www1.mbrace.or.jp/od2/${kind}/${YYYYMM}/${file}"
+            http_url="http://www1.mbrace.or.jp/od2/${kind}/${YYYYMM}/${file}"
+
+            echo "FETCH ${kind} · ${YYYYMM}/${file}"
+            if ! curl --fail --location --silent --show-error \
+              --connect-timeout 15 --max-time 60 \
+              --user-agent 'BOAT-COMMAND-HISTORY-AUDIT/1.0' \
+              "$https_url" -o "audit/input/${file}"; then
+              echo "HTTPS failed; trying official HTTP endpoint once."
+              curl --fail --location --silent --show-error \
+                --connect-timeout 15 --max-time 60 \
+                --user-agent 'BOAT-COMMAND-HISTORY-AUDIT/1.0' \
+                "$http_url" -o "audit/input/${file}"
+            fi
+
+            test -s "audit/input/${file}"
+            bytes="$(wc -c < "audit/input/${file}")"
+            echo "DOWNLOADED ${kind} · ${bytes} bytes"
+            sha256sum "audit/input/${file}"
+          }
+
+          fetch_one B "$BFILE"
+          sleep 3
+          fetch_one K "$KFILE"
+
+      - name: Extract B/K archives
+        env:
+          DAY: "20251215"
+        run: |
+          set -euo pipefail
+          YYMMDD="${DAY:2:6}"
+          BFILE="b${YYMMDD}.lzh"
+          KFILE="k${YYMMDD}.lzh"
+
+          (cd audit/B && lha -x "../input/${BFILE}")
+          (cd audit/K && lha -x "../input/${KFILE}")
+
+          echo "B extracted:"
+          find audit/B -maxdepth 1 -type f -printf '%f · %s bytes\n'
+          echo "K extracted:"
+          find audit/K -maxdepth 1 -type f -printf '%f · %s bytes\n'
+
+          test "$(find audit/B -maxdepth 1 -type f | wc -l)" -ge 1
+          test "$(find audit/K -maxdepth 1 -type f | wc -l)" -ge 1
+
+      - name: Convert Gamagori and exact-match official 12R fixture
+        run: |
+          set -euo pipefail
+          python3 program-history-builder-v121.py \
+            --b-dir audit/B \
+            --k-dir audit/K \
+            --out audit/out/history \
+            --venue 07 \
+            --official-audit-20251215
+
+      - name: Fail-closed output audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('audit/out/history/07/2025.json')
+          if not path.exists():
+              raise SystemExit('AUDIT FAIL · history/07/2025.json missing')
+
+          data = json.loads(path.read_text(encoding='utf-8'))
+          rows = [r for r in data.get('races', []) if r.get('d') == '2025-12-15']
+          if len(rows) != 12:
+              raise SystemExit(f'AUDIT FAIL · expected 12 races, got {len(rows)}')
+          if [r.get('r') for r in rows] != list(range(1, 13)):
+              raise SystemExit('AUDIT FAIL · race numbers are not exactly 1..12')
+          if any(len(r.get('c', [])) != 6 for r in rows):
+              raise SystemExit('AUDIT FAIL · six-lane class layout missing')
+
+          print('OFFICIAL ONE-DAY AUDIT PASS · GAMAGORI · 2025-12-15 · 12/12')
+          print(f'OUTPUT · {path} · {path.stat().st_size} bytes')
+          PY
+
+      - name: Upload audit output
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: program-history-audit-20251215
+          path: audit/out/history/07/2025.json
+          if-no-files-found: error
+          retention-days: 1
