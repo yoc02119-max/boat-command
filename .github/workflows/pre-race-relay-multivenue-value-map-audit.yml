@@ -1,0 +1,196 @@
+name: PRE-RACE multi-venue value-map audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      venue:
+        description: 'Audit venue only'
+        required: true
+        type: choice
+        options:
+          - wakamatsu
+          - shimonoseki
+          - gamagori
+      date:
+        description: 'YYYY-MM-DD'
+        required: true
+        type: string
+      race:
+        description: '1-12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch PRE-RACE only and write audit JSON
+        env:
+          VENUE: ${{ inputs.venue }}
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          case "$VENUE" in
+            gamagori) CODE=07; RELAY=GAMAGORI ;;
+            wakamatsu) CODE=20; RELAY=WAKAMATSU ;;
+            shimonoseki) CODE=19; RELAY=SHIMONOSEKI ;;
+            *) echo 'INVALID_VENUE'; exit 2 ;;
+          esac
+          # Normalize iPad/browser text input before validating.
+          # NFKC handles full-width digits; slash and common Unicode dashes are accepted then normalized.
+          DATE_NORM=$(python3 - <<'PYDATE'
+          import os, unicodedata, datetime
+          s=unicodedata.normalize('NFKC', os.environ.get('DATE','')).strip()
+          for ch in ('/', '‐', '‑', '‒', '–', '—', '−'):
+              s=s.replace(ch, '-')
+          try:
+              datetime.date.fromisoformat(s)
+          except ValueError:
+              print('')
+          else:
+              print(s)
+          PYDATE
+          )
+          [[ -n "$DATE_NORM" ]] || { echo "INVALID_DATE raw=[$DATE]"; exit 2; }
+          DATE="$DATE_NORM"
+
+          RACE_NORM=$(python3 - <<'PYRACE'
+          import os, unicodedata
+          s=unicodedata.normalize('NFKC', os.environ.get('RACE','')).strip()
+          print(s if s.isdigit() and 1 <= int(s) <= 12 else '')
+          PYRACE
+          )
+          [[ -n "$RACE_NORM" ]] || { echo "INVALID_RACE raw=[$RACE]"; exit 2; }
+          RACE="$RACE_NORM"
+          export DATE RACE
+          echo "NORMALIZED_INPUT venue=$VENUE date=$DATE race=$RACE"
+          HD="${DATE//-/}"
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=$RACE"
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          mkdir -p tmp_probe "live/$VENUE/$DATE/pre"
+          fetch() {
+            local url="$1" out="$2"
+            local code
+            code=$(curl --silent --show-error --location --max-time 15 --retry 0 \
+              --user-agent 'BOAT-COMMAND-PRE-RACE-VALUE-MAP-AUDIT/0.18.3' \
+              --output "$out" --write-out '%{http_code}' "$url" || true)
+            echo "${code:-000}"
+          }
+          RL_HTTP=$(fetch "$RACELIST" tmp_probe/racelist.bin)
+          BI_HTTP=$(fetch "$BEFOREINFO" tmp_probe/beforeinfo.bin)
+          export CODE RELAY RACELIST BEFOREINFO RL_HTTP BI_HTTP
+          python3 - <<'PY'
+          import os,re,json,datetime,pathlib,html
+          from html.parser import HTMLParser
+          from zoneinfo import ZoneInfo
+          date=os.environ['DATE']; race=int(os.environ['RACE']); venue=os.environ['VENUE']
+          def decode(path):
+              b=pathlib.Path(path).read_bytes() if pathlib.Path(path).exists() else b''
+              for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+                  try: return b.decode(enc),enc,len(b)
+                  except UnicodeDecodeError: pass
+              return b.decode('utf-8','replace'),'unknown',len(b)
+          rl,rl_enc,rl_bytes=decode('tmp_probe/racelist.bin')
+          bi,bi_enc,bi_bytes=decode('tmp_probe/beforeinfo.bin')
+          def score(text,markers): return sum(1 for m in markers if m in text)
+          rl_score=score(rl,['出走表','ボートレーサー','全国','当地','モーター'])
+          bi_score=score(bi,['直前情報','展示タイム','スタート展示','水面気象情報'])
+          rl_http=int(os.environ.get('RL_HTTP') or 0); bi_http=int(os.environ.get('BI_HTTP') or 0)
+          rl_ok=rl_http==200 and rl_score>=2
+          bi_ok=bi_http==200 and bi_score>=2
+          def err(http,ok):
+              if ok:return None
+              if http==404:return 'HTTP_404'
+              if http!=200:return f'HTTP_{http}'
+              return 'UNEXPECTED_PRE_RACE_FORMAT'
+          # Deadline is schedule metadata only; never inspect result endpoints.
+          plain=re.sub(r'<[^>]+>',' ',rl+' '+bi)
+          times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)
+          deadline=times[race-1] if len(times)>=12 else (times[0] if times else None)
+          now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+
+          # Value-map audit: keep complete rows only from PRE-RACE tables whose headers
+          # contain known pre-race labels. This is still audit-only: no result endpoint,
+          # prediction generation, or HARD LOCK exists in this workflow.
+          class TableParser(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.in_cell=False; self.cell=[]; self.row=[]; self.table=[]; self.tables=[]; self.depth=0
+              def handle_starttag(self,tag,attrs):
+                  if tag=='table':
+                      if self.depth==0: self.table=[]
+                      self.depth+=1
+                  elif tag in ('td','th') and self.depth:
+                      self.in_cell=True; self.cell=[]
+                  elif tag=='tr' and self.depth:
+                      self.row=[]
+                  elif tag=='br' and self.in_cell:
+                      self.cell.append(' / ')
+              def handle_data(self,data):
+                  if self.in_cell: self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ('td','th') and self.in_cell:
+                      t=re.sub(r'\s+',' ',html.unescape(''.join(self.cell))).strip()
+                      self.row.append(t); self.in_cell=False; self.cell=[]
+                  elif tag=='tr' and self.depth and self.row:
+                      if any(x for x in self.row): self.table.append(self.row)
+                      self.row=[]
+                  elif tag=='table' and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:
+                          self.tables.append(self.table); self.table=[]
+
+          def relevant_tables(text, keywords, max_tables=8, max_rows=40, max_cells=32):
+              p=TableParser(); p.feed(text); out=[]
+              for idx,t in enumerate(p.tables):
+                  joined=' '.join(' '.join(r) for r in t[:12])
+                  hits=[k for k in keywords if k in joined]
+                  if not hits: continue
+                  rows=[]
+                  for r in t[:max_rows]:
+                      rows.append([re.sub(r'\s+',' ',x).strip()[:180] for x in r[:max_cells]])
+                  out.append({'tableIndex':idx,'matchedKeywords':hits,'rowCount':len(t),'rows':rows})
+                  if len(out)>=max_tables: break
+              return out
+
+          rl_tables=relevant_tables(rl,['艇番','登録番号','級別','全国','当地','モーター','ボート','選手','レーサー','平均ST','勝率'])
+          bi_tables=relevant_tables(bi,['展示タイム','スタート展示','体重','チルト','プロペラ','部品交換','前走成績','天候','風向','風速','波高','気温','水温'])
+
+          # Candidate integrity signals only. They do not enable prediction.
+          def table_shape(tables):
+              return [{'tableIndex':t['tableIndex'],'rowCount':t['rowCount'],'matchedKeywords':t['matchedKeywords']} for t in tables]
+          value_map={
+            'racelistTables':rl_tables,
+            'beforeinfoTables':bi_tables,
+            'racelistTableShapes':table_shape(rl_tables),
+            'beforeinfoTableShapes':table_shape(bi_tables),
+            'boatMappingVerified':False,
+            'readyForPrediction':False,
+            'note':'Audit rows only. Boat-to-value mapping must be verified before prediction use.'
+          }
+          obj={
+            'schema':'boat-command-pre-race-value-map-audit-v1','venue':os.environ['RELAY'],'venueCode':os.environ['CODE'],
+            'date':date,'race':race,'fetchedAt':now.isoformat(),'fetchedAtJST':now.strftime('%H:%M:%S'),'deadline':deadline,
+            'racelist':{'ok':rl_ok,'httpStatus':rl_http,'bytes':rl_bytes,'sourceUrl':os.environ['RACELIST'],'detectedEncoding':rl_enc,'markerScore':rl_score,'error':err(rl_http,rl_ok)},
+            'beforeinfo':{'ok':bi_ok,'httpStatus':bi_http,'bytes':bi_bytes,'sourceUrl':os.environ['BEFOREINFO'],'detectedEncoding':bi_enc,'markerScore':bi_score,'error':err(bi_http,bi_ok)},
+            'valueMapAudit':value_map,
+            'safety':{'resultEndpointsIncluded':False,'predictionEnabled':False,'hardLockEnabled':False}
+          }
+          out=pathlib.Path(f'live/{venue}/{date}/pre/race-{race}.json')
+          out.write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(out); print(json.dumps(obj,ensure_ascii=False,indent=2))
+          PY
+          rm -rf tmp_probe
+      - name: Commit audit JSON
+        run: |
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add live/
+          git diff --cached --quiet && exit 0
+          git commit -m "relay: ${{ inputs.venue }} ${{ inputs.date }} ${{ inputs.race }}R value-map audit"
+          git push
