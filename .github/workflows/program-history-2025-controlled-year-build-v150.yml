@@ -1,0 +1,334 @@
+name: PROGRAM HISTORY 2025 controlled year build v1.5.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_delay_seconds:
+        description: "Delay after each B/K request. Keep >= 8."
+        required: true
+        default: "10"
+      chunk_pause_seconds:
+        description: "Extra pause after each 8 scheduled dates. Keep >= 15."
+        required: true
+        default: "20"
+
+permissions:
+  contents: read
+
+jobs:
+  controlled_year_build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify manifest builder and pacing
+        shell: bash
+        env:
+          REQUEST_DELAY: ${{ inputs.request_delay_seconds }}
+          CHUNK_PAUSE: ${{ inputs.chunk_pause_seconds }}
+        run: |
+          set -euo pipefail
+          test -f gamagori-2025-schedule-manifest.json
+          test -f program-history-builder-v121.py
+
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          rd=int(os.environ["REQUEST_DELAY"])
+          cp=int(os.environ["CHUNK_PAUSE"])
+          if rd < 8:
+              raise SystemExit("SAFETY FAIL · request delay must be >= 8 seconds")
+          if cp < 15:
+              raise SystemExit("SAFETY FAIL · chunk pause must be >= 15 seconds")
+
+          m=json.loads(Path("gamagori-2025-schedule-manifest.json").read_text(encoding="utf-8"))
+          dates=m.get("dates",[])
+          if m.get("schema")!="boat-command-program-history-manifest-v1":
+              raise SystemExit("MANIFEST FAIL · schema")
+          if m.get("venue",{}).get("code")!="07" or m.get("year")!=2025:
+              raise SystemExit("MANIFEST FAIL · venue/year")
+          if len(dates)!=199 or len(dates)!=len(set(dates)):
+              raise SystemExit(f"MANIFEST FAIL · expected 199 unique dates, got {len(dates)}")
+          if any(not d.startswith("2025-") for d in dates):
+              raise SystemExit("MANIFEST FAIL · out-of-year date")
+
+          print(f"MANIFEST PASS · GAMAGORI · scheduled_dates={len(dates)}")
+          print(f"PACING PASS · request_delay={rd}s · chunk_pause={cp}s · max_parallel=1")
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("program-history-builder-v121.py").read_text(encoding="utf-8")
+          n=len(s.splitlines())
+          if "PROGRAM-HISTORY-BUILDER-V1.2.1" not in s or n < 350:
+              raise SystemExit("BUILDER FAIL · wrong identity")
+          print(f"BUILDER PASS · V1.2.1 · lines={n}")
+          PY
+          python3 program-history-builder-v121.py --self-test
+
+      - name: Install LZH extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Process 199 scheduled dates sequentially
+        shell: bash
+        env:
+          REQUEST_DELAY: ${{ inputs.request_delay_seconds }}
+          CHUNK_PAUSE: ${{ inputs.chunk_pause_seconds }}
+        run: |
+          set -euo pipefail
+          rm -rf yearwork
+          mkdir -p yearwork/days yearwork/report
+
+          python3 - <<'PY' > yearwork/dates.txt
+          import json
+          from pathlib import Path
+          m=json.loads(Path("gamagori-2025-schedule-manifest.json").read_text(encoding="utf-8"))
+          print("\n".join(m["dates"]))
+          PY
+
+          : > yearwork/report/complete.txt
+          : > yearwork/report/missing-both.txt
+          : > yearwork/report/unpaired.txt
+          : > yearwork/report/invalid-day.txt
+
+          i=0
+          while IFS= read -r d; do
+            i=$((i+1))
+            ymd="${d//-/}"
+            yyyy="${ymd:0:4}"
+            mm="${ymd:4:2}"
+            yy="${ymd:2:2}"
+            dd="${ymd:6:2}"
+            ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"
+            k="k${yy}${mm}${dd}.lzh"
+
+            echo ""
+            echo "===== DATE ${i}/199 · ${d} ====="
+
+            rm -rf yearwork/one
+            mkdir -p yearwork/one/raw yearwork/one/b yearwork/one/k yearwork/one/out
+
+            bcode="$(curl --silent --show-error --location \
+              --connect-timeout 20 --max-time 60 \
+              --output "yearwork/one/raw/${b}" \
+              --write-out '%{http_code}' \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" || true)"
+            echo "B HTTP · ${bcode}"
+            sleep "${REQUEST_DELAY}"
+
+            kcode="$(curl --silent --show-error --location \
+              --connect-timeout 20 --max-time 60 \
+              --output "yearwork/one/raw/${k}" \
+              --write-out '%{http_code}' \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" || true)"
+            echo "K HTTP · ${kcode}"
+            sleep "${REQUEST_DELAY}"
+
+            if [[ "${bcode}" != "200" && "${kcode}" != "200" ]]; then
+              echo "${d} B=${bcode} K=${kcode}" >> yearwork/report/missing-both.txt
+              echo "DATE STATUS · MISSING_BOTH · ${d}"
+            elif [[ "${bcode}" != "200" || "${kcode}" != "200" ]]; then
+              echo "${d} B=${bcode} K=${kcode}" >> yearwork/report/unpaired.txt
+              echo "DATE STATUS · UNPAIRED · ${d}"
+            else
+              if ! test -s "yearwork/one/raw/${b}" || ! test -s "yearwork/one/raw/${k}"; then
+                echo "${d} EMPTY_ARCHIVE" >> yearwork/report/invalid-day.txt
+                echo "DATE STATUS · INVALID_ARCHIVE · ${d}"
+              elif ! lha xw=yearwork/one/b "yearwork/one/raw/${b}" >/dev/null 2>&1; then
+                echo "${d} B_EXTRACT_FAIL" >> yearwork/report/invalid-day.txt
+                echo "DATE STATUS · B_EXTRACT_FAIL · ${d}"
+              elif ! lha xw=yearwork/one/k "yearwork/one/raw/${k}" >/dev/null 2>&1; then
+                echo "${d} K_EXTRACT_FAIL" >> yearwork/report/invalid-day.txt
+                echo "DATE STATUS · K_EXTRACT_FAIL · ${d}"
+              elif ! python3 program-history-builder-v121.py \
+                    --b-dir yearwork/one/b \
+                    --k-dir yearwork/one/k \
+                    --out yearwork/one/out \
+                    --venue 07 >/tmp/builder-one.log 2>&1; then
+                cat /tmp/builder-one.log
+                echo "${d} BUILDER_FAIL" >> yearwork/report/invalid-day.txt
+                echo "DATE STATUS · BUILDER_FAIL · ${d}"
+              else
+                if python3 - "${d}" <<'PY'
+          import json, sys
+          from pathlib import Path
+          d=sys.argv[1]
+          p=Path("yearwork/one/out/07/2025.json")
+          if not p.exists():
+              raise SystemExit(1)
+          x=json.loads(p.read_text(encoding="utf-8"))
+          rows=x.get("races",[])
+          day=[r for r in rows if r.get("d")==d]
+          if len(day)!=12:
+              raise SystemExit(2)
+          if sorted(int(r["r"]) for r in day)!=list(range(1,13)):
+              raise SystemExit(3)
+          if any(len(r.get("c",[]))!=6 for r in day):
+              raise SystemExit(4)
+          ids=[r.get("id") for r in day]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit(5)
+          out={
+            "schema":x.get("schema"),
+            "builder":x.get("builder"),
+            "venueCode":x.get("venueCode"),
+            "year":x.get("year"),
+            "races":day
+          }
+          Path(f"yearwork/days/{d}.json").write_text(
+              json.dumps(out,ensure_ascii=False,separators=(",",":")),
+              encoding="utf-8"
+          )
+          print(f"DAY PASS · {d} · 12/12")
+          PY
+                then
+                  echo "${d}" >> yearwork/report/complete.txt
+                else
+                  echo "${d} NOT_12R_COMPLETE" >> yearwork/report/invalid-day.txt
+                  echo "DATE STATUS · INVALID_DAY · ${d}"
+                fi
+              fi
+            fi
+
+            if (( i % 8 == 0 )); then
+              echo "CHUNK PAUSE · processed=${i}/199 · ${CHUNK_PAUSE}s"
+              sleep "${CHUNK_PAUSE}"
+            fi
+          done < yearwork/dates.txt
+
+          echo "SEQUENTIAL PASS · all 199 scheduled dates attempted once"
+
+      - name: Merge complete days and produce audit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifact
+
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          manifest=json.loads(Path("gamagori-2025-schedule-manifest.json").read_text(encoding="utf-8"))
+          scheduled=manifest["dates"]
+
+          def lines(name):
+              p=Path("yearwork/report")/name
+              return [x.strip() for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+          complete=lines("complete.txt")
+          missing=lines("missing-both.txt")
+          unpaired=lines("unpaired.txt")
+          invalid=lines("invalid-day.txt")
+
+          rows=[]
+          for p in sorted(Path("yearwork/days").glob("*.json")):
+              x=json.loads(p.read_text(encoding="utf-8"))
+              rows.extend(x["races"])
+
+          ids=[r["id"] for r in rows]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit("MERGE FAIL · duplicate race id")
+          if any(r.get("d") not in scheduled for r in rows):
+              raise SystemExit("MERGE FAIL · unexpected date")
+          by=Counter(r["d"] for r in rows)
+          if any(n!=12 for n in by.values()):
+              raise SystemExit("MERGE FAIL · non-12R complete day")
+
+          # Known regression anchor must survive the full-year merge if the day completed.
+          if "2025-12-15" in by:
+              gold={
+                1:("1-2-3",880),2:("1-4-2",4430),3:("3-1-4",21970),
+                4:("1-2-4",920),5:("1-3-2",500),6:("1-5-2",1090),
+                7:("1-3-2",1030),8:("1-6-4",2750),9:("1-4-3",1560),
+                10:("1-2-6",2010),11:("1-2-3",600),12:("1-2-4",1060)
+              }
+              got={int(r["r"]):(r["o"],r["p"]) for r in rows if r["d"]=="2025-12-15"}
+              if got!=gold:
+                  raise SystemExit("MERGE FAIL · Golden regression")
+              print("GOLDEN REGRESSION PASS · 2025-12-15 · 12/12")
+
+          shard={
+            "schema":"boat-command-program-history-v1",
+            "builder":"PROGRAM-HISTORY-BUILDER-V1.2.1",
+            "venueCode":"07",
+            "year":2025,
+            "races":sorted(rows,key=lambda r:(r["d"],int(r["r"])))
+          }
+          Path("artifact/gamagori-2025.json").write_text(
+              json.dumps(shard,ensure_ascii=False,separators=(",",":")),
+              encoding="utf-8"
+          )
+
+          report={
+            "schema":"boat-command-program-history-year-audit-v1",
+            "venueCode":"07",
+            "year":2025,
+            "scheduled_dates":len(scheduled),
+            "complete_dates":len(complete),
+            "complete_races":len(rows),
+            "missing_both":missing,
+            "unpaired":unpaired,
+            "invalid_days":invalid,
+            "ready_for_program_history": not (missing or unpaired or invalid) and len(complete)==len(scheduled),
+            "policy":"Fail closed: only exact 12R complete days enter the shard; missing/partial days are never guessed."
+          }
+          Path("artifact/gamagori-2025-audit-report.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),
+              encoding="utf-8"
+          )
+
+          print(f"YEAR BUILD · scheduled={len(scheduled)} · complete={len(complete)} · races={len(rows)}")
+          print(f"EXCEPTIONS · missing_both={len(missing)} · unpaired={len(unpaired)} · invalid={len(invalid)}")
+          print("READY FOR PROGRAM HISTORY ·", report["ready_for_program_history"])
+          print("YEAR JSON BYTES ·", Path("artifact/gamagori-2025.json").stat().st_size)
+          PY
+
+      - name: Verify compact artifacts only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s artifact/gamagori-2025.json
+          test -s artifact/gamagori-2025-audit-report.json
+          if find artifact -type f ! -name '*.json' | grep -q .; then
+            echo "OUTPUT FAIL · non-JSON artifact"
+            exit 1
+          fi
+          echo "OUTPUT PASS · compact JSON only · raw B/K excluded"
+
+      - name: Upload controlled year-build output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-controlled-year-build
+          path: artifact/*.json
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Final fail-closed readiness gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("artifact/gamagori-2025-audit-report.json")
+          if not p.exists():
+              raise SystemExit("FINAL FAIL · no audit report")
+          r=json.loads(p.read_text(encoding="utf-8"))
+          if not r.get("ready_for_program_history"):
+              raise SystemExit(
+                  "FINAL HOLD · year shard has schedule exceptions. "
+                  "Artifact was uploaded for bounded review; do not deploy it yet."
+              )
+          print("FINAL PASS · 2025 year shard ready for PROGRAM HISTORY")
+          PY
