@@ -1,0 +1,230 @@
+name: PROGRAM HISTORY 2025 chunk build v1.4.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_index:
+        description: "0-based index into gamagori-2025-schedule-manifest.json"
+        required: true
+        default: "0"
+      count:
+        description: "Number of scheduled dates to process (max 8)"
+        required: true
+        default: "6"
+
+permissions:
+  contents: read
+
+jobs:
+  build_chunk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify inputs, manifest and builder
+        id: plan
+        env:
+          START_INDEX: ${{ inputs.start_index }}
+          COUNT: ${{ inputs.count }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f gamagori-2025-schedule-manifest.json
+          test -f program-history-builder-v121.py
+
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          start=int(os.environ["START_INDEX"])
+          count=int(os.environ["COUNT"])
+          if start < 0:
+              raise SystemExit("PLAN FAIL · start_index must be >= 0")
+          if count < 1 or count > 8:
+              raise SystemExit("PLAN FAIL · count must be 1..8")
+
+          m=json.loads(Path("gamagori-2025-schedule-manifest.json").read_text(encoding="utf-8"))
+          if m.get("schema")!="boat-command-program-history-manifest-v1":
+              raise SystemExit("PLAN FAIL · manifest schema")
+          if m.get("venue",{}).get("code")!="07" or m.get("year")!=2025:
+              raise SystemExit("PLAN FAIL · manifest venue/year")
+
+          dates=m.get("dates",[])
+          if len(dates)!=199:
+              raise SystemExit(f"PLAN FAIL · expected 199 scheduled dates, got {len(dates)}")
+          if len(dates)!=len(set(dates)):
+              raise SystemExit("PLAN FAIL · duplicate manifest dates")
+
+          selected=dates[start:start+count]
+          if not selected:
+              raise SystemExit("PLAN FAIL · selection empty")
+          if len(selected)!=count:
+              raise SystemExit(f"PLAN FAIL · requested {count}, only {len(selected)} remain")
+
+          print("MANIFEST PASS · dates=199")
+          print(f"CHUNK PLAN · start={start} · count={count}")
+          for i,d in enumerate(selected,start):
+              print(f"  [{i}] {d}")
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write("dates=" + ",".join(selected) + "\n")
+              f.write("start=" + str(start) + "\n")
+              f.write("count=" + str(count) + "\n")
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("program-history-builder-v121.py").read_text(encoding="utf-8")
+          n=len(s.splitlines())
+          if "PROGRAM-HISTORY-BUILDER-V1.2.1" not in s or n < 350:
+              raise SystemExit("BUILDER FAIL · wrong identity")
+          print(f"BUILDER PASS · V1.2.1 · lines={n}")
+          PY
+          python3 program-history-builder-v121.py --self-test
+
+      - name: Install LZH extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Download selected official B/K dates only
+        env:
+          DATES: ${{ steps.plan.outputs.dates }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit/raw audit/b audit/k
+          IFS=',' read -ra DS <<< "$DATES"
+
+          for d in "${DS[@]}"; do
+            ymd="${d//-/}"
+            yyyy="${ymd:0:4}"
+            mm="${ymd:4:2}"
+            yy="${ymd:2:2}"
+            dd="${ymd:6:2}"
+            ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"
+            k="k${yy}${mm}${dd}.lzh"
+
+            echo "FETCH · $d · B"
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-delay 3 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" \
+              -o "audit/raw/${b}"
+
+            sleep 3
+
+            echo "FETCH · $d · K"
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-delay 3 \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" \
+              -o "audit/raw/${k}"
+
+            test -s "audit/raw/${b}"
+            test -s "audit/raw/${k}"
+
+            lha xw=audit/b "audit/raw/${b}" >/dev/null
+            lha xw=audit/k "audit/raw/${k}" >/dev/null
+
+            sleep 3
+          done
+
+          echo "DOWNLOAD PASS · pairs=${#DS[@]}"
+
+      - name: Build chunk shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf audit/out
+          python3 program-history-builder-v121.py \
+            --b-dir audit/b \
+            --k-dir audit/k \
+            --out audit/out \
+            --venue 07
+          test -s audit/out/07/2025.json
+
+      - name: Fail-closed chunk audit
+        env:
+          DATES: ${{ steps.plan.outputs.dates }}
+          START: ${{ steps.plan.outputs.start }}
+          COUNT: ${{ steps.plan.outputs.count }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          from collections import Counter
+          from pathlib import Path
+
+          p=Path("audit/out/07/2025.json")
+          x=json.loads(p.read_text(encoding="utf-8"))
+          expected=os.environ["DATES"].split(",")
+          rows=x.get("races",[])
+
+          if x.get("schema")!="boat-command-program-history-v1":
+              raise SystemExit("AUDIT FAIL · schema")
+          if x.get("builder")!="PROGRAM-HISTORY-BUILDER-V1.2.1":
+              raise SystemExit("AUDIT FAIL · builder")
+          if x.get("venueCode")!="07" or x.get("year")!=2025:
+              raise SystemExit("AUDIT FAIL · venue/year")
+
+          ids=[r.get("id") for r in rows]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit("AUDIT FAIL · duplicate race id")
+
+          by=Counter(r.get("d") for r in rows)
+          extra=sorted(set(by)-set(expected))
+          if extra:
+              raise SystemExit("AUDIT FAIL · unexpected dates: "+",".join(extra))
+
+          for d in expected:
+              n=by.get(d,0)
+              if n!=12:
+                  raise SystemExit(f"AUDIT FAIL · incomplete scheduled day {d} · {n}/12")
+              rs=sorted(int(r["r"]) for r in rows if r["d"]==d)
+              if rs!=list(range(1,13)):
+                  raise SystemExit(f"AUDIT FAIL · race set {d}: {rs}")
+
+          for r in rows:
+              if len(r.get("c",[]))!=6 or any(v not in {"A1","A2","B1","B2"} for v in r["c"]):
+                  raise SystemExit("AUDIT FAIL · class vector")
+              o=str(r.get("o",""))
+              parts=o.split("-")
+              if len(parts)!=3 or any(z not in "123456" for z in parts) or len(set(parts))!=3:
+                  raise SystemExit("AUDIT FAIL · trifecta")
+              if not isinstance(r.get("p"),int) or r["p"]<=0:
+                  raise SystemExit("AUDIT FAIL · payout")
+
+          if len(rows)!=len(expected)*12:
+              raise SystemExit("AUDIT FAIL · total race count")
+
+          print(f"CHUNK PASS · GAMAGORI 2025 · start={os.environ['START']} · dates={len(expected)} · races={len(rows)}")
+          print("DATES ·", ",".join(expected))
+          print("JSON BYTES ·", p.stat().st_size)
+          PY
+
+      - name: Stage compact chunk only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifact
+          cp audit/out/07/2025.json \
+            "artifact/gamagori-2025-chunk-${{ steps.plan.outputs.start }}-${{ steps.plan.outputs.count }}.json"
+          if find artifact -type f ! -name '*.json' | grep -q .; then
+            echo "OUTPUT FAIL · non-JSON artifact"
+            exit 1
+          fi
+          echo "OUTPUT PASS · compact JSON only"
+
+      - name: Upload compact chunk
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-chunk-${{ steps.plan.outputs.start }}-${{ steps.plan.outputs.count }}
+          path: artifact/*.json
+          if-no-files-found: error
+          retention-days: 1
