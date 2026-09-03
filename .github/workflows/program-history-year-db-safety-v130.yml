@@ -1,0 +1,234 @@
+name: PROGRAM HISTORY year-db safety audit v1.3.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      dates:
+        description: "Comma-separated Gamagori dates (YYYY-MM-DD). Safety pilot only; max 12."
+        required: false
+        default: "2025-05-15,2025-12-15"
+
+permissions:
+  contents: read
+
+jobs:
+  year_db_safety_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify exact builder identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f program-history-builder-v121.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("program-history-builder-v121.py")
+          s=p.read_text(encoding="utf-8")
+          n=len(s.splitlines())
+          print("BUILDER FILE", p, "LINES", n)
+          if "PROGRAM-HISTORY-BUILDER-V1.2.1" not in s:
+              raise SystemExit("WRONG BUILDER VERSION")
+          if n < 350:
+              raise SystemExit("WRONG BUILDER LENGTH")
+          print("BUILDER ID PASS · V1.2.1")
+          PY
+          python3 program-history-builder-v121.py --self-test
+
+      - name: Validate date manifest fail-closed
+        id: manifest
+        env:
+          INPUT_DATES: ${{ inputs.dates }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, re
+          from datetime import date
+          raw=os.environ["INPUT_DATES"]
+          xs=[x.strip() for x in raw.split(",") if x.strip()]
+          if not xs:
+              raise SystemExit("MANIFEST FAIL · no dates")
+          if len(xs)>12:
+              raise SystemExit("MANIFEST FAIL · pilot limit is 12 dates")
+          if len(xs)!=len(set(xs)):
+              raise SystemExit("MANIFEST FAIL · duplicate date")
+          out=[]
+          for s in xs:
+              if not re.fullmatch(r"2025-\d{2}-\d{2}", s):
+                  raise SystemExit(f"MANIFEST FAIL · target must be 2025 only: {s}")
+              d=date.fromisoformat(s)
+              if d >= date(2026,9,4):
+                  raise SystemExit(f"MANIFEST FAIL · future/non-historical date: {s}")
+              out.append(s)
+          print("MANIFEST PASS ·", len(out), "date(s) ·", ",".join(out))
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write("dates=" + ",".join(out) + "\n")
+          PY
+
+      - name: Install LZH extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Download only manifest B/K days
+        env:
+          DATES: ${{ steps.manifest.outputs.dates }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit/raw audit/b audit/k
+          IFS=',' read -ra DS <<< "$DATES"
+          for d in "${DS[@]}"; do
+            ymd="${d//-/}"
+            yyyy="${ymd:0:4}"
+            mm="${ymd:4:2}"
+            yy="${ymd:2:2}"
+            dd="${ymd:6:2}"
+            ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"
+            k="k${yy}${mm}${dd}.lzh"
+            echo "FETCH $d"
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-delay 3 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" \
+              -o "audit/raw/${b}"
+            sleep 3
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-delay 3 \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" \
+              -o "audit/raw/${k}"
+            sleep 3
+            test -s "audit/raw/${b}"
+            test -s "audit/raw/${k}"
+            lha xw=audit/b "audit/raw/${b}" >/dev/null
+            lha xw=audit/k "audit/raw/${k}" >/dev/null
+          done
+          echo "DOWNLOAD PASS · B/K pairs=${#DS[@]}"
+
+      - name: Build 2025 year shard from pilot manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf audit/out
+          python3 program-history-builder-v121.py \
+            --b-dir audit/b \
+            --k-dir audit/k \
+            --out audit/out \
+            --venue 07
+          test -s audit/out/07/2025.json
+
+      - name: Fail-closed year-shard audit
+        env:
+          DATES: ${{ steps.manifest.outputs.dates }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          from collections import Counter
+          from datetime import date, timedelta
+          from pathlib import Path
+
+          p=Path("audit/out/07/2025.json")
+          x=json.loads(p.read_text(encoding="utf-8"))
+          expected_dates=[s for s in os.environ["DATES"].split(",") if s]
+          rows=x.get("races",[])
+
+          if x.get("schema")!="boat-command-program-history-v1":
+              raise SystemExit("AUDIT FAIL · schema")
+          if x.get("builder")!="PROGRAM-HISTORY-BUILDER-V1.2.1":
+              raise SystemExit("AUDIT FAIL · builder")
+          if x.get("venueCode")!="07":
+              raise SystemExit("AUDIT FAIL · venueCode")
+          if x.get("year")!=2025:
+              raise SystemExit("AUDIT FAIL · year")
+          if not rows:
+              raise SystemExit("AUDIT FAIL · zero races")
+
+          ids=[r.get("id") for r in rows]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit("AUDIT FAIL · duplicate race id")
+
+          by_date=Counter(r.get("d") for r in rows)
+          unexpected=sorted(set(by_date)-set(expected_dates))
+          if unexpected:
+              raise SystemExit("AUDIT FAIL · unexpected date(s): "+",".join(unexpected))
+
+          for r in rows:
+              d=r.get("d","")
+              if not d.startswith("2025-"):
+                  raise SystemExit("AUDIT FAIL · out-of-year row "+repr(r))
+              if len(r.get("c",[]))!=6 or any(v not in {"A1","A2","B1","B2"} for v in r["c"]):
+                  raise SystemExit("AUDIT FAIL · class vector "+repr(r))
+              if not (1 <= int(r.get("r",0)) <= 12):
+                  raise SystemExit("AUDIT FAIL · race number "+repr(r))
+              o=str(r.get("o",""))
+              parts=o.split("-")
+              if len(parts)!=3 or any(z not in "123456" for z in parts) or len(set(parts))!=3:
+                  raise SystemExit("AUDIT FAIL · trifecta "+repr(r))
+              if not isinstance(r.get("p"),int) or r["p"]<=0:
+                  raise SystemExit("AUDIT FAIL · payout "+repr(r))
+
+          # Complete-day rule: a requested day is either a complete 12R set or absent.
+          # Never silently accept a partial day into the year shard.
+          complete=[]
+          absent=[]
+          for d in expected_dates:
+              n=by_date.get(d,0)
+              if n==12:
+                  complete.append(d)
+              elif n==0:
+                  absent.append(d)
+              else:
+                  raise SystemExit(f"AUDIT FAIL · partial day {d} · {n}/12")
+          if absent:
+              raise SystemExit("AUDIT FAIL · requested B/K pair produced no Gamagori 12R: "+",".join(absent))
+
+          # Every complete day must contain race numbers exactly 1..12.
+          for d in complete:
+              rs=sorted(int(r["r"]) for r in rows if r["d"]==d)
+              if rs!=list(range(1,13)):
+                  raise SystemExit(f"AUDIT FAIL · race set {d}: {rs}")
+
+          # Known regression anchor remains mandatory whenever 2025-12-15 is requested.
+          if "2025-12-15" in expected_dates:
+              gold={
+                1:("1-2-3",880),2:("1-4-2",4430),3:("3-1-4",21970),
+                4:("1-2-4",920),5:("1-3-2",500),6:("1-5-2",1090),
+                7:("1-3-2",1030),8:("1-6-4",2750),9:("1-4-3",1560),
+                10:("1-2-6",2010),11:("1-2-3",600),12:("1-2-4",1060)
+              }
+              got={int(r["r"]):(r["o"],r["p"]) for r in rows if r["d"]=="2025-12-15"}
+              if got!=gold:
+                  raise SystemExit("AUDIT FAIL · 2025-12-15 regression anchor")
+              print("GOLDEN REGRESSION PASS · 2025-12-15 · 12/12")
+
+          print(f"YEAR-SHARD SAFETY PASS · GAMAGORI · complete_days={len(complete)} · races={len(rows)}")
+          print("DATES ·", ",".join(complete))
+          print("JSON BYTES ·", p.stat().st_size)
+          PY
+
+      - name: Verify no raw B/K files are in output artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f audit/out/07/2025.json
+          if find audit/out -type f ! -name '*.json' | grep -q .; then
+            echo "AUDIT FAIL · non-JSON file in output"
+            exit 1
+          fi
+          echo "OUTPUT PRIVACY PASS · compact JSON only"
+
+      - name: Upload compact safety-audit output
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-year-db-safety-pilot
+          path: audit/out/07/2025.json
+          if-no-files-found: error
+          retention-days: 1
