@@ -1,0 +1,190 @@
+name: PROGRAM HISTORY 2025 OOS threshold compare v1.9.3
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+
+      - name: Compare thresholds with strict chronological OOS
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          rows=sorted(
+              json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))["races"],
+              key=lambda r:(r["d"],r["r"])
+          )
+          assert len(rows)==2381
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lane_weights=[1.35,1.20,1.10,1.00,.95,.90]
+          thresholds=[1.5,2.5,3.5,5.0]
+          decay=.55
+          min_weighted=30.0
+
+          def cv(r):
+              c=r["c"]
+              assert len(c)==6 and all(x in rank for x in c)
+              return tuple(c)
+
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),
+                      sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+
+          def dist(a,b):
+              lane=sum(lane_weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+
+          def winner(r):
+              try: return int(str(r["o"]).split("-")[0])
+              except: return None
+
+          dates=sorted({r["d"] for r in rows})
+          records={th:[] for th in thresholds}
+          baseline_records=[]
+
+          for d in dates:
+              train=[r for r in rows if r["d"] < d]
+              targets=[r for r in rows if r["d"] == d]
+              if not train: continue
+              assert all(r["d"] < d for r in train)
+
+              bc=Counter(winner(r) for r in train if winner(r) in range(1,7))
+              bp=bc.most_common(1)[0][0] if bc else None
+
+              for t in targets:
+                  actual=winner(t)
+                  baseline_records.append((d,bp,actual))
+                  tc=cv(t)
+                  for th in thresholds:
+                      wc=Counter()
+                      wn=0.0
+                      raw=0
+                      for r in train:
+                          dd=dist(tc,cv(r))
+                          if dd<=th:
+                              raw+=1
+                              w=math.exp(-decay*dd)
+                              rw=winner(r)
+                              if rw in range(1,7):
+                                  wc[rw]+=w
+                                  wn+=w
+                      pick=wc.most_common(1)[0][0] if wn>=min_weighted and wc else None
+                      records[th].append((d,pick,actual,raw,wn))
+
+          def score_base(data):
+              e=[x for x in data if x[1] is not None and x[2] is not None]
+              h=sum(x[1]==x[2] for x in e)
+              return {"eligible":len(e),"hits":h,
+                      "accuracyPct":round(100*h/len(e),2) if e else None}
+
+          def score(data):
+              e=[x for x in data if x[1] is not None and x[2] is not None]
+              h=sum(x[1]==x[2] for x in e)
+              return {"eligible":len(e),"hits":h,
+                      "accuracyPct":round(100*h/len(e),2) if e else None,
+                      "coveragePct":round(100*len(e)/len(data),2) if data else None}
+
+          baseline=score_base(baseline_records)
+          results=[]
+          for th in thresholds:
+              data=records[th]
+              overall=score(data)
+              h1=score([x for x in data if x[0] < "2025-07-01"])
+              h2=score([x for x in data if x[0] >= "2025-07-01"])
+              gap=None
+              if h1["accuracyPct"] is not None and h2["accuracyPct"] is not None:
+                  gap=round(abs(h1["accuracyPct"]-h2["accuracyPct"]),2)
+              lift=None
+              if overall["accuracyPct"] is not None and baseline["accuracyPct"] is not None:
+                  lift=round(overall["accuracyPct"]-baseline["accuracyPct"],2)
+              results.append({
+                  "threshold":th,
+                  "overall":overall,
+                  "H1":h1,
+                  "H2":h2,
+                  "halfGapPct":gap,
+                  "liftVsBaselinePct":lift
+              })
+
+          # Diagnostic ranking only. It does NOT enable prediction.
+          # Prefer positive OOS lift, then smaller half-year gap, then coverage.
+          def rk(x):
+              lift=x["liftVsBaselinePct"] if x["liftVsBaselinePct"] is not None else -999
+              gap=x["halfGapPct"] if x["halfGapPct"] is not None else 999
+              cov=x["overall"]["coveragePct"] or 0
+              return (lift, -gap, cov)
+          best=max(results,key=rk)
+
+          out={
+              "schema":"boat-command-oos-threshold-compare-v1",
+              "venueCode":"07","year":2025,"sourceRaceCount":len(rows),
+              "thresholds":thresholds,"minimumWeightedSamples":min_weighted,
+              "strictPastOnly":True,"sameDayTrainingExcluded":True,
+              "distanceUsesResults":False,"distanceUsesPayouts":False,
+              "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+              "baselineLaneWinner":baseline,
+              "thresholdResults":results,
+              "diagnosticBestThreshold":best["threshold"]
+          }
+          Path("out/gamagori-2025-oos-threshold-compare.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("OOS THRESHOLD COMPARE PASS")
+          print("SOURCE RACES",len(rows))
+          print("LEAKAGE CHECK PASS · train date < target date")
+          print("BASELINE",baseline)
+          for x in results:
+              print("THRESHOLD",x["threshold"],
+                    "OVERALL",x["overall"],
+                    "H1",x["H1"],
+                    "H2",x["H2"],
+                    "HALF GAP",x["halfGapPct"],
+                    "LIFT VS BASELINE",x["liftVsBaselinePct"])
+          print("DIAGNOSTIC BEST THRESHOLD",best["threshold"])
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-oos-threshold-compare.json"))
+          assert x["sourceRaceCount"]==2381
+          assert x["thresholds"]==[1.5,2.5,3.5,5.0]
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"]
+          assert x["mode"]=="SHADOW_OBSERVE_ONLY"
+          print("SAFETY PASS · STRICT OOS · NO RESULT/PAYOUT DISTANCE · SHADOW ONLY")
+          PY
+
+      - name: Upload threshold comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-oos-threshold-compare
+          path: out/gamagori-2025-oos-threshold-compare.json
+          retention-days: 7
+          if-no-files-found: error
