@@ -1,4 +1,4 @@
-name: PROGRAM HISTORY 2025 finalize DB v1.8.0
+name: PROGRAM HISTORY 2025 finalize DB v1.8.1
 
 on:
   workflow_dispatch:
@@ -107,11 +107,18 @@ jobs:
               results=B.parse_result_block(kb["07"])
 
               valid=[]
-              for rno in sorted(set(programs)&set(results)):
-                  row=B.make_row(d,"07",rno,programs[rno],results[rno])
-                  if row:
-                      valid.append(row)
-
+for rno in sorted(set(programs)&set(results)):
+    p=programs[rno]
+    result,payout=results[rno]
+    valid.append({
+        "d":d,
+        "r":rno,
+        "c":list(p.classes),
+        "o":result,
+        "p":payout,
+        "t":p.race_type,
+        "id":f"{d}-07-{rno:02d}",
+    })
               patched.extend(valid)
               patch_summary.append({
                   "date":d,
