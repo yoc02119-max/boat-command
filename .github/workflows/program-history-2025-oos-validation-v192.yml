@@ -1,0 +1,200 @@
+name: PROGRAM HISTORY 2025 OOS validation v1.9.2
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+
+      - name: Time-safe out-of-sample validation
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          db=json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))
+          rows=sorted(db["races"],key=lambda r:(r["d"],r["r"]))
+          assert len(rows)==2381
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lane_weights=[1.35,1.20,1.10,1.00,.95,.90]
+          THRESHOLD=5.0
+          DECAY=.55
+          MIN_WEIGHTED=30.0
+
+          def cv(r):
+              c=r["c"]
+              assert len(c)==6 and all(x in rank for x in c)
+              return tuple(c)
+
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (
+                  sum(x=="A1" for x in c),
+                  sum(x in {"A1","A2"} for x in c),
+                  sum(n[:3]),
+                  sum(n[3:])
+              )
+
+          def dist(a,b):
+              lane=sum(lane_weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+
+          def winner(r):
+              try: return int(str(r["o"]).split("-")[0])
+              except: return None
+
+          # Strict chronological OOS:
+          # for target date D, training rows MUST have date < D.
+          dates=sorted({r["d"] for r in rows})
+          evaluated=[]
+          leakage_checks=0
+
+          for d in dates:
+              train=[r for r in rows if r["d"] < d]
+              targets=[r for r in rows if r["d"] == d]
+              if not train:
+                  continue
+              assert all(r["d"] < d for r in train)
+              leakage_checks += len(targets)
+
+              base_counts=Counter(winner(r) for r in train if winner(r) in range(1,7))
+              base_total=sum(base_counts.values())
+              base_pick=base_counts.most_common(1)[0][0] if base_total else None
+
+              for t in targets:
+                  tc=cv(t)
+                  exact=[r for r in train if cv(r)==tc]
+
+                  near=[]
+                  weighted=Counter()
+                  weighted_n=0.0
+                  for r in train:
+                      dd=dist(tc,cv(r))
+                      if dd<=THRESHOLD:
+                          w=math.exp(-DECAY*dd)
+                          near.append(r)
+                          ww=winner(r)
+                          if ww in range(1,7):
+                              weighted[ww]+=w
+                              weighted_n+=w
+
+                  exact_counts=Counter(winner(r) for r in exact if winner(r) in range(1,7))
+                  exact_pick=exact_counts.most_common(1)[0][0] if exact_counts else None
+                  sim_pick=weighted.most_common(1)[0][0] if weighted_n>=MIN_WEIGHTED and weighted else None
+                  actual=winner(t)
+
+                  evaluated.append({
+                      "d":d,"r":t["r"],"actual":actual,
+                      "trainMaxDate":max(r["d"] for r in train),
+                      "exactSamples":len(exact),
+                      "similarRawSamples":len(near),
+                      "similarWeightedSamples":round(weighted_n,4),
+                      "baselinePick":base_pick,
+                      "exactPick":exact_pick,
+                      "similarityPick":sim_pick
+                  })
+
+          assert evaluated
+          assert all(x["trainMaxDate"] < x["d"] for x in evaluated)
+
+          def score(field):
+              eligible=[x for x in evaluated if x[field] is not None and x["actual"] is not None]
+              hits=sum(x[field]==x["actual"] for x in eligible)
+              return {
+                  "eligible":len(eligible),
+                  "hits":hits,
+                  "accuracyPct":round(100*hits/len(eligible),2) if eligible else None
+              }
+
+          baseline=score("baselinePick")
+          exact=score("exactPick")
+          similarity=score("similarityPick")
+
+          # Period robustness: report similarity performance by chronological half.
+          mid="2025-07-01"
+          period={}
+          for name,subset in {
+              "H1":[x for x in evaluated if x["d"]<mid],
+              "H2":[x for x in evaluated if x["d"]>=mid]
+          }.items():
+              e=[x for x in subset if x["similarityPick"] is not None and x["actual"] is not None]
+              h=sum(x["similarityPick"]==x["actual"] for x in e)
+              period[name]={"eligible":len(e),"hits":h,"accuracyPct":round(100*h/len(e),2) if e else None}
+
+          out={
+              "schema":"boat-command-composition-oos-validation-v1",
+              "venueCode":"07",
+              "year":2025,
+              "sourceRaceCount":len(rows),
+              "threshold":THRESHOLD,
+              "minimumWeightedSamples":MIN_WEIGHTED,
+              "strictPastOnly":True,
+              "sameDayTrainingExcluded":True,
+              "distanceUsesResults":False,
+              "distanceUsesPayouts":False,
+              "predictionEnabled":False,
+              "mode":"SHADOW_OBSERVE_ONLY",
+              "evaluatedRaceCount":len(evaluated),
+              "leakageChecks":leakage_checks,
+              "baselineLaneWinner":baseline,
+              "exactCompositionLaneWinner":exact,
+              "similarityLaneWinner":similarity,
+              "similarityByHalf":period
+          }
+
+          Path("out/gamagori-2025-oos-validation.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("OOS VALIDATION PASS")
+          print("SOURCE RACES",len(rows))
+          print("EVALUATED",len(evaluated))
+          print("LEAKAGE CHECK PASS · train date < target date")
+          print("THRESHOLD",THRESHOLD,"MIN WEIGHTED",MIN_WEIGHTED)
+          print("BASELINE",baseline)
+          print("EXACT",exact)
+          print("SIMILARITY",similarity)
+          print("SIMILARITY H1",period["H1"])
+          print("SIMILARITY H2",period["H2"])
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-oos-validation.json"))
+          assert x["sourceRaceCount"]==2381
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"]
+          assert x["mode"]=="SHADOW_OBSERVE_ONLY"
+          assert x["threshold"]==5.0
+          print("SAFETY PASS · NO FUTURE/SAME-DAY TRAINING · SHADOW ONLY")
+          PY
+
+      - name: Upload OOS validation
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-oos-validation
+          path: out/gamagori-2025-oos-validation.json
+          retention-days: 7
+          if-no-files-found: error
