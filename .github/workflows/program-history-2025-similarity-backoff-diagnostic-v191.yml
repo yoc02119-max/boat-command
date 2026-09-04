@@ -1,0 +1,102 @@
+name: PROGRAM HISTORY 2025 similarity diagnostic v1.9.1
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+      - name: Diagnose similarity backoff
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json,math,statistics
+          from collections import Counter
+          from pathlib import Path
+          db=json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))
+          rows=db["races"]
+          assert len(rows)==2381
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          weights=[1.35,1.20,1.10,1.00,.95,.90]
+          def cv(r):
+              c=r["c"]
+              assert len(c)==6 and all(x in rank for x in c)
+              return tuple(c)
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),sum(x in {"A1","A2"} for x in c),sum(n[:3]),sum(n[3:]))
+          def dist(a,b):
+              lane=sum(weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+          comps=Counter(cv(r) for r in rows)
+          unique=list(comps)
+          thresholds=[0,1.5,2.5,3.5,5.0]
+          summary=[]
+          for th in thresholds:
+              raw=[]; weighted=[]
+              for c in unique:
+                  rn=0; wn=0.0
+                  for o,n in comps.items():
+                      d=dist(c,o)
+                      if d<=th:
+                          rn+=n; wn+=n*math.exp(-.55*d)
+                  raw.append(rn); weighted.append(wn)
+              summary.append({
+                "threshold":th,
+                "medianRawSamples":round(statistics.median(raw),2),
+                "medianWeightedSamples":round(statistics.median(weighted),2),
+                "rawCoverage30Pct":round(sum(n>=30 for n in raw)*100/len(raw),2),
+                "weightedCoverage30Pct":round(sum(n>=30 for n in weighted)*100/len(weighted),2),
+                "rawCoverage10Pct":round(sum(n>=10 for n in raw)*100/len(raw),2)
+              })
+          halves=([r for r in rows if r["d"]<="2025-06-30"],[r for r in rows if r["d"]>="2025-07-01"])
+          stability=[]
+          for th in thresholds[1:]:
+              gaps=[]
+              for c in unique:
+                  ss=[]
+                  for half in halves:
+                      m=[r for r in half if dist(c,cv(r))<=th]
+                      ss.append((len(m),sum(str(r["o"]).startswith("1-") for r in m)/len(m) if m else 0))
+                  if ss[0][0]>=10 and ss[1][0]>=10: gaps.append(abs(ss[0][1]-ss[1][1])*100)
+              stability.append({"threshold":th,"eligible":len(gaps),"medianLane1GapPct":round(statistics.median(gaps),2) if gaps else None})
+          out={"schema":"boat-command-composition-similarity-diagnostic-v1","venueCode":"07","year":2025,
+               "sourceRaceCount":len(rows),"exactCompositionCount":len(unique),
+               "distanceUsesResults":False,"distanceUsesPayouts":False,
+               "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+               "thresholdSummary":summary,"halfYearStability":stability}
+          Path("out/gamagori-2025-similarity-diagnostic.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print("SIMILARITY DIAGNOSTIC PASS")
+          print("SOURCE RACES",len(rows)); print("EXACT COMPOSITIONS",len(unique))
+          for x in summary: print("THRESHOLD",x["threshold"],"MEDIAN RAW",x["medianRawSamples"],"RAW >=30 %",x["rawCoverage30Pct"],"WEIGHTED >=30 %",x["weightedCoverage30Pct"])
+          for x in stability: print("STABILITY",x["threshold"],"ELIGIBLE",x["eligible"],"MEDIAN GAP",x["medianLane1GapPct"])
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-similarity-diagnostic.json"))
+          assert x["sourceRaceCount"]==2381 and x["exactCompositionCount"]==790
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"] and not x["predictionEnabled"]
+          print("SAFETY PASS · PRE-RACE composition distance only")
+          PY
+      - name: Upload diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-similarity-diagnostic
+          path: out/gamagori-2025-similarity-diagnostic.json
+          retention-days: 7
+          if-no-files-found: error
