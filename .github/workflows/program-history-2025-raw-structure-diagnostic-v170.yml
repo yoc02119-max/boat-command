@@ -1,0 +1,144 @@
+name: PROGRAM HISTORY 2025 raw-structure diagnostic v1.7.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: diagnose 5 exception structures
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LZH extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Download and extract only exception dates
+        run: |
+          set -euo pipefail
+          rm -rf diag
+          mkdir -p diag/raw diag/extracted diag/out
+          cat > diag/dates.txt <<'EOF'
+          2025-01-23
+          2025-04-13
+          2025-05-09
+          2025-06-04
+          2025-08-12
+          EOF
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"
+            yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            mkdir -p "diag/extracted/$d/B" "diag/extracted/$d/K"
+
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" -o "diag/raw/$b"
+            sleep 2
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" -o "diag/raw/$k"
+            sleep 2
+
+            lha "xw=diag/extracted/$d/B" "diag/raw/$b" >/dev/null
+            lha "xw=diag/extracted/$d/K" "diag/raw/$k" >/dev/null
+          done < diag/dates.txt
+
+      - name: Extract bounded diagnostic context
+        run: |
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          targets = {
+            "2025-01-23": {"B": [4], "K": [4]},
+            "2025-04-13": {"B": list(range(1,13)), "K": list(range(1,13))},
+            "2025-05-09": {"B": [11,12], "K": [11,12]},
+            "2025-06-04": {"B": [9], "K": [9]},
+            "2025-08-12": {"B": [8], "K": [8]},
+          }
+
+          def first_file(folder):
+              fs=[p for p in Path(folder).rglob("*") if p.is_file()]
+              return fs[0] if fs else None
+
+          def read_text(p):
+              for enc in ("cp932","shift_jis","utf-8"):
+                  try: return p.read_text(encoding=enc)
+                  except Exception: pass
+              return p.read_bytes().decode("cp932","replace")
+
+          def context_for_race(lines, rno, radius=18):
+              # Diagnostic only: capture bounded text around common race-number markers.
+              pats=[
+                  re.compile(rf'(^|[^0-9]){rno}\s*R([^0-9]|$)', re.I),
+                  re.compile(rf'第\s*{rno}\s*レース'),
+                  re.compile(rf'^\s*{rno}\s*[ＲR]\s*$', re.I),
+              ]
+              hits=[]
+              for i,line in enumerate(lines):
+                  if any(p.search(line) for p in pats):
+                      a=max(0,i-radius); b=min(len(lines),i+radius+1)
+                      hits.append({
+                          "line":i+1,
+                          "start":a+1,
+                          "end":b,
+                          "text":"\n".join(f"{j+1:05d}: {lines[j]}" for j in range(a,b))
+                      })
+              return hits[:4]
+
+          report={
+              "schema":"boat-command-program-history-raw-structure-diagnostic-v1",
+              "scope":"5 exception dates only",
+              "venueCode":"07",
+              "rawFilesCommitted":False,
+              "dates":[]
+          }
+
+          for d,sides in targets.items():
+              item={"date":d,"sides":{}}
+              for side,races in sides.items():
+                  p=first_file(f"diag/extracted/{d}/{side}")
+                  if not p:
+                      item["sides"][side]={"error":"EXTRACTED_FILE_MISSING"}
+                      continue
+                  text=read_text(p)
+                  lines=text.splitlines()
+                  sideout={
+                      "filename":p.name,
+                      "lineCount":len(lines),
+                      "raceContexts":{}
+                  }
+                  for r in races:
+                      sideout["raceContexts"][str(r)]=context_for_race(lines,r)
+                  item["sides"][side]=sideout
+              report["dates"].append(item)
+
+          out=Path("diag/out")
+          out.mkdir(parents=True,exist_ok=True)
+          (out/"gamagori-2025-raw-structure-diagnostic.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("RAW STRUCTURE DIAGNOSTIC COMPLETE · 5 dates only")
+          for d in report["dates"]:
+              print(d["date"], end="")
+              for side,x in d["sides"].items():
+                  counts={r:len(v) for r,v in x.get("raceContexts",{}).items()}
+                  print(f" · {side} contexts={counts}", end="")
+              print()
+          print("RAW B/K FILES ARE NOT INCLUDED IN ARTIFACT")
+          PY
+
+      - name: Upload diagnostic report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-raw-structure-diagnostic
+          path: diag/out/gamagori-2025-raw-structure-diagnostic.json
+          retention-days: 3
+          if-no-files-found: error
