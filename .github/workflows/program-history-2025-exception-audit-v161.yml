@@ -1,0 +1,181 @@
+name: PROGRAM HISTORY 2025 exception audit v1.6.1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: audit 5 exception dates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LZH extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Builder regression
+        run: python3 program-history-builder-v121.py --self-test
+
+      - name: Audit only the 5 exception dates
+        run: |
+          set -euo pipefail
+          rm -rf exception-audit
+          mkdir -p exception-audit/raw exception-audit/extracted exception-audit/out
+
+          python3 - <<'PY'
+          from pathlib import Path
+          Path("exception-audit/dates.txt").write_text("""2025-01-23
+          2025-04-13
+          2025-05-09
+          2025-06-04
+          2025-08-12
+          """.replace("          ",""), encoding="utf-8")
+          PY
+
+          : > exception-audit/download.tsv
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"
+            yyyy="${ymd:0:4}"
+            mm="${ymd:4:2}"
+            yy="${ymd:2:2}"
+            dd="${ymd:6:2}"
+            ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"
+            k="k${yy}${mm}${dd}.lzh"
+
+            mkdir -p "exception-audit/extracted/$d/b" "exception-audit/extracted/$d/k"
+
+            bc="$(curl -sS -L --connect-timeout 20 --max-time 60 \
+              -o "exception-audit/raw/$b" -w '%{http_code}' \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" || true)"
+            sleep 2
+            kc="$(curl -sS -L --connect-timeout 20 --max-time 60 \
+              -o "exception-audit/raw/$k" -w '%{http_code}' \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" || true)"
+            sleep 2
+
+            printf "%s\t%s\t%s\n" "$d" "$bc" "$kc" >> exception-audit/download.tsv
+
+            if [[ "$bc" == "200" ]]; then
+              lha "xw=exception-audit/extracted/$d/b" "exception-audit/raw/$b" >/dev/null 2>&1 || true
+            fi
+            if [[ "$kc" == "200" ]]; then
+              lha "xw=exception-audit/extracted/$d/k" "exception-audit/raw/$k" >/dev/null 2>&1 || true
+            fi
+          done < exception-audit/dates.txt
+
+          python3 - <<'PY'
+          import importlib.util, json, sys
+          from pathlib import Path
+
+          spec=importlib.util.spec_from_file_location("builder","program-history-builder-v121.py")
+          B=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=B
+          spec.loader.exec_module(B)
+
+          dl={}
+          for line in Path("exception-audit/download.tsv").read_text().splitlines():
+              d,bc,kc=line.split("\t")
+              dl[d]={"b_http":bc,"k_http":kc}
+
+          def one_file(folder):
+              files=[p for p in Path(folder).rglob("*") if p.is_file()]
+              return files[0] if files else None
+
+          report={
+              "schema":"boat-command-program-history-exception-audit-v1",
+              "builder":getattr(B,"VERSION","UNKNOWN"),
+              "venueCode":"07",
+              "year":2025,
+              "dates":[]
+          }
+
+          for d in Path("exception-audit/dates.txt").read_text().splitlines():
+              bp=one_file(f"exception-audit/extracted/{d}/b")
+              kp=one_file(f"exception-audit/extracted/{d}/k")
+              item={"date":d,**dl[d]}
+              try:
+                  if not bp or not kp:
+                      item.update({
+                          "classification":"DOWNLOAD_OR_EXTRACT_MISSING",
+                          "program_races":[],
+                          "result_races":[],
+                          "paired_races":[],
+                          "missing_from_program":[],
+                          "missing_from_result":[],
+                      })
+                  else:
+                      bblocks=B.venue_blocks(B.read_cp932(bp),"B")
+                      kblocks=B.venue_blocks(B.read_cp932(kp),"K")
+                      if "07" not in bblocks or "07" not in kblocks:
+                          item.update({
+                              "classification":"VENUE_BLOCK_MISSING",
+                              "program_block_found":"07" in bblocks,
+                              "result_block_found":"07" in kblocks,
+                          })
+                      else:
+                          programs=B.parse_program_block(bblocks["07"])
+                          results=B.parse_result_block(kblocks["07"])
+                          ps=sorted(programs)
+                          rs=sorted(results)
+                          paired=sorted(set(ps)&set(rs))
+                          expected=set(range(1,13))
+                          item.update({
+                              "program_races":ps,
+                              "result_races":rs,
+                              "paired_races":paired,
+                              "program_count":len(ps),
+                              "result_count":len(rs),
+                              "paired_count":len(paired),
+                              "missing_from_program":sorted(expected-set(ps)),
+                              "missing_from_result":sorted(expected-set(rs)),
+                              "program_only":sorted(set(ps)-set(rs)),
+                              "result_only":sorted(set(rs)-set(ps)),
+                          })
+                          if len(paired)==12:
+                              item["classification"]="NOW_COMPLETE_12R"
+                          elif len(ps)<12 and len(rs)==12:
+                              item["classification"]="PROGRAM_PARSE_INCOMPLETE"
+                          elif len(ps)==12 and len(rs)<12:
+                              item["classification"]="RESULT_PARSE_OR_OFFICIAL_INCOMPLETE"
+                          elif len(ps)<12 and len(rs)<12:
+                              item["classification"]="BOTH_INCOMPLETE_OR_OFFICIAL_IRREGULAR"
+                          else:
+                              item["classification"]="PAIRING_MISMATCH"
+              except Exception as e:
+                  item["classification"]="AUDIT_EXCEPTION"
+                  item["error"]=f"{type(e).__name__}: {e}"
+              report["dates"].append(item)
+
+          out=Path("exception-audit/out")
+          out.mkdir(parents=True,exist_ok=True)
+          (out/"gamagori-2025-exception-audit.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2), encoding="utf-8"
+          )
+
+          print("\n=== EXCEPTION AUDIT SUMMARY ===")
+          for x in report["dates"]:
+              print(
+                  f'{x["date"]} · {x["classification"]} · '
+                  f'B={x.get("program_count","-")} K={x.get("result_count","-")} '
+                  f'PAIRED={x.get("paired_count","-")} · '
+                  f'MISS_B={x.get("missing_from_program",[])} '
+                  f'MISS_K={x.get("missing_from_result",[])}'
+              )
+          print("AUDIT COMPLETE · 5 dates only · NO YEAR REBUILD")
+          PY
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-exception-audit
+          path: exception-audit/out/gamagori-2025-exception-audit.json
+          retention-days: 3
+          if-no-files-found: error
