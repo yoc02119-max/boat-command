@@ -1,0 +1,223 @@
+name: PROGRAM HISTORY 2025 finalize DB v1.8.1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finalize:
+    name: finalize 2025 Gamagori DB
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa jq unzip
+
+      - name: Builder self-test
+        run: python3 program-history-builder-v131.py --self-test
+
+      - name: Download previous full-year artifact
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-segmented-year-build-v151.yml
+          workflow_conclusion: failure
+          name: gamagori-2025-segmented-year-build
+          path: previous
+
+      - name: Inspect previous artifact
+        run: |
+          set -euo pipefail
+          find previous -maxdepth 3 -type f -print
+          test -f previous/gamagori-2025.json
+          test -f previous/gamagori-2025-audit-report.json
+
+      - name: Download only 5 exception dates with builder v1.3.1
+        run: |
+          set -euo pipefail
+          rm -rf patch
+          mkdir -p patch/raw patch/extracted patch/out
+          cat > patch/dates.txt <<'EOF'
+          2025-01-23
+          2025-04-13
+          2025-05-09
+          2025-06-04
+          2025-08-12
+          EOF
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"
+            yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            mkdir -p "patch/extracted/$d/B" "patch/extracted/$d/K"
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" -o "patch/raw/$b"
+            sleep 2
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" -o "patch/raw/$k"
+            sleep 2
+            lha "xw=patch/extracted/$d/B" "patch/raw/$b" >/dev/null
+            lha "xw=patch/extracted/$d/K" "patch/raw/$k" >/dev/null
+          done < patch/dates.txt
+
+      - name: Patch and finalize year shard
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json, sys
+          from pathlib import Path
+
+          spec=importlib.util.spec_from_file_location("builder","program-history-builder-v131.py")
+          B=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=B
+          spec.loader.exec_module(B)
+
+          base_path=Path("previous/gamagori-2025.json")
+          base=json.loads(base_path.read_text(encoding="utf-8"))
+          races=base.get("races",[])
+          if not isinstance(races,list):
+              raise SystemExit("BASE INVALID: races is not list")
+
+          patch_dates={"2025-01-23","2025-04-13","2025-05-09","2025-06-04","2025-08-12"}
+          kept=[r for r in races if r.get("d") not in patch_dates]
+
+          def one(folder):
+              fs=[p for p in Path(folder).rglob("*") if p.is_file()]
+              return fs[0] if fs else None
+
+          patched=[]
+          patch_summary=[]
+          for d in sorted(patch_dates):
+              bp=one(f"patch/extracted/{d}/B")
+              kp=one(f"patch/extracted/{d}/K")
+              if not bp or not kp:
+                  raise SystemExit(f"{d}: extracted file missing")
+
+              bb=B.venue_blocks(B.read_cp932(bp),"B")
+              kb=B.venue_blocks(B.read_cp932(kp),"K")
+              if "07" not in bb or "07" not in kb:
+                  raise SystemExit(f"{d}: Gamagori block missing")
+
+              programs=B.parse_program_block(bb["07"])
+              results=B.parse_result_block(kb["07"])
+
+              valid=[]
+              for rno in sorted(set(programs)&set(results)):
+                  p=programs[rno]
+                  result,payout=results[rno]
+                  valid.append({
+                      "d":d,
+                      "r":rno,
+                      "c":list(p.classes),
+                      "o":result,
+                      "p":payout,
+                      "t":p.race_type,
+                      "id":f"{d}-07-{rno:02d}",
+                  })
+
+              patched.extend(valid)
+              patch_summary.append({
+                  "date":d,
+                  "programCount":len(programs),
+                  "resultCount":len(results),
+                  "validCount":len(valid),
+                  "validRaces":[r["r"] for r in valid]
+              })
+
+          merged=kept+patched
+          merged.sort(key=lambda x:(x["d"],x["r"]))
+
+          ids=[r["id"] for r in merged]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit("DUPLICATE RACE ID")
+
+          out={
+              "schema":"boat-command-program-history-v1",
+              "builder":"PROGRAM-HISTORY-BUILDER-V1.3.1",
+              "venueCode":"07",
+              "year":2025,
+              "races":merged
+          }
+
+          complete_dates={}
+          for r in merged:
+              complete_dates.setdefault(r["d"],0)
+              complete_dates[r["d"]]+=1
+
+          full_days=sum(1 for n in complete_dates.values() if n==12)
+          irregular={d:n for d,n in sorted(complete_dates.items()) if n!=12}
+
+          report={
+              "schema":"boat-command-program-history-final-audit-v1",
+              "venueCode":"07",
+              "year":2025,
+              "builder":"PROGRAM-HISTORY-BUILDER-V1.3.1",
+              "raceCount":len(merged),
+              "daysWithValidRaces":len(complete_dates),
+              "full12RaceDays":full_days,
+              "irregularDays":irregular,
+              "patchSummary":patch_summary,
+              "goldenDate":"2025-12-15"
+          }
+
+          golden=[r for r in merged if r["d"]=="2025-12-15"]
+          if len(golden)!=12:
+              raise SystemExit(f"GOLDEN REGRESSION FAIL: {len(golden)} races")
+
+          # Critical patch assertions.
+          may9=next(x for x in patch_summary if x["date"]=="2025-05-09")
+          if may9["validCount"]!=12 or 11 not in may9["validRaces"] or 12 not in may9["validRaces"]:
+              raise SystemExit("PATCH FAIL: 2025-05-09 must contain 12 valid races incl. 11R/12R")
+
+          expected_valid={
+              "2025-01-23":11,
+              "2025-04-13":8,
+              "2025-05-09":12,
+              "2025-06-04":11,
+              "2025-08-12":11,
+          }
+          for x in patch_summary:
+              if x["validCount"]!=expected_valid[x["date"]]:
+                  raise SystemExit(f'PATCH COUNT FAIL {x["date"]}: {x["validCount"]}')
+
+          outdir=Path("patch/out")
+          outdir.mkdir(parents=True,exist_ok=True)
+          (outdir/"gamagori-2025.json").write_text(
+              json.dumps(out,ensure_ascii=False,separators=(",",":")),encoding="utf-8"
+          )
+          (outdir/"gamagori-2025-final-audit.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("FINALIZE PASS")
+          print("RACES", len(merged))
+          print("DAYS WITH VALID RACES", len(complete_dates))
+          print("FULL 12R DAYS", full_days)
+          print("IRREGULAR DAYS", irregular)
+          for x in patch_summary:
+              print(x["date"], "valid=", x["validCount"], "races=", x["validRaces"])
+          print("GOLDEN REGRESSION PASS · 2025-12-15 · 12/12")
+          PY
+
+      - name: Safety audit
+        run: |
+          set -euo pipefail
+          test -f patch/out/gamagori-2025.json
+          test -f patch/out/gamagori-2025-final-audit.json
+          ! find patch/out -type f \( -iname '*.lzh' -o -iname 'b*.txt' -o -iname 'k*.txt' \) | grep -q .
+          echo "SAFETY PASS · compact derived JSON only"
+
+      - name: Upload finalized DB
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-final
+          path: |
+            patch/out/gamagori-2025.json
+            patch/out/gamagori-2025-final-audit.json
+          retention-days: 7
+          if-no-files-found: error
