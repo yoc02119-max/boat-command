@@ -1,0 +1,162 @@
+name: PROGRAM HISTORY 2025 high-confidence segments v1.9.5
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+
+      - name: Decompose threshold 1.5 high-confidence zone
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          rows=sorted(json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))["races"],
+                      key=lambda r:(r["d"],r["r"]))
+          assert len(rows)==2381
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lane_weights=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5; decay=.55; min_weighted=30.0
+          baseline=56.61
+
+          def cv(r):
+              c=tuple(r["c"])
+              assert len(c)==6 and all(x in rank for x in c)
+              return c
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+          def dist(a,b):
+              lane=sum(lane_weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+          def winner(r):
+              try:return int(str(r["o"]).split("-")[0])
+              except:return None
+          def band(v,cuts,labels):
+              for cut,label in zip(cuts,labels):
+                  if v<cut:return label
+              return labels[-1]
+
+          rec=[]
+          dates=sorted({r["d"] for r in rows})
+          for d in dates:
+              train=[r for r in rows if r["d"]<d]
+              if not train: continue
+              assert all(r["d"]<d for r in train)
+              for t in [r for r in rows if r["d"]==d]:
+                  tc=cv(t); wc=Counter(); wn=0.0; raw=0
+                  for r in train:
+                      dd=dist(tc,cv(r))
+                      if dd<=threshold:
+                          raw+=1; w=math.exp(-decay*dd); rw=winner(r)
+                          if rw in range(1,7): wc[rw]+=w; wn+=w
+                  pick=wc.most_common(1)[0][0] if wn>=min_weighted and wc else None
+                  actual=winner(t)
+                  if pick is None or actual is None: continue
+                  n=[rank[x] for x in tc]
+                  inner=sum(n[:3]); outer=sum(n[3:]); gap=inner-outer
+                  rec.append({
+                    "date":d,"race":t["r"],"pick":pick,"actual":actual,"hit":pick==actual,
+                    "lane1Class":tc[0],"a1Count":sum(x=="A1" for x in tc),
+                    "topClassCount":sum(x in {"A1","A2"} for x in tc),
+                    "innerStrength":inner,"outerStrength":outer,"innerOuterGap":gap,
+                    "raceBand":"R01-04" if t["r"]<=4 else ("R05-08" if t["r"]<=8 else "R09-12"),
+                    "rawSamples":raw,"weightedSamples":round(wn,4),
+                    "rawBand":band(raw,[50,100,200,10**9],["<50","50-99","100-199","200+"]),
+                    "weightedBand":band(wn,[40,60,90,10**9],["30-39.9","40-59.9","60-89.9","90+"])
+                  })
+
+          assert len(rec)==161
+          assert sum(x["hit"] for x in rec)==106
+
+          split_date="2025-10-01"
+          def stat(items):
+              n=len(items); h=sum(x["hit"] for x in items)
+              h1=[x for x in items if x["date"]<split_date]
+              h2=[x for x in items if x["date"]>=split_date]
+              def acc(z): return round(100*sum(x["hit"] for x in z)/len(z),2) if z else None
+              return {"n":n,"hits":h,"accuracyPct":round(100*h/n,2) if n else None,
+                      "liftVsBaseline":round((100*h/n)-baseline,2) if n else None,
+                      "H1n":len(h1),"H1accuracyPct":acc(h1),
+                      "H2n":len(h2),"H2accuracyPct":acc(h2)}
+
+          dimensions=["lane1Class","a1Count","topClassCount","innerStrength","innerOuterGap",
+                      "raceBand","rawBand","weightedBand"]
+          groups={}
+          for dim in dimensions:
+              vals=sorted({str(x[dim]) for x in rec})
+              groups[dim]={v:stat([x for x in rec if str(x[dim])==v]) for v in vals}
+
+          # Conservative candidate: enough total and both chronological sides,
+          # with both halves above baseline. Diagnostic only; never enables prediction.
+          candidates=[]
+          for dim,g in groups.items():
+              for value,s in g.items():
+                  if s["n"]>=30 and s["H1n"]>=10 and s["H2n"]>=10 and \
+                     s["H1accuracyPct"] is not None and s["H2accuracyPct"] is not None and \
+                     s["H1accuracyPct"]>baseline and s["H2accuracyPct"]>baseline:
+                      candidates.append({"dimension":dim,"value":value,**s})
+          candidates.sort(key=lambda x:(min(x["H1accuracyPct"],x["H2accuracyPct"]),x["n"]),reverse=True)
+
+          out={"schema":"boat-command-high-confidence-segments-v1","venueCode":"07","year":2025,
+               "sourceRaceCount":len(rows),"threshold":threshold,"minimumWeightedSamples":min_weighted,
+               "baselineAccuracyPct":baseline,"strictPastOnly":True,"sameDayTrainingExcluded":True,
+               "distanceUsesResults":False,"distanceUsesPayouts":False,
+               "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+               "eligible":len(rec),"hits":sum(x["hit"] for x in rec),
+               "overall":stat(rec),"groups":groups,"stableCandidates":candidates}
+          Path("out/gamagori-2025-high-confidence-segments.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print("HIGH-CONFIDENCE SEGMENTS PASS")
+          print("SOURCE RACES",len(rows))
+          print("LEAKAGE CHECK PASS · train date < target date")
+          print("OVERALL",stat(rec))
+          for dim in dimensions:
+              print("DIMENSION",dim)
+              for value,s in groups[dim].items(): print("GROUP",dim,value,s)
+          print("STABLE CANDIDATES",len(candidates))
+          for x in candidates: print("CANDIDATE",x)
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-high-confidence-segments.json"))
+          assert x["sourceRaceCount"]==2381
+          assert x["eligible"]==161 and x["hits"]==106
+          assert x["threshold"]==1.5 and x["minimumWeightedSamples"]==30.0
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"] and x["mode"]=="SHADOW_OBSERVE_ONLY"
+          print("SAFETY PASS · SEGMENT ANALYSIS · STRICT OOS · SHADOW ONLY")
+          PY
+
+      - name: Upload segment diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-high-confidence-segments
+          path: out/gamagori-2025-high-confidence-segments.json
+          retention-days: 7
+          if-no-files-found: error
