@@ -1,0 +1,129 @@
+name: PROGRAM HISTORY builder v1.3.0 targeted regression
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify H1200 and exception handling
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LZH extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Builder self-test
+        run: python3 program-history-builder-v130.py --self-test
+
+      - name: Download only 5 exception dates
+        run: |
+          set -euo pipefail
+          rm -rf verify
+          mkdir -p verify/raw verify/extracted verify/out
+          cat > verify/dates.txt <<'EOF'
+          2025-01-23
+          2025-04-13
+          2025-05-09
+          2025-06-04
+          2025-08-12
+          EOF
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"
+            yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            mkdir -p "verify/extracted/$d/B" "verify/extracted/$d/K"
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" -o "verify/raw/$b"
+            sleep 2
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/K/${ym}/${k}" -o "verify/raw/$k"
+            sleep 2
+            lha "xw=verify/extracted/$d/B" "verify/raw/$b" >/dev/null
+            lha "xw=verify/extracted/$d/K" "verify/raw/$k" >/dev/null
+          done < verify/dates.txt
+
+      - name: Targeted parser regression
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json, sys
+          from pathlib import Path
+
+          spec=importlib.util.spec_from_file_location("builder","program-history-builder-v130.py")
+          B=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=B
+          spec.loader.exec_module(B)
+
+          def one(folder):
+              fs=[p for p in Path(folder).rglob("*") if p.is_file()]
+              return fs[0] if fs else None
+
+          expected={
+              "2025-01-23":{"valid":11},
+              "2025-04-13":{"valid":8},
+              "2025-05-09":{"valid":12},
+              "2025-06-04":{"valid":11},
+              "2025-08-12":{"valid":11},
+          }
+
+          report={"schema":"boat-command-builder-v130-targeted-regression-v1","dates":[]}
+          failed=[]
+
+          for d,exp in expected.items():
+              bp=one(f"verify/extracted/{d}/B")
+              kp=one(f"verify/extracted/{d}/K")
+              if not bp or not kp:
+                  failed.append(f"{d}: extracted file missing")
+                  continue
+
+              bb=B.venue_blocks(B.read_cp932(bp),"B")
+              kb=B.venue_blocks(B.read_cp932(kp),"K")
+              programs=B.parse_program_block(bb["07"])
+              results=B.parse_result_block(kb["07"])
+              paired=sorted(set(programs)&set(results))
+              item={
+                  "date":d,
+                  "programRaces":sorted(programs),
+                  "resultRaces":sorted(results),
+                  "validRaces":paired,
+                  "validCount":len(paired),
+                  "expectedValidCount":exp["valid"],
+              }
+              report["dates"].append(item)
+              if len(paired)!=exp["valid"]:
+                  failed.append(f'{d}: expected {exp["valid"]}, got {len(paired)}')
+
+          # Critical H1200 regression: 2025-05-09 must now include 11R and 12R.
+          may9=next(x for x in report["dates"] if x["date"]=="2025-05-09")
+          if 11 not in may9["programRaces"] or 12 not in may9["programRaces"]:
+              failed.append("2025-05-09: H1200 11R/12R still missing from B parser")
+
+          Path("verify/out/report.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          for x in report["dates"]:
+              print(f'{x["date"]} · valid={x["validCount"]} · B={len(x["programRaces"])} · K={len(x["resultRaces"])}')
+          if failed:
+              print("TARGETED REGRESSION FAIL")
+              for e in failed: print(" -",e)
+              raise SystemExit(1)
+          print("TARGETED REGRESSION PASS · 5/5 exception dates classified as expected")
+          print("H1200 REGRESSION PASS · 2025-05-09 11R/12R recognized")
+          PY
+
+      - name: Upload regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-builder-v130-targeted-regression
+          path: verify/out/report.json
+          retention-days: 3
+          if-no-files-found: warn
