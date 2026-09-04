@@ -1,0 +1,91 @@
+name: PROGRAM HISTORY 2025 composition stats v1.9.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stats:
+    name: build 2025 Gamagori composition statistics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+      - name: Build and audit exact composition statistics
+        run: |
+          set -euo pipefail
+          rm -rf out && mkdir -p out
+          python3 - <<'PY'
+          import json, statistics
+          from collections import defaultdict, Counter
+          from pathlib import Path
+          db=json.loads(Path('source/gamagori-2025.json').read_text(encoding='utf-8'))
+          audit0=json.loads(Path('source/gamagori-2025-final-audit.json').read_text(encoding='utf-8'))
+          rows=db['races']
+          assert db['schema']=='boat-command-program-history-v1'
+          assert db['venueCode']=='07' and db['year']==2025
+          assert len(rows)==2381 and audit0['raceCount']==2381
+          assert audit0['daysWithValidRaces']==199 and audit0['full12RaceDays']==195
+          ids=[r['id'] for r in rows]; assert len(ids)==len(set(ids))
+          groups=defaultdict(list)
+          for r in rows:
+              c=r['c']; o=str(r['o']); p=r['p']
+              assert len(c)==6 and all(x in {'A1','A2','B1','B2'} for x in c)
+              parts=o.split('-'); assert len(parts)==3 and all(x in '123456' for x in parts)
+              assert isinstance(p,int) and p>0
+              groups['-'.join(c)].append(r)
+          comps=[]
+          for key,rs in groups.items():
+              n=len(rs); first=Counter(); second=Counter(); third=Counter(); tri=Counter(); types=Counter(); payouts=[]
+              for r in rs:
+                  a,b,c=r['o'].split('-'); first[a]+=1; second[b]+=1; third[c]+=1; tri[r['o']]+=1
+                  types[r.get('t') or '']+=1; payouts.append(r['p'])
+              lane=lambda z:{str(i):{'count':z[str(i)],'rate':round(z[str(i)]*100/n,2)} for i in range(1,7)}
+              comps.append({'key':key,'classes':key.split('-'),'samples':n,
+                'first':lane(first),'second':lane(second),'third':lane(third),
+                'topTrifecta':[{'order':x,'count':k,'rate':round(k*100/n,2)} for x,k in tri.most_common(3)],
+                'payout':{'average':round(sum(payouts)/n),'median':round(statistics.median(payouts)),
+                  'over10000Count':sum(p>=10000 for p in payouts),'over10000Rate':round(sum(p>=10000 for p in payouts)*100/n,2)},
+                'raceTypes':[{'type':t,'count':k} for t,k in types.most_common()]})
+          comps.sort(key=lambda x:(-x['samples'],x['key']))
+          out={'schema':'boat-command-program-composition-stats-v1','version':'PROGRAM-COMPOSITION-STATS-V1.0',
+            'venueCode':'07','year':2025,'sourceRaceCount':len(rows),'compositionCount':len(comps),
+            'matching':'EXACT_SIX_LANE_CLASS_ORDER','resultUsage':'HISTORICAL_LABELS_ONLY','compositions':comps}
+          audit={'schema':'boat-command-program-composition-stats-audit-v1','venueCode':'07','year':2025,
+            'sourceRaceCount':len(rows),'groupedRaceCount':sum(x['samples'] for x in comps),'compositionCount':len(comps),
+            'maxSamples':max(x['samples'] for x in comps),'minSamples':min(x['samples'] for x in comps),
+            'samples30Plus':sum(x['samples']>=30 for x in comps),'samples10Plus':sum(x['samples']>=10 for x in comps),
+            'exactOnly':True,'similarityEnabled':False,'predictionEnabled':False}
+          assert audit['groupedRaceCount']==2381
+          Path('out/gamagori-2025-composition-stats.json').write_text(json.dumps(out,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('out/gamagori-2025-composition-stats-audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('COMPOSITION STATS PASS')
+          print('SOURCE RACES',2381); print('GROUPED RACES',audit['groupedRaceCount'])
+          print('EXACT COMPOSITIONS',audit['compositionCount']); print('SAMPLES >=30',audit['samples30Plus']); print('SAMPLES >=10',audit['samples10Plus'])
+          print('PREDICTION ENABLED false · SHADOW/OBSERVE ONLY')
+          PY
+      - name: Safety audit
+        run: |
+          set -euo pipefail
+          test -f out/gamagori-2025-composition-stats.json
+          test -f out/gamagori-2025-composition-stats-audit.json
+          if find out -type f ! -name '*.json' | grep -q .; then exit 1; fi
+          echo 'SAFETY PASS · derived composition statistics only'
+      - name: Upload composition statistics
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-composition-stats
+          path: |
+            out/gamagori-2025-composition-stats.json
+            out/gamagori-2025-composition-stats-audit.json
+          retention-days: 7
+          if-no-files-found: error
