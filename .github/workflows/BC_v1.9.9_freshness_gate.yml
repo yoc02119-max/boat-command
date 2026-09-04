@@ -1,0 +1,271 @@
+name: PROGRAM HISTORY 2025 freshness gate v1.9.9
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+
+      - name: Evaluate R05-08 freshness
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          rows=sorted(json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))["races"],
+                      key=lambda r:(r["d"],r["r"]))
+          assert len(rows)==2381
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lane_weights=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5; decay=.55; min_weighted=30.0
+          baseline=56.61
+
+          def cv(r):
+              c=tuple(r["c"])
+              assert len(c)==6 and all(x in rank for x in c)
+              return c
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+          def dist(a,b):
+              lane=sum(lane_weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+          def winner(r):
+              try:return int(str(r["o"]).split("-")[0])
+              except:return None
+          def band(v,cuts,labels):
+              for cut,label in zip(cuts,labels):
+                  if v<cut:return label
+              return labels[-1]
+
+          rec=[]
+          dates=sorted({r["d"] for r in rows})
+          for d in dates:
+              train=[r for r in rows if r["d"]<d]
+              if not train: continue
+              assert all(r["d"]<d for r in train)
+              for t in [r for r in rows if r["d"]==d]:
+                  tc=cv(t); wc=Counter(); wn=0.0; raw=0
+                  for r in train:
+                      dd=dist(tc,cv(r))
+                      if dd<=threshold:
+                          raw+=1; w=math.exp(-decay*dd); rw=winner(r)
+                          if rw in range(1,7): wc[rw]+=w; wn+=w
+                  pick=wc.most_common(1)[0][0] if wn>=min_weighted and wc else None
+                  actual=winner(t)
+                  if pick is None or actual is None: continue
+                  n=[rank[x] for x in tc]
+                  inner=sum(n[:3]); outer=sum(n[3:]); gap=inner-outer
+                  rec.append({
+                    "date":d,"race":t["r"],"pick":pick,"actual":actual,"hit":pick==actual,
+                    "lane1Class":tc[0],"a1Count":sum(x=="A1" for x in tc),
+                    "topClassCount":sum(x in {"A1","A2"} for x in tc),
+                    "innerStrength":inner,"outerStrength":outer,"innerOuterGap":gap,
+                    "raceBand":"R01-04" if t["r"]<=4 else ("R05-08" if t["r"]<=8 else "R09-12"),
+                    "rawSamples":raw,"weightedSamples":round(wn,4),
+                    "rawBand":band(raw,[50,100,200,10**9],["<50","50-99","100-199","200+"]),
+                    "weightedBand":band(wn,[40,60,90,10**9],["30-39.9","40-59.9","60-89.9","90+"])
+                  })
+
+          assert len(rec)==161
+          assert sum(x["hit"] for x in rec)==106
+
+          split_date="2025-10-01"
+          def stat(items):
+              n=len(items); h=sum(x["hit"] for x in items)
+              h1=[x for x in items if x["date"]<split_date]
+              h2=[x for x in items if x["date"]>=split_date]
+              def acc(z): return round(100*sum(x["hit"] for x in z)/len(z),2) if z else None
+              return {"n":n,"hits":h,"accuracyPct":round(100*h/n,2) if n else None,
+                      "liftVsBaseline":round((100*h/n)-baseline,2) if n else None,
+                      "H1n":len(h1),"H1accuracyPct":acc(h1),
+                      "H2n":len(h2),"H2accuracyPct":acc(h2)}
+
+          # Final two candidates discovered in v1.9.5. Validate them independently.
+          candidate_defs={
+            "R05-08": lambda x: x["raceBand"]=="R05-08",
+            "LANE1_A2": lambda x: x["lane1Class"]=="A2",
+          }
+
+          def period_stats(items):
+              # Chronological blocks expose local instability rather than only one arbitrary split.
+              z=sorted(items,key=lambda x:(x["date"],x["race"]))
+              blocks=[]
+              for i in range(0,len(z),10):
+                  q=z[i:i+10]
+                  if not q: continue
+                  blocks.append({"start":q[0]["date"],"end":q[-1]["date"],**stat(q)})
+              return blocks
+
+          validations={}
+          for name,fn in candidate_defs.items():
+              items=[x for x in rec if fn(x)]
+              s=stat(items)
+              blocks=period_stats(items)
+              full_blocks=[b for b in blocks if b["n"]==10]
+              validations[name]={
+                **s,
+                "blocks":blocks,
+                "fullBlockCount":len(full_blocks),
+                "fullBlocksAboveBaseline":sum(
+                    b["accuracyPct"] is not None and b["accuracyPct"]>baseline for b in full_blocks
+                ),
+                "minFullBlockAccuracyPct":min(
+                    (b["accuracyPct"] for b in full_blocks if b["accuracyPct"] is not None),default=None
+                )
+              }
+
+          # v1.9.9: freshness gate for R05-08.
+          # Evaluate strength across fixed chronological windows and the detected regime change.
+          r0508=sorted([x for x in rec if x["raceBand"]=="R05-08"],key=lambda x:(x["date"],x["race"]))
+          assert len(r0508)==58 and sum(x["hit"] for x in r0508)==39
+
+          def summary(z):
+              n=len(z); h=sum(x["hit"] for x in z)
+              return {
+                  "n":n,
+                  "hits":h,
+                  "accuracyPct":round(100*h/n,2) if n else None,
+                  "start":z[0]["date"] if z else None,
+                  "end":z[-1]["date"] if z else None
+              }
+
+          # Fixed windows: do not tune these after seeing outcomes.
+          window_sizes=[8,16,24,32]
+          windows={str(n):summary(r0508[-n:]) for n in window_sizes}
+          overall=summary(r0508)
+
+          # Re-run the descriptive change-point scan from v1.9.8.
+          regime_features=["lane1Class","a1Count","topClassCount","innerStrength","outerStrength"]
+          def distribution(z,key):
+              c=Counter(str(x[key]) for x in z)
+              return {k:round(v/len(z),4) for k,v in sorted(c.items())} if z else {}
+          def tv(a,b):
+              keys=set(a)|set(b)
+              return round(.5*sum(abs(a.get(k,0)-b.get(k,0)) for k in keys),4)
+
+          change_points=[]
+          for i in range(8,len(r0508)-7):
+              left=r0508[:i]; right=r0508[i:]
+              la=sum(x["hit"] for x in left)/len(left)
+              ra=sum(x["hit"] for x in right)/len(right)
+              feature_tv={}
+              for key in regime_features:
+                  feature_tv[key]=tv(distribution(left,key),distribution(right,key))
+              change_points.append({
+                  "splitAfter":left[-1]["date"],
+                  "splitBefore":right[0]["date"],
+                  "left":summary(left),
+                  "right":summary(right),
+                  "accuracyDropPct":round(100*(la-ra),2),
+                  "maxFeatureTV":max(feature_tv.values()),
+                  "featureTV":feature_tv
+              })
+          strongest=max(change_points,key=lambda z:(z["accuracyDropPct"],z["maxFeatureTV"]))
+
+          # Freshness classification.
+          # FRESH requires broad and recent windows to stay above baseline.
+          # WATCH means mixed evidence.
+          # STALE means recent windows and/or regime shift strongly contradict historical strength.
+          a8=windows["8"]["accuracyPct"]
+          a16=windows["16"]["accuracyPct"]
+          a24=windows["24"]["accuracyPct"]
+          a32=windows["32"]["accuracyPct"]
+          recent_below=sum(a < baseline for a in (a8,a16,a24,a32))
+          severe_recent=(a8 <= baseline-15 and a16 < baseline)
+          regime_break=(strongest["accuracyDropPct"] >= 20 and strongest["maxFeatureTV"] >= .35)
+
+          if a24 > baseline and a32 > baseline and a16 > baseline and a8 > baseline and not regime_break:
+              freshness="FRESH"
+          elif severe_recent or regime_break or recent_below >= 3:
+              freshness="STALE"
+          else:
+              freshness="WATCH"
+
+          reasons=[]
+          if a8 < baseline: reasons.append("RECENT_8_BELOW_BASELINE")
+          if a16 < baseline: reasons.append("RECENT_16_BELOW_BASELINE")
+          if a24 < baseline: reasons.append("RECENT_24_BELOW_BASELINE")
+          if a32 < baseline: reasons.append("RECENT_32_BELOW_BASELINE")
+          if severe_recent: reasons.append("SEVERE_RECENT_DROP")
+          if regime_break: reasons.append("REGIME_BREAK_DETECTED")
+          if not reasons: reasons.append("NO_FRESHNESS_WARNING")
+
+          # Fail closed: even FRESH here does not enable predictions.
+          production_eligible = freshness=="FRESH"
+          out={
+              "schema":"boat-command-freshness-gate-v1",
+              "venueCode":"07","year":2025,"sourceRaceCount":len(rows),
+              "threshold":threshold,"minimumWeightedSamples":min_weighted,
+              "baselineAccuracyPct":baseline,
+              "strictPastOnly":True,"sameDayTrainingExcluded":True,
+              "distanceUsesResults":False,"distanceUsesPayouts":False,
+              "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+              "candidate":"R05-08",
+              "overall":overall,
+              "windows":windows,
+              "strongestDescriptiveChangePoint":strongest,
+              "freshness":freshness,
+              "freshnessReasons":reasons,
+              "productionEligibleDiagnosticOnly":production_eligible,
+              "productionRuleSelected":False
+          }
+          Path("out/gamagori-2025-freshness-gate.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("FRESHNESS GATE PASS")
+          print("LEAKAGE CHECK PASS · train date < target date")
+          print("OVERALL",overall)
+          for n in window_sizes:
+              print("WINDOW",n,windows[str(n)])
+          print("STRONGEST CHANGE POINT",strongest)
+          print("FRESHNESS",freshness)
+          print("REASONS",reasons)
+          print("PRODUCTION ELIGIBLE DIAGNOSTIC ONLY",production_eligible)
+          print("PRODUCTION RULE SELECTED false")
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-freshness-gate.json"))
+          assert x["sourceRaceCount"]==2381
+          assert x["candidate"]=="R05-08"
+          assert x["overall"]["n"]==58 and x["overall"]["hits"]==39
+          assert set(x["windows"])=={"8","16","24","32"}
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"] and x["mode"]=="SHADOW_OBSERVE_ONLY"
+          assert not x["productionRuleSelected"]
+          assert x["freshness"] in {"FRESH","WATCH","STALE"}
+          print("SAFETY PASS · FRESHNESS GATE · STRICT OOS · NO PRODUCTION RULE · SHADOW ONLY")
+          PY
+
+      - name: Upload freshness diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-freshness-gate
+          path: out/gamagori-2025-freshness-gate.json
+          retention-days: 7
+          if-no-files-found: error
