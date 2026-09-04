@@ -1,0 +1,121 @@
+name: PROGRAM HISTORY 2026 segmented year build v2.0.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  block1:
+    name: block1 0-47
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block1
+        env: {START: "0", COUNT: "48", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment-2026.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2026-block1, path: segment-out/*.json, retention-days: 1}
+
+  block2:
+    name: block2 48-95
+    needs: block1
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block2
+        env: {START: "48", COUNT: "48", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment-2026.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2026-block2, path: segment-out/*.json, retention-days: 1}
+
+  block3:
+    name: block3 96-141
+    needs: block2
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build block3
+        env: {START: "96", COUNT: "46", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
+        run: bash .github/scripts/program-history-segment-2026.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: gamagori-2026-block3, path: segment-out/*.json, retention-days: 1}
+
+  merge:
+    name: merge and final audit
+    needs: [block1, block2, block3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v5
+        with: {pattern: gamagori-2026-block*, path: blocks}
+      - name: Merge
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from collections import Counter
+
+          m=json.loads(Path("gamagori-2026-schedule-manifest.json").read_text())
+          scheduled=m["dates"]
+          if len(scheduled)!=142: raise SystemExit("FINAL FAIL · manifest count")
+          if scheduled!=sorted(set(scheduled)): raise SystemExit("FINAL FAIL · manifest order/duplicate")
+          if scheduled[-1]!="2026-09-04": raise SystemExit("FINAL FAIL · cutoff")
+
+          rows=[]; reports=[]
+          for p in Path("blocks").rglob("segment.json"):
+              rows += json.loads(p.read_text())["races"]
+          for p in Path("blocks").rglob("report.json"):
+              reports.append(json.loads(p.read_text()))
+
+          if len(reports)!=3: raise SystemExit("FINAL FAIL · missing block report")
+          ids=[r["id"] for r in rows]
+          if len(ids)!=len(set(ids)): raise SystemExit("FINAL FAIL · duplicate id")
+          if any(not str(r["d"]).startswith("2026-") for r in rows):
+              raise SystemExit("FINAL FAIL · non-2026 row")
+          if any(r["d"] not in scheduled for r in rows):
+              raise SystemExit("FINAL FAIL · row outside manifest")
+          by=Counter(r["d"] for r in rows)
+          if any(n!=12 for n in by.values()): raise SystemExit("FINAL FAIL · partial day")
+
+          exceptions=sum((r.get("exceptions",[]) for r in reports),[])
+          # Fail closed: scheduled dates with no complete 12R day remain exceptions/review items.
+          ready=(len(by)==len(scheduled) and not exceptions)
+
+          out=Path("artifact"); out.mkdir(exist_ok=True)
+          shard={"schema":"boat-command-program-history-v1",
+                 "builder":"PROGRAM-HISTORY-BUILDER-V1.2.1",
+                 "venueCode":"07","year":2026,
+                 "cutoff":"2026-09-04",
+                 "races":sorted(rows,key=lambda r:(r["d"],int(r["r"])))}
+          report={"schema":"boat-command-program-history-year-audit-v1",
+                  "venueCode":"07","year":2026,"cutoff":"2026-09-04",
+                  "scheduled_dates":len(scheduled),"complete_dates":len(by),
+                  "complete_races":len(rows),"exceptions":exceptions,
+                  "ready_for_program_history":ready}
+          (out/"gamagori-2026.json").write_text(
+              json.dumps(shard,ensure_ascii=False,separators=(",",":")))
+          (out/"gamagori-2026-audit-report.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2))
+          print(f"YEAR BUILD · scheduled={len(scheduled)} · complete={len(by)} · races={len(rows)}")
+          print(f"EXCEPTIONS · {len(exceptions)}")
+          print("CUTOFF · 2026-09-04")
+          print("READY FOR PROGRAM HISTORY ·",ready)
+          if not ready: raise SystemExit("FINAL HOLD · review audit report")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gamagori-2026-segmented-year-build
+          path: artifact/*.json
+          retention-days: 7
+          if-no-files-found: warn
