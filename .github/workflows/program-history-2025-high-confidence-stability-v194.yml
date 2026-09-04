@@ -1,0 +1,211 @@
+name: PROGRAM HISTORY 2025 high-confidence stability v1.9.4
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source
+
+      - name: Validate threshold 1.5 chronological stability
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          rows=sorted(
+              json.loads(Path("source/gamagori-2025.json").read_text(encoding="utf-8"))["races"],
+              key=lambda r:(r["d"],r["r"])
+          )
+          assert len(rows)==2381
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lane_weights=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5
+          decay=.55
+          min_weighted=30.0
+
+          def cv(r):
+              c=r["c"]
+              assert len(c)==6 and all(x in rank for x in c)
+              return tuple(c)
+
+          def feat(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),
+                      sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+
+          def dist(a,b):
+              lane=sum(lane_weights[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat(a),feat(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+
+          def winner(r):
+              try: return int(str(r["o"]).split("-")[0])
+              except: return None
+
+          records=[]
+          dates=sorted({r["d"] for r in rows})
+
+          for d in dates:
+              train=[r for r in rows if r["d"] < d]
+              targets=[r for r in rows if r["d"] == d]
+              if not train: continue
+              assert all(r["d"] < d for r in train)
+
+              for t in targets:
+                  tc=cv(t)
+                  wc=Counter()
+                  wn=0.0
+                  raw=0
+                  for r in train:
+                      dd=dist(tc,cv(r))
+                      if dd<=threshold:
+                          raw+=1
+                          w=math.exp(-decay*dd)
+                          rw=winner(r)
+                          if rw in range(1,7):
+                              wc[rw]+=w
+                              wn+=w
+                  pick=wc.most_common(1)[0][0] if wn>=min_weighted and wc else None
+                  actual=winner(t)
+                  records.append({
+                      "date":d,"race":t["r"],"pick":pick,"actual":actual,
+                      "rawSamples":raw,"weightedSamples":round(wn,4),
+                      "eligible":pick is not None and actual is not None,
+                      "hit":pick is not None and actual is not None and pick==actual
+                  })
+
+          def score(data):
+              e=[x for x in data if x["eligible"]]
+              h=sum(x["hit"] for x in e)
+              return {
+                  "targets":len(data),
+                  "eligible":len(e),
+                  "hits":h,
+                  "accuracyPct":round(100*h/len(e),2) if e else None,
+                  "coveragePct":round(100*len(e)/len(data),2) if data else None
+              }
+
+          overall=score(records)
+          assert overall["eligible"]==161, overall
+          assert overall["hits"]==106, overall
+          assert overall["accuracyPct"]==65.84, overall
+
+          monthly=[]
+          for m in range(1,13):
+              key=f"2025-{m:02d}"
+              s=score([x for x in records if x["date"].startswith(key)])
+              s["month"]=key
+              monthly.append(s)
+
+          quarters=[]
+          for name,lo,hi in [
+              ("Q1","2025-01-01","2025-04-01"),
+              ("Q2","2025-04-01","2025-07-01"),
+              ("Q3","2025-07-01","2025-10-01"),
+              ("Q4","2025-10-01","2026-01-01")
+          ]:
+              s=score([x for x in records if lo<=x["date"]<hi])
+              s["period"]=name
+              quarters.append(s)
+
+          # Sequential blocks of 40 eligible predictions (last block may be smaller).
+          eligible=[x for x in records if x["eligible"]]
+          blocks=[]
+          for i in range(0,len(eligible),40):
+              b=eligible[i:i+40]
+              s=score(b)
+              s.update({
+                  "block":f"E{i+1:03d}-E{i+len(b):03d}",
+                  "startDate":b[0]["date"],"endDate":b[-1]["date"]
+              })
+              blocks.append(s)
+
+          nonempty_months=[x for x in monthly if x["eligible"]>0]
+          month_acc=[x["accuracyPct"] for x in nonempty_months if x["accuracyPct"] is not None]
+          weak_months=[x["month"] for x in nonempty_months if x["accuracyPct"]<56.61]
+          block_acc=[x["accuracyPct"] for x in blocks if x["accuracyPct"] is not None]
+
+          stability={
+              "nonEmptyMonths":len(nonempty_months),
+              "monthsBelowBaseline":weak_months,
+              "minMonthlyAccuracyPct":min(month_acc) if month_acc else None,
+              "maxMonthlyAccuracyPct":max(month_acc) if month_acc else None,
+              "monthlyRangePct":round(max(month_acc)-min(month_acc),2) if month_acc else None,
+              "minBlockAccuracyPct":min(block_acc) if block_acc else None,
+              "maxBlockAccuracyPct":max(block_acc) if block_acc else None,
+              "blockRangePct":round(max(block_acc)-min(block_acc),2) if block_acc else None
+          }
+
+          out={
+              "schema":"boat-command-high-confidence-stability-v1",
+              "venueCode":"07","year":2025,"sourceRaceCount":len(rows),
+              "threshold":threshold,"minimumWeightedSamples":min_weighted,
+              "strictPastOnly":True,"sameDayTrainingExcluded":True,
+              "distanceUsesResults":False,"distanceUsesPayouts":False,
+              "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+              "baselineAccuracyPct":56.61,
+              "overall":overall,
+              "monthly":monthly,
+              "quarters":quarters,
+              "eligibleSequenceBlocks":blocks,
+              "stability":stability
+          }
+          Path("out/gamagori-2025-high-confidence-stability.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+
+          print("HIGH-CONFIDENCE STABILITY PASS")
+          print("SOURCE RACES",len(rows))
+          print("LEAKAGE CHECK PASS · train date < target date")
+          print("THRESHOLD",threshold,"MIN WEIGHTED",min_weighted)
+          print("OVERALL",overall)
+          for x in monthly: print("MONTH",x)
+          for x in quarters: print("QUARTER",x)
+          for x in blocks: print("SEQUENCE",x)
+          print("STABILITY",stability)
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2025-high-confidence-stability.json"))
+          assert x["sourceRaceCount"]==2381
+          assert x["threshold"]==1.5
+          assert x["minimumWeightedSamples"]==30.0
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"]
+          assert x["mode"]=="SHADOW_OBSERVE_ONLY"
+          assert x["overall"]["eligible"]==161
+          assert x["overall"]["hits"]==106
+          assert x["overall"]["accuracyPct"]==65.84
+          print("SAFETY PASS · STRICT OOS · THRESHOLD 1.5 · SHADOW ONLY")
+          PY
+
+      - name: Upload stability diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-high-confidence-stability
+          path: out/gamagori-2025-high-confidence-stability.json
+          retention-days: 7
+          if-no-files-found: error
