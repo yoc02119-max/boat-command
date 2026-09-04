@@ -1,0 +1,125 @@
+name: PROGRAM HISTORY 2025 B-structure signature v1.7.2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: diagnose B parser edge cases
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LZH extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Download only 2025-04-13 and 2025-05-09 B files
+        run: |
+          set -euo pipefail
+          rm -rf diag
+          mkdir -p diag/raw diag/extracted diag/out
+
+          for d in 2025-04-13 2025-05-09; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"
+            yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"
+            mkdir -p "diag/extracted/$d"
+
+            curl -fsSL --connect-timeout 20 --max-time 60 \
+              "https://www1.mbrace.or.jp/od2/B/${ym}/${b}" -o "diag/raw/$b"
+            sleep 2
+            lha "xw=diag/extracted/$d" "diag/raw/$b" >/dev/null
+          done
+
+      - name: Build redacted structural signature
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json, re, sys
+          from pathlib import Path
+
+          spec=importlib.util.spec_from_file_location("builder","program-history-builder-v121.py")
+          B=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=B
+          spec.loader.exec_module(B)
+
+          def one_file(folder):
+              fs=[p for p in Path(folder).rglob("*") if p.is_file()]
+              return fs[0] if fs else None
+
+          def redact(s):
+              # Keep ASCII/full-width digits, A1/A2/B1/B2, R/H and punctuation;
+              # replace Japanese/name text so the artifact is structural, not a raw copy.
+              s=B._norm_line(s)
+              s=re.sub(r'[^\x00-\x7F]', 'X', s)
+              s=re.sub(r'X+', 'X', s)
+              return s[:180]
+
+          report={
+              "schema":"boat-command-program-history-b-structure-signature-v1",
+              "venueCode":"07",
+              "rawFilesCommitted":False,
+              "dates":[]
+          }
+
+          for d in ("2025-04-13","2025-05-09"):
+              p=one_file(f"diag/extracted/{d}")
+              item={"date":d}
+              if not p:
+                  item["error"]="EXTRACTED_FILE_MISSING"
+                  report["dates"].append(item); continue
+
+              text=B.read_cp932(p)
+              blocks=B.venue_blocks(text,"B")
+              if "07" not in blocks:
+                  item["error"]="GAMAGORI_BLOCK_MISSING"
+                  report["dates"].append(item); continue
+
+              block=blocks["07"]
+              lines=block.splitlines()
+              parsed=B.parse_program_block(block)
+              item["parsedRaces"]=sorted(parsed)
+              item["lineCount"]=len(lines)
+              sig=[]
+
+              for i,line in enumerate(lines,1):
+                  n=B._norm_line(line)
+                  grades=re.findall(r'\b(?:A1|A2|B1|B2)\b',n,re.I)
+                  lane=re.match(r'^\s*([1-6])\b',n)
+                  head_hint=bool(re.search(r'\b\d{1,2}\s*R\b',n,re.I))
+                  h1800='H1800' in re.sub(r'\s+','',n).upper()
+                  if grades or lane or head_hint or h1800:
+                      sig.append({
+                          "line":i,
+                          "headHint":head_hint,
+                          "h1800":h1800,
+                          "lane":int(lane.group(1)) if lane else None,
+                          "grades":[g.upper() for g in grades],
+                          "skeleton":redact(line)
+                      })
+              item["signature"]=sig
+              report["dates"].append(item)
+
+          out=Path("diag/out")
+          out.mkdir(parents=True,exist_ok=True)
+          path=out/"gamagori-2025-b-structure-signature.json"
+          path.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print("B-STRUCTURE SIGNATURE COMPLETE")
+          for x in report["dates"]:
+              print(x["date"], "parsed=", x.get("parsedRaces"), "signatureLines=", len(x.get("signature",[])))
+          print("RAW B FILES NOT INCLUDED")
+          PY
+
+      - name: Upload signature report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2025-b-structure-signature
+          path: diag/out/gamagori-2025-b-structure-signature.json
+          retention-days: 3
+          if-no-files-found: error
