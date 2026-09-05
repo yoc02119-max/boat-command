@@ -1,0 +1,211 @@
+name: PROGRAM HISTORY 2026 cross-year segment stability v2.2.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frozen 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source2025
+
+      - name: Download finalized 2026 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2026-exception-finalization-v202.yml
+          workflow_conclusion: success
+          name: gamagori-2026-final
+          path: source2026
+
+      - name: Cross-year stable segment diagnostic
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          y25=sorted(json.loads(Path("source2025/gamagori-2025.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          y26=sorted(json.loads(Path("source2026/gamagori-2026.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          assert len(y25)==2381 and len(y26)==1690
+          assert max(r["d"] for r in y25) < min(r["d"] for r in y26)
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lw=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5; decay=.55; minw=30.0; baseline=56.61
+
+          def cv(r):
+              c=tuple(r["c"])
+              assert len(c)==6 and all(x in rank for x in c)
+              return c
+
+          def feat(c):
+              n=[rank[x] for x in c]
+              return {
+                  "lane1Class": c[0],
+                  "a1Count": sum(x=="A1" for x in c),
+                  "topClassCount": sum(x in {"A1","A2"} for x in c),
+                  "innerStrength": sum(n[:3]),
+                  "outerStrength": sum(n[3:]),
+                  "innerOuterGap": sum(n[:3])-sum(n[3:])
+              }
+
+          def dist(a,b):
+              lane=sum(lw[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x=feat(a); y=feat(b)
+              return lane+.45*abs(x["a1Count"]-y["a1Count"]) \
+                         +.25*abs(x["topClassCount"]-y["topClassCount"]) \
+                         +.12*abs(x["innerStrength"]-y["innerStrength"]) \
+                         +.08*abs(x["outerStrength"]-y["outerStrength"])
+
+          def winner(r):
+              try:return int(str(r["o"]).split("-")[0])
+              except:return None
+
+          def eval_year(target_rows, initial_history):
+              rec=[]; hist=list(initial_history)
+              for d in sorted({r["d"] for r in target_rows}):
+                  assert all(r["d"]<d for r in hist)
+                  day=[r for r in target_rows if r["d"]==d]
+                  for t in day:
+                      if not 5<=int(t["r"])<=8: continue
+                      tc=cv(t); wc=Counter(); wn=0.0; raw=0
+                      for r in hist:
+                          dd=dist(tc,cv(r))
+                          if dd<=threshold:
+                              raw+=1
+                              w=math.exp(-decay*dd)
+                              rw=winner(r)
+                              if rw in range(1,7):
+                                  wc[rw]+=w; wn+=w
+                      pick=wc.most_common(1)[0][0] if wn>=minw and wc else None
+                      actual=winner(t)
+                      if pick is not None and actual is not None:
+                          f=feat(tc)
+                          rec.append({
+                              "date":d,"race":int(t["r"]),
+                              "pick":pick,"actual":actual,"hit":pick==actual,
+                              **f
+                          })
+                  hist.extend(day)
+              return rec
+
+          # Recreate 2025 chronologically from within-2025 past only, matching prior diagnostics.
+          rec25=[]
+          dates25=sorted({r["d"] for r in y25})
+          for d in dates25:
+              hist=[r for r in y25 if r["d"]<d]
+              if not hist: continue
+              day=[r for r in y25 if r["d"]==d]
+              for t in day:
+                  if not 5<=int(t["r"])<=8: continue
+                  tc=cv(t); wc=Counter(); wn=0.0
+                  for r in hist:
+                      dd=dist(tc,cv(r))
+                      if dd<=threshold:
+                          w=math.exp(-decay*dd); rw=winner(r)
+                          if rw in range(1,7): wc[rw]+=w; wn+=w
+                  pick=wc.most_common(1)[0][0] if wn>=minw and wc else None
+                  actual=winner(t)
+                  if pick is not None and actual is not None:
+                      rec25.append({"date":d,"race":int(t["r"]),"pick":pick,
+                                    "actual":actual,"hit":pick==actual,**feat(tc)})
+
+          rec26=eval_year(y26,y25)
+
+          def st(rows):
+              n=len(rows); h=sum(r["hit"] for r in rows)
+              return {"n":n,"hits":h,"accuracyPct":round(100*h/n,2) if n else None}
+
+          dims=["lane1Class","a1Count","topClassCount","innerStrength",
+                "outerStrength","innerOuterGap","race"]
+          segments=[]
+          for dim in dims:
+              vals=sorted(set(r[dim] for r in rec25) | set(r[dim] for r in rec26), key=lambda x:str(x))
+              for v in vals:
+                  a=[r for r in rec25 if r[dim]==v]
+                  b=[r for r in rec26 if r[dim]==v]
+                  s25=st(a); s26=st(b)
+                  stable=(s25["n"]>=15 and s26["n"]>=15 and
+                          s25["accuracyPct"] is not None and s26["accuracyPct"] is not None and
+                          s25["accuracyPct"]>=baseline and s26["accuracyPct"]>=baseline)
+                  strong=(stable and min(s25["accuracyPct"],s26["accuracyPct"])>=60.0)
+                  segments.append({
+                      "dimension":dim,"value":v,
+                      "y2025":s25,"y2026":s26,
+                      "minAccuracyPct":round(min(x for x in [s25["accuracyPct"],s26["accuracyPct"]] if x is not None),2)
+                          if s25["accuracyPct"] is not None and s26["accuracyPct"] is not None else None,
+                      "stableAboveBaseline":stable,
+                      "strongStable60":strong
+                  })
+
+          stable=[x for x in segments if x["stableAboveBaseline"]]
+          strong=[x for x in segments if x["strongStable60"]]
+          stable.sort(key=lambda x:(x["minAccuracyPct"],x["y2026"]["n"]+x["y2025"]["n"]), reverse=True)
+          strong.sort(key=lambda x:(x["minAccuracyPct"],x["y2026"]["n"]+x["y2025"]["n"]), reverse=True)
+
+          out={
+              "schema":"boat-command-cross-year-segment-stability-v1",
+              "venueCode":"07",
+              "baselineAccuracyPct":baseline,
+              "threshold":threshold,"decay":decay,"minimumWeightedSamples":minw,
+              "strictPastOnly":True,"sameDayTrainingExcluded":True,
+              "distanceUsesResults":False,"distanceUsesPayouts":False,
+              "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+              "r05to08_2025":st(rec25),
+              "r05to08_2026":st(rec26),
+              "segments":segments,
+              "stableAboveBaseline":stable,
+              "strongStable60":strong,
+              "decision":"NEW_SHADOW_CANDIDATES_FOUND" if strong else
+                         "NO_CROSS_YEAR_STRONG_SEGMENT"
+          }
+
+          Path("out/gamagori-2026-cross-year-segment-stability.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2))
+
+          print("CROSS-YEAR SEGMENT STABILITY PASS")
+          print("R05-08 2025",st(rec25))
+          print("R05-08 2026",st(rec26))
+          print("STABLE ABOVE BASELINE",len(stable))
+          for x in stable[:20]: print("STABLE",x)
+          print("STRONG STABLE >=60 BOTH YEARS",len(strong))
+          for x in strong[:20]: print("STRONG",x)
+          print("DECISION",out["decision"])
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2026-cross-year-segment-stability.json"))
+          assert x["threshold"]==1.5 and x["decay"]==.55
+          assert x["minimumWeightedSamples"]==30.0
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["distanceUsesResults"] and not x["distanceUsesPayouts"]
+          assert not x["predictionEnabled"] and x["mode"]=="SHADOW_OBSERVE_ONLY"
+          assert x["decision"] in {"NEW_SHADOW_CANDIDATES_FOUND","NO_CROSS_YEAR_STRONG_SEGMENT"}
+          print("SAFETY PASS · CROSS-YEAR SEGMENT DIAGNOSTIC · SHADOW ONLY")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2026-cross-year-segment-stability
+          path: out/gamagori-2026-cross-year-segment-stability.json
+          retention-days: 7
