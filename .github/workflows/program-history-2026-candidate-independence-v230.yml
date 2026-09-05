@@ -1,0 +1,236 @@
+name: PROGRAM HISTORY 2026 candidate independence diagnostic v2.3.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frozen 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source2025
+
+      - name: Download finalized 2026 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2026-exception-finalization-v202.yml
+          workflow_conclusion: success
+          name: gamagori-2026-final
+          path: source2026
+
+      - name: Diagnose candidate overlap stability and freshness
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          y25=sorted(json.loads(Path("source2025/gamagori-2025.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          y26=sorted(json.loads(Path("source2026/gamagori-2026.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          assert len(y25)==2381 and len(y26)==1690
+          assert max(r["d"] for r in y25) < min(r["d"] for r in y26)
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lw=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5; decay=.55; minw=30.0
+
+          def cv(r):
+              c=tuple(r["c"])
+              assert len(c)==6 and all(x in rank for x in c)
+              return c
+
+          def features(c):
+              n=[rank[x] for x in c]
+              return {
+                  "lane1A1": c[0]=="A1",
+                  "gap0": (sum(n[:3])-sum(n[3:]))==0,
+              }
+
+          def feat4(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),
+                      sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+
+          def dist(a,b):
+              lane=sum(lw[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat4(a),feat4(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+
+          def winner(r):
+              try:return int(str(r["o"]).split("-")[0])
+              except:return None
+
+          def build_2025():
+              rec=[]
+              for d in sorted({r["d"] for r in y25}):
+                  hist=[r for r in y25 if r["d"]<d]
+                  if not hist: continue
+                  for t in [r for r in y25 if r["d"]==d]:
+                      if not 5<=int(t["r"])<=8: continue
+                      tc=cv(t); wc=Counter(); wn=0.0
+                      for r in hist:
+                          dd=dist(tc,cv(r))
+                          if dd<=threshold:
+                              w=math.exp(-decay*dd); rw=winner(r)
+                              if rw in range(1,7): wc[rw]+=w; wn+=w
+                      pick=wc.most_common(1)[0][0] if wn>=minw and wc else None
+                      actual=winner(t)
+                      if pick is not None and actual is not None:
+                          f=features(tc)
+                          rec.append({"id":t["id"],"date":d,"race":int(t["r"]),
+                                      "pick":pick,"actual":actual,"hit":pick==actual,
+                                      "lane1A1":f["lane1A1"],"race7":int(t["r"])==7,"gap0":f["gap0"]})
+              return rec
+
+          def build_2026():
+              rec=[]; hist=list(y25)
+              for d in sorted({r["d"] for r in y26}):
+                  assert all(r["d"]<d for r in hist)
+                  day=[r for r in y26 if r["d"]==d]
+                  for t in day:
+                      if not 5<=int(t["r"])<=8: continue
+                      tc=cv(t); wc=Counter(); wn=0.0
+                      for r in hist:
+                          dd=dist(tc,cv(r))
+                          if dd<=threshold:
+                              w=math.exp(-decay*dd); rw=winner(r)
+                              if rw in range(1,7): wc[rw]+=w; wn+=w
+                      pick=wc.most_common(1)[0][0] if wn>=minw and wc else None
+                      actual=winner(t)
+                      if pick is not None and actual is not None:
+                          f=features(tc)
+                          rec.append({"id":t["id"],"date":d,"race":int(t["r"]),
+                                      "pick":pick,"actual":actual,"hit":pick==actual,
+                                      "lane1A1":f["lane1A1"],"race7":int(t["r"])==7,"gap0":f["gap0"]})
+                  hist.extend(day)
+              return rec
+
+          r25=build_2025()
+          r26=build_2026()
+          assert len(r25)==58
+          assert len(r26)==147
+
+          def st(rows):
+              n=len(rows); h=sum(x["hit"] for x in rows)
+              return {"n":n,"hits":h,"accuracyPct":round(100*h/n,2) if n else None}
+
+          names=["lane1A1","race7","gap0"]
+
+          def candidate_report(rows,name):
+              sel=[x for x in rows if x[name]]
+              monthly=[]
+              for m in sorted({x["date"][:7] for x in sel}):
+                  monthly.append({"month":m,**st([x for x in sel if x["date"][:7]==m])})
+              recent={}
+              for n in (8,16,24,32):
+                  recent[str(n)]=st(sel[-n:]) if sel else st([])
+              return {"overall":st(sel),"monthly":monthly,"recent":recent}
+
+          candidates={}
+          for name in names:
+              candidates[name]={"y2025":candidate_report(r25,name),
+                                "y2026":candidate_report(r26,name)}
+
+          overlaps=[]
+          for i,a in enumerate(names):
+              for b in names[i+1:]:
+                  for yr,rows in [(2025,r25),(2026,r26)]:
+                      A={x["id"] for x in rows if x[a]}
+                      B={x["id"] for x in rows if x[b]}
+                      I=A&B; U=A|B
+                      overlaps.append({
+                          "year":yr,"a":a,"b":b,
+                          "aN":len(A),"bN":len(B),"intersectionN":len(I),
+                          "jaccard":round(len(I)/len(U),4) if U else 0.0,
+                          "intersection":st([x for x in rows if x["id"] in I]),
+                          "aOnly":st([x for x in rows if x["id"] in (A-B)]),
+                          "bOnly":st([x for x in rows if x["id"] in (B-A)])
+                      })
+
+          combo={}
+          for yr,rows in [(2025,r25),(2026,r26)]:
+              triple=[x for x in rows if x["lane1A1"] and x["race7"] and x["gap0"]]
+              any_two=[x for x in rows if sum([x["lane1A1"],x["race7"],x["gap0"]])>=2]
+              exactly_one=[x for x in rows if sum([x["lane1A1"],x["race7"],x["gap0"]])==1]
+              none=[x for x in rows if not (x["lane1A1"] or x["race7"] or x["gap0"])]
+              combo[str(yr)]={
+                  "triple":st(triple),
+                  "atLeastTwo":st(any_two),
+                  "exactlyOne":st(exactly_one),
+                  "none":st(none)
+              }
+
+          # Diagnostic independence flag: pairwise Jaccard under .50 in both years.
+          pair_groups={}
+          for a,b in [("lane1A1","race7"),("lane1A1","gap0"),("race7","gap0")]:
+              xs=[x for x in overlaps if x["a"]==a and x["b"]==b]
+              pair_groups[f"{a}+{b}"]={
+                  "y2025Jaccard":next(x["jaccard"] for x in xs if x["year"]==2025),
+                  "y2026Jaccard":next(x["jaccard"] for x in xs if x["year"]==2026),
+                  "independentEnough":all(x["jaccard"]<0.50 for x in xs)
+              }
+
+          out={
+              "schema":"boat-command-candidate-independence-v1",
+              "venueCode":"07",
+              "threshold":threshold,"decay":decay,"minimumWeightedSamples":minw,
+              "strictPastOnly":True,"sameDayTrainingExcluded":True,
+              "predictionEnabled":False,"mode":"SHADOW_OBSERVE_ONLY",
+              "baseR05to08":{"y2025":st(r25),"y2026":st(r26)},
+              "candidates":candidates,
+              "pairwiseOverlap":overlaps,
+              "pairIndependence":pair_groups,
+              "combinationDiagnostics":combo,
+              "note":"Combination metrics are diagnostic only and must not be promoted as a new rule from this same 2026 sample."
+          }
+
+          Path("out/gamagori-2026-candidate-independence.json").write_text(
+              json.dumps(out,ensure_ascii=False,indent=2))
+
+          print("CANDIDATE INDEPENDENCE DIAGNOSTIC PASS")
+          print("BASE 2025",st(r25),"BASE 2026",st(r26))
+          for n in names:
+              print("CANDIDATE",n,"2025",candidates[n]["y2025"]["overall"],
+                    "2026",candidates[n]["y2026"]["overall"])
+              print("RECENT 2026",n,candidates[n]["y2026"]["recent"])
+          for x in overlaps: print("OVERLAP",x)
+          print("PAIR INDEPENDENCE",pair_groups)
+          print("COMBINATIONS DIAGNOSTIC ONLY",combo)
+          print("PREDICTION ENABLED false · SHADOW/OBSERVE ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open("out/gamagori-2026-candidate-independence.json"))
+          assert x["baseR05to08"]["y2025"]["n"]==58
+          assert x["baseR05to08"]["y2026"]["n"]==147
+          assert x["threshold"]==1.5 and x["decay"]==.55
+          assert x["minimumWeightedSamples"]==30.0
+          assert x["strictPastOnly"] and x["sameDayTrainingExcluded"]
+          assert not x["predictionEnabled"] and x["mode"]=="SHADOW_OBSERVE_ONLY"
+          print("SAFETY PASS · INDEPENDENCE/FRESHNESS DIAGNOSTIC ONLY")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-2026-candidate-independence
+          path: out/gamagori-2026-candidate-independence.json
+          retention-days: 7
