@@ -1,0 +1,207 @@
+name: PROGRAM HISTORY Candidate V2 shadow tracker v2.4.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source2025
+
+      - name: Download finalized 2026 DB
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2026-exception-finalization-v202.yml
+          workflow_conclusion: success
+          name: gamagori-2026-final
+          path: source2026
+
+      - name: Freeze Candidate V2 and build shadow baseline
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          y25=sorted(json.loads(Path("source2025/gamagori-2025.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          y26=sorted(json.loads(Path("source2026/gamagori-2026.json").read_text())["races"],
+                     key=lambda r:(r["d"],int(r["r"])))
+          assert len(y25)==2381 and len(y26)==1690
+
+          rank={"A1":3,"A2":2,"B1":1,"B2":0}
+          lw=[1.35,1.20,1.10,1.00,.95,.90]
+          threshold=1.5; decay=.55; minw=30.0
+          freeze_date="2026-09-05"
+          tracking_start="2026-09-05"
+
+          def cv(r):
+              c=tuple(r["c"])
+              assert len(c)==6 and all(x in rank for x in c)
+              return c
+
+          def feat4(c):
+              n=[rank[x] for x in c]
+              return (sum(x=="A1" for x in c),
+                      sum(x in {"A1","A2"} for x in c),
+                      sum(n[:3]),sum(n[3:]))
+
+          def dist(a,b):
+              lane=sum(lw[i]*abs(rank[a[i]]-rank[b[i]]) for i in range(6))
+              x,y=feat4(a),feat4(b)
+              return lane+.45*abs(x[0]-y[0])+.25*abs(x[1]-y[1])+.12*abs(x[2]-y[2])+.08*abs(x[3]-y[3])
+
+          def winner(r):
+              try:return int(str(r["o"]).split("-")[0])
+              except:return None
+
+          def signals(r):
+              c=cv(r); n=[rank[x] for x in c]
+              lane1A1=(c[0]=="A1")
+              race7=(int(r["r"])==7)
+              gap0=(sum(n[:3])-sum(n[3:])==0)
+              count=int(lane1A1)+int(race7)+int(gap0)
+              return {
+                  "lane1A1":lane1A1,
+                  "race7":race7,
+                  "gap0":gap0,
+                  "signalCount":count,
+                  "candidateV2":count>=2
+              }
+
+          # Historical diagnostic baseline only. This does NOT authorize production use.
+          rows=y25+y26
+          hist=[]
+          rec=[]
+          for d in sorted({r["d"] for r in rows}):
+              day=[r for r in rows if r["d"]==d]
+              if hist:
+                  for t in day:
+                      if not 5<=int(t["r"])<=8: continue
+                      tc=cv(t); wc=Counter(); wn=0.0
+                      for r in hist:
+                          dd=dist(tc,cv(r))
+                          if dd<=threshold:
+                              w=math.exp(-decay*dd); rw=winner(r)
+                              if rw in range(1,7): wc[rw]+=w; wn+=w
+                      pick=wc.most_common(1)[0][0] if wn>=minw and wc else None
+                      actual=winner(t)
+                      sig=signals(t)
+                      if pick is not None and actual is not None and sig["candidateV2"]:
+                          rec.append({
+                              "id":t["id"],"date":d,"race":int(t["r"]),
+                              "pick":pick,"actual":actual,"hit":pick==actual,
+                              **sig
+                          })
+              hist.extend(day)
+
+          def st(a):
+              n=len(a); h=sum(x["hit"] for x in a)
+              return {"n":n,"hits":h,"accuracyPct":round(100*h/n,2) if n else None}
+
+          hist25=[x for x in rec if x["date"].startswith("2025-")]
+          hist26=[x for x in rec if x["date"].startswith("2026-")]
+          spec={
+              "schema":"boat-command-candidate-v2-spec-v1",
+              "venueCode":"07",
+              "name":"Candidate V2",
+              "frozenAtJST":freeze_date,
+              "trackingStartDate":tracking_start,
+              "scope":"R05-08 only",
+              "baseModel":{
+                  "threshold":threshold,
+                  "decay":decay,
+                  "minimumWeightedSamples":minw
+              },
+              "signals":[
+                  {"id":"lane1A1","definition":"lane 1 class is A1"},
+                  {"id":"race7","definition":"race number is 7"},
+                  {"id":"gap0","definition":"inner three class strength equals outer three class strength"}
+              ],
+              "entryRule":"signalCount >= 2",
+              "historicalDiagnostic":{
+                  "y2025":st(hist25),
+                  "y2026":st(hist26)
+              },
+              "productionEnabled":False,
+              "mode":"SHADOW_ONLY",
+              "promotionRule":{
+                  "minimumNewEligible":40,
+                  "minimumAccuracyPct":65.0,
+                  "minimumRecent20AccuracyPct":60.0,
+                  "noRuleChangesBeforeEvaluation":True
+              },
+              "notes":[
+                  "2025/2026 combination performance is diagnostic and was used only to freeze this candidate.",
+                  "No production promotion is allowed from the same 2026 sample.",
+                  "Only races on/after trackingStartDate count as prospective validation."
+              ]
+          }
+
+          state={
+              "schema":"boat-command-candidate-v2-tracker-state-v1",
+              "venueCode":"07",
+              "candidate":"Candidate V2",
+              "trackingStartDate":tracking_start,
+              "eligible":0,
+              "hits":0,
+              "accuracyPct":None,
+              "recent20AccuracyPct":None,
+              "status":"WAITING_FOR_NEW_DATA",
+              "productionEnabled":False,
+              "records":[]
+          }
+
+          Path("out/gamagori-candidate-v2-spec.json").write_text(
+              json.dumps(spec,ensure_ascii=False,indent=2))
+          Path("out/gamagori-candidate-v2-shadow-state.json").write_text(
+              json.dumps(state,ensure_ascii=False,indent=2))
+
+          print("CANDIDATE V2 FREEZE PASS")
+          print("RULE · R05-08 AND signalCount>=2")
+          print("SIGNALS · lane1A1 / race7 / gap0")
+          print("HISTORICAL DIAGNOSTIC 2025",spec["historicalDiagnostic"]["y2025"])
+          print("HISTORICAL DIAGNOSTIC 2026",spec["historicalDiagnostic"]["y2026"])
+          print("TRACKING START",tracking_start)
+          print("STATUS WAITING_FOR_NEW_DATA")
+          print("PRODUCTION ENABLED false · SHADOW ONLY")
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          spec=json.load(open("out/gamagori-candidate-v2-spec.json"))
+          state=json.load(open("out/gamagori-candidate-v2-shadow-state.json"))
+          assert spec["entryRule"]=="signalCount >= 2"
+          assert spec["trackingStartDate"]=="2026-09-05"
+          assert spec["productionEnabled"] is False
+          assert spec["mode"]=="SHADOW_ONLY"
+          assert spec["promotionRule"]["minimumNewEligible"]==40
+          assert spec["promotionRule"]["noRuleChangesBeforeEvaluation"] is True
+          assert state["eligible"]==0 and state["hits"]==0
+          assert state["status"]=="WAITING_FOR_NEW_DATA"
+          assert state["productionEnabled"] is False
+          print("SAFETY PASS · CANDIDATE V2 FROZEN · PROSPECTIVE SHADOW ONLY")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-candidate-v2-frozen
+          path: out/*.json
+          retention-days: 30
