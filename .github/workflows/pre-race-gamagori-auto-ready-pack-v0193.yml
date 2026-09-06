@@ -1,0 +1,151 @@
+name: PRE-RACE Gamagori auto-ready pack v0.19.3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  auto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select next race and verify PRE-RACE readiness
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          mkdir -p tmp_auto "live/gamagori/$DATE/pre"
+
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=1"
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-AUTO-READY/0.19.3' \
+            "$RACELIST" -o tmp_auto/racelist.html
+
+          export DATE RACELIST
+          python3 - <<'PY'
+          import os,re,json,html,datetime,pathlib
+          from zoneinfo import ZoneInfo
+
+          date=os.environ["DATE"]
+          now=datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+          rl=pathlib.Path("tmp_auto/racelist.html").read_text(encoding="utf-8",errors="replace")
+          plain=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",rl)))
+          times=re.findall(r"(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)",plain)
+          deadlines=times[:12] if len(times)>=12 else []
+
+          margin_min=5
+          selected=None
+          for i,t in enumerate(deadlines,1):
+              hh,mm=map(int,t.split(":"))
+              dt=datetime.datetime.fromisoformat(date).replace(
+                  hour=hh,minute=mm,tzinfo=ZoneInfo("Asia/Tokyo"))
+              margin=(dt-now).total_seconds()/60
+              if margin>=margin_min:
+                  selected={"race":i,"deadline":t,"marginMinutes":round(margin,1)}
+                  break
+
+          out={
+              "schema":"boat-command-auto-ready-state-v1",
+              "venue":"GAMAGORI","venueCode":"07","date":date,
+              "fetchedAt":now.isoformat(),
+              "minimumSafetyMarginMinutes":margin_min,
+              "deadlineCount":len(deadlines),
+              "selected":selected,
+              "status":"NO_MORE_RACES_TODAY" if deadlines and not selected else
+                       "SCHEDULE_UNVERIFIED" if len(deadlines)!=12 else
+                       "RACE_SELECTED",
+              "resultEndpointsIncluded":False,
+              "predictionEnabled":False,
+              "hardLockEnabled":False
+          }
+          pathlib.Path("tmp_auto/state.json").write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False))
+          PY
+
+          RACE=$(python3 -c 'import json; x=json.load(open("tmp_auto/state.json")); print(x["selected"]["race"] if x["selected"] else "")')
+          if [ -z "$RACE" ]; then
+            cp tmp_auto/state.json "live/gamagori/$DATE/pre/auto-ready.json"
+            echo "NO SELECTED RACE"
+            exit 0
+          fi
+
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-AUTO-READY/0.19.3' \
+            "$BEFOREINFO" -o tmp_auto/beforeinfo.html
+
+          export BEFOREINFO RACE
+          python3 - <<'PY'
+          import os,re,json,html,pathlib
+
+          state=json.load(open("tmp_auto/state.json"))
+          bi=pathlib.Path("tmp_auto/beforeinfo.html").read_text(encoding="utf-8",errors="replace")
+          plain=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",bi)))
+
+          marker_hits=sum(k in plain for k in ("直前情報","展示タイム","スタート展示","水面気象情報"))
+          # Ready only when race-specific exhibition/start exhibition/weather are all present.
+          pre_ready=(
+              "展示タイム" in plain and
+              "スタート展示" in plain and
+              "水面気象情報" in plain and
+              marker_hits>=3
+          )
+
+          state["beforeinfoSourceUrl"]=os.environ["BEFOREINFO"]
+          state["beforeinfoMarkerHits"]=marker_hits
+          state["preRaceDataReady"]=pre_ready
+          state["status"]="PRE_RACE_DATA_READY" if pre_ready else "WAITING_FOR_PRE_RACE_DATA"
+          state["readyToBuildVerifiedPack"]=pre_ready
+
+          out=pathlib.Path(f'live/gamagori/{state["date"]}/pre/auto-ready.json')
+          out.write_text(json.dumps(state,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({
+              "status":state["status"],
+              "selected":state["selected"],
+              "beforeinfoMarkerHits":marker_hits,
+              "readyToBuildVerifiedPack":pre_ready
+          },ensure_ascii=False))
+          PY
+
+          rm -rf tmp_auto
+
+      - name: Safety audit
+        run: |
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          export DATE
+          python3 - <<'PY'
+          import os,json
+          p=f'live/gamagori/{os.environ["DATE"]}/pre/auto-ready.json'
+          x=json.load(open(p))
+          assert x["venueCode"]=="07"
+          assert x["minimumSafetyMarginMinutes"]==5
+          assert x["resultEndpointsIncluded"] is False
+          assert x["predictionEnabled"] is False
+          assert x["hardLockEnabled"] is False
+          assert x["status"] in {
+              "PRE_RACE_DATA_READY",
+              "WAITING_FOR_PRE_RACE_DATA",
+              "NO_MORE_RACES_TODAY",
+              "SCHEDULE_UNVERIFIED"
+          }
+          if x.get("readyToBuildVerifiedPack"):
+              assert x["selected"]["marginMinutes"]>=5
+              assert x["preRaceDataReady"] is True
+          print("SAFETY PASS · AUTO-READY GATE · PRE-RACE ONLY")
+          PY
+
+      - name: Commit auto-ready state
+        run: |
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add "live/gamagori/$DATE/pre/auto-ready.json"
+          git diff --cached --quiet && exit 0
+          git commit -m "live: gamagori $DATE auto-ready gate"
+          git push
