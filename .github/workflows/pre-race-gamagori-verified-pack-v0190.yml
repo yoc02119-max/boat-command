@@ -1,0 +1,291 @@
+name: PRE-RACE Gamagori verified pack v0.19.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'YYYY-MM-DD'
+        required: true
+        type: string
+      race:
+        description: '1-12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch and build verified PRE-RACE pack
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=$RACE"
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+
+          rm -rf tmp_pack
+          mkdir -p tmp_pack "live/gamagori/$DATE/pre"
+
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-PRE-RACE-PACK/0.19.0' \
+            "$RACELIST" -o tmp_pack/racelist.html
+          sleep 2
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-PRE-RACE-PACK/0.19.0' \
+            "$BEFOREINFO" -o tmp_pack/beforeinfo.html
+
+          export RACELIST BEFOREINFO
+
+          python3 - <<'PY'
+          import os,re,json,html,datetime,pathlib
+          from html.parser import HTMLParser
+          from zoneinfo import ZoneInfo
+
+          date=os.environ["DATE"]; race=int(os.environ["RACE"])
+          now=datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+
+          def read(path):
+              b=pathlib.Path(path).read_bytes()
+              for enc in ("utf-8","cp932","shift_jis","euc_jp"):
+                  try:return b.decode(enc)
+                  except UnicodeDecodeError:pass
+              return b.decode("utf-8","replace")
+
+          rl=read("tmp_pack/racelist.html")
+          bi=read("tmp_pack/beforeinfo.html")
+
+          class TableParser(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.depth=0; self.in_cell=False
+                  self.cell=[]; self.row=[]; self.table=[]; self.tables=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=="table":
+                      if self.depth==0:self.table=[]
+                      self.depth+=1
+                  elif tag in ("td","th") and self.depth:
+                      self.in_cell=True; self.cell=[]
+                  elif tag=="tr" and self.depth:self.row=[]
+                  elif tag=="br" and self.in_cell:self.cell.append(" / ")
+              def handle_data(self,data):
+                  if self.in_cell:self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ("td","th") and self.in_cell:
+                      self.row.append(re.sub(r"\s+"," ",html.unescape("".join(self.cell))).strip())
+                      self.in_cell=False; self.cell=[]
+                  elif tag=="tr" and self.depth and self.row:
+                      if any(self.row):self.table.append(self.row)
+                      self.row=[]
+                  elif tag=="table" and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:
+                          self.tables.append(self.table); self.table=[]
+
+          def tables(text):
+              p=TableParser(); p.feed(text); return p.tables
+
+          rlt=tables(rl); bit=tables(bi)
+
+          # Deadline
+          plain_rl=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",rl)))
+          times=re.findall(r"(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)",plain_rl)
+          deadline=times[race-1] if len(times)>=12 else None
+          deadline_dt=None
+          if deadline:
+              hh,mm=map(int,deadline.split(":"))
+              deadline_dt=datetime.datetime.fromisoformat(date).replace(
+                  hour=hh,minute=mm,tzinfo=ZoneInfo("Asia/Tokyo"))
+          timing="VERIFIED" if deadline_dt and now<=deadline_dt else "EXCLUDED_LATE"
+
+          # Racer/class/motor/boat
+          racer_table=None
+          for t in rlt:
+              joined=" ".join(" ".join(r) for r in t[:6])
+              if all(k in joined for k in ("登録番号","級別","モーター","ボート")):
+                  racer_table=t; break
+
+          lane_map={"１":1,"２":2,"３":3,"４":4,"５":5,"６":6}
+          boats={}
+          if racer_table:
+              for row in racer_table:
+                  if not row: continue
+                  raw=row[0].strip()
+                  if raw not in set(lane_map)|set("123456"): continue
+                  lane=lane_map.get(raw,int(raw) if raw.isdigit() else None)
+                  joined=" | ".join(row)
+                  m=re.search(r"(\d{4})\s*/\s*(A1|A2|B1|B2)\s+([^|/]+)",joined)
+                  motor=boat=None
+                  if len(row)>6:
+                      mm=re.match(r"\s*(\d+)\s*/",row[5])
+                      bb=re.match(r"\s*(\d+)\s*/",row[6])
+                      motor=int(mm.group(1)) if mm else None
+                      boat=int(bb.group(1)) if bb else None
+                  if m:
+                      boats[lane]={
+                          "lane":lane,
+                          "class":m.group(2),
+                          "motor":motor,
+                          "boat":boat
+                      }
+
+          # Exhibition and tilt
+          ex={}
+          for t in bit:
+              joined=" ".join(" ".join(r) for r in t[:5])
+              if "展示" in joined and "タイム" in joined and "体重" in joined:
+                  for row in t:
+                      if not row or row[0] not in set("123456"): continue
+                      lane=int(row[0])
+                      et=None; tilt=None
+                      if len(row)>4 and re.fullmatch(r"\d+\.\d+",row[4].strip()):
+                          et=float(row[4])
+                      if len(row)>5 and re.fullmatch(r"-?\d+(?:\.\d+)?",row[5].strip()):
+                          tilt=float(row[5])
+                      ex[lane]={"exhibitionTime":et,"tilt":tilt}
+                  break
+
+          # Start exhibition
+          st={}
+          for t in bit:
+              joined=" ".join(" ".join(r) for r in t)
+              if "スタート展示" not in joined: continue
+              for row in t:
+                  s=" ".join(row)
+                  m=re.search(r"([1-6])\s+(F\.)?(\d{2})",s)
+                  if m:
+                      st[int(m.group(1))]=("F." if m.group(2) else ".")+m.group(3)
+              if st: break
+
+          # Weather: exact weather1 blocks, no broad regex guessing.
+          title_m=re.search(r'<p class="weather1_title">([^<]+)</p>',bi)
+          weather_ref=html.unescape(title_m.group(1)).strip() if title_m else None
+
+          def weather_value(kind,label,unit):
+              block=re.search(
+                  rf'<div class="weather1_bodyUnit {re.escape(kind)}">(.*?)</div>\s*</div>',
+                  bi,re.S
+              )
+              source=block.group(1) if block else bi
+              m=re.search(
+                  rf'<span class="weather1_bodyUnitLabelTitle">\s*{label}\s*</span>\s*'
+                  rf'<span class="weather1_bodyUnitLabelData">\s*([0-9]+(?:\.[0-9]+)?)\s*{unit}\s*</span>',
+                  source,re.S
+              )
+              return float(m.group(1)) if m else None
+
+          air=weather_value("is-direction","気温","℃")
+          wind=weather_value("is-wind","風速","m")
+          water=weather_value("is-waterTemperature","水温","℃")
+          wave=weather_value("is-wave","波高","cm")
+
+          # Weather condition and wind direction are image-class encoded; keep provenance,
+          # but do not guess human-readable labels yet.
+          wm=re.search(r'weather1_bodyUnitImage\s+(is-weather\d+)',bi)
+          dm=re.search(r'weather1_bodyUnitImage\s+(is-wind\d+)',bi)
+          weather_code=wm.group(1) if wm else None
+          wind_dir_code=dm.group(1) if dm else None
+
+          final_boats=[]
+          for lane in range(1,7):
+              b=boats.get(lane,{"lane":lane,"class":None,"motor":None,"boat":None})
+              b.update(ex.get(lane,{"exhibitionTime":None,"tilt":None}))
+              final_boats.append(b)
+
+          boat_verified=(
+              len(boats)==6 and len(ex)==6 and len(st)==6 and
+              all(x["class"] in {"A1","A2","B1","B2"} for x in final_boats) and
+              all(x["motor"] is not None and x["boat"] is not None for x in final_boats)
+          )
+          weather_verified=all(x is not None for x in (air,wind,water,wave))
+          ready=boat_verified and weather_verified and timing=="VERIFIED"
+
+          pack={
+              "schema":"boat-command-live-pre-race-pack-v1",
+              "venue":"GAMAGORI","venueCode":"07",
+              "date":date,"race":race,
+              "fetchedAt":now.isoformat(),
+              "deadline":deadline,
+              "timingStatus":timing,
+              "boats":final_boats,
+              "startExhibition":[{"course":c,"st":st.get(c)} for c in range(1,7)],
+              "weather":{
+                  "reference":weather_ref,
+                  "airTempC":air,
+                  "windSpeedMps":wind,
+                  "waterTempC":water,
+                  "waveHeightCm":wave,
+                  "weatherCode":weather_code,
+                  "windDirectionCode":wind_dir_code
+              },
+              "provenance":{
+                  "racelist":{"status":"VERIFIED","url":os.environ["RACELIST"]},
+                  "beforeinfo":{"status":"VERIFIED","url":os.environ["BEFOREINFO"]},
+                  "boatMapping":{"status":"VERIFIED" if boat_verified else "MISSING"},
+                  "weatherMapping":{"status":"VERIFIED" if weather_verified else "MISSING"},
+                  "timing":{"status":timing}
+              },
+              "boatMappingVerified":boat_verified,
+              "weatherMappingVerified":weather_verified,
+              "readyForPrediction":ready,
+              "predictionEnabled":False,
+              "hardLockEnabled":False,
+              "resultEndpointsIncluded":False
+          }
+
+          out=pathlib.Path(f"live/gamagori/{date}/pre/race-{race}-pack.json")
+          out.write_text(json.dumps(pack,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print(json.dumps({
+              "out":str(out),
+              "boatMappingVerified":boat_verified,
+              "weatherMappingVerified":weather_verified,
+              "timingStatus":timing,
+              "readyForPrediction":ready,
+              "weather":pack["weather"]
+          },ensure_ascii=False))
+          PY
+
+          rm -rf tmp_pack
+
+      - name: Safety audit
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          python3 - <<'PY'
+          import os,json
+          p=f"live/gamagori/{os.environ['DATE']}/pre/race-{int(os.environ['RACE'])}-pack.json"
+          x=json.load(open(p))
+          assert x["venueCode"]=="07"
+          assert len(x["boats"])==6
+          assert len(x["startExhibition"])==6
+          assert x["resultEndpointsIncluded"] is False
+          assert x["predictionEnabled"] is False
+          assert x["hardLockEnabled"] is False
+          assert x["timingStatus"] in {"VERIFIED","EXCLUDED_LATE"}
+          if x["timingStatus"]=="EXCLUDED_LATE":
+              assert x["readyForPrediction"] is False
+          if x["readyForPrediction"]:
+              assert x["boatMappingVerified"] and x["weatherMappingVerified"]
+              assert x["timingStatus"]=="VERIFIED"
+          print("SAFETY PASS · VERIFIED PRE-RACE PACK · FAIL CLOSED")
+          PY
+
+      - name: Commit pack
+        run: |
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add live/gamagori/
+          git diff --cached --quiet && exit 0
+          git commit -m "live: gamagori ${{ inputs.date }} ${{ inputs.race }}R verified pre-race pack"
+          git push
