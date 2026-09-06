@@ -1,0 +1,32 @@
+name: PRE-RACE Gamagori live-test scheduler v0.19.5
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 2026-09-07: 14:50 / 15:00 / 15:10 / 15:20 JST
+    - cron: '50 5 7 9 *'
+    - cron: '0,10,20 6 7 9 *'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Guard live-test date
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          NOW_DATE=$(TZ=Asia/Tokyo date +%F)
+          test "$NOW_DATE" = "2026-09-07" || { echo "OUTSIDE_TEST_DATE $NOW_DATE"; exit 1; }
+
+      - name: Dispatch verified PRE-RACE auto-chain
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run pre-race-gamagori-auto-chain-v0194.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "DISPATCHED · pre-race-gamagori-auto-chain-v0194.yml"
