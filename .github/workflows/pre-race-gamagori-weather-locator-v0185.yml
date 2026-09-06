@@ -1,0 +1,179 @@
+name: PRE-RACE Gamagori weather locator v0.18.5
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'YYYY-MM-DD'
+        required: true
+        type: string
+      race:
+        description: '1-12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch PRE-RACE beforeinfo and locate weather values
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=$RACE"
+
+          rm -rf tmp_weather_locator
+          mkdir -p tmp_weather_locator "live/gamagori/$DATE/pre"
+
+          curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-WEATHER-LOCATOR/0.18.5'             "$BEFOREINFO" -o tmp_weather_locator/beforeinfo.html
+          sleep 2
+          curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-WEATHER-LOCATOR/0.18.5'             "$RACELIST" -o tmp_weather_locator/racelist.html
+
+          export BEFOREINFO RACELIST
+          python3 - <<'PY'
+          import os,re,json,html,datetime,pathlib
+          from zoneinfo import ZoneInfo
+
+          date=os.environ["DATE"]; race=int(os.environ["RACE"])
+          now=datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+
+          def read(path):
+              b=pathlib.Path(path).read_bytes()
+              for enc in ("utf-8","cp932","shift_jis","euc_jp"):
+                  try:return b.decode(enc)
+                  except UnicodeDecodeError:pass
+              return b.decode("utf-8","replace")
+
+          bi=read("tmp_weather_locator/beforeinfo.html")
+          rl=read("tmp_weather_locator/racelist.html")
+
+          # Deadline from racelist only.
+          plain_rl=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",rl)))
+          times=re.findall(r"(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)",plain_rl)
+          deadline=times[race-1] if len(times)>=12 else None
+          deadline_dt=None
+          if deadline:
+              hh,mm=map(int,deadline.split(":"))
+              deadline_dt=datetime.datetime.fromisoformat(date).replace(
+                  hour=hh,minute=mm,tzinfo=ZoneInfo("Asia/Tokyo"))
+          timing="VERIFIED" if deadline_dt and now<=deadline_dt else "EXCLUDED_LATE"
+
+          # Keep both tag-stripped and compact HTML neighborhoods so we can locate values
+          # even if weather is not rendered as a table.
+          plain_bi=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",bi)))
+          compact=re.sub(r"\s+"," ",bi)
+
+          labels=["水面気象情報","天候","風向","風速","波高","気温","水温"]
+          contexts=[]
+          for label in labels:
+              for source_name,source in (("plain",plain_bi),("html",compact)):
+                  pos=0
+                  while True:
+                      i=source.find(label,pos)
+                      if i<0:break
+                      start=max(0,i-350); end=min(len(source),i+700)
+                      contexts.append({
+                          "label":label,
+                          "source":source_name,
+                          "snippet":source[start:end]
+                      })
+                      pos=i+len(label)
+
+          # Candidate regexes. These are diagnostic only; do not mark verified yet.
+          candidates={}
+          patterns={
+              "windSpeedMps":[
+                  r"風速[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)\s*m",
+                  r"([0-9]+(?:\.[0-9]+)?)\s*m[^<]{0,60}風速"
+              ],
+              "waveHeightCm":[
+                  r"波高[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)\s*cm",
+                  r"([0-9]+(?:\.[0-9]+)?)\s*cm[^<]{0,60}波高"
+              ],
+              "airTempC":[
+                  r"気温[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)\s*(?:℃|°C)",
+                  r"([0-9]+(?:\.[0-9]+)?)\s*(?:℃|°C)[^<]{0,60}気温"
+              ],
+              "waterTempC":[
+                  r"水温[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)\s*(?:℃|°C)",
+                  r"([0-9]+(?:\.[0-9]+)?)\s*(?:℃|°C)[^<]{0,60}水温"
+              ]
+          }
+          for key,ps in patterns.items():
+              vals=[]
+              for p in ps:
+                  vals += re.findall(p, plain_bi)
+                  vals += re.findall(p, compact)
+              dedup=[]
+              for v in vals:
+                  try:v=float(v)
+                  except:continue
+                  if v not in dedup:dedup.append(v)
+              candidates[key]=dedup
+
+          out={
+              "schema":"boat-command-pre-race-weather-locator-v1",
+              "venue":"GAMAGORI","venueCode":"07",
+              "date":date,"race":race,
+              "fetchedAt":now.isoformat(),
+              "deadline":deadline,
+              "timingStatus":timing,
+              "labelContexts":contexts,
+              "candidateValues":candidates,
+              "weatherMappingVerified":False,
+              "readyForPrediction":False,
+              "resultEndpointsIncluded":False,
+              "predictionEnabled":False,
+              "hardLockEnabled":False,
+              "sourceUrls":{"beforeinfo":os.environ["BEFOREINFO"],"racelist":os.environ["RACELIST"]}
+          }
+
+          p=pathlib.Path(f"live/gamagori/{date}/pre/race-{race}-weather-locator.json")
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(p)
+          print("TIMING",timing)
+          print("CONTEXTS",len(contexts))
+          print("CANDIDATES",json.dumps(candidates,ensure_ascii=False))
+          PY
+
+          rm -rf tmp_weather_locator
+
+      - name: Safety audit
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          python3 - <<'PY'
+          import os,json
+          p=f"live/gamagori/{os.environ['DATE']}/pre/race-{int(os.environ['RACE'])}-weather-locator.json"
+          x=json.load(open(p))
+          assert x["venueCode"]=="07"
+          assert x["timingStatus"] in {"VERIFIED","EXCLUDED_LATE"}
+          assert x["weatherMappingVerified"] is False
+          assert x["readyForPrediction"] is False
+          assert x["resultEndpointsIncluded"] is False
+          assert x["predictionEnabled"] is False
+          assert x["hardLockEnabled"] is False
+          print("SAFETY PASS · WEATHER LOCATOR ONLY · FAIL CLOSED")
+          PY
+
+      - name: Commit locator JSON
+        run: |
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add live/gamagori/
+          git diff --cached --quiet && exit 0
+          git commit -m "audit: gamagori ${{ inputs.date }} ${{ inputs.race }}R weather locator"
+          git push
