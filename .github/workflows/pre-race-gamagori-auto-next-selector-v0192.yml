@@ -1,0 +1,152 @@
+name: PRE-RACE Gamagori auto-next selector v0.19.2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select next race in JST
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          print("JST NOW", datetime.now(ZoneInfo("Asia/Tokyo")).isoformat())
+          PY
+
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=1"
+
+          rm -rf tmp_selector
+          mkdir -p tmp_selector "live/gamagori/$DATE/pre"
+
+          HTTP=$(curl -sS -L --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-AUTO-NEXT/0.19.2' \
+            -o tmp_selector/racelist.html -w '%{http_code}' "$RACELIST" || true)
+
+          export DATE HTTP RACELIST
+          python3 - <<'PY'
+          import os,re,json,html,datetime,pathlib
+          from zoneinfo import ZoneInfo
+
+          date=os.environ["DATE"]
+          now=datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+          http=int(os.environ.get("HTTP") or 0)
+          text=pathlib.Path("tmp_selector/racelist.html").read_text(
+              encoding="utf-8",errors="replace"
+          ) if pathlib.Path("tmp_selector/racelist.html").exists() else ""
+
+          plain=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",text)))
+          marker_ok=http==200 and sum(k in plain for k in ("出走表","モーター","ボートレーサー"))>=2
+
+          # Same deadline extraction already proven in v0.19.1.
+          times=re.findall(r"(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)",plain)
+          deadlines=times[:12] if len(times)>=12 else []
+
+          min_margin_minutes=5
+          selected=None
+          schedule=[]
+          for i,t in enumerate(deadlines,1):
+              hh,mm=map(int,t.split(":"))
+              dt=datetime.datetime.fromisoformat(date).replace(
+                  hour=hh,minute=mm,tzinfo=ZoneInfo("Asia/Tokyo"))
+              margin=(dt-now).total_seconds()/60
+              schedule.append({
+                  "race":i,"deadline":t,
+                  "marginMinutes":round(margin,1)
+              })
+              if selected is None and margin>=min_margin_minutes:
+                  selected={
+                      "race":i,
+                      "deadline":t,
+                      "marginMinutes":round(margin,1)
+                  }
+
+          if not marker_ok:
+              status="NO_EVENT_OR_SOURCE_UNAVAILABLE"
+          elif len(deadlines)!=12:
+              status="SCHEDULE_UNVERIFIED"
+          elif selected:
+              status="NEXT_RACE_SELECTED"
+          else:
+              status="NO_MORE_RACES_TODAY"
+
+          out={
+              "schema":"boat-command-auto-next-selector-v1",
+              "venue":"GAMAGORI","venueCode":"07",
+              "date":date,
+              "fetchedAt":now.isoformat(),
+              "minimumSafetyMarginMinutes":min_margin_minutes,
+              "sourceHttpStatus":http,
+              "sourceMarkerVerified":marker_ok,
+              "deadlineCount":len(deadlines),
+              "schedule":schedule,
+              "selected":selected,
+              "status":status,
+              "readyToFetchPreRacePack":status=="NEXT_RACE_SELECTED",
+              "resultEndpointsIncluded":False,
+              "predictionEnabled":False,
+              "hardLockEnabled":False,
+              "sourceUrl":os.environ["RACELIST"]
+          }
+
+          p=pathlib.Path(f"live/gamagori/{date}/pre/next-race.json")
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print(json.dumps({
+              "status":status,
+              "date":date,
+              "selected":selected,
+              "deadlineCount":len(deadlines),
+              "readyToFetchPreRacePack":out["readyToFetchPreRacePack"]
+          },ensure_ascii=False))
+          PY
+
+          rm -rf tmp_selector
+
+      - name: Safety audit
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          export DATE
+          python3 - <<'PY'
+          import os,json
+          p=f"live/gamagori/{os.environ['DATE']}/pre/next-race.json"
+          x=json.load(open(p))
+          assert x["venueCode"]=="07"
+          assert x["minimumSafetyMarginMinutes"]==5
+          assert x["resultEndpointsIncluded"] is False
+          assert x["predictionEnabled"] is False
+          assert x["hardLockEnabled"] is False
+          assert x["status"] in {
+              "NEXT_RACE_SELECTED",
+              "NO_MORE_RACES_TODAY",
+              "NO_EVENT_OR_SOURCE_UNAVAILABLE",
+              "SCHEDULE_UNVERIFIED"
+          }
+          if x["readyToFetchPreRacePack"]:
+              assert x["selected"] is not None
+              assert x["selected"]["marginMinutes"]>=5
+          print("SAFETY PASS · AUTO-NEXT SELECTOR · PRE-RACE ONLY")
+          PY
+
+      - name: Commit selector state
+        run: |
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add "live/gamagori/$DATE/pre/next-race.json"
+          git diff --cached --quiet && exit 0
+          git commit -m "live: gamagori $DATE auto-next selector"
+          git push
