@@ -1,0 +1,160 @@
+name: PRE-RACE Gamagori weather-time audit v0.18.4
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'YYYY-MM-DD'
+        required: true
+        type: string
+      race:
+        description: '1-12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch PRE-RACE and audit weather/timing
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=$RACE"
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          mkdir -p tmp_audit "live/gamagori/$DATE/pre"
+
+          curl -fsSL --connect-timeout 20 --max-time 60 "$RACELIST" -o tmp_audit/racelist.html
+          sleep 2
+          curl -fsSL --connect-timeout 20 --max-time 60 "$BEFOREINFO" -o tmp_audit/beforeinfo.html
+
+          export RACELIST BEFOREINFO
+          python3 - <<'PY'
+          import os,re,json,html,datetime,pathlib
+          from html.parser import HTMLParser
+          from zoneinfo import ZoneInfo
+
+          date=os.environ["DATE"]; race=int(os.environ["RACE"])
+          now=datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+
+          def read(path):
+              b=pathlib.Path(path).read_bytes()
+              for enc in ("utf-8","cp932","shift_jis","euc_jp"):
+                  try: return b.decode(enc)
+                  except UnicodeDecodeError: pass
+              return b.decode("utf-8","replace")
+
+          rl=read("tmp_audit/racelist.html")
+          bi=read("tmp_audit/beforeinfo.html")
+
+          class P(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.depth=0; self.in_cell=False; self.cell=[]; self.row=[]; self.table=[]; self.tables=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=="table":
+                      if self.depth==0:self.table=[]
+                      self.depth+=1
+                  elif tag in ("td","th") and self.depth:
+                      self.in_cell=True; self.cell=[]
+                  elif tag=="tr" and self.depth:self.row=[]
+                  elif tag=="br" and self.in_cell:self.cell.append(" / ")
+              def handle_data(self,data):
+                  if self.in_cell:self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ("td","th") and self.in_cell:
+                      self.row.append(re.sub(r"\s+"," ",html.unescape("".join(self.cell))).strip())
+                      self.in_cell=False; self.cell=[]
+                  elif tag=="tr" and self.depth and self.row:
+                      if any(self.row):self.table.append(self.row)
+                      self.row=[]
+                  elif tag=="table" and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:
+                          self.tables.append(self.table); self.table=[]
+
+          p=P(); p.feed(bi)
+
+          weather_tables=[]
+          for idx,t in enumerate(p.tables):
+              joined=" ".join(" ".join(r) for r in t[:20])
+              hits=[k for k in ("水面気象情報","天候","風向","風速","波高","気温","水温") if k in joined]
+              if hits:
+                  weather_tables.append({
+                      "tableIndex":idx,
+                      "matchedKeywords":hits,
+                      "rows":[r[:24] for r in t[:30]]
+                  })
+
+          plain_rl=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",rl)))
+          times=re.findall(r"(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)",plain_rl)
+          deadline=times[race-1] if len(times)>=12 else None
+          deadline_dt=None
+          if deadline:
+              hh,mm=map(int,deadline.split(":"))
+              deadline_dt=datetime.datetime.fromisoformat(date).replace(
+                  hour=hh,minute=mm,tzinfo=ZoneInfo("Asia/Tokyo"))
+          timing="VERIFIED" if deadline_dt and now<=deadline_dt else "EXCLUDED_LATE"
+
+          out={
+              "schema":"boat-command-pre-race-weather-time-audit-v1",
+              "venue":"GAMAGORI","venueCode":"07",
+              "date":date,"race":race,
+              "fetchedAt":now.isoformat(),
+              "deadline":deadline,
+              "timingStatus":timing,
+              "weatherTables":weather_tables,
+              "weatherMappingVerified":False,
+              "readyForPrediction":False,
+              "resultEndpointsIncluded":False,
+              "predictionEnabled":False,
+              "hardLockEnabled":False,
+              "sourceUrls":{"racelist":os.environ["RACELIST"],"beforeinfo":os.environ["BEFOREINFO"]}
+          }
+
+          path=pathlib.Path(f"live/gamagori/{date}/pre/race-{race}-weather-time-audit.json")
+          path.write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(path)
+          print("TIMING",timing)
+          print("WEATHER TABLES",len(weather_tables))
+          PY
+
+          rm -rf tmp_audit
+
+      - name: Safety audit
+        env:
+          DATE: ${{ inputs.date }}
+          RACE: ${{ inputs.race }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          p=f"live/gamagori/{os.environ['DATE']}/pre/race-{int(os.environ['RACE'])}-weather-time-audit.json"
+          x=json.load(open(p))
+          assert x["venueCode"]=="07"
+          assert x["timingStatus"] in {"VERIFIED","EXCLUDED_LATE"}
+          assert x["weatherMappingVerified"] is False
+          assert x["readyForPrediction"] is False
+          assert x["resultEndpointsIncluded"] is False
+          assert x["predictionEnabled"] is False
+          assert x["hardLockEnabled"] is False
+          print("SAFETY PASS · PRE-RACE WEATHER/TIME AUDIT ONLY")
+          PY
+
+      - name: Commit audit JSON
+        run: |
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add live/gamagori/
+          git diff --cached --quiet && exit 0
+          git commit -m "audit: gamagori ${{ inputs.date }} ${{ inputs.race }}R weather-time"
+          git push
