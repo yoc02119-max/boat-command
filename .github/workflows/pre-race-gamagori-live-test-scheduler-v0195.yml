@@ -3,13 +3,19 @@ name: PRE-RACE Gamagori live-test scheduler v0.19.5
 on:
   workflow_dispatch:
   schedule:
-    # 2026-09-07: 14:50 / 15:00 / 15:10 / 15:20 JST
-    - cron: '50 5 7 9 *'
-    - cron: '0,10,20 6 7 9 *'
+    # 2026-09-08 final-day LIVE test, JST 14:40-20:50.
+    # Keep polling every 5 minutes so WAIT automatically becomes READY when data appears.
+    - cron: '40,45,50,55 5 8 9 *'
+    - cron: '*/5 6-10 8 9 *'
+    - cron: '0,5,10,15,20,25,30,35,40,45,50 11 8 9 *'
 
 permissions:
   actions: write
   contents: read
+
+concurrency:
+  group: gamagori-live-test-scheduler-2026-09-08
+  cancel-in-progress: false
 
 jobs:
   dispatch:
@@ -21,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           NOW_DATE=$(TZ=Asia/Tokyo date +%F)
-          test "$NOW_DATE" = "2026-09-07" || { echo "OUTSIDE_TEST_DATE $NOW_DATE"; exit 1; }
+          test "$NOW_DATE" = "2026-09-08" || { echo "OUTSIDE_TEST_DATE $NOW_DATE"; exit 1; }
 
       - name: Dispatch verified PRE-RACE auto-chain
         env:
