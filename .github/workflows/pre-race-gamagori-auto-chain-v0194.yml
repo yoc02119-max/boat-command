@@ -90,9 +90,13 @@ jobs:
           bi=pathlib.Path("tmp_auto/beforeinfo.html").read_text(encoding="utf-8",errors="replace")
           plain=html.unescape(re.sub(r"\s+"," ",re.sub(r"<[^>]+>"," ",bi)))
 
-          # Gate must see all race-specific pre-race sections.
-          need=("展示タイム","スタート展示","水面気象情報")
-          present={k:(k in plain) for k in need}
+          # BOAT RACE renders some table headers in separate HTML cells/tags.
+          # Match with optional whitespace instead of requiring one exact token.
+          present={
+              "展示タイム": bool(re.search(r"展示\s*タイム", plain)),
+              "スタート展示": bool(re.search(r"スタート\s*展示", plain)),
+              "水面気象情報": bool(re.search(r"水面\s*気象\s*情報", plain)),
+          }
           ready=all(present.values())
 
           state["beforeinfoSourceUrl"]=os.environ["BEFOREINFO"]
