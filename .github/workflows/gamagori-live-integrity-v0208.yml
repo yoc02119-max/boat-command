@@ -1,0 +1,49 @@
+name: Gamagori LIVE integrity audit v0.20.8
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live-integrity-audit-v0208.js'
+      - '.github/workflows/gamagori-live-integrity-v0208.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate integrity JavaScript
+        run: node --check live-integrity-audit-v0208.js
+      - name: Enable module and bump app version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.20.7','BOAT COMMAND v0.20.8')
+          s=s.replace('v0.20.7 · LEARNING GUARD','v0.20.8 · INTEGRITY AUDIT')
+          s=s.replace('?v=207','?v=208')
+          marker='<script src="live-learning-guard-v0207.js?v=208"></script>'
+          tag='<script src="live-integrity-audit-v0208.js?v=208"></script>'
+          if tag not in s:
+              if marker not in s:
+                  raise SystemExit('learning guard script marker not found')
+              s=s.replace(marker, marker+'\n'+tag)
+          p.write_text(s)
+          PY
+      - name: Commit app integrity enablement
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGE'
+            exit 0
+          fi
+          git commit -m 'app: enable Gamagori live integrity audit v0.20.8'
+          git push
