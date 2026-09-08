@@ -1,0 +1,46 @@
+name: Gamagori learning promotion guard v0.20.7
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-learning-guard-v0207.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate learning guard JavaScript
+        run: node --check live-learning-guard-v0207.js
+      - name: Enable module and bump app version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.20.6','BOAT COMMAND v0.20.7')
+          s=s.replace('v0.20.6 · LEARNING ROLLUP','v0.20.7 · LEARNING GUARD')
+          s=s.replace('?v=206','?v=207')
+          tag='<script src="live-learning-guard-v0207.js?v=207"></script>'
+          if tag not in s: s=s.replace('</body>',tag+'\n</body>')
+          p.write_text(s)
+          PY
+      - name: Verify safety boundaries
+        run: |
+          grep -q 'autoPromotion:false' live-learning-guard-v0207.js
+          grep -q 'productionPredictorChanged:false' live-learning-guard-v0207.js
+          grep -q 'live-learning-v0205.js' index.html
+          grep -q 'live-learning-dashboard-v0206.js' index.html
+          grep -q 'live-learning-guard-v0207.js' index.html
+      - name: Commit app learning guard enablement
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then echo 'NO_CHANGES'; exit 0; fi
+          git commit -m 'app: enable Gamagori learning promotion guard v0.20.7'
+          git push
