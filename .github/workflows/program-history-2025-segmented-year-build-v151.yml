@@ -2,6 +2,9 @@ name: PROGRAM HISTORY 2025 segmented year build v1.5.1
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/program-history-2025-segmented-year-build-v151.yml'
 
 permissions:
   contents: read
@@ -18,7 +21,7 @@ jobs:
         env: {START: "0", COUNT: "67", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
         run: bash .github/scripts/program-history-segment.sh
       - uses: actions/upload-artifact@v4
-        with: {name: gamagori-2025-block1, path: segment-out/*.json, retention-days: 1}
+        with: {name: gamagori-2025-block1, path: segment-out/*.json, retention-days: 7}
 
   block2:
     name: block2 67-133
@@ -32,7 +35,7 @@ jobs:
         env: {START: "67", COUNT: "67", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
         run: bash .github/scripts/program-history-segment.sh
       - uses: actions/upload-artifact@v4
-        with: {name: gamagori-2025-block2, path: segment-out/*.json, retention-days: 1}
+        with: {name: gamagori-2025-block2, path: segment-out/*.json, retention-days: 7}
 
   block3:
     name: block3 134-198
@@ -46,7 +49,7 @@ jobs:
         env: {START: "134", COUNT: "65", REQUEST_DELAY: "10", CHUNK_PAUSE: "20"}
         run: bash .github/scripts/program-history-segment.sh
       - uses: actions/upload-artifact@v4
-        with: {name: gamagori-2025-block3, path: segment-out/*.json, retention-days: 1}
+        with: {name: gamagori-2025-block3, path: segment-out/*.json, retention-days: 7}
 
   merge:
     name: merge and final audit
@@ -107,5 +110,5 @@ jobs:
         with:
           name: gamagori-2025-segmented-year-build
           path: artifact/*.json
-          retention-days: 1
+          retention-days: 7
           if-no-files-found: warn
