@@ -1,0 +1,58 @@
+name: Gamagori LIVE candidate predictor v0.20.0
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live-predictor-v0200.js'
+      - '.github/workflows/gamagori-live-predictor-v0200.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-live-predictor-v0200
+  cancel-in-progress: false
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate predictor JavaScript
+        run: node --check live-predictor-v0200.js
+
+      - name: Enable predictor module and bump app version
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.19.9','BOAT COMMAND v0.20.0')
+          s=s.replace('v0.19.9 · LIVE AUTO','v0.20.0 · LIVE PREDICT')
+          s=s.replace('styles.css?v=199','styles.css?v=200')
+          s=s.replace('app.js?v=199','app.js?v=200')
+          s=s.replace('live-autopoll-v0199.js?v=199','live-autopoll-v0199.js?v=200')
+          tag='<script src="live-predictor-v0200.js?v=200"></script>'
+          if tag not in s:
+              s=s.replace('</body>',f'{tag}\n</body>')
+          p.write_text(s)
+          PY
+
+      - name: Commit app predictor enablement
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- index.html; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add index.html
+          git commit -m 'feat: enable Gamagori LIVE candidate predictor'
+          git push
