@@ -2,6 +2,9 @@ name: PROGRAM HISTORY 2025 finalize DB v1.8.1
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/program-history-2025-finalize-db-v181.yml'
 
 permissions:
   contents: read
@@ -169,7 +172,6 @@ jobs:
           if len(golden)!=12:
               raise SystemExit(f"GOLDEN REGRESSION FAIL: {len(golden)} races")
 
-          # Critical patch assertions.
           may9=next(x for x in patch_summary if x["date"]=="2025-05-09")
           if may9["validCount"]!=12 or 11 not in may9["validRaces"] or 12 not in may9["validRaces"]:
               raise SystemExit("PATCH FAIL: 2025-05-09 must contain 12 valid races incl. 11R/12R")
