@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # 2026-09-08 final-day LIVE test, JST 14:40-20:50.
-    # Keep polling every 5 minutes so WAIT automatically becomes READY when data appears.
+    # Poll every 5 minutes. Guard dispatches auto-chain only when real exhibition/start values are complete.
     - cron: '40,45,50,55 5 8 9 *'
     - cron: '*/5 6-10 8 9 *'
     - cron: '0,5,10,15,20,25,30,35,40,45,50 11 8 9 *'
@@ -29,10 +29,10 @@ jobs:
           NOW_DATE=$(TZ=Asia/Tokyo date +%F)
           test "$NOW_DATE" = "2026-09-08" || { echo "OUTSIDE_TEST_DATE $NOW_DATE"; exit 1; }
 
-      - name: Dispatch verified PRE-RACE auto-chain
+      - name: Dispatch real-data readiness guard
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh workflow run pre-race-gamagori-auto-chain-v0194.yml --repo "$GITHUB_REPOSITORY" --ref main
-          echo "DISPATCHED · pre-race-gamagori-auto-chain-v0194.yml"
+          gh workflow run pre-race-gamagori-live-ready-guard-v0196.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "DISPATCHED · pre-race-gamagori-live-ready-guard-v0196.yml"
