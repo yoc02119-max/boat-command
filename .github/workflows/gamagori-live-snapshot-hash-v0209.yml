@@ -1,0 +1,52 @@
+name: Gamagori LIVE snapshot hash guard v0.20.9
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live-snapshot-hash-guard-v0209.js'
+      - 'live-result-v0204.js'
+      - '.github/workflows/gamagori-live-snapshot-hash-v0209.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript
+        run: |
+          node --check live-snapshot-hash-guard-v0209.js
+          node --check live-result-v0204.js
+      - name: Enable module and bump app version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.20.8','BOAT COMMAND v0.20.9')
+          s=s.replace('v0.20.8 · INTEGRITY AUDIT','v0.20.9 · HASH GUARD')
+          s=s.replace('?v=208','?v=209')
+          marker='<script src="live-integrity-audit-v0208.js?v=209"></script>'
+          tag='<script src="live-snapshot-hash-guard-v0209.js?v=209"></script>'
+          if tag not in s:
+              if marker not in s:
+                  raise SystemExit('integrity audit script marker not found')
+              s=s.replace(marker, marker+'\n'+tag)
+          p.write_text(s)
+          PY
+      - name: Commit app hash guard enablement
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGE'
+            exit 0
+          fi
+          git commit -m 'app: enable Gamagori live snapshot hash guard v0.20.9'
+          git push
