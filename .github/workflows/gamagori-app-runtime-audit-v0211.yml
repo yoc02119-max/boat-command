@@ -1,0 +1,138 @@
+name: Gamagori app runtime audit v0.21.1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-app-runtime-audit-v0211.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  runtime-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove duplicate module load and bump app cache
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          html = p.read_text(encoding='utf-8')
+
+          duplicate = '<script src="live-result-v0204.js?v=204"></script>\n'
+          if duplicate in html:
+              html = html.replace(duplicate, '')
+
+          html = html.replace('BOAT COMMAND v0.20.9', 'BOAT COMMAND v0.21.1')
+          html = html.replace('v0.20.9 · HASH GUARD', 'v0.21.1 · RUNTIME AUDIT')
+          html = html.replace('?v=209', '?v=211')
+          p.write_text(html, encoding='utf-8')
+
+      - name: Audit script uniqueness dependencies and files
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, sys
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          bases = [x.split('?', 1)[0] for x in srcs]
+
+          duplicates = sorted({x for x in bases if bases.count(x) > 1})
+          if duplicates:
+              raise SystemExit(f'DUPLICATE_SCRIPT_LOAD: {duplicates}')
+
+          required = [
+              'app.js',
+              'live-autopoll-v0199.js',
+              'live-predictor-v0200.js',
+              'live-autofill-v0201.js',
+              'live-lock-guard-v0202.js',
+              'live-lock-snapshot-v0203.js',
+              'live-result-v0204.js',
+              'live-learning-v0205.js',
+              'live-learning-dashboard-v0206.js',
+              'live-learning-guard-v0207.js',
+              'live-integrity-audit-v0208.js',
+              'live-snapshot-hash-guard-v0209.js',
+          ]
+          missing = [x for x in required if x not in bases]
+          if missing:
+              raise SystemExit(f'MISSING_REQUIRED_SCRIPT: {missing}')
+
+          positions = {x: bases.index(x) for x in required}
+          constraints = [
+              ('app.js','live-autopoll-v0199.js'),
+              ('live-autopoll-v0199.js','live-predictor-v0200.js'),
+              ('live-predictor-v0200.js','live-autofill-v0201.js'),
+              ('live-autofill-v0201.js','live-lock-guard-v0202.js'),
+              ('live-lock-guard-v0202.js','live-lock-snapshot-v0203.js'),
+              ('live-lock-snapshot-v0203.js','live-result-v0204.js'),
+              ('live-result-v0204.js','live-learning-v0205.js'),
+              ('live-learning-v0205.js','live-learning-dashboard-v0206.js'),
+              ('live-learning-dashboard-v0206.js','live-learning-guard-v0207.js'),
+              ('live-learning-guard-v0207.js','live-integrity-audit-v0208.js'),
+              ('live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js'),
+          ]
+          bad = [(a,b) for a,b in constraints if positions[a] >= positions[b]]
+          if bad:
+              raise SystemExit(f'SCRIPT_ORDER_INVALID: {bad}')
+
+          absent_files = [x for x in required if not Path(x).is_file()]
+          if absent_files:
+              raise SystemExit(f'SCRIPT_FILE_MISSING: {absent_files}')
+
+          if html.count('live-result-v0204.js') != 1:
+              raise SystemExit('POST_RACE_RESULT_MODULE_NOT_SINGLETON')
+
+          print('RUNTIME_AUDIT_PASS')
+          print('script_count=', len(bases))
+          print('post_race_result_module_singleton=true')
+
+      - name: JavaScript syntax audit
+        run: |
+          set -euo pipefail
+          for f in app.js live-autopoll-v0199.js live-predictor-v0200.js live-autofill-v0201.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-learning-v0205.js live-learning-dashboard-v0206.js live-learning-guard-v0207.js live-integrity-audit-v0208.js live-snapshot-hash-guard-v0209.js; do
+            node --check "$f"
+          done
+
+      - name: Verify POST-RACE fail-closed hash dependency
+        shell: python
+        run: |
+          from pathlib import Path
+          result = Path('live-result-v0204.js').read_text(encoding='utf-8')
+          guard = Path('live-snapshot-hash-guard-v0209.js').read_text(encoding='utf-8')
+          required_result = [
+              "bcVerifyLiveLockSnapshotHashV0209",
+              "SNAPSHOT_HASH_VERIFIERなし",
+              "if(!hashGate.ok)",
+              "preRaceDataIncluded:false",
+              "resultEndpointsIncluded:true",
+          ]
+          required_guard = [
+              "delete x.snapshotHash",
+              "SNAPSHOT HASH不一致",
+              "bcVerifyLiveLockSnapshotV0203",
+          ]
+          missing = [x for x in required_result if x not in result] + [x for x in required_guard if x not in guard]
+          if missing:
+              raise SystemExit(f'FAIL_CLOSED_HASH_DEPENDENCY_MISSING: {missing}')
+          print('POST_RACE_HASH_GATE_PASS')
+
+      - name: Commit runtime hardening
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No index change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: remove duplicate LIVE result module bootstrap v0.21.1'
+          git push
