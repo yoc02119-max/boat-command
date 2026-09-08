@@ -40,10 +40,12 @@ jobs:
               raise SystemExit
           now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
           date=os.environ['DATE']
+          # Auto-chain applies its own >=5 minute gate after this guard finishes.
+          # Keep a 2-minute handoff buffer so both workflows select the same race.
           for i,t in enumerate(times[:12],1):
               hh,mm=map(int,t.split(':'))
               dt=datetime.datetime.fromisoformat(date).replace(hour=hh,minute=mm,tzinfo=ZoneInfo('Asia/Tokyo'))
-              if (dt-now).total_seconds()/60 >= 5:
+              if (dt-now).total_seconds()/60 >= 7:
                   print(i)
                   break
           else:
