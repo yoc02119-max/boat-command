@@ -1,0 +1,56 @@
+name: Gamagori LIVE learning rollup v0.20.6
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-learning-rollup-v0206.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate learning rollup JavaScript
+        run: node --check live-learning-dashboard-v0206.js
+
+      - name: Enable module and bump app version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.20.5','BOAT COMMAND v0.20.6')
+          s=s.replace('v0.20.5 · LIVE LEARNING','v0.20.6 · LEARNING ROLLUP')
+          s=s.replace('v0.20.4 · RESULT LAYER','v0.20.6 · LEARNING ROLLUP')
+          s=s.replace('?v=205','?v=206')
+          tag='<script src="live-learning-dashboard-v0206.js?v=206"></script>'
+          if tag not in s:
+              s=s.replace('</body>',tag+'\n</body>')
+          p.write_text(s)
+          PY
+
+      - name: Verify PRE/POST boundary markers remain explicit
+        run: |
+          grep -q 'live-result-v0204.js' index.html
+          grep -q 'live-learning-v0205.js' index.html
+          grep -q 'live-learning-dashboard-v0206.js' index.html
+          grep -q 'resultUsedForPrediction===false' live-learning-dashboard-v0206.js
+          grep -q 'autoModelUpdate:false' live-learning-dashboard-v0206.js
+
+      - name: Commit app learning rollup enablement
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git commit -m 'app: enable Gamagori LIVE learning rollup v0.20.6'
+          git push
