@@ -1,0 +1,52 @@
+name: Gamagori LIVE learning records v0.20.5
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live-learning-v0205.js'
+      - '.github/workflows/gamagori-live-learning-v0205.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-live-learning-v0205
+  cancel-in-progress: false
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate learning JavaScript
+        run: node --check live-learning-v0205.js
+      - name: Enable module and bump app version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.20.4','BOAT COMMAND v0.20.5')
+          s=s.replace('v0.20.4 · LIVE RESULTS','v0.20.5 · LIVE LEARNING')
+          s=s.replace('styles.css?v=204','styles.css?v=205')
+          s=s.replace('app.js?v=204','app.js?v=205')
+          for old in ['live-autopoll-v0199.js?v=204','live-predictor-v0200.js?v=204','live-autofill-v0201.js?v=204','live-lock-guard-v0202.js?v=204','live-lock-snapshot-v0203.js?v=204','live-result-v0204.js?v=204']:
+              s=s.replace(old,old.replace('=204','=205'))
+          tag='<script src="live-learning-v0205.js?v=205"></script>'
+          if tag not in s:
+              s=s.replace('</body>',tag+'\n</body>')
+          p.write_text(s)
+          PY
+      - name: Commit app learning enablement
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGES'
+          else
+            git commit -m 'app: enable Gamagori LIVE learning records v0.20.5'
+            git push
+          fi
