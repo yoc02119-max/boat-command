@@ -22,147 +22,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Patch BOAT COMMAND for verified LIVE relay auto-apply
+      - name: Append LIVE integration module
+        run: |
+          set -euo pipefail
+          MARKER='// BOAT COMMAND GAMAGORI LIVE INTEGRATION v0.19.8'
+          if ! grep -Fq "$MARKER" app.js; then
+            printf '\n\n' >> app.js
+            cat gamagori-live-integration-v0198.js >> app.js
+            echo 'PATCHED_APP_JS'
+          else
+            echo 'APP_ALREADY_PATCHED'
+          fi
+
+      - name: Bump app cache version
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-
-          app=Path('app.js')
-          text=app.read_text()
-          marker='// BOAT COMMAND GAMAGORI LIVE INTEGRATION v0.19.8'
-          if marker in text:
-              print('ALREADY_PATCHED')
-          else:
-              addon=r'''
-
-// BOAT COMMAND GAMAGORI LIVE INTEGRATION v0.19.8
-// Consumes only the fail-closed same-origin relay generated from a verified pack.
-const BC_LIVE_V0198={last:null};
-function liveRelayReadyPayload(x,date,race){
-  if(!x||x.schema!=="boat-command-pre-race-probe-v1")return false;
-  if(x.venue!=="GAMAGORI"||x.date!==date||Number(x.race)!==Number(race))return false;
-  const v=x.verified||{},s=x.safety||{};
-  const ex=x.beforeinfo?.exhibition||[],st=x.beforeinfo?.startExhibition||[];
-  return v.timingStatus==="VERIFIED"&&v.boatMappingVerified===true&&v.weatherMappingVerified===true&&v.readyForPrediction===true&&
-    s.resultEndpointsIncluded===false&&s.predictionEnabled===false&&s.hardLockEnabled===false&&
-    ex.length===6&&ex.every(a=>a.exhibitionTime!==null&&a.exhibitionTime!==undefined)&&
-    st.length===6&&st.every(a=>String(a.st||"").trim())&&!!x.beforeinfo?.weather;
-}
-function liveRelayReason(x){
-  if(!x)return "LIVEデータ未取得";
-  const v=x.verified||{};
-  const ex=x.beforeinfo?.exhibition||[],st=x.beforeinfo?.startExhibition||[];
-  if(v.timingStatus!=="VERIFIED")return "締切時刻の安全確認待ち";
-  if(ex.length!==6||!ex.every(a=>a.exhibitionTime!==null&&a.exhibitionTime!==undefined))return `展示タイム待ち ${ex.filter(a=>a.exhibitionTime!==null&&a.exhibitionTime!==undefined).length}/6`;
-  if(st.length!==6||!st.every(a=>String(a.st||"").trim()))return `スタート展示待ち ${st.filter(a=>String(a.st||"").trim()).length}/6`;
-  if(v.boatMappingVerified!==true)return "艇番・選手対応の確認待ち";
-  if(v.weatherMappingVerified!==true||!x.beforeinfo?.weather)return "水面気象の確認待ち";
-  if(v.readyForPrediction!==true)return "安全監査READY待ち";
-  return "LIVEデータ確認待ち";
-}
-async function loadVerifiedLiveRace(date,race,{silent=false}={}){
-  const path=`./live/gamagori/${date}/pre/race-${race}.json`;
-  try{
-    const res=await fetch(`${path}?v=${Date.now()}`,{cache:"no-store",credentials:"same-origin"});
-    if(!res.ok)throw new Error(`HTTP_${res.status}`);
-    const x=validateRelayPayload(await res.json(),date,race);
-    const ready=liveRelayReadyPayload(x,date,race);
-    BC_LIVE_V0198.last={date,race,path,ready,payload:x,reason:ready?"":liveRelayReason(x),checkedAt:new Date().toISOString()};
-    if(!silent){
-      const st=$("#relayGateStatus");
-      if(st){st.className=`live-gate-status ${ready?"ok":"warn"}`;st.textContent=ready?`PREDICTION READY · ${date} ${race}R · VERIFIED LIVE`:`WAIT · ${date} ${race}R · ${BC_LIVE_V0198.last.reason}`;}
-    }
-    return BC_LIVE_V0198.last;
-  }catch(e){
-    BC_LIVE_V0198.last={date,race,path,ready:false,payload:null,reason:"verified LIVE pack待ち",error:String(e?.message||e),checkedAt:new Date().toISOString()};
-    if(!silent){const st=$("#relayGateStatus");if(st){st.className="live-gate-status warn";st.textContent=`WAIT · ${date} ${race}R · verified LIVE pack待ち`;}}
-    return BC_LIVE_V0198.last;
-  }
-}
-function livePredictionSnapshotHtml(x){
-  if(!x?.payload||!x.ready)return "";
-  const p=x.payload,b=p.beforeinfo,w=b.weather||{};
-  const ex=b.exhibition||[],st=b.startExhibition||[];
-  const rows=ex.map((a,i)=>`<div class="verified-row"><div class="full-name"><b>${a.lane}</b><span>${a.lane}号艇</span></div><span>展示 <strong>${esc(a.exhibitionTime)}</strong></span><span>チルト <strong>${esc(a.tilt??"—")}</strong></span><span>展示ST <strong>${esc(st[i]?.st??"—")}</strong></span></div>`).join("");
-  return `<div class="replay-snapshot full-snapshot"><div class="snapshot-head"><span>LIVE VERIFIED SNAPSHOT <em class="safe-badge">TIME-SAFE</em></span><b>${p.race}R · 締切 ${esc(p.deadline||"—")}</b></div><div class="weather-strip"><span>${esc(w.reference||"水面気象")}</span><span>気温 ${esc(w.airTempC??"—")}℃</span><span>水温 ${esc(w.waterTempC??"—")}℃</span><span>風 ${esc(w.windSpeedMps??"—")}m</span><span>波 ${esc(w.waveHeightCm??"—")}cm</span></div><div class="verified-grid">${rows}</div><div class="snapshot-note">GitHub LIVE基盤で timing / boat mapping / weather mapping / 6艇展示 / 6艇ST を全確認済み。結果系データは含みません。</div></div>`;
-}
-async function applyVerifiedLiveToPrediction(){
-  const s=session();
-  if(s.runType!=="LIVE")return null;
-  const date=s.date||todayISO();
-  const race=Math.max(1,Math.min(12,Number($("#liveRace")?.value)||1));
-  const x=await loadVerifiedLiveRace(date,race,{silent:false});
-  const r=s.races.find(a=>Number(a.race)===race);
-  if(r){
-    r.liveDataStatus=x.ready?"READY":"WAIT";
-    r.liveDataReason=x.reason||"";
-    r.liveVerifiedAt=x.ready?(x.payload?.fetchedAt||x.checkedAt):null;
-    r.liveRelayPath=x.path;
-    r.livePreRace=x.ready?{deadline:x.payload.deadline,beforeinfo:x.payload.beforeinfo,racelist:x.payload.racelist,verified:x.payload.verified}:null;
-    saveStore();
-  }
-  const box=document.querySelector(`[data-race-card="${race}"] .live-auto-snapshot`);
-  if(box)box.innerHTML=x.ready?livePredictionSnapshotHtml(x):`<div class="no-prediction-panel"><div class="no-prediction-head"><b>WAIT｜予想保留</b><span>${esc(x.reason)}</span></div><div class="no-prediction-rule">verified LIVEデータが揃うまで予想・LOCKしません。</div></div>`;
-  return x;
-}
-
-// Upgrade the existing relay button: receiving a verified relay also updates LIVE readiness.
-const _bcRelayProbeV0198=runRelayProbe;
-runRelayProbe=async function(){
-  await _bcRelayProbeV0198();
-  const date=$("#liveDate")?.value||todayISO(),race=Number($("#liveRace")?.value)||1;
-  await loadVerifiedLiveRace(date,race,{silent:false});
-};
-
-// Add a lightweight LIVE readiness/snapshot block to each prediction card after render.
-const _bcRenderAllV0198=renderAll;
-renderAll=function(){
-  _bcRenderAllV0198();
-  const s=session();
-  if(s.runType!=="LIVE")return;
-  document.querySelectorAll('[data-race]').forEach(()=>{});
-  const cards=[...document.querySelectorAll('.race-card')];
-  cards.forEach((card,i)=>{
-    if(card.querySelector('.live-auto-snapshot'))return;
-    card.dataset.raceCard=String(i+1);
-    const d=document.createElement('div');d.className='live-auto-snapshot';
-    const r=s.races.find(x=>Number(x.race)===i+1);
-    if(r?.liveDataStatus==='READY'&&r.livePreRace){d.innerHTML=`<div class="prediction-gate ready"><b>PREDICTION READY｜LIVE VERIFIED</b><span>締切前データ安全監査済み</span></div>`}
-    else if(r?.liveDataStatus==='WAIT'){d.innerHTML=`<div class="prediction-gate limited"><b>WAIT｜予想保留</b><span>${esc(r.liveDataReason||'直前データ待ち')}</span></div>`}
-    card.prepend(d);
-  });
-};
-
-// Make the local assistant understand LIVE READY / WAIT state and reasons.
-const _bcAnswerV0198=answer;
-answer=function(q){
-  const t=String(q||"").replace(/\s/g,"");
-  if(/READY|WAIT|見送り|保留|直前|展示|ライブ状況|LIVE状況/.test(t)){
-    const s=session(),race=Number($("#liveRace")?.value)||1,r=s.races.find(x=>Number(x.race)===race);
-    if(r?.liveDataStatus==='READY')return `${race}Rは <strong>PREDICTION READY</strong>。展示6/6・展示ST6/6・艇番対応・水面気象・締切時刻を確認済みです。`;
-    if(r?.liveDataStatus==='WAIT')return `${race}Rは <strong>WAIT</strong>。理由は「${esc(r.liveDataReason||'直前データ待ち')}」です。データが揃うまで予想しません。`;
-    return `${race}RはまだLIVE監査未取得です。DATA画面のRELAY受信テストでverifiedデータを確認できます。`;
-  }
-  return _bcAnswerV0198(q);
-};
-
-// Re-render once so LIVE gate labels appear without waiting for another user action.
-renderAll();
-'''
-              text += addon
-              app.write_text(text)
-              print('PATCHED_APP_JS')
-
-          # Bump cache-busting/version strings in index without restructuring the UI.
-          idx=Path('index.html')
-          html=idx.read_text()
-          html=html.replace('BOAT COMMAND v0.18.0','BOAT COMMAND v0.19.8')
-          html=html.replace('v0.18.0 · PROGRAM COMPOSITION','v0.19.8 · LIVE VERIFIED')
-          html=html.replace('app.js?v=180','app.js?v=198')
-          html=html.replace('styles.css?v=180','styles.css?v=198')
-          idx.write_text(html)
-          print('PATCHED_INDEX')
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('BOAT COMMAND v0.18.0','BOAT COMMAND v0.19.8')
+          s=s.replace('v0.18.0 · PROGRAM COMPOSITION','v0.19.8 · LIVE VERIFIED')
+          s=s.replace('app.js?v=180','app.js?v=198')
+          s=s.replace('styles.css?v=180','styles.css?v=198')
+          p.write_text(s)
           PY
 
       - name: Commit integration
