@@ -1,0 +1,167 @@
+name: PRE-RACE Gamagori app bridge v0.19.7
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: YYYY-MM-DD (optional; defaults to JST today)
+        required: false
+        type: string
+      race:
+        description: Race number 1-12 (optional; defaults to all existing packs for date)
+        required: false
+        type: string
+  push:
+    paths:
+      - 'live/gamagori/**/pre/race-*-pack.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-app-bridge
+  cancel-in-progress: false
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build app relay payloads from verified packs
+        env:
+          INPUT_DATE: ${{ inputs.date }}
+          INPUT_RACE: ${{ inputs.race }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          from datetime import datetime, timezone, timedelta
+
+          JST=timezone(timedelta(hours=9))
+          date=(os.environ.get('INPUT_DATE') or '').strip() or datetime.now(JST).date().isoformat()
+          race_raw=(os.environ.get('INPUT_RACE') or '').strip()
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', date):
+              raise SystemExit('INVALID_DATE')
+          base=Path('live/gamagori')/date/'pre'
+          if not base.exists():
+              raise SystemExit(f'NO_LIVE_DIR {base}')
+
+          if race_raw:
+              race=int(race_raw)
+              if not 1 <= race <= 12:
+                  raise SystemExit('INVALID_RACE')
+              packs=[base/f'race-{race}-pack.json']
+          else:
+              packs=sorted(base.glob('race-*-pack.json'), key=lambda p:int(re.search(r'race-(\d+)-pack',p.name).group(1)))
+
+          made=0
+          for path in packs:
+              if not path.exists():
+                  print(f'WAIT · missing {path}')
+                  continue
+              x=json.loads(path.read_text())
+              race=int(x.get('race') or 0)
+              boats=x.get('boats') or []
+              starts=x.get('startExhibition') or []
+              weather=x.get('weather') or None
+
+              six_boats=(len(boats)==6 and all(b.get('exhibitionTime') is not None for b in boats))
+              six_starts=(len(starts)==6 and all(str(s.get('st') or '').strip() for s in starts))
+              safe=(
+                  x.get('schema')=='boat-command-live-pre-race-pack-v1'
+                  and x.get('venue')=='GAMAGORI'
+                  and x.get('date')==date
+                  and 1 <= race <= 12
+                  and x.get('timingStatus')=='VERIFIED'
+                  and x.get('boatMappingVerified') is True
+                  and x.get('weatherMappingVerified') is True
+                  and x.get('readyForPrediction') is True
+                  and x.get('predictionEnabled') is False
+                  and x.get('hardLockEnabled') is False
+                  and x.get('resultEndpointsIncluded') is False
+                  and six_boats and six_starts and weather is not None
+              )
+              if not safe:
+                  print(f'WAIT · {date} {race}R verified pack is not app-ready')
+                  continue
+
+              hd=date.replace('-','')
+              fetched=x.get('fetchedAt')
+              try:
+                  fetched_jst=datetime.fromisoformat(fetched).astimezone(JST).strftime('%H:%M:%S') if fetched else None
+              except Exception:
+                  fetched_jst=None
+
+              payload={
+                  'schema':'boat-command-pre-race-probe-v1',
+                  'bridgeVersion':'0.19.7',
+                  'venue':'GAMAGORI',
+                  'venueCode':'07',
+                  'date':date,
+                  'race':race,
+                  'fetchedAt':fetched,
+                  'fetchedAtJST':fetched_jst,
+                  'deadline':x.get('deadline'),
+                  'racelist':{
+                      'ok':True,
+                      'httpStatus':200,
+                      'bytes':len(json.dumps(boats,ensure_ascii=False).encode()),
+                      'sourceUrl':f'https://www.boatrace.jp/owpc/pc/race/racelist?hd={hd}&jcd=07&rno={race}',
+                      'boats':[
+                          {'lane':b.get('lane'),'class':b.get('class'),'motor':b.get('motor'),'boat':b.get('boat')}
+                          for b in boats
+                      ]
+                  },
+                  'beforeinfo':{
+                      'ok':True,
+                      'httpStatus':200,
+                      'bytes':len(json.dumps({'boats':boats,'startExhibition':starts,'weather':weather},ensure_ascii=False).encode()),
+                      'sourceUrl':f'https://www.boatrace.jp/owpc/pc/race/beforeinfo?hd={hd}&jcd=07&rno={race}',
+                      'exhibition':[
+                          {'lane':b.get('lane'),'exhibitionTime':b.get('exhibitionTime'),'tilt':b.get('tilt')}
+                          for b in boats
+                      ],
+                      'startExhibition':starts,
+                      'weather':weather
+                  },
+                  'verified':{
+                      'timingStatus':x.get('timingStatus'),
+                      'boatMappingVerified':True,
+                      'weatherMappingVerified':True,
+                      'readyForPrediction':True
+                  },
+                  'safety':{
+                      'resultEndpointsIncluded':False,
+                      'predictionEnabled':False,
+                      'hardLockEnabled':False
+                  }
+              }
+              out=base/f'race-{race}.json'
+              out.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+              made+=1
+              print(f'BRIDGED · {date} {race}R · {out}')
+
+          print(f'BRIDGE_COUNT={made}')
+          PY
+
+      - name: Commit app relay payloads
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- 'live/gamagori'; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add 'live/gamagori/*/pre/race-*.json'
+          if git diff --cached --quiet; then
+            echo 'NO_BRIDGE_FILES'
+            exit 0
+          fi
+          git commit -m 'live: bridge Gamagori verified pack to app relay'
+          git push
