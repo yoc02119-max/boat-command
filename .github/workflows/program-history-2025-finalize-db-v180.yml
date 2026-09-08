@@ -107,18 +107,18 @@ jobs:
               results=B.parse_result_block(kb["07"])
 
               valid=[]
-for rno in sorted(set(programs)&set(results)):
-    p=programs[rno]
-    result,payout=results[rno]
-    valid.append({
-        "d":d,
-        "r":rno,
-        "c":list(p.classes),
-        "o":result,
-        "p":payout,
-        "t":p.race_type,
-        "id":f"{d}-07-{rno:02d}",
-    })
+              for rno in sorted(set(programs)&set(results)):
+                  p=programs[rno]
+                  result,payout=results[rno]
+                  valid.append({
+                      "d":d,
+                      "r":rno,
+                      "c":list(p.classes),
+                      "o":result,
+                      "p":payout,
+                      "t":p.race_type,
+                      "id":f"{d}-07-{rno:02d}",
+                  })
               patched.extend(valid)
               patch_summary.append({
                   "date":d,
@@ -168,7 +168,6 @@ for rno in sorted(set(programs)&set(results)):
           if len(golden)!=12:
               raise SystemExit(f"GOLDEN REGRESSION FAIL: {len(golden)} races")
 
-          # Critical patch assertions.
           may9=next(x for x in patch_summary if x["date"]=="2025-05-09")
           if may9["validCount"]!=12 or 11 not in may9["validRaces"] or 12 not in may9["validRaces"]:
               raise SystemExit("PATCH FAIL: 2025-05-09 must contain 12 valid races incl. 11R/12R")
