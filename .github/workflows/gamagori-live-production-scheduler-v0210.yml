@@ -1,0 +1,94 @@
+name: Gamagori LIVE production scheduler v0.21.0
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-production-scheduler-v0210.yml'
+  schedule:
+    # 14:00-22:59 JST. Each scheduled job checks twice, 5 minutes apart.
+    # This gives a 5-minute PRE-RACE readiness cadence with half as many workflow starts.
+    - cron: '*/10 5-13 * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: gamagori-live-production-scheduler-v0210
+  cancel-in-progress: false
+
+jobs:
+  event-aware-dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Detect current Gamagori event day
+        id: event
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          URL="https://www.boatrace.jp/owpc/pc/race/racelist?hd=$HD&jcd=07&rno=1"
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-PRODUCTION-SCHEDULER/0.21.0' \
+            "$URL" -o /tmp/gamagori-racelist.html
+          export DATE
+          ACTIVE=$(python3 - <<'PY'
+          import re,html,pathlib
+          raw=pathlib.Path('/tmp/gamagori-racelist.html').read_text(encoding='utf-8',errors='replace')
+          plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',raw)))
+          times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)
+          # A real race day exposes the 12 race deadline row. Fail closed otherwise.
+          print('true' if len(times)>=12 else 'false')
+          PY
+          )
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "active=$ACTIVE" >> "$GITHUB_OUTPUT"
+          echo "EVENT_CHECK date=$DATE active=$ACTIVE"
+
+      - name: Stop cleanly on non-event day
+        if: steps.event.outputs.active != 'true'
+        run: echo 'NO_GAMAGORI_EVENT_TODAY · no PRE-RACE or POST-RACE workflow dispatched'
+
+      - name: Dispatch first PRE-RACE readiness guard
+        if: steps.event.outputs.active == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run pre-race-gamagori-live-ready-guard-v0196.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'DISPATCHED_PRE_RACE_GUARD_1'
+
+      - name: Dispatch immutable POST-RACE collector
+        if: steps.event.outputs.active == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_DATE: ${{ steps.event.outputs.date }}
+        run: |
+          set -euo pipefail
+          gh workflow run gamagori-live-result-v0204.yml --repo "$GITHUB_REPOSITORY" --ref main -f date="$EVENT_DATE"
+          echo 'DISPATCHED_POST_RACE_COLLECTOR_1'
+
+      - name: Hold for second five-minute readiness check
+        if: steps.event.outputs.active == 'true' && github.event_name == 'schedule'
+        run: sleep 300
+
+      - name: Dispatch second PRE-RACE readiness guard
+        if: steps.event.outputs.active == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run pre-race-gamagori-live-ready-guard-v0196.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'DISPATCHED_PRE_RACE_GUARD_2'
+
+      - name: Dispatch second immutable POST-RACE collector
+        if: steps.event.outputs.active == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_DATE: ${{ steps.event.outputs.date }}
+        run: |
+          set -euo pipefail
+          gh workflow run gamagori-live-result-v0204.yml --repo "$GITHUB_REPOSITORY" --ref main -f date="$EVENT_DATE"
+          echo 'DISPATCHED_POST_RACE_COLLECTOR_2'
