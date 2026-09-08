@@ -28,86 +28,77 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
+          import json, re
 
           html = Path('index.html').read_text(encoding='utf-8')
           html_ids = set(re.findall(r'\bid="([A-Za-z0-9_:-]+)"', html))
-
           scripts = [
-              Path('app.js'),
-              Path('live-autopoll-v0199.js'),
-              Path('live-predictor-v0200.js'),
-              Path('live-autofill-v0201.js'),
-              Path('live-lock-guard-v0202.js'),
-              Path('live-lock-snapshot-v0203.js'),
-              Path('live-result-v0204.js'),
-              Path('live-learning-v0205.js'),
-              Path('live-learning-dashboard-v0206.js'),
-              Path('live-learning-guard-v0207.js'),
-              Path('live-integrity-audit-v0208.js'),
+              Path('app.js'), Path('live-autopoll-v0199.js'), Path('live-predictor-v0200.js'),
+              Path('live-autofill-v0201.js'), Path('live-lock-guard-v0202.js'),
+              Path('live-lock-snapshot-v0203.js'), Path('live-result-v0204.js'),
+              Path('live-learning-v0205.js'), Path('live-learning-dashboard-v0206.js'),
+              Path('live-learning-guard-v0207.js'), Path('live-integrity-audit-v0208.js'),
               Path('live-snapshot-hash-guard-v0209.js'),
           ]
-
-          referenced = set()
-          detail = {}
+          referenced, detail = set(), {}
           patterns = [
               re.compile(r"getElementById\(\s*['\"]([^'\"]+)['\"]\s*\)"),
               re.compile(r"\$\(\s*['\"]#([^'\" .>+~:[\]]+)['\"]\s*\)"),
               re.compile(r"querySelector\(\s*['\"]#([^'\" .>+~:[\]]+)['\"]\s*\)"),
           ]
-
+          missing_files = [str(p) for p in scripts if not p.is_file()]
+          if missing_files:
+              Path('contract-audit-report.json').write_text(json.dumps({'status':'FAIL','missingFiles':missing_files},ensure_ascii=False,indent=2),encoding='utf-8')
+              raise SystemExit(f'MISSING_SCRIPT_FILE: {missing_files}')
           for p in scripts:
-              if not p.is_file():
-                  raise SystemExit(f'MISSING_SCRIPT_FILE: {p}')
               text = p.read_text(encoding='utf-8')
               for pat in patterns:
                   for m in pat.finditer(text):
                       ident = m.group(1)
                       referenced.add(ident)
                       detail.setdefault(ident, set()).add(str(p))
-
           missing = sorted(referenced - html_ids)
+          report = {
+              'status':'FAIL' if missing else 'PASS',
+              'htmlIdCount':len(html_ids),
+              'referencedLiteralIdCount':len(referenced),
+              'missingIds':[{'id':x,'files':sorted(detail.get(x,[]))} for x in missing],
+          }
+          Path('contract-audit-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
           if missing:
-              for ident in missing:
-                  print(f'MISSING_DOM_ID {ident}: {sorted(detail.get(ident, []))}')
+              for x in report['missingIds']: print('MISSING_DOM_ID', x['id'], x['files'])
               raise SystemExit(f'DOM_CONTRACT_FAIL: {len(missing)} missing literal IDs')
-
           print('DOM_CONTRACT_PASS')
-          print('html_ids=', len(html_ids))
-          print('referenced_literal_ids=', len(referenced))
+
+      - name: Upload DOM audit diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-contract-audit-v0212
+          path: contract-audit-report.json
+          if-no-files-found: warn
+          retention-days: 3
 
       - name: Audit module bootstrap order and singleton loads
         shell: python
         run: |
           from pathlib import Path
           import re
-
           html = Path('index.html').read_text(encoding='utf-8')
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           bases = [x.split('?', 1)[0] for x in srcs]
           required = [
-              'app.js',
-              'live-autopoll-v0199.js',
-              'live-predictor-v0200.js',
-              'live-autofill-v0201.js',
-              'live-lock-guard-v0202.js',
-              'live-lock-snapshot-v0203.js',
-              'live-result-v0204.js',
-              'live-learning-v0205.js',
-              'live-learning-dashboard-v0206.js',
-              'live-learning-guard-v0207.js',
-              'live-integrity-audit-v0208.js',
-              'live-snapshot-hash-guard-v0209.js',
+              'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+              'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
+              'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
+              'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js',
           ]
           missing = [x for x in required if x not in bases]
           duplicates = sorted({x for x in bases if bases.count(x) > 1})
-          if missing:
-              raise SystemExit(f'MISSING_BOOTSTRAP: {missing}')
-          if duplicates:
-              raise SystemExit(f'DUPLICATE_BOOTSTRAP: {duplicates}')
+          if missing: raise SystemExit(f'MISSING_BOOTSTRAP: {missing}')
+          if duplicates: raise SystemExit(f'DUPLICATE_BOOTSTRAP: {duplicates}')
           positions = [bases.index(x) for x in required]
-          if positions != sorted(positions):
-              raise SystemExit('BOOTSTRAP_ORDER_FAIL')
+          if positions != sorted(positions): raise SystemExit('BOOTSTRAP_ORDER_FAIL')
           print('BOOTSTRAP_CONTRACT_PASS')
 
       - name: Audit shared runtime globals
@@ -115,19 +106,13 @@ jobs:
         run: |
           from pathlib import Path
           import re
-
           app = Path('app.js').read_text(encoding='utf-8')
           required = ['session','saveStore','renderAll','answer','esc','money','digest']
           missing = []
           for name in required:
-              patterns = [
-                  rf'function\s+{re.escape(name)}\s*\(',
-                  rf'(?:const|let|var)\s+{re.escape(name)}\s*=',
-              ]
-              if not any(re.search(p, app) for p in patterns):
-                  missing.append(name)
-          if missing:
-              raise SystemExit(f'APP_GLOBAL_CONTRACT_FAIL: {missing}')
+              patterns = [rf'function\s+{re.escape(name)}\s*\(',rf'(?:const|let|var)\s+{re.escape(name)}\s*=']
+              if not any(re.search(p, app) for p in patterns): missing.append(name)
+          if missing: raise SystemExit(f'APP_GLOBAL_CONTRACT_FAIL: {missing}')
           print('APP_GLOBAL_CONTRACT_PASS')
 
       - name: JavaScript syntax audit
