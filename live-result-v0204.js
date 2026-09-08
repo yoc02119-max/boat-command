@@ -58,6 +58,8 @@ async function sweepLiveResultsV0204({render=true}={}){
       if(r.settled)continue;
       const gate=bcCanSettleLiveV0204(r);
       if(!gate.ok){if(r.locked)blocked++;continue;}
+      const hashGate=typeof bcVerifyLiveLockSnapshotHashV0209==='function'?await bcVerifyLiveLockSnapshotHashV0209(r):{ok:false,reason:'SNAPSHOT_HASH_VERIFIERなし'};
+      if(!hashGate.ok){r.liveResultStatus='BLOCKED';r.liveResultReason=hashGate.reason;blocked++;continue;}
       const out=await bcLoadResultV0204(s.date,r.race);
       if(!out.ok){r.liveResultStatus='WAIT';r.liveResultReason=out.reason;waiting++;continue;}
       bcSettleLiveV0204(r,out.payload,out.path);r.liveResultStatus='SETTLED';r.liveResultReason='';settled++;changed=true;
