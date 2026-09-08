@@ -67,7 +67,24 @@ jobs:
           outdir=Path('live/gamagori')/date/'post';outdir.mkdir(parents=True,exist_ok=True)
           made=[]
           headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND/0.20.4'}
+
+          def validate_existing(path,race):
+              x=json.loads(path.read_text())
+              if x.get('schema')!='boat-command-live-result-v1': raise RuntimeError(f'EXISTING_RESULT_SCHEMA_INVALID race={race}')
+              if x.get('venue')!='GAMAGORI' or x.get('date')!=date or int(x.get('race',0))!=race: raise RuntimeError(f'EXISTING_RESULT_TARGET_INVALID race={race}')
+              if x.get('preRaceDataIncluded') is not False or x.get('resultEndpointsIncluded') is not True: raise RuntimeError(f'EXISTING_RESULT_BOUNDARY_INVALID race={race}')
+              if not re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta',''))): raise RuntimeError(f'EXISTING_RESULT_TRIFECTA_INVALID race={race}')
+              if not isinstance(x.get('payout100'),int) or x.get('payout100')<0: raise RuntimeError(f'EXISTING_RESULT_PAYOUT_INVALID race={race}')
+
           for race in range(1,13):
+              path=outdir/f'race-{race}-result.json'
+              # POST-RACE relay is append-only evidence. Once a valid result file exists,
+              # never refresh fetchedAt or overwrite it on later polling runs.
+              if path.exists():
+                  validate_existing(path,race)
+                  print('KEEP_IMMUTABLE_RESULT',race)
+                  continue
+
               url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=07&rno={race}'
               try:
                   res=requests.get(url,headers=headers,timeout=20);res.raise_for_status()
@@ -94,13 +111,12 @@ jobs:
                   'fetchedAt':datetime.now(JST).isoformat(),'officialSource':url,
                   'trifecta':trifecta,'payout100':payout,'finishOrder':finish[:6],
                   'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
-                  'predictionEnabled':False,'hardLockEnabled':False
+                  'predictionEnabled':False,'hardLockEnabled':False,
+                  'immutableAfterFirstWrite':True
               }
-              path=outdir/f'race-{race}-result.json'
-              text=json.dumps(payload,ensure_ascii=False,indent=2)+'\n'
-              if not path.exists() or path.read_text()!=text:
-                  path.write_text(text);made.append(race)
-          print('RESULT_FILES_UPDATED',made)
+              path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+              made.append(race)
+          print('RESULT_FILES_CREATED',made)
           PY
 
       - name: Commit app enablement and POST-RACE relay files
@@ -113,5 +129,5 @@ jobs:
           git config user.name 'boat-command-result-relay'
           git config user.email 'boat-command-result-relay@users.noreply.github.com'
           git add index.html live/gamagori
-          git commit -m 'live: add separated Gamagori post-race result relay'
+          git commit -m 'live: add immutable separated Gamagori post-race result relay'
           git push
