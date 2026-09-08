@@ -10,218 +10,33 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BOAT COMMAND">
-  <title>BOAT COMMAND v0.20.2</title>
+  <title>BOAT COMMAND v0.20.3</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=202">
+  <link rel="stylesheet" href="styles.css?v=203">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">◉</div>
-      <div class="brand-copy"><b>BOAT COMMAND</b><small>PRIVATE RACE ANALYTICS</small></div>
-    </div>
-
-    <nav>
-      <button class="nav active" data-view="home"><span>⌂</span><em>HOME</em></button>
-      <button class="nav" data-view="predict"><span>≋</span><em>12R予想</em></button>
-      <button class="nav" data-view="results"><span>✓</span><em>精算</em></button>
-      <button class="nav" data-view="analytics"><span>⌁</span><em>分析</em></button>
-      <button class="nav" data-view="assistant"><span>✦</span><em>AI</em></button>
-      <button class="nav" data-view="data"><span>⇅</span><em>DATA</em></button>
-    </nav>
-
-    <div class="venue-card">
-      <small>担当場</small>
-      <strong>蒲郡</strong>
-      <span><i></i> GAMAGORI-01</span>
-    </div>
-    <div class="version">v0.20.2 · FINAL LOCK GUARD</div>
+    <div class="brand"><div class="logo">◉</div><div class="brand-copy"><b>BOAT COMMAND</b><small>PRIVATE RACE ANALYTICS</small></div></div>
+    <nav><button class="nav active" data-view="home"><span>⌂</span><em>HOME</em></button><button class="nav" data-view="predict"><span>≋</span><em>12R予想</em></button><button class="nav" data-view="results"><span>✓</span><em>精算</em></button><button class="nav" data-view="analytics"><span>⌁</span><em>分析</em></button><button class="nav" data-view="assistant"><span>✦</span><em>AI</em></button><button class="nav" data-view="data"><span>⇅</span><em>DATA</em></button></nav>
+    <div class="venue-card"><small>担当場</small><strong>蒲郡</strong><span><i></i> GAMAGORI-01</span></div><div class="version">v0.20.3 · LOCK SNAPSHOT</div>
   </aside>
-
   <main>
-    <header class="topbar">
-      <div>
-        <div class="eyebrow">GAMAGORI ANALYST</div>
-        <h1 id="pageTitle">蒲郡コマンドセンター</h1>
-      </div>
-      <div class="top-actions">
-        <label class="date-box"><span>対象日</span><input id="sessionDate" type="date"></label>
-        <div id="modeBadge" class="badge blind">🔒 STRICT BLIND</div>
-      </div>
-    </header>
-
-    <section id="home" class="view active">
-      <div class="hero-grid">
-        <section class="panel assistant-card">
-          <div class="panel-head">
-            <div><h2>AIに聞く</h2><p>端末内データを会話形式で説明</p></div>
-            <div class="voice-tools"><button id="speakBtn" class="mic" title="音声返答">🔊</button><button id="micBtn" class="mic">🎙</button></div>
-          </div>
-          <div id="chat" class="chat">
-            <div class="bubble ai">蒲郡担当です。<br>「今日どう？」「ロック状況」「資金推移」「弱点は？」と聞いてください。</div>
-          </div>
-          <div class="input-row">
-            <input id="prompt" placeholder="例：今日の蒲郡どう？">
-            <button id="send">送信</button>
-          </div>
-          <div class="quick">
-            <button data-q="今日どう？">今日どう？</button>
-            <button data-q="ロック状況">ロック状況</button>
-            <button data-q="資金推移">資金推移</button>
-            <button data-q="弱点は？">弱点</button>
-            <button data-q="過去と本番">過去 vs 本番</button>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head"><div><h2>今日のサマリー</h2><p id="summarySub">未開始</p></div><div id="todayStatus" class="status-pill">OPEN</div></div>
-          <div class="kpis">
-            <div class="kpi"><span>LOCK</span><strong id="kLocked">0/12</strong><small>予想固定</small></div>
-            <div class="kpi"><span>的中</span><strong id="kHits">—</strong><small id="kHitRate">—</small></div>
-            <div class="kpi"><span>回収率</span><strong id="kRoi">—</strong><small>当日</small></div>
-            <div class="kpi"><span>損益</span><strong id="kProfit">¥0</strong><small>当日</small></div>
-          </div>
-          <div class="guard-note" id="guardNote">全12RをLOCKするまで、結果入力は開きません。</div>
-        </section>
-      </div>
-
-      <div class="dashboard-grid">
-        <section class="panel chart-card">
-          <div class="panel-head"><div><h2>仮想資金推移</h2><p>精算済みレース単位</p></div><strong id="bankrollNow">¥100,000</strong></div>
-          <svg id="bankrollChart" viewBox="0 0 900 280" preserveAspectRatio="none"></svg>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head"><div><h2>累計</h2><p>保存データ全期間</p></div></div>
-          <div class="stack-stats">
-            <div><span>戦績</span><b id="allRecord">0戦 0的中</b></div>
-            <div><span>的中率</span><b id="allHitRate">—</b></div>
-            <div><span>回収率</span><b id="allRoi">—</b></div>
-            <div><span>最大DD</span><b id="allDd">¥0</b></div>
-          </div>
-        </section>
-
-        <section class="panel wide">
-          <div class="panel-head"><div><h2>12Rステータス</h2><p>予想 → LOCK → 結果 → 精算</p></div><button class="ghost" data-jump="predict">予想を開く</button></div>
-          <div id="raceStrip" class="race-strip"></div>
-        </section>
-      </div>
-    </section>
-
-    <section id="predict" class="view">
-      <section class="panel">
-        <div class="panel-head">
-          <div><h2>蒲郡 1R〜12R 予想</h2><p>番組構成 → 過去同型 → 機力・展示 → 展開予測｜3連単 最大4点</p></div>
-          <button id="lockAllBtn" class="primary">入力済みを一括LOCK</button>
-        </div>
-        <div class="session-controls">
-          <div class="field"><label>データ区分</label><select id="runType"><option value="LIVE">LIVE（本番）</option><option value="BACKTEST">BACKTEST（過去検証）</option></select></div>
-          <div class="field"><label>戦略バージョン</label><input id="strategyVersion" value="GAMAGORI-V1.0" placeholder="GAMAGORI-V1.0"></div>
-          <div class="session-lock-note" id="sessionLockNote">1RでもLOCKすると区分と戦略バージョンは固定されます。</div>
-        </div>
-        <div id="replayPanel" class="replay-panel">
-          <div>
-            <div class="replay-kicker">STRICT BACKTEST REPLAY</div>
-            <h3>蒲郡・実レース検証パック</h3>
-            <p>事前情報だけを先に表示し、予想対象レースをすべてHARD LOCKするまで公式結果は画面に出しません。</p>
-          </div>
-          <div class="replay-actions">
-            <button id="autoPrepBtn" class="primary">BLIND AUTO PREP</button><div id="autoPrepStatus" class="generator-status">READY · 自動準備待ち</div><button id="loadReplayBtn" class="ghost">2025/12/15 パックを読み込む</button><button id="unloadReplayBtn" class="ghost hidden">パック未読込に戻す</button><button id="generateBlindBtn" class="ghost">BLIND予想を自動生成</button><div id="generatorStatus" class="generator-status">READY · 生成待ち</div><div id="replayLoadStatus" class="replay-load-status">READY · 読み込み待ち</div>
-            <button id="autoFinishBtn" class="primary hidden">RESULT AUTO FINISH</button><div id="autoFinishStatus" class="generator-status">READY · 結果待ち</div><button id="revealReplayBtn" class="ghost hidden">結果を解禁・一括精算</button>
-          </div>
-          <div id="replayStatus" class="replay-status">未読込</div>
-        </div>
-        <div id="predictionList" class="race-list"></div>
-      </section>
-    </section>
-
-    <section id="results" class="view">
-      <section class="panel">
-        <div class="panel-head">
-          <div><h2>結果・精算</h2><p>予想対象全件LOCK後に解禁。見送りレースは成績集計から除外</p></div>
-          <div id="resultGateBadge" class="badge blind">LOCK待ち</div>
-        </div>
-        <div id="resultGate" class="gate">
-          <div class="gate-icon">🔒</div>
-          <h3>RESULT MODEはまだ開いていません</h3>
-          <p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p>
-        </div>
-        <div id="resultSummary" class="result-summary hidden"></div><div id="resultList" class="race-list hidden"></div>
-      </section>
-    </section>
-
-    <section id="analytics" class="view">
-      <div class="analytics-grid">
-        <section class="panel">
-          <div class="panel-head"><div><h2>1着艇別 回収率</h2><p>あなたの買い目の1着艇で集計</p></div></div>
-          <div id="headBoatBars" class="bars"></div>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><div><h2>結果1着艇 分布</h2><p>精算済みレース</p></div></div>
-          <div id="winnerBars" class="bars"></div>
-        </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><h2>BACKTEST vs LIVE</h2><p>過去検証と本番成績を混ぜずに比較</p></div></div>
-          <div id="modeCompare" class="compare-grid"></div>
-        </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><h2>日別成績</h2><p>保存済みセッション</p></div></div>
-          <div id="historyTable" class="history-table"></div>
-        </section>
-      </div>
-    </section>
-
-    <section id="assistant" class="view">
-      <section class="panel">
-        <div class="panel-head"><div><h2>蒲郡担当AI 分析レポート</h2><p>外部APIを使わない無料のローカル分析</p></div><div class="report-refresh"><button id="refreshReport" class="ghost">更新</button><span id="reportRefreshStatus" class="refresh-status">未更新</span></div></div>
-        <div id="reportCards" class="report-grid"></div>
-        <div class="fineprint">v0.7の「AI」は保存データをルールベースで要約する無料版です。音声返答はiPadの標準音声合成を利用します。外部AIや有料APIは自動で有効にしません。</div>
-      </section>
-    </section>
-
-    <section id="data" class="view">
-      <div class="data-grid">
-        <section class="panel">
-          <h2>バックアップ</h2>
-          <p>このアプリの記録はこのiPadのブラウザ領域に保存されます。定期的にJSONを書き出すのがおすすめです。</p>
-          <div class="data-actions">
-            <button id="exportBtn" class="primary">バックアップを書き出す</button>
-            <label class="file-btn">バックアップを読み込む<input id="importFile" type="file" accept="application/json"></label>
-          </div>
-        </section>
-        <section class="panel">
-          <h2>対象日の管理</h2>
-          <p id="sessionInfo"></p>
-          <button id="resetDayBtn" class="danger">この日だけ初期化</button>
-        </section>
-        <section class="panel wide live-monitor-panel">
-          <div class="panel-head"><div><h2>LIVE DATA GATE v1.1 · 12R TIMING AUDIT</h2><p>9/4本番用の受け皿。12Rの取得時刻・READY時刻・締切・購入余裕を監査します。</p></div><span class="badge ready">AUDIT ONLY</span></div>
-          <div class="live-monitor-controls">
-            <label>日付<input id="liveDate" type="date"></label>
-            <label>レース<select id="liveRace">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}R</option>`).join("")}</select></label>
-            <button id="liveProbeBtn" class="primary">公式PRE-RACE直接テスト</button><button id="relayProbeBtn" class="secondary">RELAY受信テスト</button>
-          </div>
-          <div id="liveGateStatus" class="live-gate-status">未実行</div>
-          <div id="liveGateAudit" class="live-gate-audit"></div><div id="relayGateStatus" class="live-gate-status">RELAY未実行 · same-origin JSONのみ</div><div id="relayGateAudit" class="live-gate-audit"></div>
-          <div class="timing-audit-head"><div><b>12R LIVE TIMING AUDIT</b><span id="timingAuditSummary">0/12 READY</span></div><button id="clearTimingAuditBtn" class="secondary">監査ログだけクリア</button></div>
-          <div id="timingAuditTable" class="audit-table"></div>
-          <div class="fineprint">PRE-RACE専用。許可ソースは racelist / beforeinfo と将来の監査済み pre/race-N.json のみ。result / resultlist はこのモニターから呼び出せません。予想・LOCKも接続していません。</div>
-        </section>
-        <section class="panel wide">
-          <h2>監査情報</h2>
-          <p>各レースのLOCK時刻と簡易ハッシュを保存します。結果入力は全12R LOCK後のみ解禁されます。</p>
-          <div id="auditTable" class="audit-table"></div>
-        </section>
-      </div>
-    </section>
+    <header class="topbar"><div><div class="eyebrow">GAMAGORI ANALYST</div><h1 id="pageTitle">蒲郡コマンドセンター</h1></div><div class="top-actions"><label class="date-box"><span>対象日</span><input id="sessionDate" type="date"></label><div id="modeBadge" class="badge blind">🔒 STRICT BLIND</div></div></header>
+    <section id="home" class="view active"><div class="hero-grid"><section class="panel assistant-card"><div class="panel-head"><div><h2>AIに聞く</h2><p>端末内データを会話形式で説明</p></div><div class="voice-tools"><button id="speakBtn" class="mic" title="音声返答">🔊</button><button id="micBtn" class="mic">🎙</button></div></div><div id="chat" class="chat"><div class="bubble ai">蒲郡担当です。<br>「今日どう？」「ロック状況」「資金推移」「弱点は？」と聞いてください。</div></div><div class="input-row"><input id="prompt" placeholder="例：今日の蒲郡どう？"><button id="send">送信</button></div><div class="quick"><button data-q="今日どう？">今日どう？</button><button data-q="ロック状況">ロック状況</button><button data-q="資金推移">資金推移</button><button data-q="弱点は？">弱点</button><button data-q="過去と本番">過去 vs 本番</button></div></section><section class="panel"><div class="panel-head"><div><h2>今日のサマリー</h2><p id="summarySub">未開始</p></div><div id="todayStatus" class="status-pill">OPEN</div></div><div class="kpis"><div class="kpi"><span>LOCK</span><strong id="kLocked">0/12</strong><small>予想固定</small></div><div class="kpi"><span>的中</span><strong id="kHits">—</strong><small id="kHitRate">—</small></div><div class="kpi"><span>回収率</span><strong id="kRoi">—</strong><small>当日</small></div><div class="kpi"><span>損益</span><strong id="kProfit">¥0</strong><small>当日</small></div></div><div class="guard-note" id="guardNote">全12RをLOCKするまで、結果入力は開きません。</div></section></div><div class="dashboard-grid"><section class="panel chart-card"><div class="panel-head"><div><h2>仮想資金推移</h2><p>精算済みレース単位</p></div><strong id="bankrollNow">¥100,000</strong></div><svg id="bankrollChart" viewBox="0 0 900 280" preserveAspectRatio="none"></svg></section><section class="panel"><div class="panel-head"><div><h2>累計</h2><p>保存データ全期間</p></div></div><div class="stack-stats"><div><span>戦績</span><b id="allRecord">0戦 0的中</b></div><div><span>的中率</span><b id="allHitRate">—</b></div><div><span>回収率</span><b id="allRoi">—</b></div><div><span>最大DD</span><b id="allDd">¥0</b></div></div></section><section class="panel wide"><div class="panel-head"><div><h2>12Rステータス</h2><p>予想 → LOCK → 結果 → 精算</p></div><button class="ghost" data-jump="predict">予想を開く</button></div><div id="raceStrip" class="race-strip"></div></section></div></section>
+    <section id="predict" class="view"><section class="panel"><div class="panel-head"><div><h2>蒲郡 1R〜12R 予想</h2><p>番組構成 → 過去同型 → 機力・展示 → 展開予測｜3連単 最大4点</p></div><button id="lockAllBtn" class="primary">入力済みを一括LOCK</button></div><div class="session-controls"><div class="field"><label>データ区分</label><select id="runType"><option value="LIVE">LIVE（本番）</option><option value="BACKTEST">BACKTEST（過去検証）</option></select></div><div class="field"><label>戦略バージョン</label><input id="strategyVersion" value="GAMAGORI-V1.0" placeholder="GAMAGORI-V1.0"></div><div class="session-lock-note" id="sessionLockNote">1RでもLOCKすると区分と戦略バージョンは固定されます。</div></div><div id="replayPanel" class="replay-panel"><div><div class="replay-kicker">STRICT BACKTEST REPLAY</div><h3>蒲郡・実レース検証パック</h3><p>事前情報だけを先に表示し、予想対象レースをすべてHARD LOCKするまで公式結果は画面に出しません。</p></div><div class="replay-actions"><button id="autoPrepBtn" class="primary">BLIND AUTO PREP</button><div id="autoPrepStatus" class="generator-status">READY · 自動準備待ち</div><button id="loadReplayBtn" class="ghost">2025/12/15 パックを読み込む</button><button id="unloadReplayBtn" class="ghost hidden">パック未読込に戻す</button><button id="generateBlindBtn" class="ghost">BLIND予想を自動生成</button><div id="generatorStatus" class="generator-status">READY · 生成待ち</div><div id="replayLoadStatus" class="replay-load-status">READY · 読み込み待ち</div><button id="autoFinishBtn" class="primary hidden">RESULT AUTO FINISH</button><div id="autoFinishStatus" class="generator-status">READY · 結果待ち</div><button id="revealReplayBtn" class="ghost hidden">結果を解禁・一括精算</button></div><div id="replayStatus" class="replay-status">未読込</div></div><div id="predictionList" class="race-list"></div></section></section>
+    <section id="results" class="view"><section class="panel"><div class="panel-head"><div><h2>結果・精算</h2><p>予想対象全件LOCK後に解禁。見送りレースは成績集計から除外</p></div><div id="resultGateBadge" class="badge blind">LOCK待ち</div></div><div id="resultGate" class="gate"><div class="gate-icon">🔒</div><h3>RESULT MODEはまだ開いていません</h3><p>予想対象レースをすべてHARD LOCKすると、結果が解禁されます。見送りレースはLOCK不要です。</p></div><div id="resultSummary" class="result-summary hidden"></div><div id="resultList" class="race-list hidden"></div></section></section>
+    <section id="analytics" class="view"><div class="analytics-grid"><section class="panel"><div class="panel-head"><div><h2>1着艇別 回収率</h2><p>あなたの買い目の1着艇で集計</p></div></div><div id="headBoatBars" class="bars"></div></section><section class="panel"><div class="panel-head"><div><h2>結果1着艇 分布</h2><p>精算済みレース</p></div></div><div id="winnerBars" class="bars"></div></section><section class="panel wide"><div class="panel-head"><div><h2>BACKTEST vs LIVE</h2><p>過去検証と本番成績を混ぜずに比較</p></div></div><div id="modeCompare" class="compare-grid"></div></section><section class="panel wide"><div class="panel-head"><div><h2>日別成績</h2><p>保存済みセッション</p></div></div><div id="historyTable" class="history-table"></div></section></div></section>
+    <section id="assistant" class="view"><section class="panel"><div class="panel-head"><div><h2>蒲郡担当AI 分析レポート</h2><p>外部APIを使わない無料のローカル分析</p></div><div class="report-refresh"><button id="refreshReport" class="ghost">更新</button><span id="reportRefreshStatus" class="refresh-status">未更新</span></div></div><div id="reportCards" class="report-grid"></div><div class="fineprint">ローカル分析版です。外部AIや有料APIは自動で有効にしません。</div></section></section>
+    <section id="data" class="view"><div class="data-grid"><section class="panel"><h2>バックアップ</h2><p>このアプリの記録はこのiPadのブラウザ領域に保存されます。定期的にJSONを書き出すのがおすすめです。</p><div class="data-actions"><button id="exportBtn" class="primary">バックアップを書き出す</button><label class="file-btn">バックアップを読み込む<input id="importFile" type="file" accept="application/json"></label></div></section><section class="panel"><h2>対象日の管理</h2><p id="sessionInfo"></p><button id="resetDayBtn" class="danger">この日だけ初期化</button></section><section class="panel wide live-monitor-panel"><div class="panel-head"><div><h2>LIVE DATA GATE v1.1 · 12R TIMING AUDIT</h2><p>PRE-RACE取得時刻・READY時刻・締切・購入余裕を監査します。</p></div><span class="badge ready">AUDIT ONLY</span></div><div class="live-monitor-controls"><label>日付<input id="liveDate" type="date"></label><label>レース<select id="liveRace"><option value="1">1R</option><option value="2">2R</option><option value="3">3R</option><option value="4">4R</option><option value="5">5R</option><option value="6">6R</option><option value="7">7R</option><option value="8">8R</option><option value="9">9R</option><option value="10">10R</option><option value="11">11R</option><option value="12">12R</option></select></label><button id="liveProbeBtn" class="primary">公式PRE-RACE直接テスト</button><button id="relayProbeBtn" class="secondary">RELAY受信テスト</button></div><div id="liveGateStatus" class="live-gate-status">未実行</div><div id="liveGateAudit" class="live-gate-audit"></div><div id="relayGateStatus" class="live-gate-status">RELAY未実行 · same-origin JSONのみ</div><div id="relayGateAudit" class="live-gate-audit"></div><div class="timing-audit-head"><div><b>12R LIVE TIMING AUDIT</b><span id="timingAuditSummary">0/12 READY</span></div><button id="clearTimingAuditBtn" class="secondary">監査ログだけクリア</button></div><div id="timingAuditTable" class="audit-table"></div><div class="fineprint">PRE-RACE専用。result系はこのモニターから呼び出しません。</div></section><section class="panel wide"><h2>監査情報</h2><p>LOCK時刻・簡易ハッシュ・LIVE LOCK SNAPSHOTを保存します。</p><div id="auditTable" class="audit-table"></div></section></div></section>
   </main>
 </div>
-<script src="app.js?v=202"></script>
-<script src="live-autopoll-v0199.js?v=201"></script>
-<script src="live-predictor-v0200.js?v=201"></script>
-<script src="live-autofill-v0201.js?v=201"></script>
-<script src="live-lock-guard-v0202.js?v=202"></script>
+<script src="app.js?v=203"></script>
+<script src="live-autopoll-v0199.js?v=203"></script>
+<script src="live-predictor-v0200.js?v=203"></script>
+<script src="live-autofill-v0201.js?v=203"></script>
+<script src="live-lock-guard-v0202.js?v=203"></script>
+<script src="live-lock-snapshot-v0203.js?v=203"></script>
 </body>
 </html>
