@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'app.js'
       - 'styles.css'
+      - 'manifest.webmanifest'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
       - 'live-autofill-v0201.js'
@@ -58,7 +59,7 @@ jobs:
             node --check "$f"
           done
 
-      - name: Verify local trial DOM and script contract
+      - name: Verify local trial DOM, script and cache contract
         shell: python
         run: |
           from pathlib import Path
@@ -89,6 +90,12 @@ jobs:
           positions = [bases.index(x) for x in required_scripts]
           if positions != sorted(positions):
             raise SystemExit('LOCAL_SCRIPT_ORDER_BAD')
+          stale = [x for x in srcs if not x.endswith('?v=221')]
+          if stale:
+            raise SystemExit(f'LOCAL_SCRIPT_CACHE_KEY_STALE:{stale}')
+          for required_asset in ('styles.css?v=221','manifest.webmanifest?v=221','icon.svg?v=221'):
+            if required_asset not in html:
+              raise SystemExit(f'LOCAL_ASSET_CACHE_KEY_MISSING:{required_asset}')
           print('LOCAL_TRIAL_CONTRACT_PASS')
 
       - name: Wait for GitHub Pages and audit deployed app
@@ -102,7 +109,7 @@ jobs:
           for i in $(seq 1 18); do
             url="${APP_URL}?trial_smoke=${GITHUB_SHA}&attempt=${i}"
             code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "$url" || true)
-            if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js?v=218' /tmp/public-index.html; then
+            if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js?v=221' /tmp/public-index.html; then
               ok=1
               break
             fi
@@ -141,6 +148,12 @@ jobs:
           pos = [bases.index(x) for x in required]
           if pos != sorted(pos):
             raise SystemExit('PUBLIC_SCRIPT_ORDER_BAD')
+          stale = [x for x in srcs if not x.endswith('?v=221')]
+          if stale:
+            raise SystemExit(f'PUBLIC_SCRIPT_CACHE_KEY_STALE:{stale}')
+          for required_asset in ('styles.css?v=221','manifest.webmanifest?v=221','icon.svg?v=221'):
+            if required_asset not in html:
+              raise SystemExit(f'PUBLIC_ASSET_CACHE_KEY_MISSING:{required_asset}')
           print('PUBLIC_HTML_CONTRACT_PASS')
           PY
 
@@ -155,7 +168,11 @@ jobs:
           from pathlib import Path
           import re
           html=Path('/tmp/public-index.html').read_text(encoding='utf-8')
-          for src in re.findall(r'<script\s+src="([^"]+)"', html):
+          assets=[]
+          assets += re.findall(r'<script\s+src="([^"]+)"', html)
+          for pattern in [r'<link\s+rel="stylesheet"\s+href="([^"]+)"', r'<link\s+rel="manifest"\s+href="([^"]+)"', r'<link\s+rel="icon"\s+href="([^"]+)"']:
+              assets += re.findall(pattern, html)
+          for src in assets:
               print(src)
           PY
           )
@@ -174,6 +191,7 @@ jobs:
             'schema':'boat-command-public-trial-smoke-v1',
             'venue':'蒲郡',
             'appVersion':'0.21.8',
+            'assetCacheKey':'221',
             'status':'PASS',
             'publicUrl':os.environ['APP_URL'],
             'localSyntaxAudit':True,
