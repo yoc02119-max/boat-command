@@ -22,22 +22,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate learning JavaScript
         run: node --check live-learning-v0205.js
-      - name: Enable module and bump app version
+      - name: Enforce singleton learning bootstrap
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.20.4','BOAT COMMAND v0.20.5')
-          s=s.replace('v0.20.4 · LIVE RESULTS','v0.20.5 · LIVE LEARNING')
-          s=s.replace('v0.20.4 · RESULT LAYER','v0.20.5 · LIVE LEARNING')
-          s=s.replace('styles.css?v=204','styles.css?v=205')
-          s=s.replace('app.js?v=204','app.js?v=205')
-          for old in ['live-autopoll-v0199.js?v=204','live-predictor-v0200.js?v=204','live-autofill-v0201.js?v=204','live-lock-guard-v0202.js?v=204','live-lock-snapshot-v0203.js?v=204','live-result-v0204.js?v=204']:
-              s=s.replace(old,old.replace('=204','=205'))
-          tag='<script src="live-learning-v0205.js?v=205"></script>'
-          if tag not in s:
-              s=s.replace('</body>',tag+'\n</body>')
+          s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
+          s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
+          # Remove every prior cache-busted copy, then insert exactly one after result layer.
+          s=re.sub(r'\n?<script src="live-learning-v0205\.js\?v=\d+"></script>','',s)
+          anchor='<script src="live-result-v0204.js?v=214"></script>'
+          tag='<script src="live-learning-v0205.js?v=214"></script>'
+          if anchor not in s:
+              raise SystemExit('LEARNING_BOOTSTRAP_ANCHOR_MISSING')
+          s=s.replace(anchor,anchor+'\n'+tag,1)
+          if s.count('live-learning-v0205.js')!=1:
+              raise SystemExit('LEARNING_BOOTSTRAP_SINGLETON_FAIL')
           p.write_text(s)
           PY
       - name: Commit app learning enablement
@@ -48,6 +50,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'NO_CHANGES'
           else
-            git commit -m 'app: enable Gamagori LIVE learning records v0.20.5'
+            git commit -m 'app: maintain singleton Gamagori LIVE learning bootstrap'
             git push
           fi
