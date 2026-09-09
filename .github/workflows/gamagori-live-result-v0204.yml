@@ -66,7 +66,8 @@ jobs:
           hd=date.replace('-','')
           outdir=Path('live/gamagori')/date/'post';outdir.mkdir(parents=True,exist_ok=True)
           made=[]
-          headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND/0.20.4'}
+          headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND/0.21.4'}
+          valid_methods={'逃げ','差し','まくり','まくり差し','抜き','恵まれ'}
 
           def validate_existing(path,race):
               x=json.loads(path.read_text())
@@ -75,6 +76,8 @@ jobs:
               if x.get('preRaceDataIncluded') is not False or x.get('resultEndpointsIncluded') is not True: raise RuntimeError(f'EXISTING_RESULT_BOUNDARY_INVALID race={race}')
               if not re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta',''))): raise RuntimeError(f'EXISTING_RESULT_TRIFECTA_INVALID race={race}')
               if not isinstance(x.get('payout100'),int) or x.get('payout100')<0: raise RuntimeError(f'EXISTING_RESULT_PAYOUT_INVALID race={race}')
+              method=x.get('winningMethod')
+              if method is not None and method not in valid_methods: raise RuntimeError(f'EXISTING_RESULT_METHOD_INVALID race={race}')
 
           for race in range(1,13):
               path=outdir/f'race-{race}-result.json'
@@ -106,10 +109,14 @@ jobs:
                   cells=[' '.join(td.stripped_strings) for td in tr.find_all(['th','td'])]
                   if len(cells)>=2 and cells[0] in {'１','２','３','４','５','６','1','2','3','4','5','6'} and re.fullmatch(r'[1-6]',cells[1].strip()):
                       finish.append(int(cells[1].strip()))
+              plain=' '.join(soup.stripped_strings)
+              mm=re.search(r'決まり手\s*(まくり差し|まくり|逃げ|差し|抜き|恵まれ)(?:\s|$)',plain)
+              winning_method=mm.group(1) if mm else None
               payload={
-                  'schema':'boat-command-live-result-v1','version':'0.20.4','venue':'GAMAGORI','date':date,'race':race,
+                  'schema':'boat-command-live-result-v1','version':'0.21.4','venue':'GAMAGORI','date':date,'race':race,
                   'fetchedAt':datetime.now(JST).isoformat(),'officialSource':url,
                   'trifecta':trifecta,'payout100':payout,'finishOrder':finish[:6],
+                  'winningMethod':winning_method,
                   'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
                   'predictionEnabled':False,'hardLockEnabled':False,
                   'immutableAfterFirstWrite':True
