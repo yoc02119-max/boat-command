@@ -21,21 +21,21 @@ jobs:
         run: |
           node --check live-snapshot-hash-guard-v0209.js
           node --check live-result-v0204.js
-      - name: Enable module and bump app version
+      - name: Enforce singleton snapshot hash bootstrap
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.20.8','BOAT COMMAND v0.20.9')
-          s=s.replace('v0.20.8 · INTEGRITY AUDIT','v0.20.9 · HASH GUARD')
-          s=s.replace('?v=208','?v=209')
-          marker='<script src="live-integrity-audit-v0208.js?v=209"></script>'
-          tag='<script src="live-snapshot-hash-guard-v0209.js?v=209"></script>'
-          if tag not in s:
-              if marker not in s:
-                  raise SystemExit('integrity audit script marker not found')
-              s=s.replace(marker, marker+'\n'+tag)
+          s=re.sub(r'\n?<script src="live-snapshot-hash-guard-v0209\.js\?v=\d+"></script>','',s)
+          anchor_re=r'(<script src="live-integrity-audit-v0208\.js\?v=\d+"></script>)'
+          if not re.search(anchor_re,s):
+              raise SystemExit('SNAPSHOT_HASH_ANCHOR_MISSING')
+          tag='<script src="live-snapshot-hash-guard-v0209.js?v=214"></script>'
+          s=re.sub(anchor_re,lambda m:m.group(1)+'\n'+tag,s,count=1)
+          if s.count('live-snapshot-hash-guard-v0209.js')!=1:
+              raise SystemExit('SNAPSHOT_HASH_SINGLETON_FAIL')
           p.write_text(s)
           PY
       - name: Commit app hash guard enablement
@@ -48,5 +48,5 @@ jobs:
             echo 'NO_CHANGE'
             exit 0
           fi
-          git commit -m 'app: enable Gamagori live snapshot hash guard v0.20.9'
+          git commit -m 'app: maintain singleton Gamagori live snapshot hash bootstrap'
           git push
