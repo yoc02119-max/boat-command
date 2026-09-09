@@ -35,6 +35,39 @@ jobs:
               assert all(isinstance(y, str) and y for y in x['patterns'])
           print('LINE_INTENT_CONTRACT_PASS')
 
+      - name: Validate representative intent routing
+        shell: python
+        run: |
+          import json
+          import re
+          from pathlib import Path
+
+          p = json.loads(Path('line/intent-routes.json').read_text(encoding='utf-8'))
+          routes = p['intents']
+
+          def detect(text):
+              for route in routes:
+                  for pattern in route['patterns']:
+                      if re.search(pattern, text, flags=re.I):
+                          return route['name']
+              return None
+
+          samples = {
+              '進捗どう？': 'progress',
+              '試せる？': 'trial',
+              '今日の蒲郡は？': 'today_gamagori',
+              '次のレースはいつ？': 'next_race',
+              '次回開催はいつから？': 'next_event',
+              '蒲郡次いつ？': 'next_event',
+              '次節いつ？': 'next_event',
+              'このあと何する？': 'next_task',
+              '何ができる？': 'help',
+          }
+          for text, expected in samples.items():
+              actual = detect(text)
+              assert actual == expected, f'{text}: expected={expected} actual={actual}'
+          print('LINE_INTENT_ROUTING_PASS')
+
       - name: Validate Worker config
         shell: python
         run: |
