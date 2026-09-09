@@ -1,0 +1,101 @@
+name: Gamagori early trial UI v0.21.7
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-early-trial-ui-v0217.yml'
+      - 'development-status-v0217.js'
+
+permissions:
+  contents: write
+
+jobs:
+  early-trial-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JavaScript syntax audit
+        run: node --check development-status-v0217.js
+
+      - name: Enable progress card without touching race logic
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          html = p.read_text(encoding='utf-8')
+
+          html = html.replace('BOAT COMMAND v0.21.6', 'BOAT COMMAND v0.21.7')
+          html = html.replace('v0.21.6 · LEARNING INTEGRITY', 'v0.21.7 · EARLY TRIAL')
+
+          script = '<script src="development-status-v0217.js?v=217"></script>'
+          anchor = '<script src="live-snapshot-hash-guard-v0209.js?v=214"></script>'
+          if script not in html:
+              if anchor not in html:
+                  raise SystemExit('SAFE_INSERT_ANCHOR_MISSING')
+              html = html.replace(anchor, anchor + '\n' + script)
+
+          p.write_text(html, encoding='utf-8')
+
+      - name: Verify PRE and POST race module boundary preserved
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          bases = [x.split('?',1)[0] for x in srcs]
+
+          required = [
+            'app.js',
+            'live-autopoll-v0199.js',
+            'live-predictor-v0200.js',
+            'live-autofill-v0201.js',
+            'live-lock-guard-v0202.js',
+            'live-lock-snapshot-v0203.js',
+            'live-result-v0204.js',
+            'live-learning-v0205.js',
+            'live-learning-dashboard-v0206.js',
+            'live-learning-guard-v0207.js',
+            'live-integrity-audit-v0208.js',
+            'live-snapshot-hash-guard-v0209.js',
+            'development-status-v0217.js',
+          ]
+          missing = [x for x in required if x not in bases]
+          if missing:
+              raise SystemExit(f'MISSING_REQUIRED_SCRIPT: {missing}')
+          duplicates = sorted({x for x in bases if bases.count(x) > 1})
+          if duplicates:
+              raise SystemExit(f'DUPLICATE_SCRIPT_LOAD: {duplicates}')
+
+          core = required[:-1]
+          pos = [bases.index(x) for x in core]
+          if pos != sorted(pos):
+              raise SystemExit('CORE_SCRIPT_ORDER_CHANGED')
+          if bases.index('development-status-v0217.js') <= bases.index('live-snapshot-hash-guard-v0209.js'):
+              raise SystemExit('PROGRESS_UI_MUST_LOAD_AFTER_SAFETY_MODULES')
+
+          result = Path('live-result-v0204.js').read_text(encoding='utf-8')
+          if 'bcVerifyLiveLockSnapshotHashV0209' not in result or 'resultEndpointsIncluded:true' not in result:
+              raise SystemExit('POST_RACE_FAIL_CLOSED_GATE_MISSING')
+
+          print('EARLY_TRIAL_UI_AUDIT_PASS')
+          print('core_safety_order_preserved=true')
+          print('progress_ui_display_only=true')
+
+      - name: Commit app enablement
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No index change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'app: enable Gamagori early-trial progress UI v0.21.7'
+          git push
