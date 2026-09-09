@@ -40,7 +40,11 @@ jobs:
 
           forbidden_literals = ['raceresult', 'result?jcd=', 'officialResult', 'fetchResult', 'settleRace(']
           bad = [x for x in forbidden_literals if x in gate]
-          mutation_patterns = [r'(^|\n)\s*lockRace\s*=', r'window\.lockRace\s*=', r'(^|\n)\s*saveStore\s*\(']
+          mutation_patterns = [
+            r'(^|\n)\s*lockRace\s*=(?!=)',
+            r'window\.lockRace\s*=(?!=)',
+            r'(^|\n)\s*saveStore\s*\('
+          ]
           bad_patterns = [p for p in mutation_patterns if re.search(p, gate)]
           if bad or bad_patterns:
             raise SystemExit(f'TRIAL_GATE_MUST_BE_READ_ONLY: literals={bad} patterns={bad_patterns}')
