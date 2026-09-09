@@ -1,0 +1,84 @@
+name: Gamagori asset cache-bust guard v0.22.1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-asset-cache-bust-v0221.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cache-bust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Refresh same-origin app asset cache keys
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          html_path = Path('index.html')
+          html = html_path.read_text(encoding='utf-8')
+          token = '221'
+
+          # iPad/Safari can retain same-origin assets across deploys. Keep the
+          # semantic app version unchanged; only refresh deterministic asset URLs.
+          html = re.sub(r'href="manifest\.webmanifest(?:\?v=\d+)?"', f'href="manifest.webmanifest?v={token}"', html)
+          html = re.sub(r'href="icon\.svg(?:\?v=\d+)?"', f'href="icon.svg?v={token}"', html)
+          html = re.sub(r'href="styles\.css\?v=\d+"', f'href="styles.css?v={token}"', html)
+          html = re.sub(r'src="([^"]+\.js)\?v=\d+"', rf'src="\1?v={token}"', html)
+          html_path.write_text(html, encoding='utf-8')
+
+          manifest_path = Path('manifest.webmanifest')
+          manifest = manifest_path.read_text(encoding='utf-8')
+          manifest = manifest.replace(
+              'BOAT COMMAND v0.7 — Gamagori strict-blind backtest/live analytics',
+              'BOAT COMMAND v0.21.8 EARLY TRIAL — Gamagori strict-blind live/backtest analytics'
+          )
+          manifest_path.write_text(manifest, encoding='utf-8')
+
+      - name: Verify cache-bust and PWA metadata contract
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          token = '221'
+          if f'manifest.webmanifest?v={token}' not in html:
+              raise SystemExit('MANIFEST_CACHE_KEY_MISSING')
+          if f'icon.svg?v={token}' not in html:
+              raise SystemExit('ICON_CACHE_KEY_MISSING')
+          if f'styles.css?v={token}' not in html:
+              raise SystemExit('CSS_CACHE_KEY_MISSING')
+
+          scripts = re.findall(r'<script\s+src="([^"]+)"', html)
+          if not scripts:
+              raise SystemExit('APP_SCRIPTS_MISSING')
+          bad = [s for s in scripts if not s.endswith(f'?v={token}')]
+          if bad:
+              raise SystemExit(f'STALE_SCRIPT_CACHE_KEYS:{bad}')
+
+          manifest = json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
+          if manifest.get('name') != 'BOAT COMMAND' or manifest.get('start_url') != './' or manifest.get('scope') != './':
+              raise SystemExit('PWA_SCOPE_CONTRACT_CHANGED')
+          if 'v0.21.8 EARLY TRIAL' not in manifest.get('description',''):
+              raise SystemExit('PWA_DESCRIPTION_STALE')
+          print('GAMAGORI_ASSET_CACHE_BUST_PASS')
+
+      - name: Commit cache-safe app shell
+        run: |
+          if git diff --quiet -- index.html manifest.webmanifest; then
+            echo 'No cache metadata change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html manifest.webmanifest
+          git commit -m 'fix: refresh Gamagori iPad app asset cache keys v0.22.1'
+          git push
