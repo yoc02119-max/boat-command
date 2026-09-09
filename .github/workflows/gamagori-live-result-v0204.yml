@@ -74,10 +74,34 @@ jobs:
           JST=timezone(timedelta(hours=9))
           date=(os.environ.get('INPUT_DATE') or '').strip() or datetime.now(JST).strftime('%Y-%m-%d')
           hd=date.replace('-','')
-          outdir=Path('live/gamagori')/date/'post';outdir.mkdir(parents=True,exist_ok=True)
+          base=Path('live/gamagori')/date
+          pre_dir=base/'pre'
+
+          # Fail closed before touching any result endpoint. A scheduled POST-RACE poll is
+          # allowed only when BOAT COMMAND has already produced PRE-RACE evidence for this
+          # exact Gamagori date. This avoids blind result polling on non-event days and
+          # keeps the PRE/POST chain auditable.
+          if not pre_dir.exists():
+              print('NO_PRE_RACE_EVENT_EVIDENCE',date)
+              raise SystemExit(0)
+
+          outdir=base/'post';outdir.mkdir(parents=True,exist_ok=True)
           made=[]
-          headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND/0.21.4'}
+          headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND/0.21.7'}
           valid_methods={'逃げ','差し','まくり','まくり差し','抜き','恵まれ'}
+
+          def validate_pre_pack(path,race):
+              try:
+                  x=json.loads(path.read_text(encoding='utf-8'))
+              except Exception as e:
+                  raise RuntimeError(f'PRE_RACE_PACK_INVALID_JSON race={race}: {e}')
+              if x.get('schema')!='boat-command-live-pre-race-pack-v1': raise RuntimeError(f'PRE_RACE_PACK_SCHEMA_INVALID race={race}')
+              if x.get('venue')!='GAMAGORI' or x.get('date')!=date or int(x.get('race',0))!=race: raise RuntimeError(f'PRE_RACE_PACK_TARGET_INVALID race={race}')
+              if x.get('timingStatus')!='VERIFIED': raise RuntimeError(f'PRE_RACE_PACK_TIMING_INVALID race={race}')
+              if x.get('boatMappingVerified') is not True or x.get('weatherMappingVerified') is not True: raise RuntimeError(f'PRE_RACE_PACK_MAPPING_INVALID race={race}')
+              if x.get('readyForPrediction') is not True: raise RuntimeError(f'PRE_RACE_PACK_NOT_READY race={race}')
+              if x.get('resultEndpointsIncluded') is not False: raise RuntimeError(f'PRE_RACE_PACK_RESULT_BOUNDARY_INVALID race={race}')
+              return x
 
           def validate_existing(path,race):
               x=json.loads(path.read_text())
@@ -97,6 +121,14 @@ jobs:
                   validate_existing(path,race)
                   print('KEEP_IMMUTABLE_RESULT',race)
                   continue
+
+              # No result endpoint request is made until this exact race has a fully
+              # verified PRE-RACE pack. WAIT remains fail-closed.
+              pre_pack=pre_dir/f'race-{race}-pack.json'
+              if not pre_pack.exists():
+                  print('WAIT_PRE_RACE_PACK',race)
+                  continue
+              validate_pre_pack(pre_pack,race)
 
               url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=07&rno={race}'
               try:
@@ -123,13 +155,14 @@ jobs:
               mm=re.search(r'決まり手\s*(まくり差し|まくり|逃げ|差し|抜き|恵まれ)(?:\s|$)',plain)
               winning_method=mm.group(1) if mm else None
               payload={
-                  'schema':'boat-command-live-result-v1','version':'0.21.4','venue':'GAMAGORI','date':date,'race':race,
+                  'schema':'boat-command-live-result-v1','version':'0.21.7','venue':'GAMAGORI','date':date,'race':race,
                   'fetchedAt':datetime.now(JST).isoformat(),'officialSource':url,
                   'trifecta':trifecta,'payout100':payout,'finishOrder':finish[:6],
                   'winningMethod':winning_method,
                   'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
                   'predictionEnabled':False,'hardLockEnabled':False,
-                  'immutableAfterFirstWrite':True
+                  'immutableAfterFirstWrite':True,
+                  'preRaceEvidenceRequired':True
               }
               path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
               made.append(race)
