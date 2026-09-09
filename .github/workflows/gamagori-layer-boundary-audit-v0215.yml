@@ -1,0 +1,173 @@
+name: Gamagori PRE-POST layer boundary audit v0.21.5
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'live-*.js'
+      - 'live/gamagori/**'
+      - '.github/workflows/gamagori-*.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gamagori-layer-boundary-audit-v0215
+  cancel-in-progress: true
+
+jobs:
+  boundary-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check LIVE modules
+        run: |
+          set -euo pipefail
+          for f in live-*.js; do
+            node --check "$f"
+          done
+
+      - name: Enforce PRE-RACE / POST-RACE source boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          pre_race = [
+              'live-autopoll-v0199.js',
+              'live-predictor-v0200.js',
+              'live-autofill-v0201.js',
+              'live-lock-guard-v0202.js',
+              'live-lock-snapshot-v0203.js',
+              'live-learning-guard-v0207.js',
+              'live-integrity-audit-v0208.js',
+              'live-snapshot-hash-guard-v0209.js',
+          ]
+          forbidden = [
+              r'owpc/pc/race/raceresult',
+              r'/post/race-',
+              r'resultEndpointsIncluded\s*[:=]\s*true',
+              r'boat-command-live-result-v1',
+          ]
+
+          errors=[]
+          for name in pre_race:
+              p=Path(name)
+              if not p.exists():
+                  errors.append(f'MISSING_PRE_RACE_MODULE {name}')
+                  continue
+              text=p.read_text(encoding='utf-8')
+              for pat in forbidden:
+                  if re.search(pat,text,re.I):
+                      errors.append(f'POST_RACE_REFERENCE_IN_PRE_RACE {name} /{pat}/')
+
+          result=Path('live-result-v0204.js')
+          if not result.exists():
+              errors.append('MISSING_POST_RACE_MODULE live-result-v0204.js')
+          else:
+              text=result.read_text(encoding='utf-8')
+              required=[
+                  r'/post/race-',
+                  r'boat-command-live-result-v1',
+                  r'preRaceDataIncluded',
+                  r'resultEndpointsIncluded',
+                  r'liveLockSnapshot',
+              ]
+              for pat in required:
+                  if not re.search(pat,text):
+                      errors.append(f'POST_RACE_GUARD_MISSING /{pat}/')
+
+          if errors:
+              print('\n'.join(errors))
+              raise SystemExit(1)
+          print('PRE_POST_SOURCE_BOUNDARY_OK')
+          PY
+
+      - name: Enforce immutable POST-RACE relay contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,re
+
+          errors=[]
+          for p in Path('live/gamagori').glob('*/post/race-*-result.json'):
+              try:
+                  x=json.loads(p.read_text(encoding='utf-8'))
+              except Exception as e:
+                  errors.append(f'INVALID_JSON {p}: {e}')
+                  continue
+              if x.get('schema')!='boat-command-live-result-v1':
+                  errors.append(f'BAD_SCHEMA {p}')
+              if x.get('venue')!='GAMAGORI':
+                  errors.append(f'BAD_VENUE {p}')
+              if x.get('preRaceDataIncluded') is not False:
+                  errors.append(f'PRE_RACE_DATA_PRESENT {p}')
+              if x.get('resultEndpointsIncluded') is not True:
+                  errors.append(f'RESULT_ENDPOINT_FLAG_INVALID {p}')
+              if x.get('predictionEnabled') is not False:
+                  errors.append(f'PREDICTION_ENABLED_IN_POST_RACE {p}')
+              if x.get('hardLockEnabled') is not False:
+                  errors.append(f'HARD_LOCK_ENABLED_IN_POST_RACE {p}')
+              if x.get('immutableAfterFirstWrite') is not True:
+                  errors.append(f'IMMUTABLE_FLAG_MISSING {p}')
+              if not re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta',''))):
+                  errors.append(f'BAD_TRIFECTA {p}')
+              if not isinstance(x.get('payout100'),int) or x.get('payout100')<0:
+                  errors.append(f'BAD_PAYOUT {p}')
+
+          if errors:
+              print('\n'.join(errors))
+              raise SystemExit(1)
+          print('POST_RACE_RELAY_CONTRACT_OK')
+          PY
+
+      - name: Verify canonical browser module order and singleton bootstraps
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          s=Path('index.html').read_text(encoding='utf-8')
+          expected=[
+              'app.js',
+              'live-autopoll-v0199.js',
+              'live-predictor-v0200.js',
+              'live-autofill-v0201.js',
+              'live-lock-guard-v0202.js',
+              'live-lock-snapshot-v0203.js',
+              'live-result-v0204.js',
+              'live-learning-v0205.js',
+              'live-learning-dashboard-v0206.js',
+              'live-learning-guard-v0207.js',
+              'live-integrity-audit-v0208.js',
+              'live-snapshot-hash-guard-v0209.js',
+          ]
+          loaded=re.findall(r'<script\s+src="([^"?]+)(?:\?[^" ]*)?"></script>',s)
+          errors=[]
+          for name in expected:
+              n=loaded.count(name)
+              if n!=1:
+                  errors.append(f'BOOTSTRAP_COUNT {name}={n}')
+          positions=[loaded.index(x) for x in expected if x in loaded]
+          if positions!=sorted(positions):
+              errors.append('BOOTSTRAP_ORDER_INVALID')
+          if errors:
+              print('\n'.join(errors))
+              print('LOADED',loaded)
+              raise SystemExit(1)
+          print('BROWSER_BOOTSTRAP_BOUNDARY_OK')
+          PY
+
+      - name: Confirm audit is Gamagori-only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('.github/workflows/gamagori-layer-boundary-audit-v0215.yml').read_text(encoding='utf-8')
+          if 'live/gamagori/**' not in s:
+              raise SystemExit('GAMAGORI_SCOPE_MISSING')
+          print('GAMAGORI_ONLY_SCOPE_OK')
+          PY
