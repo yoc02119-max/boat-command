@@ -18,21 +18,21 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate integrity JavaScript
         run: node --check live-integrity-audit-v0208.js
-      - name: Enable module and bump app version
+      - name: Enforce singleton integrity bootstrap
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.20.7','BOAT COMMAND v0.20.8')
-          s=s.replace('v0.20.7 · LEARNING GUARD','v0.20.8 · INTEGRITY AUDIT')
-          s=s.replace('?v=207','?v=208')
-          marker='<script src="live-learning-guard-v0207.js?v=208"></script>'
-          tag='<script src="live-integrity-audit-v0208.js?v=208"></script>'
-          if tag not in s:
-              if marker not in s:
-                  raise SystemExit('learning guard script marker not found')
-              s=s.replace(marker, marker+'\n'+tag)
+          s=re.sub(r'\n?<script src="live-integrity-audit-v0208\.js\?v=\d+"></script>','',s)
+          anchor_re=r'(<script src="live-learning-guard-v0207\.js\?v=\d+"></script>)'
+          if not re.search(anchor_re,s):
+              raise SystemExit('INTEGRITY_ANCHOR_MISSING')
+          tag='<script src="live-integrity-audit-v0208.js?v=214"></script>'
+          s=re.sub(anchor_re,lambda m:m.group(1)+'\n'+tag,s,count=1)
+          if s.count('live-integrity-audit-v0208.js')!=1:
+              raise SystemExit('INTEGRITY_SINGLETON_FAIL')
           p.write_text(s)
           PY
       - name: Commit app integrity enablement
@@ -45,5 +45,5 @@ jobs:
             echo 'NO_CHANGE'
             exit 0
           fi
-          git commit -m 'app: enable Gamagori live integrity audit v0.20.8'
+          git commit -m 'app: maintain singleton Gamagori live integrity bootstrap'
           git push
