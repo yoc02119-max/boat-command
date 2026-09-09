@@ -1,17 +1,19 @@
 // BOAT COMMAND GAMAGORI LIVE RESULT LAYER v0.20.4
 // Reads same-origin POST-RACE relay files only after a successful immutable LIVE lock snapshot exists.
 // PRE-RACE evidence and POST-RACE results remain physically and logically separated.
-// Settlement integrity hardening v0.21.3: stake must come only from the frozen lock snapshot.
-const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.3',timer:null,running:false};
+// Settlement integrity hardening v0.21.4: stake comes only from frozen lock snapshot; official winning method is POST-RACE metadata only.
+const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4',timer:null,running:false};
 
 function bcLiveResultPathV0204(date,race){return `./live/gamagori/${date}/post/race-${race}-result.json`;}
 function bcValidResultPickV0204(v){return /^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;}
+function bcValidWinningMethodV0214(v){return v==null||['逃げ','差し','まくり','まくり差し','抜き','恵まれ'].includes(String(v));}
 function bcValidateResultPayloadV0204(x,date,race){
   if(!x||x.schema!=='boat-command-live-result-v1')throw new Error('INVALID_RESULT_SCHEMA');
   if(x.venue!=='GAMAGORI'||x.date!==date||Number(x.race)!==Number(race))throw new Error('RESULT_TARGET_MISMATCH');
   if(x.preRaceDataIncluded!==false||x.resultEndpointsIncluded!==true)throw new Error('RESULT_LAYER_BOUNDARY_INVALID');
   if(!bcValidResultPickV0204(x.trifecta))throw new Error('TRIFECTA_INVALID');
   const p=Number(x.payout100);if(!Number.isFinite(p)||p<0)throw new Error('PAYOUT_INVALID');
+  if(!bcValidWinningMethodV0214(x.winningMethod))throw new Error('WINNING_METHOD_INVALID');
   return true;
 }
 async function bcLoadResultV0204(date,race){
@@ -49,13 +51,13 @@ function bcSettleLiveV0204(r,x,path){
   const contract=bcFrozenSettlementContractV0213(r);
   if(!contract.ok)return contract;
   const frozen=r.liveLockSnapshot;
-  const result=String(x.trifecta),payout100=Number(x.payout100);
-  if(!bcValidResultPickV0204(result)||!Number.isFinite(payout100)||payout100<0)return {ok:false,reason:'RESULT_CONTRACT_INVALID'};
+  const result=String(x.trifecta),payout100=Number(x.payout100),winningMethod=x.winningMethod==null?null:String(x.winningMethod);
+  if(!bcValidResultPickV0204(result)||!Number.isFinite(payout100)||payout100<0||!bcValidWinningMethodV0214(winningMethod))return {ok:false,reason:'RESULT_CONTRACT_INVALID'};
   const picks=contract.picks;
   const hit=picks.includes(result);
   const stake=contract.stake;
   const returnAmount=hit?payout100*(contract.stakePerPick/100):0;
-  r.result=result;r.officialPayout100=payout100;r.refundAmount=0;
+  r.result=result;r.officialPayout100=payout100;r.refundAmount=0;r.winningMethod=winningMethod;
   r.hit=hit;r.returnAmount=returnAmount;r.profit=returnAmount-stake;
   r.stake=stake;r.settled=true;r.settledAt=new Date().toISOString();
   r.note='LIVE / OFFICIAL POST-RACE RELAY';
@@ -66,7 +68,7 @@ function bcSettleLiveV0204(r,x,path){
     preRaceDataIncluded:false,resultEndpointsIncluded:true,
     frozenPredictionUsed:true,mutableStakeFallbackUsed:false,
     frozenStake:stake,stakePerPick:contract.stakePerPick,pickCount:picks.length,
-    trifecta:result,payout100
+    trifecta:result,payout100,winningMethod
   };
   return {ok:true,reason:''};
 }
@@ -105,7 +107,7 @@ answer=function(q){
   const t=String(q||'').replace(/\s/g,'');const m=t.match(/(\d{1,2})R/);const race=m?Number(m[1]):Number($('#liveRace')?.value)||1;
   if(/自動精算|結果取得|結果待ち|精算状況|POST-RACE|ポストレース/.test(t)){
     const r=session().races.find(x=>Number(x.race)===race);
-    if(r?.settled)return `${race}Rは<strong>自動精算済み</strong>です。結果 ${esc(r.result)}、払戻100円あたり ${Number(r.officialPayout100||0).toLocaleString()}円、損益 ${money(r.profit||0)}。予想時スナップショットとは分離保存しています。`;
+    if(r?.settled){const method=r.winningMethod?`、決まり手 ${esc(r.winningMethod)}`:'';return `${race}Rは<strong>自動精算済み</strong>です。結果 ${esc(r.result)}${method}、払戻100円あたり ${Number(r.officialPayout100||0).toLocaleString()}円、損益 ${money(r.profit||0)}。予想時スナップショットとは分離保存しています。`;}
     const g=bcCanSettleLiveV0204(r);if(!g.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(g.reason)}」です。`;
     const c=bcFrozenSettlementContractV0213(r);if(!c.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(c.reason)}」です。`;
     return `${race}RはPOST-RACE結果待ちです。LOCK時スナップショットは固定済みで、結果は別レイヤーからのみ取得します。`;
