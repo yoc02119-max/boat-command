@@ -1,0 +1,104 @@
+name: Gamagori LINE day status v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-line-day-status-v1.yml'
+  schedule:
+    # 13:00-23:00 JST, hourly. Output only commits when the day/event/deadlines change.
+    - cron: '0 4-14 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-line-day-status-v1
+  cancel-in-progress: false
+
+jobs:
+  build-day-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch official Gamagori racelist
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          URL="https://www.boatrace.jp/owpc/pc/race/racelist?hd=$HD&jcd=07&rno=1"
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-LINE-DAY-STATUS/1' \
+            "$URL" -o /tmp/gamagori-racelist.html
+          echo "DATE=$DATE" >> "$GITHUB_ENV"
+          echo "URL=$URL" >> "$GITHUB_ENV"
+
+      - name: Build machine-readable day status
+        shell: python
+        run: |
+          from pathlib import Path
+          import html as htmlmod
+          import json
+          import os
+          import re
+
+          raw = Path('/tmp/gamagori-racelist.html').read_text(encoding='utf-8', errors='replace')
+          plain = htmlmod.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', raw)))
+          times = re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)', plain)
+          active = len(times) >= 12
+          deadlines = [
+            {'race': i + 1, 'deadlineJst': t}
+            for i, t in enumerate(times[:12])
+          ] if active else []
+
+          payload = {
+            'schema': 'boat-command-gamagori-day-status-v1',
+            'venue': '蒲郡',
+            'venueCode': 'GAMAGORI-01',
+            'dateJst': os.environ['DATE'],
+            'eventActive': active,
+            'raceCount': 12 if active else 0,
+            'deadlines': deadlines,
+            'statusReason': 'ACTIVE_EVENT' if active else 'NO_EVENT_DETECTED',
+            'source': {
+              'officialRacelist': os.environ['URL'],
+              'deadlineExtraction': 'first 12 HH:MM values; same contract as production guard v0.19.6'
+            }
+          }
+
+          out = Path('line/gamagori-day-status.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+      - name: Validate day status contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          p = json.loads(Path('line/gamagori-day-status.json').read_text(encoding='utf-8'))
+          assert p['schema'] == 'boat-command-gamagori-day-status-v1'
+          assert p['venueCode'] == 'GAMAGORI-01'
+          if p['eventActive']:
+            assert p['raceCount'] == 12
+            assert len(p['deadlines']) == 12
+            assert [x['race'] for x in p['deadlines']] == list(range(1, 13))
+          else:
+            assert p['raceCount'] == 0
+            assert p['deadlines'] == []
+          print('GAMAGORI_LINE_DAY_STATUS_CONTRACT_PASS')
+
+      - name: Commit day status when changed
+        run: |
+          if [ -z "$(git status --porcelain -- line/gamagori-day-status.json)" ]; then
+            echo 'No Gamagori day status change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add line/gamagori-day-status.json
+          git commit -m 'chore: refresh Gamagori LINE day status'
+          git push
