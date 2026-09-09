@@ -94,6 +94,7 @@ jobs:
           import json,re
 
           errors=[]
+          legacy=[]
           for p in Path('live/gamagori').glob('*/post/race-*-result.json'):
               try:
                   x=json.loads(p.read_text(encoding='utf-8'))
@@ -112,17 +113,49 @@ jobs:
                   errors.append(f'PREDICTION_ENABLED_IN_POST_RACE {p}')
               if x.get('hardLockEnabled') is not False:
                   errors.append(f'HARD_LOCK_ENABLED_IN_POST_RACE {p}')
-              if x.get('immutableAfterFirstWrite') is not True:
-                  errors.append(f'IMMUTABLE_FLAG_MISSING {p}')
+
+              immutable=x.get('immutableAfterFirstWrite')
+              if immutable is not True:
+                  # 2026-09-08 relays were written before the explicit immutable flag
+                  # existed. They are historical evidence and must not be rewritten just
+                  # to add metadata. The current collector treats every existing valid
+                  # relay as append-only and emits immutableAfterFirstWrite=true for all
+                  # newly created relays.
+                  if immutable is None and str(x.get('version',''))=='0.20.4':
+                      legacy.append(str(p))
+                  else:
+                      errors.append(f'IMMUTABLE_CONTRACT_INVALID {p}')
+
               if not re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta',''))):
                   errors.append(f'BAD_TRIFECTA {p}')
               if not isinstance(x.get('payout100'),int) or x.get('payout100')<0:
                   errors.append(f'BAD_PAYOUT {p}')
 
+          if legacy:
+              print('LEGACY_RESULT_EVIDENCE_PRESERVED',len(legacy))
+              for p in legacy:
+                  print('LEGACY_IMMUTABLE_BY_COLLECTOR',p)
           if errors:
               print('\n'.join(errors))
               raise SystemExit(1)
           print('POST_RACE_RELAY_CONTRACT_OK')
+          PY
+
+      - name: Verify current collector preserves and emits immutable evidence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('.github/workflows/gamagori-live-result-v0204.yml').read_text(encoding='utf-8')
+          required=[
+              "if path.exists():",
+              "validate_existing(path,race)",
+              "continue",
+              "'immutableAfterFirstWrite':True",
+          ]
+          missing=[x for x in required if x not in s]
+          if missing:
+              raise SystemExit('RESULT_COLLECTOR_IMMUTABILITY_GUARD_MISSING '+repr(missing))
+          print('RESULT_COLLECTOR_IMMUTABILITY_OK')
           PY
 
       - name: Verify canonical browser module order and singleton bootstraps
