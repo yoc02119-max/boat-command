@@ -19,19 +19,22 @@ jobs:
       - name: Validate learning rollup JavaScript
         run: node --check live-learning-dashboard-v0206.js
 
-      - name: Enable module and bump app version
+      - name: Enforce singleton rollup bootstrap
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.20.5','BOAT COMMAND v0.20.6')
-          s=s.replace('v0.20.5 · LIVE LEARNING','v0.20.6 · LEARNING ROLLUP')
-          s=s.replace('v0.20.4 · RESULT LAYER','v0.20.6 · LEARNING ROLLUP')
-          s=s.replace('?v=205','?v=206')
-          tag='<script src="live-learning-dashboard-v0206.js?v=206"></script>'
-          if tag not in s:
-              s=s.replace('</body>',tag+'\n</body>')
+          # Remove every existing copy regardless of cache-buster.
+          s=re.sub(r'\n?<script src="live-learning-dashboard-v0206\.js\?v=\d+"></script>','',s)
+          anchor_re=r'(<script src="live-learning-v0205\.js\?v=\d+"></script>)'
+          if not re.search(anchor_re,s):
+              raise SystemExit('LEARNING_ROLLUP_ANCHOR_MISSING')
+          tag='<script src="live-learning-dashboard-v0206.js?v=214"></script>'
+          s=re.sub(anchor_re,lambda m:m.group(1)+'\n'+tag,s,count=1)
+          if s.count('live-learning-dashboard-v0206.js')!=1:
+              raise SystemExit('LEARNING_ROLLUP_SINGLETON_FAIL')
           p.write_text(s)
           PY
 
@@ -52,5 +55,5 @@ jobs:
             echo 'NO_CHANGES'
             exit 0
           fi
-          git commit -m 'app: enable Gamagori LIVE learning rollup v0.20.6'
+          git commit -m 'app: maintain singleton Gamagori LIVE learning rollup bootstrap'
           git push
