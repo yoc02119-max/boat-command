@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/gamagori-line-day-status-v1.yml'
   schedule:
-    # 13:00-23:00 JST, hourly. Output only commits when the day/event/deadlines change.
+    # 13:00-23:00 JST, hourly. Output only commits when the status changes.
     - cron: '0 4-14 * * *'
 
 permissions:
@@ -24,49 +24,142 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch official Gamagori racelist
+      - name: Fetch official Gamagori sources
         run: |
           set -euo pipefail
           DATE=$(TZ=Asia/Tokyo date +%F)
           HD="${DATE//-/}"
-          URL="https://www.boatrace.jp/owpc/pc/race/racelist?hd=$HD&jcd=07&rno=1"
+          YM=$(TZ=Asia/Tokyo date +%Y%m)
+          MONTH_START=$(TZ=Asia/Tokyo date +%Y-%m-01)
+          NEXT_YM=$(TZ=Asia/Tokyo date -d "$MONTH_START +1 month" +%Y%m)
+
+          RACELIST_URL="https://www.boatrace.jp/owpc/pc/race/racelist?hd=$HD&jcd=07&rno=1"
+          SCHEDULE_URL="https://www.boatrace.jp/owsp/sp/race/monthlyschedule?ym=$YM"
+          NEXT_SCHEDULE_URL="https://www.boatrace.jp/owsp/sp/race/monthlyschedule?ym=$NEXT_YM"
+
           curl -fsSL --connect-timeout 20 --max-time 60 \
             --user-agent 'BOAT-COMMAND-LINE-DAY-STATUS/1' \
-            "$URL" -o /tmp/gamagori-racelist.html
+            "$RACELIST_URL" -o /tmp/gamagori-racelist.html
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-LINE-DAY-STATUS/1' \
+            "$SCHEDULE_URL" -o /tmp/gamagori-schedule-current.html
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-LINE-DAY-STATUS/1' \
+            "$NEXT_SCHEDULE_URL" -o /tmp/gamagori-schedule-next.html
+
           echo "DATE=$DATE" >> "$GITHUB_ENV"
-          echo "URL=$URL" >> "$GITHUB_ENV"
+          echo "YM=$YM" >> "$GITHUB_ENV"
+          echo "NEXT_YM=$NEXT_YM" >> "$GITHUB_ENV"
+          echo "RACELIST_URL=$RACELIST_URL" >> "$GITHUB_ENV"
+          echo "SCHEDULE_URL=$SCHEDULE_URL" >> "$GITHUB_ENV"
+          echo "NEXT_SCHEDULE_URL=$NEXT_SCHEDULE_URL" >> "$GITHUB_ENV"
 
       - name: Build machine-readable day status
         shell: python
         run: |
           from pathlib import Path
+          from datetime import date
           import html as htmlmod
           import json
           import os
           import re
 
+          def plain_text(raw):
+              return htmlmod.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', raw)))
+
+          def full_date(mmdd, page_ym):
+              page_year = int(page_ym[:4])
+              page_month = int(page_ym[4:])
+              month, day = map(int, mmdd.split('/'))
+              year = page_year
+              if month - page_month >= 6:
+                  year -= 1
+              elif page_month - month >= 6:
+                  year += 1
+              return date(year, month, day)
+
+          def parse_gamagori_schedule(path, page_ym):
+              raw = Path(path).read_text(encoding='utf-8', errors='replace')
+              plain = plain_text(raw)
+              section = re.search(r'蒲\s*郡(.*?)(?:常\s*滑)', plain)
+              if not section:
+                  return []
+              segment = section.group(1)
+              rows = re.findall(
+                  r'(\d{2}/\d{2})\s*-\s*(\d{2}/\d{2})\s*(.*?)(?=\s+\d{2}/\d{2}\s*-\s*\d{2}/\d{2}|$)',
+                  segment,
+              )
+              events = []
+              for start_mmdd, end_mmdd, title in rows:
+                  start = full_date(start_mmdd, page_ym)
+                  end = full_date(end_mmdd, page_ym)
+                  if end < start:
+                      end = date(start.year + 1, end.month, end.day)
+                  title = re.sub(r'\s+', ' ', title).strip()
+                  if not title:
+                      continue
+                  events.append({
+                      'start': start,
+                      'end': end,
+                      'title': title,
+                  })
+              return events
+
           raw = Path('/tmp/gamagori-racelist.html').read_text(encoding='utf-8', errors='replace')
-          plain = htmlmod.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', raw)))
+          plain = plain_text(raw)
           times = re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)', plain)
           active = len(times) >= 12
           deadlines = [
-            {'race': i + 1, 'deadlineJst': t}
-            for i, t in enumerate(times[:12])
+              {'race': i + 1, 'deadlineJst': t}
+              for i, t in enumerate(times[:12])
           ] if active else []
 
+          today = date.fromisoformat(os.environ['DATE'])
+          events = (
+              parse_gamagori_schedule('/tmp/gamagori-schedule-current.html', os.environ['YM']) +
+              parse_gamagori_schedule('/tmp/gamagori-schedule-next.html', os.environ['NEXT_YM'])
+          )
+
+          deduped = {}
+          for e in events:
+              key = (e['start'].isoformat(), e['end'].isoformat(), e['title'])
+              deduped[key] = e
+
+          future = sorted(
+              (e for e in deduped.values() if e['start'] > today),
+              key=lambda e: (e['start'], e['end'], e['title'])
+          )
+
+          next_event = None
+          if future:
+              e = future[0]
+              next_event = {
+                  'startDateJst': e['start'].isoformat(),
+                  'endDateJst': e['end'].isoformat(),
+                  'title': e['title'],
+                  'daysUntil': (e['start'] - today).days,
+              }
+
           payload = {
-            'schema': 'boat-command-gamagori-day-status-v1',
-            'venue': '蒲郡',
-            'venueCode': 'GAMAGORI-01',
-            'dateJst': os.environ['DATE'],
-            'eventActive': active,
-            'raceCount': 12 if active else 0,
-            'deadlines': deadlines,
-            'statusReason': 'ACTIVE_EVENT' if active else 'NO_EVENT_DETECTED',
-            'source': {
-              'officialRacelist': os.environ['URL'],
-              'deadlineExtraction': 'first 12 HH:MM values; same contract as production guard v0.19.6'
-            }
+              'schema': 'boat-command-gamagori-day-status-v1',
+              'venue': '蒲郡',
+              'venueCode': 'GAMAGORI-01',
+              'dateJst': os.environ['DATE'],
+              'eventActive': active,
+              'raceCount': 12 if active else 0,
+              'deadlines': deadlines,
+              'statusReason': 'ACTIVE_EVENT' if active else 'NO_EVENT_DETECTED',
+              'nextEvent': next_event,
+              'scheduleStatus': 'OK' if next_event else 'NOT_FOUND',
+              'source': {
+                  'officialRacelist': os.environ['RACELIST_URL'],
+                  'officialMonthlySchedule': [
+                      os.environ['SCHEDULE_URL'],
+                      os.environ['NEXT_SCHEDULE_URL'],
+                  ],
+                  'deadlineExtraction': 'first 12 HH:MM values; same contract as production guard v0.19.6',
+                  'nextEventExtraction': 'official monthly schedule; Gamagori section only',
+              }
           }
 
           out = Path('line/gamagori-day-status.json')
@@ -78,17 +171,27 @@ jobs:
         shell: python
         run: |
           import json
+          from datetime import date
           from pathlib import Path
+
           p = json.loads(Path('line/gamagori-day-status.json').read_text(encoding='utf-8'))
           assert p['schema'] == 'boat-command-gamagori-day-status-v1'
           assert p['venueCode'] == 'GAMAGORI-01'
           if p['eventActive']:
-            assert p['raceCount'] == 12
-            assert len(p['deadlines']) == 12
-            assert [x['race'] for x in p['deadlines']] == list(range(1, 13))
+              assert p['raceCount'] == 12
+              assert len(p['deadlines']) == 12
+              assert [x['race'] for x in p['deadlines']] == list(range(1, 13))
           else:
-            assert p['raceCount'] == 0
-            assert p['deadlines'] == []
+              assert p['raceCount'] == 0
+              assert p['deadlines'] == []
+
+          if p['nextEvent'] is not None:
+              n = p['nextEvent']
+              assert date.fromisoformat(n['startDateJst']) > date.fromisoformat(p['dateJst'])
+              assert date.fromisoformat(n['endDateJst']) >= date.fromisoformat(n['startDateJst'])
+              assert isinstance(n['title'], str) and n['title'].strip()
+              assert isinstance(n['daysUntil'], int) and n['daysUntil'] > 0
+
           print('GAMAGORI_LINE_DAY_STATUS_CONTRACT_PASS')
 
       - name: Commit day status when changed
