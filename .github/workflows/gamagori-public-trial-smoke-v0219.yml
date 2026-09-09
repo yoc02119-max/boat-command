@@ -1,0 +1,201 @@
+name: Gamagori public early-trial smoke v0.21.9
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-public-trial-smoke-v0219.yml'
+      - 'index.html'
+      - 'app.js'
+      - 'styles.css'
+      - 'live-autopoll-v0199.js'
+      - 'live-predictor-v0200.js'
+      - 'live-autofill-v0201.js'
+      - 'live-lock-guard-v0202.js'
+      - 'live-lock-snapshot-v0203.js'
+      - 'live-result-v0204.js'
+      - 'live-learning-v0205.js'
+      - 'live-learning-dashboard-v0206.js'
+      - 'live-learning-guard-v0207.js'
+      - 'live-integrity-audit-v0208.js'
+      - 'live-snapshot-hash-guard-v0209.js'
+      - 'development-status-v0217.js'
+      - 'trial-readiness-v0218.js'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-public-trial-smoke
+  cancel-in-progress: true
+
+jobs:
+  public-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Local JavaScript syntax audit
+        run: |
+          set -euo pipefail
+          for f in \
+            app.js \
+            live-autopoll-v0199.js \
+            live-predictor-v0200.js \
+            live-autofill-v0201.js \
+            live-lock-guard-v0202.js \
+            live-lock-snapshot-v0203.js \
+            live-result-v0204.js \
+            live-learning-v0205.js \
+            live-learning-dashboard-v0206.js \
+            live-learning-guard-v0207.js \
+            live-integrity-audit-v0208.js \
+            live-snapshot-hash-guard-v0209.js \
+            development-status-v0217.js \
+            trial-readiness-v0218.js
+          do
+            node --check "$f"
+          done
+
+      - name: Verify local trial DOM and script contract
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          required_ids = [
+            'sessionDate','modeBadge','runType','strategyVersion','predictionList','lockAllBtn',
+            'resultGate','resultGateBadge','resultSummary','resultList','raceStrip',
+            'chat','prompt','send','liveDate','liveRace'
+          ]
+          missing = [x for x in required_ids if not re.search(rf'id=["\']{re.escape(x)}["\']', html)]
+          if missing:
+            raise SystemExit(f'LOCAL_DOM_MISSING:{missing}')
+
+          required_scripts = [
+            'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
+            'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
+            'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
+            'trial-readiness-v0218.js'
+          ]
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          bases = [x.split('?',1)[0] for x in srcs]
+          missing_scripts = [x for x in required_scripts if x not in bases]
+          if missing_scripts:
+            raise SystemExit(f'LOCAL_SCRIPT_MISSING:{missing_scripts}')
+          positions = [bases.index(x) for x in required_scripts]
+          if positions != sorted(positions):
+            raise SystemExit('LOCAL_SCRIPT_ORDER_BAD')
+          print('LOCAL_TRIAL_CONTRACT_PASS')
+
+      - name: Wait for GitHub Pages and audit deployed app
+        id: public
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 18); do
+            url="${APP_URL}?trial_smoke=${GITHUB_SHA}&attempt=${i}"
+            code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "$url" || true)
+            if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js?v=218' /tmp/public-index.html; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then
+            echo 'PUBLIC_PAGE_NOT_CURRENT_OR_UNREACHABLE'
+            cat /tmp/public-index.html 2>/dev/null | head -80 || true
+            exit 1
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          required_ids = [
+            'sessionDate','modeBadge','runType','strategyVersion','predictionList','lockAllBtn',
+            'resultGate','resultGateBadge','resultSummary','resultList','raceStrip',
+            'chat','prompt','send','liveDate','liveRace'
+          ]
+          missing = [x for x in required_ids if not re.search(rf'id=["\']{re.escape(x)}["\']', html)]
+          if missing:
+            raise SystemExit(f'PUBLIC_DOM_MISSING:{missing}')
+          required = [
+            'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
+            'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
+            'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
+            'trial-readiness-v0218.js'
+          ]
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          bases = [x.split('?',1)[0] for x in srcs]
+          miss = [x for x in required if x not in bases]
+          if miss:
+            raise SystemExit(f'PUBLIC_SCRIPT_MISSING:{miss}')
+          pos = [bases.index(x) for x in required]
+          if pos != sorted(pos):
+            raise SystemExit('PUBLIC_SCRIPT_ORDER_BAD')
+          print('PUBLIC_HTML_CONTRACT_PASS')
+          PY
+
+          while IFS= read -r src; do
+            asset="${APP_URL}${src}"
+            code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "$asset" || true)
+            if [ "$code" != "200" ]; then
+              echo "PUBLIC_ASSET_FAIL $code $asset"
+              exit 1
+            fi
+          done < <(python - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          for src in re.findall(r'<script\s+src="([^"]+)"', html):
+              print(src)
+          PY
+          )
+
+          echo "PUBLIC_TRIAL_SMOKE_PASS"
+          echo "app_url=${APP_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish public trial audit status
+        shell: python
+        env:
+          APP_URL: ${{ steps.public.outputs.app_url }}
+        run: |
+          from pathlib import Path
+          import json, os, datetime
+          out = {
+            'schema':'boat-command-public-trial-smoke-v1',
+            'venue':'蒲郡',
+            'appVersion':'0.21.8',
+            'status':'PASS',
+            'publicUrl':os.environ['APP_URL'],
+            'localSyntaxAudit':True,
+            'localDomContract':True,
+            'publicHttp200':True,
+            'publicDomContract':True,
+            'publicRequiredAssetsHttp200':True,
+            'prePostBoundaryPolicy':'UNCHANGED',
+            'predictionQualityCertified':False,
+            'checkedCommit':os.environ.get('GITHUB_SHA'),
+            'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          }
+          Path('trial-readiness-public.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+      - name: Commit public audit status
+        run: |
+          if git diff --quiet -- trial-readiness-public.json; then
+            echo 'No public status change.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trial-readiness-public.json
+          git commit -m 'chore: publish Gamagori public trial smoke PASS'
+          git push
