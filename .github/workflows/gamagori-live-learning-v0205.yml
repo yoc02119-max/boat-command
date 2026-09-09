@@ -22,6 +22,39 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate learning JavaScript
         run: node --check live-learning-v0205.js
+      - name: Enforce immutable learning evidence chain
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('live-learning-v0205.js').read_text(encoding='utf-8')
+          required=[
+              'bcLearningImmutableOutcomeV0216',
+              "audit.status!=='SETTLED_FROM_SEPARATED_POST_RACE_LAYER'",
+              'audit.preRaceDataIncluded!==false',
+              'audit.resultEndpointsIncluded!==true',
+              'audit.frozenPredictionUsed!==true',
+              'audit.mutableStakeFallbackUsed!==false',
+              'audit.snapshotHash!==snapshotHash',
+              "source:'liveResultAudit'",
+              'mutableSettlementFieldsUsed:false',
+              'autoModelUpdate:false',
+          ]
+          missing=[x for x in required if x not in s]
+          if missing:
+              raise SystemExit('LEARNING_IMMUTABLE_CHAIN_MISSING '+repr(missing))
+          # The learning outcome must not be copied from mutable settlement fields.
+          forbidden=[
+              'payout100:Number(r.officialPayout100)',
+              'hit:!!r.hit',
+              'stake:Number(r.stake)',
+              'returnAmount:Number(r.returnAmount)',
+              'profit:Number(r.profit)',
+          ]
+          bad=[x for x in forbidden if x in s]
+          if bad:
+              raise SystemExit('LEARNING_MUTABLE_SETTLEMENT_DEPENDENCY '+repr(bad))
+          print('LEARNING_IMMUTABLE_EVIDENCE_CHAIN_OK')
+          PY
       - name: Enforce singleton learning bootstrap
         run: |
           python - <<'PY'
@@ -29,15 +62,16 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
-          s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
+          s=re.sub(r'BOAT COMMAND v0\.21\.[0-5]', 'BOAT COMMAND v0.21.6', s)
+          s=re.sub(r'v0\.21\.[0-5] · [^<\n]+', 'v0.21.6 · LEARNING INTEGRITY', s)
           # Remove every prior cache-busted copy, then insert exactly one after result layer.
           s=re.sub(r'\n?<script src="live-learning-v0205\.js\?v=\d+"></script>','',s)
-          anchor='<script src="live-result-v0204.js?v=214"></script>'
-          tag='<script src="live-learning-v0205.js?v=214"></script>'
-          if anchor not in s:
+          result_pat=r'<script src="live-result-v0204\.js\?v=\d+"></script>'
+          m=re.search(result_pat,s)
+          if not m:
               raise SystemExit('LEARNING_BOOTSTRAP_ANCHOR_MISSING')
-          s=s.replace(anchor,anchor+'\n'+tag,1)
+          tag='<script src="live-learning-v0205.js?v=216"></script>'
+          s=s[:m.end()]+'\n'+tag+s[m.end():]
           if s.count('live-learning-v0205.js')!=1:
               raise SystemExit('LEARNING_BOOTSTRAP_SINGLETON_FAIL')
           p.write_text(s)
@@ -50,6 +84,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'NO_CHANGES'
           else
-            git commit -m 'app: maintain singleton Gamagori LIVE learning bootstrap'
+            git commit -m 'app: enable immutable Gamagori learning evidence chain v0.21.6'
             git push
           fi
