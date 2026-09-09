@@ -1,0 +1,70 @@
+name: LINE Worker contract v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'line-worker/**'
+      - 'line/intent-routes.json'
+      - '.github/workflows/line-worker-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate intent contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          p = json.loads(Path('line/intent-routes.json').read_text(encoding='utf-8'))
+          assert p['schema'] == 'boat-command-line-intents-v1'
+          assert isinstance(p['intents'], list) and p['intents']
+          names = [x['name'] for x in p['intents']]
+          assert len(names) == len(set(names))
+          for x in p['intents']:
+              assert isinstance(x['name'], str) and x['name']
+              assert isinstance(x['patterns'], list) and x['patterns']
+              assert all(isinstance(y, str) and y for y in x['patterns'])
+          print('LINE_INTENT_CONTRACT_PASS')
+
+      - name: Validate Worker config
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          raw = Path('line-worker/wrangler.jsonc').read_text(encoding='utf-8')
+          p = json.loads(raw)
+          assert p['name'] == 'boat-command-line-webhook'
+          assert p['main'] == 'src/index.js'
+          print('LINE_WORKER_CONFIG_PASS')
+
+      - name: Check JavaScript syntax
+        working-directory: line-worker
+        run: node --check src/index.js
+
+      - name: Validate required safety strings
+        shell: python
+        run: |
+          from pathlib import Path
+          s = Path('line-worker/src/index.js').read_text(encoding='utf-8')
+          required = [
+              'x-line-signature',
+              'LINE_CHANNEL_SECRET',
+              'LINE_CHANNEL_ACCESS_TOKEN',
+              'Invalid signature',
+              'LEARNING_QUEUE',
+              'ユーザーIDやグループIDは保存していません',
+          ]
+          for item in required:
+              assert item in s, item
+          assert 'github_pat_' not in s
+          assert 'Channel secret' not in s
+          print('LINE_WORKER_SAFETY_CONTRACT_PASS')
