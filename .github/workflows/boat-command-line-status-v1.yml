@@ -1,0 +1,119 @@
+name: BOAT COMMAND LINE status feed v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/boat-command-line-status-v1.yml'
+      - 'index.html'
+      - 'development-status-v0217.js'
+      - 'trial-readiness-v0218.js'
+
+permissions:
+  contents: write
+
+jobs:
+  build-line-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build machine-readable LINE status
+        shell: python
+        run: |
+          from pathlib import Path
+          import datetime as dt
+          import json
+          import re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          dev = Path('development-status-v0217.js').read_text(encoding='utf-8')
+          trial = Path('trial-readiness-v0218.js').read_text(encoding='utf-8')
+
+          def one(pattern, text, label):
+            m = re.search(pattern, text)
+            if not m:
+              raise SystemExit(f'MISSING_{label}')
+            return m.group(1)
+
+          app_version = one(r'<title>BOAT COMMAND v([^<]+)</title>', html, 'APP_VERSION')
+          venue = one(r"venue:\s*'([^']+)'", dev, 'VENUE')
+          venue_code = one(r"venueCode:\s*'([^']+)'", dev, 'VENUE_CODE')
+          overall = int(one(r'overall:\s*(\d+)', dev, 'OVERALL'))
+          current_task = one(r"currentTask:\s*'([^']*)'", dev, 'CURRENT_TASK')
+          next_task = one(r"nextTask:\s*'([^']*)'", dev, 'NEXT_TASK')
+
+          phases = []
+          for name, pct, state in re.findall(r"\['([^']+)',\s*(\d+),\s*'([^']+)'\]", dev):
+            phases.append({'name': name, 'percent': int(pct), 'state': state})
+
+          required_trial_tokens = [
+            "status:ok?'READY_FOR_EARLY_TRIAL':'HOLD'",
+            'productionMutation:false',
+            'predictionQualityCertified:false',
+            'bcFinalLiveLockAudit',
+            'bcVerifyLiveLockSnapshotV0203',
+            'bcVerifyLiveLockSnapshotHashV0209',
+          ]
+          trial_contract_ok = all(token in trial for token in required_trial_tokens)
+
+          payload = {
+            'schema': 'boat-command-line-status-v1',
+            'venue': venue,
+            'venueCode': venue_code,
+            'appVersion': app_version,
+            'overall': overall,
+            'currentTask': current_task,
+            'nextTask': next_task,
+            'phases': phases,
+            'trial': {
+              'gateVersion': '0.21.8',
+              'staticContract': 'PASS' if trial_contract_ok else 'HOLD',
+              'productionMutation': False,
+              'predictionQualityCertified': False,
+              'note': '技術的な早期試用ゲート。予想精度や収益性の保証ではありません。'
+            },
+            'source': {
+              'repository': 'yoc02119-max/boat-command',
+              'branch': 'main',
+              'developmentStatusFile': 'development-status-v0217.js',
+              'trialReadinessFile': 'trial-readiness-v0218.js'
+            },
+            'generatedAt': dt.datetime.now(dt.timezone.utc).isoformat().replace('+00:00', 'Z')
+          }
+
+          if not trial_contract_ok:
+            raise SystemExit('TRIAL_READINESS_CONTRACT_HOLD')
+
+          out = Path('line/boat-command-status.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+      - name: Validate JSON contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          p = json.loads(Path('line/boat-command-status.json').read_text(encoding='utf-8'))
+          assert p['schema'] == 'boat-command-line-status-v1'
+          assert p['venueCode'] == 'GAMAGORI-01'
+          assert isinstance(p['overall'], int) and 0 <= p['overall'] <= 100
+          assert p['trial']['staticContract'] == 'PASS'
+          assert p['trial']['productionMutation'] is False
+          assert p['trial']['predictionQualityCertified'] is False
+          assert len(p['phases']) >= 1
+          print('LINE_STATUS_CONTRACT_PASS')
+
+      - name: Commit status feed
+        run: |
+          if git diff --quiet -- line/boat-command-status.json; then
+            echo 'No LINE status change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add line/boat-command-status.json
+          git commit -m 'chore: refresh BOAT COMMAND LINE status feed'
+          git push
