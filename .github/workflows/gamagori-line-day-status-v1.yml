@@ -80,8 +80,6 @@ jobs:
 
           def parse_gamagori_links(path):
               raw = decode_html(path)
-              # Official schedule race links contain assen?hd=YYYYMMDD and jcd=07.
-              # Be tolerant of attribute order, &amp; escaping and extra query params.
               rows = re.findall(
                   r'<a\b[^>]*href=["\']([^"\']*assen\?[^"\']*)["\'][^>]*>(.*?)</a>',
                   raw,
@@ -200,4 +198,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add line/gamagori-day-status.json
           git commit -m 'chore: refresh Gamagori LINE day status'
+          # Another safe automation may have advanced main while this job was fetching official data.
+          # Rebase the generated status commit before push so unrelated concurrent changes are preserved.
+          git pull --rebase origin main
           git push
