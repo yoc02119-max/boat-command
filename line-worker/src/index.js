@@ -1,6 +1,8 @@
 const encoder = new TextEncoder();
 
 const RAW = "https://raw.githubusercontent.com/yoc02119-max/boat-command/main/line";
+const GITHUB_REPO = "yoc02119-max/boat-command";
+const QUEUE_TTL_SECONDS = 60 * 60 * 24 * 90;
 
 function base64ToBytes(value) {
   const binary = atob(value);
@@ -266,78 +268,283 @@ function normalizeGroupCommand(text) {
     .trim();
 }
 
+function normalizeQuestion(text) {
+  return String(text)
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\u3000]+/g, "")
+    .replace(/[?？!！。、，,.．・:：;；"'「」『』【】（）()\[\]［］{}<>〈〉《》]/g, "");
+}
+
+async function sha256Hex(value) {
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(value));
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function questionFingerprint(text) {
+  return sha256Hex(normalizeQuestion(text));
+}
+
+async function createGitHubLearningIssue(env, item) {
+  if (!env.GITHUB_QUEUE_TOKEN) return null;
+
+  const safeQuestion = item.text.replace(/[\r\n]+/g, " ").slice(0, 160);
+  const title = `[LINE改善] ${safeQuestion}`;
+  const body = [
+    `<!-- boat-command-line-learning:${item.fingerprint} -->`,
+    "## 未対応質問",
+    "",
+    item.text,
+    "",
+    "## Queue metadata",
+    `- ticket: ${item.ticket}`,
+    `- fingerprint: ${item.fingerprint}`,
+    `- sourceType: ${item.sourceType}`,
+    `- firstSeenAt: ${item.firstSeenAt}`,
+    "- LINE user ID / group ID: not stored",
+    "",
+    "このIssueはBOAT COMMAND LINE改善キューから自動生成されています。蒲郡以外の競艇場には展開しないでください。",
+  ].join("\n");
+
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.GITHUB_QUEUE_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+      "User-Agent": "boat-command-line-webhook",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    body: JSON.stringify({ title, body }),
+  });
+
+  if (!res.ok) {
+    console.error("GitHub queue sync failed", res.status, await res.text());
+    return null;
+  }
+
+  const issue = await res.json();
+  return {
+    number: issue.number,
+    url: issue.html_url,
+  };
+}
+
+async function readQueueItem(env, key) {
+  const raw = await env.LEARNING_QUEUE.get(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+async function findLegacyMatches(env, normalized, limit = 100) {
+  const result = await env.LEARNING_QUEUE.list({ prefix: "q:", limit });
+  const matches = [];
+
+  for (const entry of result.keys || []) {
+    if (entry.name.startsWith("q:v2:")) continue;
+    const item = await readQueueItem(env, entry.name);
+    if (!item?.text) continue;
+    if (normalizeQuestion(item.text) === normalized) {
+      matches.push({ key: entry.name, item });
+    }
+  }
+
+  return matches;
+}
+
 async function enqueueUnsupported(env, text, sourceType) {
   if (!env.LEARNING_QUEUE) return { queued: false, reason: "NO_QUEUE_BINDING" };
 
-  const item = {
-    schema: "boat-command-line-learning-item-v1",
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    sourceType: sourceType || "unknown",
-    text: String(text).slice(0, 300),
-    status: "queued",
-  };
+  const normalized = normalizeQuestion(text);
+  const fingerprint = await questionFingerprint(text);
+  const ticket = fingerprint.slice(0, 8);
+  const key = `q:v2:${fingerprint}`;
+  const now = new Date().toISOString();
 
-  const key = `q:${item.createdAt}:${item.id}`;
+  let item = await readQueueItem(env, key);
+  let repeated = Boolean(item);
+
+  if (!item) {
+    const legacyMatches = await findLegacyMatches(env, normalized);
+    if (legacyMatches.length) {
+      repeated = true;
+      const first = legacyMatches[0].item;
+      const firstSeenAt = first.firstSeenAt || first.createdAt || now;
+      item = {
+        schema: "boat-command-line-learning-item-v2",
+        fingerprint,
+        ticket,
+        firstSeenAt,
+        lastSeenAt: now,
+        sourceType: sourceType || "unknown",
+        sourceTypes: [...new Set([
+          ...legacyMatches.map((x) => x.item.sourceType || "unknown"),
+          sourceType || "unknown",
+        ])],
+        text: String(text).slice(0, 300),
+        normalized,
+        status: "queued",
+        occurrences: legacyMatches.length + 1,
+      };
+
+      for (const legacy of legacyMatches) {
+        await env.LEARNING_QUEUE.delete(legacy.key);
+      }
+    }
+  }
+
+  if (!item) {
+    item = {
+      schema: "boat-command-line-learning-item-v2",
+      fingerprint,
+      ticket,
+      firstSeenAt: now,
+      lastSeenAt: now,
+      sourceType: sourceType || "unknown",
+      sourceTypes: [sourceType || "unknown"],
+      text: String(text).slice(0, 300),
+      normalized,
+      status: "queued",
+      occurrences: 1,
+    };
+  } else if (item.schema === "boat-command-line-learning-item-v2") {
+    item.lastSeenAt = now;
+    item.occurrences = Number(item.occurrences || 1) + 1;
+    item.sourceTypes = [...new Set([...(item.sourceTypes || []), sourceType || "unknown"])]
+      .slice(0, 4);
+    item.status = item.status === "implemented" ? "implemented" : "queued";
+  }
+
+  if (!item.githubIssueNumber) {
+    const synced = await createGitHubLearningIssue(env, item);
+    if (synced) {
+      item.githubIssueNumber = synced.number;
+      item.githubIssueUrl = synced.url;
+    }
+  }
+
   await env.LEARNING_QUEUE.put(key, JSON.stringify(item), {
-    expirationTtl: 60 * 60 * 24 * 30,
+    expirationTtl: QUEUE_TTL_SECONDS,
   });
 
-  return { queued: true, id: item.id.slice(0, 8) };
+  return {
+    queued: true,
+    id: ticket,
+    repeated,
+    occurrences: item.occurrences,
+    githubIssueNumber: item.githubIssueNumber || null,
+  };
 }
 
 async function queueCount(env) {
   if (!env.LEARNING_QUEUE) return null;
   const result = await env.LEARNING_QUEUE.list({ prefix: "q:", limit: 1000 });
-  return result.keys.length;
+  let count = 0;
+
+  for (const entry of result.keys || []) {
+    const item = await readQueueItem(env, entry.name);
+    if (!item) continue;
+    if (!item.status || item.status === "queued") count += 1;
+  }
+
+  return {
+    count,
+    capped: result.list_complete === false,
+  };
+}
+
+async function markImplementedIfQueued(env, text, intent) {
+  if (!env.LEARNING_QUEUE) return false;
+  const fingerprint = await questionFingerprint(text);
+  const key = `q:v2:${fingerprint}`;
+  const item = await readQueueItem(env, key);
+  if (!item || item.status !== "queued") return false;
+
+  item.status = "implemented";
+  item.resolvedAt = new Date().toISOString();
+  item.resolvedIntent = intent;
+  await env.LEARNING_QUEUE.put(key, JSON.stringify(item), {
+    expirationTtl: QUEUE_TTL_SECONDS,
+  });
+  return true;
+}
+
+function withUpgradeNotice(answer, upgraded) {
+  if (!upgraded) return answer;
+  return [
+    "✅ BOAT COMMANDアップデート",
+    "この質問に対応できるようになりました。",
+    "",
+    answer,
+  ].join("\n");
 }
 
 async function makeReply(text, env, sourceType) {
   if (/改善キュー.*件数|未対応.*件数/.test(text)) {
-    const count = await queueCount(env);
-    return count == null
-      ? "改善キューはまだ接続前です。"
-      : `🛠️ 改善キュー：${count}件`;
+    const summary = await queueCount(env);
+    if (!summary) return "改善キューはまだ接続前です。";
+    return `🛠️ 改善キュー：${summary.count}${summary.capped ? "+" : ""}件`;
   }
 
   const intent = await detectIntent(text);
 
   if (intent === "next_race") {
-    return nextRaceText(await fetchJson("gamagori-day-status.json"));
+    const answer = nextRaceText(await fetchJson("gamagori-day-status.json"));
+    return withUpgradeNotice(answer, await markImplementedIfQueued(env, text, intent));
   }
   if (intent === "next_event") {
-    return nextEventText(await fetchJson("gamagori-day-status.json"));
+    const answer = nextEventText(await fetchJson("gamagori-day-status.json"));
+    return withUpgradeNotice(answer, await markImplementedIfQueued(env, text, intent));
   }
   if (intent === "today_gamagori") {
-    return todayText(await fetchJson("gamagori-day-status.json"));
+    const answer = todayText(await fetchJson("gamagori-day-status.json"));
+    return withUpgradeNotice(answer, await markImplementedIfQueued(env, text, intent));
   }
 
   const status = await fetchJson("boat-command-status.json");
+  let answer = null;
 
-  if (intent === "trial") return trialText(status);
-  if (intent === "phase") return phaseText(status);
-  if (intent === "progress") return progressText(status);
+  if (intent === "trial") answer = trialText(status);
+  if (intent === "phase") answer = phaseText(status);
+  if (intent === "progress") answer = progressText(status);
   if (intent === "next_task") {
-    return [
+    answer = [
       `🚤 BOAT COMMAND v${status.appVersion}`,
       `現在：${status.currentTask}`,
       `NEXT：${status.nextTask}`,
     ].join("\n");
   }
   if (intent === "version") {
-    return `現在のBOAT COMMANDは v${status.appVersion} です。`;
+    answer = `現在のBOAT COMMANDは v${status.appVersion} です。`;
   }
-  if (intent === "help") return helpText();
+  if (intent === "help") answer = helpText();
+
+  if (answer) {
+    return withUpgradeNotice(answer, await markImplementedIfQueued(env, text, intent));
+  }
 
   const queued = await enqueueUnsupported(env, text, sourceType);
   if (queued.queued) {
+    const queueLine = queued.repeated
+      ? `既存の改善キュー #${queued.id} を更新しました（${queued.occurrences}回目）。`
+      : `改善キュー #${queued.id} に登録しました。`;
     return [
       "その質問はまだ未対応です 🛠️",
-      `改善キュー #${queued.id} に登録しました。`,
+      queueLine,
       "対応できる形にアップデートしていきます。",
+      queued.githubIssueNumber ? `開発連携：GitHub Issue #${queued.githubIssueNumber}` : null,
       "",
       "※LINEのユーザーIDやグループIDは保存していません。",
-    ].join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
   }
 
   return [
