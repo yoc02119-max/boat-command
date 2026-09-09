@@ -1,0 +1,204 @@
+name: Gamagori PRE-RACE wind direction collector v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 5-12 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-wind-direction-collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Locate current PRE-RACE wind direction only
+        id: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          CODE=07
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=1"
+
+          rm -rf tmp_wind
+          mkdir -p tmp_wind "live/gamagori/$DATE/pre"
+
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-GAMAGORI-WIND/1.0' \
+            "$RACELIST" -o tmp_wind/racelist.html
+
+          export DATE RACELIST BASE CODE
+          python3 - <<'PY'
+          import datetime, html, json, os, pathlib, re
+          from zoneinfo import ZoneInfo
+
+          date = os.environ['DATE']
+          now = datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+          raw = pathlib.Path('tmp_wind/racelist.html').read_text(encoding='utf-8', errors='replace')
+          plain = html.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', raw)))
+          times = re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)', plain)
+          deadlines = times[:12] if len(times) >= 12 else []
+
+          selected = None
+          for race, value in enumerate(deadlines, 1):
+              hh, mm = map(int, value.split(':'))
+              deadline = datetime.datetime.fromisoformat(date).replace(
+                  hour=hh, minute=mm, tzinfo=ZoneInfo('Asia/Tokyo')
+              )
+              # Keep a small fail-closed margin so the collector never intentionally
+              # fetches after the betting deadline.
+              if (deadline - now).total_seconds() >= 120:
+                  selected = {'race': race, 'deadline': value}
+                  break
+
+          state = {
+              'date': date,
+              'deadlineCount': len(deadlines),
+              'selected': selected,
+              'safeToFetch': bool(selected and len(deadlines) == 12),
+          }
+          pathlib.Path('tmp_wind/state.json').write_text(
+              json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8'
+          )
+          print(json.dumps(state, ensure_ascii=False))
+          PY
+
+          SAFE=$(python3 -c 'import json; print("true" if json.load(open("tmp_wind/state.json"))["safeToFetch"] else "false")')
+          if [ "$SAFE" != 'true' ]; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          RACE=$(python3 -c 'import json; print(json.load(open("tmp_wind/state.json"))["selected"]["race"])')
+          DEADLINE=$(python3 -c 'import json; print(json.load(open("tmp_wind/state.json"))["selected"]["deadline"])')
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+
+          curl -fsSL --connect-timeout 20 --max-time 60 \
+            --user-agent 'BOAT-COMMAND-GAMAGORI-WIND/1.0' \
+            "$BEFOREINFO" -o tmp_wind/beforeinfo.html
+
+          export RACE DEADLINE BEFOREINFO
+          python3 - <<'PY'
+          import datetime, html, json, os, pathlib, re, sys
+          from zoneinfo import ZoneInfo
+
+          date = os.environ['DATE']
+          race = int(os.environ['RACE'])
+          deadline_text = os.environ['DEADLINE']
+          now = datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+          hh, mm = map(int, deadline_text.split(':'))
+          deadline = datetime.datetime.fromisoformat(date).replace(
+              hour=hh, minute=mm, tzinfo=ZoneInfo('Asia/Tokyo')
+          )
+          if now >= deadline:
+              print('FAIL_CLOSED_AFTER_DEADLINE')
+              sys.exit(0)
+
+          bi = pathlib.Path('tmp_wind/beforeinfo.html').read_text(encoding='utf-8', errors='replace')
+
+          # Wind direction is image-class encoded by the official beforeinfo page.
+          # Capture only the official code; do not infer a human direction label here.
+          direction_block = re.search(
+              r'<div class="weather1_bodyUnit is-windDirection">(.*?)</div>\s*</div>',
+              bi, re.S
+          )
+          source = direction_block.group(1) if direction_block else ''
+          code_match = re.search(r'weather1_bodyUnitImage\s+(is-wind([0-9]{1,2}))', source)
+          if not code_match:
+              print('WIND_DIRECTION_NOT_READY')
+              sys.exit(0)
+
+          direction_code = code_match.group(1)
+          direction_index = int(code_match.group(2))
+          if not (1 <= direction_index <= 17):
+              print('WIND_DIRECTION_CODE_OUT_OF_RANGE')
+              sys.exit(0)
+
+          wind_block = re.search(
+              r'<div class="weather1_bodyUnit is-wind">(.*?)</div>\s*</div>',
+              bi, re.S
+          )
+          wind_source = wind_block.group(1) if wind_block else ''
+          speed_match = re.search(
+              r'<span class="weather1_bodyUnitLabelTitle">\s*風速\s*</span>\s*'
+              r'<span class="weather1_bodyUnitLabelData">\s*([0-9]+(?:\.[0-9]+)?)\s*m\s*</span>',
+              wind_source, re.S
+          )
+          wind_speed = float(speed_match.group(1)) if speed_match else None
+
+          title_match = re.search(r'<p class="weather1_title">([^<]+)</p>', bi)
+          reference = html.unescape(title_match.group(1)).strip() if title_match else None
+
+          out = {
+              'schema': 'boat-command-gamagori-pre-race-wind-v1',
+              'venue': 'GAMAGORI',
+              'venueCode': '07',
+              'date': date,
+              'race': race,
+              'fetchedAt': now.isoformat(),
+              'deadline': deadline_text,
+              'timingStatus': 'VERIFIED',
+              'weatherReference': reference,
+              'windSpeedMps': wind_speed,
+              'windDirectionCode': direction_code,
+              'windDirectionIndex': direction_index,
+              'humanDirection': None,
+              'humanDirectionVerified': False,
+              'sourceUrl': os.environ['BEFOREINFO'],
+              'resultEndpointsIncluded': False,
+              'predictionEnabled': False,
+              'hardLockEnabled': False,
+          }
+
+          path = pathlib.Path(f'live/gamagori/{date}/pre/race-{race}-wind.json')
+          path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(path)
+          PY
+
+          TARGET="live/gamagori/$DATE/pre/race-$RACE-wind.json"
+          if [ ! -f "$TARGET" ]; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import json, os
+          p=f"live/gamagori/{os.environ['DATE']}/pre/race-{int(os.environ['RACE'])}-wind.json"
+          x=json.load(open(p, encoding='utf-8'))
+          assert x['venueCode'] == '07'
+          assert x['timingStatus'] == 'VERIFIED'
+          assert isinstance(x['windDirectionIndex'], int)
+          assert 1 <= x['windDirectionIndex'] <= 17
+          assert x['humanDirection'] is None
+          assert x['humanDirectionVerified'] is False
+          assert x['resultEndpointsIncluded'] is False
+          assert x['predictionEnabled'] is False
+          assert x['hardLockEnabled'] is False
+          print('SAFETY PASS · GAMAGORI PRE-RACE WIND ONLY · NO HUMAN-LABEL GUESSING')
+          PY
+
+          echo 'wrote=true' >> "$GITHUB_OUTPUT"
+
+      - name: Commit PRE-RACE wind snapshot
+        if: steps.collect.outputs.wrote == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add "live/gamagori/$DATE/pre/"*-wind.json
+          git diff --cached --quiet && exit 0
+          git commit -m "live: gamagori $DATE pre-race wind direction snapshot"
+          git pull --rebase origin main
+          git push origin HEAD:main
