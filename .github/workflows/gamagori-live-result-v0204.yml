@@ -7,6 +7,10 @@ on:
         description: 'YYYY-MM-DD (JST). Empty = today JST'
         required: false
         type: string
+  schedule:
+    # Gamagori is a night venue. Poll only the useful JST window (16:00-23:59),
+    # every 30 minutes. Non-event days produce no relay changes and no commit.
+    - cron: '*/30 7-14 * * *'
   push:
     paths:
       - '.github/workflows/gamagori-live-result-v0204.yml'
