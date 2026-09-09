@@ -62,29 +62,49 @@ jobs:
           import os
           import re
 
+          def decode_html(path):
+              raw = Path(path).read_bytes()
+              for enc in ('utf-8', 'cp932', 'shift_jis', 'euc_jp'):
+                  try:
+                      return raw.decode(enc)
+                  except UnicodeDecodeError:
+                      pass
+              return raw.decode('utf-8', 'replace')
+
           def plain_text(raw):
               return htmlmod.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', raw)))
 
+          def clean_title(inner):
+              title = plain_text(inner).strip()
+              return title or '蒲郡開催'
+
           def parse_gamagori_links(path):
-              raw = Path(path).read_text(encoding='utf-8', errors='replace')
+              raw = decode_html(path)
+              # Official schedule race links contain assen?hd=YYYYMMDD and jcd=07.
+              # Be tolerant of attribute order, &amp; escaping and extra query params.
               rows = re.findall(
-                  r'<a[^>]+href=["\'][^"\']*assen\?hd=(\d{8})(?:&amp;|&)jcd=07[^"\']*["\'][^>]*>(.*?)</a>',
+                  r'<a\b[^>]*href=["\']([^"\']*assen\?[^"\']*)["\'][^>]*>(.*?)</a>',
                   raw,
                   flags=re.I | re.S,
               )
               out = []
-              for yyyymmdd, inner in rows:
+              for href, inner in rows:
+                  href = htmlmod.unescape(href)
+                  hd = re.search(r'(?:^|[?&])hd=(\d{8})(?:&|$)', href)
+                  jcd = re.search(r'(?:^|[?&])jcd=0?7(?:&|$)', href)
+                  if not hd or not jcd:
+                      continue
+                  yyyymmdd = hd.group(1)
                   try:
-                      start = date.fromisoformat(f'{yyyymmdd[:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:]}')
+                      start = date.fromisoformat(
+                          f'{yyyymmdd[:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:]}'
+                      )
                   except ValueError:
                       continue
-                  title = plain_text(inner).strip()
-                  if not title:
-                      title = '蒲郡開催'
-                  out.append({'start': start, 'title': title})
+                  out.append({'start': start, 'title': clean_title(inner)})
               return out
 
-          raw = Path('/tmp/gamagori-racelist.html').read_text(encoding='utf-8', errors='replace')
+          raw = decode_html('/tmp/gamagori-racelist.html')
           plain = plain_text(raw)
           times = re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)', plain)
           active = len(times) >= 12
