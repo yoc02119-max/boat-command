@@ -1,0 +1,170 @@
+name: Gamagori wind evidence status v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live/gamagori/**/pre/race-*-wind.json'
+      - 'live/gamagori/**/pre/race-*-pack.json'
+      - 'live/gamagori/**/post/race-*-result.json'
+      - '.github/workflows/gamagori-wind-evidence-status-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-wind-evidence-status
+  cancel-in-progress: false
+
+jobs:
+  derive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Derive fail-closed wind evidence status
+        shell: python
+        run: |
+          import datetime
+          import json
+          import pathlib
+          import re
+          from zoneinfo import ZoneInfo
+
+          root = pathlib.Path('live/gamagori')
+          wind_files = sorted(root.glob('*/pre/race-*-wind.json'))
+
+          raw = 0
+          human_verified = 0
+          paired_results = 0
+          performance = 0
+
+          for wind_path in wind_files:
+              try:
+                  wind = json.loads(wind_path.read_text(encoding='utf-8'))
+              except Exception:
+                  continue
+
+              if wind.get('venue') != 'GAMAGORI' or wind.get('venueCode') != '07':
+                  continue
+              if wind.get('timingStatus') != 'VERIFIED':
+                  continue
+              if wind.get('resultEndpointsIncluded') is not False:
+                  continue
+              if not isinstance(wind.get('windDirectionIndex'), int):
+                  continue
+              if not (1 <= wind['windDirectionIndex'] <= 17):
+                  continue
+
+              raw += 1
+              if wind.get('humanDirectionVerified') is True and wind.get('humanDirection'):
+                  human_verified += 1
+
+              race = wind.get('race')
+              date = wind.get('date')
+              if not isinstance(race, int) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', str(date)):
+                  continue
+
+              day = root / date
+              result_path = day / 'post' / f'race-{race}-result.json'
+              pack_path = day / 'pre' / f'race-{race}-pack.json'
+              if not result_path.exists():
+                  continue
+
+              try:
+                  result = json.loads(result_path.read_text(encoding='utf-8'))
+              except Exception:
+                  continue
+              if result.get('venue') != 'GAMAGORI' or result.get('resultEndpointsIncluded') is not True:
+                  continue
+              paired_results += 1
+
+              # Performance classification remains fail-closed. A wind/result pair is
+              # NOT eligible unless the corresponding PRE-RACE pack proves that the
+              # prediction was enabled and hard-locked before result ingestion, and
+              # the human direction label itself has been verified.
+              if not pack_path.exists():
+                  continue
+              try:
+                  pack = json.loads(pack_path.read_text(encoding='utf-8'))
+              except Exception:
+                  continue
+              if pack.get('venue') != 'GAMAGORI':
+                  continue
+              if pack.get('resultEndpointsIncluded') is not False:
+                  continue
+              if pack.get('predictionEnabled') is not True:
+                  continue
+              if pack.get('hardLockEnabled') is not True:
+                  continue
+              if wind.get('humanDirectionVerified') is not True or not wind.get('humanDirection'):
+                  continue
+              performance += 1
+
+          minimum = 30
+          mapping_verified = raw > 0 and human_verified == raw
+          classification_ready = mapping_verified and performance >= minimum
+
+          if raw == 0:
+              reason = 'RAW_DIRECTION_COLLECTION_ENABLED_BUT_NO_VERIFIED_PERFORMANCE_SAMPLE_YET'
+          elif not mapping_verified:
+              reason = 'HUMAN_DIRECTION_MAPPING_NOT_VERIFIED'
+          elif performance < minimum:
+              reason = 'INSUFFICIENT_HARD_LOCKED_PERFORMANCE_SAMPLES'
+          else:
+              # Readiness only. Weakest-direction calculation is intentionally not
+              # guessed here; a later audited analyzer must calculate hit/return data.
+              classification_ready = False
+              reason = 'PERFORMANCE_ANALYZER_NOT_YET_AUDITED'
+
+          now = datetime.datetime.now(ZoneInfo('Asia/Tokyo')).replace(microsecond=0).isoformat()
+          status = {
+              'schema': 'boat-command-gamagori-wind-status-v1',
+              'venue': 'GAMAGORI',
+              'venueCode': '07',
+              'updatedAtJst': now,
+              'collectionEnabled': True,
+              'collector': 'gamagori-wind-direction-collector-v1',
+              'rawDirectionSamples': raw,
+              'humanDirectionMappingVerified': mapping_verified,
+              'humanDirectionVerifiedSamples': human_verified,
+              'pairedResultSamples': paired_results,
+              'performanceSamples': performance,
+              'minimumPerformanceSamples': minimum,
+              'classificationReady': classification_ready,
+              'weakestDirection': None,
+              'reason': reason,
+              'safety': {
+                  'preRaceOnlyCollection': True,
+                  'postRaceResultsSeparated': True,
+                  'resultEndpointsIncludedInCollector': False,
+                  'guessHumanDirectionLabels': False,
+                  'requiresHardLockForPerformance': True,
+              },
+          }
+
+          out = pathlib.Path('line/gamagori-wind-status.json')
+          out.write_text(json.dumps(status, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          assert status['venueCode'] == '07'
+          assert status['classificationReady'] is False
+          assert status['weakestDirection'] is None
+          assert status['safety']['preRaceOnlyCollection'] is True
+          assert status['safety']['postRaceResultsSeparated'] is True
+          assert status['safety']['guessHumanDirectionLabels'] is False
+          print(json.dumps(status, ensure_ascii=False))
+
+      - name: Commit status if changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- line/gamagori-wind-status.json; then
+            echo 'No wind evidence status change.'
+            exit 0
+          fi
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add line/gamagori-wind-status.json
+          git commit -m 'chore: refresh Gamagori wind evidence status'
+          git push
