@@ -1,7 +1,7 @@
 // BOAT COMMAND GAMAGORI LIVE LEARNING RECORDS v0.20.5
 // Builds post-settlement learning records from immutable PRE-RACE lock snapshots + separated POST-RACE results.
 // SHADOW/RECORD ONLY: never rewrites the predictor and never leaks results back into PRE-RACE state.
-const BC_LIVE_LEARNING_V0205={version:'GAMAGORI-LIVE-LEARNING-V0.20.5',autoModelUpdate:false};
+const BC_LIVE_LEARNING_V0205={version:'GAMAGORI-LIVE-LEARNING-V0.20.5+METHOD-V0.21.4',autoModelUpdate:false};
 
 function bcLearningMissClassV0205(picks,result){
   if((picks||[]).includes(result))return 'EXACT_HIT';
@@ -30,7 +30,10 @@ async function bcBuildLearningRecordV0205(s,r){
   const frozen=r.liveLockSnapshot;
   const snapAudit=typeof bcVerifyLiveLockSnapshotV0203==='function'?bcVerifyLiveLockSnapshotV0203(r):{ok:false,reason:'SNAPSHOT_VERIFIERなし'};
   if(!snapAudit.ok)return null;
+  const hashAudit=typeof bcVerifyLiveLockSnapshotHashV0209==='function'?await bcVerifyLiveLockSnapshotHashV0209(r):{ok:false,reason:'SNAPSHOT_HASH_VERIFIERなし'};
+  if(!hashAudit.ok)return null;
   const picks=(frozen.picks||[]).filter(Boolean),result=String(r.result||'');
+  const winningMethod=r.winningMethod==null?null:String(r.winningMethod);
   const record={
     schema:'boat-command-live-learning-record-v1',version:BC_LIVE_LEARNING_V0205.version,
     venue:'GAMAGORI',date:s.date,race:Number(r.race),
@@ -39,7 +42,7 @@ async function bcBuildLearningRecordV0205(s,r){
     strategyVersion:frozen.strategyVersion||s.strategyVersion||null,
     prediction:{picks,rationale:String(frozen.rationale||''),status:frozen.predictionStatus||null},
     features:bcLearningFeatureSnapshotV0205(frozen),
-    outcome:{trifecta:result,payout100:Number(r.officialPayout100)||0,hit:!!r.hit,stake:Number(r.stake)||0,returnAmount:Number(r.returnAmount)||0,profit:Number(r.profit)||0},
+    outcome:{trifecta:result,payout100:Number(r.officialPayout100)||0,winningMethod,hit:!!r.hit,stake:Number(r.stake)||0,returnAmount:Number(r.returnAmount)||0,profit:Number(r.profit)||0},
     diagnosis:{class:bcLearningMissClassV0205(picks,result)},
     boundaries:{preRaceImmutable:true,postRaceSeparated:true,resultUsedForPrediction:false,autoModelUpdate:false}
   };
@@ -61,6 +64,7 @@ async function refreshLiveLearningRecordsV0205(){
     hitRate:records.length?hits/records.length*100:null,investment,returns,profit:returns-investment,
     roi:investment?returns/investment*100:null,
     missClasses:records.reduce((a,x)=>{const k=x.diagnosis?.class||'UNKNOWN';a[k]=(a[k]||0)+1;return a;},{}),
+    winningMethods:records.reduce((a,x)=>{const k=x.outcome?.winningMethod||'UNKNOWN';a[k]=(a[k]||0)+1;return a;},{}),
     autoModelUpdate:false,updatedAt:new Date().toISOString()
   };
   if(changed)saveStore();
@@ -86,7 +90,8 @@ answer=function(q){
       const z=s.liveLearningSummary||{};return `蒲郡LIVE学習記録は <strong>${z.records||0}R</strong>。的中 ${z.hits||0}R、回収率 ${Number.isFinite(z.roi)?z.roi.toFixed(1)+'%':'—'}。現在は記録専用で、自動モデル更新はOFFです。`;
     }
     if(!rec)return `${race}Rはまだ学習記録が確定していません。LOCK済み予想とPOST-RACE精算が揃った後に作成します。`;
-    return `${race}Rの診断は <strong>${esc(rec.diagnosis.class)}</strong>。結果 ${esc(rec.outcome.trifecta)}、損益 ${money(rec.outcome.profit)}。結果は次回予想へ自動混入せず、改善材料として分離保存しています。`;
+    const method=rec.outcome?.winningMethod?`、決まり手 ${esc(rec.outcome.winningMethod)}`:'';
+    return `${race}Rの診断は <strong>${esc(rec.diagnosis.class)}</strong>。結果 ${esc(rec.outcome.trifecta)}${method}、損益 ${money(rec.outcome.profit)}。結果は次回予想へ自動混入せず、改善材料として分離保存しています。`;
   }
   return _bcAnswerV0205(q);
 };
