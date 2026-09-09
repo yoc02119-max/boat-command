@@ -39,12 +39,15 @@ jobs:
           s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
           s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
           # Remove every prior cache-busted copy, then insert exactly one in canonical order.
+          # The learning module cache version is intentionally not hard-coded: later app
+          # audits may bump it independently, and POST-RACE collection must keep working.
           s=re.sub(r'\n?<script src="live-result-v0204\.js\?v=\d+"></script>','',s)
-          anchor='<script src="live-learning-v0205.js?v=211"></script>'
-          tag='<script src="live-result-v0204.js?v=214"></script>'
-          if anchor not in s:
+          learning_pat=r'<script src="live-learning-v0205\.js\?v=\d+"></script>'
+          m=re.search(learning_pat,s)
+          if not m:
               raise SystemExit('RESULT_BOOTSTRAP_ANCHOR_MISSING')
-          s=s.replace(anchor,tag+'\n'+anchor,1)
+          tag='<script src="live-result-v0204.js?v=214"></script>'
+          s=s[:m.start()]+tag+'\n'+s[m.start():]
           if s.count('live-result-v0204.js')!=1:
               raise SystemExit('RESULT_BOOTSTRAP_SINGLETON_FAIL')
           p.write_text(s)
