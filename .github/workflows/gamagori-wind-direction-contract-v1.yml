@@ -1,0 +1,63 @@
+name: Gamagori wind direction collector contract v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-wind-direction-collector-v1.yml'
+      - '.github/workflows/gamagori-wind-direction-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate collector safety contract
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('.github/workflows/gamagori-wind-direction-collector-v1.yml')
+          s = p.read_text(encoding='utf-8')
+
+          required = [
+              "CODE=07",
+              "live/gamagori/$DATE/pre",
+              "is-windDirection",
+              "windDirectionCode",
+              "windDirectionIndex",
+              "humanDirectionVerified",
+              "'humanDirection': None",
+              "'resultEndpointsIncluded': False",
+              "'predictionEnabled': False",
+              "'hardLockEnabled': False",
+              "FAIL_CLOSED_AFTER_DEADLINE",
+              "timingStatus': 'VERIFIED'",
+          ]
+          for item in required:
+              assert item in s, item
+
+          forbidden = [
+              '/result?',
+              'odds3t',
+              'racereplay',
+              'jcd=01',
+              'jcd=02',
+              'jcd=03',
+              'jcd=04',
+              'jcd=05',
+              'jcd=06',
+              'jcd=08',
+              'LINE_CHANNEL_SECRET',
+              'LINE_CHANNEL_ACCESS_TOKEN',
+              'github_pat_',
+          ]
+          for item in forbidden:
+              assert item not in s, item
+
+          print('GAMAGORI_WIND_COLLECTOR_CONTRACT_PASS')
