@@ -108,7 +108,7 @@ jobs:
 
       - name: Commit status feed
         run: |
-          if git diff --quiet -- line/boat-command-status.json; then
+          if [ -z "$(git status --porcelain -- line/boat-command-status.json)" ]; then
             echo 'No LINE status change required.'
             exit 0
           fi
