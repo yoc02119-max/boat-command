@@ -190,7 +190,7 @@ jobs:
 
       - name: Commit public audit status
         run: |
-          if git diff --quiet -- trial-readiness-public.json; then
+          if [ -z "$(git status --porcelain -- trial-readiness-public.json)" ]; then
             echo 'No public status change.'
             exit 0
           fi
