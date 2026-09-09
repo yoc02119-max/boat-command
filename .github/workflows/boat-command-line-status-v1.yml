@@ -12,9 +12,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: boat-command-line-status-v1
+  cancel-in-progress: false
+
 jobs:
   build-line-status:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,9 +49,17 @@ jobs:
           current_task = one(r"currentTask:\s*'([^']*)'", dev, 'CURRENT_TASK')
           next_task = one(r"nextTask:\s*'([^']*)'", dev, 'NEXT_TASK')
 
-          phases = []
-          for name, pct, state in re.findall(r"\['([^']+)',\s*(\d+),\s*'([^']+)'\]", dev):
-            phases.append({'name': name, 'percent': int(pct), 'state': state})
+          if venue != '蒲郡' or venue_code != 'GAMAGORI-01':
+            raise SystemExit('VENUE_SCOPE_HOLD')
+          if not 0 <= overall <= 100:
+            raise SystemExit('OVERALL_RANGE_HOLD')
+
+          phases = [
+            {'name': name, 'percent': int(pct), 'state': state}
+            for name, pct, state in re.findall(r"\['([^']+)',\s*(\d+),\s*'([^']+)'\]", dev)
+          ]
+          if not phases or any(not 0 <= p['percent'] <= 100 for p in phases):
+            raise SystemExit('PHASE_CONTRACT_HOLD')
 
           required_trial_tokens = [
             "status:ok?'READY_FOR_EARLY_TRIAL':'HOLD'",
@@ -57,6 +70,8 @@ jobs:
             'bcVerifyLiveLockSnapshotHashV0209',
           ]
           trial_contract_ok = all(token in trial for token in required_trial_tokens)
+          if not trial_contract_ok:
+            raise SystemExit('TRIAL_READINESS_CONTRACT_HOLD')
 
           payload = {
             'schema': 'boat-command-line-status-v1',
@@ -69,7 +84,7 @@ jobs:
             'phases': phases,
             'trial': {
               'gateVersion': '0.21.8',
-              'staticContract': 'PASS' if trial_contract_ok else 'HOLD',
+              'staticContract': 'PASS',
               'productionMutation': False,
               'predictionQualityCertified': False,
               'note': '技術的な早期試用ゲート。予想精度や収益性の保証ではありません。'
@@ -83,9 +98,6 @@ jobs:
             'generatedAt': dt.datetime.now(dt.timezone.utc).isoformat().replace('+00:00', 'Z')
           }
 
-          if not trial_contract_ok:
-            raise SystemExit('TRIAL_READINESS_CONTRACT_HOLD')
-
           out = Path('line/boat-command-status.json')
           out.parent.mkdir(parents=True, exist_ok=True)
           out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -98,12 +110,14 @@ jobs:
           from pathlib import Path
           p = json.loads(Path('line/boat-command-status.json').read_text(encoding='utf-8'))
           assert p['schema'] == 'boat-command-line-status-v1'
+          assert p['venue'] == '蒲郡'
           assert p['venueCode'] == 'GAMAGORI-01'
           assert isinstance(p['overall'], int) and 0 <= p['overall'] <= 100
           assert p['trial']['staticContract'] == 'PASS'
           assert p['trial']['productionMutation'] is False
           assert p['trial']['predictionQualityCertified'] is False
           assert len(p['phases']) >= 1
+          assert all(isinstance(x['percent'], int) and 0 <= x['percent'] <= 100 for x in p['phases'])
           print('LINE_STATUS_CONTRACT_PASS')
 
       - name: Commit status feed
@@ -116,4 +130,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add line/boat-command-status.json
           git commit -m 'chore: refresh BOAT COMMAND LINE status feed'
+          git pull --rebase origin main
           git push
