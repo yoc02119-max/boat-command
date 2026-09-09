@@ -73,11 +73,16 @@ jobs:
         run: |
           import json
           from pathlib import Path
-          raw = Path('line-worker/wrangler.jsonc').read_text(encoding='utf-8')
-          p = json.loads(raw)
+          p = json.loads(Path('line-worker/wrangler.jsonc').read_text(encoding='utf-8'))
           assert p['name'] == 'boat-command-line-webhook'
           assert p['main'] == 'src/index.js'
+          kv = p.get('kv_namespaces') or []
+          learning = [x for x in kv if x.get('binding') == 'LEARNING_QUEUE']
+          assert len(learning) == 1, learning
+          namespace_id = learning[0].get('id', '')
+          assert len(namespace_id) == 32 and all(c in '0123456789abcdef' for c in namespace_id.lower())
           print('LINE_WORKER_CONFIG_PASS')
+          print('LINE_LEARNING_KV_BINDING_PASS')
 
       - name: Check JavaScript syntax
         working-directory: line-worker
