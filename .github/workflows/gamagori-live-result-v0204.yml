@@ -30,20 +30,23 @@ jobs:
       - name: Validate app result module
         run: node --check live-result-v0204.js
 
-      - name: Enable result module and bump app version
+      - name: Enforce singleton result module bootstrap
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html');s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.20.3','BOAT COMMAND v0.20.4')
-          s=s.replace('v0.20.3 · LOCK SNAPSHOT','v0.20.4 · RESULT LAYER')
-          s=s.replace('styles.css?v=203','styles.css?v=204')
-          s=s.replace('app.js?v=203','app.js?v=204')
-          for old in ['live-autopoll-v0199.js?v=203','live-predictor-v0200.js?v=203','live-autofill-v0201.js?v=203','live-lock-guard-v0202.js?v=203','live-lock-snapshot-v0203.js?v=203']:
-              s=s.replace(old,old.replace('v=203','v=204'))
-          tag='<script src="live-result-v0204.js?v=204"></script>'
-          if tag not in s:
-              s=s.replace('</body>',tag+'\n</body>')
+          s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
+          s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
+          # Remove every prior cache-busted copy, then insert exactly one in canonical order.
+          s=re.sub(r'\n?<script src="live-result-v0204\.js\?v=\d+"></script>','',s)
+          anchor='<script src="live-learning-v0205.js?v=211"></script>'
+          tag='<script src="live-result-v0204.js?v=214"></script>'
+          if anchor not in s:
+              raise SystemExit('RESULT_BOOTSTRAP_ANCHOR_MISSING')
+          s=s.replace(anchor,tag+'\n'+anchor,1)
+          if s.count('live-result-v0204.js')!=1:
+              raise SystemExit('RESULT_BOOTSTRAP_SINGLETON_FAIL')
           p.write_text(s)
           PY
 
@@ -136,5 +139,5 @@ jobs:
           git config user.name 'boat-command-result-relay'
           git config user.email 'boat-command-result-relay@users.noreply.github.com'
           git add index.html live/gamagori
-          git commit -m 'live: add immutable separated Gamagori post-race result relay'
+          git commit -m 'live: maintain singleton result bootstrap and immutable result relay'
           git push
