@@ -1,0 +1,62 @@
+name: Gamagori iPad layout fix v0.22.0
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-ipad-layout-fix-v0220.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ipad-layout-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix responsive main selector and refresh CSS cache key
+        shell: python
+        run: |
+          from pathlib import Path
+
+          css_path = Path('styles.css')
+          css = css_path.read_text(encoding='utf-8')
+          old = '.wide{grid-column:1}.main{padding:20px 18px}'
+          new = '.wide{grid-column:1}main{padding:20px 18px}'
+          if old not in css and new not in css:
+              raise SystemExit('IPAD_RESPONSIVE_SELECTOR_ANCHOR_MISSING')
+          css = css.replace(old, new)
+          css_path.write_text(css, encoding='utf-8')
+
+          html_path = Path('index.html')
+          html = html_path.read_text(encoding='utf-8')
+          html = html.replace('styles.css?v=211', 'styles.css?v=220')
+          html_path.write_text(html, encoding='utf-8')
+
+      - name: Verify iPad responsive contract
+        shell: python
+        run: |
+          from pathlib import Path
+          css = Path('styles.css').read_text(encoding='utf-8')
+          html = Path('index.html').read_text(encoding='utf-8')
+          if '.wide{grid-column:1}.main{padding:20px 18px}' in css:
+              raise SystemExit('BAD_CLASS_SELECTOR_STILL_PRESENT')
+          if '.wide{grid-column:1}main{padding:20px 18px}' not in css:
+              raise SystemExit('RESPONSIVE_MAIN_SELECTOR_MISSING')
+          if 'styles.css?v=220' not in html:
+              raise SystemExit('CSS_CACHE_BUST_MISSING')
+          print('GAMAGORI_IPAD_LAYOUT_FIX_PASS')
+
+      - name: Commit iPad layout fix
+        run: |
+          if git diff --quiet -- styles.css index.html; then
+            echo 'No layout change required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add styles.css index.html
+          git commit -m 'fix: apply Gamagori iPad responsive main padding v0.22.0'
+          git push
