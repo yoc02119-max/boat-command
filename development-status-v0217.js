@@ -4,10 +4,10 @@
   const STATUS = Object.freeze({
     venue: '蒲郡',
     venueCode: 'GAMAGORI-01',
-    appVersion: '0.21.7',
-    overall: 82,
-    currentTask: '早期試用版のUI仕上げ・実運用導線確認',
-    nextTask: '試用開始判定 → iPadでの実操作確認',
+    appVersion: '0.21.8',
+    overall: 84,
+    currentTask: '公開版の安全監査 PASS・iPad実機試用待ち',
+    nextTask: 'iPad実操作 → READY/WAIT → 予想 → HARD LOCK確認',
     phases: [
       ['LIVE基盤', 100, 'done'],
       ['安全・HARD LOCK', 100, 'done'],
