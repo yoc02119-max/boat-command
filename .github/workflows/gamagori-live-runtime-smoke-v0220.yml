@@ -67,21 +67,59 @@ jobs:
           set -euo pipefail
           ok=0
           for i in $(seq 1 18); do
-            code=$(curl -L -sS -o /tmp/index.html -w '%{http_code}' --max-time 20 "${APP_URL}?runtime_smoke=${GITHUB_SHA}&attempt=${i}" || true)
-            if [ "$code" = "200" ] && grep -q 'gamagori-live-integration-v0198.js?v=221' /tmp/index.html; then ok=1; break; fi
+            code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "${APP_URL}?runtime_smoke=${GITHUB_SHA}&attempt=${i}" || true)
+            if [ "$code" = "200" ]; then
+              if python - <<'PY'
+          from pathlib import Path
+          import re, sys
+          local=Path('index.html').read_text(encoding='utf-8')
+          public=Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          required=[
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'live-predictor-v0200.js','live-autofill-v0201.js','live-lock-guard-v0202.js',
+            'live-result-v0204.js','trial-readiness-v0218.js'
+          ]
+          def assets(html):
+              return re.findall(r'<script\s+src="([^"]+)"',html)
+          lsrc=assets(local); psrc=assets(public)
+          lm={x.split('?',1)[0]:x for x in lsrc}
+          pm={x.split('?',1)[0]:x for x in psrc}
+          bad=[x for x in required if lm.get(x)!=pm.get(x)]
+          if bad:
+              print('PUBLIC_RUNTIME_VERSION_MISMATCH',bad)
+              sys.exit(1)
+          manifest_local=re.search(r'<link\s+rel="manifest"\s+href="([^"]+)"',local)
+          manifest_public=re.search(r'<link\s+rel="manifest"\s+href="([^"]+)"',public)
+          if not manifest_local or not manifest_public or manifest_local.group(1)!=manifest_public.group(1):
+              print('PUBLIC_MANIFEST_VERSION_MISMATCH')
+              sys.exit(1)
+          print('PUBLIC_RUNTIME_INDEX_CURRENT')
+          PY
+              then ok=1; break; fi
+            fi
             sleep 10
           done
           if [ "$ok" != "1" ]; then echo 'PUBLIC_LIVE_RUNTIME_NOT_CURRENT'; exit 1; fi
-          for asset in \
-            'gamagori-live-integration-v0198.js?v=221' \
-            'live-autopoll-v0199.js?v=221' \
-            'live-predictor-v0200.js?v=221' \
-            'live-lock-guard-v0202.js?v=221' \
-            'live-result-v0204.js?v=221' \
-            'trial-readiness-v0218.js?v=221' \
-            'manifest.webmanifest?v=221'
-          do
+
+          python - <<'PY' > /tmp/runtime-assets.txt
+          from pathlib import Path
+          import re
+          html=Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          required={
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'live-predictor-v0200.js','live-autofill-v0201.js','live-lock-guard-v0202.js',
+            'live-result-v0204.js','trial-readiness-v0218.js'
+          }
+          for src in re.findall(r'<script\s+src="([^"]+)"',html):
+              if src.split('?',1)[0] in required:
+                  print(src)
+          m=re.search(r'<link\s+rel="manifest"\s+href="([^"]+)"',html)
+          if not m: raise SystemExit('PUBLIC_MANIFEST_LINK_MISSING')
+          print(m.group(1))
+          PY
+
+          while IFS= read -r asset; do
             code=$(curl -L -sS -o /tmp/asset -w '%{http_code}' --max-time 20 "${APP_URL}${asset}" || true)
             if [ "$code" != "200" ]; then echo "PUBLIC_RUNTIME_ASSET_FAIL $code $asset"; exit 1; fi
-          done
+          done < /tmp/runtime-assets.txt
           echo 'PUBLIC_LIVE_RUNTIME_SMOKE_PASS'
