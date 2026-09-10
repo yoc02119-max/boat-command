@@ -1,13 +1,9 @@
 name: BOAT COMMAND LINE status feed v1
 
+# PAUSED: LINE work is intentionally frozen until the user explicitly resumes it.
+# Manual dispatch only; app changes must not mutate line/** while LINE is paused.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/boat-command-line-status-v1.yml'
-      - 'index.html'
-      - 'development-status-v0217.js'
-      - 'trial-readiness-v0218.js'
 
 permissions:
   contents: write
