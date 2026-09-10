@@ -9,6 +9,7 @@ on:
       - 'app.js'
       - 'styles.css'
       - 'manifest.webmanifest'
+      - 'gamagori-live-integration-v0198.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
       - 'live-autofill-v0201.js'
@@ -42,6 +43,7 @@ jobs:
           set -euo pipefail
           for f in \
             app.js \
+            gamagori-live-integration-v0198.js \
             live-autopoll-v0199.js \
             live-predictor-v0200.js \
             live-autofill-v0201.js \
@@ -76,7 +78,7 @@ jobs:
             raise SystemExit(f'LOCAL_DOM_MISSING:{missing}')
 
           required_scripts = [
-            'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
@@ -87,15 +89,23 @@ jobs:
           missing_scripts = [x for x in required_scripts if x not in bases]
           if missing_scripts:
             raise SystemExit(f'LOCAL_SCRIPT_MISSING:{missing_scripts}')
+          duplicates = sorted({x for x in bases if bases.count(x) > 1})
+          if duplicates:
+            raise SystemExit(f'LOCAL_SCRIPT_DUPLICATE:{duplicates}')
           positions = [bases.index(x) for x in required_scripts]
           if positions != sorted(positions):
             raise SystemExit('LOCAL_SCRIPT_ORDER_BAD')
-          stale = [x for x in srcs if not x.endswith('?v=221')]
-          if stale:
-            raise SystemExit(f'LOCAL_SCRIPT_CACHE_KEY_STALE:{stale}')
-          for required_asset in ('styles.css?v=221','manifest.webmanifest?v=221','icon.svg?v=221'):
-            if required_asset not in html:
-              raise SystemExit(f'LOCAL_ASSET_CACHE_KEY_MISSING:{required_asset}')
+          bad_cache = [x for x in srcs if not re.search(r'\?v=\d+$', x)]
+          if bad_cache:
+            raise SystemExit(f'LOCAL_SCRIPT_CACHE_KEY_INVALID:{bad_cache}')
+          for pattern, label in [
+            (r'<link\s+rel="stylesheet"\s+href="([^"]+)"', 'stylesheet'),
+            (r'<link\s+rel="manifest"\s+href="([^"]+)"', 'manifest'),
+            (r'<link\s+rel="icon"\s+href="([^"]+)"', 'icon'),
+          ]:
+            found = re.findall(pattern, html)
+            if not found or any(not re.search(r'\?v=\d+$', x) for x in found):
+              raise SystemExit(f'LOCAL_ASSET_CACHE_KEY_INVALID:{label}:{found}')
           print('LOCAL_TRIAL_CONTRACT_PASS')
 
       - name: Wait for GitHub Pages and audit deployed app
@@ -109,7 +119,7 @@ jobs:
           for i in $(seq 1 18); do
             url="${APP_URL}?trial_smoke=${GITHUB_SHA}&attempt=${i}"
             code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "$url" || true)
-            if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js?v=221' /tmp/public-index.html; then
+            if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js' /tmp/public-index.html; then
               ok=1
               break
             fi
@@ -124,6 +134,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
+          local = Path('index.html').read_text(encoding='utf-8')
           html = Path('/tmp/public-index.html').read_text(encoding='utf-8')
           required_ids = [
             'sessionDate','modeBadge','runType','strategyVersion','predictionList','lockAllBtn',
@@ -134,26 +145,33 @@ jobs:
           if missing:
             raise SystemExit(f'PUBLIC_DOM_MISSING:{missing}')
           required = [
-            'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
             'trial-readiness-v0218.js'
           ]
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          local_srcs = re.findall(r'<script\s+src="([^"]+)"', local)
           bases = [x.split('?',1)[0] for x in srcs]
           miss = [x for x in required if x not in bases]
           if miss:
             raise SystemExit(f'PUBLIC_SCRIPT_MISSING:{miss}')
+          duplicates = sorted({x for x in bases if bases.count(x) > 1})
+          if duplicates:
+            raise SystemExit(f'PUBLIC_SCRIPT_DUPLICATE:{duplicates}')
           pos = [bases.index(x) for x in required]
           if pos != sorted(pos):
             raise SystemExit('PUBLIC_SCRIPT_ORDER_BAD')
-          stale = [x for x in srcs if not x.endswith('?v=221')]
-          if stale:
-            raise SystemExit(f'PUBLIC_SCRIPT_CACHE_KEY_STALE:{stale}')
-          for required_asset in ('styles.css?v=221','manifest.webmanifest?v=221','icon.svg?v=221'):
-            if required_asset not in html:
-              raise SystemExit(f'PUBLIC_ASSET_CACHE_KEY_MISSING:{required_asset}')
+          if srcs != local_srcs:
+            raise SystemExit(f'PUBLIC_SCRIPT_VERSION_MISMATCH: local={local_srcs} public={srcs}')
+          def assets(text):
+            out=[]
+            for pattern in [r'<link\s+rel="stylesheet"\s+href="([^"]+)"', r'<link\s+rel="manifest"\s+href="([^"]+)"', r'<link\s+rel="icon"\s+href="([^"]+)"']:
+              out += re.findall(pattern, text)
+            return out
+          if assets(html) != assets(local):
+            raise SystemExit(f'PUBLIC_ASSET_VERSION_MISMATCH: local={assets(local)} public={assets(html)}')
           print('PUBLIC_HTML_CONTRACT_PASS')
           PY
 
@@ -186,12 +204,14 @@ jobs:
           APP_URL: ${{ steps.public.outputs.app_url }}
         run: |
           from pathlib import Path
-          import json, os, datetime
+          import json, os, datetime, re
+          html = Path('index.html').read_text(encoding='utf-8')
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           out = {
             'schema':'boat-command-public-trial-smoke-v1',
             'venue':'蒲郡',
             'appVersion':'0.21.8',
-            'assetCacheKey':'221',
+            'scriptAssets':srcs,
             'status':'PASS',
             'publicUrl':os.environ['APP_URL'],
             'localSyntaxAudit':True,
