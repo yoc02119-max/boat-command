@@ -70,7 +70,8 @@ function liveSuggestionHtml(r){
 function renderLiveCandidates(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
-  const cards=[...document.querySelectorAll('.race-card')];
+  // PRE-RACE only: never decorate result/settlement cards with prediction-layer UI.
+  const cards=[...document.querySelectorAll('#predictionList .race-card')];
   cards.forEach((card,i)=>{
     let box=card.querySelector('.live-candidate-v0200');
     if(!box){box=document.createElement('div');box.className='live-candidate-v0200';card.prepend(box);}
