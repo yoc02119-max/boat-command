@@ -12,6 +12,7 @@ on:
       - 'gamagori-live-integration-v0198.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
+      - 'live-skip-gate-v0225.js'
       - 'live-autofill-v0201.js'
       - 'live-lock-guard-v0202.js'
       - 'live-lock-snapshot-v0203.js'
@@ -46,6 +47,7 @@ jobs:
             gamagori-live-integration-v0198.js \
             live-autopoll-v0199.js \
             live-predictor-v0200.js \
+            live-skip-gate-v0225.js \
             live-autofill-v0201.js \
             live-lock-guard-v0202.js \
             live-lock-snapshot-v0203.js \
@@ -78,7 +80,7 @@ jobs:
             raise SystemExit(f'LOCAL_DOM_MISSING:{missing}')
 
           required_scripts = [
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
@@ -145,7 +147,7 @@ jobs:
           if missing:
             raise SystemExit(f'PUBLIC_DOM_MISSING:{missing}')
           required = [
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
