@@ -26,23 +26,34 @@ jobs:
       - name: Validate predictor JavaScript
         run: node --check live-predictor-v0200.js
 
-      - name: Enable predictor module and bump app version
+      - name: Ensure exactly one predictor module include
+        shell: python
         run: |
-          set -euo pipefail
-          python - <<'PY'
           from pathlib import Path
+          import re
+
           p=Path('index.html')
-          s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.19.9','BOAT COMMAND v0.20.0')
-          s=s.replace('v0.19.9 · LIVE AUTO','v0.20.0 · LIVE PREDICT')
-          s=s.replace('styles.css?v=199','styles.css?v=200')
-          s=s.replace('app.js?v=199','app.js?v=200')
-          s=s.replace('live-autopoll-v0199.js?v=199','live-autopoll-v0199.js?v=200')
-          tag='<script src="live-predictor-v0200.js?v=200"></script>'
-          if tag not in s:
-              s=s.replace('</body>',f'{tag}\n</body>')
-          p.write_text(s)
-          PY
+          s=p.read_text(encoding='utf-8')
+
+          # Do not pin/rollback the current cache token. Reuse the app shell's
+          # current numeric token and make the module include idempotent.
+          m=re.search(r'<script\s+src="app\.js\?v=(\d+)"></script>',s)
+          token=m.group(1) if m else '1'
+          pattern=r'\s*<script\s+src="live-predictor-v0200\.js(?:\?v=\d+)?"></script>'
+          s=re.sub(pattern,'',s)
+
+          anchor=re.search(r'<script\s+src="live-autopoll-v0199\.js(?:\?v=\d+)?"></script>',s)
+          tag=f'\n<script src="live-predictor-v0200.js?v={token}"></script>'
+          if anchor:
+              pos=anchor.end()
+              s=s[:pos]+tag+s[pos:]
+          else:
+              s=s.replace('</body>',tag+'\n</body>')
+
+          if len(re.findall(r'<script\s+src="live-predictor-v0200\.js(?:\?v=\d+)?"></script>',s)) != 1:
+              raise SystemExit('PREDICTOR_INCLUDE_COUNT_INVALID')
+          p.write_text(s,encoding='utf-8')
+          print(f'PREDICTOR_INCLUDE_OK token={token}')
 
       - name: Commit app predictor enablement
         run: |
@@ -54,5 +65,5 @@ jobs:
           git config user.name 'boat-command-relay'
           git config user.email 'boat-command-relay@users.noreply.github.com'
           git add index.html
-          git commit -m 'feat: enable Gamagori LIVE candidate predictor'
+          git commit -m 'fix: keep one Gamagori LIVE candidate predictor include'
           git push
