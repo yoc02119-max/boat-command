@@ -1,0 +1,59 @@
+name: Gamagori result cache guard v0.22.3
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-result-cache-guard-v0223.yml'
+      - 'index.html'
+      - 'live-result-v0204.js'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-result-cache-guard
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enforce current LIVE result cache key
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          html = p.read_text(encoding='utf-8')
+          matches = re.findall(r'<script src="live-result-v0204\.js\?v=(\d+)"></script>', html)
+          if len(matches) != 1:
+            raise SystemExit(f'LIVE_RESULT_SCRIPT_COUNT_BAD:{matches}')
+
+          fixed = re.sub(
+              r'<script src="live-result-v0204\.js\?v=\d+"></script>',
+              '<script src="live-result-v0204.js?v=222"></script>',
+              html,
+              count=1,
+          )
+          p.write_text(fixed, encoding='utf-8')
+
+          if 'live-result-v0204.js?v=222' not in fixed:
+            raise SystemExit('LIVE_RESULT_CACHE_KEY_NOT_ENFORCED')
+          print('GAMAGORI_RESULT_CACHE_GUARD_PASS')
+
+      - name: Commit correction
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No correction required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: keep Gamagori LIVE result cache on v222'
+          git push
