@@ -8,7 +8,7 @@
     'chat','prompt','send','liveDate','liveRace'
   ];
   const REQUIRED_SCRIPTS=[
-    'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
+    'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
     'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
     'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
     'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
@@ -25,13 +25,14 @@
     const scriptsMissing=REQUIRED_SCRIPTS.filter(x=>!bases.includes(x));
     const duplicateScripts=[...new Set(bases.filter((x,i)=>bases.indexOf(x)!==i))];
     const safetyFunctions={
+      liveRelayLoader:typeof window.loadVerifiedLiveRace==='function',
       lockRace:typeof window.lockRace==='function',
       finalLiveLockAudit:typeof window.bcFinalLiveLockAudit==='function',
       lockSnapshotVerifier:typeof window.bcVerifyLiveLockSnapshotV0203==='function',
       snapshotHashVerifier:typeof window.bcVerifyLiveLockSnapshotHashV0209==='function'
     };
     const functionsMissing=Object.entries(safetyFunctions).filter(([,ok])=>!ok).map(([name])=>name);
-    const orderNames=['app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js'];
+    const orderNames=['app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js'];
     const orderPositions=orderNames.map(x=>bases.indexOf(x));
     const orderOk=orderPositions.every((p,i)=>p>=0&&(i===0||p>orderPositions[i-1]));
     const ok=idsMissing.length===0&&scriptsMissing.length===0&&duplicateScripts.length===0&&functionsMissing.length===0&&orderOk;
