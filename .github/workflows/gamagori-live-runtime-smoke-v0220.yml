@@ -1,0 +1,87 @@
+name: Gamagori LIVE runtime smoke v0.22.0
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-runtime-smoke-v0220.yml'
+      - 'index.html'
+      - 'app.js'
+      - 'gamagori-live-integration-v0198.js'
+      - 'live-autopoll-v0199.js'
+      - 'live-predictor-v0200.js'
+      - 'live-autofill-v0201.js'
+      - 'live-lock-guard-v0202.js'
+      - 'live-result-v0204.js'
+      - 'trial-readiness-v0218.js'
+      - 'manifest.webmanifest'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gamagori-live-runtime-smoke
+  cancel-in-progress: true
+
+jobs:
+  runtime-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify local LIVE dependency chain
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, json
+          html=Path('index.html').read_text(encoding='utf-8')
+          required=[
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'live-predictor-v0200.js','live-autofill-v0201.js','live-lock-guard-v0202.js',
+            'live-result-v0204.js','trial-readiness-v0218.js'
+          ]
+          srcs=re.findall(r'<script\s+src="([^"]+)"',html)
+          bases=[x.split('?',1)[0] for x in srcs]
+          missing=[x for x in required if x not in bases]
+          if missing: raise SystemExit(f'LIVE_RUNTIME_SCRIPT_MISSING:{missing}')
+          pos=[bases.index(x) for x in required]
+          if pos != sorted(pos): raise SystemExit('LIVE_RUNTIME_SCRIPT_ORDER_BAD')
+          if len(bases) != len(set(bases)): raise SystemExit('DUPLICATE_SCRIPT_LOAD')
+          integration=Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
+          autopoll=Path('live-autopoll-v0199.js').read_text(encoding='utf-8')
+          readiness=Path('trial-readiness-v0218.js').read_text(encoding='utf-8')
+          if 'loadVerifiedLiveRace' not in integration: raise SystemExit('LIVE_RELAY_LOADER_DEFINITION_MISSING')
+          if 'loadVerifiedLiveRace' not in autopoll: raise SystemExit('LIVE_RELAY_LOADER_CONSUMER_MISSING')
+          if "liveRelayLoader:typeof window.loadVerifiedLiveRace==='function'" not in readiness: raise SystemExit('READINESS_RUNTIME_DEPENDENCY_CHECK_MISSING')
+          manifest=json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
+          if manifest.get('display')!='standalone' or manifest.get('start_url')!='./' or manifest.get('scope')!='./':
+            raise SystemExit('PWA_MANIFEST_CONTRACT_BAD')
+          print('LOCAL_LIVE_RUNTIME_SMOKE_PASS')
+
+      - name: Verify public app and runtime assets
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 18); do
+            code=$(curl -L -sS -o /tmp/index.html -w '%{http_code}' --max-time 20 "${APP_URL}?runtime_smoke=${GITHUB_SHA}&attempt=${i}" || true)
+            if [ "$code" = "200" ] && grep -q 'gamagori-live-integration-v0198.js?v=221' /tmp/index.html; then ok=1; break; fi
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then echo 'PUBLIC_LIVE_RUNTIME_NOT_CURRENT'; exit 1; fi
+          for asset in \
+            'gamagori-live-integration-v0198.js?v=221' \
+            'live-autopoll-v0199.js?v=221' \
+            'live-predictor-v0200.js?v=221' \
+            'live-lock-guard-v0202.js?v=221' \
+            'live-result-v0204.js?v=221' \
+            'trial-readiness-v0218.js?v=221' \
+            'manifest.webmanifest?v=221'
+          do
+            code=$(curl -L -sS -o /tmp/asset -w '%{http_code}' --max-time 20 "${APP_URL}${asset}" || true)
+            if [ "$code" != "200" ]; then echo "PUBLIC_RUNTIME_ASSET_FAIL $code $asset"; exit 1; fi
+          done
+          echo 'PUBLIC_LIVE_RUNTIME_SMOKE_PASS'
