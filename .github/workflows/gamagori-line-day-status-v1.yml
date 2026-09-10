@@ -1,13 +1,9 @@
 name: Gamagori LINE day status v1
 
+# PAUSED: LINE work is intentionally frozen until the user explicitly resumes it.
+# Keep manual dispatch only so no scheduled/push run can mutate line/** while paused.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/gamagori-line-day-status-v1.yml'
-  schedule:
-    # 13:00-23:00 JST, hourly. Output only commits when the status changes.
-    - cron: '0 4-14 * * *'
 
 permissions:
   contents: write
@@ -198,7 +194,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add line/gamagori-day-status.json
           git commit -m 'chore: refresh Gamagori LINE day status'
-          # Another safe automation may have advanced main while this job was fetching official data.
-          # Rebase the generated status commit before push so unrelated concurrent changes are preserved.
           git pull --rebase origin main
           git push
