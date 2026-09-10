@@ -61,7 +61,7 @@ function bcApplyLivePredictionControlsV0225(s){
     card.classList.toggle('live-skip-race',skip);
     card.classList.toggle('live-wait-race',wait);
     if(skip||wait){
-      card.querySelectorAll('.pick,[data-reason],[data-lock]').forEach(el=>{el.disabled=true;});
+      card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]').forEach(el=>{el.disabled=true;});
     }
   }
 }
