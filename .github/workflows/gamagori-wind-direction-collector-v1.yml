@@ -1,9 +1,9 @@
 name: Gamagori PRE-RACE wind direction collector v1
 
+# LINE-related evidence collection is intentionally paused.
+# Keep manual dispatch only so the workflow can be resumed explicitly later.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 5-12 * * *'
 
 permissions:
   contents: write
@@ -55,8 +55,6 @@ jobs:
               deadline = datetime.datetime.fromisoformat(date).replace(
                   hour=hh, minute=mm, tzinfo=ZoneInfo('Asia/Tokyo')
               )
-              # Keep a small fail-closed margin so the collector never intentionally
-              # fetches after the betting deadline.
               if (deadline - now).total_seconds() >= 120:
                   selected = {'race': race, 'deadline': value}
                   break
@@ -105,9 +103,6 @@ jobs:
               sys.exit(0)
 
           bi = pathlib.Path('tmp_wind/beforeinfo.html').read_text(encoding='utf-8', errors='replace')
-
-          # Wind direction is image-class encoded by the official beforeinfo page.
-          # Capture only the official code; do not infer a human direction label here.
           direction_block = re.search(
               r'<div class="weather1_bodyUnit is-windDirection">(.*?)</div>\s*</div>',
               bi, re.S
