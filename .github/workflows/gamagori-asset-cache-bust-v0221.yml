@@ -48,14 +48,23 @@ jobs:
           html_path = Path('index.html')
           html = html_path.read_text(encoding='utf-8')
 
-          # Never roll a newer module back to an older cache key. Use one token
-          # strictly greater than every existing numeric app-shell cache key.
+          # Fail-safe against legacy enablement workflows appending a second copy
+          # of the same runtime module. Preserve the first include and remove only
+          # exact duplicate JS paths before refreshing cache keys.
+          seen=set()
+          def dedupe_script(m):
+              path=m.group(1)
+              base=path.split('?',1)[0]
+              if base in seen:
+                  return ''
+              seen.add(base)
+              return m.group(0)
+          html=re.sub(r'<script\s+src="([^"]+\.js(?:\?v=\d+)?)"></script>\s*',dedupe_script,html)
+
           existing = [int(x) for x in re.findall(r'[?&]v=(\d+)', html)]
           token = str((max(existing) if existing else 0) + 1)
           Path('/tmp/boat-command-cache-token').write_text(token, encoding='utf-8')
 
-          # iPad/Safari can retain same-origin assets across deploys. Keep the
-          # semantic app version unchanged; only refresh deterministic asset URLs.
           html = re.sub(r'href="manifest\.webmanifest(?:\?v=\d+)?"', f'href="manifest.webmanifest?v={token}"', html)
           html = re.sub(r'href="icon\.svg(?:\?v=\d+)?"', f'href="icon.svg?v={token}"', html)
           html = re.sub(r'href="styles\.css(?:\?v=\d+)?"', f'href="styles.css?v={token}"', html)
@@ -92,8 +101,11 @@ jobs:
           bad = [s for s in scripts if not s.endswith(f'?v={token}')]
           if bad:
               raise SystemExit(f'STALE_SCRIPT_CACHE_KEYS:{bad}')
+          bases=[s.split('?',1)[0] for s in scripts]
+          dupes=sorted({s for s in bases if bases.count(s)>1})
+          if dupes:
+              raise SystemExit(f'DUPLICATE_RUNTIME_SCRIPTS:{dupes}')
 
-          # Guard against accidental rollback if this workflow is edited again.
           all_tokens = [int(x) for x in re.findall(r'[?&]v=(\d+)', html)]
           if not all_tokens or len(set(all_tokens)) != 1 or all_tokens[0] != int(token):
               raise SystemExit(f'CACHE_KEYS_NOT_MONOTONIC:{all_tokens}')
@@ -103,7 +115,7 @@ jobs:
               raise SystemExit('PWA_SCOPE_CONTRACT_CHANGED')
           if 'v0.21.8 EARLY TRIAL' not in manifest.get('description',''):
               raise SystemExit('PWA_DESCRIPTION_STALE')
-          print(f'GAMAGORI_ASSET_CACHE_BUST_PASS token={token}')
+          print(f'GAMAGORI_ASSET_CACHE_BUST_PASS token={token} scripts={len(scripts)}')
 
       - name: Commit cache-safe app shell
         run: |
