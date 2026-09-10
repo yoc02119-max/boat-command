@@ -2,7 +2,7 @@
 // Final fail-closed check immediately before HARD LOCK. LIVE only.
 // Verifies READY, verified mappings, candidate state, source freshness, and deadline margin.
 const BC_LIVE_LOCK_GUARD_V0202={
-  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7',
+  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7+DOM-FAIL-CLOSED-V0.22.10',
   minMarginMinutes:3,
   maxSourceAgeMinutes:20,
   maxFutureSkewMinutes:2
@@ -82,14 +82,22 @@ function renderLiveLockGuard(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
   // Prediction-only DOM scope: result/analytics cards must never receive PRE-RACE lock controls.
+  // Race identity is fail-closed: never infer a race from card position after DOM rewrites/reordering.
   const cards=[...document.querySelectorAll('#predictionList .race-card')];
-  cards.forEach((card,i)=>{
+  cards.forEach(card=>{
     const parsedRace=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
-    const race=Number.isInteger(parsedRace)&&parsedRace>=1&&parsedRace<=12?parsedRace:i+1;
-    const r=s.races.find(x=>Number(x.race)===race);
     let box=card.querySelector('.live-lock-guard-v0202');
     if(!box){box=document.createElement('div');box.className='live-lock-guard-v0202';card.prepend(box);}
-    if(!r||r.locked){box.innerHTML='';return;}
+    if(!Number.isInteger(parsedRace)||parsedRace<1||parsedRace>12){
+      box.innerHTML='<div class="prediction-gate limited"><b>FINAL LOCK GATE｜BLOCKED</b><span>レース番号を安全に確認できないためLOCK禁止</span></div>';
+      return;
+    }
+    const r=s.races.find(x=>Number(x.race)===parsedRace);
+    if(!r){
+      box.innerHTML='<div class="prediction-gate limited"><b>FINAL LOCK GATE｜BLOCKED</b><span>レース情報を照合できないためLOCK禁止</span></div>';
+      return;
+    }
+    if(r.locked){box.innerHTML='';return;}
     const a=bcFinalLiveLockAudit(s,r,new Date());
     if(a.ok){
       box.innerHTML=`<div class="prediction-gate ready"><b>FINAL LOCK GATE｜SAFE</b><span>締切余裕 ${a.marginMinutes.toFixed(1)}分 · LIVE鮮度 ${a.sourceAgeMinutes.toFixed(1)}分</span></div>`;
