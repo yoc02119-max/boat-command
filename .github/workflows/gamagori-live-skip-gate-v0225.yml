@@ -30,7 +30,8 @@ jobs:
           grep -Fq "waitFailClosed:true" live-skip-gate-v0225.js
           grep -Fq "resultLookahead:false" live-skip-gate-v0225.js
           grep -Fq "if(bcLiveUnresolvedV0225(s).length)return false" live-skip-gate-v0225.js
-          if grep -Eqi 'resultlist|/result\?|payout100|bcLoadResult|fetch\(.+post' live-skip-gate-v0225.js; then
+          # Reject actual POST-RACE retrieval/settlement primitives, not harmless UI ids such as #resultList.
+          if grep -Eqi 'resultlist\?|/result\?|payout100|bcLoadResult|fetch\([^\n]*post/' live-skip-gate-v0225.js; then
             echo 'POST_RACE_LOGIC_MUST_NOT_EXIST_IN_SKIP_GATE'
             exit 1
           fi
