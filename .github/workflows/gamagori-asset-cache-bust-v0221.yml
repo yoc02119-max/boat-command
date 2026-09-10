@@ -24,20 +24,27 @@ jobs:
 
           html_path = Path('index.html')
           html = html_path.read_text(encoding='utf-8')
-          token = '221'
+
+          # Never roll a newer module back to an older cache key. Use one token
+          # strictly greater than every existing numeric app-shell cache key.
+          existing = [int(x) for x in re.findall(r'[?&]v=(\d+)', html)]
+          token = str((max(existing) if existing else 0) + 1)
+          Path('/tmp/boat-command-cache-token').write_text(token, encoding='utf-8')
 
           # iPad/Safari can retain same-origin assets across deploys. Keep the
           # semantic app version unchanged; only refresh deterministic asset URLs.
           html = re.sub(r'href="manifest\.webmanifest(?:\?v=\d+)?"', f'href="manifest.webmanifest?v={token}"', html)
           html = re.sub(r'href="icon\.svg(?:\?v=\d+)?"', f'href="icon.svg?v={token}"', html)
-          html = re.sub(r'href="styles\.css\?v=\d+"', f'href="styles.css?v={token}"', html)
-          html = re.sub(r'src="([^"]+\.js)\?v=\d+"', rf'src="\1?v={token}"', html)
+          html = re.sub(r'href="styles\.css(?:\?v=\d+)?"', f'href="styles.css?v={token}"', html)
+          html = re.sub(r'src="([^"]+\.js)(?:\?v=\d+)?"', rf'src="\1?v={token}"', html)
           html_path.write_text(html, encoding='utf-8')
 
           manifest_path = Path('manifest.webmanifest')
           manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
           manifest['description'] = 'BOAT COMMAND v0.21.8 EARLY TRIAL — 蒲郡 strict-blind live/backtest analytics'
           manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          print(f'CACHE_TOKEN={token}')
 
       - name: Verify cache-bust and PWA metadata contract
         shell: python
@@ -46,7 +53,9 @@ jobs:
           import json, re
 
           html = Path('index.html').read_text(encoding='utf-8')
-          token = '221'
+          token = Path('/tmp/boat-command-cache-token').read_text(encoding='utf-8').strip()
+          if not token.isdigit():
+              raise SystemExit('CACHE_TOKEN_INVALID')
           if f'manifest.webmanifest?v={token}' not in html:
               raise SystemExit('MANIFEST_CACHE_KEY_MISSING')
           if f'icon.svg?v={token}' not in html:
@@ -61,12 +70,17 @@ jobs:
           if bad:
               raise SystemExit(f'STALE_SCRIPT_CACHE_KEYS:{bad}')
 
+          # Guard against accidental rollback if this workflow is edited again.
+          all_tokens = [int(x) for x in re.findall(r'[?&]v=(\d+)', html)]
+          if not all_tokens or len(set(all_tokens)) != 1 or all_tokens[0] != int(token):
+              raise SystemExit(f'CACHE_KEYS_NOT_MONOTONIC:{all_tokens}')
+
           manifest = json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
           if manifest.get('name') != 'BOAT COMMAND' or manifest.get('start_url') != './' or manifest.get('scope') != './':
               raise SystemExit('PWA_SCOPE_CONTRACT_CHANGED')
           if 'v0.21.8 EARLY TRIAL' not in manifest.get('description',''):
               raise SystemExit('PWA_DESCRIPTION_STALE')
-          print('GAMAGORI_ASSET_CACHE_BUST_PASS')
+          print(f'GAMAGORI_ASSET_CACHE_BUST_PASS token={token}')
 
       - name: Commit cache-safe app shell
         run: |
