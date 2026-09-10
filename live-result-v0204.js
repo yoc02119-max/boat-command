@@ -2,7 +2,8 @@
 // Reads same-origin POST-RACE relay files only after a successful immutable LIVE lock snapshot exists.
 // PRE-RACE evidence and POST-RACE results remain physically and logically separated.
 // Settlement integrity hardening v0.21.4: stake comes only from frozen lock snapshot; official winning method is POST-RACE metadata only.
-const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4',timer:null,running:false};
+// Global reveal hardening v0.22.2: do not fetch any POST-RACE result until every prediction target is HARD LOCKed.
+const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2',timer:null,running:false};
 
 function bcLiveResultPathV0204(date,race){return `./live/gamagori/${date}/post/race-${race}-result.json`;}
 function bcValidResultPickV0204(v){return /^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;}
@@ -24,6 +25,16 @@ async function bcLoadResultV0204(date,race){
     const x=await res.json();bcValidateResultPayloadV0204(x,date,race);
     return {ok:true,status:'READY',payload:x,path};
   }catch(e){return {ok:false,status:'WAIT',reason:e?.message||'RESULT_FETCH_FAILED',path};}
+}
+function bcGlobalLiveResultGateV0222(s){
+  if(!s||s.runType!=='LIVE')return {ok:false,reason:'LIVEセッションではありません'};
+  if(typeof isResultMode!=='function')return {ok:false,reason:'GLOBAL_RESULT_GATE_UNAVAILABLE'};
+  if(!isResultMode(s)){
+    const target=typeof requiredReplayLocks==='function'?requiredReplayLocks(s):12;
+    const locked=typeof targetLockedCount==='function'?targetLockedCount(s):(s.races||[]).filter(r=>r.locked).length;
+    return {ok:false,reason:`全予想対象のHARD LOCK待ち ${locked}/${target}`};
+  }
+  return {ok:true,reason:''};
 }
 function bcCanSettleLiveV0204(r){
   if(!r?.locked)return {ok:false,reason:'未LOCK'};
@@ -75,6 +86,8 @@ function bcSettleLiveV0204(r,x,path){
 async function sweepLiveResultsV0204({render=true}={}){
   const s=session();
   if(BC_LIVE_RESULT_V0204.running||!s||s.runType!=='LIVE')return null;
+  const globalGate=bcGlobalLiveResultGateV0222(s);
+  if(!globalGate.ok)return {settled:0,waiting:0,blocked:0,globalBlocked:true,reason:globalGate.reason};
   BC_LIVE_RESULT_V0204.running=true;
   let settled=0,waiting=0,blocked=0,changed=false;
   try{
@@ -106,7 +119,10 @@ const _bcAnswerV0204=answer;
 answer=function(q){
   const t=String(q||'').replace(/\s/g,'');const m=t.match(/(\d{1,2})R/);const race=m?Number(m[1]):Number($('#liveRace')?.value)||1;
   if(/自動精算|結果取得|結果待ち|精算状況|POST-RACE|ポストレース/.test(t)){
-    const r=session().races.find(x=>Number(x.race)===race);
+    const s=session();
+    const globalGate=bcGlobalLiveResultGateV0222(s);
+    if(!globalGate.ok)return `POST-RACE結果はまだ取得しません。理由は「${esc(globalGate.reason)}」です。結果先読み防止のため、全予想対象のHARD LOCK完了後にだけ解禁します。`;
+    const r=s.races.find(x=>Number(x.race)===race);
     if(r?.settled){const method=r.winningMethod?`、決まり手 ${esc(r.winningMethod)}`:'';return `${race}Rは<strong>自動精算済み</strong>です。結果 ${esc(r.result)}${method}、払戻100円あたり ${Number(r.officialPayout100||0).toLocaleString()}円、損益 ${money(r.profit||0)}。予想時スナップショットとは分離保存しています。`;}
     const g=bcCanSettleLiveV0204(r);if(!g.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(g.reason)}」です。`;
     const c=bcFrozenSettlementContractV0213(r);if(!c.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(c.reason)}」です。`;
