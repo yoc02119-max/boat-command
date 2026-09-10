@@ -1,0 +1,108 @@
+name: Gamagori LIVE integration dedup v0.22.4
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-integration-dedup-v0224.yml'
+      - 'app.js'
+      - 'gamagori-live-integration-v0198.js'
+      - 'index.html'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-live-integration-dedup-v0224
+  cancel-in-progress: true
+
+jobs:
+  dedup-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: JavaScript syntax audit
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check gamagori-live-integration-v0198.js
+
+      - name: Verify single active LIVE integration implementation
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          app = Path('app.js').read_text(encoding='utf-8')
+          compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
+          html = Path('index.html').read_text(encoding='utf-8')
+
+          app_decl = len(re.findall(r'\bconst\s+BC_LIVE_V0198\s*=', app))
+          app_loader = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', app))
+          compat_decl = len(re.findall(r'\bconst\s+BC_LIVE_V0198\s*=', compat))
+          compat_loader = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', compat))
+
+          if app_decl != 1 or app_loader != 1:
+            raise SystemExit(f'EMBEDDED_LIVE_INTEGRATION_COUNT_INVALID: const={app_decl} loader={app_loader}')
+          if compat_decl != 0 or compat_loader != 0:
+            raise SystemExit(f'DUPLICATE_LIVE_GLOBALS_IN_COMPAT_ASSET: const={compat_decl} loader={compat_loader}')
+          if 'duplicateGlobalsDeclared:false' not in compat:
+            raise SystemExit('COMPAT_GUARD_TOKEN_MISSING')
+
+          scripts = re.findall(r'<script\s+src="([^"]+)"', html)
+          bases = [x.split('?',1)[0] for x in scripts]
+          if bases.count('app.js') != 1 or bases.count('gamagori-live-integration-v0198.js') != 1:
+            raise SystemExit('LIVE_INTEGRATION_SCRIPT_SINGLETON_INVALID')
+          if bases.index('app.js') > bases.index('gamagori-live-integration-v0198.js'):
+            raise SystemExit('LIVE_INTEGRATION_SCRIPT_ORDER_INVALID')
+
+          print('GAMAGORI_LIVE_INTEGRATION_DEDUP_PASS')
+
+      - name: Bust compatibility asset cache after dedup fix
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          html = p.read_text(encoding='utf-8')
+          pattern = r'gamagori-live-integration-v0198\.js\?v=\d+'
+          replacement = 'gamagori-live-integration-v0198.js?v=224'
+          new, count = re.subn(pattern, replacement, html)
+          if count != 1:
+            raise SystemExit(f'LIVE_COMPAT_CACHE_KEY_MATCH_COUNT:{count}')
+          p.write_text(new, encoding='utf-8')
+
+      - name: Verify final cache key and PRE/POST boundary
+        shell: python
+        run: |
+          from pathlib import Path
+          html = Path('index.html').read_text(encoding='utf-8')
+          app = Path('app.js').read_text(encoding='utf-8')
+          compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
+          if html.count('gamagori-live-integration-v0198.js?v=224') != 1:
+            raise SystemExit('LIVE_COMPAT_CACHE_KEY_NOT_FINAL')
+          if 'const LIVE_ALLOWED_PATHS=new Set(["racelist","beforeinfo"])' not in app:
+            raise SystemExit('PRE_RACE_ALLOWLIST_MISSING')
+          if 'resultEndpointsIncluded===false' not in app:
+            raise SystemExit('PRE_RACE_RESULT_BOUNDARY_MISSING')
+          if 'result' in compat.lower() and 'result lookahead' in compat.lower():
+            raise SystemExit('UNEXPECTED_COMPAT_RESULT_LOGIC')
+          print('GAMAGORI_LIVE_INTEGRATION_FINAL_PASS')
+
+      - name: Commit cache-key repair
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- index.html; then
+            echo 'NO_INDEX_CHANGE'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: bust Gamagori LIVE integration cache after dedup'
+          git push
