@@ -20,7 +20,6 @@ jobs:
         run: |
           from pathlib import Path
 
-          # index.html: live-autopoll depends on loadVerifiedLiveRace from the integration module.
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
           anchor = '<script src="app.js?v=221"></script>'
@@ -32,29 +31,10 @@ jobs:
           s = s.replace('live-snapshot-hash-guard-v0209.js?v=214', 'live-snapshot-hash-guard-v0209.js?v=221')
           p.write_text(s, encoding='utf-8')
 
-          # Runtime readiness gate must fail if the integration module disappears again.
           p = Path('trial-readiness-v0218.js')
           s = p.read_text(encoding='utf-8')
           s = s.replace("'app.js','live-autopoll-v0199.js'", "'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js'")
           s = s.replace("lockRace:typeof window.lockRace==='function',", "liveRelayLoader:typeof window.loadVerifiedLiveRace==='function',\n      lockRace:typeof window.lockRace==='function',")
-          p.write_text(s, encoding='utf-8')
-
-          # Public smoke audit: include integration in trigger, syntax audit, local/public order contract.
-          p = Path('.github/workflows/gamagori-public-trial-smoke-v0219.yml')
-          s = p.read_text(encoding='utf-8')
-          if "      - 'gamagori-live-integration-v0198.js'" not in s:
-              s = s.replace("      - 'manifest.webmanifest'\n", "      - 'manifest.webmanifest'\n      - 'gamagori-live-integration-v0198.js'\n", 1)
-          if '            gamagori-live-integration-v0198.js \\\n' not in s:
-              s = s.replace('            app.js \\\n', '            app.js \\\n            gamagori-live-integration-v0198.js \\\n', 1)
-          s = s.replace("'app.js','live-autopoll-v0199.js'", "'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js'")
-          p.write_text(s, encoding='utf-8')
-
-          # Static readiness workflow: include integration in trigger and script-order contract.
-          p = Path('.github/workflows/gamagori-early-trial-readiness-v0218.yml')
-          s = p.read_text(encoding='utf-8')
-          if "      - 'gamagori-live-integration-v0198.js'" not in s:
-              s = s.replace("      - 'trial-readiness-v0218.js'\n", "      - 'trial-readiness-v0218.js'\n      - 'gamagori-live-integration-v0198.js'\n", 1)
-          s = s.replace("'app.js','live-autopoll-v0199.js'", "'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js'")
           p.write_text(s, encoding='utf-8')
 
       - name: Verify repaired dependency chain
@@ -85,12 +65,12 @@ jobs:
 
       - name: Commit repaired app runtime
         run: |
-          if git diff --quiet -- index.html trial-readiness-v0218.js .github/workflows/gamagori-public-trial-smoke-v0219.yml .github/workflows/gamagori-early-trial-readiness-v0218.yml; then
+          if git diff --quiet -- index.html trial-readiness-v0218.js; then
             echo 'No repair required.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html trial-readiness-v0218.js .github/workflows/gamagori-public-trial-smoke-v0219.yml .github/workflows/gamagori-early-trial-readiness-v0218.yml
+          git add index.html trial-readiness-v0218.js
           git commit -m 'fix: restore Gamagori LIVE runtime dependency chain'
           git push
