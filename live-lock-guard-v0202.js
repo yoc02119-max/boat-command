@@ -2,7 +2,7 @@
 // Final fail-closed check immediately before HARD LOCK. LIVE only.
 // Verifies READY, verified mappings, candidate state, source freshness, and deadline margin.
 const BC_LIVE_LOCK_GUARD_V0202={
-  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2',
+  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7',
   minMarginMinutes:3,
   maxSourceAgeMinutes:20,
   maxFutureSkewMinutes:2
@@ -81,9 +81,12 @@ lockRace=async function(n){
 function renderLiveLockGuard(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
-  const cards=[...document.querySelectorAll('.race-card')];
+  // Prediction-only DOM scope: result/analytics cards must never receive PRE-RACE lock controls.
+  const cards=[...document.querySelectorAll('#predictionList .race-card')];
   cards.forEach((card,i)=>{
-    const r=s.races.find(x=>Number(x.race)===i+1);
+    const parsedRace=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
+    const race=Number.isInteger(parsedRace)&&parsedRace>=1&&parsedRace<=12?parsedRace:i+1;
+    const r=s.races.find(x=>Number(x.race)===race);
     let box=card.querySelector('.live-lock-guard-v0202');
     if(!box){box=document.createElement('div');box.className='live-lock-guard-v0202';card.prepend(box);}
     if(!r||r.locked){box.innerHTML='';return;}
