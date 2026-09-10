@@ -1,6 +1,6 @@
 // BOAT COMMAND GAMAGORI LIVE CANDIDATE PREDICTOR v0.20.0
 // Uses only verified PRE-RACE relay data. Generates suggestions only: no result fetch, no auto LOCK, no auto bet.
-const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0'};
+const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8'};
 
 function bcStValue(raw){
   const s=String(raw||'').trim();
@@ -71,12 +71,16 @@ function renderLiveCandidates(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
   // PRE-RACE only: never decorate result/settlement cards with prediction-layer UI.
+  // Bind by the rendered race number, not by card index, so filtered/reordered DOM cannot cross-wire suggestions.
   const cards=[...document.querySelectorAll('#predictionList .race-card')];
-  cards.forEach((card,i)=>{
+  cards.forEach(card=>{
     let box=card.querySelector('.live-candidate-v0200');
     if(!box){box=document.createElement('div');box.className='live-candidate-v0200';card.prepend(box);}
-    const r=s.races.find(x=>Number(x.race)===i+1);
-    box.innerHTML=liveSuggestionHtml(r);
+    const parsedRace=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
+    const r=Number.isInteger(parsedRace)&&parsedRace>=1&&parsedRace<=12
+      ?s.races.find(x=>Number(x.race)===parsedRace)
+      :null;
+    box.innerHTML=r?liveSuggestionHtml(r):'<div class="prediction-gate limited"><b>WAIT｜予想保留</b><span>レース番号を安全に特定できないため表示を停止</span></div>';
   });
 }
 
