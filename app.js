@@ -1054,7 +1054,10 @@ function finalScoreHtml({races,hits,skipped,invested,returned,profit,hitRate,roi
 }
 function currentFinalScoreHtml(s){
   const settled=settledRaces(s), skipped=skippedReplayRaces(s);
-  if(!s.replayRevealed||!settled.length)return "";
+  // LIVE settlement is not a replay reveal. Once POST-RACE gating has opened and
+  // official settlements exist, show the performance summary without depending
+  // on the BACKTEST-only replayRevealed flag.
+  if((s.runType==="BACKTEST"&&!s.replayRevealed)||!settled.length)return "";
   const races=settled.length,hits=settled.filter(r=>r.hit).length;
   const invested=settled.reduce((a,r)=>a+(Number(r.stake)||0),0);
   const returned=settled.reduce((a,r)=>a+(Number(r.returnAmount)||0),0);
@@ -1062,7 +1065,7 @@ function currentFinalScoreHtml(s){
   return finalScoreHtml({
     races,hits,skipped:skipped.length,invested,returned,profit,
     hitRate:races?hits/races*100:0,roi:invested?returned/invested*100:0,
-    kicker:s.retestMode?`RETEST FINAL SCORE ${s.retestRunId||""}｜今回の再検証成績`:"BACKTEST FINAL SCORE｜最終成績",
+    kicker:s.retestMode?`RETEST FINAL SCORE ${s.retestRunId||""}｜今回の再検証成績`:(s.runType==="LIVE"?"LIVE FINAL SCORE｜本番成績":"BACKTEST FINAL SCORE｜最終成績"),
     note:s.retestMode
       ?"RETEST参考成績｜正式BACKTEST/LIVE集計には加算しません。ORIGINAL BLINDは下の比較基準として固定保存。"
       :`見送り ${skipped.length}R は投資・的中率・ROI・MISS集計から除外`
