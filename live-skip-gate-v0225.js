@@ -60,8 +60,19 @@ function bcApplyLivePredictionControlsV0225(s){
     const skip=bcLiveSkipV0225(r),wait=bcLiveWaitV0225(r);
     card.classList.toggle('live-skip-race',skip);
     card.classList.toggle('live-wait-race',wait);
+    const controls=[...card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]')];
     if(skip||wait){
-      card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]').forEach(el=>{el.disabled=true;});
+      controls.forEach(el=>{
+        if(!el.disabled)el.dataset.bcV0225Disabled='1';
+        el.disabled=true;
+      });
+    }else{
+      controls.forEach(el=>{
+        if(el.dataset.bcV0225Disabled==='1'){
+          el.disabled=false;
+          delete el.dataset.bcV0225Disabled;
+        }
+      });
     }
   }
 }
