@@ -1,13 +1,9 @@
 name: Gamagori wind evidence status v1
 
+# PAUSED: this workflow writes line/gamagori-wind-status.json.
+# LINE work remains frozen until the user explicitly resumes it.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'live/gamagori/**/pre/race-*-wind.json'
-      - 'live/gamagori/**/pre/race-*-pack.json'
-      - 'live/gamagori/**/post/race-*-result.json'
-      - '.github/workflows/gamagori-wind-evidence-status-v1.yml'
 
 permissions:
   contents: write
@@ -80,10 +76,6 @@ jobs:
                   continue
               paired_results += 1
 
-              # Performance classification remains fail-closed. A wind/result pair is
-              # NOT eligible unless the corresponding PRE-RACE pack proves that the
-              # prediction was enabled and hard-locked before result ingestion, and
-              # the human direction label itself has been verified.
               if not pack_path.exists():
                   continue
               try:
@@ -113,8 +105,6 @@ jobs:
           elif performance < minimum:
               reason = 'INSUFFICIENT_HARD_LOCKED_PERFORMANCE_SAMPLES'
           else:
-              # Readiness only. Weakest-direction calculation is intentionally not
-              # guessed here; a later audited analyzer must calculate hit/return data.
               classification_ready = False
               reason = 'PERFORMANCE_ANALYZER_NOT_YET_AUDITED'
 
