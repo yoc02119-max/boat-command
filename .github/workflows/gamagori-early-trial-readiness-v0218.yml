@@ -1,4 +1,4 @@
-name: Gamagori early trial readiness v0.21.8
+name: Gamagori early trial readiness v0.21.8 + skip gate v0.22.5
 
 on:
   workflow_dispatch:
@@ -6,19 +6,31 @@ on:
     paths:
       - '.github/workflows/gamagori-early-trial-readiness-v0218.yml'
       - 'trial-readiness-v0218.js'
+      - 'live-skip-gate-v0225.js'
+      - 'gamagori-live-integration-v0198.js'
+      - 'index.html'
 
 permissions:
   contents: write
 
+concurrency:
+  group: gamagori-early-trial-readiness
+  cancel-in-progress: true
+
 jobs:
   readiness-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: JavaScript syntax audit
-        run: node --check trial-readiness-v0218.js
+        run: |
+          set -euo pipefail
+          node --check trial-readiness-v0218.js
+          node --check live-skip-gate-v0225.js
+          node --check gamagori-live-integration-v0198.js
 
       - name: Verify read-only trial gate and critical DOM contract
         shell: python
@@ -28,6 +40,8 @@ jobs:
 
           html = Path('index.html').read_text(encoding='utf-8')
           gate = Path('trial-readiness-v0218.js').read_text(encoding='utf-8')
+          skip = Path('live-skip-gate-v0225.js').read_text(encoding='utf-8')
+          compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
 
           required_ids = [
             'sessionDate','modeBadge','runType','strategyVersion','predictionList','lockAllBtn',
@@ -52,6 +66,8 @@ jobs:
           required_tokens = [
             'productionMutation:false',
             'predictionQualityCertified:false',
+            'liveSkipGate:',
+            'skipExcludedFromLockTarget:true',
             'bcFinalLiveLockAudit',
             'bcVerifyLiveLockSnapshotV0203',
             'bcVerifyLiveLockSnapshotHashV0209',
@@ -61,38 +77,41 @@ jobs:
           if missing_tokens:
             raise SystemExit(f'READINESS_GUARD_TOKEN_MISSING: {missing_tokens}')
 
+          if 'waitFailClosed:true' not in skip or 'resultLookahead:false' not in skip:
+            raise SystemExit('LIVE_SKIP_FAIL_CLOSED_CONTRACT_MISSING')
+          if "if(bcLiveUnresolvedV0225(s).length)return false" not in skip:
+            raise SystemExit('LIVE_WAIT_RESULT_GATE_MISSING')
+          if 'duplicateGlobalsDeclared:false' not in compat:
+            raise SystemExit('LIVE_INTEGRATION_COMPAT_GUARD_MISSING')
+
           result = Path('live-result-v0204.js').read_text(encoding='utf-8')
           lock = Path('live-lock-guard-v0202.js').read_text(encoding='utf-8')
           hguard = Path('live-snapshot-hash-guard-v0209.js').read_text(encoding='utf-8')
           if 'resultEndpointsIncluded:true' not in result or 'bcVerifyLiveLockSnapshotHashV0209' not in result:
             raise SystemExit('POST_RACE_FAIL_CLOSED_CONTRACT_MISSING')
-          if "r.liveDataStatus!=='READY'" not in lock or 'minMarginMinutes:3' not in lock:
+          if 'bcGlobalLiveResultGateV0222' not in result or 'if(!globalGate.ok)return' not in result:
+            raise SystemExit('POST_RACE_GLOBAL_GATE_MISSING')
+          if "r.liveDataStatus!=='READY'" not in lock or 'minMarginMinutes:3' not in lock or "suggestion?.status!=='CANDIDATE'" not in lock:
             raise SystemExit('PRE_RACE_LOCK_FAIL_CLOSED_CONTRACT_MISSING')
           if "computed!==stored" not in hguard:
             raise SystemExit('SNAPSHOT_HASH_RECOMPUTE_MISSING')
 
           print('EARLY_TRIAL_READINESS_STATIC_AUDIT_PASS')
           print('critical_dom_contract=true')
-          print('trial_gate_read_only=true')
+          print('live_skip_wait_contract=true')
           print('pre_post_boundary_preserved=true')
 
-      - name: Enable v0.21.8 readiness gate after all safety modules
+      - name: Refresh trial-readiness cache key
         shell: python
         run: |
           from pathlib import Path
+          import re
 
           p = Path('index.html')
           html = p.read_text(encoding='utf-8')
-          html = html.replace('BOAT COMMAND v0.21.7', 'BOAT COMMAND v0.21.8')
-          html = html.replace('v0.21.7 · EARLY TRIAL', 'v0.21.8 · EARLY TRIAL')
-
-          anchor = '<script src="development-status-v0217.js?v=217"></script>'
-          script = '<script src="trial-readiness-v0218.js?v=218"></script>'
-          if script not in html:
-            if anchor not in html:
-              raise SystemExit('READINESS_INSERT_ANCHOR_MISSING')
-            html = html.replace(anchor, anchor + '\n' + script)
-
+          html, count = re.subn(r'trial-readiness-v0218\.js\?v=\d+', 'trial-readiness-v0218.js?v=225', html, count=1)
+          if count != 1:
+            raise SystemExit(f'TRIAL_READINESS_CACHE_KEY_MATCH_COUNT:{count}')
           p.write_text(html, encoding='utf-8')
 
       - name: Verify final script order and singleton loads
@@ -105,9 +124,9 @@ jobs:
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           bases = [x.split('?',1)[0] for x in srcs]
           required = [
-            'app.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-autofill-v0201.js',
-            'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
-            'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
+            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js',
+            'live-skip-gate-v0225.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js',
+            'live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
             'trial-readiness-v0218.js'
           ]
@@ -120,10 +139,13 @@ jobs:
           pos = [bases.index(x) for x in required]
           if pos != sorted(pos):
             raise SystemExit('SAFETY_SCRIPT_ORDER_CHANGED')
+          if 'trial-readiness-v0218.js?v=225' not in html:
+            raise SystemExit('TRIAL_READINESS_CACHE_KEY_NOT_CURRENT')
           print('EARLY_TRIAL_READINESS_FINAL_AUDIT_PASS')
 
-      - name: Commit app enablement
+      - name: Commit cache-key refresh
         run: |
+          set -euo pipefail
           if git diff --quiet -- index.html; then
             echo 'No index change required.'
             exit 0
@@ -131,5 +153,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'app: enable Gamagori early-trial readiness gate v0.21.8'
+          git commit -m 'fix: refresh Gamagori trial-readiness cache key'
           git push
