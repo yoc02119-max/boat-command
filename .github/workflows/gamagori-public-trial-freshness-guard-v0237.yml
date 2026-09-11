@@ -28,15 +28,24 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import json, re, datetime, os
+          import json, re, datetime, os, hashlib
 
           html = Path('index.html').read_text(encoding='utf-8')
           expected = re.findall(r'<script\s+src="([^"]+)"', html)
+          expected_index_sha256 = hashlib.sha256(html.encode('utf-8')).hexdigest()
           path = Path('trial-readiness-public.json')
           data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
           recorded = data.get('scriptAssets') or []
+          recorded_index_sha256 = data.get('indexSha256') or ''
 
-          fresh = data.get('status') == 'PASS' and recorded == expected
+          # Script URLs alone are not enough: an index rewrite can change DOM,
+          # visibility, labels or gates without changing a single script src.
+          # Require the exact audited index.html fingerprint as well.
+          fresh = (
+              data.get('status') == 'PASS'
+              and recorded == expected
+              and recorded_index_sha256 == expected_index_sha256
+          )
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
               out.write(f"needs_recheck={'false' if fresh else 'true'}\n")
 
@@ -51,6 +60,8 @@ jobs:
               'status': 'HOLD',
               'scriptAssets': recorded,
               'expectedScriptAssets': expected,
+              'indexSha256': recorded_index_sha256 or None,
+              'expectedIndexSha256': expected_index_sha256,
               'staleReason': 'CURRENT_PUBLIC_BUILD_NOT_YET_REVERIFIED',
               'freshnessCheckedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
           })
@@ -157,7 +168,7 @@ jobs:
               for p in [r'<link\s+rel="stylesheet"\s+href="([^"]+)"', r'<link\s+rel="manifest"\s+href="([^"]+)"', r'<link\s+rel="icon"\s+href="([^"]+)"']:
                   out += re.findall(p, text)
               return out
-          sys.exit(0 if scripts(local) == scripts(public) and links(local) == links(public) else 1)
+          sys.exit(0 if scripts(local) == scripts(public) and links(local) == links(public) and local == public else 1)
           PY
               then
                 ok=1
@@ -203,7 +214,7 @@ jobs:
           fi
           python - <<'PY'
           from pathlib import Path
-          import json, re, os, datetime, subprocess
+          import json, re, os, datetime, subprocess, hashlib
           html=Path('index.html').read_text(encoding='utf-8')
           srcs=re.findall(r'<script\s+src="([^"]+)"', html)
           out={
@@ -211,6 +222,7 @@ jobs:
             'venue':'蒲郡',
             'appVersion':'0.21.8',
             'scriptAssets':srcs,
+            'indexSha256':hashlib.sha256(html.encode('utf-8')).hexdigest(),
             'status':'PASS',
             'publicUrl':os.environ['APP_URL'],
             'localSyntaxAudit':True,
