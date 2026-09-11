@@ -1,7 +1,7 @@
 // BOAT COMMAND GAMAGORI LIVE CANDIDATE PREDICTOR v0.20.0
 // Uses only verified PRE-RACE relay data. Generates suggestions only: no result fetch, no auto LOCK, no auto bet.
 // DOM binding hardening: rendered cards are matched by explicit race number, never list position.
-const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2'};
+const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2+FULL-6-BOAT-GATE-V0.24.0'};
 
 function bcStValue(raw){
   const s=String(raw||'').trim();
@@ -41,7 +41,9 @@ function bcLiveScoreRows(r){
 function bcLiveCandidate(r){
   if(r?.liveDataStatus!=='READY'||!r?.livePreRace)return {status:'WAIT',reason:r?.liveDataReason||'verified LIVEデータ待ち'};
   const rows=bcLiveScoreRows(r);
-  if(rows.length<4)return {status:'SKIP',reason:'6艇分の比較材料を安全に採点できないため見送り'};
+  // Fail closed: a missing/misaligned boat can materially change the ranking.
+  // Never create a betting candidate from only a partial 4/5-boat comparison.
+  if(rows.length!==6)return {status:'SKIP',reason:'6艇すべての展示・ST・艇番対応を安全に採点できないため見送り'};
   const [a,b,c,d]=rows.map(x=>x.lane);
   const candidates=[`${a}-${b}-${c}`,`${a}-${c}-${b}`,`${b}-${a}-${c}`,`${a}-${b}-${d}`];
   const picks=[...new Set(candidates)].slice(0,4);
