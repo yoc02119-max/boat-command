@@ -208,8 +208,9 @@ jobs:
           APP_URL: ${{ steps.public.outputs.app_url }}
         run: |
           from pathlib import Path
-          import json, os, datetime, re
-          html = Path('index.html').read_text(encoding='utf-8')
+          import json, os, datetime, re, hashlib
+          raw = Path('index.html').read_bytes()
+          html = raw.decode('utf-8')
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           out = {
             'schema':'boat-command-public-trial-smoke-v1',
@@ -227,6 +228,7 @@ jobs:
             'predictionQualityCertified':False,
             'checkedCommit':os.environ.get('GITHUB_SHA'),
             'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'indexSha256':hashlib.sha256(raw).hexdigest(),
           }
           Path('trial-readiness-public.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
@@ -240,17 +242,32 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          AUDITED_INDEX_SHA=$(python - <<'PY'
+          import json
+          print(json.load(open('trial-readiness-public.json', encoding='utf-8')).get('indexSha256',''))
+          PY
+          )
+          if [ -z "$AUDITED_INDEX_SHA" ]; then
+            echo 'AUDITED_INDEX_SHA_MISSING'
+            exit 1
+          fi
           git add trial-readiness-public.json
           git commit -m 'chore: publish Gamagori public trial smoke PASS'
 
-          # A cache-bust guard can legitimately commit index.html while this smoke
-          # is running. Rebase the status-only commit onto the newest main before
-          # pushing so a harmless concurrent cache refresh cannot turn a PASSing
-          # public audit into a red workflow.
+          # A cache-bust guard can legitimately advance main while this smoke is
+          # running. A PASS must never be rebased onto a different index.html:
+          # that would advertise an unaudited public build as trial-ready.
           for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              echo "PUBLIC_AUDIT_STATUS_PUSH_PASS attempt=${attempt}"
-              exit 0
+            if git pull --rebase origin main; then
+              PARENT_INDEX_SHA=$(git show HEAD^:index.html | sha256sum | awk '{print $1}')
+              if [ "$PARENT_INDEX_SHA" != "$AUDITED_INDEX_SHA" ]; then
+                echo "STALE_PUBLIC_AUDIT_REFUSED audited=${AUDITED_INDEX_SHA} current=${PARENT_INDEX_SHA}"
+                exit 1
+              fi
+              if git push origin HEAD:main; then
+                echo "PUBLIC_AUDIT_STATUS_PUSH_PASS attempt=${attempt}"
+                exit 0
+              fi
             fi
             git rebase --abort >/dev/null 2>&1 || true
             git fetch origin main
