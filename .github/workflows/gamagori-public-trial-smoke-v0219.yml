@@ -24,6 +24,10 @@ on:
       - 'live-snapshot-hash-guard-v0209.js'
       - 'development-status-v0217.js'
       - 'trial-readiness-v0218.js'
+  workflow_run:
+    workflows:
+      - 'Gamagori asset cache-bust guard v0.22.1'
+    types: [completed]
 
 permissions:
   contents: write
@@ -34,12 +38,14 @@ concurrency:
 
 jobs:
   public-smoke:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout current main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Local JavaScript syntax audit
         run: |
@@ -121,7 +127,7 @@ jobs:
           set -euo pipefail
           ok=0
           for i in $(seq 1 18); do
-            url="${APP_URL}?trial_smoke=${GITHUB_SHA}&attempt=${i}"
+            url="${APP_URL}?trial_smoke=${GITHUB_RUN_ID}&attempt=${i}"
             code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "$url" || true)
             if [ "$code" = "200" ] && grep -q 'BOAT COMMAND v0.21.8' /tmp/public-index.html && grep -q 'trial-readiness-v0218.js' /tmp/public-index.html; then
               ok=1
@@ -208,10 +214,11 @@ jobs:
           APP_URL: ${{ steps.public.outputs.app_url }}
         run: |
           from pathlib import Path
-          import json, os, datetime, re, hashlib
+          import json, os, datetime, re, hashlib, subprocess
           raw = Path('index.html').read_bytes()
           html = raw.decode('utf-8')
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          checked_commit = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
           out = {
             'schema':'boat-command-public-trial-smoke-v1',
             'venue':'蒲郡',
@@ -226,7 +233,7 @@ jobs:
             'publicRequiredAssetsHttp200':True,
             'prePostBoundaryPolicy':'UNCHANGED',
             'predictionQualityCertified':False,
-            'checkedCommit':os.environ.get('GITHUB_SHA'),
+            'checkedCommit':checked_commit,
             'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'indexSha256':hashlib.sha256(raw).hexdigest(),
           }
@@ -254,15 +261,15 @@ jobs:
           git add trial-readiness-public.json
           git commit -m 'chore: publish Gamagori public trial smoke PASS'
 
-          # A cache-bust guard can legitimately advance main while this smoke is
-          # running. A PASS must never be rebased onto a different index.html:
-          # that would advertise an unaudited public build as trial-ready.
+          # Main can move while Pages is being audited (notably the cache-bust
+          # guard). Never publish a stale PASS. A successful cache-bust triggers
+          # this workflow again against current main, so stale runs defer cleanly.
           for attempt in 1 2 3; do
             if git pull --rebase origin main; then
               PARENT_INDEX_SHA=$(git show HEAD^:index.html | sha256sum | awk '{print $1}')
               if [ "$PARENT_INDEX_SHA" != "$AUDITED_INDEX_SHA" ]; then
-                echo "STALE_PUBLIC_AUDIT_REFUSED audited=${AUDITED_INDEX_SHA} current=${PARENT_INDEX_SHA}"
-                exit 1
+                echo "STALE_PUBLIC_AUDIT_DEFERRED audited=${AUDITED_INDEX_SHA} current=${PARENT_INDEX_SHA}"
+                exit 0
               fi
               if git push origin HEAD:main; then
                 echo "PUBLIC_AUDIT_STATUS_PUSH_PASS attempt=${attempt}"
