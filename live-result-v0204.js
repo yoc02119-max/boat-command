@@ -3,7 +3,8 @@
 // PRE-RACE evidence and POST-RACE results remain physically and logically separated.
 // Settlement integrity hardening v0.21.4: stake comes only from frozen lock snapshot; official winning method is POST-RACE metadata only.
 // Global reveal hardening v0.22.2: do not fetch any POST-RACE result until every prediction target is HARD LOCKed.
-const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2',timer:null,running:false};
+// Manual-settlement hardening v0.23.3: LIVE results are read-only and can settle only from the separated official POST-RACE relay.
+const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2+NO-MANUAL-LIVE-SETTLEMENT-V0.23.3',timer:null,running:false};
 
 function bcLiveResultPathV0204(date,race){return `./live/gamagori/${date}/post/race-${race}-result.json`;}
 function bcValidResultPickV0204(v){return /^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;}
@@ -115,6 +116,39 @@ function startLiveResultPollV0204(){
   setTimeout(()=>sweepLiveResultsV0204({render:true}),1200);
   BC_LIVE_RESULT_V0204.timer=setInterval(()=>sweepLiveResultsV0204({render:true}),120000);
 }
+
+function bcGuardManualLiveSettlementV0233(){
+  const s=typeof session==='function'?session():null;
+  if(!s||s.runType!=='LIVE')return;
+  const cards=[...document.querySelectorAll('#resultList .race-card')];
+  for(const card of cards){
+    if(!card.querySelector('.result-fields'))continue;
+    const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
+    const r=Number.isInteger(race)?(s.races||[]).find(x=>Number(x.race)===race):null;
+    if(!r||r.settled)continue;
+    const status=r.liveResultStatus==='BLOCKED'?'BLOCKED':'WAIT';
+    const reason=r.liveResultReason||'公式POST-RACE結果待ち';
+    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LOCK買い目 ${r.picks.filter(Boolean).map(esc).join(' / ')}</div></div><div class="stake">${status}</div></div><div class="prediction-gate ${status==='BLOCKED'?'limited':'ready'}"><b>POST-RACE ${status}</b><span>${esc(reason)}</span></div><div class="refund-note">LIVEは手入力精算を禁止しています。HARD LOCK済みスナップショットと分離された公式POST-RACE relayだけで自動精算します。</div>`;
+  }
+}
+
+const _bcManualSettleRaceV0233=settleRace;
+settleRace=function(n){
+  const s=typeof session==='function'?session():null;
+  if(s?.runType==='LIVE'){
+    alert(`${n}R LIVEは手入力精算できません。公式POST-RACE結果の自動精算を待ってください。`);
+    return false;
+  }
+  return _bcManualSettleRaceV0233(n);
+};
+
+const _bcRenderAllV0233=renderAll;
+renderAll=function(){
+  const out=_bcRenderAllV0233();
+  bcGuardManualLiveSettlementV0233();
+  return out;
+};
+
 const _bcAnswerV0204=answer;
 answer=function(q){
   const t=String(q||'').replace(/\s/g,'');const m=t.match(/(\d{1,2})R/);const race=m?Number(m[1]):Number($('#liveRace')?.value)||1;
@@ -123,7 +157,7 @@ answer=function(q){
     const globalGate=bcGlobalLiveResultGateV0222(s);
     if(!globalGate.ok)return `POST-RACE結果はまだ取得しません。理由は「${esc(globalGate.reason)}」です。結果先読み防止のため、全予想対象のHARD LOCK完了後にだけ解禁します。`;
     const r=s.races.find(x=>Number(x.race)===race);
-    if(r?.settled){const method=r.winningMethod?`、決まり手 ${esc(r.winningMethod)}`:'';return `${race}Rは<strong>自動精算済み</strong>です。結果 ${esc(r.result)}${method}、払戻100円あたり ${Number(r.officialPayout100||0).toLocaleString()}円、損益 ${money(r.profit||0)}。予想時スナップショットとは分離保存しています。`;}
+    if(r?.settled){const method=r.winningMethod?`、決まり手 ${esc(r.winningMethod)}`:'';return `${race}Rは <strong>自動精算済み</strong>です。結果 ${esc(r.result)}${method}、払戻100円あたり ${Number(r.officialPayout100||0).toLocaleString()}円、損益 ${money(r.profit||0)}。予想時スナップショットとは分離保存しています。`;}
     const g=bcCanSettleLiveV0204(r);if(!g.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(g.reason)}」です。`;
     const c=bcFrozenSettlementContractV0213(r);if(!c.ok)return `${race}Rは結果取得を開始しません。理由は「${esc(c.reason)}」です。`;
     return `${race}RはPOST-RACE結果待ちです。LOCK時スナップショットは固定済みで、結果は別レイヤーからのみ取得します。`;
@@ -132,3 +166,4 @@ answer=function(q){
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sweepLiveResultsV0204({render:true});});
 startLiveResultPollV0204();
+bcGuardManualLiveSettlementV0233();
