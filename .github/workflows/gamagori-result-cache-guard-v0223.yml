@@ -30,21 +30,26 @@ jobs:
 
           p = Path('index.html')
           html = p.read_text(encoding='utf-8')
-          matches = re.findall(r'<script src="live-result-v0204\.js\?v=(\d+)"></script>', html)
-          if len(matches) != 1:
-            raise SystemExit(f'LIVE_RESULT_SCRIPT_COUNT_BAD:{matches}')
 
+          app_matches = re.findall(r'<script src="app\.js\?v=(\d+)"></script>', html)
+          result_matches = re.findall(r'<script src="live-result-v0204\.js\?v=(\d+)"></script>', html)
+          if len(app_matches) != 1:
+            raise SystemExit(f'APP_SCRIPT_COUNT_BAD:{app_matches}')
+          if len(result_matches) != 1:
+            raise SystemExit(f'LIVE_RESULT_SCRIPT_COUNT_BAD:{result_matches}')
+
+          expected = app_matches[0]
           fixed = re.sub(
               r'<script src="live-result-v0204\.js\?v=\d+"></script>',
-              '<script src="live-result-v0204.js?v=222"></script>',
+              f'<script src="live-result-v0204.js?v={expected}"></script>',
               html,
               count=1,
           )
           p.write_text(fixed, encoding='utf-8')
 
-          if 'live-result-v0204.js?v=222' not in fixed:
+          if f'live-result-v0204.js?v={expected}' not in fixed:
             raise SystemExit('LIVE_RESULT_CACHE_KEY_NOT_ENFORCED')
-          print('GAMAGORI_RESULT_CACHE_GUARD_PASS')
+          print(f'GAMAGORI_RESULT_CACHE_GUARD_PASS:v={expected}')
 
       - name: Commit correction
         run: |
@@ -55,5 +60,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'fix: keep Gamagori LIVE result cache on v222'
+          git commit -m 'fix(gamagori): align LIVE result cache with current app key'
           git push
