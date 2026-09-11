@@ -1,14 +1,18 @@
 // BOAT COMMAND GAMAGORI LIVE CANDIDATE PREDICTOR v0.20.0
 // Uses only verified PRE-RACE relay data. Generates suggestions only: no result fetch, no auto LOCK, no auto bet.
 // DOM binding hardening: rendered cards are matched by explicit race number, never list position.
-const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8'};
+const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2'};
 
 function bcStValue(raw){
   const s=String(raw||'').trim();
   if(!s)return null;
-  const m=s.match(/^(F\.)?(\d+)$/i);
-  if(!m)return null;
-  const v=Number(`0.${m[2]}`);
+  // BOAT RACE start-exhibition values are normally ".03" / "F.11".
+  // Also accept normalized "0.03" and legacy digit-only "03"; unknown forms fail closed.
+  let v=null;
+  if(/^F\.\d+$/i.test(s))v=Number(`0.${s.slice(2)}`);
+  else if(/^\.\d+$/.test(s))v=Number(`0${s}`);
+  else if(/^0\.\d+$/.test(s))v=Number(s);
+  else if(/^\d+$/.test(s))v=Number(`0.${s}`);
   return Number.isFinite(v)?v:null;
 }
 function bcLiveScoreRows(r){
@@ -20,12 +24,15 @@ function bcLiveScoreRows(r){
   return ex.map((e,i)=>{
     const lane=Number(e.lane)||i+1;
     const exTime=Number(e.exhibitionTime);
-    const stRaw=String(st[i]?.st||'');
+    const stRow=st[i]||{};
+    // Do not cross-wire ST to another lane/course after entry changes or malformed relay ordering.
+    if(Number(stRow.course)!==lane)return null;
+    const stRaw=String(stRow.st||'');
     const stVal=bcStValue(stRaw);
     if(!Number.isFinite(exTime)||stVal===null)return null;
     const laneBonus=[2.8,1.6,1.15,.82,.52,.32][lane-1]||0;
     const exScore=(6.95-exTime)*8;
-    const stScore=stRaw.startsWith('F.')?Math.max(0,.8-stVal*1.5):(.30-stVal)*4;
+    const stScore=stRaw.toUpperCase().startsWith('F.')?Math.max(0,.8-stVal*1.5):(.30-stVal)*4;
     const className=String(boats[i]?.class||'');
     const classScore=className==='A1'?1.0:className==='A2'?.55:0;
     return {lane,score:laneBonus+exScore+stScore+classScore,exTime,stRaw};
