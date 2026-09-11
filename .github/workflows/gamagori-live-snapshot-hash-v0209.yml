@@ -29,13 +29,18 @@ jobs:
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r'\n?<script src="live-snapshot-hash-guard-v0209\.js\?v=\d+"></script>','',s)
-          anchor_re=r'(<script src="live-integrity-audit-v0208\.js\?v=\d+"></script>)'
-          if not re.search(anchor_re,s):
+          anchor_re=r'(<script src="live-integrity-audit-v0208\.js\?v=(\d+)"></script>)'
+          m=re.search(anchor_re,s)
+          if not m:
               raise SystemExit('SNAPSHOT_HASH_ANCHOR_MISSING')
-          tag='<script src="live-snapshot-hash-guard-v0209.js?v=214"></script>'
+          cache_key=m.group(2)
+          tag=f'<script src="live-snapshot-hash-guard-v0209.js?v={cache_key}"></script>'
           s=re.sub(anchor_re,lambda m:m.group(1)+'\n'+tag,s,count=1)
           if s.count('live-snapshot-hash-guard-v0209.js')!=1:
               raise SystemExit('SNAPSHOT_HASH_SINGLETON_FAIL')
+          keys=re.findall(r'<script src="(?:app|gamagori-live-integration-v0198|live-[^"]+|development-status-v0217|trial-readiness-v0218)\.js\?v=(\d+)"></script>',s)
+          if keys and len(set(keys))!=1:
+              raise SystemExit('CACHE_KEY_MISMATCH')
           p.write_text(s)
           PY
       - name: Commit app hash guard enablement
