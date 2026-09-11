@@ -4,7 +4,8 @@
 // Settlement integrity hardening v0.21.4: stake comes only from frozen lock snapshot; official winning method is POST-RACE metadata only.
 // Global reveal hardening v0.22.2: do not fetch any POST-RACE result until every prediction target is HARD LOCKed.
 // Manual-settlement hardening v0.23.3: LIVE results are read-only and can settle only from the separated official POST-RACE relay.
-const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2+NO-MANUAL-LIVE-SETTLEMENT-V0.23.3',timer:null,running:false};
+// Status-visibility hardening v0.23.4: persist and render WAIT/BLOCKED transitions; display frozen LOCK picks only.
+const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2+NO-MANUAL-LIVE-SETTLEMENT-V0.23.3+STATUS-VISIBILITY-V0.23.4',timer:null,running:false};
 
 function bcLiveResultPathV0204(date,race){return `./live/gamagori/${date}/post/race-${race}-result.json`;}
 function bcValidResultPickV0204(v){return /^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;}
@@ -84,6 +85,13 @@ function bcSettleLiveV0204(r,x,path){
   };
   return {ok:true,reason:''};
 }
+function bcSetLiveResultStateV0234(r,status,reason=''){
+  const nextStatus=String(status||'');
+  const nextReason=String(reason||'');
+  const changed=r.liveResultStatus!==nextStatus||String(r.liveResultReason||'')!==nextReason;
+  if(changed){r.liveResultStatus=nextStatus;r.liveResultReason=nextReason;}
+  return changed;
+}
 async function sweepLiveResultsV0204({render=true}={}){
   const s=session();
   if(BC_LIVE_RESULT_V0204.running||!s||s.runType!=='LIVE')return null;
@@ -95,16 +103,16 @@ async function sweepLiveResultsV0204({render=true}={}){
     for(const r of s.races||[]){
       if(r.settled)continue;
       const gate=bcCanSettleLiveV0204(r);
-      if(!gate.ok){if(r.locked)blocked++;continue;}
+      if(!gate.ok){if(r.locked){changed=bcSetLiveResultStateV0234(r,'BLOCKED',gate.reason)||changed;blocked++;}continue;}
       const hashGate=typeof bcVerifyLiveLockSnapshotHashV0209==='function'?await bcVerifyLiveLockSnapshotHashV0209(r):{ok:false,reason:'SNAPSHOT_HASH_VERIFIERなし'};
-      if(!hashGate.ok){r.liveResultStatus='BLOCKED';r.liveResultReason=hashGate.reason;blocked++;continue;}
+      if(!hashGate.ok){changed=bcSetLiveResultStateV0234(r,'BLOCKED',hashGate.reason)||changed;blocked++;continue;}
       const contract=bcFrozenSettlementContractV0213(r);
-      if(!contract.ok){r.liveResultStatus='BLOCKED';r.liveResultReason=contract.reason;blocked++;continue;}
+      if(!contract.ok){changed=bcSetLiveResultStateV0234(r,'BLOCKED',contract.reason)||changed;blocked++;continue;}
       const out=await bcLoadResultV0204(s.date,r.race);
-      if(!out.ok){r.liveResultStatus='WAIT';r.liveResultReason=out.reason;waiting++;continue;}
+      if(!out.ok){changed=bcSetLiveResultStateV0234(r,'WAIT',out.reason)||changed;waiting++;continue;}
       const settlement=bcSettleLiveV0204(r,out.payload,out.path);
-      if(!settlement?.ok){r.liveResultStatus='BLOCKED';r.liveResultReason=settlement?.reason||'SETTLEMENT_CONTRACT_INVALID';blocked++;continue;}
-      r.liveResultStatus='SETTLED';r.liveResultReason='';settled++;changed=true;
+      if(!settlement?.ok){changed=bcSetLiveResultStateV0234(r,'BLOCKED',settlement?.reason||'SETTLEMENT_CONTRACT_INVALID')||changed;blocked++;continue;}
+      changed=bcSetLiveResultStateV0234(r,'SETTLED','')||changed;settled++;changed=true;
     }
     if(changed)saveStore();
     if(render&&changed&&typeof renderAll==='function')renderAll();
@@ -128,7 +136,8 @@ function bcGuardManualLiveSettlementV0233(){
     if(!r||r.settled)continue;
     const status=r.liveResultStatus==='BLOCKED'?'BLOCKED':'WAIT';
     const reason=r.liveResultReason||'公式POST-RACE結果待ち';
-    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LOCK買い目 ${r.picks.filter(Boolean).map(esc).join(' / ')}</div></div><div class="stake">${status}</div></div><div class="prediction-gate ${status==='BLOCKED'?'limited':'ready'}"><b>POST-RACE ${status}</b><span>${esc(reason)}</span></div><div class="refund-note">LIVEは手入力精算を禁止しています。HARD LOCK済みスナップショットと分離された公式POST-RACE relayだけで自動精算します。</div>`;
+    const frozenPicks=Array.isArray(r.liveLockSnapshot?.picks)?r.liveLockSnapshot.picks.filter(Boolean):[];
+    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LOCK買い目 ${frozenPicks.map(esc).join(' / ')||'—'}</div></div><div class="stake">${status}</div></div><div class="prediction-gate ${status==='BLOCKED'?'limited':'ready'}"><b>POST-RACE ${status}</b><span>${esc(reason)}</span></div><div class="refund-note">LIVEは手入力精算を禁止しています。HARD LOCK済みスナップショットと分離された公式POST-RACE relayだけで自動精算します。</div>`;
   }
 }
 
