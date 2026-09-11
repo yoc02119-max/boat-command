@@ -158,3 +158,82 @@
   install();
   window.BOAT_COMMAND_GAMAGORI_SCHEDULE=Object.freeze({series:SERIES,nextAnswer:scheduleAnswer,sourceCheckedAt:'2026-09-12'});
 })();
+
+// GAMAGORI safe local conversational layer.
+// Read-only: it never mutates predictions, locks, results, settlement or LIVE data.
+(()=>{
+  'use strict';
+  const VERSION='GAMAGORI-LOCAL-CONVERSATION-V0.24.2';
+  const KEY='boatCommand.gamagoriConversation.v0242';
+  const domainIntent=/次の開催日|次回開催|次節|開催いつ|いつ開催|READY|WAIT|見送り|保留|直前|展示|ライブ状況|LIVE状況|ロック|LOCK|予想|資金|推移|過去|本番|BACKTEST|LIVE|比較|弱点|原因|分析|結果|精算|成績|回収率|的中|損益|レース|\d+R/i;
+  const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
+  const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}};
+  const remember=(q,a,topic='chat')=>save({lastQuestion:clean(q),lastAnswer:String(a||''),topic,at:new Date().toISOString()});
+  const previousState=()=>load();
+
+  function casualAnswer(q){
+    const raw=clean(q),t=raw.replace(/\s/g,'');
+    if(!t)return null;
+    if(/^(おはよ|おはよう|おはー)/.test(t))return pick(['おはよう。今日も蒲郡担当でいくよ。開催やLIVEの状態を見たくなったら、そのまま普通に聞いて。','おはよう。こっちは準備OK。雑談でも蒲郡の確認でも、そのまま話しかけて大丈夫。']);
+    if(/^(こんにちは|こんちは|ちわ|やあ|よっ|よー|おーい)/.test(t))return pick(['どうも。普通に話しかけてくれて大丈夫だよ。蒲郡のことならアプリの状態も見ながら答える。','いるよ。雑談でも蒲郡の確認でもOK。']);
+    if(/^(こんばんは|ばんは)/.test(t))return 'こんばんは。ナイター担当らしい時間だね。蒲郡のことでも雑談でもどうぞ。';
+    if(/ありがとう|ありがと|サンキュ|助かった/.test(t))return pick(['どういたしまして。','任せて。必要なとこはこっちで拾うよ。','こちらこそ。続きもそのまま話して。']);
+    if(/ごめん|すまん|すみません|悪い/.test(t))return '全然大丈夫。気にせずそのまま続けて。';
+    if(/疲れた|つかれた|しんどい|だるい/.test(t))return pick(['それはきついな。今日は必要な確認だけサクッとやる感じでもいいよ。','お疲れ。アプリ側の確認は短く済ませよう。話したいだけならそれでもいい。']);
+    if(/眠い|ねむい/.test(t))return pick(['眠い時に無理して判断すると雑になりやすいから、蒲郡はREADY/WAITだけ確認して余計な操作はしないのもあり。','眠いな笑。雑談だけでもいいし、蒲郡の状態だけ確認して終わりでもOK。']);
+    if(/暇|ひま/.test(t))return pick(['じゃあ少し話す？ 蒲郡の話でも全然関係ない話でもいいよ。','暇なら付き合うよ。今のBOAT COMMANDで気になるところを雑に投げても大丈夫。']);
+    if(/寒い|さむい/.test(t))return '寒いな。こういう日は外の風も気になるけど、予想にはアプリで確認できた水面気象だけを使うよ。';
+    if(/暑い|あつい/.test(t))return '暑いな。水分とりつついこう。蒲郡の予想側は気象データが揃った時だけREADYにする。';
+    if(/腹減った|お腹すいた|腹へった/.test(t))return 'それは先に何か食べたい笑。蒲郡は逃げないから、戻ったら続きから見ればOK。';
+    if(/笑|ｗｗ|www|ウケる|おもろ/.test(t)&&raw.length<40)return pick(['笑 そういうノリでも普通に返すよ。','わかる笑。で、次どうする？','笑 そのまま普通にしゃべってくれてOK。']);
+    if(/何できる|なにできる|何ができる|どこまで話せる|普通に話せる/.test(t))return '今は、蒲郡の開催日・READY/WAIT・予想状況・LOCK・精算・成績みたいなアプリ情報に加えて、挨拶や雑談も普通に返せる。予想やHARD LOCKを会話AIが勝手に変更することはないよ。';
+    if(/誰|何者|名前|お前は/.test(t))return 'BOAT COMMANDの蒲郡担当AI。予想エンジンとは別の会話担当で、説明と会話はするけど、HARD LOCKや結果データを勝手に触る権限は持ってない。';
+    if(/調子どう|元気|げんき/.test(t))return pick(['こっちは問題なし。蒲郡の状態確認でも雑談でもいけるよ。','元気。今のところ会話担当は正常運転。']);
+    if(/よろしく|宜しく/.test(t))return pick(['よろしく。蒲郡は安全ルール守りつつ、会話はもう少し普通にいこう。','こちらこそ。固いコマンドじゃなくて普通に話しかけてくれて大丈夫。']);
+    if(/それ(って|は)?どういうこと|どういう意味|もう少し詳しく|詳しく教えて/.test(t)){
+      const s=previousState();
+      if(s.lastAnswer)return `さっきの話のことなら、要するに「${String(s.lastAnswer).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}」ってこと。気になる部分をそのまま言ってくれれば、そこを掘るよ。`;
+    }
+    if(/どう思う|どうおもう|ありだと思う|アリだと思う/.test(t))return '内容によるけど、BOAT COMMANDについてなら「安全性を落とさず、操作を減らせるか」を基準に考える。その案の中身をそのまま言ってくれれば意見を返すよ。';
+    if(/できる[？?]?|いける[？?]?/.test(t)&&raw.length<35)return '内容次第だけど、まずやれる方法を探すよ。蒲郡の安全ルールに触れる操作だけは、無理に通さずWAITにする。';
+    return null;
+  }
+
+  function install(){
+    if(typeof window.answer!=='function'||window.answer.__gamagoriConversationWrapped)return false;
+    const previous=window.answer;
+    const wrapped=function(q){
+      const raw=clean(q),t=raw.replace(/\s/g,'');
+      if(domainIntent.test(t)){
+        const a=previous(q);remember(q,a,'gamagori');return a;
+      }
+      const local=casualAnswer(q);
+      if(local){remember(q,local,'casual');return local;}
+      const fallback=pick([
+        `うん、聞いてるよ。「${raw.slice(0,80)}」の話だね。今のローカル会話版だと一般知識を作り話で埋めないようにしてる。蒲郡やアプリのことならそのまま詳しく答えられるよ。`,
+        '普通に会話はできるよ。ただ、まだ外部の大規模AIにはつないでないから、知らない一般知識を適当に答えることはしない。蒲郡やBOAT COMMANDの話ならかなり具体的に返せる。',
+        'その話は受け取った。今は無料ローカル会話モードだから、雑談は返せるけど外部知識が必要な質問は無理に知ったふりしない設計にしてる。'
+      ]);
+      remember(q,fallback,'fallback');return fallback;
+    };
+    wrapped.__gamagoriConversationWrapped=true;
+    window.answer=wrapped;
+
+    const prompt=document.getElementById('prompt');
+    if(prompt)prompt.placeholder='普通に話しかけてOK。例：今日どう？／次の開催日は？／眠いわ笑';
+    const first=document.querySelector('#chat .bubble.ai');
+    if(first)first.innerHTML='蒲郡担当です。<br>アプリの確認だけじゃなく、普通に話しかけてOK。「次の開催日は？」「今日どう？」「眠いわ笑」みたいな感じで大丈夫。';
+    const quick=document.querySelector('.quick');
+    if(quick&&!quick.querySelector('[data-q="次の開催日は？"]')){
+      const b=document.createElement('button');b.dataset.q='次の開催日は？';b.textContent='次の開催日';
+      b.onclick=()=>{if(typeof window.send==='function')window.send(b.dataset.q);else{const p=document.getElementById('prompt');if(p){p.value=b.dataset.q;document.getElementById('send')?.click();}}};
+      quick.appendChild(b);
+    }
+    return true;
+  }
+
+  const ok=install();
+  window.BOAT_COMMAND_LOCAL_CONVERSATION_V0242=Object.freeze({version:VERSION,installed:ok||!!window.answer?.__gamagoriConversationWrapped,mode:'READ_ONLY_LOCAL',mutatesRaceState:false,externalLlm:false});
+})();
