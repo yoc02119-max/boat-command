@@ -1,0 +1,80 @@
+name: Gamagori public trial freshness guard v0.23.7
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - 'trial-readiness-public.json'
+      - '.github/workflows/gamagori-public-trial-freshness-guard-v0237.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-public-trial-freshness-guard
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail closed when PASS metadata is stale
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re, datetime
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          expected = re.findall(r'<script\s+src="([^"]+)"', html)
+          path = Path('trial-readiness-public.json')
+          data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
+          recorded = data.get('scriptAssets') or []
+
+          if data.get('status') == 'PASS' and recorded == expected:
+              print('PUBLIC_TRIAL_METADATA_FRESH')
+              raise SystemExit(0)
+
+          if recorded == expected and data.get('status') != 'PASS':
+              print('Metadata versions match but status is not PASS; leave smoke workflow authoritative.')
+              raise SystemExit(0)
+
+          out = dict(data)
+          out.update({
+              'schema': 'boat-command-public-trial-smoke-v1',
+              'venue': '蒲郡',
+              'status': 'HOLD',
+              'scriptAssets': recorded,
+              'expectedScriptAssets': expected,
+              'staleReason': 'INDEX_ASSET_VERSION_CHANGED_AFTER_LAST_PUBLIC_SMOKE',
+              'freshnessCheckedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          })
+          path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print('PUBLIC_TRIAL_METADATA_HOLD_STALE')
+
+      - name: Commit HOLD metadata when changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- trial-readiness-public.json)" ]; then
+            echo 'No freshness status change.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trial-readiness-public.json
+          git commit -m 'chore(gamagori): hold stale public trial metadata'
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "PUBLIC_TRIAL_FRESHNESS_PUSH_PASS attempt=${attempt}"
+              exit 0
+            fi
+            git rebase --abort >/dev/null 2>&1 || true
+            git fetch origin main
+            sleep 2
+          done
+          exit 1
