@@ -1,6 +1,7 @@
 // BOAT COMMAND GAMAGORI LIVE AUTO-FILL v0.20.1
 // Auto-fills unlocked LIVE candidate picks/rationale only. Never auto-locks, auto-bets, or fetches results.
-const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-LIVE-AUTOFILL-V0.20.1'};
+// DOM binding hardening v0.23.6: prediction badges bind by explicit race number, never global card order.
+const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-LIVE-AUTOFILL-V0.20.1+RACE-DOM-BIND-V0.23.6'};
 
 function bcNormalizedPicks(r){
   return (r?.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);
@@ -62,13 +63,21 @@ function applyLiveCandidateAutoFill(){
 function renderLiveAutoFillBadges(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
-  const cards=[...document.querySelectorAll('.race-card')];
-  cards.forEach((card,i)=>{
-    const r=s.races.find(x=>Number(x.race)===i+1);
+  // PRE-RACE only. Never decorate result/settlement cards, and never infer race from DOM position.
+  const cards=[...document.querySelectorAll('#predictionList .race-card')];
+  cards.forEach(card=>{
     let box=card.querySelector('.live-autofill-v0201');
     if(!box){box=document.createElement('div');box.className='live-autofill-v0201';card.prepend(box);}
-    const a=r?.liveAutoFill;
-    if(r?.locked){box.innerHTML='<div class="snapshot-note">LOCK済み · 自動入力は停止</div>';return;}
+    const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
+    const r=Number.isInteger(race)&&race>=1&&race<=12
+      ?s.races.find(x=>Number(x.race)===race)
+      :null;
+    if(!r){
+      box.innerHTML='<div class="prediction-gate limited"><b>WAIT｜AUTO FILL停止</b><span>レース番号を安全に特定できないため表示・入力連携を停止</span></div>';
+      return;
+    }
+    const a=r.liveAutoFill;
+    if(r.locked){box.innerHTML='<div class="snapshot-note">LOCK済み · 自動入力は停止</div>';return;}
     if(a?.status==='AUTO_FILLED'&&a.owned){
       box.innerHTML='<div class="prediction-gate ready"><b>AUTO FILL｜入力済み・未LOCK</b><span>候補を買い目欄へ反映済み。HARD LOCKは手動です。</span></div>';
     }else if(a?.status==='MANUAL_PRESERVED'){
