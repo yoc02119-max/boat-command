@@ -1,8 +1,9 @@
 // BOAT COMMAND GAMAGORI LIVE FINAL LOCK GUARD v0.20.2
 // Final fail-closed check immediately before HARD LOCK. LIVE only.
 // Verifies READY, verified mappings, candidate state, source freshness, and deadline margin.
+// Batch-lock hardening v0.23.9: preflight every LIVE target before the first HARD LOCK to avoid avoidable partial batches.
 const BC_LIVE_LOCK_GUARD_V0202={
-  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7+DOM-FAIL-CLOSED-V0.22.10',
+  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7+DOM-FAIL-CLOSED-V0.22.10+BATCH-PREFLIGHT-V0.23.9',
   minMarginMinutes:3,
   maxSourceAgeMinutes:20,
   maxFutureSkewMinutes:2
@@ -76,6 +77,30 @@ lockRace=async function(n){
     }
   }
   return ok;
+};
+
+const _bcLockAllEligibleV0239=lockAllEligible;
+lockAllEligible=async function(){
+  const s=typeof session==='function'?session():null;
+  if(!s||s.runType!=='LIVE')return _bcLockAllEligibleV0239();
+  const eligible=typeof eligibleReplayRaces==='function'
+    ?eligibleReplayRaces(s).filter(r=>!r.locked)
+    :(s.races||[]).filter(r=>!r.locked);
+  if(!eligible.length)return _bcLockAllEligibleV0239();
+  const now=new Date();
+  const blocked=[];
+  for(const r of eligible){
+    const audit=bcFinalLiveLockAudit(s,r,now);
+    bcSaveLiveLockAudit(r,audit);
+    if(!audit.ok)blocked.push({race:r.race,reason:audit.reason});
+  }
+  if(blocked.length){
+    const first=blocked[0];
+    alert(`一括HARD LOCK BLOCKED\n${first.race}R: ${first.reason}\n\n全対象を事前監査し、1件でもBLOCKEDなら一括LOCKを開始しません。`);
+    if(typeof renderAll==='function')renderAll();
+    return false;
+  }
+  return _bcLockAllEligibleV0239();
 };
 
 function renderLiveLockGuard(){
