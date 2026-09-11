@@ -1,7 +1,8 @@
 // BOAT COMMAND GAMAGORI LIVE AUTO-FILL v0.20.1
 // Auto-fills unlocked LIVE candidate picks/rationale only. Never auto-locks, auto-bets, or fetches results.
 // DOM binding hardening v0.23.6: prediction badges bind by explicit race number, never global card order.
-const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-LIVE-AUTOFILL-V0.20.1+RACE-DOM-BIND-V0.23.6'};
+// Manual-edit hardening v0.23.8: current prediction DOM controls take ownership on input before change/blur persistence.
+const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-LIVE-AUTOFILL-V0.20.1+RACE-DOM-BIND-V0.23.6+MANUAL-EDIT-V0.23.8'};
 
 function bcNormalizedPicks(r){
   return (r?.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);
@@ -86,14 +87,23 @@ function renderLiveAutoFillBadges(){
   });
 }
 
-// Any human edit takes ownership away from auto-fill. Subsequent refreshes must not overwrite it.
+function bcManualEditRaceV0238(el){
+  const raw=el?.dataset?.race??el?.dataset?.r??el?.dataset?.reason;
+  const race=Number(raw);
+  return Number.isInteger(race)&&race>=1&&race<=12?race:null;
+}
+
+// Any human edit takes ownership away from auto-fill immediately, before the core change handler persists the value.
+// Support both the current app DOM (.pick[data-r] / [data-reason]) and legacy LIVE DOM selectors.
 document.addEventListener('input',e=>{
   const el=e.target;
-  if(!el?.matches?.('.pick-input[data-race], .rationale-input[data-race]'))return;
-  const race=Number(el.dataset.race),r=session().races.find(x=>Number(x.race)===race);
+  if(!el?.matches?.('.pick[data-r], [data-reason], .pick-input[data-race], .rationale-input[data-race]'))return;
+  const race=bcManualEditRaceV0238(el);
+  const s=typeof session==='function'?session():null;
+  const r=race&&s?.races?.find(x=>Number(x.race)===race);
   if(!r||r.locked)return;
   if(r.liveAutoFill?.owned){
-    r.liveAutoFill={...r.liveAutoFill,owned:false,status:'MANUAL_OVERRIDE',manualAt:new Date().toISOString()};
+    r.liveAutoFill={...r.liveAutoFill,owned:false,status:'MANUAL_OVERRIDE',manualAt:new Date().toISOString(),version:BC_LIVE_AUTOFILL_V0201.version};
     saveStore();
   }
 },{capture:true});
