@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Local JavaScript syntax audit
         run: |
@@ -229,7 +231,9 @@ jobs:
           Path('trial-readiness-public.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
       - name: Commit public audit status
+        shell: bash
         run: |
+          set -euo pipefail
           if [ -z "$(git status --porcelain -- trial-readiness-public.json)" ]; then
             echo 'No public status change.'
             exit 0
@@ -238,4 +242,19 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add trial-readiness-public.json
           git commit -m 'chore: publish Gamagori public trial smoke PASS'
-          git push
+
+          # A cache-bust guard can legitimately commit index.html while this smoke
+          # is running. Rebase the status-only commit onto the newest main before
+          # pushing so a harmless concurrent cache refresh cannot turn a PASSing
+          # public audit into a red workflow.
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "PUBLIC_AUDIT_STATUS_PUSH_PASS attempt=${attempt}"
+              exit 0
+            fi
+            git rebase --abort >/dev/null 2>&1 || true
+            git fetch origin main
+            sleep 2
+          done
+          echo 'PUBLIC_AUDIT_STATUS_PUSH_FAILED_AFTER_RETRIES'
+          exit 1
