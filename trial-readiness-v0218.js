@@ -111,3 +111,50 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,0),{once:true});
   else setTimeout(run,0);
 })();
+
+// GAMAGORI local AI schedule helper.
+// Schedule is venue-only and independent of PRE-RACE/POST-RACE data paths.
+(()=>{
+  'use strict';
+  const SERIES=Object.freeze([
+    {start:'2026-09-13',end:'2026-09-18',name:'ルーキーシリーズ第17戦スカパー！・JLC杯'},
+    {start:'2026-09-29',end:'2026-10-04',name:'G3「いい風吹け」キリンビール晴れ風賞'},
+    {start:'2026-10-07',end:'2026-10-10',name:'幸田町長杯争奪秋の美味筆柿レース'},
+    {start:'2026-10-27',end:'2026-11-01',name:'日刊スポーツ杯争奪第56回蒲郡大賞典'},
+    {start:'2026-11-09',end:'2026-11-14',name:'DMM.com杯争奪「ボートガマ一代」カップ'},
+    {start:'2026-11-21',end:'2026-11-24',name:'三遠ネオフェニックス杯'},
+    {start:'2026-11-27',end:'2026-12-02',name:'マクール杯争奪男女ハーフバトル'},
+    {start:'2026-12-06',end:'2026-12-11',name:'G1オールジャパン竹島特別 開設71周年記念競走'},
+    {start:'2026-12-25',end:'2026-12-29',name:'BOATRACE振興会会長賞'}
+  ]);
+  const jpDate=iso=>{
+    const [y,m,d]=iso.split('-').map(Number);
+    const w=['日','月','火','水','木','金','土'][new Date(Date.UTC(y,m-1,d)).getUTCDay()];
+    return `${m}/${d}（${w}）`;
+  };
+  const todayJst=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const scheduleAnswer=()=>{
+    const today=todayJst();
+    const active=SERIES.find(x=>x.start<=today&&today<=x.end);
+    if(active){
+      const next=SERIES.find(x=>x.start>active.end);
+      return `蒲郡は <strong>今日開催日</strong> です。${active.name}（${jpDate(active.start)}〜${jpDate(active.end)}）。${next?`次節は <strong>${jpDate(next.start)}</strong> から、${next.name}です。`:''}`;
+    }
+    const next=SERIES.find(x=>x.start>today);
+    if(next)return `蒲郡の次の開催日は <strong>${jpDate(next.start)}</strong> です。${next.name}（${jpDate(next.start)}〜${jpDate(next.end)}）。`;
+    return '蒲郡の登録済み開催日程はここまでです。次期日程は未確認なので、推測では答えません。';
+  };
+  const install=()=>{
+    if(typeof window.answer!=='function'||window.answer.__gamagoriScheduleWrapped)return;
+    const previous=window.answer;
+    const wrapped=function(q){
+      const t=String(q||'').replace(/\s/g,'');
+      if(/次の開催日|次回開催|次節|開催いつ|いつ開催/.test(t))return scheduleAnswer();
+      return previous(q);
+    };
+    wrapped.__gamagoriScheduleWrapped=true;
+    window.answer=wrapped;
+  };
+  install();
+  window.BOAT_COMMAND_GAMAGORI_SCHEDULE=Object.freeze({series:SERIES,nextAnswer:scheduleAnswer,sourceCheckedAt:'2026-09-12'});
+})();
