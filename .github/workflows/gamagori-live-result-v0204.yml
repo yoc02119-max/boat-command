@@ -42,18 +42,24 @@ jobs:
           p=Path('index.html');s=p.read_text()
           s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
           s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
-          # Remove every prior cache-busted copy, then insert exactly one in canonical order.
-          # The learning module cache version is intentionally not hard-coded: later app
-          # audits may bump it independently, and POST-RACE collection must keep working.
+          # Keep exactly one result module in canonical order, but never pin a stale
+          # cache key. The result layer must follow the current app.js cache version so
+          # scheduled POST-RACE polling cannot regress a newer deployed runtime.
+          app_m=re.search(r'<script src="app\.js\?v=(\d+)"></script>',s)
+          if not app_m:
+              raise SystemExit('APP_BOOTSTRAP_CACHE_KEY_MISSING')
+          cache_key=app_m.group(1)
           s=re.sub(r'\n?<script src="live-result-v0204\.js\?v=\d+"></script>','',s)
           learning_pat=r'<script src="live-learning-v0205\.js\?v=\d+"></script>'
           m=re.search(learning_pat,s)
           if not m:
               raise SystemExit('RESULT_BOOTSTRAP_ANCHOR_MISSING')
-          tag='<script src="live-result-v0204.js?v=222"></script>'
+          tag=f'<script src="live-result-v0204.js?v={cache_key}"></script>'
           s=s[:m.start()]+tag+'\n'+s[m.start():]
           if s.count('live-result-v0204.js')!=1:
               raise SystemExit('RESULT_BOOTSTRAP_SINGLETON_FAIL')
+          if f'live-result-v0204.js?v={cache_key}' not in s:
+              raise SystemExit('RESULT_BOOTSTRAP_CACHE_KEY_MISMATCH')
           p.write_text(s)
           PY
 
