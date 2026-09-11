@@ -8,53 +8,81 @@ on:
       - 'live-lock-guard-v0202.js'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: gamagori-live-lock-guard-v0202
   cancel-in-progress: false
 
 jobs:
-  enable:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Validate final lock guard JavaScript
         run: |
           set -euo pipefail
           node --check live-lock-guard-v0202.js
 
-      - name: Enable module and bump app version
+      - name: Verify current app integration is singular and ordered
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
-          tag='<script src="live-lock-guard-v0202.js?v=202"></script>'
-          if tag not in s:
-              s=s.replace('</body>',f'{tag}\n</body>')
-          s=s.replace('BOAT COMMAND v0.20.1','BOAT COMMAND v0.20.2')
-          s=s.replace('v0.20.1 · LIVE AUTO FILL','v0.20.2 · FINAL LOCK GUARD')
-          s=s.replace('styles.css?v=201','styles.css?v=202')
-          s=s.replace('app.js?v=201','app.js?v=202')
-          p.write_text(s)
-          print('ENABLED_V0202')
+          import re
+
+          html=Path('index.html').read_text()
+          scripts=re.findall(r'<script\s+src="([^"]+)"', html)
+          bases=[s.split('?',1)[0] for s in scripts]
+          target='live-lock-guard-v0202.js'
+
+          count=bases.count(target)
+          if count != 1:
+              raise SystemExit(f'LOCK_GUARD_SCRIPT_COUNT_INVALID:{count}')
+
+          required=[
+              'app.js',
+              'gamagori-live-integration-v0198.js',
+              'live-autopoll-v0199.js',
+              'live-predictor-v0200.js',
+              'live-skip-gate-v0225.js',
+              'live-autofill-v0201.js',
+              'live-lock-guard-v0202.js',
+              'live-lock-snapshot-v0203.js',
+              'live-result-v0204.js',
+          ]
+          pos=[]
+          for name in required:
+              if bases.count(name) != 1:
+                  raise SystemExit(f'REQUIRED_SCRIPT_COUNT_INVALID:{name}:{bases.count(name)}')
+              pos.append(bases.index(name))
+          if pos != sorted(pos):
+              raise SystemExit('LIVE_SCRIPT_ORDER_INVALID')
+
+          print('LOCK_GUARD_INTEGRATION_OK')
           PY
 
-      - name: Commit app lock-guard enablement
+      - name: Verify fail-closed lock contract
         run: |
           set -euo pipefail
-          if git diff --quiet -- index.html; then
-            echo 'NO_CHANGES'
-            exit 0
-          fi
-          git config user.name 'boat-command-relay'
-          git config user.email 'boat-command-relay@users.noreply.github.com'
-          git add index.html
-          git commit -m 'feat: enforce final Gamagori LIVE lock safety gate'
-          git push
+          python - <<'PY'
+          from pathlib import Path
+
+          js=Path('live-lock-guard-v0202.js').read_text()
+          required=[
+              "liveDataStatus!=='READY'",
+              "suggestion?.status!=='CANDIDATE'",
+              'minMarginMinutes:3',
+              'maxSourceAgeMinutes:20',
+              'boatMappingVerified!==true',
+              'weatherMappingVerified!==true',
+              'readyForPrediction!==true',
+              '一括HARD LOCK BLOCKED',
+          ]
+          missing=[x for x in required if x not in js]
+          if missing:
+              raise SystemExit('LOCK_FAIL_CLOSED_CONTRACT_MISSING:'+','.join(missing))
+          print('LOCK_FAIL_CLOSED_CONTRACT_OK')
+          PY
