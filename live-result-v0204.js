@@ -5,7 +5,8 @@
 // Global reveal hardening v0.22.2: do not fetch any POST-RACE result until every prediction target is HARD LOCKed.
 // Manual-settlement hardening v0.23.3: LIVE results are read-only and can settle only from the separated official POST-RACE relay.
 // Status-visibility hardening v0.23.4: persist and render WAIT/BLOCKED transitions; display frozen LOCK picks only.
-const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2+NO-MANUAL-LIVE-SETTLEMENT-V0.23.3+STATUS-VISIBILITY-V0.23.4',timer:null,running:false};
+// WAIT-visibility hardening v0.24.3: POST-RACE WAIT must never use READY styling.
+const BC_LIVE_RESULT_V0204={version:'GAMAGORI-LIVE-RESULT-V0.20.4+INTEGRITY-V0.21.4+GLOBAL-GATE-V0.22.2+NO-MANUAL-LIVE-SETTLEMENT-V0.23.3+STATUS-VISIBILITY-V0.23.4+WAIT-VISIBILITY-V0.24.3',timer:null,running:false};
 
 function bcLiveResultPathV0204(date,race){return `./live/gamagori/${date}/post/race-${race}-result.json`;}
 function bcValidResultPickV0204(v){return /^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;}
@@ -137,7 +138,7 @@ function bcGuardManualLiveSettlementV0233(){
     const status=r.liveResultStatus==='BLOCKED'?'BLOCKED':'WAIT';
     const reason=r.liveResultReason||'公式POST-RACE結果待ち';
     const frozenPicks=Array.isArray(r.liveLockSnapshot?.picks)?r.liveLockSnapshot.picks.filter(Boolean):[];
-    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LOCK買い目 ${frozenPicks.map(esc).join(' / ')||'—'}</div></div><div class="stake">${status}</div></div><div class="prediction-gate ${status==='BLOCKED'?'limited':'ready'}"><b>POST-RACE ${status}</b><span>${esc(reason)}</span></div><div class="refund-note">LIVEは手入力精算を禁止しています。HARD LOCK済みスナップショットと分離された公式POST-RACE relayだけで自動精算します。</div>`;
+    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LOCK買い目 ${frozenPicks.map(esc).join(' / ')||'—'}</div></div><div class="stake">${status}</div></div><div class="prediction-gate ${status==='BLOCKED'?'limited':'limited'}"><b>POST-RACE ${status}</b><span>${esc(reason)}</span></div><div class="refund-note">LIVEは手入力精算を禁止しています。HARD LOCK済みスナップショットと分離された公式POST-RACE relayだけで自動精算します。</div>`;
   }
 }
 
