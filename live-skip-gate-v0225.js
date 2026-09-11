@@ -2,8 +2,9 @@
 // LIVE only. Treat explicit predictor SKIP as a non-bet race while WAIT stays fail-closed.
 // No result fetches are added here; PRE-RACE / POST-RACE separation remains unchanged.
 // UI status hardening v0.24.1: the core prediction-gate-top must mirror LIVE CANDIDATE/SKIP/WAIT instead of showing stale generic READY.
+// Completion hardening v0.24.2: LIVE COMPLETE is based on settled prediction targets; explicit SKIP races stay excluded.
 const BC_LIVE_SKIP_GATE_V0225=Object.freeze({
-  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1',
+  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1+COMPLETION-V0.24.2',
   venue:'蒲郡',
   waitFailClosed:true,
   resultLookahead:false
@@ -116,7 +117,10 @@ function bcApplyLiveResultSkipCardsV0225(s){
 
 function bcRenderLiveGateSummaryV0225(s){
   if(!s||s.runType!=='LIVE')return;
-  const locked=targetLockedCount(s),target=requiredReplayLocks(s),skips=bcLiveSkipsV0225(s).length,wait=bcLiveUnresolvedV0225(s).length;
+  const targets=bcLiveTargetsV0225(s);
+  const locked=targetLockedCount(s),target=targets.length,skips=bcLiveSkipsV0225(s).length,wait=bcLiveUnresolvedV0225(s).length;
+  const settledTargets=targets.filter(r=>r.settled).length;
+  const complete=wait===0&&isResultMode(s)&&settledTargets===target;
   const note=document.getElementById('guardNote');
   if(note){
     note.textContent=isResultMode(s)
@@ -124,7 +128,16 @@ function bcRenderLiveGateSummaryV0225(s){
       :`HARD LOCK ${locked}/${target} · 見送り ${skips}R · WAIT ${wait}R。WAITが残る間はPOST-RACEを開きません。`;
   }
   const sub=document.getElementById('summarySub');
-  if(sub&&!settledRaces(s).length&&(locked||skips||wait))sub.textContent=`LOCK ${locked}/${target} · SKIP ${skips} · WAIT ${wait}`;
+  if(sub){
+    if(complete)sub.textContent=`予想対象 ${target}R精算完了 · SKIP ${skips}`;
+    else if(settledTargets)sub.textContent=`精算 ${settledTargets}/${target} · SKIP ${skips} · WAIT ${wait}`;
+    else if(locked||skips||wait)sub.textContent=`LOCK ${locked}/${target} · SKIP ${skips} · WAIT ${wait}`;
+  }
+  const today=document.getElementById('todayStatus');
+  if(today){
+    today.textContent=complete?'COMPLETE':(isResultMode(s)?'RESULT MODE':'OPEN');
+    today.classList.toggle('done',complete);
+  }
 }
 
 const _bcRenderAllV0225=renderAll;
