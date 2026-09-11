@@ -11,7 +11,7 @@ on:
       - 'index.html'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: gamagori-early-trial-readiness
@@ -83,6 +83,8 @@ jobs:
             raise SystemExit('LIVE_WAIT_RESULT_GATE_MISSING')
           if 'duplicateGlobalsDeclared:false' not in compat:
             raise SystemExit('LIVE_INTEGRATION_COMPAT_GUARD_MISSING')
+          if 'predictionDomScoped:true' not in compat or 'raceIdentityFailClosed:true' not in compat:
+            raise SystemExit('LIVE_INTEGRATION_DOM_SCOPE_GUARD_MISSING')
 
           result = Path('live-result-v0204.js').read_text(encoding='utf-8')
           lock = Path('live-lock-guard-v0202.js').read_text(encoding='utf-8')
@@ -101,20 +103,7 @@ jobs:
           print('live_skip_wait_contract=true')
           print('pre_post_boundary_preserved=true')
 
-      - name: Refresh trial-readiness cache key
-        shell: python
-        run: |
-          from pathlib import Path
-          import re
-
-          p = Path('index.html')
-          html = p.read_text(encoding='utf-8')
-          html, count = re.subn(r'trial-readiness-v0218\.js\?v=\d+', 'trial-readiness-v0218.js?v=225', html, count=1)
-          if count != 1:
-            raise SystemExit(f'TRIAL_READINESS_CACHE_KEY_MATCH_COUNT:{count}')
-          p.write_text(html, encoding='utf-8')
-
-      - name: Verify final script order and singleton loads
+      - name: Verify final script order, singleton loads, and unified cache key
         shell: python
         run: |
           from pathlib import Path
@@ -139,19 +128,23 @@ jobs:
           pos = [bases.index(x) for x in required]
           if pos != sorted(pos):
             raise SystemExit('SAFETY_SCRIPT_ORDER_CHANGED')
-          if 'trial-readiness-v0218.js?v=225' not in html:
-            raise SystemExit('TRIAL_READINESS_CACHE_KEY_NOT_CURRENT')
-          print('EARLY_TRIAL_READINESS_FINAL_AUDIT_PASS')
 
-      - name: Commit cache-key refresh
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- index.html; then
-            echo 'No index change required.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          git commit -m 'fix: refresh Gamagori trial-readiness cache key'
-          git push
+          versions=[]
+          for src in srcs:
+            m=re.search(r'[?&]v=(\d+)',src)
+            if not m:
+              raise SystemExit(f'SCRIPT_CACHE_KEY_MISSING:{src}')
+            versions.append(int(m.group(1)))
+          if len(set(versions)) != 1:
+            raise SystemExit(f'CACHE_KEYS_NOT_UNIFIED:{versions}')
+
+          shell_versions=[]
+          for pattern in [r'manifest\.webmanifest\?v=(\d+)',r'icon\.svg\?v=(\d+)',r'styles\.css\?v=(\d+)']:
+            m=re.search(pattern,html)
+            if not m:
+              raise SystemExit(f'SHELL_CACHE_KEY_MISSING:{pattern}')
+            shell_versions.append(int(m.group(1)))
+          if shell_versions != [versions[0]]*3:
+            raise SystemExit(f'SHELL_SCRIPT_CACHE_MISMATCH:shell={shell_versions}:scripts={versions[0]}')
+
+          print(f'EARLY_TRIAL_READINESS_FINAL_AUDIT_PASS cache={versions[0]}')
