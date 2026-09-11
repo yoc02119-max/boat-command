@@ -1,8 +1,9 @@
 // BOAT COMMAND GAMAGORI LIVE SKIP / RESULT GATE v0.22.5
 // LIVE only. Treat explicit predictor SKIP as a non-bet race while WAIT stays fail-closed.
 // No result fetches are added here; PRE-RACE / POST-RACE separation remains unchanged.
+// UI status hardening v0.24.1: the core prediction-gate-top must mirror LIVE CANDIDATE/SKIP/WAIT instead of showing stale generic READY.
 const BC_LIVE_SKIP_GATE_V0225=Object.freeze({
-  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5',
+  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1',
   venue:'蒲郡',
   waitFailClosed:true,
   resultLookahead:false
@@ -50,6 +51,26 @@ isResultMode=function(s=session()){
   return _bcIsResultModeV0225(s);
 };
 
+function bcSyncLiveCoreGateV0241(card,r,skip,wait){
+  const gate=card?.querySelector('.prediction-gate-top');
+  if(!gate||!r||r.locked)return;
+  if(wait){
+    const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'verified LIVEデータ待ち');
+    gate.className='prediction-gate limited prediction-gate-top live-core-wait';
+    gate.innerHTML=`<b>WAIT｜予想保留</b><span>${reason}</span>`;
+    return;
+  }
+  if(skip){
+    const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'安全条件により見送り');
+    gate.className='prediction-gate limited prediction-gate-top live-core-skip';
+    gate.innerHTML=`<b>NO PREDICTION｜見送り</b><span>${reason}</span>`;
+    return;
+  }
+  const reason=esc(r.liveSuggestion?.rationale||'verified LIVEデータと予想候補の安全条件を通過');
+  gate.className='prediction-gate ready prediction-gate-top live-core-ready';
+  gate.innerHTML=`<b>PREDICTION READY｜LIVE CANDIDATE</b><span>${reason}</span>`;
+}
+
 function bcApplyLivePredictionControlsV0225(s){
   if(!s||s.runType!=='LIVE')return;
   const cards=[...document.querySelectorAll('#predictionList .race-card')];
@@ -60,6 +81,7 @@ function bcApplyLivePredictionControlsV0225(s){
     const skip=bcLiveSkipV0225(r),wait=bcLiveWaitV0225(r);
     card.classList.toggle('live-skip-race',skip);
     card.classList.toggle('live-wait-race',wait);
+    bcSyncLiveCoreGateV0241(card,r,skip,wait);
     const controls=[...card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]')];
     if(skip||wait){
       controls.forEach(el=>{
