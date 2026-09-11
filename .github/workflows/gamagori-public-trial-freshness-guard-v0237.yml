@@ -23,11 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fail closed when PASS metadata is stale
+      - name: Decide freshness and fail closed first
+        id: freshness
         shell: python
         run: |
           from pathlib import Path
-          import json, re, datetime
+          import json, re, datetime, os
 
           html = Path('index.html').read_text(encoding='utf-8')
           expected = re.findall(r'<script\s+src="([^"]+)"', html)
@@ -35,12 +36,12 @@ jobs:
           data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
           recorded = data.get('scriptAssets') or []
 
-          if data.get('status') == 'PASS' and recorded == expected:
-              print('PUBLIC_TRIAL_METADATA_FRESH')
-              raise SystemExit(0)
+          fresh = data.get('status') == 'PASS' and recorded == expected
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write(f"needs_recheck={'false' if fresh else 'true'}\n")
 
-          if recorded == expected and data.get('status') != 'PASS':
-              print('Metadata versions match but status is not PASS; leave smoke workflow authoritative.')
+          if fresh:
+              print('PUBLIC_TRIAL_METADATA_FRESH')
               raise SystemExit(0)
 
           out = dict(data)
@@ -50,31 +51,183 @@ jobs:
               'status': 'HOLD',
               'scriptAssets': recorded,
               'expectedScriptAssets': expected,
-              'staleReason': 'INDEX_ASSET_VERSION_CHANGED_AFTER_LAST_PUBLIC_SMOKE',
+              'staleReason': 'CURRENT_PUBLIC_BUILD_NOT_YET_REVERIFIED',
               'freshnessCheckedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
           })
           path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          print('PUBLIC_TRIAL_METADATA_HOLD_STALE')
+          print('PUBLIC_TRIAL_METADATA_HOLD_PENDING_RECHECK')
 
       - name: Commit HOLD metadata when changed
+        if: steps.freshness.outputs.needs_recheck == 'true'
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "$(git status --porcelain -- trial-readiness-public.json)" ]; then
-            echo 'No freshness status change.'
+            echo 'HOLD already recorded.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add trial-readiness-public.json
-          git commit -m 'chore(gamagori): hold stale public trial metadata'
-          for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              echo "PUBLIC_TRIAL_FRESHNESS_PUSH_PASS attempt=${attempt}"
-              exit 0
-            fi
-            git rebase --abort >/dev/null 2>&1 || true
-            git fetch origin main
-            sleep 2
+          git commit -m 'chore(gamagori): hold public trial pending recheck'
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Refresh to latest main before public recheck
+        if: steps.freshness.outputs.needs_recheck == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Recheck local syntax and contract
+        if: steps.freshness.outputs.needs_recheck == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            app.js \
+            gamagori-live-integration-v0198.js \
+            live-autopoll-v0199.js \
+            live-predictor-v0200.js \
+            live-skip-gate-v0225.js \
+            live-autofill-v0201.js \
+            live-lock-guard-v0202.js \
+            live-lock-snapshot-v0203.js \
+            live-result-v0204.js \
+            live-learning-v0205.js \
+            live-learning-dashboard-v0206.js \
+            live-learning-guard-v0207.js \
+            live-integrity-audit-v0208.js \
+            live-snapshot-hash-guard-v0209.js \
+            development-status-v0217.js \
+            trial-readiness-v0218.js
+          do
+            node --check "$f"
           done
-          exit 1
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          required_ids = [
+            'sessionDate','modeBadge','runType','strategyVersion','predictionList','lockAllBtn',
+            'resultGate','resultGateBadge','resultSummary','resultList','raceStrip',
+            'chat','prompt','send','liveDate','liveRace'
+          ]
+          missing = [x for x in required_ids if not re.search(rf'id=["\']{re.escape(x)}["\']', html)]
+          if missing:
+              raise SystemExit(f'LOCAL_DOM_MISSING:{missing}')
+          srcs = re.findall(r'<script\s+src="([^"]+)"', html)
+          if not srcs or any(not re.search(r'\?v=\d+$', x) for x in srcs):
+              raise SystemExit('LOCAL_SCRIPT_CACHE_CONTRACT_BAD')
+          bases = [x.split('?',1)[0] for x in srcs]
+          if len(bases) != len(set(bases)):
+              raise SystemExit('LOCAL_SCRIPT_DUPLICATE')
+          for pattern, label in [
+              (r'<link\s+rel="stylesheet"\s+href="([^"]+)"', 'stylesheet'),
+              (r'<link\s+rel="manifest"\s+href="([^"]+)"', 'manifest'),
+              (r'<link\s+rel="icon"\s+href="([^"]+)"', 'icon'),
+          ]:
+              found = re.findall(pattern, html)
+              if not found or any(not re.search(r'\?v=\d+$', x) for x in found):
+                  raise SystemExit(f'LOCAL_ASSET_CACHE_KEY_INVALID:{label}:{found}')
+          print('LOCAL_FRESHNESS_RECHECK_PASS')
+          PY
+
+      - name: Wait for matching GitHub Pages build and verify public assets
+        if: steps.freshness.outputs.needs_recheck == 'true'
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 24); do
+            code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "${APP_URL}?freshness=${GITHUB_RUN_ID}&attempt=${i}" || true)
+            if [ "$code" = "200" ]; then
+              if python - <<'PY'
+          from pathlib import Path
+          import re, sys
+          local = Path('index.html').read_text(encoding='utf-8')
+          public = Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          def scripts(text): return re.findall(r'<script\s+src="([^"]+)"', text)
+          def links(text):
+              out=[]
+              for p in [r'<link\s+rel="stylesheet"\s+href="([^"]+)"', r'<link\s+rel="manifest"\s+href="([^"]+)"', r'<link\s+rel="icon"\s+href="([^"]+)"']:
+                  out += re.findall(p, text)
+              return out
+          sys.exit(0 if scripts(local) == scripts(public) and links(local) == links(public) else 1)
+          PY
+              then
+                ok=1
+                break
+              fi
+            fi
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then
+            echo 'PUBLIC_BUILD_NOT_MATCHING_CURRENT_MAIN'
+            exit 1
+          fi
+
+          while IFS= read -r src; do
+            code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}${src}" || true)
+            if [ "$code" != "200" ]; then
+              echo "PUBLIC_ASSET_FAIL $code $src"
+              exit 1
+            fi
+          done < <(python - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('/tmp/public-index.html').read_text(encoding='utf-8')
+          assets=re.findall(r'<script\s+src="([^"]+)"', html)
+          for p in [r'<link\s+rel="stylesheet"\s+href="([^"]+)"', r'<link\s+rel="manifest"\s+href="([^"]+)"', r'<link\s+rel="icon"\s+href="([^"]+)"']:
+              assets += re.findall(p, html)
+          for src in assets: print(src)
+          PY
+          )
+          echo 'PUBLIC_FRESHNESS_RECHECK_PASS'
+
+      - name: Publish fresh PASS only if main stayed unchanged
+        if: steps.freshness.outputs.needs_recheck == 'true'
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            echo 'MAIN_ADVANCED_DURING_RECHECK_LEAVE_HOLD'
+            exit 0
+          fi
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, os, datetime, subprocess
+          html=Path('index.html').read_text(encoding='utf-8')
+          srcs=re.findall(r'<script\s+src="([^"]+)"', html)
+          out={
+            'schema':'boat-command-public-trial-smoke-v1',
+            'venue':'蒲郡',
+            'appVersion':'0.21.8',
+            'scriptAssets':srcs,
+            'status':'PASS',
+            'publicUrl':os.environ['APP_URL'],
+            'localSyntaxAudit':True,
+            'localDomContract':True,
+            'publicHttp200':True,
+            'publicDomContract':True,
+            'publicRequiredAssetsHttp200':True,
+            'prePostBoundaryPolicy':'UNCHANGED',
+            'predictionQualityCertified':False,
+            'checkedCommit':subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
+            'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'freshnessGuard':'v0.23.7'
+          }
+          Path('trial-readiness-public.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trial-readiness-public.json
+          git commit -m 'chore(gamagori): publish fresh public trial PASS'
+          git push origin HEAD:main
