@@ -1,0 +1,35 @@
+name: Gamagori public smoke after snapshot guard v0.24.6
+
+on:
+  push:
+    paths:
+      - '.github/workflows/gamagori-public-smoke-after-snapshot-v0246.yml'
+  workflow_run:
+    workflows:
+      - 'Gamagori LIVE snapshot hash guard v0.20.9'
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: gamagori-public-smoke-after-snapshot
+  cancel-in-progress: true
+
+jobs:
+  dispatch-public-smoke:
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch final public trial smoke on current main
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'gamagori-public-trial-smoke-v0219.yml',
+              ref: 'main'
+            });
+            core.info('Dispatched final Gamagori public trial smoke.');
