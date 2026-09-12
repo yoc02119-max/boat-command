@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06101c">
+  <title>BOAT COMMAND</title>
+  <style>
+    :root{--bg:#06101c;--panel:#0b1b2d;--panel2:#10243a;--line:#1c3d5f;--text:#f4f8fc;--muted:#8ea7bd;--blue:#178cff;--cyan:#20e0c7;--locked:#6f8396}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#071521 0%,#04101b 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+    .wrap{max-width:1180px;margin:auto;padding:24px 22px 110px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:14px}.mark{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#0aa8ff,#0a5bff);display:grid;place-items:center;font-size:30px;box-shadow:0 10px 30px rgba(15,133,255,.25)}.brand h1{margin:0;font-size:clamp(24px,4vw,42px);letter-spacing:.02em}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px;letter-spacing:.12em}.tag{color:#b7c7d6;font-size:13px;white-space:nowrap}.hero{border:1px solid var(--line);background:radial-gradient(circle at 80% 20%,rgba(32,224,199,.09),transparent 28%),linear-gradient(135deg,#0a1a2b,#0b2238);border-radius:22px;padding:24px;margin-bottom:24px}.hero h2{margin:0 0 8px;font-size:clamp(22px,4vw,36px)}.hero p{margin:0;color:#a8bdd0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:26px 2px 14px}.section-head h3{margin:0;font-size:24px}.section-head span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.venue{min-height:138px;border:1px solid #183753;background:linear-gradient(180deg,#10243a,#0b1b2d);border-radius:16px;padding:16px;text-align:left;color:#b8c8d7;position:relative}.venue strong{display:block;font-size:24px;margin-bottom:18px;color:inherit}.venue small{display:block;color:#7790a6;font-size:13px}.venue.locked{opacity:.72;cursor:not-allowed}.venue.locked::after{content:"🔒";position:absolute;right:14px;bottom:13px;font-size:18px;opacity:.8}.venue.active{cursor:pointer;border-color:var(--cyan);box-shadow:0 0 0 1px rgba(32,224,199,.35),0 14px 32px rgba(0,0,0,.22);background:linear-gradient(180deg,#0c2a34,#0a1f2b)}.venue.active strong{color:#fff}.venue.active small{color:var(--cyan)}.live-dot{display:inline-block;width:9px;height:9px;background:var(--cyan);border-radius:50%;margin-right:7px;box-shadow:0 0 16px var(--cyan)}.arrow{position:absolute;right:15px;bottom:14px;font-size:25px;color:#fff}.notice{margin-top:24px;border:1px solid var(--line);background:#081827;border-radius:16px;padding:18px;display:flex;justify-content:space-between;gap:16px}.notice b{display:block;margin-bottom:5px}.notice p{margin:0;color:#a6bbcc;font-size:14px}.notice time{color:#708aa0;font-size:13px;white-space:nowrap}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(5,15,25,.94);backdrop-filter:blur(14px);border-top:1px solid #17324d;padding:11px 18px calc(11px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:60px}.nav{color:#8097aa;font-size:12px;text-align:center}.nav b{display:block;color:var(--blue);font-size:23px;margin-bottom:3px}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}@media(max-width:640px){.wrap{padding:18px 14px 100px}.grid{grid-template-columns:repeat(3,1fr);gap:9px}.venue{min-height:112px;padding:13px}.venue strong{font-size:20px;margin-bottom:14px}.tag{display:none}.bottom{gap:34px}.hero{padding:19px}.section-head h3{font-size:21px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand"><div class="mark">◉</div><div><h1>BOAT COMMAND</h1><p>AI × DATA × STRATEGY</p></div></div>
+      <div class="tag">競艇を、もっとシンプルに。</div>
+    </header>
+    <section class="hero"><h2>競艇場を選択</h2><p>完成した競艇場から順番に利用できるようになります。</p></section>
+    <div class="section-head"><h3>24 BOAT RACE VENUES</h3><span>現在は蒲郡のみ利用可能</span></div>
+    <section class="grid" id="venueGrid"></section>
+    <section class="notice"><div><b>お知らせ</b><p>蒲郡の予想機能を先行公開中。他の競艇場は完成次第、順次このホームから選択できるようになります。</p></div><time>2026.09.12</time></section>
+  </div>
+  <nav class="bottom"><div class="nav"><b>⌂</b>ホーム</div><div class="nav"><b style="color:#8097aa">▥</b>成績</div><div class="nav"><b style="color:#8097aa">✦</b>AIチャット</div><div class="nav"><b style="color:#8097aa">☰</b>その他</div></nav>
+  <script>
+    const venues=['桐生','戸田','江戸川','平和島','多摩川','浜名湖','蒲郡','常滑','津','三国','びわこ','住之江','尼崎','鳴門','丸亀','児島','宮島','徳山','下関','若松','芦屋','福岡','唐津','大村'];
+    const grid=document.getElementById('venueGrid');
+    venues.forEach(name=>{
+      const btn=document.createElement('button');
+      const active=name==='蒲郡';
+      btn.className='venue '+(active?'active':'locked');
+      btn.disabled=!active;
+      btn.innerHTML=active?`<strong>${name}</strong><small><span class="live-dot"></span>利用可能</small><span class="arrow">→</span>`:`<strong>${name}</strong><small>準備中</small>`;
+      if(active)btn.onclick=()=>location.href='./';
+      grid.appendChild(btn);
+    });
+  </script>
+</body>
+</html>
