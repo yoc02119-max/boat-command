@@ -9,6 +9,8 @@ on:
       - 'live-skip-gate-v0225.js'
       - 'gamagori-live-integration-v0198.js'
       - 'index.html'
+      - 'portal.html'
+      - 'manifest.webmanifest'
 
 permissions:
   contents: read
@@ -102,6 +104,34 @@ jobs:
           print('critical_dom_contract=true')
           print('live_skip_wait_contract=true')
           print('pre_post_boundary_preserved=true')
+
+      - name: Verify portal launcher and PWA contract
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re
+
+          portal = Path('portal.html').read_text(encoding='utf-8')
+          manifest = json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
+
+          if manifest.get('display') != 'standalone' or manifest.get('scope') != './':
+            raise SystemExit('PORTAL_PWA_DISPLAY_SCOPE_BAD')
+          if manifest.get('start_url') != './portal.html':
+            raise SystemExit(f"PORTAL_PWA_START_URL_BAD:{manifest.get('start_url')}")
+          if not re.search(r'<link\s+rel="manifest"\s+href="manifest\.webmanifest\?v=\d+"', portal):
+            raise SystemExit('PORTAL_MANIFEST_LINK_MISSING_OR_UNVERSIONED')
+          if "const active=name==='蒲郡'" not in portal or 'btn.disabled=!active' not in portal:
+            raise SystemExit('PORTAL_ONLY_GAMAGORI_ACTIVE_CONTRACT_BAD')
+          if "if(active)btn.onclick=()=>location.href='./'" not in portal:
+            raise SystemExit('PORTAL_GAMAGORI_ENTRY_LINK_BAD')
+          for required_id in ['portalBankroll','portalProfit','portalTodayProfit','portalTodayRoi','portalTotalRoi','venueGrid']:
+            if f'id="{required_id}"' not in portal:
+              raise SystemExit(f'PORTAL_CRITICAL_ID_MISSING:{required_id}')
+          forbidden = ['live/gamagori/${date}/post/', 'race-result', 'raceresult', 'officialResult', 'fetchResult']
+          hits = [x for x in forbidden if x in portal]
+          if hits:
+            raise SystemExit(f'PORTAL_RESULT_LOOKAHEAD_SURFACE_FOUND:{hits}')
+          print('PORTAL_LAUNCHER_PWA_CONTRACT_PASS')
 
       - name: Verify final script order, singleton loads, and unified cache key
         shell: python
