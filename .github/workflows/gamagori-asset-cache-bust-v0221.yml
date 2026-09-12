@@ -127,4 +127,20 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html manifest.webmanifest
           git commit -m 'fix: refresh Gamagori iPad app asset cache keys v0.22.1'
-          git push
+
+          # Other Gamagori verification workflows may publish small audit files to
+          # main at the same time. Rebase and retry instead of failing the cache
+          # refresh on a harmless ref race. Any real content conflict still fails
+          # closed because `set -e` aborts the job.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Cache-safe app shell pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push race on attempt ${attempt}; refreshing main before retry."
+            sleep $((attempt * 2))
+          done
+          echo 'CACHE_BUST_PUSH_RETRIES_EXHAUSTED' >&2
+          exit 1
