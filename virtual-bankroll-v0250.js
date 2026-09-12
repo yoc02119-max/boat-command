@@ -12,6 +12,14 @@
     }
   }
 
+  function settledProfit(r){
+    const saved=Number(r?.profit);
+    if(Number.isFinite(saved))return saved;
+    const returned=Number(r?.returnAmount)||0;
+    const stake=Number(r?.stake)||0;
+    return returned-stake;
+  }
+
   // Operational bankroll must match the launcher: deposits + LIVE settlements only.
   // BACKTEST/RETEST performance remains analytics-only and must never change money available for LIVE trial use.
   bankrollSeries=function(){
@@ -20,7 +28,7 @@
     const out=[{label:'START + DEPOSIT',value:bal}];
     for(const s of allSessions().filter(s=>!s.retestMode&&s.runType==='LIVE')){
       for(const r of (s.races||[]).filter(x=>x.settled)){
-        bal+=Number(r.profit)||0;
+        bal+=settledProfit(r);
         out.push({label:`${s.date.slice(5)} ${r.race}R`,value:bal});
       }
     }
