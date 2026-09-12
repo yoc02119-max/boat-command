@@ -1,8 +1,11 @@
 // BOAT COMMAND GAMAGORI LIVE CANDIDATE PREDICTOR v0.20.0
 // Uses only verified PRE-RACE relay data. Generates suggestions only: no result fetch, no auto LOCK, no auto bet.
 // DOM binding hardening: rendered cards are matched by explicit race number, never list position.
-// Data binding hardening v0.24.9: exhibition/ST/boat rows are joined by explicit lane/course identity, never array position.
-const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2+FULL-6-BOAT-GATE-V0.24.0+LANE-JOIN-V0.24.9'};
+// Data binding hardening v0.25.0: exhibition/boat rows are joined by explicit lane identity.
+// Start-exhibition rows currently carry course+ST but no explicit boat/lane identity. They are completeness-checked,
+// but are NOT applied to an individual boat score until an explicit lane identity is present. This prevents
+// a course number from being mistaken for a boat number when the start exhibition entry order changes.
+const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2+FULL-6-BOAT-GATE-V0.24.0+ST-IDENTITY-SAFE-V0.25.0'};
 
 function bcStValue(raw){
   const s=String(raw||'').trim();
@@ -32,23 +35,43 @@ function bcLiveScoreRows(r){
   const st=pre?.beforeinfo?.startExhibition||[];
   const boats=pre?.racelist?.boats||[];
   const exByLane=bcUniqueLaneMap(ex,'lane');
-  const stByCourse=bcUniqueLaneMap(st,'course');
   const boatsByLane=bcUniqueLaneMap(boats,'lane');
-  if(!exByLane||!stByCourse||!boatsByLane)return [];
+  // Prefer an explicit lane identity when the relay can provide one in the future.
+  // Legacy/current payloads expose only `course`, which is not safe to equate with boat lane.
+  const stByLane=bcUniqueLaneMap(st,'lane');
+  const stByCourse=bcUniqueLaneMap(st,'course');
+  if(!exByLane||!boatsByLane||(!stByLane&&!stByCourse))return [];
+
+  // Start exhibition is still a required PRE-RACE completeness signal. Parse all six values fail-closed,
+  // even when they cannot safely be assigned to individual boats.
+  const stRows=stByLane?[...stByLane.values()]:[...stByCourse.values()];
+  if(stRows.some(row=>bcStValue(row?.st)===null))return [];
+  const stIdentityVerified=!!stByLane;
+
   const out=[];
   for(let lane=1;lane<=6;lane++){
-    const e=exByLane.get(lane),stRow=stByCourse.get(lane),boat=boatsByLane.get(lane);
-    if(!e||!stRow||!boat)return [];
+    const e=exByLane.get(lane),boat=boatsByLane.get(lane);
+    if(!e||!boat)return [];
     const exTime=Number(e.exhibitionTime);
-    const stRaw=String(stRow.st||'');
-    const stVal=bcStValue(stRaw);
-    if(!Number.isFinite(exTime)||stVal===null)return [];
+    if(!Number.isFinite(exTime))return [];
     const laneBonus=[2.8,1.6,1.15,.82,.52,.32][lane-1]||0;
     const exScore=(6.95-exTime)*8;
-    const stScore=stRaw.toUpperCase().startsWith('F.')?Math.max(0,.8-stVal*1.5):(.30-stVal)*4;
+
+    // Never attach a course-only ST to a boat. If an explicit lane identity is available, individual ST
+    // may contribute; otherwise its score contribution is neutral while the six-value completeness gate remains.
+    let stRaw='',stScore=0;
+    if(stIdentityVerified){
+      const stRow=stByLane.get(lane);
+      if(!stRow)return [];
+      stRaw=String(stRow.st||'');
+      const stVal=bcStValue(stRaw);
+      if(stVal===null)return [];
+      stScore=stRaw.toUpperCase().startsWith('F.')?Math.max(0,.8-stVal*1.5):(.30-stVal)*4;
+    }
+
     const className=String(boat.class||'');
     const classScore=className==='A1'?1.0:className==='A2'?.55:0;
-    out.push({lane,score:laneBonus+exScore+stScore+classScore,exTime,stRaw});
+    out.push({lane,score:laneBonus+exScore+stScore+classScore,exTime,stRaw,stIdentityVerified});
   }
   return out.sort((a,b)=>b.score-a.score);
 }
@@ -57,16 +80,19 @@ function bcLiveCandidate(r){
   const rows=bcLiveScoreRows(r);
   // Fail closed: a missing, duplicate, or unjoinable lane can materially change the ranking.
   // Never create a betting candidate from only a partial 4/5-boat comparison.
-  if(rows.length!==6)return {status:'SKIP',reason:'6艇すべての展示・ST・艇番対応を安全に採点できないため見送り'};
+  if(rows.length!==6)return {status:'SKIP',reason:'6艇すべての展示・ST・艇番対応を安全に確認できないため見送り'};
   const [a,b,c,d]=rows.map(x=>x.lane);
   const candidates=[`${a}-${b}-${c}`,`${a}-${c}-${b}`,`${b}-${a}-${c}`,`${a}-${b}-${d}`];
   const picks=[...new Set(candidates)].slice(0,4);
   const top=rows[0],second=rows[1];
   const gap=top.score-second.score;
   if(!Number.isFinite(gap)||gap<0.18)return {status:'SKIP',reason:'上位評価差が小さく軸を固定できないため見送り',rank:rows.map(x=>x.lane)};
+  const stMapped=rows.every(x=>x.stIdentityVerified===true);
   return {
     status:'CANDIDATE',picks,rank:rows.map(x=>x.lane),
-    rationale:`LIVE VERIFIED候補。評価順 ${rows.map(x=>x.lane).join('→')}。コース優位・展示タイム・展示ST・級別を固定ルールで採点。結果データ未使用。`,
+    rationale:stMapped
+      ?`LIVE VERIFIED候補。評価順 ${rows.map(x=>x.lane).join('→')}。コース優位・展示タイム・艇番対応済み展示ST・級別を固定ルールで採点。結果データ未使用。`
+      :`LIVE VERIFIED候補。評価順 ${rows.map(x=>x.lane).join('→')}。コース優位・展示タイム・級別を固定ルールで採点。展示STは6艇分の存在を確認済みですが艇番対応が明示されていないため個別採点には使用していません。結果データ未使用。`,
     generatedAt:new Date().toISOString(),strategyVersion:BC_LIVE_PREDICTOR_V0200.version
   };
 }
