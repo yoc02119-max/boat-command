@@ -1,0 +1,109 @@
+name: Gamagori public asset hash v0.24.7
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-public-asset-hash-v0247.yml'
+      - 'index.html'
+      - 'app.js'
+      - 'styles.css'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'gamagori-live-integration-v0198.js'
+      - 'live-autopoll-v0199.js'
+      - 'live-predictor-v0200.js'
+      - 'live-skip-gate-v0225.js'
+      - 'live-autofill-v0201.js'
+      - 'live-lock-guard-v0202.js'
+      - 'live-lock-snapshot-v0203.js'
+      - 'live-result-v0204.js'
+      - 'live-learning-v0205.js'
+      - 'live-learning-dashboard-v0206.js'
+      - 'live-learning-guard-v0207.js'
+      - 'live-integrity-audit-v0208.js'
+      - 'live-snapshot-hash-guard-v0209.js'
+      - 'development-status-v0217.js'
+      - 'trial-readiness-v0218.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gamagori-public-asset-hash
+  cancel-in-progress: true
+
+jobs:
+  deployed-byte-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Wait for current Pages shell and verify deployed asset bytes
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY' > /tmp/assets.tsv
+          from pathlib import Path
+          import re
+          html=Path('index.html').read_text(encoding='utf-8')
+          assets=[]
+          assets += re.findall(r'<script\s+src="([^"]+)"', html)
+          for pattern in [
+              r'<link\s+rel="stylesheet"\s+href="([^"]+)"',
+              r'<link\s+rel="manifest"\s+href="([^"]+)"',
+              r'<link\s+rel="icon"\s+href="([^"]+)"',
+          ]:
+              assets += re.findall(pattern, html)
+          if not assets:
+              raise SystemExit('NO_PUBLIC_ASSETS_FOUND')
+          for src in assets:
+              base=src.split('?',1)[0]
+              if not Path(base).is_file():
+                  raise SystemExit(f'LOCAL_ASSET_MISSING:{base}')
+              print(f'{src}\t{base}')
+          PY
+
+          expected_app=$(awk -F '\t' '$2=="app.js"{print $1}' /tmp/assets.tsv)
+          if [ -z "$expected_app" ]; then
+            echo 'APP_ASSET_REFERENCE_MISSING'
+            exit 1
+          fi
+
+          ready=0
+          for attempt in $(seq 1 30); do
+            code=$(curl -L -sS -o /tmp/public-index.html -w '%{http_code}' --max-time 20 "${APP_URL}?asset_hash=${GITHUB_RUN_ID}&attempt=${attempt}" || true)
+            if [ "$code" = "200" ] && grep -Fq "$expected_app" /tmp/public-index.html; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$ready" != "1" ]; then
+            echo "PUBLIC_PAGE_NOT_CURRENT expected=${expected_app}"
+            exit 1
+          fi
+
+          while IFS=$'\t' read -r src base; do
+            tmp="/tmp/public-$(basename "$base")"
+            code=$(curl -L -sS -o "$tmp" -w '%{http_code}' --max-time 20 "${APP_URL}${src}" || true)
+            if [ "$code" != "200" ]; then
+              echo "PUBLIC_ASSET_HTTP_FAIL:${code}:${src}"
+              exit 1
+            fi
+            local_sha=$(sha256sum "$base" | awk '{print $1}')
+            public_sha=$(sha256sum "$tmp" | awk '{print $1}')
+            if [ "$local_sha" != "$public_sha" ]; then
+              echo "PUBLIC_ASSET_HASH_MISMATCH:${base}:local=${local_sha}:public=${public_sha}"
+              exit 1
+            fi
+            echo "HASH_OK ${base} ${local_sha}"
+          done < /tmp/assets.tsv
+
+          echo 'GAMAGORI_PUBLIC_ASSET_HASH_PASS'
