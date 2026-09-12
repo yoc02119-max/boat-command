@@ -120,7 +120,7 @@ jobs:
             raise SystemExit(f"PORTAL_PWA_START_URL_BAD:{manifest.get('start_url')}")
           if not re.search(r'<link\s+rel="manifest"\s+href="manifest\.webmanifest\?v=\d+"', portal):
             raise SystemExit('PORTAL_MANIFEST_LINK_MISSING_OR_UNVERSIONED')
-          if "const active=name==='蒲郡'" not in portal or 'btn.disabled=!active' not in portal:
+          if "active=name==='蒲郡'" not in portal or 'btn.disabled=!active' not in portal:
             raise SystemExit('PORTAL_ONLY_GAMAGORI_ACTIVE_CONTRACT_BAD')
           if "if(active)btn.onclick=()=>location.href='./'" not in portal:
             raise SystemExit('PORTAL_GAMAGORI_ENTRY_LINK_BAD')
