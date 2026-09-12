@@ -7,6 +7,7 @@ on:
       - '.github/workflows/gamagori-live-runtime-smoke-v0220.yml'
       - 'index.html'
       - 'app.js'
+      - 'virtual-bankroll-v0250.js'
       - 'gamagori-live-integration-v0198.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
@@ -45,7 +46,7 @@ jobs:
           import re, json
           html=Path('index.html').read_text(encoding='utf-8')
           required=[
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
             'live-predictor-v0200.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
@@ -59,6 +60,7 @@ jobs:
           pos=[bases.index(x) for x in required]
           if pos != sorted(pos): raise SystemExit('LIVE_RUNTIME_SCRIPT_ORDER_BAD')
           if len(bases) != len(set(bases)): raise SystemExit('DUPLICATE_SCRIPT_LOAD')
+          virtual=Path('virtual-bankroll-v0250.js').read_text(encoding='utf-8')
           integration=Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
           autopoll=Path('live-autopoll-v0199.js').read_text(encoding='utf-8')
           skip=Path('live-skip-gate-v0225.js').read_text(encoding='utf-8')
@@ -67,6 +69,8 @@ jobs:
           result=Path('live-result-v0204.js').read_text(encoding='utf-8')
           hash_guard=Path('live-snapshot-hash-guard-v0209.js').read_text(encoding='utf-8')
           readiness=Path('trial-readiness-v0218.js').read_text(encoding='utf-8')
+          if "DEPOSIT_KEY='boatCommand.portalDeposits.v1'" not in virtual or 'window.bcVirtualDepositTotal=virtualDepositTotal' not in virtual:
+            raise SystemExit('VIRTUAL_BANKROLL_RUNTIME_CONTRACT_MISSING')
           if 'loadVerifiedLiveRace' not in integration: raise SystemExit('LIVE_RELAY_LOADER_DEFINITION_MISSING')
           if 'loadVerifiedLiveRace' not in autopoll: raise SystemExit('LIVE_RELAY_LOADER_CONSUMER_MISSING')
           if 'bcLiveUnresolvedV0225' not in skip or 'isResultMode=function' not in skip: raise SystemExit('LIVE_WAIT_FAIL_CLOSED_GATE_MISSING')
@@ -79,6 +83,28 @@ jobs:
           if manifest.get('display')!='standalone' or manifest.get('start_url')!='./portal.html' or manifest.get('scope')!='./':
             raise SystemExit('PWA_MANIFEST_CONTRACT_BAD')
           print('LOCAL_LIVE_RUNTIME_SMOKE_PASS')
+
+      - name: Verify JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check virtual-bankroll-v0250.js
+          node --check gamagori-live-integration-v0198.js
+          node --check live-autopoll-v0199.js
+          node --check live-predictor-v0200.js
+          node --check live-skip-gate-v0225.js
+          node --check live-autofill-v0201.js
+          node --check live-lock-guard-v0202.js
+          node --check live-lock-snapshot-v0203.js
+          node --check live-result-v0204.js
+          node --check live-learning-v0205.js
+          node --check live-learning-dashboard-v0206.js
+          node --check live-learning-guard-v0207.js
+          node --check live-integrity-audit-v0208.js
+          node --check live-snapshot-hash-guard-v0209.js
+          node --check development-status-v0217.js
+          node --check trial-readiness-v0218.js
 
       - name: Verify public app and runtime assets
         env:
@@ -96,7 +122,7 @@ jobs:
           local=Path('index.html').read_text(encoding='utf-8')
           public=Path('/tmp/public-index.html').read_text(encoding='utf-8')
           required=[
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
             'live-predictor-v0200.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
@@ -130,7 +156,7 @@ jobs:
           import re
           html=Path('/tmp/public-index.html').read_text(encoding='utf-8')
           required={
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
+            'app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js',
             'live-predictor-v0200.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
             'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js',
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
