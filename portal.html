@@ -9,72 +9,58 @@
     :root{--bg:#06101c;--panel:#0b1b2d;--panel2:#10243a;--line:#1c3d5f;--text:#f4f8fc;--muted:#8ea7bd;--blue:#178cff;--cyan:#20e0c7;--locked:#6f8396;--plus:#42e6a4;--minus:#ff6f86}
     *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#071521 0%,#04101b 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
     .wrap{max-width:1180px;margin:auto;padding:24px 22px 110px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:14px}.mark{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#0aa8ff,#0a5bff);display:grid;place-items:center;font-size:30px;box-shadow:0 10px 30px rgba(15,133,255,.25)}.brand h1{margin:0;font-size:clamp(24px,4vw,42px);letter-spacing:.02em}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px;letter-spacing:.12em}.tag{color:#b7c7d6;font-size:13px;white-space:nowrap}.hero{border:1px solid var(--line);background:radial-gradient(circle at 80% 20%,rgba(32,224,199,.09),transparent 28%),linear-gradient(135deg,#0a1a2b,#0b2238);border-radius:22px;padding:24px;margin-bottom:18px}.hero h2{margin:0 0 8px;font-size:clamp(22px,4vw,36px)}.hero p{margin:0;color:#a8bdd0}
-    .money-strip{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin-bottom:24px}.money-card{border:1px solid var(--line);background:linear-gradient(180deg,#0c1e31,#091725);border-radius:17px;padding:16px 18px}.money-card span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}.money-card strong{font-size:clamp(22px,4vw,34px);letter-spacing:.01em}.money-card small{display:block;color:#6f8aa1;font-size:11px;margin-top:5px}.money-card .plus{color:var(--plus)}.money-card .minus{color:var(--minus)}.money-card .flat{color:#dbe7f1}
-    .section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:26px 2px 14px}.section-head h3{margin:0;font-size:24px}.section-head span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.venue{min-height:138px;border:1px solid #183753;background:linear-gradient(180deg,#10243a,#0b1b2d);border-radius:16px;padding:16px;text-align:left;color:#b8c8d7;position:relative}.venue strong{display:block;font-size:24px;margin-bottom:18px;color:inherit}.venue small{display:block;color:#7790a6;font-size:13px}.venue.locked{opacity:.72;cursor:not-allowed}.venue.locked::after{content:"🔒";position:absolute;right:14px;bottom:13px;font-size:18px;opacity:.8}.venue.active{cursor:pointer;border-color:var(--cyan);box-shadow:0 0 0 1px rgba(32,224,199,.35),0 14px 32px rgba(0,0,0,.22);background:linear-gradient(180deg,#0c2a34,#0a1f2b)}.venue.active strong{color:#fff}.venue.active small{color:var(--cyan)}.live-dot{display:inline-block;width:9px;height:9px;background:var(--cyan);border-radius:50%;margin-right:7px;box-shadow:0 0 16px var(--cyan)}.arrow{position:absolute;right:15px;bottom:14px;font-size:25px;color:#fff}.notice{margin-top:24px;border:1px solid var(--line);background:#081827;border-radius:16px;padding:18px;display:flex;justify-content:space-between;gap:16px}.notice b{display:block;margin-bottom:5px}.notice p{margin:0;color:#a6bbcc;font-size:14px}.notice time{color:#708aa0;font-size:13px;white-space:nowrap}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(5,15,25,.94);backdrop-filter:blur(14px);border-top:1px solid #17324d;padding:11px 18px calc(11px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:60px}.nav{color:#8097aa;font-size:12px;text-align:center}.nav b{display:block;color:var(--blue);font-size:23px;margin-bottom:3px}
-    @media(max-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}@media(max-width:640px){.wrap{padding:18px 14px 100px}.grid{grid-template-columns:repeat(3,1fr);gap:9px}.venue{min-height:112px;padding:13px}.venue strong{font-size:20px;margin-bottom:14px}.tag{display:none}.bottom{gap:34px}.hero{padding:19px}.section-head h3{font-size:21px}.money-strip{grid-template-columns:1fr 1fr}.money-card:first-child{grid-column:1/-1}.money-card{padding:14px}.money-card strong{font-size:26px}}
+    .money-strip{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin-bottom:24px}.money-card{border:1px solid var(--line);background:linear-gradient(180deg,#0c1e31,#091725);border-radius:17px;padding:16px 18px}.money-card span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}.money-card strong{font-size:clamp(22px,4vw,34px);letter-spacing:.01em}.money-card small{display:block;color:#6f8aa1;font-size:11px;margin-top:5px}.plus{color:var(--plus)}.minus{color:var(--minus)}.flat{color:#dbe7f1}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:26px 2px 14px}.section-head h3{margin:0;font-size:24px}.section-head span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.venue{min-height:148px;border:1px solid #183753;background:linear-gradient(180deg,#10243a,#0b1b2d);border-radius:16px;padding:16px;text-align:left;color:#b8c8d7;position:relative}.venue strong{display:block;font-size:24px;margin-bottom:12px;color:inherit}.venue small{display:block;color:#7790a6;font-size:13px}.venue.locked{opacity:.72;cursor:not-allowed}.venue.locked::after{content:"🔒";position:absolute;right:14px;bottom:13px;font-size:18px;opacity:.8}.venue.active{cursor:pointer;border-color:var(--cyan);box-shadow:0 0 0 1px rgba(32,224,199,.35),0 14px 32px rgba(0,0,0,.22);background:linear-gradient(180deg,#0c2a34,#0a1f2b)}.venue.active strong{color:#fff}.venue.active small{color:var(--cyan)}.live-dot{display:inline-block;width:9px;height:9px;background:var(--cyan);border-radius:50%;margin-right:7px;box-shadow:0 0 16px var(--cyan)}.venue-live{margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#dce9f3;line-height:1.45}.venue-live b{color:#fff;font-size:13px}.venue-live.wait{color:#9eb2c3}.arrow{position:absolute;right:15px;bottom:14px;font-size:25px;color:#fff}.notice{margin-top:24px;border:1px solid var(--line);background:#081827;border-radius:16px;padding:18px;display:flex;justify-content:space-between;gap:16px}.notice b{display:block;margin-bottom:5px}.notice p{margin:0;color:#a6bbcc;font-size:14px}.notice time{color:#708aa0;font-size:13px;white-space:nowrap}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(5,15,25,.94);backdrop-filter:blur(14px);border-top:1px solid #17324d;padding:11px 18px calc(11px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:60px}.nav{color:#8097aa;font-size:12px;text-align:center}.nav b{display:block;color:var(--blue);font-size:23px;margin-bottom:3px}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}@media(max-width:640px){.wrap{padding:18px 14px 100px}.grid{grid-template-columns:repeat(3,1fr);gap:9px}.venue{min-height:126px;padding:13px}.venue strong{font-size:20px;margin-bottom:9px}.venue-live{font-size:11px}.tag{display:none}.bottom{gap:34px}.hero{padding:19px}.section-head h3{font-size:21px}.money-strip{grid-template-columns:1fr 1fr}.money-card:first-child{grid-column:1/-1}.money-card{padding:14px}.money-card strong{font-size:26px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header class="top">
-      <div class="brand"><div class="mark">◉</div><div><h1>BOAT COMMAND</h1><p>AI × DATA × STRATEGY</p></div></div>
-      <div class="tag">競艇を、もっとシンプルに。</div>
-    </header>
+    <header class="top"><div class="brand"><div class="mark">◉</div><div><h1>BOAT COMMAND</h1><p>AI × DATA × STRATEGY</p></div></div><div class="tag">競艇を、もっとシンプルに。</div></header>
     <section class="hero"><h2>競艇場を選択</h2><p>完成した競艇場から順番に利用できるようになります。</p></section>
-
     <section class="money-strip" aria-label="資金と収支">
       <div class="money-card"><span>現在の資金</span><strong id="portalBankroll">¥100,000</strong><small>LIVE精算済みデータから自動計算</small></div>
       <div class="money-card"><span>累計収支</span><strong id="portalProfit" class="flat">¥0</strong><small>プラス / マイナス</small></div>
       <div class="money-card"><span>今日の収支</span><strong id="portalTodayProfit" class="flat">¥0</strong><small id="portalTodayLabel">本日LIVE</small></div>
     </section>
-
     <div class="section-head"><h3>24 BOAT RACE VENUES</h3><span>現在は蒲郡のみ利用可能</span></div>
     <section class="grid" id="venueGrid"></section>
     <section class="notice"><div><b>お知らせ</b><p>蒲郡の予想機能を先行公開中。他の競艇場は完成次第、順次このホームから選択できるようになります。</p></div><time>2026.09.12</time></section>
   </div>
   <nav class="bottom"><div class="nav"><b>⌂</b>ホーム</div><div class="nav"><b style="color:#8097aa">▥</b>成績</div><div class="nav"><b style="color:#8097aa">✦</b>AIチャット</div><div class="nav"><b style="color:#8097aa">☰</b>その他</div></nav>
   <script>
-    const START_BANKROLL=100000;
+    const APP_KEY='boatCommand.v05',START_BANKROLL=100000;
     const money=n=>`¥${Math.round(Number(n)||0).toLocaleString('ja-JP')}`;
     const signed=n=>`${Number(n)>0?'+':''}${money(n)}`;
     const todayJst=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    function portalStats(){
-      let raw=null;
-      try{raw=JSON.parse(localStorage.getItem('boatCommand.v05')||'null')}catch{}
-      const sessions=raw&&raw.sessions&&typeof raw.sessions==='object'?Object.values(raw.sessions):[];
-      let total=0,today=0;
-      const todayKey=todayJst();
-      for(const s of sessions){
-        if(!s||s.runType!=='LIVE'||s.retestMode)continue;
-        const races=Array.isArray(s.races)?s.races:[];
-        for(const r of races){
-          if(!r||!r.settled)continue;
-          const stake=Number(r.stake)||0,ret=Number(r.returnAmount)||0,p=ret-stake;
-          total+=p;
-          if(s.date===todayKey)today+=p;
-        }
+    const nowJstHM=()=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+    const SERIES=[['2026-09-13','2026-09-18'],['2026-09-29','2026-10-04'],['2026-10-07','2026-10-10'],['2026-10-27','2026-11-01'],['2026-11-09','2026-11-14'],['2026-11-21','2026-11-24'],['2026-11-27','2026-12-02'],['2026-12-06','2026-12-11'],['2026-12-25','2026-12-29']];
+    function store(){try{return JSON.parse(localStorage.getItem(APP_KEY)||'null')}catch{return null}}
+    function sessions(){const x=store();return x&&x.sessions&&typeof x.sessions==='object'?Object.values(x.sessions):[]}
+    function portalStats(){let total=0,today=0;const day=todayJst();for(const s of sessions()){if(!s||s.runType!=='LIVE'||s.retestMode)continue;for(const r of Array.isArray(s.races)?s.races:[]){if(!r||!r.settled)continue;const p=(Number(r.returnAmount)||0)-(Number(r.stake)||0);total+=p;if(s.date===day)today+=p}}return{bankroll:START_BANKROLL+total,total,today,todayKey:day}}
+    function renderPortalStats(){const s=portalStats(),b=document.getElementById('portalBankroll'),p=document.getElementById('portalProfit'),t=document.getElementById('portalTodayProfit'),l=document.getElementById('portalTodayLabel');b.textContent=money(s.bankroll);p.textContent=signed(s.total);t.textContent=signed(s.today);l.textContent=`${s.todayKey} LIVE`;const cls=n=>n>0?'plus':n<0?'minus':'flat';p.className=cls(s.total);t.className=cls(s.today);b.className=cls(s.bankroll-START_BANKROLL)}
+    function parseMinutes(hm){const m=String(hm||'').match(/(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):null}
+    function gamagoriStatus(){
+      const day=todayJst(),now=parseMinutes(nowJstHM());
+      const live=sessions().find(s=>s&&s.runType==='LIVE'&&!s.retestMode&&s.date===day);
+      const active=SERIES.find(([a,b])=>a<=day&&day<=b);
+      if(active){
+        const races=Array.isArray(live?.races)?live.races:[];
+        const timed=races.map(r=>({race:Number(r.race),deadline:r?.livePreRace?.deadline||r?.deadline||'',settled:!!r?.settled})).filter(x=>x.race>=1&&x.race<=12&&parseMinutes(x.deadline)!==null).sort((a,b)=>a.race-b.race);
+        const next=timed.find(x=>parseMinutes(x.deadline)>=now&&!x.settled);
+        if(next)return {top:'開催中',detail:`次 ${next.race}R　締切 ${next.deadline}`,live:true};
+        if(timed.length&&timed.every(x=>x.settled||parseMinutes(x.deadline)<now))return {top:'本日終了',detail:'12R終了後',live:false};
+        return {top:'開催中',detail:'LIVE時刻取得待ち',live:true};
       }
-      return {bankroll:START_BANKROLL+total,total,today,todayKey};
-    }
-    function renderPortalStats(){
-      const s=portalStats();
-      const b=document.getElementById('portalBankroll'),p=document.getElementById('portalProfit'),t=document.getElementById('portalTodayProfit'),l=document.getElementById('portalTodayLabel');
-      b.textContent=money(s.bankroll);p.textContent=signed(s.total);t.textContent=signed(s.today);l.textContent=`${s.todayKey} LIVE`;
-      const cls=n=>n>0?'plus':n<0?'minus':'flat';p.className=cls(s.total);t.className=cls(s.today);b.className=cls(s.bankroll-START_BANKROLL);
+      const next=SERIES.find(([a])=>a>day);
+      if(next){const label=next[0]===new Date(Date.now()+86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'})?'明日開催':'次回開催';return {top:label,detail:next[0].slice(5).replace('-','/'),live:false}}
+      return {top:'利用可能',detail:'次回日程確認待ち',live:false};
     }
     renderPortalStats();
-
     const venues=['桐生','戸田','江戸川','平和島','多摩川','浜名湖','蒲郡','常滑','津','三国','びわこ','住之江','尼崎','鳴門','丸亀','児島','宮島','徳山','下関','若松','芦屋','福岡','唐津','大村'];
-    const grid=document.getElementById('venueGrid');
-    venues.forEach(name=>{
-      const btn=document.createElement('button');
-      const active=name==='蒲郡';
-      btn.className='venue '+(active?'active':'locked');
-      btn.disabled=!active;
-      btn.innerHTML=active?`<strong>${name}</strong><small><span class="live-dot"></span>利用可能</small><span class="arrow">→</span>`:`<strong>${name}</strong><small>準備中</small>`;
-      if(active)btn.onclick=()=>location.href='./';
-      grid.appendChild(btn);
-    });
+    const grid=document.getElementById('venueGrid'),gs=gamagoriStatus();
+    venues.forEach(name=>{const btn=document.createElement('button'),active=name==='蒲郡';btn.className='venue '+(active?'active':'locked');btn.disabled=!active;btn.innerHTML=active?`<strong>${name}</strong><small>${gs.live?'<span class="live-dot"></span>':''}${gs.top}</small><div class="venue-live ${gs.live?'':'wait'}"><b>${gs.detail}</b></div><span class="arrow">→</span>`:`<strong>${name}</strong><small>準備中</small>`;if(active)btn.onclick=()=>location.href='./';grid.appendChild(btn)});
+    setInterval(()=>{const card=[...document.querySelectorAll('.venue.active')][0];if(!card)return;const s=gamagoriStatus();card.querySelector('small').innerHTML=`${s.live?'<span class="live-dot"></span>':''}${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`;renderPortalStats()},60000);
   </script>
 </body>
 </html>
