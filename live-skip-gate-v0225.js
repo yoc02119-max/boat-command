@@ -3,8 +3,9 @@
 // No result fetches are added here; PRE-RACE / POST-RACE separation remains unchanged.
 // UI status hardening v0.24.1: the core prediction-gate-top must mirror LIVE CANDIDATE/SKIP/WAIT instead of showing stale generic READY.
 // Completion hardening v0.24.2: LIVE COMPLETE is based on settled prediction targets; explicit SKIP races stay excluded.
+// Visibility hardening v0.25.1: READY / WAIT / SKIP must remain visually distinct even if stylesheet state colors regress.
 const BC_LIVE_SKIP_GATE_V0225=Object.freeze({
-  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1+COMPLETION-V0.24.2',
+  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1+COMPLETION-V0.24.2+VISIBILITY-V0.25.1',
   venue:'蒲郡',
   waitFailClosed:true,
   resultLookahead:false
@@ -52,23 +53,48 @@ isResultMode=function(s=session()){
   return _bcIsResultModeV0225(s);
 };
 
+function bcLiveGateVisualV0251(kind){
+  if(kind==='READY')return 'border-color:rgba(43,226,143,.78);background:rgba(43,226,143,.08);box-shadow:inset 3px 0 0 rgba(43,226,143,.88);';
+  if(kind==='SKIP')return 'border-color:rgba(255,96,120,.72);background:rgba(255,96,120,.07);border-style:dashed;box-shadow:inset 3px 0 0 rgba(255,96,120,.82);';
+  return 'border-color:rgba(255,194,74,.78);background:rgba(255,194,74,.07);box-shadow:inset 3px 0 0 rgba(255,194,74,.88);';
+}
+function bcLiveCardVisualV0251(card,kind){
+  if(!card)return;
+  if(kind==='READY'){
+    card.style.borderColor='rgba(43,226,143,.42)';
+    card.style.boxShadow='inset 3px 0 0 rgba(43,226,143,.46)';
+  }else if(kind==='SKIP'){
+    card.style.borderColor='rgba(255,96,120,.42)';
+    card.style.boxShadow='inset 3px 0 0 rgba(255,96,120,.45)';
+  }else if(kind==='WAIT'){
+    card.style.borderColor='rgba(255,194,74,.42)';
+    card.style.boxShadow='inset 3px 0 0 rgba(255,194,74,.45)';
+  }else{
+    card.style.removeProperty('border-color');
+    card.style.removeProperty('box-shadow');
+  }
+}
+
 function bcSyncLiveCoreGateV0241(card,r,skip,wait){
   const gate=card?.querySelector('.prediction-gate-top');
   if(!gate||!r||r.locked)return;
   if(wait){
     const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'verified LIVEデータ待ち');
     gate.className='prediction-gate limited prediction-gate-top live-core-wait';
+    gate.setAttribute('style',bcLiveGateVisualV0251('WAIT'));
     gate.innerHTML=`<b>WAIT｜予想保留</b><span>${reason}</span>`;
     return;
   }
   if(skip){
     const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'安全条件により見送り');
     gate.className='prediction-gate limited prediction-gate-top live-core-skip';
+    gate.setAttribute('style',bcLiveGateVisualV0251('SKIP'));
     gate.innerHTML=`<b>NO PREDICTION｜見送り</b><span>${reason}</span>`;
     return;
   }
   const reason=esc(r.liveSuggestion?.rationale||'verified LIVEデータと予想候補の安全条件を通過');
   gate.className='prediction-gate ready prediction-gate-top live-core-ready';
+  gate.setAttribute('style',bcLiveGateVisualV0251('READY'));
   gate.innerHTML=`<b>PREDICTION READY｜LIVE CANDIDATE</b><span>${reason}</span>`;
 }
 
@@ -78,10 +104,19 @@ function bcApplyLivePredictionControlsV0225(s){
   for(const card of cards){
     const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
     const r=(s.races||[]).find(x=>Number(x.race)===race);
-    if(!r||r.locked)continue;
+    if(!r){
+      bcLiveCardVisualV0251(card,'WAIT');
+      continue;
+    }
+    if(r.locked){
+      card.classList.remove('live-skip-race','live-wait-race');
+      bcLiveCardVisualV0251(card,'');
+      continue;
+    }
     const skip=bcLiveSkipV0225(r),wait=bcLiveWaitV0225(r);
     card.classList.toggle('live-skip-race',skip);
     card.classList.toggle('live-wait-race',wait);
+    bcLiveCardVisualV0251(card,wait?'WAIT':skip?'SKIP':'READY');
     bcSyncLiveCoreGateV0241(card,r,skip,wait);
     const controls=[...card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]')];
     if(skip||wait){
@@ -111,7 +146,8 @@ function bcApplyLiveResultSkipCardsV0225(s){
     const r=byRace.get(race);if(!r)continue;
     const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'安全条件により見送り');
     card.className='race-card no-prediction-race live-skip-result';
-    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LIVE監査記録</div></div><div class="stake">SKIPPED</div></div><div class="no-prediction-panel"><div class="no-prediction-head"><b>NO PREDICTION｜見送り</b><span>投資対象外</span></div><div class="no-prediction-reason">${reason}</div><div class="no-prediction-rule">結果取得・投資・的中率・ROI・MISS集計の対象外です。</div></div>`;
+    card.style.borderColor='rgba(255,96,120,.42)';
+    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LIVE監査記録</div></div><div class="stake">SKIPPED</div></div><div class="no-prediction-panel" style="${bcLiveGateVisualV0251('SKIP')}"><div class="no-prediction-head"><b>NO PREDICTION｜見送り</b><span>投資対象外</span></div><div class="no-prediction-reason">${reason}</div><div class="no-prediction-rule">結果取得・投資・的中率・ROI・MISS集計の対象外です。</div></div>`;
   }
 }
 
@@ -126,6 +162,7 @@ function bcRenderLiveGateSummaryV0225(s){
     note.textContent=isResultMode(s)
       ?`予想対象 ${target}RをHARD LOCK済み。見送り ${skips}Rは成績対象外。POST-RACE解禁済み。`
       :`HARD LOCK ${locked}/${target} · 見送り ${skips}R · WAIT ${wait}R。WAITが残る間はPOST-RACEを開きません。`;
+    note.style.borderLeftColor=wait?'#ffc24a':(isResultMode(s)?'#2be28f':'#8a63ff');
   }
   const sub=document.getElementById('summarySub');
   if(sub){
@@ -135,8 +172,11 @@ function bcRenderLiveGateSummaryV0225(s){
   }
   const today=document.getElementById('todayStatus');
   if(today){
-    today.textContent=complete?'COMPLETE':(isResultMode(s)?'RESULT MODE':'OPEN');
+    today.textContent=complete?'COMPLETE':(isResultMode(s)?'RESULT MODE':wait?'WAIT':'OPEN');
     today.classList.toggle('done',complete);
+    today.style.borderColor=complete?'#287253':wait?'rgba(255,194,74,.72)':'';
+    today.style.color=complete?'#7fffc0':wait?'#ffe09a':'';
+    today.style.background=complete?'#0c2c22':wait?'rgba(255,194,74,.08)':'';
   }
 }
 
