@@ -76,7 +76,7 @@ jobs:
           if 'bcVerifyLiveLockSnapshotHashV0209' not in hash_guard: raise SystemExit('LIVE_SNAPSHOT_HASH_GUARD_MISSING')
           if "liveRelayLoader:typeof window.loadVerifiedLiveRace==='function'" not in readiness: raise SystemExit('READINESS_RUNTIME_DEPENDENCY_CHECK_MISSING')
           manifest=json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
-          if manifest.get('display')!='standalone' or manifest.get('start_url')!='./' or manifest.get('scope')!='./':
+          if manifest.get('display')!='standalone' or manifest.get('start_url')!='./portal.html' or manifest.get('scope')!='./':
             raise SystemExit('PWA_MANIFEST_CONTRACT_BAD')
           print('LOCAL_LIVE_RUNTIME_SMOKE_PASS')
 
