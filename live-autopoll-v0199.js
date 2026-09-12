@@ -1,10 +1,17 @@
 // BOAT COMMAND GAMAGORI LIVE AUTO-POLL v0.19.9
 // No manual relay button is required. Only same-origin verified PRE-RACE relay files are read.
+// Final-state freeze v0.24.8: once a race is HARD LOCKed, or the global POST-RACE gate opens,
+// PRE-RACE polling must stop mutating live state. This keeps lock evidence immutable and prevents
+// SKIP/WAIT/CANDIDATE reclassification from reopening a completed PRE-RACE target set.
 const BC_LIVE_AUTOPOLL_V0199={timer:null,running:false,lastSweepAt:null};
 function liveAutoPollEligible(){
   try{
     const s=session();
-    return !!s&&s.runType==='LIVE'&&!document.hidden;
+    if(!s||s.runType!=='LIVE'||document.hidden)return false;
+    // Result mode is evaluated dynamically after all LIVE wrappers have loaded. If the target set
+    // is complete, PRE-RACE acquisition is finished for the day and the POST-RACE layer owns updates.
+    if(typeof isResultMode==='function'&&isResultMode(s))return false;
+    return true;
   }catch{return false}
 }
 function liveAutoStatusSummary(s){
@@ -24,7 +31,9 @@ async function sweepVerifiedLiveRelays({render=true}={}){
     let changed=false;
     for(let race=1;race<=12;race++){
       const rec=s.races.find(x=>Number(x.race)===race);
-      if(!rec)continue;
+      // HARD LOCK captures immutable PRE-RACE evidence. Never refresh that race afterward.
+      // Settled is included as an additional fail-closed guard for restored/imported sessions.
+      if(!rec||rec.locked||rec.settled)continue;
       const before=JSON.stringify([rec.liveDataStatus,rec.liveDataReason,rec.liveVerifiedAt]);
       const x=await loadVerifiedLiveRace(date,race,{silent:true});
       rec.liveDataStatus=x.ready?'READY':'WAIT';
