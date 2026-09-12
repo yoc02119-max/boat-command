@@ -1,7 +1,8 @@
 // BOAT COMMAND GAMAGORI LIVE CANDIDATE PREDICTOR v0.20.0
 // Uses only verified PRE-RACE relay data. Generates suggestions only: no result fetch, no auto LOCK, no auto bet.
 // DOM binding hardening: rendered cards are matched by explicit race number, never list position.
-const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2+FULL-6-BOAT-GATE-V0.24.0'};
+// Data binding hardening v0.24.9: exhibition/ST/boat rows are joined by explicit lane/course identity, never array position.
+const BC_LIVE_PREDICTOR_V0200={version:'GAMAGORI-LIVE-V0.20.0+RACE-DOM-BIND-V0.22.8+ST-PARSE-V0.23.2+FULL-6-BOAT-GATE-V0.24.0+LANE-JOIN-V0.24.9'};
 
 function bcStValue(raw){
   const s=String(raw||'').trim();
@@ -15,33 +16,46 @@ function bcStValue(raw){
   else if(/^\d+$/.test(s))v=Number(`0.${s}`);
   return Number.isFinite(v)?v:null;
 }
+function bcUniqueLaneMap(rows,key){
+  if(!Array.isArray(rows)||rows.length!==6)return null;
+  const map=new Map();
+  for(const row of rows){
+    const lane=Number(row?.[key]);
+    if(!Number.isInteger(lane)||lane<1||lane>6||map.has(lane))return null;
+    map.set(lane,row);
+  }
+  return map.size===6?map:null;
+}
 function bcLiveScoreRows(r){
   const pre=r?.livePreRace;
   const ex=pre?.beforeinfo?.exhibition||[];
   const st=pre?.beforeinfo?.startExhibition||[];
   const boats=pre?.racelist?.boats||[];
-  if(ex.length!==6||st.length!==6||boats.length!==6)return [];
-  return ex.map((e,i)=>{
-    const lane=Number(e.lane)||i+1;
+  const exByLane=bcUniqueLaneMap(ex,'lane');
+  const stByCourse=bcUniqueLaneMap(st,'course');
+  const boatsByLane=bcUniqueLaneMap(boats,'lane');
+  if(!exByLane||!stByCourse||!boatsByLane)return [];
+  const out=[];
+  for(let lane=1;lane<=6;lane++){
+    const e=exByLane.get(lane),stRow=stByCourse.get(lane),boat=boatsByLane.get(lane);
+    if(!e||!stRow||!boat)return [];
     const exTime=Number(e.exhibitionTime);
-    const stRow=st[i]||{};
-    // Do not cross-wire ST to another lane/course after entry changes or malformed relay ordering.
-    if(Number(stRow.course)!==lane)return null;
     const stRaw=String(stRow.st||'');
     const stVal=bcStValue(stRaw);
-    if(!Number.isFinite(exTime)||stVal===null)return null;
+    if(!Number.isFinite(exTime)||stVal===null)return [];
     const laneBonus=[2.8,1.6,1.15,.82,.52,.32][lane-1]||0;
     const exScore=(6.95-exTime)*8;
     const stScore=stRaw.toUpperCase().startsWith('F.')?Math.max(0,.8-stVal*1.5):(.30-stVal)*4;
-    const className=String(boats[i]?.class||'');
+    const className=String(boat.class||'');
     const classScore=className==='A1'?1.0:className==='A2'?.55:0;
-    return {lane,score:laneBonus+exScore+stScore+classScore,exTime,stRaw};
-  }).filter(Boolean).sort((a,b)=>b.score-a.score);
+    out.push({lane,score:laneBonus+exScore+stScore+classScore,exTime,stRaw});
+  }
+  return out.sort((a,b)=>b.score-a.score);
 }
 function bcLiveCandidate(r){
   if(r?.liveDataStatus!=='READY'||!r?.livePreRace)return {status:'WAIT',reason:r?.liveDataReason||'verified LIVEデータ待ち'};
   const rows=bcLiveScoreRows(r);
-  // Fail closed: a missing/misaligned boat can materially change the ranking.
+  // Fail closed: a missing, duplicate, or unjoinable lane can materially change the ranking.
   // Never create a betting candidate from only a partial 4/5-boat comparison.
   if(rows.length!==6)return {status:'SKIP',reason:'6艇すべての展示・ST・艇番対応を安全に採点できないため見送り'};
   const [a,b,c,d]=rows.map(x=>x.lane);
