@@ -7,6 +7,7 @@ on:
       - 'app.js'
       - 'styles.css'
       - 'gamagori-live-integration-v0198.js'
+      - 'live-program-v0270.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
       - 'live-two-stage-v0260.js'
@@ -23,6 +24,9 @@ on:
       - 'live-snapshot-hash-guard-v0209.js'
       - 'development-status-v0217.js'
       - 'trial-readiness-v0218.js'
+      - 'live-session-today-v0263.js'
+      - 'trial-readiness-v0272.js'
+      - 'live-manual-refresh-v0276.js'
       - '.github/workflows/gamagori-asset-cache-bust-v0221.yml'
 
 permissions:
@@ -49,6 +53,16 @@ jobs:
 
           html_path = Path('index.html')
           html = html_path.read_text(encoding='utf-8')
+
+          # Ensure the manual refresh module is published in the live shell.
+          if 'live-manual-refresh-v0276.js' not in html:
+              anchor = '<script src="trial-readiness-v0272.js'
+              pos = html.find(anchor)
+              tag = '<script src="live-manual-refresh-v0276.js"></script>'
+              if pos >= 0:
+                  html = html[:pos] + tag + html[pos:]
+              else:
+                  html = html.replace('</body>', tag + '</body>')
 
           # Preserve the first include and remove exact duplicate runtime scripts.
           seen=set()
@@ -97,7 +111,7 @@ jobs:
           if dupes:
               raise SystemExit(f'DUPLICATE_RUNTIME_SCRIPTS:{dupes}')
 
-          required={'live-two-stage-v0260.js','live-prediction-compact-v0261.js'}
+          required={'live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-manual-refresh-v0276.js'}
           missing=sorted(required-set(bases))
           if missing:
               raise SystemExit(f'GAMAGORI_TRIAL_UI_ASSET_MISSING:{missing}')
