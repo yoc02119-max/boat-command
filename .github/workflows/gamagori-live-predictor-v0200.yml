@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'live-predictor-v0200.js'
+      - 'live-two-stage-v0260.js'
       - '.github/workflows/gamagori-live-predictor-v0200.yml'
 
 permissions:
@@ -24,9 +25,11 @@ jobs:
           fetch-depth: 0
 
       - name: Validate predictor JavaScript
-        run: node --check live-predictor-v0200.js
+        run: |
+          node --check live-predictor-v0200.js
+          node --check live-two-stage-v0260.js
 
-      - name: Ensure exactly one predictor module include
+      - name: Ensure predictor and two-stage modules are loaded once in order
         shell: python
         run: |
           from pathlib import Path
@@ -34,26 +37,28 @@ jobs:
 
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-
-          # Do not pin/rollback the current cache token. Reuse the app shell's
-          # current numeric token and make the module include idempotent.
           m=re.search(r'<script\s+src="app\.js\?v=(\d+)"></script>',s)
           token=m.group(1) if m else '1'
-          pattern=r'\s*<script\s+src="live-predictor-v0200\.js(?:\?v=\d+)?"></script>'
-          s=re.sub(pattern,'',s)
+
+          for name in ('live-predictor-v0200.js','live-two-stage-v0260.js'):
+              s=re.sub(rf'\s*<script\s+src="{re.escape(name)}(?:\?v=\d+)?"></script>','',s)
 
           anchor=re.search(r'<script\s+src="live-autopoll-v0199\.js(?:\?v=\d+)?"></script>',s)
-          tag=f'\n<script src="live-predictor-v0200.js?v={token}"></script>'
+          tags=(f'\n<script src="live-predictor-v0200.js?v={token}"></script>'
+                f'\n<script src="live-two-stage-v0260.js?v={token}"></script>')
           if anchor:
               pos=anchor.end()
-              s=s[:pos]+tag+s[pos:]
+              s=s[:pos]+tags+s[pos:]
           else:
-              s=s.replace('</body>',tag+'\n</body>')
+              s=s.replace('</body>',tags+'\n</body>')
 
-          if len(re.findall(r'<script\s+src="live-predictor-v0200\.js(?:\?v=\d+)?"></script>',s)) != 1:
-              raise SystemExit('PREDICTOR_INCLUDE_COUNT_INVALID')
+          for name in ('live-predictor-v0200.js','live-two-stage-v0260.js'):
+              n=len(re.findall(rf'<script\s+src="{re.escape(name)}(?:\?v=\d+)?"></script>',s))
+              if n!=1: raise SystemExit(f'{name}_INCLUDE_COUNT_INVALID:{n}')
+          if s.index('live-predictor-v0200.js')>s.index('live-two-stage-v0260.js'):
+              raise SystemExit('TWO_STAGE_SCRIPT_ORDER_INVALID')
           p.write_text(s,encoding='utf-8')
-          print(f'PREDICTOR_INCLUDE_OK token={token}')
+          print(f'TWO_STAGE_INCLUDE_OK token={token}')
 
       - name: Commit app predictor enablement
         run: |
@@ -65,5 +70,5 @@ jobs:
           git config user.name 'boat-command-relay'
           git config user.email 'boat-command-relay@users.noreply.github.com'
           git add index.html
-          git commit -m 'fix: keep one Gamagori LIVE candidate predictor include'
+          git commit -m 'feat: load Gamagori two-stage prediction overlay'
           git push
