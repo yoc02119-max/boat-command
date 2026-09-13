@@ -1,0 +1,73 @@
+name: Gamagori v0.27.2 safety audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - 'app.js'
+      - 'live-program-v0270.js'
+      - 'live-autopoll-v0199.js'
+      - 'live-predictor-v0200.js'
+      - 'live-two-stage-v0260.js'
+      - 'live-prediction-compact-v0261.js'
+      - 'live-lock-guard-v0202.js'
+      - 'live-lock-snapshot-v0203.js'
+      - 'live-result-v0204.js'
+      - 'live-session-today-v0263.js'
+      - 'trial-readiness-v0272.js'
+      - '.github/workflows/gamagori-v0272-safety.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and script-order audit
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, subprocess
+          critical=['app.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-session-today-v0263.js']
+          for f in critical:
+              subprocess.run(['node','--check',f],check=True)
+          html=Path('index.html').read_text(encoding='utf-8')
+          srcs=re.findall(r'<script\s+src="([^"]+)"',html)
+          bases=[x.split('?',1)[0] for x in srcs]
+          missing=[x for x in critical if x not in bases]
+          if missing: raise SystemExit(f'CRITICAL_SCRIPT_MISSING:{missing}')
+          pos=[bases.index(x) for x in critical]
+          if pos!=sorted(pos): raise SystemExit(f'CRITICAL_SCRIPT_ORDER_BAD:{pos}')
+          keys=[x.split('?v=',1)[1] if '?v=' in x else '' for x in srcs]
+          if not keys or any(not x for x in keys) or len(set(keys))!=1: raise SystemExit('CACHE_KEY_CONTRACT_BAD')
+          print('CRITICAL_SCRIPT_CONTRACT_PASS')
+      - name: Current Gamagori program snapshot audit
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, datetime, zoneinfo
+          today=datetime.datetime.now(zoneinfo.ZoneInfo('Asia/Tokyo')).date().isoformat()
+          root=Path('live/gamagori')/today/'program'
+          if not root.exists():
+              print(f'NO_PROGRAM_DIR_FOR_{today}; safe WAIT allowed before publisher creates it')
+              raise SystemExit(0)
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          if manifest.get('resultIncluded') is not False or manifest.get('resultEndpointsIncluded') is not False or manifest.get('exhibitionIncluded') is not False:
+              raise SystemExit('PROGRAM_BOUNDARY_BROKEN')
+          if manifest.get('allProgramReady') is True:
+              missing=[]
+              for race in range(1,13):
+                  p=root/f'race-{race}.json'
+                  if not p.exists(): missing.append(race); continue
+                  x=json.loads(p.read_text(encoding='utf-8'))
+                  boats=x.get('boats') or []
+                  lanes=sorted(int(b.get('lane',0)) for b in boats)
+                  if len(boats)!=6 or lanes!=[1,2,3,4,5,6] or x.get('resultIncluded') is not False or x.get('exhibitionIncluded') is not False or x.get('resultEndpointsIncluded') is not False:
+                      missing.append(race)
+              if missing: raise SystemExit(f'PROGRAM_12R_CONTRACT_FAIL:{missing}')
+              print('PROGRAM_12R_RESULT_FREE_PASS')
+          else:
+              print('PROGRAM_MANIFEST_NOT_FULL_READY_YET')
