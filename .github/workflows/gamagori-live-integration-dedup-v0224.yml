@@ -31,7 +31,7 @@ jobs:
           node --check app.js
           node --check gamagori-live-integration-v0198.js
 
-      - name: Verify single active LIVE integration implementation
+      - name: Verify single canonical loader plus one compatibility bridge
         shell: python
         run: |
           from pathlib import Path
@@ -41,22 +41,29 @@ jobs:
           compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
           html = Path('index.html').read_text(encoding='utf-8')
 
-          app_decl = len(re.findall(r'\bconst\s+BC_LIVE_V0198\s*=', app))
+          # app.js owns exactly one canonical PRE-RACE loader. The compatibility asset is
+          # allowed to wrap window.loadVerifiedLiveRace once for the verified race-N-pack
+          # fallback, but must never redeclare the canonical function or legacy state globals.
           app_loader = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', app))
-          compat_decl = len(re.findall(r'\bconst\s+BC_LIVE_V0198\s*=', compat))
-          compat_loader = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', compat))
+          compat_loader_decl = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', compat))
+          compat_bridge_assign = len(re.findall(r'window\.loadVerifiedLiveRace\s*=\s*async\s+function\s*\(', compat))
+          compat_legacy_decl = len(re.findall(r'\bconst\s+BC_LIVE_V0198\s*=', compat))
 
-          if app_decl != 1 or app_loader != 1:
-            raise SystemExit(f'EMBEDDED_LIVE_INTEGRATION_COUNT_INVALID: const={app_decl} loader={app_loader}')
-          if compat_decl != 0 or compat_loader != 0:
-            raise SystemExit(f'DUPLICATE_LIVE_GLOBALS_IN_COMPAT_ASSET: const={compat_decl} loader={compat_loader}')
-          if 'duplicateGlobalsDeclared:false' not in compat:
-            raise SystemExit('COMPAT_GUARD_TOKEN_MISSING')
+          if app_loader != 1:
+            raise SystemExit(f'CANONICAL_LIVE_LOADER_COUNT_INVALID:{app_loader}')
+          if compat_loader_decl != 0 or compat_legacy_decl != 0:
+            raise SystemExit(f'DUPLICATE_LIVE_GLOBALS_IN_COMPAT_ASSET: loader={compat_loader_decl} legacy={compat_legacy_decl}')
+          if compat_bridge_assign != 1:
+            raise SystemExit(f'LIVE_PACK_BRIDGE_COUNT_INVALID:{compat_bridge_assign}')
+          for token in ['duplicateGlobalsDeclared:false','implementation:\'app.js\'','canonicalLoader=typeof window.loadVerifiedLiveRace']:
+            if token not in compat:
+              raise SystemExit(f'COMPAT_GUARD_TOKEN_MISSING:{token}')
 
           scripts = re.findall(r'<script\s+src="([^"]+)"', html)
           bases = [x.split('?',1)[0] for x in scripts]
-          if bases.count('app.js') != 1 or bases.count('gamagori-live-integration-v0198.js') != 1:
-            raise SystemExit('LIVE_INTEGRATION_SCRIPT_SINGLETON_INVALID')
+          for required in ['app.js','gamagori-live-integration-v0198.js']:
+            if bases.count(required) != 1:
+              raise SystemExit(f'LIVE_INTEGRATION_SCRIPT_SINGLETON_INVALID:{required}:{bases.count(required)}')
           if bases.index('app.js') > bases.index('gamagori-live-integration-v0198.js'):
             raise SystemExit('LIVE_INTEGRATION_SCRIPT_ORDER_INVALID')
 
@@ -97,8 +104,8 @@ jobs:
             raise SystemExit('PRE_RACE_ALLOWLIST_MISSING')
           if 'resultEndpointsIncluded===false' not in app:
             raise SystemExit('PRE_RACE_RESULT_BOUNDARY_MISSING')
-          if 'result' in compat.lower() and 'result lookahead' in compat.lower():
-            raise SystemExit('UNEXPECTED_COMPAT_RESULT_LOGIC')
+          if 'resultEndpointsIncluded!==false' not in compat or 'No POST-RACE/result endpoint is referenced here.' not in compat:
+            raise SystemExit('COMPAT_PRE_RACE_BOUNDARY_MISSING')
           print('GAMAGORI_LIVE_INTEGRATION_FINAL_PASS')
 
       - name: Commit cache-key repair
