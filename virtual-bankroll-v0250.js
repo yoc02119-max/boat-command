@@ -20,10 +20,13 @@
     return returned-stake;
   }
 
-  // Operational bankroll must match the launcher: deposits + LIVE settlements only.
-  // BACKTEST/RETEST performance remains analytics-only and must never change money available for LIVE trial use.
+  // Operational bankroll must match the launcher exactly:
+  // fixed trial base + portal deposits + LIVE settlements only.
+  // Do not reuse store.startBankroll here because older launcher builds may
+  // already have copied deposits into that field; adding deposits again would
+  // double count them. BACKTEST/RETEST remains analytics-only.
   bankrollSeries=function(){
-    const base=Number(store?.startBankroll)||START_BANKROLL;
+    const base=START_BANKROLL;
     let bal=base+virtualDepositTotal();
     const out=[{label:'START + DEPOSIT',value:bal}];
     for(const s of allSessions().filter(s=>!s.retestMode&&s.runType==='LIVE')){
