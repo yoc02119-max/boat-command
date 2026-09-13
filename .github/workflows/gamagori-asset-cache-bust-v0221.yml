@@ -9,6 +9,8 @@ on:
       - 'gamagori-live-integration-v0198.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
+      - 'live-two-stage-v0260.js'
+      - 'live-prediction-compact-v0261.js'
       - 'live-skip-gate-v0225.js'
       - 'live-autofill-v0201.js'
       - 'live-lock-guard-v0202.js'
@@ -105,6 +107,11 @@ jobs:
           dupes=sorted({s for s in bases if bases.count(s)>1})
           if dupes:
               raise SystemExit(f'DUPLICATE_RUNTIME_SCRIPTS:{dupes}')
+
+          required={'live-two-stage-v0260.js','live-prediction-compact-v0261.js'}
+          missing=sorted(required-set(bases))
+          if missing:
+              raise SystemExit(f'GAMAGORI_TRIAL_UI_ASSET_MISSING:{missing}')
 
           all_tokens = [int(x) for x in re.findall(r'[?&]v=(\d+)', html)]
           if not all_tokens or len(set(all_tokens)) != 1 or all_tokens[0] != int(token):
