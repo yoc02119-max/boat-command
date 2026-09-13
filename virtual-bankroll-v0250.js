@@ -6,7 +6,7 @@
     try{
       const rows=JSON.parse(localStorage.getItem(DEPOSIT_KEY)||'[]');
       if(!Array.isArray(rows))return 0;
-      return rows.reduce((sum,row)=>sum+(Number(row?.amount)||0),0;
+      return rows.reduce((sum,row)=>sum+(Number(row?.amount)||0),0);
     }catch(_){
       return 0;
     }
