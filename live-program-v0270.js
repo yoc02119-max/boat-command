@@ -61,7 +61,7 @@ async function syncGamagoriProgramSnapshot({render=true}={}){
   finally{STATE.running=false}
 }
 window.syncGamagoriProgramSnapshot=syncGamagoriProgramSnapshot;
-window.BOAT_COMMAND_PROGRAM_V0270=Object.freeze({version:VERSION,venue:'蒲郡',state:STATE,sync:syncGamagoriProgramSnapshot,resultLookahead:false,exhibitionUsed:false});
+window.BOAT_COMMAND_PROGRAM_V0270=Object.freeze({version:VERSION,venue:'蒲郡',state:STATE,sync:syncGamagoriProgramSnapshot,resultLookahead:false,resultEndpointsIncluded:false,resultIncluded:false,exhibitionUsed:false});
 function boot(){syncGamagoriProgramSnapshot({render:true});setInterval(()=>{if(!document.hidden)syncGamagoriProgramSnapshot({render:true})},5*60*1000)}
 window.addEventListener('boatcommand:today-live',()=>setTimeout(()=>syncGamagoriProgramSnapshot({render:true}),40));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncGamagoriProgramSnapshot({render:true})});
