@@ -2,6 +2,9 @@ name: Gamagori LIVE PRE-RACE dispatcher v0.25.2
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-dispatch-v0252.yml'
   schedule:
     - cron: '*/5 * * * *'
 
