@@ -1,63 +1,60 @@
 const APP_KEY="boatCommand.v05";
 const MIRROR_KEY="boatCommand.v05.mirror";
 const SESSION_MIRROR_KEY="boatCommand.v05.sessionMirror";
-
-const VERIFIED_BASELINES={
-  "2025-12-15":{
-    id:"BT-001",venue:"蒲郡",strategyVersion:"GAMAGORI-V1.0",
-    races:9,hits:2,skipped:3,invested:18000,returned:9700,profit:-8300,
-    hitRate:22.2,roi:53.9,
-    note:"v0.14.0でSTRICT BACKTESTのHARD LOCK→結果解禁→精算まで完了した確定集計。"
-  }
-};
 const START_BANKROLL=100000;
 const PICK_PRICE=500;
 const MAX_PICKS=4;
-
-const PROGRAM_MODEL={
-  version:"PROGRAM-V1.0",historyYears:3,primaryMonths:12,minSamples:30,strongSamples:100,
-  weights:[
-    {maxDays:92,weight:1.00,label:"直近3か月"},{maxDays:365,weight:.82,label:"3〜12か月"},
-    {maxDays:730,weight:.52,label:"1〜2年前"},{maxDays:1095,weight:.28,label:"2〜3年前"}
-  ]
-};
-
-const BACKTEST_PACKS={};
 const STARTUP_FORCE_TODAY_LIVE=true;
 
-function dateISOInTokyo(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const get=t=>parts.find(p=>p.type===t)?.value;return `${get('year')}-${get('month')}-${get('day')}`}
+function $(sel){if(!sel)return null;return String(sel).startsWith('#')?document.querySelector(sel):document.getElementById(sel)||document.querySelector(sel)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function dateISOInTokyo(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t)?.value;return `${g('year')}-${g('month')}-${g('day')}`}
 const todayISO=()=>dateISOInTokyo();
-const money=n=>(n<0?"-":"")+"¥"+Math.abs(Math.round(n||0)).toLocaleString("ja-JP");
-const pct=n=>Number.isFinite(n)?n.toFixed(1)+"%":"—";
+const money=n=>(Number(n||0)<0?'-':'')+'¥'+Math.abs(Math.round(Number(n)||0)).toLocaleString('ja-JP');
+const pct=n=>Number.isFinite(Number(n))?Number(n).toFixed(1)+'%':'—';
+async function digest(text){const bytes=new TextEncoder().encode(String(text??''));const hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 
-function baseStore(){return {schema:5,venue:"蒲郡",startBankroll:START_BANKROLL,sessions:{},retestArchive:[]}}
-function baseSession(date){return {date,venue:"蒲郡",mode:"STRICT",runType:"LIVE",strategyVersion:"GAMAGORI-V1.0",createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>({race:i+1,picks:["","","",""],locked:false,lockedAt:null,lockHash:null,stake:0,result:"",officialPayout100:0,refundAmount:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false,rationale:"",missClass:""}))}}
-
-function parseStored(raw){try{const x=JSON.parse(raw);if(x&&x.schema===5&&x.sessions)return x}catch(e){}return null}
-function storeRank(x){const rev=Number(x?._meta?.revision)||0;const t=Date.parse(x?._meta?.updatedAt||"")||0;return rev*10000000000000+t}
-function loadStore(){const candidates=[];try{const x=parseStored(localStorage.getItem(APP_KEY));if(x)candidates.push(x)}catch(e){}try{const x=parseStored(localStorage.getItem(MIRROR_KEY));if(x)candidates.push(x)}catch(e){}try{const x=parseStored(sessionStorage.getItem(SESSION_MIRROR_KEY));if(x)candidates.push(x)}catch(e){}if(!candidates.length)return baseStore();candidates.sort((a,b)=>storeRank(b)-storeRank(a));const chosen=candidates[0];const raw=JSON.stringify(chosen);try{localStorage.setItem(APP_KEY,raw)}catch(e){}try{localStorage.setItem(MIRROR_KEY,raw)}catch(e){}try{sessionStorage.setItem(SESSION_MIRROR_KEY,raw)}catch(e){}return chosen}
-function saveStore(){store._meta=store._meta||{};store._meta.revision=(Number(store._meta.revision)||0)+1;store._meta.updatedAt=new Date().toISOString();const raw=JSON.stringify(store);let ok=0;try{localStorage.setItem(APP_KEY,raw);ok++}catch(e){}try{localStorage.setItem(MIRROR_KEY,raw);ok++}catch(e){}try{sessionStorage.setItem(SESSION_MIRROR_KEY,raw);ok++}catch(e){}return ok>0}
-
+function baseStore(){return {schema:5,venue:'蒲郡',startBankroll:START_BANKROLL,sessions:{},retestArchive:[],liveMonitor:{last:null,history:[]}}}
+function baseRace(n){return {race:n,picks:['','','',''],locked:false,lockedAt:null,lockHash:null,stake:0,result:'',officialPayout100:0,refundAmount:0,settled:false,settledAt:null,returnAmount:0,profit:0,hit:false,rationale:'',missClass:'',programComposition:null}}
+function baseSession(date){return {date,venue:'蒲郡',mode:'STRICT',runType:'LIVE',strategyVersion:'GAMAGORI-V1.0',createdAt:new Date().toISOString(),races:Array.from({length:12},(_,i)=>baseRace(i+1))}}
+function parseStored(raw){try{const x=JSON.parse(raw);if(x&&x.schema===5&&x.sessions)return x}catch{}return null}
+function storeRank(x){return (Number(x?._meta?.revision)||0)*10000000000000+(Date.parse(x?._meta?.updatedAt||'')||0)}
+function loadStore(){const c=[];for(const [kind,key] of [['l',APP_KEY],['l',MIRROR_KEY],['s',SESSION_MIRROR_KEY]]){try{const raw=kind==='s'?sessionStorage.getItem(key):localStorage.getItem(key);const x=parseStored(raw);if(x)c.push(x)}catch{}}if(!c.length)return baseStore();c.sort((a,b)=>storeRank(b)-storeRank(a));const x=c[0],raw=JSON.stringify(x);try{localStorage.setItem(APP_KEY,raw);localStorage.setItem(MIRROR_KEY,raw);sessionStorage.setItem(SESSION_MIRROR_KEY,raw)}catch{}return x}
+function saveStore(){store._meta=store._meta||{};store._meta.revision=(Number(store._meta.revision)||0)+1;store._meta.updatedAt=new Date().toISOString();const raw=JSON.stringify(store);let ok=0;for(const [kind,key] of [['l',APP_KEY],['l',MIRROR_KEY],['s',SESSION_MIRROR_KEY]])try{(kind==='s'?sessionStorage:localStorage).setItem(key,raw);ok++}catch{}return ok>0}
+function ensureSessionShape(s){if(!s||typeof s!=='object')return s;if(!Array.isArray(s.races))s.races=[];for(let n=1;n<=12;n++){let r=s.races.find(x=>Number(x.race)===n);if(!r){r=baseRace(n);s.races.push(r)}for(const [k,v] of Object.entries(baseRace(n)))if(r[k]===undefined)r[k]=Array.isArray(v)?[...v]:v}if(!s.runType)s.runType='LIVE';s.venue='蒲郡';if(!s.strategyVersion)s.strategyVersion='GAMAGORI-V1.0';s.races.sort((a,b)=>a.race-b.race);return s}
 let store=loadStore();if(!Array.isArray(store.retestArchive))store.retestArchive=[];if(!store.liveMonitor)store.liveMonitor={last:null,history:[]};
-function initialSessionDate(){return todayISO()}
-let currentDate=initialSessionDate();
-function session(date=currentDate){if(!store.sessions[date])store.sessions[date]=baseSession(date);return ensureSessionShape(store.sessions[date])}
-function ensureSessionShape(s){if(s.replayPackId===undefined)s.replayPackId="";if(s.replayRevealed===undefined)s.replayRevealed=false;if(!s.runType)s.runType="LIVE";if(!s.strategyVersion||s.strategyVersion==="GAMAGORI-v0.6")s.strategyVersion="GAMAGORI-V1.0";for(const r of s.races){if(r.rationale===undefined)r.rationale="";if(r.missClass===undefined)r.missClass="";if(r.refundAmount===undefined)r.refundAmount=0;if(r.programComposition===undefined)r.programComposition=null}return s}
-
-// Compatibility shell: retained API names for LIVE modules. Historical RETEST is never auto-opened.
-function activeReplayPack(){return null}
-function programProfiles(s,r){return Array.isArray(r.preRaceProfiles)&&r.preRaceProfiles.length===6?r.preRaceProfiles:null}
-function renderAll(){
- const s=session();
- const date=document.querySelector('#sessionDate');if(date)date.value=currentDate;
- const type=document.querySelector('#runType');if(type&&!type.disabled)type.value=s.runType;
- const title=document.querySelector('#pageTitle');if(title&&document.querySelector('#predict.view.active'))title.textContent='蒲郡 12R予想';
- const list=document.querySelector('#predictionList');if(list&&!list.children.length){list.innerHTML=s.races.map(r=>`<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><span>${r.locked?'HARD LOCK':'PRE-RACE'}</span></div><div class="two-stage-v0260"></div></article>`).join('')}
-}
+let currentDate=todayISO();
+function session(date=currentDate){if(STARTUP_FORCE_TODAY_LIVE)date=todayISO();currentDate=date;if(!store.sessions[date])store.sessions[date]=baseSession(date);const s=ensureSessionShape(store.sessions[date]);s.runType='LIVE';s.venue='蒲郡';return s}
 function save(){return saveStore()}
-try{localStorage.setItem('boatCommand.lastDate',currentDate)}catch(e){}
+function activeReplayPack(){return null}
+function programProfiles(s,r){return Array.isArray(r?.preRaceProfiles)&&r.preRaceProfiles.length===6?r.preRaceProfiles:null}
 
-// Minimal navigation remains functional while LIVE modules own prediction/detail rendering.
-document.querySelectorAll('.nav').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.view)?.classList.add('active');renderAll()}));
-document.querySelectorAll('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>document.querySelector(`.nav[data-view="${btn.dataset.jump}"]`)?.click()));
-renderAll();
+function validPick(v){const s=String(v||'').trim();return /^[1-6]-[1-6]-[1-6]$/.test(s)&&new Set(s.split('-')).size===3}
+function normalizedPicks(r){return (r?.picks||[]).map(x=>String(x||'').trim()).filter(Boolean)}
+function skippedReplayRaces(){return []}
+function eligibleReplayRaces(s=session()){return (s?.races||[]).filter(Boolean)}
+function requiredReplayLocks(s=session()){return eligibleReplayRaces(s).length}
+function targetLockedCount(s=session()){const targets=new Set(eligibleReplayRaces(s).map(r=>Number(r.race)));return (s?.races||[]).filter(r=>r.locked&&targets.has(Number(r.race))).length}
+function isResultMode(s=session()){const target=requiredReplayLocks(s);return target>0&&targetLockedCount(s)===target}
+
+async function lockRace(n){const s=session(),r=s.races.find(x=>Number(x.race)===Number(n));if(!r||r.locked)return false;const picks=normalizedPicks(r);if(picks.length<1||picks.length>MAX_PICKS||picks.some(x=>!validPick(x)))return false;if(!String(r.rationale||'').trim())r.rationale='LIVE候補に基づく事前予想';r.picks=[...picks];while(r.picks.length<4)r.picks.push('');r.stake=picks.length*PICK_PRICE;r.lockedAt=new Date().toISOString();r.lockHash=await digest(JSON.stringify({date:s.date,race:r.race,picks,rationale:r.rationale,stake:r.stake,lockedAt:r.lockedAt}));r.locked=true;saveStore();renderAll();return true}
+async function lockAllEligible(){const s=session();const targets=eligibleReplayRaces(s).filter(r=>!r.locked);for(const r of targets){const ok=await lockRace(r.race);if(!ok)return false}return true}
+function settleRace(){return false}
+
+function liveRelayReadyPayload(x){return !!x&&x.ready===true&&!!x.payload}
+function liveRelayReason(x){return String(x?.reason||'LIVEデータ確認待ち')}
+function applyVerifiedLiveToPrediction(r,x){if(!r||!x)return false;r.liveDataStatus=x.ready?'READY':'WAIT';r.liveDataReason=x.reason||'';r.liveVerifiedAt=x.ready?(x.payload?.fetchedAt||x.checkedAt||new Date().toISOString()):null;r.liveRelayPath=x.path||'';r.livePreRace=x.ready?{deadline:x.payload.deadline,beforeinfo:x.payload.beforeinfo,racelist:x.payload.racelist,verified:x.payload.verified}:null;return x.ready}
+function mapCorePreRacePack(pack,date,race,path){if(!pack||pack.schema!=='boat-command-live-pre-race-pack-v1')throw new Error('INVALID_PRE_RACE_SCHEMA');if(pack.venue!=='GAMAGORI'||String(pack.date)!==String(date)||Number(pack.race)!==Number(race))throw new Error('PRE_RACE_TARGET_MISMATCH');if(pack.resultEndpointsIncluded!==false)throw new Error('PRE_RACE_RESULT_BOUNDARY_INVALID');const boats=Array.isArray(pack.boats)?pack.boats:[],start=Array.isArray(pack.startExhibition)?pack.startExhibition:[];if(boats.length!==6)throw new Error('PRE_RACE_BOAT_COUNT_INVALID');const lanes=new Set(boats.map(x=>Number(x.lane)));if(lanes.size!==6||[1,2,3,4,5,6].some(n=>!lanes.has(n)))throw new Error('PRE_RACE_LANE_MAPPING_INVALID');const timingVerified=pack.timingStatus==='VERIFIED';const ready=timingVerified&&pack.readyForPrediction===true&&pack.boatMappingVerified===true&&pack.weatherMappingVerified===true&&!!pack.weather&&start.length===6;const payload={fetchedAt:pack.fetchedAt||null,deadline:pack.deadline,beforeinfo:{exhibition:boats.map(b=>({lane:Number(b.lane),exhibitionTime:Number(b.exhibitionTime),tilt:b.tilt,motor:b.motor,boat:b.boat})),startExhibition:start,weather:pack.weather},racelist:{boats:boats.map(b=>({lane:Number(b.lane),class:String(b.class||''),motor:b.motor,boat:b.boat}))},verified:{timingStatus:pack.timingStatus,boatMappingVerified:pack.boatMappingVerified,weatherMappingVerified:pack.weatherMappingVerified,readyForPrediction:pack.readyForPrediction}};return {ready,reason:ready?'':(!timingVerified?'時刻監査待ち':'安全監査READY待ち'),path,payload,checkedAt:new Date().toISOString()}}
+async function loadVerifiedLiveRace(date,race,{silent=false}={}){const paths=[`./live/gamagori/${date}/pre/race-${race}-pack.json`,`./live/gamagori/${date}/pre/race-${race}.json`];let reason='HTTP_404';for(const path of paths){try{const res=await fetch(`${path}?v=${Date.now()}`,{cache:'no-store',credentials:'same-origin'});if(!res.ok){reason=`HTTP_${res.status}`;continue}const raw=await res.json();if(raw?.schema==='boat-command-live-pre-race-pack-v1')return mapCorePreRacePack(raw,date,race,path);reason='未対応PRE-RACE形式'}catch(e){reason=e?.message||String(e)}}if(!silent)console.warn('LIVE_PRE_RACE_WAIT',date,race,reason);return {ready:false,reason,path:paths[0],checkedAt:new Date().toISOString()}}
+
+function sessionStats(s=session()){const targets=(s.races||[]).filter(r=>r.locked),settled=targets.filter(r=>r.settled),invested=settled.reduce((a,r)=>a+Number(r.stake||0),0),returned=settled.reduce((a,r)=>a+Number(r.returnAmount||0),0),hits=settled.filter(r=>r.hit).length;return {locked:targets.length,settled:settled.length,invested,returned,hits,profit:returned-invested,roi:invested?returned/invested*100:null,hitRate:settled.length?hits/settled.length*100:null}}
+function allStats(){const settled=Object.values(store.sessions||{}).flatMap(s=>s.races||[]).filter(r=>r.settled),invested=settled.reduce((a,r)=>a+Number(r.stake||0),0),returned=settled.reduce((a,r)=>a+Number(r.returnAmount||0),0),hits=settled.filter(r=>r.hit).length;return {races:settled.length,hits,invested,returned,profit:returned-invested,roi:invested?returned/invested*100:null,hitRate:settled.length?hits/settled.length*100:null}}
+function predictionCard(r){const picks=[...r.picks];while(picks.length<4)picks.push('');const disabled=r.locked?'disabled':'';const status=r.locked?'HARD LOCK':(r.liveSuggestion?.status==='SKIP'?'SKIP':r.liveSuggestion?.status==='CANDIDATE'?'READY':'PRE-RACE');return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><span>${esc(status)}</span></div><div class="prediction-gate prediction-gate-top ${r.liveSuggestion?.status==='CANDIDATE'?'ready':'limited'}"><b>${r.locked?'HARD LOCK':r.liveSuggestion?.status==='CANDIDATE'?'PREDICTION READY':'WAIT｜予想保留'}</b><span>${esc(r.liveSuggestion?.rationale||r.liveSuggestion?.reason||r.liveDataReason||'verified PRE-RACE待ち')}</span></div><div class="pick-grid">${picks.slice(0,4).map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" value="${esc(p)}" placeholder="1-2-3" ${disabled}>`).join('')}</div><textarea class="rationale-input" data-reason="${r.race}" placeholder="予想根拠" ${disabled}>${esc(r.rationale||'')}</textarea><div class="race-actions"><button class="lock-btn" data-lock="${r.race}" ${disabled}>${r.locked?'LOCK済み':'HARD LOCK'}</button></div></article>`}
+function resultCard(r){if(r.settled)return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><div class="stake">${r.hit?'HIT':'MISS'}</div></div><div class="snapshot-note">結果 ${esc(r.result)} · 払戻 ${money(r.returnAmount)} · 損益 ${money(r.profit)}</div></article>`;return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><div class="stake">${r.locked?'POST-RACE WAIT':'LOCK待ち'}</div></div><div class="result-fields"><div class="snapshot-note">公式POST-RACE relayのみで自動精算します。</div></div></article>`}
+function renderAll(){const s=session();const stats=sessionStats(s),all=allStats();const date=$('#sessionDate');if(date){date.value=s.date;date.min=s.date;date.max=s.date}const type=$('#runType');if(type){type.value='LIVE';type.disabled=true}const strategy=$('#strategyVersion');if(strategy)strategy.value=s.strategyVersion;const list=$('#predictionList');if(list)list.innerHTML=s.races.map(predictionCard).join('');const rlist=$('#resultList'),gate=$('#resultGate'),sum=$('#resultSummary'),badge=$('#resultGateBadge');const resultMode=isResultMode(s);if(gate){gate.classList.toggle('hidden',resultMode);gate.innerHTML=resultMode?'':'<h3>RESULT MODEはまだ開いていません</h3><p>全予想対象をHARD LOCKするまでPOST-RACEを取得しません。</p>'}if(rlist){rlist.classList.toggle('hidden',!resultMode);if(resultMode)rlist.innerHTML=s.races.map(resultCard).join('')}if(sum){sum.classList.toggle('hidden',!resultMode);if(resultMode)sum.innerHTML=`<div class="snapshot-note">精算 ${stats.settled}/${requiredReplayLocks(s)} · 的中 ${stats.hits} · 回収率 ${stats.roi==null?'—':pct(stats.roi)} · 損益 ${money(stats.profit)}</div>`}if(badge){badge.textContent=resultMode?'POST-RACE OPEN':'LOCK待ち';badge.className=`badge ${resultMode?'ready':'blind'}`}const kLocked=$('#kLocked');if(kLocked)kLocked.textContent=`${stats.locked}/12`;const kHits=$('#kHits');if(kHits)kHits.textContent=stats.settled?`${stats.hits}/${stats.settled}`:'—';const kHitRate=$('#kHitRate');if(kHitRate)kHitRate.textContent=stats.hitRate==null?'—':pct(stats.hitRate);const kRoi=$('#kRoi');if(kRoi)kRoi.textContent=stats.roi==null?'—':pct(stats.roi);const kProfit=$('#kProfit');if(kProfit)kProfit.textContent=money(stats.profit);const bankroll=$('#bankrollNow');if(bankroll)bankroll.textContent=money(Number(store.startBankroll||START_BANKROLL)+all.profit);const allRecord=$('#allRecord');if(allRecord)allRecord.textContent=`${all.races}戦 ${all.hits}的中`;const allHitRate=$('#allHitRate');if(allHitRate)allHitRate.textContent=all.hitRate==null?'—':pct(all.hitRate);const allRoi=$('#allRoi');if(allRoi)allRoi.textContent=all.roi==null?'—':pct(all.roi);const strip=$('#raceStrip');if(strip)strip.innerHTML=s.races.map(r=>`<span class="status-pill ${r.locked?'done':''}">${r.race}R ${r.locked?'LOCK':r.liveSuggestion?.status||'WAIT'}</span>`).join('');const note=$('#guardNote');if(note)note.textContent=resultMode?'全予想対象のHARD LOCK完了。POST-RACEのみ解禁中。':`HARD LOCK ${targetLockedCount(s)}/${requiredReplayLocks(s)}。WAITが残る間は結果を開きません。`;const title=$('#pageTitle');if(title&&document.querySelector('#predict.view.active'))title.textContent='蒲郡 12R予想'}
+function answer(q){const t=String(q||'').replace(/\s/g,'');const s=session(),st=sessionStats(s);if(/今日|状況|進捗/.test(t))return `蒲郡LIVEは HARD LOCK <strong>${st.locked}/${requiredReplayLocks(s)}</strong>、精算 ${st.settled}Rです。`;if(/回収率|成績|損益/.test(t))return `今日の精算済み成績は、回収率 <strong>${st.roi==null?'—':pct(st.roi)}</strong>、損益 ${money(st.profit)}です。`;return '蒲郡LIVE担当です。READY/WAIT、予想、LOCK、精算状況を確認できます。'}
+
+function bindCoreUi(){document.querySelectorAll('.nav').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.view)?.classList.add('active');renderAll()}));document.querySelectorAll('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>document.querySelector(`.nav[data-view="${btn.dataset.jump}"]`)?.click()));document.addEventListener('input',e=>{const el=e.target,s=session();if(el.matches?.('.pick[data-r]')){const r=s.races.find(x=>Number(x.race)===Number(el.dataset.r));if(r&&!r.locked){r.picks[Number(el.dataset.i)||0]=el.value;saveStore()}}else if(el.matches?.('[data-reason]')){const r=s.races.find(x=>Number(x.race)===Number(el.dataset.reason));if(r&&!r.locked){r.rationale=el.value;saveStore()}}});document.addEventListener('click',async e=>{const b=e.target.closest?.('[data-lock]');if(b){b.disabled=true;await lockRace(Number(b.dataset.lock));renderAll()}});const all=$('#lockAllBtn');if(all)all.addEventListener('click',async()=>{all.disabled=true;try{await lockAllEligible()}finally{all.disabled=false;renderAll()}});const date=$('#sessionDate');if(date)date.addEventListener('change',()=>{if(date.value!==todayISO())date.value=todayISO();currentDate=todayISO();renderAll()});const send=$('#send'),prompt=$('#prompt');if(send&&prompt)send.addEventListener('click',()=>{const q=prompt.value.trim();if(!q)return;const chat=$('#chat');if(chat)chat.insertAdjacentHTML('beforeend',`<div class="bubble user">${esc(q)}</div><div class="bubble ai">${answer(q)}</div>`);prompt.value=''})}
+
+try{localStorage.setItem('boatCommand.lastDate',todayISO())}catch{}
+session();bindCoreUi();renderAll();
