@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/gamagori-early-trial-readiness-v0218.yml'
       - 'trial-readiness-v0218.js'
+      - 'trial-readiness-v0272.js'
+      - 'live-program-v0270.js'
       - 'live-two-stage-v0260.js'
       - 'live-prediction-compact-v0261.js'
       - 'live-skip-gate-v0225.js'
@@ -33,6 +35,8 @@ jobs:
         run: |
           set -euo pipefail
           node --check trial-readiness-v0218.js
+          node --check trial-readiness-v0272.js
+          node --check live-program-v0270.js
           node --check live-two-stage-v0260.js
           node --check live-prediction-compact-v0261.js
           node --check live-skip-gate-v0225.js
@@ -46,8 +50,10 @@ jobs:
 
           html = Path('index.html').read_text(encoding='utf-8')
           gate = Path('trial-readiness-v0218.js').read_text(encoding='utf-8')
+          gate2 = Path('trial-readiness-v0272.js').read_text(encoding='utf-8')
           skip = Path('live-skip-gate-v0225.js').read_text(encoding='utf-8')
           compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
+          program = Path('live-program-v0270.js').read_text(encoding='utf-8')
           two = Path('live-two-stage-v0260.js').read_text(encoding='utf-8')
           compact = Path('live-prediction-compact-v0261.js').read_text(encoding='utf-8')
 
@@ -94,16 +100,26 @@ jobs:
           if 'predictionDomScoped:true' not in compat or 'raceIdentityFailClosed:true' not in compat:
             raise SystemExit('LIVE_INTEGRATION_DOM_SCOPE_GUARD_MISSING')
 
-          # New compact trial layers must remain PRE-RACE display helpers only.
-          if 'firstUsesSameDayResults:false' not in two or 'noResultLookahead:true' not in two:
-            raise SystemExit('TWO_STAGE_RESULT_LOOKAHEAD_GUARD_MISSING')
+          # FIRST must be generated from result-free program data + strictly older history only.
+          # SECOND/compact must not expose any result endpoint in PRE-RACE modules.
+          if 'resultEndpointsIncluded:false' not in program or 'resultIncluded:false' not in program:
+            raise SystemExit('PROGRAM_RESULT_FREE_CONTRACT_MISSING')
+          if "String(hs.date)>=String(s.date)" not in two:
+            raise SystemExit('TWO_STAGE_SAME_DAY_HISTORY_EXCLUSION_MISSING')
           if "document.querySelectorAll('#predictionList .race-card')" not in two:
             raise SystemExit('TWO_STAGE_DOM_SCOPE_GUARD_MISSING')
-          if "host.querySelectorAll('.race-card')" not in compact or "closest('.race-card')" not in compact:
+          if "document.querySelector('#predictionList')" not in compact or "document.querySelector('#predict')" not in compact:
             raise SystemExit('COMPACT_DOM_SCOPE_GUARD_MISSING')
+          if 'refreshesAppVersion:true' not in compact or 'refreshesProgram:true' not in compact or 'refreshesExhibition:true' not in compact:
+            raise SystemExit('COMPACT_LATEST_REFRESH_CONTRACT_MISSING')
           for forbidden in ['raceresult','result?jcd=','officialResult','fetchResult']:
-            if forbidden in two or forbidden in compact:
-              raise SystemExit(f'COMPACT_PRE_RACE_RESULT_SURFACE_FOUND:{forbidden}')
+            if forbidden in program or forbidden in two or forbidden in compact:
+              raise SystemExit(f'PRE_RACE_RESULT_SURFACE_FOUND:{forbidden}')
+
+          # Current readiness must refuse READY unless today's 12R program and FIRST are complete.
+          for token in ['programReady===12','firstReady===12','waitFailClosed:true','noResultLookahead:true']:
+            if token not in gate2:
+              raise SystemExit(f'CURRENT_READINESS_CONTRACT_MISSING:{token}')
 
           result = Path('live-result-v0204.js').read_text(encoding='utf-8')
           lock = Path('live-lock-guard-v0202.js').read_text(encoding='utf-8')
@@ -160,11 +176,12 @@ jobs:
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           bases = [x.split('?',1)[0] for x in srcs]
           required = [
-            'app.js','gamagori-live-integration-v0198.js','live-autopoll-v0199.js','live-predictor-v0200.js',
-            'live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-skip-gate-v0225.js','live-autofill-v0201.js',
-            'live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js',
-            'live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js',
-            'live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js'
+            'app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-program-v0270.js',
+            'live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js',
+            'live-skip-gate-v0225.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js',
+            'live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
+            'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
+            'trial-readiness-v0218.js','live-session-today-v0263.js','trial-readiness-v0272.js'
           ]
           missing = [x for x in required if x not in bases]
           if missing:
