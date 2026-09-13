@@ -1,7 +1,8 @@
 // BOAT COMMAND GAMAGORI LIVE LOCK SNAPSHOT v0.20.3
 // Freezes the exact pre-race evidence used at successful LIVE HARD LOCK.
 // Snapshot is deep-cloned and never refreshed from later LIVE polling.
-const BC_LIVE_LOCK_SNAPSHOT_V0203={version:'GAMAGORI-LIVE-LOCK-SNAPSHOT-V0.20.3'};
+// DOM hardening v0.25.4: snapshot badges are prediction-only and bind by explicit race number.
+const BC_LIVE_LOCK_SNAPSHOT_V0203={version:'GAMAGORI-LIVE-LOCK-SNAPSHOT-V0.20.3+DOM-BIND-V0.25.4'};
 
 function bcDeepCloneV0203(v){return v==null?v:JSON.parse(JSON.stringify(v));}
 function bcBuildLiveLockSnapshotV0203(s,r){
@@ -52,12 +53,24 @@ function bcVerifyLiveLockSnapshotV0203(r){
 }
 function renderLiveLockSnapshotsV0203(){
   const s=session();if(!s||s.runType!=='LIVE')return;
-  [...document.querySelectorAll('.race-card')].forEach((card,i)=>{
-    const r=s.races.find(x=>Number(x.race)===i+1);if(!r?.locked)return;
+  const cards=[...document.querySelectorAll('#predictionList .race-card')];
+  cards.forEach(card=>{
+    const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
+    if(!Number.isInteger(race)||race<1||race>12){
+      const stale=card.querySelector('.live-lock-snapshot-v0203');
+      if(stale)stale.remove();
+      return;
+    }
+    const r=s.races.find(x=>Number(x.race)===race);
     let box=card.querySelector('.live-lock-snapshot-v0203');
+    if(!r?.locked){if(box)box.remove();return;}
     if(!box){box=document.createElement('div');box.className='live-lock-snapshot-v0203';card.prepend(box);}
     const a=bcVerifyLiveLockSnapshotV0203(r);
     box.innerHTML=a.ok?`<div class="snapshot-note">🔒 LOCK SNAPSHOT IMMUTABLE · ${esc(r.liveLockSnapshotHash||'')}</div>`:`<div class="integrity-warning">⚠ LOCK SNAPSHOT AUDIT · ${esc(a.reason)}</div>`;
+  });
+  // Guard against stale badges left by older builds in non-prediction surfaces.
+  document.querySelectorAll('.race-card .live-lock-snapshot-v0203').forEach(box=>{
+    if(!box.closest('#predictionList'))box.remove();
   });
 }
 const _bcRenderAllV0203=renderAll;
