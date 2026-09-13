@@ -1,41 +1,44 @@
-// BOAT COMMAND GAMAGORI TWO-STAGE PREDICTION v0.26.1
+// BOAT COMMAND GAMAGORI TWO-STAGE PREDICTION v0.26.2
 // FIRST = historical/program-composition only. Same-day results + exhibition excluded.
 // SECOND = existing verified LIVE candidate. No result fetch here.
 (()=>{
   'use strict';
-  const VERSION='GAMAGORI-TWO-STAGE-V0.26.1';
+  const VERSION='GAMAGORI-TWO-STAGE-V0.26.2';
 
   function installSimpleUi(){
-    if(document.getElementById('bc-two-stage-simple-style'))return;
-    const style=document.createElement('style');
-    style.id='bc-two-stage-simple-style';
+    let style=document.getElementById('bc-two-stage-simple-style');
+    if(!style){style=document.createElement('style');style.id='bc-two-stage-simple-style';document.head.appendChild(style);}
     style.textContent=`
-      #predictionList .race-card{padding:14px 14px 12px}
-      #predictionList .two-stage-v0260{display:grid;gap:8px;margin-bottom:10px}
-      .bc-stage-row{border:1px solid #24475f;background:#081a2a;border-radius:12px;padding:11px 12px}
+      #predictionList .race-card{padding:12px 14px!important}
+      #predictionList .race-card>:not(.race-head):not(.two-stage-v0260):not(.race-actions){display:none!important}
+      #predictionList .race-head{margin-bottom:9px!important}
+      #predictionList .race-no{font-size:24px!important}
+      #predictionList .two-stage-v0260{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;margin:0!important}
+      #predictionList .race-actions{margin-top:8px!important}
+      #predictionList .race-actions>:not(.lock-btn){display:none!important}
+      .bc-stage-row{border:1px solid #24475f;background:#081a2a;border-radius:12px;padding:11px 12px;min-height:82px}
       .bc-stage-row.bc-first{border-color:#2b607d;background:#071a29}
       .bc-stage-row.bc-second.ready{border-color:#277b5d;background:#09241c}
-      .bc-stage-row.bc-second.wait{opacity:.78}
+      .bc-stage-row.bc-second.wait{opacity:.72}
       .bc-stage-row.bc-second.none{border-color:#57465d;background:#171420}
-      .bc-stage-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
-      .bc-stage-title{font-size:12px;font-weight:800;letter-spacing:.02em}
+      .bc-stage-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+      .bc-stage-title{font-size:12px;font-weight:900}
       .bc-stage-tag{font-size:9px;color:#8db2cf;border:1px solid #31516e;border-radius:999px;padding:3px 7px;white-space:nowrap}
-      .bc-stage-picks{font-size:18px;font-weight:900;line-height:1.35;letter-spacing:.02em;color:#eef9ff;word-break:break-word}
+      .bc-stage-picks{font-size:20px;font-weight:900;line-height:1.35;color:#eef9ff;word-break:break-word}
       .bc-stage-row.bc-second.ready .bc-stage-picks{color:#9dffd0}
-      .bc-stage-status{font-size:11px;color:#8ca8bd;line-height:1.45}
+      .bc-stage-status{font-size:12px;color:#8ca8bd;line-height:1.45;padding-top:6px}
       .bc-stage-detail{margin-top:7px;border-top:1px solid rgba(255,255,255,.08);padding-top:6px}
       .bc-stage-detail summary{font-size:10px;color:#7796ae;cursor:pointer;list-style:none}
       .bc-stage-detail summary::-webkit-details-marker{display:none}
       .bc-stage-detail div{font-size:10px;color:#9bb2c5;line-height:1.5;margin-top:5px}
       #predictionList .program-score,#predictionList .live-candidate-v0200{display:none!important}
-      #predictionList .race-meta{font-size:9px}
-      @media(max-width:680px){
-        #predictionList .race-card{padding:12px 10px}
-        .bc-stage-picks{font-size:17px}
-        .bc-stage-row{padding:10px}
+      @media(max-width:760px){
+        #predictionList .race-card{padding:10px!important}
+        #predictionList .two-stage-v0260{grid-template-columns:1fr}
+        .bc-stage-picks{font-size:19px}
+        .bc-stage-row{padding:10px;min-height:0}
       }
     `;
-    document.head.appendChild(style);
   }
 
   function validResult(v){const s=String(v||'').trim();return /^[1-6]-[1-6]-[1-6]$/.test(s)&&new Set(s.split('-')).size===3?s:null;}
