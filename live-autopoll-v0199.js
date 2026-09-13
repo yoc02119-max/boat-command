@@ -1,4 +1,4 @@
-// BOAT COMMAND GAMAGORI LIVE AUTO-POLL v0.19.10
+// BOAT COMMAND GAMAGORI LIVE AUTO-POLL v0.19.11
 // Reads same-origin verified PRE-RACE packs only. No result endpoints.
 const BC_LIVE_AUTOPOLL_V0199={timer:null,running:false,lastSweepAt:null};
 function liveAutoPollEligible(){
@@ -24,14 +24,15 @@ function mapVerifiedPack(pack,date,race,path){
   if(laneSet.size!==6||[1,2,3,4,5,6].some(n=>!laneSet.has(n)))return {ready:false,reason:'艇番対応を安全に確認できません',path};
   const exhibition=boats.map(b=>({lane:Number(b.lane),exhibitionTime:Number(b.exhibitionTime),tilt:b.tilt,motor:b.motor,boat:b.boat}));
   const racelistBoats=boats.map(b=>({lane:Number(b.lane),class:String(b.class||''),motor:b.motor,boat:b.boat}));
-  const ready=pack.readyForPrediction===true&&pack.boatMappingVerified===true&&pack.weatherMappingVerified===true&&!!pack.weather&&start.length===6;
+  const timingVerified=pack.timingStatus==='VERIFIED';
+  const ready=timingVerified&&pack.readyForPrediction===true&&pack.boatMappingVerified===true&&pack.weatherMappingVerified===true&&!!pack.weather&&start.length===6;
   const payload={
     fetchedAt:pack.fetchedAt,deadline:pack.deadline,
     beforeinfo:{exhibition,startExhibition:start,weather:pack.weather},
     racelist:{boats:racelistBoats},
-    verified:{boatMappingVerified:pack.boatMappingVerified,weatherMappingVerified:pack.weatherMappingVerified,readyForPrediction:pack.readyForPrediction}
+    verified:{timingStatus:pack.timingStatus,boatMappingVerified:pack.boatMappingVerified,weatherMappingVerified:pack.weatherMappingVerified,readyForPrediction:pack.readyForPrediction}
   };
-  return {ready,reason:ready?'':(pack.timingStatus!=='VERIFIED'?'時刻監査待ち':'安全監査READY待ち'),path,payload,checkedAt:new Date().toISOString()};
+  return {ready,reason:ready?'':(!timingVerified?'時刻監査待ち':'安全監査READY待ち'),path,payload,checkedAt:new Date().toISOString()};
 }
 async function loadVerifiedLiveRaceCompat(date,race){
   const paths=[`./live/gamagori/${date}/pre/race-${race}-pack.json`,`./live/gamagori/${date}/pre/race-${race}.json`];
