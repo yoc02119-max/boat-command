@@ -41,9 +41,6 @@ jobs:
           compat = Path('gamagori-live-integration-v0198.js').read_text(encoding='utf-8')
           html = Path('index.html').read_text(encoding='utf-8')
 
-          # app.js owns exactly one canonical PRE-RACE loader. The compatibility asset is
-          # allowed to wrap window.loadVerifiedLiveRace once for the verified race-N-pack
-          # fallback, but must never redeclare the canonical function or legacy state globals.
           app_loader = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', app))
           compat_loader_decl = len(re.findall(r'\basync\s+function\s+loadVerifiedLiveRace\s*\(', compat))
           compat_bridge_assign = len(re.findall(r'window\.loadVerifiedLiveRace\s*=\s*async\s+function\s*\(', compat))
@@ -100,12 +97,16 @@ jobs:
           compat_cache = re.search(r'gamagori-live-integration-v0198\.js\?v=(\d+)', html)
           if not app_cache or not compat_cache or app_cache.group(1) != compat_cache.group(1):
             raise SystemExit('LIVE_COMPAT_CACHE_KEY_NOT_ALIGNED')
-          if 'const LIVE_ALLOWED_PATHS=new Set(["racelist","beforeinfo"])' not in app:
-            raise SystemExit('PRE_RACE_ALLOWLIST_MISSING')
-          if 'resultEndpointsIncluded===false' not in app:
-            raise SystemExit('PRE_RACE_RESULT_BOUNDARY_MISSING')
+
+          # The current core accepts only the explicit result-free PRE-RACE pack schema and
+          # refuses any pack unless the producer asserts resultEndpointsIncluded === false.
+          for token in ["boat-command-live-pre-race-pack-v1","pack.resultEndpointsIncluded!==false","./live/gamagori/${date}/pre/race-${race}-pack.json"]:
+            if token not in app:
+              raise SystemExit(f'PRE_RACE_CORE_BOUNDARY_MISSING:{token}')
           if 'resultEndpointsIncluded!==false' not in compat or 'No POST-RACE/result endpoint is referenced here.' not in compat:
             raise SystemExit('COMPAT_PRE_RACE_BOUNDARY_MISSING')
+          if '/post/' in compat or 'raceresult' in compat.lower():
+            raise SystemExit('COMPAT_POST_RACE_SURFACE_FOUND')
           print('GAMAGORI_LIVE_INTEGRATION_FINAL_PASS')
 
       - name: Commit cache-key repair
