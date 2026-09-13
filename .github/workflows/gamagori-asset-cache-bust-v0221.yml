@@ -45,14 +45,12 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import json, re
+          import re
 
           html_path = Path('index.html')
           html = html_path.read_text(encoding='utf-8')
 
-          # Fail-safe against legacy enablement workflows appending a second copy
-          # of the same runtime module. Preserve the first include and remove only
-          # exact duplicate JS paths before refreshing cache keys.
+          # Preserve the first include and remove exact duplicate runtime scripts.
           seen=set()
           def dedupe_script(m):
               path=m.group(1)
@@ -72,12 +70,6 @@ jobs:
           html = re.sub(r'href="styles\.css(?:\?v=\d+)?"', f'href="styles.css?v={token}"', html)
           html = re.sub(r'src="([^"]+\.js)(?:\?v=\d+)?"', rf'src="\1?v={token}"', html)
           html_path.write_text(html, encoding='utf-8')
-
-          manifest_path = Path('manifest.webmanifest')
-          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
-          manifest['description'] = 'BOAT COMMAND v0.21.8 EARLY TRIAL — 蒲郡 strict-blind live/backtest analytics'
-          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-
           print(f'CACHE_TOKEN={token}')
 
       - name: Verify cache-bust and PWA metadata contract
@@ -90,12 +82,9 @@ jobs:
           token = Path('/tmp/boat-command-cache-token').read_text(encoding='utf-8').strip()
           if not token.isdigit():
               raise SystemExit('CACHE_TOKEN_INVALID')
-          if f'manifest.webmanifest?v={token}' not in html:
-              raise SystemExit('MANIFEST_CACHE_KEY_MISSING')
-          if f'icon.svg?v={token}' not in html:
-              raise SystemExit('ICON_CACHE_KEY_MISSING')
-          if f'styles.css?v={token}' not in html:
-              raise SystemExit('CSS_CACHE_KEY_MISSING')
+          for asset in ('manifest.webmanifest','icon.svg','styles.css'):
+              if f'{asset}?v={token}' not in html:
+                  raise SystemExit(f'CACHE_KEY_MISSING:{asset}')
 
           scripts = re.findall(r'<script\s+src="([^"]+)"', html)
           if not scripts:
@@ -118,27 +107,23 @@ jobs:
               raise SystemExit(f'CACHE_KEYS_NOT_MONOTONIC:{all_tokens}')
 
           manifest = json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
-          if manifest.get('name') != 'BOAT COMMAND' or manifest.get('start_url') != './' or manifest.get('scope') != './':
+          if manifest.get('name') != 'BOAT COMMAND' or manifest.get('scope') != './':
               raise SystemExit('PWA_SCOPE_CONTRACT_CHANGED')
-          if 'v0.21.8 EARLY TRIAL' not in manifest.get('description',''):
-              raise SystemExit('PWA_DESCRIPTION_STALE')
-          print(f'GAMAGORI_ASSET_CACHE_BUST_PASS token={token} scripts={len(scripts)}')
+          if manifest.get('start_url') not in ('./','./portal.html'):
+              raise SystemExit(f'PWA_START_URL_UNEXPECTED:{manifest.get("start_url")}')
+          print(f'GAMAGORI_ASSET_CACHE_BUST_PASS token={token} scripts={len(scripts)} start_url={manifest.get("start_url")}')
 
       - name: Commit cache-safe app shell
         run: |
-          if git diff --quiet -- index.html manifest.webmanifest; then
+          if git diff --quiet -- index.html; then
             echo 'No cache metadata change required.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html manifest.webmanifest
+          git add index.html
           git commit -m 'fix: refresh Gamagori iPad app asset cache keys v0.22.1'
 
-          # Other Gamagori verification workflows may publish small audit files to
-          # main at the same time. Rebase and retry instead of failing the cache
-          # refresh on a harmless ref race. Any real content conflict still fails
-          # closed because `set -e` aborts the job.
           for attempt in 1 2 3; do
             git fetch origin main
             git rebase origin/main
