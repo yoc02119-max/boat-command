@@ -1,15 +1,43 @@
-// BOAT COMMAND GAMAGORI LIVE PREDICTION COMPACT UI v0.26.6
-// LIVE prediction screen: race + first/second prediction + safe per-race HARD LOCK + refresh control.
+// BOAT COMMAND GAMAGORI LIVE PREDICTION COMPACT UI v0.27.0
+// LIVE prediction screen: first/second predictions + HARD LOCK + prediction/app-version refresh.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-LIVE-COMPACT-V0.26.6';
+const VERSION='GAMAGORI-LIVE-COMPACT-V0.27.0';
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function forceTodayLiveSession(){let s=null;try{s=typeof session==='function'?session():null}catch{return false}if(!s||s.runType!=='LIVE'||s.replayPackId)return false;const today=todayJst();if(String(s.date||'')===today)return false;try{if(typeof currentDate!=='undefined')currentDate=today;localStorage.setItem('boatCommand.lastDate',today);const d=document.querySelector('#sessionDate');if(d)d.value=today;if(typeof session==='function')session(today);return true}catch{return false}}
 const style=document.createElement('style');style.id='bc-live-compact-v0261-style';style.textContent=`#predict.bc-live-clean>.panel>.panel-head #lockAllBtn,#predict.bc-live-clean .session-controls,#predict.bc-live-clean #replayPanel{display:none!important}#predict.bc-live-clean>.panel>.panel-head p{display:none!important}#predictionList.bc-live-compact-v0261{display:grid;gap:12px}#predictionList.bc-live-compact-v0261 .race-card{padding:14px;border-radius:16px}#predictionList.bc-live-compact-v0261 .race-head{margin-bottom:10px;align-items:center}#predictionList.bc-live-compact-v0261 .race-no{font-size:22px;font-weight:900}#predictionList.bc-live-compact-v0261 .race-meta,#predictionList.bc-live-compact-v0261 .stake,#predictionList.bc-live-compact-v0261 .prediction-gate-top,#predictionList.bc-live-compact-v0261 .program-score,#predictionList.bc-live-compact-v0261 .snapshot-slot,#predictionList.bc-live-compact-v0261 .live-candidate-v0200,#predictionList.bc-live-compact-v0261 .live-autofill-v0201,#predictionList.bc-live-compact-v0261 .pick-grid,#predictionList.bc-live-compact-v0261 .reason-box,#predictionList.bc-live-compact-v0261 .rationale-input,#predictionList.bc-live-compact-v0261 .compact-tools{display:none!important}#predictionList.bc-live-compact-v0261 .two-stage-v0260{display:grid!important;gap:8px;margin:0!important}#predictionList.bc-live-compact-v0261 .race-actions{display:flex!important;justify-content:flex-end;margin-top:9px!important}#predictionList.bc-live-compact-v0261 .race-actions .lock-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:112px;border:1px solid #2b607d;background:#0a263b;color:#dff4ff;border-radius:10px;padding:8px 12px;font-weight:900}#predictionList.bc-live-compact-v0261 .race-actions .lock-btn:disabled{opacity:.55}.bc-latest-tools{display:flex;align-items:center;gap:10px;margin-left:auto}.bc-latest-btn{border:1px solid #1ea2e3;background:#0b3150;color:#fff;border-radius:10px;padding:9px 13px;font-weight:800}.bc-latest-btn:disabled{opacity:.55}.bc-latest-status{font-size:10px;color:#7f9ab5;white-space:nowrap}@media(max-width:720px){#predictionList.bc-live-compact-v0261 .race-card{padding:12px}.bc-latest-tools{gap:6px}.bc-latest-status{display:none}}`;if(!document.getElementById(style.id))document.head.appendChild(style);
 function isLive(){let s=null;try{s=typeof session==='function'?session():null}catch{}return !!s&&s.runType==='LIVE'&&!s.replayPackId&&String(s.date||'')===todayJst()}
+function currentAssetKey(){try{const src=[...document.scripts].map(s=>s.getAttribute('src')||'').find(x=>x.startsWith('app.js'));return new URL(src,location.href).searchParams.get('v')||'unknown'}catch{return 'unknown'}}
 function stamp(msg='✓ 最新'){const el=document.querySelector('#bcLatestStatus');if(!el)return;const t=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());el.textContent=`${msg} ${t}`}
-async function refreshLatest(){const btn=document.querySelector('#bcLatestBtn');if(btn?.disabled)return;if(btn){btn.disabled=true;btn.textContent='更新中…'}stamp('同期中');try{forceTodayLiveSession();if(typeof sweepVerifiedLiveRelays==='function')await sweepVerifiedLiveRelays({reason:'manual-latest-refresh'});else if(typeof renderAll==='function')renderAll();if(typeof renderAll==='function')renderAll();stamp('✓ 最新')}catch(e){console.warn('[BC latest refresh]',e);stamp('更新失敗')}finally{if(btn){btn.disabled=false;btn.textContent='↻ 最新に更新'}}}
+async function remoteAssetState(){
+  const res=await fetch(`./index.html?bc-version-check=${Date.now()}`,{cache:'no-store',credentials:'same-origin'});if(!res.ok)throw new Error(`INDEX_HTTP_${res.status}`);
+  const text=await res.text(),doc=new DOMParser().parseFromString(text,'text/html');
+  const app=[...doc.scripts].map(s=>s.getAttribute('src')||'').find(x=>x.startsWith('app.js'))||'';
+  const key=app?new URL(app,location.href).searchParams.get('v')||'unknown':'unknown';
+  const hasProgram=[...doc.scripts].some(s=>(s.getAttribute('src')||'').startsWith('live-program-v0270.js'));
+  return {key,hasProgram};
+}
+async function clearBrowserCaches(){try{if('caches'in window){for(const k of await caches.keys())await caches.delete(k)}}catch{}}
+async function refreshLatest(){
+  const btn=document.querySelector('#bcLatestBtn');if(btn?.disabled)return;if(btn){btn.disabled=true;btn.textContent='更新中…'}stamp('同期中');
+  try{
+    forceTodayLiveSession();
+    const remote=await remoteAssetState();
+    const localKey=currentAssetKey();
+    if(remote.key!=='unknown'&&(remote.key!==localKey||!remote.hasProgram||typeof window.syncGamagoriProgramSnapshot!=='function')){
+      stamp(`新版 v${remote.key} へ更新`);await clearBrowserCaches();
+      const u=new URL(location.href);u.searchParams.set('bcv',remote.key);u.searchParams.set('t',Date.now().toString());location.replace(u.toString());return;
+    }
+    if(typeof syncGamagoriProgramSnapshot==='function')await syncGamagoriProgramSnapshot({render:false});
+    if(typeof BOAT_COMMAND_TWO_STAGE_V0260?.ensureHistory==='function')await BOAT_COMMAND_TWO_STAGE_V0260.ensureHistory();
+    if(typeof sweepVerifiedLiveRelays==='function')await sweepVerifiedLiveRelays({render:false,reason:'manual-latest-refresh'});
+    if(typeof BOAT_COMMAND_TWO_STAGE_V0260?.sync==='function')BOAT_COMMAND_TWO_STAGE_V0260.sync();
+    if(typeof renderAll==='function')renderAll();
+    stamp(`✓ 最新 v${localKey}`);
+  }catch(e){console.warn('[BC latest refresh]',e);stamp('更新失敗')}
+  finally{if(btn&&document.contains(btn)){btn.disabled=false;btn.textContent='↻ 最新に更新'}}
+}
 function ensureTools(){const view=document.querySelector('#predict');const head=view?.querySelector(':scope>.panel>.panel-head');if(!head||!isLive())return;let box=head.querySelector('.bc-latest-tools');if(!box){box=document.createElement('div');box.className='bc-latest-tools';box.innerHTML='<button id="bcLatestBtn" class="bc-latest-btn" type="button">↻ 最新に更新</button><span id="bcLatestStatus" class="bc-latest-status">未更新</span>';head.appendChild(box);box.querySelector('#bcLatestBtn').addEventListener('click',refreshLatest)}}
 function apply(){forceTodayLiveSession();let s=null;try{s=typeof session==='function'?session():null}catch{return}const host=document.querySelector('#predictionList'),view=document.querySelector('#predict');if(!host||!view)return;const live=!!s&&s.runType==='LIVE'&&!s.replayPackId&&String(s.date||'')===todayJst();host.classList.toggle('bc-live-compact-v0261',live);view.classList.toggle('bc-live-clean',live);if(!live)return;host.querySelectorAll('.compact-tools-v0261').forEach(x=>x.remove());ensureTools()}
-const priorRender=typeof renderAll==='function'?renderAll:null;if(priorRender)renderAll=function(){forceTodayLiveSession();const out=priorRender.apply(this,arguments);apply();return out};const priorSweep=typeof sweepVerifiedLiveRelays==='function'?sweepVerifiedLiveRelays:null;if(priorSweep)sweepVerifiedLiveRelays=async function(opts={}){forceTodayLiveSession();const out=await priorSweep(opts);apply();return out};window.BOAT_COMMAND_LIVE_COMPACT_V0261=Object.freeze({version:VERSION,venue:'蒲郡',currentLiveDateOnly:true,displayOnly:false,manualRefresh:true,perRaceHardLock:true});const switched=forceTodayLiveSession();if(switched&&typeof renderAll==='function')renderAll();else apply();
+const priorRender=typeof renderAll==='function'?renderAll:null;if(priorRender)renderAll=function(){forceTodayLiveSession();const out=priorRender.apply(this,arguments);apply();return out};const priorSweep=typeof sweepVerifiedLiveRelays==='function'?sweepVerifiedLiveRelays:null;if(priorSweep)sweepVerifiedLiveRelays=async function(opts={}){forceTodayLiveSession();const out=await priorSweep(opts);apply();return out};window.BOAT_COMMAND_LIVE_COMPACT_V0261=Object.freeze({version:VERSION,venue:'蒲郡',currentLiveDateOnly:true,displayOnly:false,manualRefresh:true,refreshesAppVersion:true,refreshesProgram:true,refreshesExhibition:true,perRaceHardLock:true});const switched=forceTodayLiveSession();if(switched&&typeof renderAll==='function')renderAll();else apply();
 })();
