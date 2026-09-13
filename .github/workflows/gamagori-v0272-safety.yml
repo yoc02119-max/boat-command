@@ -1,4 +1,4 @@
-name: Gamagori v0.27.2 safety audit
+name: Gamagori v0.27.7 safety audit
 
 on:
   workflow_dispatch:
@@ -11,10 +11,15 @@ on:
       - 'live-predictor-v0200.js'
       - 'live-two-stage-v0260.js'
       - 'live-prediction-compact-v0261.js'
+      - 'live-skip-gate-v0225.js'
+      - 'live-autofill-v0201.js'
       - 'live-lock-guard-v0202.js'
       - 'live-lock-snapshot-v0203.js'
       - 'live-result-v0204.js'
+      - 'live-integrity-audit-v0208.js'
+      - 'live-snapshot-hash-guard-v0209.js'
       - 'live-session-today-v0263.js'
+      - 'live-manual-refresh-v0276.js'
       - 'trial-readiness-v0272.js'
       - '.github/workflows/gamagori-v0272-safety.yml'
 
@@ -31,7 +36,13 @@ jobs:
         run: |
           from pathlib import Path
           import re, subprocess
-          critical=['app.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-session-today-v0263.js']
+          critical=[
+            'app.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js',
+            'live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-skip-gate-v0225.js',
+            'live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js',
+            'live-result-v0204.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js',
+            'live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js'
+          ]
           for f in critical:
               subprocess.run(['node','--check',f],check=True)
           html=Path('index.html').read_text(encoding='utf-8')
@@ -39,10 +50,14 @@ jobs:
           bases=[x.split('?',1)[0] for x in srcs]
           missing=[x for x in critical if x not in bases]
           if missing: raise SystemExit(f'CRITICAL_SCRIPT_MISSING:{missing}')
+          duplicates=sorted({x for x in bases if bases.count(x)>1})
+          if duplicates: raise SystemExit(f'CRITICAL_SCRIPT_DUPLICATE:{duplicates}')
           pos=[bases.index(x) for x in critical]
           if pos!=sorted(pos): raise SystemExit(f'CRITICAL_SCRIPT_ORDER_BAD:{pos}')
           keys=[x.split('?v=',1)[1] if '?v=' in x else '' for x in srcs]
           if not keys or any(not x for x in keys) or len(set(keys))!=1: raise SystemExit('CACHE_KEY_CONTRACT_BAD')
+          if bases.index('live-manual-refresh-v0276.js') > bases.index('trial-readiness-v0272.js'):
+              raise SystemExit('MANUAL_REFRESH_MUST_LOAD_BEFORE_READINESS')
           print('CRITICAL_SCRIPT_CONTRACT_PASS')
       - name: Current Gamagori program snapshot audit
         shell: python
@@ -65,7 +80,8 @@ jobs:
                   x=json.loads(p.read_text(encoding='utf-8'))
                   boats=x.get('boats') or []
                   lanes=sorted(int(b.get('lane',0)) for b in boats)
-                  if len(boats)!=6 or lanes!=[1,2,3,4,5,6] or x.get('resultIncluded') is not False or x.get('exhibitionIncluded') is not False or x.get('resultEndpointsIncluded') is not False:
+                  classes=[str(b.get('class','')) for b in boats]
+                  if len(boats)!=6 or lanes!=[1,2,3,4,5,6] or any(c not in {'A1','A2','B1','B2'} for c in classes) or x.get('resultIncluded') is not False or x.get('exhibitionIncluded') is not False or x.get('resultEndpointsIncluded') is not False:
                       missing.append(race)
               if missing: raise SystemExit(f'PROGRAM_12R_CONTRACT_FAIL:{missing}')
               print('PROGRAM_12R_RESULT_FREE_PASS')
