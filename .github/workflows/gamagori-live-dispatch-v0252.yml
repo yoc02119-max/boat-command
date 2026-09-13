@@ -44,5 +44,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh workflow run pre-race-gamagori-auto-chain-v0194.yml --ref main
+          gh workflow run pre-race-gamagori-auto-chain-v0194.yml --repo "$GITHUB_REPOSITORY" --ref main
           echo 'GAMAGORI_PRE_RACE_CHAIN_DISPATCHED'
