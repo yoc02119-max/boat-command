@@ -2,7 +2,7 @@
 // Free local voice shell: Web Speech API + BOAT COMMAND live state. No paid API.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-VOICE-AGENT-V0.28.3';
+const VERSION='GAMAGORI-VOICE-AGENT-V0.29.0';
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const canSpeak='speechSynthesis' in window;
 function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
@@ -31,7 +31,7 @@ function answer(q){const t=String(q||'').trim();const a=t.replace(/\s/g,'');cons
 }
 function speak(text){if(!canSpeak)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=1.02;speechSynthesis.speak(u)}catch{}}
 function pushChat(role,text){const chat=document.querySelector('#chat');if(!chat)return;const d=document.createElement('div');d.className=`bubble ${role}`;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
-async function handle(q){if(!q)return;pushChat('user',q);let out=answer(q);if(out==='__REFRESH__')out=await doRefresh();pushChat('ai',out);speak(out);return out}
+async function handle(q){if(!q)return;pushChat('user',q);let out;const core=window.BOAT_COMMAND_AI_CORE;if(typeof core?.respond==='function')out=await core.respond(q);else{out=answer(q);if(out==='__REFRESH__')out=await doRefresh()}pushChat('ai',out);speak(out);return out}
 function loadBridge(){if(window.BOAT_COMMAND_CHATGPT_BRIDGE||document.querySelector('script[data-bc-chatgpt-bridge]'))return;const s=document.createElement('script');s.src=`boat-chatgpt-bridge-v0281.js?v=${Date.now()}`;s.dataset.bcChatgptBridge='1';s.async=true;document.head.appendChild(s)}
 function install(){const card=document.querySelector('.assistant-card');const row=card?.querySelector('.input-row');if(!card||!row||document.querySelector('#bcVoiceBtn')){loadBridge();return}
  const btn=document.createElement('button');btn.id='bcVoiceBtn';btn.type='button';btn.className='bc-voice-btn';btn.textContent='🎙 話す';row.appendChild(btn);
