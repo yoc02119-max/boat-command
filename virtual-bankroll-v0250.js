@@ -29,7 +29,7 @@
     const out=[{label:'START + DEPOSIT',value:bal}];
     const sessions=typeof allSessions==='function'
       ?allSessions()
-      :Object.values(window.store?.sessions||{});
+      :(typeof store!=='undefined'?Object.values(store?.sessions||{}):[]);
     for(const s of sessions.filter(s=>s&&!s.retestMode&&s.runType==='LIVE')){
       for(const r of (s.races||[]).filter(x=>x.settled)){
         bal+=settledProfit(r);
