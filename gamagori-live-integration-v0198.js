@@ -81,12 +81,13 @@
   syncPredictionOnlyLiveBadges();
 })();
 
-// v0.25.2: the PRE-RACE auto-chain writes race-N-pack.json. The legacy loader consumes race-N.json.
-// Bridge the verified pack to the legacy relay contract, and fail closed when the receive-time buying
-// margin is under two minutes. No POST-RACE/result endpoint is referenced here.
+// v0.25.3: the PRE-RACE auto-chain writes race-N-pack.json while the legacy loader first probes race-N.json.
+// Fall back to the verified pack only when the canonical probe is genuinely absent (HTTP 404).
+// Any other canonical validation/fetch failure remains fail-closed and is returned unchanged.
+// No POST-RACE/result endpoint is referenced here.
 (()=>{
   'use strict';
-  const VERSION='GAMAGORI-LIVE-PACK-BRIDGE-V0.25.2';
+  const VERSION='GAMAGORI-LIVE-PACK-BRIDGE-V0.25.3';
   const MIN_RECEIVE_MARGIN_MINUTES=2;
   const canonicalLoader=typeof window.loadVerifiedLiveRace==='function'?window.loadVerifiedLiveRace:null;
 
@@ -130,7 +131,7 @@
   }
   function normalizePack(x){
     return {
-      schema:'boat-command-pre-race-probe-v1',bridgeVersion:'0.25.2-pack-bridge',venue:'GAMAGORI',venueCode:String(x.venueCode||'07'),date:x.date,race:Number(x.race),
+      schema:'boat-command-pre-race-probe-v1',bridgeVersion:'0.25.3-pack-bridge',venue:'GAMAGORI',venueCode:String(x.venueCode||'07'),date:x.date,race:Number(x.race),
       fetchedAt:x.fetchedAt||new Date().toISOString(),fetchedAtJST:null,deadline:x.deadline,
       racelist:{ok:true,httpStatus:200,bytes:0,sourceUrl:'AUTO_CHAIN_VERIFIED_PACK',boats:x.boats.map(b=>({lane:Number(b.lane),class:String(b.class||''),motor:Number(b.motor),boat:Number(b.boat)}))},
       beforeinfo:{ok:true,httpStatus:200,bytes:0,sourceUrl:'AUTO_CHAIN_VERIFIED_PACK',exhibition:x.boats.map(b=>({lane:Number(b.lane),exhibitionTime:Number(b.exhibitionTime),tilt:Number(b.tilt)||0})),startExhibition:x.startExhibition.map(r=>({course:Number(r.course),st:String(r.st)})),weather:x.weather},
@@ -152,7 +153,8 @@
         const gate=receiveGate(date,out.payload?.deadline);
         return gate.ok?out:{ready:false,path:out.path||canonicalPath,payload:null,reason:gate.reason,checkedAt};
       }
-      if(out&&out.reason&&!/HTTP_404/.test(String(out.reason)))return out;
+      const canonicalError=String(out?.error||'');
+      if(out&&!/^HTTP_404$/.test(canonicalError))return out;
     }
     const packPath=`./live/gamagori/${date}/pre/race-${race}-pack.json`;
     try{
