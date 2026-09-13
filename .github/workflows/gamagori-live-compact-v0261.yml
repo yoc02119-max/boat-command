@@ -1,0 +1,64 @@
+name: Gamagori LIVE prediction compact v0.26.1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live-prediction-compact-v0261.js'
+      - '.github/workflows/gamagori-live-compact-v0261.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-live-compact-v0261
+  cancel-in-progress: false
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate compact UI JavaScript
+        run: node --check live-prediction-compact-v0261.js
+
+      - name: Ensure exactly one compact UI include
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          m=re.search(r'<script\s+src="app\.js\?v=(\d+)"></script>',s)
+          token=m.group(1) if m else '1'
+          pattern=r'\s*<script\s+src="live-prediction-compact-v0261\.js(?:\?v=\d+)?"></script>'
+          s=re.sub(pattern,'',s)
+          anchor=re.search(r'<script\s+src="live-two-stage-v0260\.js(?:\?v=\d+)?"></script>',s)
+          tag=f'\n<script src="live-prediction-compact-v0261.js?v={token}"></script>'
+          if anchor:
+              pos=anchor.end()
+              s=s[:pos]+tag+s[pos:]
+          else:
+              s=s.replace('</body>',tag+'\n</body>')
+          if len(re.findall(r'<script\s+src="live-prediction-compact-v0261\.js(?:\?v=\d+)?"></script>',s)) != 1:
+              raise SystemExit('COMPACT_INCLUDE_COUNT_INVALID')
+          p.write_text(s,encoding='utf-8')
+          print(f'COMPACT_INCLUDE_OK token={token}')
+
+      - name: Commit compact UI enablement
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- index.html; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git config user.name 'boat-command-relay'
+          git config user.email 'boat-command-relay@users.noreply.github.com'
+          git add index.html
+          git commit -m 'feat: load Gamagori compact LIVE prediction UI'
+          git push
