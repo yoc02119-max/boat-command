@@ -1,9 +1,9 @@
-// BOAT COMMAND GAMAGORI TWO-STAGE PREDICTION v0.27.0
+// BOAT COMMAND GAMAGORI TWO-STAGE PREDICTION v0.27.1
 // FIRST: result-free official program snapshot + historical database only.
 // SECOND: verified exhibition/live predictor only. Same-day results are never read here.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-TWO-STAGE-V0.27.0';
+const VERSION='GAMAGORI-TWO-STAGE-V0.27.1';
 const HISTORY_URL='./gamagori-2026-base-v131.json';
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const isCurrentLive=s=>!!s&&s.runType==='LIVE'&&s.venue==='蒲郡'&&String(s.date||'')===todayJst();
@@ -63,6 +63,7 @@ function baselinePicks(classes){
 function firstCandidate(s,r){
   if(r?.firstSuggestion?.status==='CANDIDATE'&&r.firstSuggestion.lockedAt&&r.firstSuggestion.sessionDate===s.date)return r.firstSuggestion;
   const comp=currentComposition(s,r);if(!comp)return{status:'WAIT',reason:'当日12R番組データ同期中',sessionDate:s.date};
+  if(historyState==='LOADING')return{status:'WAIT',reason:'過去DB読込中',sessionDate:s.date};
   const rows=weightedHistory(s),scores=new Map();let samples=0;
   for(const h of rows){
     const res=validResult(h.o);if(!res||!Array.isArray(h.c)||h.c.length!==6)continue;
@@ -75,7 +76,8 @@ function firstCandidate(s,r){
   }
   const picks=scores.size?[...scores].sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]):baselinePicks(comp.classes);
   const now=new Date().toISOString();
-  return{status:'CANDIDATE',stage:'FIRST',picks,samples,sessionDate:s.date,generatedAt:now,lockedAt:now,strategyVersion:VERSION,historyState,rationale:`当日結果・展示・払戻を不使用。公式番組6艇の級別構成と過去${samples}レースを照合した第一候補。`};
+  const source=historyState==='READY'?`公式番組6艇の級別構成と過去${samples}レースを照合`:'過去DB取得失敗時の級別・枠順フォールバック';
+  return{status:'CANDIDATE',stage:'FIRST',picks,samples,sessionDate:s.date,generatedAt:now,lockedAt:now,strategyVersion:VERSION,historyState,rationale:`当日結果・展示・払戻を不使用。${source}した第一候補。`};
 }
 function refresh(){let s;try{s=session()}catch{return}if(!isCurrentLive(s))return;let changed=false;for(const r of s.races||[]){if(r.firstSuggestion?.sessionDate&&r.firstSuggestion.sessionDate!==s.date){delete r.firstSuggestion;changed=true}const x=firstCandidate(s,r);if(JSON.stringify(r.firstSuggestion||null)!==JSON.stringify(x)){r.firstSuggestion=x;changed=true}}if(changed&&typeof saveStore==='function')saveStore()}
 const firstHtml=r=>{const x=r?.firstSuggestion;if(x?.status!=='CANDIDATE')return `<div class="bc-stage-row bc-first"><div class="bc-stage-top"><b>第一候補</b><span class="bc-stage-tag">番組×過去DB</span></div><div class="bc-stage-status">${safeEsc(x?.reason||'準備中')}</div></div>`;return `<div class="bc-stage-row bc-first"><div class="bc-stage-top"><b>第一候補</b><span class="bc-stage-tag">事前情報のみ 🔒</span></div><div class="bc-stage-picks">${x.picks.map(safeEsc).join(' / ')}</div><details class="bc-stage-detail"><summary>理由を見る</summary>${safeEsc(x.rationale)}</details></div>`};
