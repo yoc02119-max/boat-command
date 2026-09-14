@@ -1,0 +1,113 @@
+name: GAMAGORI main history build v0.32.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/gamagori-main-history-build-v0320.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-main-history-build-v0320
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download finalized 2025 history
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2025-finalize-db-v181.yml
+          workflow_conclusion: success
+          name: gamagori-2025-final
+          path: source2025
+
+      - name: Download finalized 2026 history
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: program-history-2026-exception-finalization-v202.yml
+          workflow_conclusion: success
+          name: gamagori-2026-final
+          path: source2026
+
+      - name: Build audited production history
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          sources = [
+              Path("source2025/gamagori-2025.json"),
+              Path("source2026/gamagori-2026.json"),
+          ]
+          expected = {2025: 2381, 2026: 1690}
+          rows = []
+          source_counts = {}
+          for path in sources:
+              db = json.loads(path.read_text(encoding="utf-8"))
+              year = int(db["year"])
+              source_counts[str(year)] = len(db["races"])
+              assert len(db["races"]) == expected[year]
+              rows.extend(db["races"])
+
+          rows.sort(key=lambda r: (r["d"], int(r["r"])))
+          valid_classes = {"A1", "A2", "B1", "B2"}
+          ids = [r["id"] for r in rows]
+          assert len(rows) == 4071
+          assert len(ids) == len(set(ids))
+          assert all(len(r["c"]) == 6 and set(r["c"]) <= valid_classes for r in rows)
+          assert all(r["d"] <= "2026-09-04" for r in rows)
+          assert all(len(str(r.get("t", ""))) > 0 for r in rows)
+
+          out = {
+              "schema": "boat-command-program-history-v2",
+              "builder": "GAMAGORI-MAIN-HISTORY-V0.32.0",
+              "venueCode": "07",
+              "cutoff": "2026-09-04",
+              "resultUse": "HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE",
+              "exhibitionIncluded": False,
+              "races": rows,
+          }
+          audit = {
+              "schema": "boat-command-main-history-audit-v1",
+              "venueCode": "07",
+              "sourceCounts": source_counts,
+              "validRaces": len(rows),
+              "firstDate": rows[0]["d"],
+              "lastDate": rows[-1]["d"],
+              "uniqueDates": len(Counter(r["d"] for r in rows)),
+              "duplicateIds": len(ids) - len(set(ids)),
+              "futureRowsBeyondCutoff": sum(r["d"] > "2026-09-04" for r in rows),
+              "invalidClassRows": sum(not (len(r["c"]) == 6 and set(r["c"]) <= valid_classes) for r in rows),
+              "missingRaceTypeRows": sum(not str(r.get("t", "")) for r in rows),
+              "exhibitionIncluded": False,
+              "readyForMainPrediction": True,
+          }
+          Path("gamagori-main-history-v0320.json").write_text(
+              json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+          Path("gamagori-main-history-audit-v0320.json").write_text(
+              json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
+          print("MAIN HISTORY PASS", audit)
+          PY
+
+      - name: Commit generated history
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add gamagori-main-history-v0320.json gamagori-main-history-audit-v0320.json
+          if git diff --cached --quiet; then
+            echo "Production history already current"
+            exit 0
+          fi
+          git commit -m "data(gamagori): publish audited 4071-race main history"
+          git push
