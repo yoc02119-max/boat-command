@@ -1,0 +1,61 @@
+// BOAT COMMAND GAMAGORI VOICE AGENT v0.29.3
+// iPad/Safari safe speech sequencing + visible local-core status.
+(()=>{
+'use strict';
+const VERSION='GAMAGORI-VOICE-AGENT-V0.29.6';
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const canSpeak='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+let activeUtterance=null,speechPrimed=false,pendingTranscript='';
+function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
+function stats(){const s=getSession(),rs=s?.races||[];return{session:s,first:rs.filter(r=>r.firstSuggestion?.status==='CANDIDATE').length,second:rs.filter(r=>r.liveSuggestion?.status==='CANDIDATE').length,locked:rs.filter(r=>r.locked).length,settled:rs.filter(r=>r.settled).length}}
+function picksFor(race){const r=getSession()?.races?.find(x=>Number(x.race)===Number(race));return r?{first:r.firstSuggestion,second:r.liveSuggestion}:null}
+async function doRefresh(){try{const api=window.BOAT_COMMAND_MANUAL_REFRESH_V0276;if(typeof api?.refresh==='function'){await api.refresh({user:true});return'予想データとアプリ最新版を同期しました。'}if(typeof window.syncGamagoriProgramSnapshot==='function')await window.syncGamagoriProgramSnapshot({render:true});if(typeof window.sweepVerifiedLiveRelays==='function')await window.sweepVerifiedLiveRelays({render:true});return'最新データを同期しました。'}catch(e){console.warn('[voice-refresh]',e);return'更新中にエラーが発生しました。'}}
+function fallbackAnswer(q){const t=String(q||'').trim(),a=t.replace(/\s/g,''),st=stats();if(!st.session)return'蒲郡LIVEセッションを確認できません。';const m=a.match(/(\d{1,2})R/),race=m?Number(m[1]):null;if(/今日どう|状況|進捗|予想でき/.test(a))return`第一候補${st.first}レース、第二候補${st.second}レース、ハードロック${st.locked}レースです。`;if(/第一候補/.test(a)&&race){const x=picksFor(race)?.first;return x?.status==='CANDIDATE'?`${race}レースの第一候補は、${x.picks.join('、')}です。`:`${race}レースの第一候補は準備中です。`}if(/第二候補|展示/.test(a)&&race){const x=picksFor(race)?.second;return x?.status==='CANDIDATE'?`${race}レースの第二候補は、${x.picks.join('、')}です。`:`${race}レースの第二候補は展示待ちです。`}if(/資金|残高/.test(a))return`現在の仮想資金は${document.querySelector('#bankrollNow')?.textContent?.trim()||'確認中'}です。`;if(/更新|同期/.test(a))return'__REFRESH__';return'ローカル会話エンジンで回答できない質問です。生成AIとの自由会話は、チャットジーピーティーと接続から利用できます。'}
+function voiceStatus(text,tone='ready'){const el=document.querySelector('#bcVoiceStatus');if(el){el.textContent=text;el.dataset.tone=tone}}
+function primeSpeech(){if(!canSpeak)return false;try{speechSynthesis.resume();if(!speechPrimed){const u=new SpeechSynthesisUtterance('\u200b');u.volume=.01;u.lang='ja-JP';speechSynthesis.speak(u);speechPrimed=true}return true}catch(e){console.warn('[voice-prime]',e);return false}}
+function japaneseVoice(){try{const voices=speechSynthesis.getVoices();return voices.find(v=>/^ja(-|_)/i.test(v.lang))||voices.find(v=>/Japanese|Kyoko|Otoya/i.test(v.name))||null}catch{return null}}
+function speechText(text){
+ let v=String(text||'').replace(/<[^>]+>/g,'').trim();
+ v=v.replace(/([1-6])\s*[-→]\s*([1-6])\s*[-→]\s*([1-6])/g,'$1、$2、$3');
+ v=v.replace(/\b(1[0-2]|[1-9])\s*R\b/gi,'$1レース');
+ v=v.replace(/(\d+)\s*\/\s*12/g,'12レース中$1レース');
+ v=v.replace(/¥\s*([\d,]+)/g,(_,n)=>`${n}円`);
+ const words=[
+  [/HTTP[_ ]?404/gi,'データみこうかい'],[/HTTP[_ ]?403/gi,'せつぞく待ち'],[/HTTP[_ ]?5\d\d/gi,'はいしんもと応答待ち'],
+  [/HARD\s*LOCK/gi,'ハードロック'],[/PRE[- ]?RACE/gi,'レース前'],[/POST[- ]?RACE/gi,'レース後'],
+  [/AI\s*LOCAL\s*CORE/gi,'ローカル エーアイ'],[/LOCAL\s*CORE/gi,'ローカル エーアイ'],[/ChatGPT/gi,'チャットジーピーティー'],
+  [/READY/gi,'準備完了'],[/WAIT/gi,'待機'],[/SKIP/gi,'見送り'],[/LIVE/gi,'ライブ'],[/LOCK/gi,'ロック'],
+  [/A1級?/gi,'エーワン級'],[/A2級?/gi,'エーツー級'],[/B1級?/gi,'ビーワン級'],[/B2級?/gi,'ビーツー級'],
+  [/\bST\b/gi,'スタートタイミング'],[/\bDB\b/gi,'データベース'],
+  [/蒲郡/g,'がまごおり'],[/払戻/g,'はらいもどし'],[/艇番/g,'ていばん'],[/級別/g,'きゅうべつ'],[/枠順/g,'わくじゅん'],
+  [/展示/g,'てんじ'],[/精算/g,'せいさん'],[/未公開/g,'みこうかい'],[/直前/g,'ちょくぜん']
+ ];
+ for(const [from,to] of words)v=v.replace(from,to);
+ return v.replace(/[_•]/g,'、').replace(/\s{2,}/g,' ').trim()
+}
+function speak(text,{test=false}={}){const value=speechText(text);if(!value||!canSpeak){voiceStatus('音声出力 非対応','error');return false}try{speechSynthesis.cancel();speechSynthesis.resume();const u=new SpeechSynthesisUtterance(value);const v=japaneseVoice();if(v)u.voice=v;u.lang='ja-JP';u.rate=.96;u.pitch=1;u.volume=1;u.onstart=()=>voiceStatus(test?'音声テスト中':'音声で返答中','speaking');u.onend=()=>{activeUtterance=null;voiceStatus('音声アシスト • 待機','ready')};u.onerror=e=>{activeUtterance=null;console.warn('[voice-output]',e);voiceStatus('音声出力エラー・再タップ','error')};activeUtterance=u;setTimeout(()=>{try{speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){console.warn('[voice-speak]',e);voiceStatus('音声出力エラー','error')}},test?20:220);return true}catch(e){console.warn('[voice-output]',e);voiceStatus('音声出力エラー','error');return false}}
+function pushChat(role,text){const chat=document.querySelector('#chat');if(!chat)return;const d=document.createElement('div');d.className=`bubble ${role}`;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+async function handle(q,{spoken=true}={}){if(!q)return'';pushChat('user',q);let out;const core=window.BOAT_COMMAND_AI_CORE;if(typeof core?.respond==='function')out=await core.respond(q);else{out=fallbackAnswer(q);if(out==='__REFRESH__')out=await doRefresh()}out=String(out||'回答を生成できませんでした。');pushChat('ai',out);if(spoken)speak(out);return out}
+function loadBridge(){if(window.BOAT_COMMAND_CHATGPT_BRIDGE||document.querySelector('script[data-bc-chatgpt-bridge]'))return;const s=document.createElement('script');s.src=`boat-chatgpt-bridge-v0281.js?v=${Date.now()}`;s.dataset.bcChatgptBridge='1';s.async=true;document.head.appendChild(s)}
+function installCoreBadge(card){const head=card?.querySelector('.panel-head');if(!head||document.querySelector('#bcVoiceStatus'))return;const badge=document.createElement('span');badge.id='bcVoiceStatus';badge.className='bc-core-status';badge.textContent='音声アシスト • 待機';head.appendChild(badge)}
+function install(){const card=document.querySelector('.assistant-card'),row=card?.querySelector('.input-row');if(!card||!row){loadBridge();return}installCoreBadge(card);if(document.querySelector('#bcVoiceBtn')){loadBridge();return}
+ const btn=document.createElement('button');btn.id='bcVoiceBtn';btn.type='button';btn.className='bc-voice-btn';btn.textContent='🎙 話す';
+ const test=document.createElement('button');test.id='bcVoiceTestBtn';test.type='button';test.className='bc-voice-test';test.textContent='🔊';
+ row.append(btn,test);
+ const style=document.createElement('style');style.id='bc-voice-agent-style';style.textContent='.bc-voice-btn,.bc-voice-test{border:1px solid #2a6f96;background:#0b2740;color:#fff;border-radius:10px;padding:0 13px;font-weight:800;white-space:nowrap}.bc-voice-test{padding:0 11px}.bc-voice-btn.listening{box-shadow:0 0 0 3px rgba(30,162,227,.2);background:#123c5d}.bubble.user{margin-left:auto;background:#123a5a;color:#eaf8ff}.bc-core-status{margin-left:auto;font-size:10px;color:#78dfb1;border:1px solid #277b5d;background:#09241c;border-radius:999px;padding:5px 8px;white-space:nowrap}.bc-core-status[data-tone="speaking"]{color:#9ed8ff;border-color:#2a6f96;background:#0b2740}.bc-core-status[data-tone="error"]{color:#ffb0b0;border-color:#8b4141;background:#321718}@media(max-width:720px){.bc-core-status{font-size:8px;padding:4px 6px}}';document.head.appendChild(style);
+ const prompt=document.querySelector('#prompt'),send=document.querySelector('#send');if(send&&!send.dataset.bcVoiceBound){send.dataset.bcVoiceBound='1';send.addEventListener('click',e=>{const q=prompt?.value?.trim();if(!q)return;e.stopImmediatePropagation();primeSpeech();if(prompt)prompt.value='';handle(q,{spoken:true})},true)}
+ if(prompt&&!prompt.dataset.bcVoiceBound){prompt.dataset.bcVoiceBound='1';prompt.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=prompt.value.trim();if(q){primeSpeech();prompt.value='';handle(q,{spoken:true})}}})}
+ test.addEventListener('click',()=>{primeSpeech();speak('音声出力は正常です。',{test:true})});
+ if(!SR){btn.textContent='🎙 音声入力非対応';btn.disabled=true;voiceStatus(canSpeak?'音声アシスト • 入力非対応':'音声機能 非対応','error');loadBridge();return}
+ const rec=new SR();rec.lang='ja-JP';rec.interimResults=false;rec.maxAlternatives=1;
+ rec.onstart=()=>{pendingTranscript='';btn.classList.add('listening');btn.textContent='● 聞いてます';voiceStatus('音声認識中','speaking')};
+ rec.onresult=e=>{pendingTranscript=e.results?.[0]?.[0]?.transcript||'';if(pendingTranscript)voiceStatus('認識完了・返答準備中','speaking')};
+ rec.onend=()=>{btn.classList.remove('listening');btn.textContent='🎙 話す';const q=pendingTranscript;pendingTranscript='';if(q)setTimeout(()=>handle(q,{spoken:true}),260);else voiceStatus('音声アシスト • 待機','ready')};
+ rec.onerror=e=>{pendingTranscript='';btn.classList.remove('listening');btn.textContent='🎙 話す';voiceStatus(`音声認識エラー ${e?.error||''}`,'error')};
+ btn.addEventListener('click',()=>{primeSpeech();try{speechSynthesis.cancel();rec.start()}catch(e){console.warn('[voice-start]',e)}});
+ try{speechSynthesis.addEventListener?.('voiceschanged',()=>japaneseVoice(),{once:true})}catch{}
+ loadBridge()
+}
+window.BOAT_COMMAND_VOICE_AGENT=Object.freeze({version:VERSION,free:true,paidApi:false,localCore:true,generativeAi:false,handle,speak,speechText,refresh:doRefresh});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
