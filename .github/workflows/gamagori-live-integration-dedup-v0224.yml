@@ -18,6 +18,8 @@ concurrency:
 
 jobs:
   dedup-audit:
+    # Retired with the exhibition-free v0.32.0 runtime. Kept for manual legacy diagnostics only.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
