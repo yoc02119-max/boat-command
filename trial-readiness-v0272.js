@@ -1,4 +1,4 @@
-// BOAT COMMAND GAMAGORI main-prediction readiness v0.32.5
+// BOAT COMMAND GAMAGORI main-prediction readiness v0.32.6
 (()=>{'use strict';
 function isSafeSkip(r){const x=r?.firstSuggestion;return !r?.locked&&x?.status==='SKIP'&&x?.stage==='MAIN'&&x?.skipPolicy==='MISSED_SAFE_LOCK_WINDOW'&&x?.resultFetch===false}
 function installSkipTargetPolicy(){
@@ -14,20 +14,21 @@ function renderSkipVisibility(){
  document.querySelectorAll('#predictionList .race-card').forEach(card=>{
   const n=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,'')),r=s.races?.find(x=>Number(x.race)===n);if(!r)return;
   const x=r.firstSuggestion,gate=card.querySelector('.prediction-gate-top'),b=gate?.querySelector('b'),sp=gate?.querySelector('span'),lb=card.querySelector('[data-lock]');
-  if(r.locked){setControls(card,true);return}
+  if(r.locked){setControls(card,true);card.dataset.readiness='locked';return}
   if(isSafeSkip(r)){
-   if(b)b.textContent='SKIP｜安全締切超過';if(sp)sp.textContent=x.reason||'HARD LOCK可能時間を過ぎたため予想対象外';
+   card.dataset.readiness='skip';if(b)b.textContent='SKIP｜安全締切超過';if(sp)sp.textContent=x.reason||'HARD LOCK可能時間を過ぎたため予想対象外';
    gate?.classList.remove('ready');gate?.classList.add('limited');setControls(card,true);if(lb)lb.textContent='SKIP';return;
   }
   if(x?.status==='CANDIDATE'){
-   if(b)b.textContent='READY｜メイン予想生成済み';if(sp)sp.textContent=x.rationale||r.rationale||'メイン予想生成済み';
+   card.dataset.readiness='ready';if(b)b.textContent='READY｜メイン予想生成済み';if(sp)sp.textContent=x.rationale||r.rationale||'メイン予想生成済み';
    gate?.classList.add('ready');gate?.classList.remove('limited');setControls(card,false);if(lb)lb.textContent='HARD LOCK';
   }else{
-   if(b)b.textContent='WAIT｜予想保留';if(sp)sp.textContent=x?.reason||r.programSnapshotReason||'公式番組データ待ち';
+   card.dataset.readiness='wait';if(b)b.textContent='WAIT｜予想保留';if(sp)sp.textContent=x?.reason||r.programSnapshotReason||'公式番組データ待ち';
    gate?.classList.remove('ready');gate?.classList.add('limited');setControls(card,true);if(lb)lb.textContent='WAIT';
   }
  });
 }
+function pillClass(r){if(r.locked)return'done';if(isSafeSkip(r))return'skip';return r.firstSuggestion?.status==='CANDIDATE'?'ready':'wait'}
 function renderTargetVisibility(){
  installSkipTargetPolicy();const s=liveState();if(!s)return;
  const targets=typeof requiredReplayLocks==='function'?requiredReplayLocks(s):(s.races||[]).length;
@@ -37,15 +38,15 @@ function renderTargetVisibility(){
  const wait=(s.races||[]).filter(r=>!r.locked&&!isSafeSkip(r)&&r.firstSuggestion?.status!=='CANDIDATE').length;
  const k=$('#kLocked');if(k)k.textContent=`${locked}/${targets}`;
  const sub=$('#summarySub');if(sub)sub.textContent=`READY ${ready} · WAIT ${wait} · SKIP ${skipped}`;
- const status=$('#todayStatus');if(status){status.textContent=wait?'WAIT':(targets>0&&locked===targets?'POST-RACE':'READY');status.classList.toggle('done',!wait&&targets>0&&locked===targets)}
+ const status=$('#todayStatus');if(status){const state=wait?'WAIT':(targets>0&&locked===targets?'POST-RACE':'READY');status.textContent=state;status.classList.remove('done','ready','wait','skip','post');status.classList.add(state==='WAIT'?'wait':state==='POST-RACE'?'post':'ready')}
  const note=$('#guardNote');if(note)note.textContent=(targets>0&&locked===targets)?`予想対象 ${locked}/${targets} HARD LOCK完了${skipped?`（SKIP ${skipped}R）`:''}。POST-RACEのみ解禁中。`:`予想対象 HARD LOCK ${locked}/${targets} · READY ${ready} · WAIT ${wait}${skipped?` · SKIP ${skipped}`:''}。WAIT中は入力・LOCK・結果取得を停止します。`;
- const strip=$('#raceStrip');if(strip)strip.innerHTML=(s.races||[]).map(r=>{const x=r.firstSuggestion;const label=r.locked?'LOCK':isSafeSkip(r)?'SKIP':x?.status==='CANDIDATE'?'READY':'WAIT';return `<span class="status-pill ${r.locked?'done':''}">${r.race}R ${label}</span>`}).join('');
+ const strip=$('#raceStrip');if(strip)strip.innerHTML=(s.races||[]).map(r=>{const label=r.locked?'LOCK':isSafeSkip(r)?'SKIP':r.firstSuggestion?.status==='CANDIDATE'?'READY':'WAIT';return `<span class="status-pill ${pillClass(r)}">${r.race}R ${label}</span>`}).join('');
 }
-function audit(){installSkipTargetPolicy();const s=liveState(),races=s?.races||[],today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),current=s?.runType==='LIVE'&&s?.date===today;const program=current?races.filter(r=>r.programSnapshotStatus==='READY').length:null,main=current?races.filter(r=>r.firstSuggestion?.status==='CANDIDATE'&&r.firstSuggestion.stage==='MAIN'&&r.firstSuggestion.sessionDate===today).length:null,skipped=current?races.filter(isSafeSkip).length:null,wait=current?12-main-skipped:null;const globals={programSync:typeof syncGamagoriProgramSnapshot==='function',model:!!window.BOAT_COMMAND_MAIN_MODEL_V0320,mainPrediction:!!window.BOAT_COMMAND_MAIN_PREDICTION_V0320,mainLock:typeof window.bcFinalMainLockAuditV0320==='function',historicalReplay:!!window.BOAT_COMMAND_HISTORICAL_REPLAY_V0320,resultSweep:typeof window.sweepLiveResultsV0204==='function',lockSnapshot:typeof window.bcVerifyLiveLockSnapshotV0203==='function',snapshotHash:typeof window.bcVerifyLiveLockSnapshotHashV0209==='function'};const noLegacy=[...document.scripts].every(x=>!/live-(?:predictor|two-stage|autopoll|skip-gate|autofill|lock-guard)-v0/.test(x.src));const targetCount=current&&typeof requiredReplayLocks==='function'?requiredReplayLocks(s):null;return {version:'0.32.5',current,program,main,skipped,wait,targetCount,globals,noLegacyExhibitionStack:noLegacy,exhibitionFetch:false,strictPastOnly:true,waitControlsFailClosed:true,ready:current&&program===12&&wait===0&&Object.values(globals).every(Boolean)&&noLegacy}}
+function audit(){installSkipTargetPolicy();const s=liveState(),races=s?.races||[],today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),current=s?.runType==='LIVE'&&s?.date===today;const program=current?races.filter(r=>r.programSnapshotStatus==='READY').length:null,main=current?races.filter(r=>r.firstSuggestion?.status==='CANDIDATE'&&r.firstSuggestion.stage==='MAIN'&&r.firstSuggestion.sessionDate===today).length:null,skipped=current?races.filter(isSafeSkip).length:null,wait=current?12-main-skipped:null;const globals={programSync:typeof syncGamagoriProgramSnapshot==='function',model:!!window.BOAT_COMMAND_MAIN_MODEL_V0320,mainPrediction:!!window.BOAT_COMMAND_MAIN_PREDICTION_V0320,mainLock:typeof window.bcFinalMainLockAuditV0320==='function',historicalReplay:!!window.BOAT_COMMAND_HISTORICAL_REPLAY_V0320,resultSweep:typeof window.sweepLiveResultsV0204==='function',lockSnapshot:typeof window.bcVerifyLiveLockSnapshotV0203==='function',snapshotHash:typeof window.bcVerifyLiveLockSnapshotHashV0209==='function'};const noLegacy=[...document.scripts].every(x=>!/live-(?:predictor|two-stage|autopoll|skip-gate|autofill|lock-guard)-v0/.test(x.src));const targetCount=current&&typeof requiredReplayLocks==='function'?requiredReplayLocks(s):null;return {version:'0.32.6',current,program,main,skipped,wait,targetCount,globals,noLegacyExhibitionStack:noLegacy,exhibitionFetch:false,strictPastOnly:true,waitControlsFailClosed:true,ready:current&&program===12&&wait===0&&Object.values(globals).every(Boolean)&&noLegacy}}
 function renderReadiness(){installSkipTargetPolicy();renderSkipVisibility();renderTargetVisibility()}
 installSkipTargetPolicy();
 const prior=typeof renderAll==='function'?renderAll:null;if(prior)renderAll=function(){installSkipTargetPolicy();const out=prior.apply(this,arguments);renderReadiness();return out};
 window.addEventListener('boatcommand:program-sync',()=>setTimeout(()=>{renderReadiness();if(typeof renderAll==='function')renderAll()},0));
-window.BOAT_COMMAND_TRIAL_READINESS_V0272=Object.freeze({version:'0.32.5',audit,isSafeSkip,render:renderReadiness});
+window.BOAT_COMMAND_TRIAL_READINESS_V0272=Object.freeze({version:'0.32.6',audit,isSafeSkip,render:renderReadiness});
 setTimeout(()=>{renderReadiness();if(typeof renderAll==='function')renderAll()},50);
 })();
