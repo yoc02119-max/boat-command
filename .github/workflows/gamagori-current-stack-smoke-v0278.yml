@@ -1,4 +1,4 @@
-name: Gamagori current LIVE stack smoke v0.32.2
+name: Gamagori current LIVE stack smoke v0.32.8
 
 on:
   workflow_dispatch:
@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'app.js'
       - 'styles.css'
+      - 'trial-readiness-v0326.css'
       - 'manifest.webmanifest'
       - 'virtual-bankroll-v0250.js'
       - 'live-program-v0270.js'
@@ -16,12 +17,14 @@ on:
       - 'live-main-autofill-v0320.js'
       - 'live-main-prediction-v0320.js'
       - 'live-main-lock-guard-v0320.js'
+      - 'trial-lock-all-v0327.js'
       - 'live-lock-snapshot-v0203.js'
       - 'live-result-v0204.js'
       - 'live-snapshot-hash-guard-v0209.js'
       - 'live-session-today-v0263.js'
       - 'live-manual-refresh-v0276.js'
       - 'trial-readiness-v0272.js'
+      - 'live-performance-v0323.js'
       - 'boat-ai-core-v0290.js'
       - 'boat-voice-agent-v0296.js'
       - 'boat-chatgpt-voice-v0298.js'
@@ -34,7 +37,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: gamagori-current-stack-smoke-v0322
+  group: gamagori-current-stack-smoke-v0328
   cancel-in-progress: true
 
 jobs:
@@ -47,7 +50,7 @@ jobs:
       - name: Syntax audit current Gamagori runtime
         run: |
           set -euo pipefail
-          for f in app.js virtual-bankroll-v0250.js live-program-v0270.js gamagori-main-model-v0320.js historical-replay-v0320.js live-main-autofill-v0320.js live-main-prediction-v0320.js live-main-lock-guard-v0320.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js boat-ai-core-v0290.js boat-voice-agent-v0296.js boat-chatgpt-voice-v0298.js boat-ai-visual-v0312.js boat-remote-control-v0284.js; do
+          for f in app.js virtual-bankroll-v0250.js live-program-v0270.js gamagori-main-model-v0320.js historical-replay-v0320.js live-main-autofill-v0320.js live-main-prediction-v0320.js live-main-lock-guard-v0320.js trial-lock-all-v0327.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js live-performance-v0323.js boat-ai-core-v0290.js boat-voice-agent-v0296.js boat-chatgpt-voice-v0298.js boat-ai-visual-v0312.js boat-remote-control-v0284.js; do
             node --check "$f"
           done
 
@@ -57,10 +60,10 @@ jobs:
           from pathlib import Path
           import re
           h=Path('index.html').read_text(encoding='utf-8')
-          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus','kLocked','summarySub']
+          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus','kLocked','summarySub','lockAllBtn','allDd','headBoatBars','winnerBars','modeCompare','historyTable']
           miss=[x for x in ids if not re.search(rf'id=["\']{x}["\']',h)]
           assert not miss, f'DOM_MISSING:{miss}'
-          required=['app.js','virtual-bankroll-v0250.js','live-program-v0270.js','gamagori-main-model-v0320.js','historical-replay-v0320.js','live-main-autofill-v0320.js','live-main-prediction-v0320.js','live-main-lock-guard-v0320.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-snapshot-hash-guard-v0209.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0312.js','boat-remote-control-v0284.js']
+          required=['app.js','virtual-bankroll-v0250.js','live-program-v0270.js','gamagori-main-model-v0320.js','historical-replay-v0320.js','live-main-autofill-v0320.js','live-main-prediction-v0320.js','live-main-lock-guard-v0320.js','trial-lock-all-v0327.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-snapshot-hash-guard-v0209.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','live-performance-v0323.js','boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0312.js','boat-remote-control-v0284.js']
           srcs=re.findall(r'<script\s+src="([^"]+)"',h); bases=[x.split('?',1)[0] for x in srcs]
           miss=[x for x in required if x not in bases]; assert not miss, f'SCRIPT_MISSING:{miss}'
           dup=[x for x in set(bases) if bases.count(x)>1]; assert not dup, f'SCRIPT_DUPLICATE:{dup}'
@@ -73,6 +76,8 @@ jobs:
           assert len(set(keys))==1, f'CACHE_KEYS_MIXED:{sorted(set(keys))}'
           key=keys[0]
           css=re.findall(r'<link[^>]+href="([^"]+\.css\?v=\d+)"',h); assert css, 'STYLESHEET_CACHE_KEY_MISSING'
+          css_bases=[x.split('?',1)[0] for x in css]
+          assert 'styles.css' in css_bases and 'trial-readiness-v0326.css' in css_bases, f'CURRENT_CSS_MISSING:{css_bases}'
           css_keys=[re.search(r'[?&]v=(\d+)',x).group(1) for x in css]; assert set(css_keys)=={key}, f'CSS_SCRIPT_CACHE_MISMATCH:{css_keys}:{key}'
           assert re.search(r'<link[^>]+rel="manifest"[^>]+href="manifest\.webmanifest\?v='+re.escape(key)+r'"',h), 'MANIFEST_CACHE_MISMATCH'
           print('CURRENT_STACK_CONTRACT_PASS',key)
@@ -85,10 +90,12 @@ jobs:
             'live-program-v0270.js':['resultEndpointsIncluded!==false','exhibitionIncluded!==false','Fail closed'],
             'live-main-prediction-v0320.js':['strictPastOnly:true','exhibitionUsed:false','resultFetch:false','MISSED_SAFE_LOCK_WINDOW'],
             'live-main-lock-guard-v0320.js':['SAFE_TO_LOCK','minMarginMinutes:3','120通り確率監査NG'],
+            'trial-lock-all-v0327.js':['candidateReady','WAIT','perRaceGuardPreserved:true','waitFailClosed:true'],
             'live-lock-snapshot-v0203.js':['sourcePolicy:{preRaceOnly:true,programOnly:true','mutableAfterLock:false'],
             'live-result-v0204.js':['Global reveal hardening','LOCK SNAPSHOTなし','POST-RACE relay'],
             'live-snapshot-hash-guard-v0209.js':['snapshot'],
             'trial-readiness-v0272.js':['isSafeSkip','eligibleReplayRaces=fn','READY ${ready} · WAIT ${wait} · SKIP ${skipped}'],
+            'live-performance-v0323.js':['readOnly:true','fetchesResults:false','fetchesPreRace:false'],
           }
           for f,needles in checks.items():
             text=Path(f).read_text(encoding='utf-8')
@@ -129,11 +136,11 @@ jobs:
           ok=0
           for i in $(seq 1 18); do
             code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
-            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-main-prediction-v0320.js?v=' /tmp/public.html && grep -Fq 'live-main-lock-guard-v0320.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html; then ok=1; break; fi
+            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-main-prediction-v0320.js?v=' /tmp/public.html && grep -Fq 'live-main-lock-guard-v0320.js?v=' /tmp/public.html && grep -Fq 'trial-lock-all-v0327.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'live-performance-v0323.js?v=' /tmp/public.html; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = 1
-          for asset in app.js styles.css manifest.webmanifest live-program-v0270.js gamagori-main-model-v0320.js historical-replay-v0320.js live-main-autofill-v0320.js live-main-prediction-v0320.js live-main-lock-guard-v0320.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-manual-refresh-v0276.js trial-readiness-v0272.js; do
+          for asset in app.js styles.css trial-readiness-v0326.css manifest.webmanifest live-program-v0270.js gamagori-main-model-v0320.js historical-replay-v0320.js live-main-autofill-v0320.js live-main-prediction-v0320.js live-main-lock-guard-v0320.js trial-lock-all-v0327.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-manual-refresh-v0276.js trial-readiness-v0272.js live-performance-v0323.js; do
             code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}${asset}?v=${GITHUB_RUN_ID}" || true)
             test "$code" = 200 || { echo "PUBLIC_ASSET_FAIL $code $asset"; exit 1; }
           done
