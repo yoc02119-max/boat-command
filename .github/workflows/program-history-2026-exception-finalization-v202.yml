@@ -2,12 +2,16 @@ name: PROGRAM HISTORY 2026 exception finalization v2.0.2
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["PROGRAM HISTORY 2025 finalize DB v1.8.1"]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   finalize:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     name: finalize 2026 with official exceptions
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -198,4 +202,4 @@ jobs:
         with:
           name: gamagori-2026-final
           path: artifact/*.json
-          retention-days: 7
+          retention-days: 30
