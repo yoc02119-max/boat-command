@@ -1,4 +1,4 @@
-name: Gamagori asset cache-bust guard v0.22.1
+name: Gamagori asset cache-bust guard v0.22.2
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'app.js'
       - 'styles.css'
+      - 'manifest.webmanifest'
       - 'gamagori-live-integration-v0198.js'
       - 'live-program-v0270.js'
       - 'live-autopoll-v0199.js'
@@ -136,7 +137,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'fix: refresh Gamagori iPad app asset cache keys v0.22.1'
+          git commit -m 'fix: refresh Gamagori iPad app asset cache keys v0.22.2'
 
           for attempt in 1 2 3; do
             git fetch origin main
