@@ -1,9 +1,10 @@
-// BOAT COMMAND GAMAGORI official main prediction v0.32.8
+// BOAT COMMAND GAMAGORI official main prediction v0.33.1
 // LIVE picks preserve the frozen v0.29.1 baseline. The 4,071-race model remains SHADOW until promotion passes.
 // Safety/usability: once an unlocked race is inside the final 3-minute lock cutoff, mark it SKIP.
+// READY integrity: missing/invalid deadline or snapshot timestamp must remain WAIT because final HARD LOCK would reject them.
 // Stability: identical unlocked candidates preserve generatedAt so render cycles do not churn storage revisions.
 (()=>{'use strict';
-const VERSION='GAMAGORI-MAIN-PREDICTION-V0.32.8',BASELINE_URL='./gamagori-2026-base-v131.json',SHADOW_URL='./gamagori-main-history-v0320.json',LOCK_MARGIN_MINUTES=3;
+const VERSION='GAMAGORI-MAIN-PREDICTION-V0.33.1',BASELINE_URL='./gamagori-2026-base-v131.json',SHADOW_URL='./gamagori-main-history-v0320.json',LOCK_MARGIN_MINUTES=3,MAX_FUTURE_SKEW_MINUTES=2;
 let baselineHistory=[],shadowHistory=[],state='LOADING',pending=null;
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const escMain=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -15,12 +16,19 @@ function cutoffState(s,r,now=new Date()){
  const margin=(at-now)/60000;
  return {closed:margin<LOCK_MARGIN_MINUTES,marginMinutes:margin,deadline:time};
 }
+function snapshotState(r,now=new Date()){
+ const at=new Date(r?.programSnapshotAt);if(!Number.isFinite(at.getTime()))return {ok:false,reason:'番組取得時刻未確認'};
+ if((now-at)/60000 < -MAX_FUTURE_SKEW_MINUTES)return {ok:false,reason:'番組取得時刻異常'};
+ return {ok:true};
+}
 async function json(url){const r=await fetch(url,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error(`HISTORY_HTTP_${r.status}`);return r.json()}
 async function ensureHistory(){if(state==='READY')return shadowHistory;if(pending)return pending;pending=(async()=>{try{const [base,shadow]=await Promise.all([json(`${BASELINE_URL}?v=131`),json(`${SHADOW_URL}?v=320`)]);baselineHistory=(base.races||[]).filter(x=>BOAT_COMMAND_MAIN_MODEL_V0320.validPick(x.o));shadowHistory=(shadow.races||[]).filter(x=>BOAT_COMMAND_MAIN_MODEL_V0320.validPick(x.o));if(baselineHistory.length!==1668||shadow.schema!=='boat-command-program-history-v2'||shadow.exhibitionIncluded!==false||shadowHistory.length!==4071)throw new Error('HISTORY_CONTRACT_INVALID');state='READY'}catch(e){state='ERROR';console.warn('[MAIN history]',e)}finally{pending=null;setTimeout(sync,0)}return shadowHistory})();return pending}
 function frozenBaseline(classes,race,targetDate){const scores=new Map();for(const h of baselineHistory){if(String(h.d)>=String(targetDate))continue;let sim=.06;if(Number(h.r)===Number(race))sim+=.18;if(h.c.join('-')===classes.join('-'))sim+=1.25;let same=0;for(let i=0;i<6;i++)if(h.c[i]===classes[i])same++;sim+=same*.34;if(same===6)sim+=2.5;scores.set(h.o,(scores.get(h.o)||0)+sim)}return [...scores].sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0])}
 function candidate(s,r){
  const p=program(r);if(!p)return{status:'WAIT',stage:'MAIN',reason:r?.programSnapshotReason||'公式番組データ同期中',sessionDate:s.date,strategyVersion:VERSION};
- const cutoff=cutoffState(s,r);if(cutoff?.closed)return{status:'SKIP',stage:'MAIN',reason:`HARD LOCK安全余裕を下回ったため予想対象外（締切 ${cutoff.deadline} / 余裕 ${Math.max(0,cutoff.marginMinutes).toFixed(1)}分）`,sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION,skipPolicy:'MISSED_SAFE_LOCK_WINDOW',resultFetch:false};
+ const snap=snapshotState(r);if(!snap.ok)return{status:'WAIT',stage:'MAIN',reason:snap.reason,sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION};
+ const cutoff=cutoffState(s,r);if(!cutoff)return{status:'WAIT',stage:'MAIN',reason:'締切時刻未確認',sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION};
+ if(cutoff.closed)return{status:'SKIP',stage:'MAIN',reason:`HARD LOCK安全余裕を下回ったため予想対象外（締切 ${cutoff.deadline} / 余裕 ${Math.max(0,cutoff.marginMinutes).toFixed(1)}分）`,sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION,skipPolicy:'MISSED_SAFE_LOCK_WINDOW',resultFetch:false};
  if(state!=='READY')return{status:'WAIT',stage:'MAIN',reason:state==='ERROR'?'履歴DB監査待ち':'履歴DB読込中',sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION};
  const picks=frozenBaseline(p.classes,p.race,s.date),dist=BOAT_COMMAND_MAIN_MODEL_V0320.probabilities(p,shadowHistory,{targetDate:s.date}),shadowPicks=BOAT_COMMAND_MAIN_MODEL_V0320.select(dist,{count:4}).map(x=>x.order),prior=r?.firstSuggestion;
  const samePrior=prior?.status==='CANDIDATE'&&prior?.stage==='MAIN'&&prior?.programFingerprint===p.fingerprint&&prior?.strategyVersion===VERSION&&JSON.stringify(prior?.picks||[])===JSON.stringify(picks);
@@ -31,5 +39,5 @@ function installStyle(){if(document.getElementById('bc-main-v0320-style'))return
 function render(){installStyle();const s=liveSession();if(!s)return;document.querySelectorAll('#predictionList .race-card').forEach(card=>{const n=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,'')),r=s.races.find(x=>Number(x.race)===n);if(!r)return;let box=card.querySelector('.main-prediction-v0320');if(!box){box=document.createElement('div');box.className='main-prediction-v0320';card.appendChild(box)}const x=r.firstSuggestion;box.classList.toggle('skip',x?.status==='SKIP');box.innerHTML=x?.status==='CANDIDATE'?`<div class="main-top"><b>メイン予想</b><span class="main-tag">現行第一候補・正式採用</span></div><div class="main-picks">${(x.picks||[]).map(escMain).join(' / ')}</div><details class="main-detail"><summary>根拠</summary>${escMain(x.rationale)}</details>`:x?.status==='SKIP'?`<div class="main-top"><b>SKIP</b><span class="main-tag">安全締切超過・予想対象外</span></div><div class="main-detail">${escMain(x.reason)}</div>`:`<div class="main-top"><b>メイン予想</b><span class="main-tag">WAIT</span></div><div class="main-detail">${escMain(x?.reason||'準備中')}</div>`})}
 function sync(){refresh();if(typeof applyMainCandidateAutoFill==='function')applyMainCandidateAutoFill();render()}
 const prior=typeof renderAll==='function'?renderAll:null;if(prior)renderAll=function(){const out=prior.apply(this,arguments);sync();return out};window.addEventListener('boatcommand:program-sync',()=>setTimeout(sync,0));window.addEventListener('boatcommand:today-live',()=>setTimeout(()=>{if(typeof syncGamagoriProgramSnapshot==='function')syncGamagoriProgramSnapshot({render:false}).then(sync);else sync()},40));
-window.BOAT_COMMAND_MAIN_PREDICTION_V0320=Object.freeze({version:VERSION,venue:'蒲郡',sync,ensureHistory,productionModel:'FROZEN_BASELINE_V0.29.1',shadowModel:'GAMAGORI-MAIN-MODEL-V0.32.0',shadowPromotionEligible:false,exhibitionUsed:false,resultFetch:false,payoutFetch:false,strictPastOnly:true,lockMarginMinutes:LOCK_MARGIN_MINUTES,safeSkipAfterCutoff:true,stableCandidateTimestamp:true});installStyle();ensureHistory();sync();
+window.BOAT_COMMAND_MAIN_PREDICTION_V0320=Object.freeze({version:VERSION,venue:'蒲郡',sync,ensureHistory,productionModel:'FROZEN_BASELINE_V0.29.1',shadowModel:'GAMAGORI-MAIN-MODEL-V0.32.0',shadowPromotionEligible:false,exhibitionUsed:false,resultFetch:false,payoutFetch:false,strictPastOnly:true,lockMarginMinutes:LOCK_MARGIN_MINUTES,safeSkipAfterCutoff:true,readyMatchesLockPrerequisites:true,stableCandidateTimestamp:true});installStyle();ensureHistory();sync();
 })();
