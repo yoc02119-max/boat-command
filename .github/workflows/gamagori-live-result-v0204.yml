@@ -11,9 +11,6 @@ on:
     # Gamagori is a night venue. Poll only the useful JST window (16:00-23:59),
     # every 30 minutes. Non-event days produce no relay changes and no commit.
     - cron: '*/30 7-14 * * *'
-  push:
-    paths:
-      - '.github/workflows/gamagori-live-result-v0204.yml'
 
 permissions:
   contents: write
@@ -39,28 +36,21 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          p=Path('index.html');s=p.read_text()
-          s=s.replace('BOAT COMMAND v0.21.1','BOAT COMMAND v0.21.4')
-          s=s.replace('v0.21.1 · RUNTIME AUDIT','v0.21.4 · RESULT METHOD')
-          # Keep exactly one result module in canonical order, but never pin a stale
-          # cache key. The result layer must follow the current app.js cache version so
-          # scheduled POST-RACE polling cannot regress a newer deployed runtime.
+          s=Path('index.html').read_text()
           app_m=re.search(r'<script src="app\.js\?v=(\d+)"></script>',s)
           if not app_m:
               raise SystemExit('APP_BOOTSTRAP_CACHE_KEY_MISSING')
           cache_key=app_m.group(1)
-          s=re.sub(r'\n?<script src="live-result-v0204\.js\?v=\d+"></script>','',s)
-          learning_pat=r'<script src="live-learning-v0205\.js\?v=\d+"></script>'
-          m=re.search(learning_pat,s)
-          if not m:
-              raise SystemExit('RESULT_BOOTSTRAP_ANCHOR_MISSING')
-          tag=f'<script src="live-result-v0204.js?v={cache_key}"></script>'
-          s=s[:m.start()]+tag+'\n'+s[m.start():]
           if s.count('live-result-v0204.js')!=1:
               raise SystemExit('RESULT_BOOTSTRAP_SINGLETON_FAIL')
           if f'live-result-v0204.js?v={cache_key}' not in s:
               raise SystemExit('RESULT_BOOTSTRAP_CACHE_KEY_MISMATCH')
-          p.write_text(s)
+          order=['live-main-lock-guard-v0320.js','live-lock-snapshot-v0203.js',
+                 'live-result-v0204.js','live-snapshot-hash-guard-v0209.js']
+          positions=[s.index(name) for name in order]
+          if positions != sorted(positions):
+              raise SystemExit('RESULT_BOOTSTRAP_ORDER_FAIL')
+          print('RESULT_BOOTSTRAP_PASS',cache_key)
           PY
 
       - name: Install parser
