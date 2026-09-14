@@ -1,0 +1,70 @@
+name: Gamagori LIVE performance v0.32.3
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gamagori-live-performance-v0323.yml'
+      - 'index.html'
+      - 'app.js'
+      - 'live-result-v0204.js'
+      - 'live-performance-v0323.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gamagori-live-performance-v0323
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and index contract
+        run: |
+          set -euo pipefail
+          node --check live-performance-v0323.js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          h=Path('index.html').read_text(encoding='utf-8')
+          srcs=re.findall(r'<script\s+src="([^"]+)"',h)
+          bases=[x.split('?',1)[0] for x in srcs]
+          assert 'live-result-v0204.js' in bases, 'RESULT_LAYER_MISSING'
+          assert 'live-performance-v0323.js' in bases, 'PERFORMANCE_LAYER_MISSING'
+          assert bases.index('live-result-v0204.js') < bases.index('live-performance-v0323.js'), 'PERFORMANCE_MUST_LOAD_AFTER_RESULT'
+          for dom_id in ['kHits','kHitRate','kRoi','kProfit','bankrollNow','allRecord','allHitRate','allRoi','allDd','resultSummary']:
+              assert re.search(rf'id=["\']{dom_id}["\']',h), f'DOM_MISSING:{dom_id}'
+          print('PERFORMANCE_INDEX_CONTRACT_PASS')
+          PY
+      - name: Verify POST-only performance accounting
+        shell: python
+        run: |
+          from pathlib import Path
+          text=Path('live-performance-v0323.js').read_text(encoding='utf-8')
+          required=['settled','returnAmount','profit','hit','officialPayout100','bankrollNow','allRecord','allHitRate','allRoi','allDd']
+          missing=[x for x in required if x not in text]
+          assert not missing, f'PERFORMANCE_CONTRACT_MISSING:{missing}'
+          forbidden=['liveSuggestion','exhibitionTime','exhibitionST','displayTime','tenjiTime']
+          leaked=[x for x in forbidden if x in text]
+          assert not leaked, f'PRE_RACE_LEAK_IN_PERFORMANCE:{leaked}'
+          assert 'r.settled' in text or '.settled' in text, 'SETTLED_GATE_MISSING'
+          print('POST_ONLY_PERFORMANCE_PASS')
+      - name: Verify public performance asset
+        env:
+          APP_URL: https://yoc02119-max.github.io/boat-command/
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 18); do
+            code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
+            if [ "$code" = 200 ] && grep -Fq 'live-performance-v0323.js?v=' /tmp/public.html; then ok=1; break; fi
+            sleep 10
+          done
+          test "$ok" = 1
+          code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}live-performance-v0323.js?v=${GITHUB_RUN_ID}" || true)
+          test "$code" = 200
+          echo PUBLIC_PERFORMANCE_PASS
