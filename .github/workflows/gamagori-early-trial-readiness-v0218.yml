@@ -149,7 +149,7 @@ jobs:
 
           if manifest.get('display') != 'standalone' or manifest.get('scope') != './':
             raise SystemExit('PORTAL_PWA_DISPLAY_SCOPE_BAD')
-          if manifest.get('start_url') != './portal.html':
+          if manifest.get('start_url') != './index.html':
             raise SystemExit(f"PORTAL_PWA_START_URL_BAD:{manifest.get('start_url')}")
           if not re.search(r'<link\s+rel="manifest"\s+href="manifest\.webmanifest\?v=\d+"', portal):
             raise SystemExit('PORTAL_MANIFEST_LINK_MISSING_OR_UNVERSIONED')
