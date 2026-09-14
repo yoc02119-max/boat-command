@@ -2,10 +2,9 @@ name: GAMAGORI main history build v0.32.0
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/gamagori-main-history-build-v0320.yml
+  workflow_run:
+    workflows: ["PROGRAM HISTORY 2026 exception finalization v2.0.2"]
+    types: [completed]
 
 permissions:
   contents: write
@@ -16,6 +15,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
