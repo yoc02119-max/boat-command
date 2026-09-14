@@ -1,12 +1,11 @@
-// BOAT COMMAND GAMAGORI LIVE FINAL LOCK GUARD v0.20.2
+// BOAT COMMAND GAMAGORI LIVE FINAL LOCK GUARD v0.31.3
 // Final fail-closed check immediately before HARD LOCK. LIVE only.
-// Verifies READY, verified mappings, candidate state, source freshness, and deadline margin.
-// Batch-lock hardening v0.23.9: preflight every LIVE target before the first HARD LOCK to avoid avoidable partial batches.
+// Formal prediction uses result-free official program + historical DB only; exhibition is not required.
 const BC_LIVE_LOCK_GUARD_V0202={
-  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.20.2+PREDICTION-DOM-SCOPE-V0.22.7+DOM-FAIL-CLOSED-V0.22.10+BATCH-PREFLIGHT-V0.23.9',
+  version:'GAMAGORI-LIVE-LOCK-GUARD-V0.31.3',
   minMarginMinutes:3,
-  maxSourceAgeMinutes:20,
-  maxFutureSkewMinutes:2
+  maxFutureSkewMinutes:2,
+  maxProgramAgeHours:24
 };
 
 function bcLiveDeadlineAt(date,deadline){
@@ -20,35 +19,32 @@ function bcFinalLiveLockAudit(s,r,now=new Date()){
   if(!s||s.runType!=='LIVE')return {ok:true,status:'NOT_LIVE',reason:''};
   if(!r)return {ok:false,status:'BLOCKED',reason:'レース情報を確認できません'};
   if(r.locked)return {ok:false,status:'BLOCKED',reason:'すでにHARD LOCK済みです'};
-  if(r.liveDataStatus!=='READY'||!r.livePreRace)return {ok:false,status:'BLOCKED',reason:r.liveDataReason||'LIVEデータがREADYではありません'};
+  if(r.programSnapshotStatus!=='READY'||!Array.isArray(r.preRaceProfiles)||r.preRaceProfiles.length!==6)return {ok:false,status:'BLOCKED',reason:r.programSnapshotReason||'公式番組データがREADYではありません'};
 
-  const v=r.livePreRace.verified||{};
-  if(v.timingStatus!=='VERIFIED')return {ok:false,status:'BLOCKED',reason:'締切時刻の安全確認がVERIFIEDではありません'};
-  if(v.boatMappingVerified!==true)return {ok:false,status:'BLOCKED',reason:'艇番対応の確認が完了していません'};
-  if(v.weatherMappingVerified!==true)return {ok:false,status:'BLOCKED',reason:'水面気象の対応確認が完了していません'};
-  if(v.readyForPrediction!==true)return {ok:false,status:'BLOCKED',reason:'readyForPredictionがtrueではありません'};
+  const suggestion=r.firstSuggestion;
+  if(suggestion?.status!=='CANDIDATE'||suggestion.sessionDate!==s.date)return {ok:false,status:'BLOCKED',reason:suggestion?.reason||'正式メイン予想がREADYではありません'};
+  if(!Array.isArray(suggestion.picks)||suggestion.picks.length<1||suggestion.picks.length>4)return {ok:false,status:'BLOCKED',reason:'正式メイン予想の買い目数が不正です'};
 
-  const suggestion=r.liveSuggestion;
-  if(suggestion?.status!=='CANDIDATE')return {ok:false,status:'BLOCKED',reason:suggestion?.reason||'現在のLIVE判定は予想候補成立ではありません'};
-
-  const deadline=bcLiveDeadlineAt(s.date,r.livePreRace.deadline);
-  if(!deadline)return {ok:false,status:'BLOCKED',reason:'締切時刻を安全に解釈できません'};
+  const deadline=bcLiveDeadlineAt(s.date,r.programDeadline);
+  if(!deadline)return {ok:false,status:'BLOCKED',reason:'公式番組の締切時刻を安全に解釈できません'};
   const margin=bcMinutes(deadline,now);
   if(margin<BC_LIVE_LOCK_GUARD_V0202.minMarginMinutes){
     return {ok:false,status:'BLOCKED',reason:`締切まで${Math.max(0,margin).toFixed(1)}分。安全余裕${BC_LIVE_LOCK_GUARD_V0202.minMarginMinutes}分未満のためLOCK禁止`,marginMinutes:margin};
   }
 
-  const sourceRaw=r.liveVerifiedAt||r.livePreRace?.verifiedAt||null;
+  const sourceRaw=r.programSnapshotAt||null;
   const source=sourceRaw?new Date(sourceRaw):null;
-  if(!source||!Number.isFinite(source.getTime()))return {ok:false,status:'BLOCKED',reason:'verified LIVE取得時刻を確認できません',marginMinutes:margin};
+  if(!source||!Number.isFinite(source.getTime()))return {ok:false,status:'BLOCKED',reason:'公式番組取得時刻を確認できません',marginMinutes:margin};
   const age=bcMinutes(now,source);
-  if(age < -BC_LIVE_LOCK_GUARD_V0202.maxFutureSkewMinutes)return {ok:false,status:'BLOCKED',reason:'LIVE取得時刻が未来値になっているためLOCK禁止',marginMinutes:margin,sourceAgeMinutes:age};
-  if(age > BC_LIVE_LOCK_GUARD_V0202.maxSourceAgeMinutes)return {ok:false,status:'BLOCKED',reason:`LIVEデータが古すぎます（${age.toFixed(1)}分前）。再取得後にLOCKしてください`,marginMinutes:margin,sourceAgeMinutes:age};
+  if(age < -BC_LIVE_LOCK_GUARD_V0202.maxFutureSkewMinutes)return {ok:false,status:'BLOCKED',reason:'公式番組取得時刻が未来値になっているためLOCK禁止',marginMinutes:margin,sourceAgeMinutes:age};
+  if(age > BC_LIVE_LOCK_GUARD_V0202.maxProgramAgeHours*60)return {ok:false,status:'BLOCKED',reason:'公式番組データが24時間以上古いため再同期が必要です',marginMinutes:margin,sourceAgeMinutes:age};
 
   const picks=(r.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);
   if(picks.length<1||picks.length>4)return {ok:false,status:'BLOCKED',reason:'買い目が1〜4点の範囲ではありません',marginMinutes:margin,sourceAgeMinutes:age};
+  const expected=(suggestion.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);
+  if(JSON.stringify(picks)!==JSON.stringify(expected))return {ok:false,status:'BLOCKED',reason:'買い目欄が正式メイン予想と一致しません。手入力変更があるため安全確認が必要です',marginMinutes:margin,sourceAgeMinutes:age};
 
-  return {ok:true,status:'SAFE_TO_LOCK',reason:'',marginMinutes:margin,sourceAgeMinutes:age,checkedAt:now.toISOString(),version:BC_LIVE_LOCK_GUARD_V0202.version};
+  return {ok:true,status:'SAFE_TO_LOCK',reason:'',marginMinutes:margin,sourceAgeMinutes:age,checkedAt:now.toISOString(),predictionSource:'firstSuggestion',exhibitionUsed:false,version:BC_LIVE_LOCK_GUARD_V0202.version};
 }
 function bcSaveLiveLockAudit(r,audit){
   if(!r)return;
@@ -83,9 +79,7 @@ const _bcLockAllEligibleV0239=lockAllEligible;
 lockAllEligible=async function(){
   const s=typeof session==='function'?session():null;
   if(!s||s.runType!=='LIVE')return _bcLockAllEligibleV0239();
-  const eligible=typeof eligibleReplayRaces==='function'
-    ?eligibleReplayRaces(s).filter(r=>!r.locked)
-    :(s.races||[]).filter(r=>!r.locked);
+  const eligible=typeof eligibleReplayRaces==='function'?eligibleReplayRaces(s).filter(r=>!r.locked):(s.races||[]).filter(r=>!r.locked);
   if(!eligible.length)return _bcLockAllEligibleV0239();
   const now=new Date();
   const blocked=[];
@@ -106,8 +100,6 @@ lockAllEligible=async function(){
 function renderLiveLockGuard(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
-  // Prediction-only DOM scope: result/analytics cards must never receive PRE-RACE lock controls.
-  // Race identity is fail-closed: never infer a race from card position after DOM rewrites/reordering.
   const cards=[...document.querySelectorAll('#predictionList .race-card')];
   cards.forEach(card=>{
     const parsedRace=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
@@ -118,14 +110,11 @@ function renderLiveLockGuard(){
       return;
     }
     const r=s.races.find(x=>Number(x.race)===parsedRace);
-    if(!r){
-      box.innerHTML='<div class="prediction-gate limited"><b>FINAL LOCK GATE｜BLOCKED</b><span>レース情報を照合できないためLOCK禁止</span></div>';
-      return;
-    }
+    if(!r){box.innerHTML='<div class="prediction-gate limited"><b>FINAL LOCK GATE｜BLOCKED</b><span>レース情報を照合できないためLOCK禁止</span></div>';return;}
     if(r.locked){box.innerHTML='';return;}
     const a=bcFinalLiveLockAudit(s,r,new Date());
     if(a.ok){
-      box.innerHTML=`<div class="prediction-gate ready"><b>FINAL LOCK GATE｜SAFE</b><span>締切余裕 ${a.marginMinutes.toFixed(1)}分 · LIVE鮮度 ${a.sourceAgeMinutes.toFixed(1)}分</span></div>`;
+      box.innerHTML=`<div class="prediction-gate ready"><b>FINAL LOCK GATE｜SAFE</b><span>メイン予想一致 · 締切余裕 ${a.marginMinutes.toFixed(1)}分 · 番組取得 ${a.sourceAgeMinutes.toFixed(1)}分前</span></div>`;
     }else{
       box.innerHTML=`<div class="prediction-gate limited"><b>FINAL LOCK GATE｜BLOCKED</b><span>${esc(a.reason)}</span></div>`;
     }
@@ -133,10 +122,7 @@ function renderLiveLockGuard(){
 }
 
 const _bcRenderAllV0202=renderAll;
-renderAll=function(){
-  _bcRenderAllV0202();
-  renderLiveLockGuard();
-};
+renderAll=function(){_bcRenderAllV0202();renderLiveLockGuard();};
 
 const _bcAnswerV0202=answer;
 answer=function(q){
@@ -144,7 +130,7 @@ answer=function(q){
   const m=t.match(/(\d{1,2})R/),race=m?Number(m[1]):Number($('#liveRace')?.value)||1;
   if(/LOCKできる|ロックできる|LOCK安全|ロック安全|最終確認|締切余裕|鮮度/.test(t)){
     const s=session(),r=s.races.find(x=>Number(x.race)===race),a=bcFinalLiveLockAudit(s,r,new Date());
-    if(a.ok)return `${race}Rは <strong>FINAL LOCK GATE SAFE</strong>。締切余裕 ${a.marginMinutes.toFixed(1)}分、LIVEデータ鮮度 ${a.sourceAgeMinutes.toFixed(1)}分です。`;
+    if(a.ok)return `${race}Rは <strong>FINAL LOCK GATE SAFE</strong>。正式メイン予想一致、締切余裕 ${a.marginMinutes.toFixed(1)}分です。`;
     return `${race}Rは <strong>HARD LOCK BLOCKED</strong>。理由は「${esc(a.reason)}」です。`;
   }
   return _bcAnswerV0202(q);
