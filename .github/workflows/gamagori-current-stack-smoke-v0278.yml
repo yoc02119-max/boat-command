@@ -111,18 +111,21 @@ jobs:
           from zoneinfo import ZoneInfo
           d=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date().isoformat()
           base=Path('live/gamagori')/d/'program'
-          ready_path=base/'pages-ready.json'
-          if not ready_path.exists():
+          manifest_path=base/'manifest.json'
+          if not manifest_path.exists():
             print('PROGRAM_SNAPSHOT_NOT_READY_YET',d); raise SystemExit(0)
-          ready=json.loads(ready_path.read_text(encoding='utf-8'))
-          assert ready.get('allProgramReady') is True and ready.get('programRaces')==12
+          ready=json.loads(manifest_path.read_text(encoding='utf-8'))
+          assert ready.get('schema')=='boat-command-program-manifest-v1'
+          assert ready.get('venue')=='GAMAGORI' and ready.get('date')==d
+          assert ready.get('allProgramReady') is True and ready.get('races')==12
           assert ready.get('exhibitionIncluded') is False
-          assert ready.get('resultEndpointsIncluded') is False
+          assert ready.get('resultEndpointsIncluded') is False and ready.get('resultIncluded') is False
           for n in range(1,13):
             p=json.loads((base/f'race-{n}.json').read_text(encoding='utf-8'))
             assert p.get('schema')=='boat-command-program-pack-v1'
             assert p.get('venue')=='GAMAGORI' and p.get('date')==d and p.get('race')==n
             assert p.get('programReady') is True
+            assert p.get('fetchedAt') and p.get('deadline')
             assert [b.get('lane') for b in p.get('boats',[])]==[1,2,3,4,5,6]
             assert all(b.get('class') in ('A1','A2','B1','B2') for b in p['boats'])
             assert p.get('exhibitionIncluded') is False
