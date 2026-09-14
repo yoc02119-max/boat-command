@@ -2,6 +2,9 @@ name: PROGRAM HISTORY 2025 finalize DB v1.8.1
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/program-history-2025-finalize-db-v181.yml'
   workflow_run:
     workflows: ["PROGRAM HISTORY 2025 segmented year build v1.5.1"]
     types: [completed]
@@ -11,7 +14,7 @@ permissions:
 
 jobs:
   finalize:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'failure'
     name: finalize 2025 Gamagori DB
     runs-on: ubuntu-latest
     timeout-minutes: 20
