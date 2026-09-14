@@ -33,7 +33,7 @@ on:
       - 'boat-ai-core-v0290.js'
       - 'boat-voice-agent-v0296.js'
       - 'boat-chatgpt-voice-v0298.js'
-      - 'boat-ai-visual-v0310.js'
+      - 'boat-ai-visual-v0311.js'
       - 'boat-remote-control-v0284.js'
   workflow_run:
     workflows:
@@ -87,7 +87,7 @@ jobs:
             boat-ai-core-v0290.js \
             boat-voice-agent-v0296.js \
             boat-chatgpt-voice-v0298.js \
-            boat-ai-visual-v0310.js \
+            boat-ai-visual-v0311.js \
             boat-remote-control-v0284.js
           do
             node --check "$f"
@@ -116,7 +116,7 @@ jobs:
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
             'trial-readiness-v0218.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js',
-            'boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0310.js','boat-remote-control-v0284.js'
+            'boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0311.js','boat-remote-control-v0284.js'
           ]
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           bases = [x.split('?',1)[0] for x in srcs]
@@ -218,7 +218,7 @@ jobs:
             'live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js',
             'live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js',
             'trial-readiness-v0218.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js',
-            'boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0310.js','boat-remote-control-v0284.js'
+            'boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0311.js','boat-remote-control-v0284.js'
           ]
           srcs = re.findall(r'<script\s+src="([^"]+)"', html)
           local_srcs = re.findall(r'<script\s+src="([^"]+)"', local)
