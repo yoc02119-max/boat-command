@@ -1,0 +1,46 @@
+name: Gamagori SHADOW replay v0.33.3
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'historical-replay-v0333.js'
+      - 'gamagori-replay-*-v0333.json'
+      - 'gamagori-shadow-evaluation-v0333.json'
+      - 'scripts/gamagori-*-v0333.js'
+      - 'baseline/live-v0332-freeze.json'
+      - '.github/workflows/gamagori-shadow-replay-v0333.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-replay-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: JavaScript syntax
+        run: |
+          node --check historical-replay-v0333.js
+          node --check scripts/gamagori-shadow-evaluation-v0333.js
+          node --check scripts/gamagori-replay-boundary-v0333.js
+          node --check scripts/gamagori-shadow-contract-v0333.js
+          node --check scripts/gamagori-live-freeze-contract-v0333.js
+      - name: Current LIVE freeze
+        run: node scripts/gamagori-live-freeze-contract-v0333.js
+      - name: REPLAY one-way boundary and append-only history
+        run: node scripts/gamagori-replay-boundary-v0333.js
+      - name: Reproduce SHADOW artifacts
+        run: node scripts/gamagori-shadow-evaluation-v0333.js /tmp/evaluation.json /tmp/predictions.json /tmp/results.json
+      - name: Compare reproducible artifacts
+        run: |
+          cmp gamagori-shadow-evaluation-v0333.json /tmp/evaluation.json
+          cmp gamagori-replay-predictions-v0333.json /tmp/predictions.json
+          cmp gamagori-replay-results-v0333.json /tmp/results.json
+      - name: SHADOW and UI contract
+        run: node scripts/gamagori-shadow-contract-v0333.js

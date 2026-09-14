@@ -1,0 +1,1275 @@
+{
+  "schema": "boat-command-shadow-evaluation-v0333",
+  "model": "GAMAGORI-MAIN-MODEL-V0.32.0",
+  "scope": {
+    "raceDays": 30,
+    "races": 360,
+    "firstDate": "2026-06-28",
+    "lastDate": "2026-09-04",
+    "hits": 96,
+    "misses": 264
+  },
+  "boundaries": {
+    "shadowOnly": true,
+    "strictWalkForward": true,
+    "sameDayOutcomeExcluded": true,
+    "targetAndFutureOutcomeExcluded": true,
+    "exhibitionUsed": false,
+    "designDates": [
+      "2026-06-28",
+      "2026-07-01",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-18",
+      "2026-08-11",
+      "2026-08-12"
+    ],
+    "holdoutDates": [
+      "2026-08-13",
+      "2026-08-14",
+      "2026-08-15",
+      "2026-08-16",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-24",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-04"
+    ],
+    "thresholdsOutcomeOptimized": false
+  },
+  "thresholds": {
+    "confidenceCut": 0.05763574516451842,
+    "highCut": 1.365132859157498,
+    "lowCut": -1.5595914536446023,
+    "programNearestDistanceCut": 1.05,
+    "source": "FIRST_15_DAYS_INPUT_DISTRIBUTION_ONLY"
+  },
+  "strategies": {
+    "all": {
+      "design": {
+        "sampleRaces": 180,
+        "betRaces": 180,
+        "skipRaces": 0,
+        "averagePoints": 4,
+        "hits": 42,
+        "hitRate": 0.23333333333333334,
+        "totalInvestment": 72000,
+        "totalPayout": 47920,
+        "roi": 0.6655555555555556,
+        "maxDrawdown": 25850,
+        "lane1PickShare": 0.9305555555555556
+      },
+      "holdout": {
+        "sampleRaces": 180,
+        "betRaces": 180,
+        "skipRaces": 0,
+        "averagePoints": 4,
+        "hits": 54,
+        "hitRate": 0.3,
+        "totalInvestment": 72000,
+        "totalPayout": 51060,
+        "roi": 0.7091666666666666,
+        "maxDrawdown": 20940,
+        "lane1PickShare": 0.8861111111111111
+      },
+      "all360": {
+        "sampleRaces": 360,
+        "betRaces": 360,
+        "skipRaces": 0,
+        "averagePoints": 4,
+        "hits": 96,
+        "hitRate": 0.26666666666666666,
+        "totalInvestment": 144000,
+        "totalPayout": 98980,
+        "roi": 0.6873611111111111,
+        "maxDrawdown": 45020,
+        "lane1PickShare": 0.9083333333333333
+      }
+    },
+    "confidence": {
+      "design": {
+        "sampleRaces": 180,
+        "betRaces": 91,
+        "skipRaces": 89,
+        "averagePoints": 4,
+        "hits": 29,
+        "hitRate": 0.31868131868131866,
+        "totalInvestment": 36400,
+        "totalPayout": 29480,
+        "roi": 0.8098901098901099,
+        "maxDrawdown": 9340,
+        "lane1PickShare": 0.9423076923076923
+      },
+      "holdout": {
+        "sampleRaces": 180,
+        "betRaces": 103,
+        "skipRaces": 77,
+        "averagePoints": 4,
+        "hits": 39,
+        "hitRate": 0.3786407766990291,
+        "totalInvestment": 41200,
+        "totalPayout": 32130,
+        "roi": 0.7798543689320389,
+        "maxDrawdown": 9070,
+        "lane1PickShare": 0.8956310679611651
+      },
+      "all360": {
+        "sampleRaces": 360,
+        "betRaces": 194,
+        "skipRaces": 166,
+        "averagePoints": 4,
+        "hits": 68,
+        "hitRate": 0.35051546391752575,
+        "totalInvestment": 77600,
+        "totalPayout": 61610,
+        "roi": 0.7939432989690721,
+        "maxDrawdown": 17060,
+        "lane1PickShare": 0.9175257731958762
+      }
+    },
+    "program": {
+      "design": {
+        "sampleRaces": 180,
+        "betRaces": 95,
+        "skipRaces": 85,
+        "averagePoints": 4,
+        "hits": 29,
+        "hitRate": 0.30526315789473685,
+        "totalInvestment": 38000,
+        "totalPayout": 30110,
+        "roi": 0.7923684210526316,
+        "maxDrawdown": 10550,
+        "lane1PickShare": 0.9263157894736842
+      },
+      "holdout": {
+        "sampleRaces": 180,
+        "betRaces": 133,
+        "skipRaces": 47,
+        "averagePoints": 4,
+        "hits": 39,
+        "hitRate": 0.2932330827067669,
+        "totalInvestment": 53200,
+        "totalPayout": 40620,
+        "roi": 0.7635338345864662,
+        "maxDrawdown": 12590,
+        "lane1PickShare": 0.8966165413533834
+      },
+      "all360": {
+        "sampleRaces": 360,
+        "betRaces": 228,
+        "skipRaces": 132,
+        "averagePoints": 4,
+        "hits": 68,
+        "hitRate": 0.2982456140350877,
+        "totalInvestment": 91200,
+        "totalPayout": 70730,
+        "roi": 0.7755482456140351,
+        "maxDrawdown": 21280,
+        "lane1PickShare": 0.9089912280701754
+      }
+    },
+    "combined": {
+      "design": {
+        "sampleRaces": 180,
+        "betRaces": 53,
+        "skipRaces": 127,
+        "averagePoints": 4,
+        "hits": 21,
+        "hitRate": 0.39622641509433965,
+        "totalInvestment": 21200,
+        "totalPayout": 20890,
+        "roi": 0.9853773584905661,
+        "maxDrawdown": 3200,
+        "lane1PickShare": 0.9292452830188679
+      },
+      "holdout": {
+        "sampleRaces": 180,
+        "betRaces": 69,
+        "skipRaces": 111,
+        "averagePoints": 4,
+        "hits": 26,
+        "hitRate": 0.37681159420289856,
+        "totalInvestment": 27600,
+        "totalPayout": 23660,
+        "roi": 0.8572463768115942,
+        "maxDrawdown": 5570,
+        "lane1PickShare": 0.9021739130434783
+      },
+      "all360": {
+        "sampleRaces": 360,
+        "betRaces": 122,
+        "skipRaces": 238,
+        "averagePoints": 4,
+        "hits": 47,
+        "hitRate": 0.38524590163934425,
+        "totalInvestment": 48800,
+        "totalPayout": 44550,
+        "roi": 0.9129098360655737,
+        "maxDrawdown": 7730,
+        "lane1PickShare": 0.9139344262295082
+      }
+    }
+  },
+  "confidenceBands": {
+    "design": {
+      "HIGH": {
+        "sampleRaces": 180,
+        "betRaces": 61,
+        "skipRaces": 119,
+        "averagePoints": 4,
+        "hits": 21,
+        "hitRate": 0.3442622950819672,
+        "totalInvestment": 24400,
+        "totalPayout": 22160,
+        "roi": 0.9081967213114754,
+        "maxDrawdown": 5400,
+        "lane1PickShare": 0.9344262295081968
+      },
+      "MEDIUM": {
+        "sampleRaces": 180,
+        "betRaces": 60,
+        "skipRaces": 120,
+        "averagePoints": 4,
+        "hits": 12,
+        "hitRate": 0.2,
+        "totalInvestment": 24000,
+        "totalPayout": 11930,
+        "roi": 0.4970833333333333,
+        "maxDrawdown": 12070,
+        "lane1PickShare": 0.9416666666666667
+      },
+      "LOW": {
+        "sampleRaces": 180,
+        "betRaces": 59,
+        "skipRaces": 121,
+        "averagePoints": 4,
+        "hits": 9,
+        "hitRate": 0.15254237288135594,
+        "totalInvestment": 23600,
+        "totalPayout": 13830,
+        "roi": 0.5860169491525423,
+        "maxDrawdown": 12690,
+        "lane1PickShare": 0.9152542372881356
+      }
+    },
+    "holdout": {
+      "HIGH": {
+        "sampleRaces": 180,
+        "betRaces": 80,
+        "skipRaces": 100,
+        "averagePoints": 4,
+        "hits": 33,
+        "hitRate": 0.4125,
+        "totalInvestment": 32000,
+        "totalPayout": 27420,
+        "roi": 0.856875,
+        "maxDrawdown": 6770,
+        "lane1PickShare": 0.915625
+      },
+      "MEDIUM": {
+        "sampleRaces": 180,
+        "betRaces": 58,
+        "skipRaces": 122,
+        "averagePoints": 4,
+        "hits": 14,
+        "hitRate": 0.2413793103448276,
+        "totalInvestment": 23200,
+        "totalPayout": 13290,
+        "roi": 0.5728448275862069,
+        "maxDrawdown": 9910,
+        "lane1PickShare": 0.8275862068965517
+      },
+      "LOW": {
+        "sampleRaces": 180,
+        "betRaces": 42,
+        "skipRaces": 138,
+        "averagePoints": 4,
+        "hits": 7,
+        "hitRate": 0.16666666666666666,
+        "totalInvestment": 16800,
+        "totalPayout": 10350,
+        "roi": 0.6160714285714286,
+        "maxDrawdown": 6450,
+        "lane1PickShare": 0.9107142857142857
+      }
+    },
+    "all360": {
+      "HIGH": {
+        "sampleRaces": 360,
+        "betRaces": 141,
+        "skipRaces": 219,
+        "averagePoints": 4,
+        "hits": 54,
+        "hitRate": 0.3829787234042553,
+        "totalInvestment": 56400,
+        "totalPayout": 49580,
+        "roi": 0.8790780141843971,
+        "maxDrawdown": 7890,
+        "lane1PickShare": 0.9237588652482269
+      },
+      "MEDIUM": {
+        "sampleRaces": 360,
+        "betRaces": 118,
+        "skipRaces": 242,
+        "averagePoints": 4,
+        "hits": 26,
+        "hitRate": 0.22033898305084745,
+        "totalInvestment": 47200,
+        "totalPayout": 25220,
+        "roi": 0.5343220338983051,
+        "maxDrawdown": 21980,
+        "lane1PickShare": 0.885593220338983
+      },
+      "LOW": {
+        "sampleRaces": 360,
+        "betRaces": 101,
+        "skipRaces": 259,
+        "averagePoints": 4,
+        "hits": 16,
+        "hitRate": 0.15841584158415842,
+        "totalInvestment": 40400,
+        "totalPayout": 24180,
+        "roi": 0.5985148514851485,
+        "maxDrawdown": 19080,
+        "lane1PickShare": 0.9133663366336634
+      }
+    }
+  },
+  "impactRanking": [
+    {
+      "feature": "nearestDistance",
+      "design": {
+        "auc": 0.3574016563146998,
+        "separationAuc": 0.6425983436853002,
+        "standardizedDifference": -0.5271315640767625
+      },
+      "holdout": {
+        "auc": 0.5014697236919459,
+        "separationAuc": 0.5014697236919459,
+        "standardizedDifference": -0.045968732497677245
+      }
+    },
+    {
+      "feature": "classInnerOuterGap",
+      "design": {
+        "auc": 0.6418219461697723,
+        "separationAuc": 0.6418219461697723,
+        "standardizedDifference": 0.49504901936377904
+      },
+      "holdout": {
+        "auc": 0.5877425044091711,
+        "separationAuc": 0.5877425044091711,
+        "standardizedDifference": 0.3721014085451875
+      }
+    },
+    {
+      "feature": "top1",
+      "design": {
+        "auc": 0.6392339544513458,
+        "separationAuc": 0.6392339544513458,
+        "standardizedDifference": 0.43952608291898104
+      },
+      "holdout": {
+        "auc": 0.6287477954144621,
+        "separationAuc": 0.6287477954144621,
+        "standardizedDifference": 0.4920017260485172
+      }
+    },
+    {
+      "feature": "top4",
+      "design": {
+        "auc": 0.6376811594202898,
+        "separationAuc": 0.6376811594202898,
+        "standardizedDifference": 0.48083460869076333
+      },
+      "holdout": {
+        "auc": 0.6497648442092887,
+        "separationAuc": 0.6497648442092887,
+        "standardizedDifference": 0.5338121293651904
+      }
+    },
+    {
+      "feature": "abilityInnerOuterGap",
+      "design": {
+        "auc": 0.6357832988267771,
+        "separationAuc": 0.6357832988267771,
+        "standardizedDifference": 0.49630157749066905
+      },
+      "holdout": {
+        "auc": 0.5914168136390359,
+        "separationAuc": 0.5914168136390359,
+        "standardizedDifference": 0.3835248328095602
+      }
+    },
+    {
+      "feature": "entropy",
+      "design": {
+        "auc": 0.4001035196687371,
+        "separationAuc": 0.599896480331263,
+        "standardizedDifference": -0.34343656080152407
+      },
+      "holdout": {
+        "auc": 0.3517048794826573,
+        "separationAuc": 0.6482951205173427,
+        "standardizedDifference": -0.5356177378671967
+      }
+    },
+    {
+      "feature": "lane1MotorGap",
+      "design": {
+        "auc": 0.5729813664596274,
+        "separationAuc": 0.5729813664596274,
+        "standardizedDifference": 0.23697402879062704
+      },
+      "holdout": {
+        "auc": 0.503968253968254,
+        "separationAuc": 0.503968253968254,
+        "standardizedDifference": 0.016429913906971117
+      }
+    },
+    {
+      "feature": "raceNumber",
+      "design": {
+        "auc": 0.5543478260869565,
+        "separationAuc": 0.5543478260869565,
+        "standardizedDifference": 0.18271151275933575
+      },
+      "holdout": {
+        "auc": 0.5925925925925926,
+        "separationAuc": 0.5925925925925926,
+        "standardizedDifference": 0.3257743800089323
+      }
+    },
+    {
+      "feature": "margin45",
+      "design": {
+        "auc": 0.5458937198067633,
+        "separationAuc": 0.5458937198067633,
+        "standardizedDifference": 0.19674425228985679
+      },
+      "holdout": {
+        "auc": 0.5670194003527337,
+        "separationAuc": 0.5670194003527337,
+        "standardizedDifference": 0.16512911872004485
+      }
+    },
+    {
+      "feature": "lane1VsBestOther",
+      "design": {
+        "auc": 0.52864044168392,
+        "separationAuc": 0.52864044168392,
+        "standardizedDifference": 0.08117430412431643
+      },
+      "holdout": {
+        "auc": 0.6396237507348619,
+        "separationAuc": 0.6396237507348619,
+        "standardizedDifference": 0.5002395946594203
+      }
+    },
+    {
+      "feature": "a2Count",
+      "design": {
+        "auc": 0.4718771566597654,
+        "separationAuc": 0.5281228433402346,
+        "standardizedDifference": -0.1305205856986566
+      },
+      "holdout": {
+        "auc": 0.5920047031158142,
+        "separationAuc": 0.5920047031158142,
+        "standardizedDifference": 0.3408888011679007
+      }
+    },
+    {
+      "feature": "lane1NationalGap",
+      "design": {
+        "auc": 0.5253623188405797,
+        "separationAuc": 0.5253623188405797,
+        "standardizedDifference": 0.05821483085608924
+      },
+      "holdout": {
+        "auc": 0.6272045855379189,
+        "separationAuc": 0.6272045855379189,
+        "standardizedDifference": 0.4389994380655742
+      }
+    },
+    {
+      "feature": "a1Count",
+      "design": {
+        "auc": 0.47653554175293306,
+        "separationAuc": 0.5234644582470669,
+        "standardizedDifference": -0.1254644195999346
+      },
+      "holdout": {
+        "auc": 0.47663139329806,
+        "separationAuc": 0.5233686067019401,
+        "standardizedDifference": -0.1495665228838122
+      }
+    },
+    {
+      "feature": "lane1StAdvantage",
+      "design": {
+        "auc": 0.4767943409247757,
+        "separationAuc": 0.5232056590752243,
+        "standardizedDifference": -0.10530729005565759
+      },
+      "holdout": {
+        "auc": 0.5842886537330981,
+        "separationAuc": 0.5842886537330981,
+        "standardizedDifference": 0.30514409038905166
+      }
+    },
+    {
+      "feature": "lane1LocalGap",
+      "design": {
+        "auc": 0.47903726708074534,
+        "separationAuc": 0.5209627329192547,
+        "standardizedDifference": -0.018153842618964168
+      },
+      "holdout": {
+        "auc": 0.6547619047619048,
+        "separationAuc": 0.6547619047619048,
+        "standardizedDifference": 0.589852053430266
+      }
+    },
+    {
+      "feature": "topBoatGap",
+      "design": {
+        "auc": 0.49309868875086266,
+        "separationAuc": 0.5069013112491374,
+        "standardizedDifference": -0.044570428877017544
+      },
+      "holdout": {
+        "auc": 0.5815696649029982,
+        "separationAuc": 0.5815696649029982,
+        "standardizedDifference": 0.2868029726610492
+      }
+    },
+    {
+      "feature": "eventDay",
+      "design": {
+        "auc": 0.505175983436853,
+        "separationAuc": 0.505175983436853,
+        "standardizedDifference": 0.0034275670887083123
+      },
+      "holdout": {
+        "auc": 0.5149911816578483,
+        "separationAuc": 0.5149911816578483,
+        "standardizedDifference": 0.047364649087419976
+      }
+    },
+    {
+      "feature": "similarProgramCount",
+      "design": {
+        "auc": 0.5,
+        "separationAuc": 0.5,
+        "standardizedDifference": 0
+      },
+      "holdout": {
+        "auc": 0.5,
+        "separationAuc": 0.5,
+        "standardizedDifference": 0
+      }
+    }
+  ],
+  "programComposition": {
+    "lane1Class": {
+      "design": {
+        "A1": {
+          "sampleRaces": 180,
+          "betRaces": 71,
+          "skipRaces": 109,
+          "averagePoints": 4,
+          "hits": 18,
+          "hitRate": 0.2535211267605634,
+          "totalInvestment": 28400,
+          "totalPayout": 16850,
+          "roi": 0.5933098591549296,
+          "maxDrawdown": 13800,
+          "lane1PickShare": 1
+        },
+        "A2": {
+          "sampleRaces": 180,
+          "betRaces": 59,
+          "skipRaces": 121,
+          "averagePoints": 4,
+          "hits": 12,
+          "hitRate": 0.2033898305084746,
+          "totalInvestment": 23600,
+          "totalPayout": 13670,
+          "roi": 0.5792372881355933,
+          "maxDrawdown": 10440,
+          "lane1PickShare": 0.9364406779661016
+        },
+        "B1": {
+          "sampleRaces": 180,
+          "betRaces": 41,
+          "skipRaces": 139,
+          "averagePoints": 4,
+          "hits": 11,
+          "hitRate": 0.2682926829268293,
+          "totalInvestment": 16400,
+          "totalPayout": 12840,
+          "roi": 0.7829268292682927,
+          "maxDrawdown": 4970,
+          "lane1PickShare": 0.8475609756097561
+        },
+        "B2": {
+          "sampleRaces": 180,
+          "betRaces": 9,
+          "skipRaces": 171,
+          "averagePoints": 4,
+          "hits": 1,
+          "hitRate": 0.1111111111111111,
+          "totalInvestment": 3600,
+          "totalPayout": 4560,
+          "roi": 1.2666666666666666,
+          "maxDrawdown": 2000,
+          "lane1PickShare": 0.7222222222222222
+        }
+      },
+      "holdout": {
+        "A1": {
+          "sampleRaces": 180,
+          "betRaces": 62,
+          "skipRaces": 118,
+          "averagePoints": 4,
+          "hits": 22,
+          "hitRate": 0.3548387096774194,
+          "totalInvestment": 24800,
+          "totalPayout": 17960,
+          "roi": 0.7241935483870968,
+          "maxDrawdown": 7280,
+          "lane1PickShare": 0.9838709677419355
+        },
+        "A2": {
+          "sampleRaces": 180,
+          "betRaces": 47,
+          "skipRaces": 133,
+          "averagePoints": 4,
+          "hits": 19,
+          "hitRate": 0.40425531914893614,
+          "totalInvestment": 18800,
+          "totalPayout": 15800,
+          "roi": 0.8404255319148937,
+          "maxDrawdown": 3920,
+          "lane1PickShare": 0.8776595744680851
+        },
+        "B1": {
+          "sampleRaces": 180,
+          "betRaces": 66,
+          "skipRaces": 114,
+          "averagePoints": 4,
+          "hits": 13,
+          "hitRate": 0.19696969696969696,
+          "totalInvestment": 26400,
+          "totalPayout": 17300,
+          "roi": 0.6553030303030303,
+          "maxDrawdown": 9100,
+          "lane1PickShare": 0.8106060606060606
+        },
+        "B2": {
+          "sampleRaces": 180,
+          "betRaces": 5,
+          "skipRaces": 175,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 2000,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 2000,
+          "lane1PickShare": 0.75
+        }
+      }
+    },
+    "a1Count": {
+      "design": {
+        "0": {
+          "sampleRaces": 180,
+          "betRaces": 28,
+          "skipRaces": 152,
+          "averagePoints": 4,
+          "hits": 5,
+          "hitRate": 0.17857142857142858,
+          "totalInvestment": 11200,
+          "totalPayout": 9880,
+          "roi": 0.8821428571428571,
+          "maxDrawdown": 6510,
+          "lane1PickShare": 0.9285714285714286
+        },
+        "1": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 18,
+          "hitRate": 0.3,
+          "totalInvestment": 24000,
+          "totalPayout": 18990,
+          "roi": 0.79125,
+          "maxDrawdown": 5920,
+          "lane1PickShare": 0.8833333333333333
+        },
+        "2": {
+          "sampleRaces": 180,
+          "betRaces": 34,
+          "skipRaces": 146,
+          "averagePoints": 4,
+          "hits": 6,
+          "hitRate": 0.17647058823529413,
+          "totalInvestment": 13600,
+          "totalPayout": 7340,
+          "roi": 0.5397058823529411,
+          "maxDrawdown": 8390,
+          "lane1PickShare": 0.9044117647058824
+        },
+        "3": {
+          "sampleRaces": 180,
+          "betRaces": 32,
+          "skipRaces": 148,
+          "averagePoints": 4,
+          "hits": 9,
+          "hitRate": 0.28125,
+          "totalInvestment": 12800,
+          "totalPayout": 7440,
+          "roi": 0.58125,
+          "maxDrawdown": 5730,
+          "lane1PickShare": 0.9921875
+        },
+        "4": {
+          "sampleRaces": 180,
+          "betRaces": 15,
+          "skipRaces": 165,
+          "averagePoints": 4,
+          "hits": 3,
+          "hitRate": 0.2,
+          "totalInvestment": 6000,
+          "totalPayout": 3490,
+          "roi": 0.5816666666666667,
+          "maxDrawdown": 2800,
+          "lane1PickShare": 1
+        },
+        "5": {
+          "sampleRaces": 180,
+          "betRaces": 9,
+          "skipRaces": 171,
+          "averagePoints": 4,
+          "hits": 1,
+          "hitRate": 0.1111111111111111,
+          "totalInvestment": 3600,
+          "totalPayout": 780,
+          "roi": 0.21666666666666667,
+          "maxDrawdown": 2820,
+          "lane1PickShare": 1
+        },
+        "6": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 800,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 800,
+          "lane1PickShare": 1
+        }
+      },
+      "holdout": {
+        "0": {
+          "sampleRaces": 180,
+          "betRaces": 27,
+          "skipRaces": 153,
+          "averagePoints": 4,
+          "hits": 9,
+          "hitRate": 0.3333333333333333,
+          "totalInvestment": 10800,
+          "totalPayout": 12220,
+          "roi": 1.1314814814814815,
+          "maxDrawdown": 2670,
+          "lane1PickShare": 0.9444444444444444
+        },
+        "1": {
+          "sampleRaces": 180,
+          "betRaces": 85,
+          "skipRaces": 95,
+          "averagePoints": 4,
+          "hits": 26,
+          "hitRate": 0.3058823529411765,
+          "totalInvestment": 34000,
+          "totalPayout": 22900,
+          "roi": 0.6735294117647059,
+          "maxDrawdown": 11110,
+          "lane1PickShare": 0.861764705882353
+        },
+        "2": {
+          "sampleRaces": 180,
+          "betRaces": 45,
+          "skipRaces": 135,
+          "averagePoints": 4,
+          "hits": 12,
+          "hitRate": 0.26666666666666666,
+          "totalInvestment": 18000,
+          "totalPayout": 7800,
+          "roi": 0.43333333333333335,
+          "maxDrawdown": 10200,
+          "lane1PickShare": 0.8611111111111112
+        },
+        "3": {
+          "sampleRaces": 180,
+          "betRaces": 17,
+          "skipRaces": 163,
+          "averagePoints": 4,
+          "hits": 7,
+          "hitRate": 0.4117647058823529,
+          "totalInvestment": 6800,
+          "totalPayout": 8140,
+          "roi": 1.1970588235294117,
+          "maxDrawdown": 1530,
+          "lane1PickShare": 0.9411764705882353
+        },
+        "4": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 800,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 800,
+          "lane1PickShare": 1
+        },
+        "5": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 800,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 800,
+          "lane1PickShare": 1
+        },
+        "6": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 800,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 800,
+          "lane1PickShare": 1
+        }
+      }
+    },
+    "raceBucket": {
+      "design": {
+        "EARLY": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 12,
+          "hitRate": 0.2,
+          "totalInvestment": 24000,
+          "totalPayout": 17940,
+          "roi": 0.7475,
+          "maxDrawdown": 8670,
+          "lane1PickShare": 0.875
+        },
+        "LATE": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 18,
+          "hitRate": 0.3,
+          "totalInvestment": 24000,
+          "totalPayout": 18420,
+          "roi": 0.7675,
+          "maxDrawdown": 7670,
+          "lane1PickShare": 0.9833333333333333
+        },
+        "MIDDLE": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 12,
+          "hitRate": 0.2,
+          "totalInvestment": 24000,
+          "totalPayout": 11560,
+          "roi": 0.4816666666666667,
+          "maxDrawdown": 13110,
+          "lane1PickShare": 0.9333333333333333
+        }
+      },
+      "holdout": {
+        "EARLY": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 14,
+          "hitRate": 0.23333333333333334,
+          "totalInvestment": 24000,
+          "totalPayout": 16960,
+          "roi": 0.7066666666666667,
+          "maxDrawdown": 7250,
+          "lane1PickShare": 0.8291666666666667
+        },
+        "LATE": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 23,
+          "hitRate": 0.38333333333333336,
+          "totalInvestment": 24000,
+          "totalPayout": 19450,
+          "roi": 0.8104166666666667,
+          "maxDrawdown": 6170,
+          "lane1PickShare": 0.9541666666666667
+        },
+        "MIDDLE": {
+          "sampleRaces": 180,
+          "betRaces": 60,
+          "skipRaces": 120,
+          "averagePoints": 4,
+          "hits": 17,
+          "hitRate": 0.2833333333333333,
+          "totalInvestment": 24000,
+          "totalPayout": 14650,
+          "roi": 0.6104166666666667,
+          "maxDrawdown": 9650,
+          "lane1PickShare": 0.875
+        }
+      }
+    },
+    "raceType": {
+      "design": {
+        "DREAM": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 800,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 800,
+          "lane1PickShare": 1
+        },
+        "FINAL": {
+          "sampleRaces": 180,
+          "betRaces": 8,
+          "skipRaces": 172,
+          "averagePoints": 4,
+          "hits": 1,
+          "hitRate": 0.125,
+          "totalInvestment": 3200,
+          "totalPayout": 2360,
+          "roi": 0.7375,
+          "maxDrawdown": 1600,
+          "lane1PickShare": 0.9375
+        },
+        "GENERAL": {
+          "sampleRaces": 180,
+          "betRaces": 46,
+          "skipRaces": 134,
+          "averagePoints": 4,
+          "hits": 13,
+          "hitRate": 0.2826086956521739,
+          "totalInvestment": 18400,
+          "totalPayout": 15340,
+          "roi": 0.8336956521739131,
+          "maxDrawdown": 6200,
+          "lane1PickShare": 0.967391304347826
+        },
+        "QUALIFY": {
+          "sampleRaces": 180,
+          "betRaces": 115,
+          "skipRaces": 65,
+          "averagePoints": 4,
+          "hits": 26,
+          "hitRate": 0.22608695652173913,
+          "totalInvestment": 46000,
+          "totalPayout": 29000,
+          "roi": 0.6304347826086957,
+          "maxDrawdown": 20990,
+          "lane1PickShare": 0.908695652173913
+        },
+        "SELECT": {
+          "sampleRaces": 180,
+          "betRaces": 6,
+          "skipRaces": 174,
+          "averagePoints": 4,
+          "hits": 1,
+          "hitRate": 0.16666666666666666,
+          "totalInvestment": 2400,
+          "totalPayout": 510,
+          "roi": 0.2125,
+          "maxDrawdown": 1890,
+          "lane1PickShare": 1
+        },
+        "SPECIAL": {
+          "sampleRaces": 180,
+          "betRaces": 2,
+          "skipRaces": 178,
+          "averagePoints": 4,
+          "hits": 1,
+          "hitRate": 0.5,
+          "totalInvestment": 800,
+          "totalPayout": 710,
+          "roi": 0.8875,
+          "maxDrawdown": 400,
+          "lane1PickShare": 1
+        },
+        "UNKNOWN": {
+          "sampleRaces": 180,
+          "betRaces": 1,
+          "skipRaces": 179,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 400,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 400,
+          "lane1PickShare": 1
+        }
+      },
+      "holdout": {
+        "DREAM": {
+          "sampleRaces": 180,
+          "betRaces": 3,
+          "skipRaces": 177,
+          "averagePoints": 4,
+          "hits": 0,
+          "hitRate": 0,
+          "totalInvestment": 1200,
+          "totalPayout": 0,
+          "roi": 0,
+          "maxDrawdown": 1200,
+          "lane1PickShare": 1
+        },
+        "FINAL": {
+          "sampleRaces": 180,
+          "betRaces": 12,
+          "skipRaces": 168,
+          "averagePoints": 4,
+          "hits": 4,
+          "hitRate": 0.3333333333333333,
+          "totalInvestment": 4800,
+          "totalPayout": 5640,
+          "roi": 1.175,
+          "maxDrawdown": 1550,
+          "lane1PickShare": 0.8958333333333334
+        },
+        "GENERAL": {
+          "sampleRaces": 180,
+          "betRaces": 53,
+          "skipRaces": 127,
+          "averagePoints": 4,
+          "hits": 14,
+          "hitRate": 0.2641509433962264,
+          "totalInvestment": 21200,
+          "totalPayout": 17150,
+          "roi": 0.8089622641509434,
+          "maxDrawdown": 5950,
+          "lane1PickShare": 0.9433962264150944
+        },
+        "QUALIFY": {
+          "sampleRaces": 180,
+          "betRaces": 91,
+          "skipRaces": 89,
+          "averagePoints": 4,
+          "hits": 26,
+          "hitRate": 0.2857142857142857,
+          "totalInvestment": 36400,
+          "totalPayout": 22100,
+          "roi": 0.6071428571428571,
+          "maxDrawdown": 14300,
+          "lane1PickShare": 0.8296703296703297
+        },
+        "SELECT": {
+          "sampleRaces": 180,
+          "betRaces": 6,
+          "skipRaces": 174,
+          "averagePoints": 4,
+          "hits": 5,
+          "hitRate": 0.8333333333333334,
+          "totalInvestment": 2400,
+          "totalPayout": 3180,
+          "roi": 1.325,
+          "maxDrawdown": 400,
+          "lane1PickShare": 0.9583333333333334
+        },
+        "SPECIAL": {
+          "sampleRaces": 180,
+          "betRaces": 15,
+          "skipRaces": 165,
+          "averagePoints": 4,
+          "hits": 5,
+          "hitRate": 0.3333333333333333,
+          "totalInvestment": 6000,
+          "totalPayout": 2990,
+          "roi": 0.49833333333333335,
+          "maxDrawdown": 3240,
+          "lane1PickShare": 0.9666666666666667
+        }
+      }
+    },
+    "innerStrength": {
+      "design": {
+        "INNER_GE_OUTER": {
+          "sampleRaces": 180,
+          "betRaces": 128,
+          "skipRaces": 52,
+          "averagePoints": 4,
+          "hits": 37,
+          "hitRate": 0.2890625,
+          "totalInvestment": 51200,
+          "totalPayout": 39440,
+          "roi": 0.7703125,
+          "maxDrawdown": 13980,
+          "lane1PickShare": 0.919921875
+        },
+        "OUTER_GT_INNER": {
+          "sampleRaces": 180,
+          "betRaces": 52,
+          "skipRaces": 128,
+          "averagePoints": 4,
+          "hits": 5,
+          "hitRate": 0.09615384615384616,
+          "totalInvestment": 20800,
+          "totalPayout": 8480,
+          "roi": 0.4076923076923077,
+          "maxDrawdown": 13170,
+          "lane1PickShare": 0.9567307692307693
+        }
+      },
+      "holdout": {
+        "INNER_GE_OUTER": {
+          "sampleRaces": 180,
+          "betRaces": 128,
+          "skipRaces": 52,
+          "averagePoints": 4,
+          "hits": 42,
+          "hitRate": 0.328125,
+          "totalInvestment": 51200,
+          "totalPayout": 36910,
+          "roi": 0.7208984375,
+          "maxDrawdown": 14290,
+          "lane1PickShare": 0.865234375
+        },
+        "OUTER_GT_INNER": {
+          "sampleRaces": 180,
+          "betRaces": 52,
+          "skipRaces": 128,
+          "averagePoints": 4,
+          "hits": 12,
+          "hitRate": 0.23076923076923078,
+          "totalInvestment": 20800,
+          "totalPayout": 14150,
+          "roi": 0.6802884615384616,
+          "maxDrawdown": 6650,
+          "lane1PickShare": 0.9375
+        }
+      }
+    }
+  },
+  "missAnalysis": {
+    "misses": 264,
+    "primaryFiveClass": {
+      "WINNER_WRONG": 37,
+      "SECOND_WRONG": 58,
+      "THIRD_WRONG": 0,
+      "JUST_OUTSIDE_5_TO_8": 54,
+      "MAJOR_MISREAD": 115
+    },
+    "stage": {
+      "WINNER_WRONG": 159,
+      "SECOND_WRONG": 105,
+      "THIRD_WRONG": 0
+    },
+    "rankBands": {
+      "fiveToEight": 54,
+      "nineToTwentyFour": 95,
+      "overTwentyFour": 115
+    },
+    "domainCounts": {
+      "OUTER_PROFILE_EDGE": 106,
+      "HIGH_PAYOUT_UPSET": 61,
+      "OTHER": 61,
+      "HIT": 96,
+      "OUTER_ST_EDGE": 6,
+      "OUTER_MOTOR_EDGE": 28,
+      "BALANCED_FIELD": 2
+    }
+  },
+  "pointComparison": {
+    "fixed4": {
+      "sampleRaces": 360,
+      "betRaces": 360,
+      "skipRaces": 0,
+      "averagePoints": 4,
+      "hits": 96,
+      "hitRate": 0.26666666666666666,
+      "totalInvestment": 144000,
+      "totalPayout": 98980,
+      "roi": 0.6873611111111111,
+      "maxDrawdown": 45020,
+      "lane1PickShare": 0.9083333333333333
+    },
+    "variable": {
+      "sampleRaces": 360,
+      "betRaces": 360,
+      "skipRaces": 0,
+      "averagePoints": 5.525,
+      "hits": 124,
+      "hitRate": 0.34444444444444444,
+      "totalInvestment": 198900,
+      "totalPayout": 141580,
+      "roi": 0.7118149824032177,
+      "maxDrawdown": 57320,
+      "lane1PickShare": 0.8823529411764706
+    }
+  },
+  "lane1Audit": {
+    "actualWinnerRate": 0.5444444444444444,
+    "fixed4PickShare": 0.9083333333333333,
+    "variablePickShare": 0.8823529411764706
+  },
+  "probabilityAudit": {
+    "orders": 120,
+    "minSum": 0.9999999999999991,
+    "maxSum": 1.0000000000000007,
+    "pass": true
+  },
+  "livePromotionEligible": false,
+  "decision": "STOP_FOR_USER_ADOPTION_DECISION"
+}
