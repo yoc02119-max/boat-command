@@ -138,7 +138,7 @@ jobs:
           ok=0
           for i in $(seq 1 18); do
             code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
-            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-main-prediction-v0320.js?v=' /tmp/public.html && grep -Fq 'live-main-lock-guard-v0320.js?v=' /tmp/public.html && grep -Fq 'trial-lock-all-v0327.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'live-performance-v0323.js?v=' /tmp/public.html; then ok=1; break; fi
+            if [ "$code" = 200 ] && grep -Fq 'BOAT COMMAND v0.33.3' /tmp/public.html && grep -Fq '<em>REPLAY</em>' /tmp/public.html && grep -Fq 'historical-replay-v0333.js?v=' /tmp/public.html && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-main-prediction-v0320.js?v=' /tmp/public.html && grep -Fq 'live-main-lock-guard-v0320.js?v=' /tmp/public.html && grep -Fq 'trial-lock-all-v0327.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'live-performance-v0323.js?v=' /tmp/public.html; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = 1
