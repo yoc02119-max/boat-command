@@ -1,4 +1,4 @@
-name: Gamagori current LIVE stack smoke v0.27.9
+name: Gamagori current LIVE stack smoke v0.31.1
 
 on:
   workflow_dispatch:
@@ -34,6 +34,7 @@ on:
       - 'boat-ai-core-v0290.js'
       - 'boat-voice-agent-v0296.js'
       - 'boat-chatgpt-voice-v0298.js'
+      - 'boat-ai-visual-v0310.js'
       - 'boat-remote-control-v0284.js'
       - 'live/gamagori/**/program/**'
       - 'live/gamagori/**/pre/**'
@@ -55,7 +56,7 @@ jobs:
       - name: Syntax audit current Gamagori LIVE modules
         run: |
           set -euo pipefail
-          for f in app.js virtual-bankroll-v0250.js gamagori-live-integration-v0198.js live-program-v0270.js live-autopoll-v0199.js live-predictor-v0200.js live-two-stage-v0260.js live-prediction-compact-v0261.js live-skip-gate-v0225.js live-autofill-v0201.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-learning-v0205.js live-learning-dashboard-v0206.js live-learning-guard-v0207.js live-integrity-audit-v0208.js live-snapshot-hash-guard-v0209.js development-status-v0217.js trial-readiness-v0218.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js boat-ai-core-v0290.js boat-voice-agent-v0296.js boat-chatgpt-voice-v0298.js boat-remote-control-v0284.js; do
+          for f in app.js virtual-bankroll-v0250.js gamagori-live-integration-v0198.js live-program-v0270.js live-autopoll-v0199.js live-predictor-v0200.js live-two-stage-v0260.js live-prediction-compact-v0261.js live-skip-gate-v0225.js live-autofill-v0201.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-learning-v0205.js live-learning-dashboard-v0206.js live-learning-guard-v0207.js live-integrity-audit-v0208.js live-snapshot-hash-guard-v0209.js development-status-v0217.js trial-readiness-v0218.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js boat-ai-core-v0290.js boat-voice-agent-v0296.js boat-chatgpt-voice-v0298.js boat-ai-visual-v0310.js boat-remote-control-v0284.js; do
             node --check "$f"
           done
       - name: Verify current DOM, full script order and single cache key
@@ -67,7 +68,7 @@ jobs:
           ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus']
           miss=[x for x in ids if not re.search(rf'id=["\']{x}["\']',h)]
           assert not miss, f'DOM_MISSING:{miss}'
-          required=['app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-skip-gate-v0225.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-remote-control-v0284.js']
+          required=['app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-skip-gate-v0225.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0310.js','boat-remote-control-v0284.js']
           srcs=re.findall(r'<script\s+src="([^"]+)"',h); bases=[x.split('?',1)[0] for x in srcs]
           miss=[x for x in required if x not in bases]; assert not miss, f'SCRIPT_MISSING:{miss}'
           dup=[x for x in set(bases) if bases.count(x)>1]; assert not dup, f'SCRIPT_DUPLICATE:{dup}'
@@ -94,6 +95,7 @@ jobs:
             'live-lock-guard-v0202.js':['FINAL LOCK GATE','SAFE_TO_LOCK','minMarginMinutes'],
             'live-result-v0204.js':['resultEndpointsIncluded!==true','Global reveal hardening','LOCK SNAPSHOTなし'],
             'live-snapshot-hash-guard-v0209.js':['snapshot'],
+            'boat-ai-visual-v0310.js':['protectedMutations:true','data-core-stat="locked"','data-core-view="results"'],
           }
           for f,needles in checks.items():
             text=Path(f).read_text(encoding='utf-8')
@@ -132,11 +134,11 @@ jobs:
           ok=0
           for i in $(seq 1 18); do
             code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
-            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-skip-gate-v0225.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html; then ok=1; break; fi
+            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-skip-gate-v0225.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'boat-ai-visual-v0310.js?v=' /tmp/public.html; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = 1
-          for asset in app.js styles.css manifest.webmanifest live-program-v0270.js live-two-stage-v0260.js live-skip-gate-v0225.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-manual-refresh-v0276.js trial-readiness-v0272.js; do
+          for asset in app.js styles.css manifest.webmanifest live-program-v0270.js live-two-stage-v0260.js live-skip-gate-v0225.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-manual-refresh-v0276.js trial-readiness-v0272.js boat-ai-visual-v0310.js; do
             code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}${asset}?v=${GITHUB_RUN_ID}" || true)
             test "$code" = 200 || { echo "PUBLIC_ASSET_FAIL $code $asset"; exit 1; }
           done
