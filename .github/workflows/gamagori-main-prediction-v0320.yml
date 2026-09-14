@@ -8,10 +8,12 @@ on:
       - index.html
       - app.js
       - gamagori-main-**
+      - gamagori-selection-**
       - live-main-**
       - historical-replay-v0320.js
       - baseline/**
       - scripts/gamagori-main-**
+      - scripts/gamagori-selection-**
       - .github/workflows/gamagori-main-prediction-v0320.yml
 
 permissions:
@@ -39,4 +41,14 @@ jobs:
           const live=require('fs').readFileSync('live-main-prediction-v0320.js','utf8');
           if(!r.promotionEligible&&!live.includes("productionModel:'FROZEN_BASELINE_V0.29.1'"))throw new Error('FAILED_MODEL_MUST_REMAIN_SHADOW');
           console.log(JSON.stringify({baseline:r.baseline,candidate:r.candidate,delta:r.delta,pointCountComparison:r.pointCountComparison,variable:r.variable}));
+          NODE
+      - name: Selection gate analysis
+        run: |
+          set -euo pipefail
+          node scripts/gamagori-selection-analysis-v0321.js gamagori-main-history-v0320.json /tmp/selection.json >/dev/null
+          node - <<'NODE'
+          const r=require('/tmp/selection.json');
+          if(!r.strictWalkForward||!r.sameDayRowsExcluded)throw new Error('SELECTION_TIME_BOUNDARY_FAILED');
+          if(r.decision!=='SHADOW_ONLY'||r.livePromotionEligible)throw new Error('UNPROVEN_SELECTION_GATE_MUST_NOT_REACH_LIVE');
+          console.log(JSON.stringify({selected:r.selected,confidenceSelected:r.confidenceSelected,holdoutImprovement:r.holdoutImprovement,decision:r.decision}));
           NODE

@@ -1,0 +1,1008 @@
+{
+  "schema": "boat-command-selection-analysis-v1",
+  "model": "GAMAGORI-MAIN-MODEL-V0.32.0",
+  "source": "gamagori-main-history-v0320.json",
+  "policy": "Gate definitions use PRE-RACE features only. Thresholds and selection use 2025 design rows; 2026 remains untouched until evaluation.",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "designPeriod": "through 2025-12-31",
+  "holdoutPeriod": "2026-01-01 onward",
+  "records": 3951,
+  "designRows": 2261,
+  "holdoutRows": 1690,
+  "baseline": {
+    "name": "ALL",
+    "field": null,
+    "direction": null,
+    "threshold": null,
+    "value": null,
+    "design": {
+      "races": 2261,
+      "coverage": 1,
+      "hits": 605,
+      "hitRate": 0.26758071649712517,
+      "analyticalRoi": 0.7659885006634233
+    },
+    "holdout": {
+      "races": 1690,
+      "coverage": 1,
+      "hits": 454,
+      "hitRate": 0.2686390532544379,
+      "analyticalRoi": 0.7762278106508875
+    },
+    "recent360": {
+      "races": 360,
+      "coverage": 1,
+      "hits": 96,
+      "hitRate": 0.26666666666666666,
+      "analyticalRoi": 0.6873611111111111
+    }
+  },
+  "selected": {
+    "name": "TYPE_GENERAL",
+    "field": "typeGroup",
+    "direction": null,
+    "threshold": null,
+    "value": "GENERAL",
+    "design": {
+      "races": 591,
+      "coverage": 0.26138876603272887,
+      "hits": 145,
+      "hitRate": 0.24534686971235195,
+      "analyticalRoi": 0.8514382402707276
+    },
+    "holdout": {
+      "races": 458,
+      "coverage": 0.2710059171597633,
+      "hits": 124,
+      "hitRate": 0.27074235807860264,
+      "analyticalRoi": 0.8633187772925764
+    },
+    "recent360": {
+      "races": 99,
+      "coverage": 0.275,
+      "hits": 27,
+      "hitRate": 0.2727272727272727,
+      "analyticalRoi": 0.8204545454545454
+    }
+  },
+  "confidenceSelected": {
+    "name": "ENTROPY_Q25_DOWN",
+    "field": "entropy",
+    "direction": "lte",
+    "threshold": 0.7755402073639898,
+    "value": null,
+    "design": {
+      "races": 566,
+      "coverage": 0.2503317116320212,
+      "hits": 209,
+      "hitRate": 0.36925795053003535,
+      "analyticalRoi": 0.8193462897526502
+    },
+    "holdout": {
+      "races": 402,
+      "coverage": 0.2378698224852071,
+      "hits": 161,
+      "hitRate": 0.40049751243781095,
+      "analyticalRoi": 0.8623134328358208
+    },
+    "recent360": {
+      "races": 77,
+      "coverage": 0.21388888888888888,
+      "hits": 33,
+      "hitRate": 0.42857142857142855,
+      "analyticalRoi": 0.9737012987012987
+    }
+  },
+  "holdoutImprovement": {
+    "hitRate": 0.0021033048241647645,
+    "analyticalRoi": 0.08709096664168892,
+    "coverage": 0.2710059171597633
+  },
+  "recentMissBreakdown": {
+    "rows": 360,
+    "misses": 264,
+    "byLane1Class": {
+      "A1": {
+        "races": 133,
+        "coverage": 0.36944444444444446,
+        "hits": 40,
+        "hitRate": 0.3007518796992481,
+        "analyticalRoi": 0.6543233082706766
+      },
+      "A2": {
+        "races": 106,
+        "coverage": 0.29444444444444445,
+        "hits": 31,
+        "hitRate": 0.29245283018867924,
+        "analyticalRoi": 0.6950471698113208
+      },
+      "B1": {
+        "races": 107,
+        "coverage": 0.2972222222222222,
+        "hits": 24,
+        "hitRate": 0.22429906542056074,
+        "analyticalRoi": 0.7042056074766355
+      },
+      "B2": {
+        "races": 14,
+        "coverage": 0.03888888888888889,
+        "hits": 1,
+        "hitRate": 0.07142857142857142,
+        "analyticalRoi": 0.8142857142857143
+      }
+    },
+    "byRaceBucket": {
+      "EARLY": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 26,
+        "hitRate": 0.21666666666666667,
+        "analyticalRoi": 0.7270833333333333
+      },
+      "MIDDLE": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 29,
+        "hitRate": 0.24166666666666667,
+        "analyticalRoi": 0.5460416666666666
+      },
+      "LATE": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 41,
+        "hitRate": 0.3416666666666667,
+        "analyticalRoi": 0.7889583333333333
+      }
+    },
+    "resultOdds": {
+      "median": 21.5,
+      "q75": 56.9,
+      "missMedian": 32.8
+    }
+  },
+  "comparisons": [
+    {
+      "name": "ALL",
+      "field": null,
+      "direction": null,
+      "threshold": null,
+      "value": null,
+      "design": {
+        "races": 2261,
+        "coverage": 1,
+        "hits": 605,
+        "hitRate": 0.26758071649712517,
+        "analyticalRoi": 0.7659885006634233
+      },
+      "holdout": {
+        "races": 1690,
+        "coverage": 1,
+        "hits": 454,
+        "hitRate": 0.2686390532544379,
+        "analyticalRoi": 0.7762278106508875
+      },
+      "recent360": {
+        "races": 360,
+        "coverage": 1,
+        "hits": 96,
+        "hitRate": 0.26666666666666666,
+        "analyticalRoi": 0.6873611111111111
+      }
+    },
+    {
+      "name": "TOP1_Q25_UP",
+      "field": "top1",
+      "direction": "gte",
+      "threshold": 0.06257778017076197,
+      "value": null,
+      "design": {
+        "races": 1696,
+        "coverage": 0.7501105705440071,
+        "hits": 505,
+        "hitRate": 0.2977594339622642,
+        "analyticalRoi": 0.7712264150943396
+      },
+      "holdout": {
+        "races": 1300,
+        "coverage": 0.7692307692307693,
+        "hits": 390,
+        "hitRate": 0.3,
+        "analyticalRoi": 0.7832884615384615
+      },
+      "recent360": {
+        "races": 261,
+        "coverage": 0.725,
+        "hits": 84,
+        "hitRate": 0.3218390804597701,
+        "analyticalRoi": 0.7692528735632184
+      }
+    },
+    {
+      "name": "TOP1_Q50_UP",
+      "field": "top1",
+      "direction": "gte",
+      "threshold": 0.07607982941474796,
+      "value": null,
+      "design": {
+        "races": 1131,
+        "coverage": 0.5002211410880142,
+        "hits": 363,
+        "hitRate": 0.3209549071618037,
+        "analyticalRoi": 0.7372015915119363
+      },
+      "holdout": {
+        "races": 893,
+        "coverage": 0.5284023668639053,
+        "hits": 288,
+        "hitRate": 0.322508398656215,
+        "analyticalRoi": 0.7630459126539754
+      },
+      "recent360": {
+        "races": 166,
+        "coverage": 0.46111111111111114,
+        "hits": 57,
+        "hitRate": 0.3433734939759036,
+        "analyticalRoi": 0.7954819277108434
+      }
+    },
+    {
+      "name": "TOP1_Q75_UP",
+      "field": "top1",
+      "direction": "gte",
+      "threshold": 0.09221915621940209,
+      "value": null,
+      "design": {
+        "races": 566,
+        "coverage": 0.2503317116320212,
+        "hits": 195,
+        "hitRate": 0.34452296819787986,
+        "analyticalRoi": 0.7253975265017668
+      },
+      "holdout": {
+        "races": 453,
+        "coverage": 0.26804733727810653,
+        "hits": 165,
+        "hitRate": 0.36423841059602646,
+        "analyticalRoi": 0.7791390728476821
+      },
+      "recent360": {
+        "races": 93,
+        "coverage": 0.25833333333333336,
+        "hits": 34,
+        "hitRate": 0.3655913978494624,
+        "analyticalRoi": 0.8919354838709678
+      }
+    },
+    {
+      "name": "TOP4_Q25_UP",
+      "field": "top4",
+      "direction": "gte",
+      "threshold": 0.21217513328390555,
+      "value": null,
+      "design": {
+        "races": 1696,
+        "coverage": 0.7501105705440071,
+        "hits": 509,
+        "hitRate": 0.3001179245283019,
+        "analyticalRoi": 0.7630601415094339
+      },
+      "holdout": {
+        "races": 1262,
+        "coverage": 0.7467455621301775,
+        "hits": 384,
+        "hitRate": 0.30427892234548337,
+        "analyticalRoi": 0.7895206022187005
+      },
+      "recent360": {
+        "races": 250,
+        "coverage": 0.6944444444444444,
+        "hits": 80,
+        "hitRate": 0.32,
+        "analyticalRoi": 0.7559
+      }
+    },
+    {
+      "name": "TOP4_Q50_UP",
+      "field": "top4",
+      "direction": "gte",
+      "threshold": 0.24759638976844506,
+      "value": null,
+      "design": {
+        "races": 1131,
+        "coverage": 0.5002211410880142,
+        "hits": 370,
+        "hitRate": 0.3271441202475685,
+        "analyticalRoi": 0.7504420866489832
+      },
+      "holdout": {
+        "races": 880,
+        "coverage": 0.5207100591715976,
+        "hits": 291,
+        "hitRate": 0.3306818181818182,
+        "analyticalRoi": 0.7557954545454545
+      },
+      "recent360": {
+        "races": 173,
+        "coverage": 0.48055555555555557,
+        "hits": 65,
+        "hitRate": 0.37572254335260113,
+        "analyticalRoi": 0.8738439306358381
+      }
+    },
+    {
+      "name": "TOP4_Q75_UP",
+      "field": "top4",
+      "direction": "gte",
+      "threshold": 0.29226839555995965,
+      "value": null,
+      "design": {
+        "races": 566,
+        "coverage": 0.2503317116320212,
+        "hits": 207,
+        "hitRate": 0.3657243816254417,
+        "analyticalRoi": 0.7933303886925795
+      },
+      "holdout": {
+        "races": 418,
+        "coverage": 0.24733727810650888,
+        "hits": 161,
+        "hitRate": 0.38516746411483255,
+        "analyticalRoi": 0.805921052631579
+      },
+      "recent360": {
+        "races": 85,
+        "coverage": 0.2361111111111111,
+        "hits": 35,
+        "hitRate": 0.4117647058823529,
+        "analyticalRoi": 0.9091176470588235
+      }
+    },
+    {
+      "name": "MARGIN45_Q25_UP",
+      "field": "margin45",
+      "direction": "gte",
+      "threshold": 0.001634509351247794,
+      "value": null,
+      "design": {
+        "races": 1696,
+        "coverage": 0.7501105705440071,
+        "hits": 473,
+        "hitRate": 0.27889150943396224,
+        "analyticalRoi": 0.7600678066037736
+      },
+      "holdout": {
+        "races": 1257,
+        "coverage": 0.7437869822485207,
+        "hits": 343,
+        "hitRate": 0.2728719172633254,
+        "analyticalRoi": 0.7816030230708035
+      },
+      "recent360": {
+        "races": 266,
+        "coverage": 0.7388888888888889,
+        "hits": 76,
+        "hitRate": 0.2857142857142857,
+        "analyticalRoi": 0.6762218045112782
+      }
+    },
+    {
+      "name": "MARGIN45_Q50_UP",
+      "field": "margin45",
+      "direction": "gte",
+      "threshold": 0.0038420874653954384,
+      "value": null,
+      "design": {
+        "races": 1131,
+        "coverage": 0.5002211410880142,
+        "hits": 330,
+        "hitRate": 0.2917771883289125,
+        "analyticalRoi": 0.7640141467727675
+      },
+      "holdout": {
+        "races": 862,
+        "coverage": 0.5100591715976331,
+        "hits": 243,
+        "hitRate": 0.2819025522041763,
+        "analyticalRoi": 0.7922563805104408
+      },
+      "recent360": {
+        "races": 178,
+        "coverage": 0.49444444444444446,
+        "hits": 54,
+        "hitRate": 0.30337078651685395,
+        "analyticalRoi": 0.6806179775280898
+      }
+    },
+    {
+      "name": "MARGIN45_Q75_UP",
+      "field": "margin45",
+      "direction": "gte",
+      "threshold": 0.007632584461561016,
+      "value": null,
+      "design": {
+        "races": 566,
+        "coverage": 0.2503317116320212,
+        "hits": 181,
+        "hitRate": 0.3197879858657244,
+        "analyticalRoi": 0.7670494699646643
+      },
+      "holdout": {
+        "races": 443,
+        "coverage": 0.2621301775147929,
+        "hits": 141,
+        "hitRate": 0.3182844243792325,
+        "analyticalRoi": 0.7451467268623024
+      },
+      "recent360": {
+        "races": 90,
+        "coverage": 0.25,
+        "hits": 30,
+        "hitRate": 0.3333333333333333,
+        "analyticalRoi": 0.7713888888888889
+      }
+    },
+    {
+      "name": "ENTROPY_Q25_DOWN",
+      "field": "entropy",
+      "direction": "lte",
+      "threshold": 0.7755402073639898,
+      "value": null,
+      "design": {
+        "races": 566,
+        "coverage": 0.2503317116320212,
+        "hits": 209,
+        "hitRate": 0.36925795053003535,
+        "analyticalRoi": 0.8193462897526502
+      },
+      "holdout": {
+        "races": 402,
+        "coverage": 0.2378698224852071,
+        "hits": 161,
+        "hitRate": 0.40049751243781095,
+        "analyticalRoi": 0.8623134328358208
+      },
+      "recent360": {
+        "races": 77,
+        "coverage": 0.21388888888888888,
+        "hits": 33,
+        "hitRate": 0.42857142857142855,
+        "analyticalRoi": 0.9737012987012987
+      }
+    },
+    {
+      "name": "ENTROPY_Q50_DOWN",
+      "field": "entropy",
+      "direction": "lte",
+      "threshold": 0.8128850463377615,
+      "value": null,
+      "design": {
+        "races": 1131,
+        "coverage": 0.5002211410880142,
+        "hits": 376,
+        "hitRate": 0.33244916003536695,
+        "analyticalRoi": 0.7607427055702918
+      },
+      "holdout": {
+        "races": 829,
+        "coverage": 0.4905325443786982,
+        "hits": 275,
+        "hitRate": 0.33172496984318456,
+        "analyticalRoi": 0.7498492159227985
+      },
+      "recent360": {
+        "races": 173,
+        "coverage": 0.48055555555555557,
+        "hits": 62,
+        "hitRate": 0.3583815028901734,
+        "analyticalRoi": 0.8141618497109827
+      }
+    },
+    {
+      "name": "ENTROPY_Q75_DOWN",
+      "field": "entropy",
+      "direction": "lte",
+      "threshold": 0.8499613872553985,
+      "value": null,
+      "design": {
+        "races": 1696,
+        "coverage": 0.7501105705440071,
+        "hits": 503,
+        "hitRate": 0.2965801886792453,
+        "analyticalRoi": 0.7613354952830189
+      },
+      "holdout": {
+        "races": 1194,
+        "coverage": 0.7065088757396449,
+        "hits": 357,
+        "hitRate": 0.2989949748743719,
+        "analyticalRoi": 0.7384003350083752
+      },
+      "recent360": {
+        "races": 246,
+        "coverage": 0.6833333333333333,
+        "hits": 78,
+        "hitRate": 0.3170731707317073,
+        "analyticalRoi": 0.7356707317073171
+      }
+    },
+    {
+      "name": "NEARESTDISTANCE_Q25_DOWN",
+      "field": "nearestDistance",
+      "direction": "lte",
+      "threshold": 0,
+      "value": null,
+      "design": {
+        "races": 746,
+        "coverage": 0.32994250331711633,
+        "hits": 214,
+        "hitRate": 0.2868632707774799,
+        "analyticalRoi": 0.7892426273458445
+      },
+      "holdout": {
+        "races": 754,
+        "coverage": 0.4461538461538462,
+        "hits": 210,
+        "hitRate": 0.27851458885941643,
+        "analyticalRoi": 0.8854442970822282
+      },
+      "recent360": {
+        "races": 128,
+        "coverage": 0.35555555555555557,
+        "hits": 39,
+        "hitRate": 0.3046875,
+        "analyticalRoi": 0.8927734375
+      }
+    },
+    {
+      "name": "NEARESTDISTANCE_Q50_DOWN",
+      "field": "nearestDistance",
+      "direction": "lte",
+      "threshold": 1.05,
+      "value": null,
+      "design": {
+        "races": 1225,
+        "coverage": 0.541795665634675,
+        "hits": 325,
+        "hitRate": 0.2653061224489796,
+        "analyticalRoi": 0.7569795918367347
+      },
+      "holdout": {
+        "races": 1158,
+        "coverage": 0.685207100591716,
+        "hits": 308,
+        "hitRate": 0.2659758203799655,
+        "analyticalRoi": 0.8073618307426598
+      },
+      "recent360": {
+        "races": 228,
+        "coverage": 0.6333333333333333,
+        "hits": 68,
+        "hitRate": 0.2982456140350877,
+        "analyticalRoi": 0.7755482456140351
+      }
+    },
+    {
+      "name": "NEARESTDISTANCE_Q75_DOWN",
+      "field": "nearestDistance",
+      "direction": "lte",
+      "threshold": 2.04,
+      "value": null,
+      "design": {
+        "races": 1701,
+        "coverage": 0.7523219814241486,
+        "hits": 453,
+        "hitRate": 0.26631393298059963,
+        "analyticalRoi": 0.7505144032921811
+      },
+      "holdout": {
+        "races": 1449,
+        "coverage": 0.857396449704142,
+        "hits": 387,
+        "hitRate": 0.2670807453416149,
+        "analyticalRoi": 0.779951690821256
+      },
+      "recent360": {
+        "races": 294,
+        "coverage": 0.8166666666666667,
+        "hits": 85,
+        "hitRate": 0.2891156462585034,
+        "analyticalRoi": 0.7105442176870749
+      }
+    },
+    {
+      "name": "LANE1_A1",
+      "field": "lane1Class",
+      "direction": null,
+      "threshold": null,
+      "value": "A1",
+      "design": {
+        "races": 748,
+        "coverage": 0.3308270676691729,
+        "hits": 249,
+        "hitRate": 0.33288770053475936,
+        "analyticalRoi": 0.7946524064171123
+      },
+      "holdout": {
+        "races": 555,
+        "coverage": 0.32840236686390534,
+        "hits": 172,
+        "hitRate": 0.3099099099099099,
+        "analyticalRoi": 0.710990990990991
+      },
+      "recent360": {
+        "races": 133,
+        "coverage": 0.36944444444444446,
+        "hits": 40,
+        "hitRate": 0.3007518796992481,
+        "analyticalRoi": 0.6543233082706766
+      }
+    },
+    {
+      "name": "LANE1_A2",
+      "field": "lane1Class",
+      "direction": null,
+      "threshold": null,
+      "value": "A2",
+      "design": {
+        "races": 602,
+        "coverage": 0.26625386996904027,
+        "hits": 169,
+        "hitRate": 0.2807308970099668,
+        "analyticalRoi": 0.690282392026578
+      },
+      "holdout": {
+        "races": 459,
+        "coverage": 0.2715976331360947,
+        "hits": 143,
+        "hitRate": 0.3115468409586057,
+        "analyticalRoi": 0.7322440087145969
+      },
+      "recent360": {
+        "races": 106,
+        "coverage": 0.29444444444444445,
+        "hits": 31,
+        "hitRate": 0.29245283018867924,
+        "analyticalRoi": 0.6950471698113208
+      }
+    },
+    {
+      "name": "LANE1_B1",
+      "field": "lane1Class",
+      "direction": null,
+      "threshold": null,
+      "value": "B1",
+      "design": {
+        "races": 861,
+        "coverage": 0.38080495356037153,
+        "hits": 179,
+        "hitRate": 0.20789779326364694,
+        "analyticalRoi": 0.780952380952381
+      },
+      "holdout": {
+        "races": 616,
+        "coverage": 0.36449704142011835,
+        "hits": 126,
+        "hitRate": 0.20454545454545456,
+        "analyticalRoi": 0.8525974025974026
+      },
+      "recent360": {
+        "races": 107,
+        "coverage": 0.2972222222222222,
+        "hits": 24,
+        "hitRate": 0.22429906542056074,
+        "analyticalRoi": 0.7042056074766355
+      }
+    },
+    {
+      "name": "LANE1_B2",
+      "field": "lane1Class",
+      "direction": null,
+      "threshold": null,
+      "value": "B2",
+      "design": {
+        "races": 50,
+        "coverage": 0.022114108801415303,
+        "hits": 8,
+        "hitRate": 0.16,
+        "analyticalRoi": 0.991
+      },
+      "holdout": {
+        "races": 60,
+        "coverage": 0.03550295857988166,
+        "hits": 13,
+        "hitRate": 0.21666666666666667,
+        "analyticalRoi": 0.9320833333333334
+      },
+      "recent360": {
+        "races": 14,
+        "coverage": 0.03888888888888889,
+        "hits": 1,
+        "hitRate": 0.07142857142857142,
+        "analyticalRoi": 0.8142857142857143
+      }
+    },
+    {
+      "name": "RACE_EARLY",
+      "field": "raceBucket",
+      "direction": null,
+      "threshold": null,
+      "value": "EARLY",
+      "design": {
+        "races": 755,
+        "coverage": 0.3339230429013711,
+        "hits": 149,
+        "hitRate": 0.19735099337748344,
+        "analyticalRoi": 0.7573509933774835
+      },
+      "holdout": {
+        "races": 563,
+        "coverage": 0.33313609467455624,
+        "hits": 124,
+        "hitRate": 0.2202486678507993,
+        "analyticalRoi": 0.8979129662522203
+      },
+      "recent360": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 26,
+        "hitRate": 0.21666666666666667,
+        "analyticalRoi": 0.7270833333333333
+      }
+    },
+    {
+      "name": "RACE_MIDDLE",
+      "field": "raceBucket",
+      "direction": null,
+      "threshold": null,
+      "value": "MIDDLE",
+      "design": {
+        "races": 755,
+        "coverage": 0.3339230429013711,
+        "hits": 229,
+        "hitRate": 0.3033112582781457,
+        "analyticalRoi": 0.7745364238410596
+      },
+      "holdout": {
+        "races": 563,
+        "coverage": 0.33313609467455624,
+        "hits": 159,
+        "hitRate": 0.2824156305506217,
+        "analyticalRoi": 0.7348134991119005
+      },
+      "recent360": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 29,
+        "hitRate": 0.24166666666666667,
+        "analyticalRoi": 0.5460416666666666
+      }
+    },
+    {
+      "name": "RACE_LATE",
+      "field": "raceBucket",
+      "direction": null,
+      "threshold": null,
+      "value": "LATE",
+      "design": {
+        "races": 751,
+        "coverage": 0.33215391419725787,
+        "hits": 227,
+        "hitRate": 0.3022636484687084,
+        "analyticalRoi": 0.7660785619174434
+      },
+      "holdout": {
+        "races": 564,
+        "coverage": 0.3337278106508876,
+        "hits": 171,
+        "hitRate": 0.30319148936170215,
+        "analyticalRoi": 0.6960992907801419
+      },
+      "recent360": {
+        "races": 120,
+        "coverage": 0.3333333333333333,
+        "hits": 41,
+        "hitRate": 0.3416666666666667,
+        "analyticalRoi": 0.7889583333333333
+      }
+    },
+    {
+      "name": "TYPE_QUALIFY",
+      "field": "typeGroup",
+      "direction": null,
+      "threshold": null,
+      "value": "QUALIFY",
+      "design": {
+        "races": 1230,
+        "coverage": 0.5440070765148165,
+        "hits": 318,
+        "hitRate": 0.25853658536585367,
+        "analyticalRoi": 0.6948170731707317
+      },
+      "holdout": {
+        "races": 915,
+        "coverage": 0.5414201183431953,
+        "hits": 230,
+        "hitRate": 0.25136612021857924,
+        "analyticalRoi": 0.7545628415300546
+      },
+      "recent360": {
+        "races": 206,
+        "coverage": 0.5722222222222222,
+        "hits": 52,
+        "hitRate": 0.2524271844660194,
+        "analyticalRoi": 0.6201456310679612
+      }
+    },
+    {
+      "name": "TYPE_GENERAL",
+      "field": "typeGroup",
+      "direction": null,
+      "threshold": null,
+      "value": "GENERAL",
+      "design": {
+        "races": 591,
+        "coverage": 0.26138876603272887,
+        "hits": 145,
+        "hitRate": 0.24534686971235195,
+        "analyticalRoi": 0.8514382402707276
+      },
+      "holdout": {
+        "races": 458,
+        "coverage": 0.2710059171597633,
+        "hits": 124,
+        "hitRate": 0.27074235807860264,
+        "analyticalRoi": 0.8633187772925764
+      },
+      "recent360": {
+        "races": 99,
+        "coverage": 0.275,
+        "hits": 27,
+        "hitRate": 0.2727272727272727,
+        "analyticalRoi": 0.8204545454545454
+      }
+    },
+    {
+      "name": "TYPE_SPECIAL",
+      "field": "typeGroup",
+      "direction": null,
+      "threshold": null,
+      "value": "SPECIAL",
+      "design": {
+        "races": 196,
+        "coverage": 0.08668730650154799,
+        "hits": 52,
+        "hitRate": 0.2653061224489796,
+        "analyticalRoi": 0.7131377551020408
+      },
+      "holdout": {
+        "races": 130,
+        "coverage": 0.07692307692307693,
+        "hits": 35,
+        "hitRate": 0.2692307692307692,
+        "analyticalRoi": 0.6117307692307692
+      },
+      "recent360": {
+        "races": 17,
+        "coverage": 0.04722222222222222,
+        "hits": 6,
+        "hitRate": 0.35294117647058826,
+        "analyticalRoi": 0.5441176470588235
+      }
+    },
+    {
+      "name": "TYPE_SEMI",
+      "field": "typeGroup",
+      "direction": null,
+      "threshold": null,
+      "value": "SEMI",
+      "design": {
+        "races": 11,
+        "coverage": 0.004865103936311367,
+        "hits": 5,
+        "hitRate": 0.45454545454545453,
+        "analyticalRoi": 0.6045454545454545
+      },
+      "holdout": {
+        "races": 12,
+        "coverage": 0.007100591715976331,
+        "hits": 9,
+        "hitRate": 0.75,
+        "analyticalRoi": 2.158333333333333
+      },
+      "recent360": {
+        "races": 0,
+        "coverage": 0,
+        "hits": 0,
+        "hitRate": null,
+        "analyticalRoi": null
+      }
+    },
+    {
+      "name": "TYPE_FINAL",
+      "field": "typeGroup",
+      "direction": null,
+      "threshold": null,
+      "value": "FINAL",
+      "design": {
+        "races": 132,
+        "coverage": 0.0583812472357364,
+        "hits": 49,
+        "hitRate": 0.3712121212121212,
+        "analyticalRoi": 0.8441287878787879
+      },
+      "holdout": {
+        "races": 99,
+        "coverage": 0.058579881656804736,
+        "hits": 33,
+        "hitRate": 0.3333333333333333,
+        "analyticalRoi": 0.726010101010101
+      },
+      "recent360": {
+        "races": 20,
+        "coverage": 0.05555555555555555,
+        "hits": 5,
+        "hitRate": 0.25,
+        "analyticalRoi": 1
+      }
+    },
+    {
+      "name": "VARIABLE_LE_4",
+      "field": "variableCount",
+      "direction": null,
+      "threshold": null,
+      "value": 4,
+      "design": {
+        "races": 245,
+        "coverage": 0.10835913312693499,
+        "hits": 101,
+        "hitRate": 0.4122448979591837,
+        "analyticalRoi": 0.7862244897959184
+      },
+      "holdout": {
+        "races": 219,
+        "coverage": 0.12958579881656804,
+        "hits": 93,
+        "hitRate": 0.4246575342465753,
+        "analyticalRoi": 0.9066210045662101
+      },
+      "recent360": {
+        "races": 49,
+        "coverage": 0.1361111111111111,
+        "hits": 23,
+        "hitRate": 0.46938775510204084,
+        "analyticalRoi": 1.2066326530612246
+      }
+    },
+    {
+      "name": "VARIABLE_LE_5",
+      "field": "variableCount",
+      "direction": null,
+      "threshold": null,
+      "value": 5,
+      "design": {
+        "races": 826,
+        "coverage": 0.3653250773993808,
+        "hits": 286,
+        "hitRate": 0.34624697336561744,
+        "analyticalRoi": 0.7655871670702179
+      },
+      "holdout": {
+        "races": 605,
+        "coverage": 0.35798816568047337,
+        "hits": 213,
+        "hitRate": 0.35206611570247937,
+        "analyticalRoi": 0.7592561983471074
+      },
+      "recent360": {
+        "races": 118,
+        "coverage": 0.3277777777777778,
+        "hits": 43,
+        "hitRate": 0.3644067796610169,
+        "analyticalRoi": 0.8180084745762712
+      }
+    }
+  ],
+  "livePromotionEligible": false,
+  "decision": "SHADOW_ONLY"
+}
