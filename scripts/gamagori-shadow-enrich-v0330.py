@@ -71,11 +71,11 @@ def parse(text,date_s,expected_classes):
         avg_match=re.search(r'(?<!\d)(0\.\d{2})(?!\d)',row[3] if len(row)>3 else joined)
         national=rates(row[4]) if len(row)>4 else [];local=rates(row[5]) if len(row)>5 else []
         motor,motor2,motor3=equipment(row[6] if len(row)>6 else '');boat,boat2,boat3=equipment(row[7] if len(row)>7 else '')
-        if not avg_match or len(national)<3 or len(local)<3 or motor is None:raise RuntimeError(f'PROFILE_FIELDS_MISSING lane={lane} cells={len(row)}')
+        if len(national)<3 or len(local)<3 or motor is None:raise RuntimeError(f'PROFILE_FIELDS_MISSING lane={lane} cells={len(row)}')
         name_match=re.search(r'\d{4}\s*/\s*(?:A1|A2|B1|B2)\s+([^|/]+)',joined)
         boats[lane]={
             'lane':lane,'registration':registration,'name':re.sub(r'\s+',' ',name_match.group(1)).strip() if name_match else '',
-            'class':cls,'averageST':float(avg_match.group(1)),
+            'class':cls,'averageST':float(avg_match.group(1)) if avg_match else None,
             'nationalWinRate':national[0],'national2Rate':round(national[1]/100,4),'national3Rate':round(national[2]/100,4),
             'localWinRate':local[0],'local2Rate':round(local[1]/100,4),'local3Rate':round(local[2]/100,4),
             'motor':motor,'motor2Rate':motor2,'motor3Rate':motor3,'boat':boat,'boat2Rate':boat2,'boat3Rate':boat3}
