@@ -111,9 +111,10 @@ jobs:
           from zoneinfo import ZoneInfo
           d=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date().isoformat()
           base=Path('live/gamagori')/d/'program'
-          if not base.exists():
-            print('PROGRAM_NOT_PUBLISHED_YET',d); raise SystemExit(0)
-          ready=json.loads((base/'pages-ready.json').read_text(encoding='utf-8'))
+          ready_path=base/'pages-ready.json'
+          if not ready_path.exists():
+            print('PROGRAM_SNAPSHOT_NOT_READY_YET',d); raise SystemExit(0)
+          ready=json.loads(ready_path.read_text(encoding='utf-8'))
           assert ready.get('allProgramReady') is True and ready.get('programRaces')==12
           assert ready.get('exhibitionIncluded') is False
           assert ready.get('resultEndpointsIncluded') is False
