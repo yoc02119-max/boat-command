@@ -42,7 +42,7 @@ jobs:
   merge:
     needs: collect
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -56,7 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime, json, pathlib
+          import datetime, importlib.util, json, pathlib
 
           paths=sorted(pathlib.Path('shadow-pre-shards').glob('shadow-pre-shard-*.json'))
           if len(paths)!=6:raise SystemExit(f'SHARD_COUNT_INVALID {len(paths)}')
@@ -64,14 +64,30 @@ jobs:
           races=[race for shard in shards for race in shard['races']]
           dates=sorted({date for shard in shards for date in shard['dates']})
           ids=[race['id'] for race in races]
-          failures=[failure for shard in shards for failure in shard['failures']]
+          collection_failures=[failure for shard in shards for failure in shard['failures']]
+          history=json.loads(pathlib.Path('gamagori-main-history-v0320.json').read_text(encoding='utf-8'))
+          expected_rows=[row for row in history['races'] if row['d'] in dates]
+          by_id={race['id']:race for race in races}
+          spec=importlib.util.spec_from_file_location('shadow_enrich','scripts/gamagori-shadow-enrich-v0330.py')
+          enrich=importlib.util.module_from_spec(spec);spec.loader.exec_module(enrich)
+          repair_failures=[]
+          for row in expected_rows:
+              if row['id'] in by_id:continue
+              url=f"https://www.boatrace.jp/owpc/pc/race/racelist?hd={row['d'].replace('-','')}&jcd=07&rno={row['r']}"
+              try:
+                  day,boats=enrich.parse(enrich.fetch(url),row['d'],row['c'])
+                  by_id[row['id']]={'id':row['id'],'date':row['d'],'race':int(row['r']),'raceType':row.get('t',''),'eventDay':day,'boats':boats,'sourceUrl':url,'sourceTiming':'OFFICIAL_RACELIST_PRE_RACE'}
+                  print('REPAIR_PASS',row['id'])
+              except Exception as exc:
+                  repair_failures.append({'id':row['id'],'error':str(exc)});print('REPAIR_FAILURE',row['id'],exc)
+          races=list(by_id.values());ids=[race['id'] for race in races]
           audit={
               'schema':'boat-command-shadow-enrichment-audit-v1','target':'LATEST_30_RACE_DAYS',
               'firstDate':dates[0] if dates else None,'lastDate':dates[-1] if dates else None,
-              'dates':len(dates),'expectedRaces':360,'validRaces':len(races),'failures':failures,
+              'dates':len(dates),'expectedRaces':360,'validRaces':len(races),'collectionFailures':collection_failures,'failures':repair_failures,
               'duplicateIds':len(ids)-len(set(ids)),'outcomeFieldsIncluded':False,
               'resultOddsIncluded':False,'exhibitionIncluded':False,
-              'ready':len(races)==360 and len(dates)==30 and not failures and len(ids)==len(set(ids))
+              'ready':len(races)==360 and len(dates)==30 and not repair_failures and len(ids)==len(set(ids))
           }
           pathlib.Path('gamagori-shadow-enrichment-audit-v0330.json').write_text(
               json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')

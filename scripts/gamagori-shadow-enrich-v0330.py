@@ -24,7 +24,7 @@ class Tables(HTMLParser):
 
 def fetch(url):
     error=None
-    for attempt in range(3):
+    for attempt in range(6):
         try:
             request=urllib.request.Request(url,headers={'User-Agent':'BOAT-COMMAND-SHADOW-ENRICHMENT/0.33.0'})
             with urllib.request.urlopen(request,timeout=30) as response:raw=response.read()
@@ -33,7 +33,7 @@ def fetch(url):
                 except UnicodeDecodeError:pass
             return raw.decode('utf-8','replace')
         except Exception as exc:
-            error=exc;time.sleep(attempt+1)
+            error=exc;time.sleep(min(4,attempt+1))
     raise error
 
 def rates(cell):return [float(x) for x in re.findall(r'(?<!\d)(\d+(?:\.\d+)?)(?!\d)',cell)]
@@ -96,11 +96,11 @@ def main():
         try:
             day,boats=parse(fetch(url),row['d'],row['c'])
             output.append({'id':row['id'],'date':row['d'],'race':int(row['r']),'raceType':row.get('t',''),'eventDay':day,'boats':boats,'sourceUrl':url,'sourceTiming':'OFFICIAL_RACELIST_PRE_RACE'})
-        except Exception as exc:failures.append({'id':row['id'],'error':str(exc)})
+        except Exception as exc:
+            failures.append({'id':row['id'],'error':str(exc)});print(f"SHARD {args.shard} FAILURE {row['id']} {exc}",flush=True)
         if index%12==0:print(f'SHARD {args.shard} COLLECTED {index}/{len(targets)} failures={len(failures)}',flush=True)
         time.sleep(.08)
     payload={'schema':'boat-command-shadow-pre-race-shard-v1','shard':args.shard,'shards':args.shards,'dates':dates,'expected':len(targets),'races':output,'failures':failures}
     pathlib.Path(args.output).write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
-    if failures or len(output)!=len(targets):raise SystemExit(f'SHARD_INCOMPLETE {args.shard} valid={len(output)} failures={len(failures)}')
-    print(f'SHARD_PASS {args.shard} races={len(output)}',flush=True)
+    print(f'SHARD_{"PASS" if not failures else "PARTIAL"} {args.shard} races={len(output)} failures={len(failures)}',flush=True)
 if __name__=='__main__':main()
