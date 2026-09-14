@@ -1,4 +1,4 @@
-name: Gamagori LIVE performance v0.32.3
+name: Gamagori LIVE performance v0.32.4
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: gamagori-live-performance-v0323
+  group: gamagori-live-performance-v0324
   cancel-in-progress: true
 
 jobs:
@@ -47,14 +47,14 @@ jobs:
           perf=Path('live-performance-v0323.js').read_text(encoding='utf-8')
           app=Path('app.js').read_text(encoding='utf-8')
           result=Path('live-result-v0204.js').read_text(encoding='utf-8')
-          required_perf=['settled','returnAmount','profit','hit','headBoatBars','winnerBars','modeCompare','historyTable','fetchesResults:false','fetchesPreRace:false']
+          required_perf=['settled','returnAmount','profit','hit','headBoatBars','winnerBars','modeCompare','historyTable','allDd','maxDrawdown','fetchesResults:false','fetchesPreRace:false']
           missing=[x for x in required_perf if x not in perf]
           assert not missing, f'PERFORMANCE_CONTRACT_MISSING:{missing}'
           forbidden=['liveSuggestion','exhibitionTime','exhibitionST','displayTime','tenjiTime']
           leaked=[x for x in forbidden if x in perf]
           assert not leaked, f'PRE_RACE_LEAK_IN_PERFORMANCE:{leaked}'
           assert 'r?.settled===true' in perf, 'SETTLED_GATE_MISSING'
-          required_app=['bankrollNow','allRecord','allHitRate','allRoi','allDd','kHits','kHitRate','kRoi','kProfit','resultSummary']
+          required_app=['bankrollNow','allRecord','allHitRate','allRoi','kHits','kHitRate','kRoi','kProfit','resultSummary']
           missing_app=[x for x in required_app if x not in app]
           assert not missing_app, f'APP_PERFORMANCE_VISIBILITY_MISSING:{missing_app}'
           for x in ['officialPayout100','returnAmount','profit','settled=true']:
