@@ -1,8 +1,8 @@
-// BOAT COMMAND GAMAGORI RESULT-FREE PROGRAM LOADER v0.27.0
+// BOAT COMMAND GAMAGORI RESULT-FREE PROGRAM LOADER v0.27.1
 // Loads only same-origin program snapshots. No exhibition, payout or result endpoint is read here.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-PROGRAM-V0.27.0';
+const VERSION='GAMAGORI-PROGRAM-V0.27.1';
 const STATE={running:false,lastSyncAt:null,ready:0,wait:12};
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function currentLive(){let s=null;try{s=typeof session==='function'?session():null}catch{}return s&&s.runType==='LIVE'&&s.venue==='蒲郡'&&String(s.date||'')===todayJst()?s:null}
@@ -34,22 +34,28 @@ async function syncGamagoriProgramSnapshot({render=true}={}){
       try{
         const {raw,boats,path}=await loadOne(s.date,race);
         const profiles=boats.map(b=>({lane:Number(b.lane),cls:String(b.class),class:String(b.class),registration:b.registration||null,name:b.name||'',motor:b.motor??null,boat:b.boat??null}));
-        const before=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.preRaceProfiles]);
+        const before=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.programSnapshotReason,rec.preRaceProfiles]);
         rec.preRaceProfiles=profiles;
         rec.programSnapshotStatus='READY';
         rec.programSnapshotAt=raw.fetchedAt||new Date().toISOString();
         rec.programSnapshotPath=path;
         rec.programDeadline=raw.deadline||null;
         rec.programSnapshotReason='';
-        const after=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.preRaceProfiles]);
+        const after=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.programSnapshotReason,rec.preRaceProfiles]);
         if(before!==after)changed=true;
         ready++;
       }catch(e){
         const reason=String(e?.message||e);
-        if(rec.programSnapshotStatus!=='READY'){
-          if(rec.programSnapshotStatus!=='WAIT'||rec.programSnapshotReason!==reason)changed=true;
-          rec.programSnapshotStatus='WAIT';rec.programSnapshotReason=reason;
-        }
+        const before=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotReason,rec.preRaceProfiles,rec.programSnapshotAt,rec.programDeadline]);
+        // Fail closed on the current sync attempt. A previously READY snapshot must not remain lock-eligible
+        // when the public result-free program asset can no longer be verified.
+        rec.programSnapshotStatus='WAIT';
+        rec.programSnapshotReason=reason;
+        rec.preRaceProfiles=null;
+        rec.programSnapshotAt=null;
+        rec.programDeadline=null;
+        const after=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotReason,rec.preRaceProfiles,rec.programSnapshotAt,rec.programDeadline]);
+        if(before!==after)changed=true;
       }
     }
     STATE.ready=ready;STATE.wait=12-ready;STATE.lastSyncAt=new Date().toISOString();
@@ -61,7 +67,7 @@ async function syncGamagoriProgramSnapshot({render=true}={}){
   finally{STATE.running=false}
 }
 window.syncGamagoriProgramSnapshot=syncGamagoriProgramSnapshot;
-window.BOAT_COMMAND_PROGRAM_V0270=Object.freeze({version:VERSION,venue:'蒲郡',state:STATE,sync:syncGamagoriProgramSnapshot,resultLookahead:false,resultEndpointsIncluded:false,resultIncluded:false,exhibitionUsed:false});
+window.BOAT_COMMAND_PROGRAM_V0270=Object.freeze({version:VERSION,venue:'蒲郡',state:STATE,sync:syncGamagoriProgramSnapshot,resultLookahead:false,resultEndpointsIncluded:false,resultIncluded:false,exhibitionUsed:false,failClosedOnSyncError:true});
 function boot(){syncGamagoriProgramSnapshot({render:true});setInterval(()=>{if(!document.hidden)syncGamagoriProgramSnapshot({render:true})},5*60*1000)}
 window.addEventListener('boatcommand:today-live',()=>setTimeout(()=>syncGamagoriProgramSnapshot({render:true}),40));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncGamagoriProgramSnapshot({render:true})});
