@@ -1,4 +1,4 @@
-name: Gamagori current LIVE stack smoke v0.27.8
+name: Gamagori current LIVE stack smoke v0.27.9
 
 on:
   workflow_dispatch:
@@ -9,19 +9,35 @@ on:
       - 'app.js'
       - 'styles.css'
       - 'manifest.webmanifest'
+      - 'virtual-bankroll-v0250.js'
+      - 'gamagori-live-integration-v0198.js'
       - 'live-program-v0270.js'
-      - 'live-two-stage-v0260.js'
-      - 'live-manual-refresh-v0276.js'
-      - 'live-session-today-v0263.js'
-      - 'trial-readiness-v0272.js'
       - 'live-autopoll-v0199.js'
       - 'live-predictor-v0200.js'
+      - 'live-two-stage-v0260.js'
+      - 'live-prediction-compact-v0261.js'
+      - 'live-skip-gate-v0225.js'
       - 'live-autofill-v0201.js'
       - 'live-lock-guard-v0202.js'
       - 'live-lock-snapshot-v0203.js'
       - 'live-result-v0204.js'
+      - 'live-learning-v0205.js'
+      - 'live-learning-dashboard-v0206.js'
+      - 'live-learning-guard-v0207.js'
+      - 'live-integrity-audit-v0208.js'
       - 'live-snapshot-hash-guard-v0209.js'
+      - 'development-status-v0217.js'
+      - 'trial-readiness-v0218.js'
+      - 'live-session-today-v0263.js'
+      - 'live-manual-refresh-v0276.js'
+      - 'trial-readiness-v0272.js'
+      - 'boat-ai-core-v0290.js'
+      - 'boat-voice-agent-v0296.js'
+      - 'boat-chatgpt-voice-v0298.js'
+      - 'boat-remote-control-v0284.js'
       - 'live/gamagori/**/program/**'
+      - 'live/gamagori/**/pre/**'
+      - 'live/gamagori/**/post/**'
 
 permissions:
   contents: read
@@ -39,21 +55,22 @@ jobs:
       - name: Syntax audit current Gamagori LIVE modules
         run: |
           set -euo pipefail
-          for f in app.js live-program-v0270.js live-autopoll-v0199.js live-predictor-v0200.js live-two-stage-v0260.js live-autofill-v0201.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js; do
+          for f in app.js virtual-bankroll-v0250.js gamagori-live-integration-v0198.js live-program-v0270.js live-autopoll-v0199.js live-predictor-v0200.js live-two-stage-v0260.js live-prediction-compact-v0261.js live-skip-gate-v0225.js live-autofill-v0201.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-learning-v0205.js live-learning-dashboard-v0206.js live-learning-guard-v0207.js live-integrity-audit-v0208.js live-snapshot-hash-guard-v0209.js development-status-v0217.js trial-readiness-v0218.js live-session-today-v0263.js live-manual-refresh-v0276.js trial-readiness-v0272.js boat-ai-core-v0290.js boat-voice-agent-v0296.js boat-chatgpt-voice-v0298.js boat-remote-control-v0284.js; do
             node --check "$f"
           done
-      - name: Verify current DOM, script order and single cache key
+      - name: Verify current DOM, full script order and single cache key
         shell: python
         run: |
           from pathlib import Path
           import re
           h=Path('index.html').read_text(encoding='utf-8')
-          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip']
+          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus']
           miss=[x for x in ids if not re.search(rf'id=["\']{x}["\']',h)]
           assert not miss, f'DOM_MISSING:{miss}'
-          required=['app.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-snapshot-hash-guard-v0209.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js']
+          required=['app.js','virtual-bankroll-v0250.js','gamagori-live-integration-v0198.js','live-program-v0270.js','live-autopoll-v0199.js','live-predictor-v0200.js','live-two-stage-v0260.js','live-prediction-compact-v0261.js','live-skip-gate-v0225.js','live-autofill-v0201.js','live-lock-guard-v0202.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-learning-v0205.js','live-learning-dashboard-v0206.js','live-learning-guard-v0207.js','live-integrity-audit-v0208.js','live-snapshot-hash-guard-v0209.js','development-status-v0217.js','trial-readiness-v0218.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','boat-ai-core-v0290.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-remote-control-v0284.js']
           srcs=re.findall(r'<script\s+src="([^"]+)"',h); bases=[x.split('?',1)[0] for x in srcs]
           miss=[x for x in required if x not in bases]; assert not miss, f'SCRIPT_MISSING:{miss}'
+          dup=[x for x in set(bases) if bases.count(x)>1]; assert not dup, f'SCRIPT_DUPLICATE:{dup}'
           pos=[bases.index(x) for x in required]; assert pos==sorted(pos), f'SCRIPT_ORDER_BAD:{pos}'
           keys=[]
           for x in srcs:
@@ -61,7 +78,28 @@ jobs:
             assert m, f'CACHE_KEY_MISSING:{x}'
             keys.append(m.group(1))
           assert len(set(keys))==1, f'CACHE_KEYS_MIXED:{sorted(set(keys))}'
+          css=re.findall(r'<link[^>]+href="([^"]+\.css\?v=\d+)"',h)
+          assert css, 'STYLESHEET_CACHE_KEY_MISSING'
+          css_keys=[re.search(r'[?&]v=(\d+)',x).group(1) for x in css]
+          assert set(css_keys)==set(keys), f'CSS_SCRIPT_CACHE_MISMATCH:{css_keys}:{keys[0]}'
+          assert re.search(r'<link[^>]+rel="manifest"[^>]+href="manifest\.webmanifest\?v='+re.escape(keys[0])+r'"',h), 'MANIFEST_CACHE_MISMATCH'
           print('CURRENT_STACK_CONTRACT_PASS', keys[0])
+      - name: Verify result boundary and fail-closed source contracts
+        shell: python
+        run: |
+          from pathlib import Path
+          checks={
+            'app.js':['resultEndpointsIncluded!==false','PRE_RACE_RESULT_BOUNDARY_INVALID'],
+            'live-skip-gate-v0225.js':['WAIT stays fail-closed','bcLiveUnresolvedV0225','isResultMode'],
+            'live-lock-guard-v0202.js':['FINAL LOCK GATE','SAFE_TO_LOCK','minMarginMinutes'],
+            'live-result-v0204.js':['resultEndpointsIncluded!==true','Global reveal hardening','LOCK SNAPSHOTなし'],
+            'live-snapshot-hash-guard-v0209.js':['snapshot'],
+          }
+          for f,needles in checks.items():
+            text=Path(f).read_text(encoding='utf-8')
+            missing=[n for n in needles if n not in text]
+            assert not missing, f'SAFETY_CONTRACT_MISSING:{f}:{missing}'
+          print('PRE_POST_AND_FAIL_CLOSED_CONTRACT_PASS')
       - name: Verify today's result-free 12R program snapshot when present
         shell: python
         run: |
@@ -94,11 +132,11 @@ jobs:
           ok=0
           for i in $(seq 1 18); do
             code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
-            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-manual-refresh-v0276.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html; then ok=1; break; fi
+            if [ "$code" = 200 ] && grep -Fq 'live-program-v0270.js?v=' /tmp/public.html && grep -Fq 'live-skip-gate-v0225.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = 1
-          for asset in app.js live-program-v0270.js live-two-stage-v0260.js live-manual-refresh-v0276.js trial-readiness-v0272.js; do
+          for asset in app.js styles.css manifest.webmanifest live-program-v0270.js live-two-stage-v0260.js live-skip-gate-v0225.js live-lock-guard-v0202.js live-lock-snapshot-v0203.js live-result-v0204.js live-snapshot-hash-guard-v0209.js live-manual-refresh-v0276.js trial-readiness-v0272.js; do
             code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}${asset}?v=${GITHUB_RUN_ID}" || true)
             test "$code" = 200 || { echo "PUBLIC_ASSET_FAIL $code $asset"; exit 1; }
           done
