@@ -36,7 +36,7 @@ jobs:
           assert 'live-result-v0204.js' in bases, 'RESULT_LAYER_MISSING'
           assert 'live-performance-v0323.js' in bases, 'PERFORMANCE_LAYER_MISSING'
           assert bases.index('live-result-v0204.js') < bases.index('live-performance-v0323.js'), 'PERFORMANCE_MUST_LOAD_AFTER_RESULT'
-          for dom_id in ['kHits','kHitRate','kRoi','kProfit','bankrollNow','allRecord','allHitRate','allRoi','allDd','resultSummary']:
+          for dom_id in ['kHits','kHitRate','kRoi','kProfit','bankrollNow','allRecord','allHitRate','allRoi','allDd','resultSummary','headBoatBars','winnerBars','modeCompare','historyTable']:
               assert re.search(rf'id=["\']{dom_id}["\']',h), f'DOM_MISSING:{dom_id}'
           print('PERFORMANCE_INDEX_CONTRACT_PASS')
           PY
@@ -44,14 +44,21 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          text=Path('live-performance-v0323.js').read_text(encoding='utf-8')
-          required=['settled','returnAmount','profit','hit','officialPayout100','bankrollNow','allRecord','allHitRate','allRoi','allDd']
-          missing=[x for x in required if x not in text]
+          perf=Path('live-performance-v0323.js').read_text(encoding='utf-8')
+          app=Path('app.js').read_text(encoding='utf-8')
+          result=Path('live-result-v0204.js').read_text(encoding='utf-8')
+          required_perf=['settled','returnAmount','profit','hit','headBoatBars','winnerBars','modeCompare','historyTable','fetchesResults:false','fetchesPreRace:false']
+          missing=[x for x in required_perf if x not in perf]
           assert not missing, f'PERFORMANCE_CONTRACT_MISSING:{missing}'
           forbidden=['liveSuggestion','exhibitionTime','exhibitionST','displayTime','tenjiTime']
-          leaked=[x for x in forbidden if x in text]
+          leaked=[x for x in forbidden if x in perf]
           assert not leaked, f'PRE_RACE_LEAK_IN_PERFORMANCE:{leaked}'
-          assert 'r.settled' in text or '.settled' in text, 'SETTLED_GATE_MISSING'
+          assert 'r?.settled===true' in perf, 'SETTLED_GATE_MISSING'
+          required_app=['bankrollNow','allRecord','allHitRate','allRoi','allDd','kHits','kHitRate','kRoi','kProfit','resultSummary']
+          missing_app=[x for x in required_app if x not in app]
+          assert not missing_app, f'APP_PERFORMANCE_VISIBILITY_MISSING:{missing_app}'
+          for x in ['officialPayout100','returnAmount','profit','settled=true']:
+              assert x in result, f'RESULT_SETTLEMENT_FIELD_MISSING:{x}'
           print('POST_ONLY_PERFORMANCE_PASS')
       - name: Verify public performance asset
         env:
