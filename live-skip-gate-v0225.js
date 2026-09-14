@@ -1,206 +1,34 @@
-// BOAT COMMAND GAMAGORI LIVE SKIP / RESULT GATE v0.22.5
-// LIVE only. Treat explicit predictor SKIP as a non-bet race while WAIT stays fail-closed.
-// No result fetches are added here; PRE-RACE / POST-RACE separation remains unchanged.
-// UI status hardening v0.24.1: the core prediction-gate-top must mirror LIVE CANDIDATE/SKIP/WAIT instead of showing stale generic READY.
-// Completion hardening v0.24.2: LIVE COMPLETE is based on settled prediction targets; explicit SKIP races stay excluded.
-// Visibility hardening v0.25.1: READY / WAIT / SKIP must remain visually distinct even if stylesheet state colors regress.
-const BC_LIVE_SKIP_GATE_V0225=Object.freeze({
-  version:'GAMAGORI-LIVE-SKIP-GATE-V0.22.5+UI-STATUS-V0.24.1+COMPLETION-V0.24.2+VISIBILITY-V0.25.1',
-  venue:'蒲郡',
-  waitFailClosed:true,
-  resultLookahead:false
-});
+// BOAT COMMAND GAMAGORI LIVE MAIN GATE v0.32.9
+// LIVE only. Formal state comes from firstSuggestion (MAIN). WAIT stays fail-closed; SKIP is excluded from betting/results.
+// PRE-RACE/POST-RACE separation is preserved; this module never fetches results.
+const BC_LIVE_SKIP_GATE_V0225=Object.freeze({version:'GAMAGORI-LIVE-MAIN-GATE-V0.32.9',venue:'蒲郡',waitFailClosed:true,resultLookahead:false,formalState:'firstSuggestion'});
 
-function bcLiveSkipV0225(r){return r?.liveSuggestion?.status==='SKIP'&&!r?.locked;}
-function bcLiveWaitV0225(r){return !r?.locked&&!bcLiveSkipV0225(r)&&r?.liveSuggestion?.status!=='CANDIDATE';}
-function bcLiveTargetsV0225(s){return (s?.races||[]).filter(r=>!bcLiveSkipV0225(r));}
-function bcLiveSkipsV0225(s){return (s?.races||[]).filter(bcLiveSkipV0225);}
-function bcLiveUnresolvedV0225(s){return (s?.races||[]).filter(bcLiveWaitV0225);}
+function bcFormalStateV0329(r){return r?.firstSuggestion||null}
+function bcLiveSkipV0225(r){return !r?.locked&&bcFormalStateV0329(r)?.status==='SKIP'}
+function bcLiveWaitV0225(r){return !r?.locked&&!bcLiveSkipV0225(r)&&bcFormalStateV0329(r)?.status!=='CANDIDATE'}
+function bcLiveTargetsV0225(s){return (s?.races||[]).filter(r=>!bcLiveSkipV0225(r))}
+function bcLiveSkipsV0225(s){return (s?.races||[]).filter(bcLiveSkipV0225)}
+function bcLiveUnresolvedV0225(s){return (s?.races||[]).filter(bcLiveWaitV0225)}
 
 const _bcEligibleReplayRacesV0225=eligibleReplayRaces;
-eligibleReplayRaces=function(s=session()){
-  if(s?.runType==='LIVE')return bcLiveTargetsV0225(s);
-  return _bcEligibleReplayRacesV0225(s);
-};
-
+eligibleReplayRaces=function(s=session()){if(s?.runType==='LIVE')return bcLiveTargetsV0225(s);return _bcEligibleReplayRacesV0225(s)};
 const _bcSkippedReplayRacesV0225=skippedReplayRaces;
-skippedReplayRaces=function(s=session()){
-  if(s?.runType==='LIVE')return bcLiveSkipsV0225(s);
-  return _bcSkippedReplayRacesV0225(s);
-};
-
+skippedReplayRaces=function(s=session()){if(s?.runType==='LIVE')return bcLiveSkipsV0225(s);return _bcSkippedReplayRacesV0225(s)};
 const _bcRequiredReplayLocksV0225=requiredReplayLocks;
-requiredReplayLocks=function(s=session()){
-  if(s?.runType==='LIVE')return bcLiveTargetsV0225(s).length;
-  return _bcRequiredReplayLocksV0225(s);
-};
-
+requiredReplayLocks=function(s=session()){if(s?.runType==='LIVE')return bcLiveTargetsV0225(s).length;return _bcRequiredReplayLocksV0225(s)};
 const _bcTargetLockedCountV0225=targetLockedCount;
-targetLockedCount=function(s=session()){
-  if(s?.runType==='LIVE'){
-    const target=new Set(bcLiveTargetsV0225(s).map(r=>Number(r.race)));
-    return (s.races||[]).filter(r=>r.locked&&target.has(Number(r.race))).length;
-  }
-  return _bcTargetLockedCountV0225(s);
-};
-
+targetLockedCount=function(s=session()){if(s?.runType==='LIVE'){const target=new Set(bcLiveTargetsV0225(s).map(r=>Number(r.race)));return (s.races||[]).filter(r=>r.locked&&target.has(Number(r.race))).length}return _bcTargetLockedCountV0225(s)};
 const _bcIsResultModeV0225=isResultMode;
-isResultMode=function(s=session()){
-  if(s?.runType==='LIVE'){
-    if(bcLiveUnresolvedV0225(s).length)return false;
-    return targetLockedCount(s)===requiredReplayLocks(s);
-  }
-  return _bcIsResultModeV0225(s);
-};
+isResultMode=function(s=session()){if(s?.runType==='LIVE'){if(bcLiveUnresolvedV0225(s).length)return false;return targetLockedCount(s)===requiredReplayLocks(s)}return _bcIsResultModeV0225(s)};
 
-function bcLiveGateVisualV0251(kind){
-  if(kind==='READY')return 'border-color:rgba(43,226,143,.78);background:rgba(43,226,143,.08);box-shadow:inset 3px 0 0 rgba(43,226,143,.88);';
-  if(kind==='SKIP')return 'border-color:rgba(255,96,120,.72);background:rgba(255,96,120,.07);border-style:dashed;box-shadow:inset 3px 0 0 rgba(255,96,120,.82);';
-  return 'border-color:rgba(255,194,74,.78);background:rgba(255,194,74,.07);box-shadow:inset 3px 0 0 rgba(255,194,74,.88);';
-}
-function bcLiveCardVisualV0251(card,kind){
-  if(!card)return;
-  if(kind==='READY'){
-    card.style.borderColor='rgba(43,226,143,.42)';
-    card.style.boxShadow='inset 3px 0 0 rgba(43,226,143,.46)';
-  }else if(kind==='SKIP'){
-    card.style.borderColor='rgba(255,96,120,.42)';
-    card.style.boxShadow='inset 3px 0 0 rgba(255,96,120,.45)';
-  }else if(kind==='WAIT'){
-    card.style.borderColor='rgba(255,194,74,.42)';
-    card.style.boxShadow='inset 3px 0 0 rgba(255,194,74,.45)';
-  }else{
-    card.style.removeProperty('border-color');
-    card.style.removeProperty('box-shadow');
-  }
-}
-
-function bcSyncLiveCoreGateV0241(card,r,skip,wait){
-  const gate=card?.querySelector('.prediction-gate-top');
-  if(!gate||!r||r.locked)return;
-  if(wait){
-    const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'verified LIVEデータ待ち');
-    gate.className='prediction-gate limited prediction-gate-top live-core-wait';
-    gate.setAttribute('style',bcLiveGateVisualV0251('WAIT'));
-    gate.innerHTML=`<b>WAIT｜予想保留</b><span>${reason}</span>`;
-    return;
-  }
-  if(skip){
-    const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'安全条件により見送り');
-    gate.className='prediction-gate limited prediction-gate-top live-core-skip';
-    gate.setAttribute('style',bcLiveGateVisualV0251('SKIP'));
-    gate.innerHTML=`<b>NO PREDICTION｜見送り</b><span>${reason}</span>`;
-    return;
-  }
-  const reason=esc(r.liveSuggestion?.rationale||'verified LIVEデータと予想候補の安全条件を通過');
-  gate.className='prediction-gate ready prediction-gate-top live-core-ready';
-  gate.setAttribute('style',bcLiveGateVisualV0251('READY'));
-  gate.innerHTML=`<b>PREDICTION READY｜LIVE CANDIDATE</b><span>${reason}</span>`;
-}
-
-function bcApplyLivePredictionControlsV0225(s){
-  if(!s||s.runType!=='LIVE')return;
-  const cards=[...document.querySelectorAll('#predictionList .race-card')];
-  for(const card of cards){
-    const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
-    const r=(s.races||[]).find(x=>Number(x.race)===race);
-    if(!r){
-      bcLiveCardVisualV0251(card,'WAIT');
-      continue;
-    }
-    if(r.locked){
-      card.classList.remove('live-skip-race','live-wait-race');
-      bcLiveCardVisualV0251(card,'');
-      continue;
-    }
-    const skip=bcLiveSkipV0225(r),wait=bcLiveWaitV0225(r);
-    card.classList.toggle('live-skip-race',skip);
-    card.classList.toggle('live-wait-race',wait);
-    bcLiveCardVisualV0251(card,wait?'WAIT':skip?'SKIP':'READY');
-    bcSyncLiveCoreGateV0241(card,r,skip,wait);
-    const controls=[...card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]')];
-    if(skip||wait){
-      controls.forEach(el=>{
-        if(!el.disabled)el.dataset.bcV0225Disabled='1';
-        el.disabled=true;
-      });
-    }else{
-      controls.forEach(el=>{
-        if(el.dataset.bcV0225Disabled==='1'){
-          el.disabled=false;
-          delete el.dataset.bcV0225Disabled;
-        }
-      });
-    }
-  }
-}
-
-function bcApplyLiveResultSkipCardsV0225(s){
-  if(!s||s.runType!=='LIVE'||!isResultMode(s))return;
-  const skips=bcLiveSkipsV0225(s);
-  if(!skips.length)return;
-  const byRace=new Map(skips.map(r=>[Number(r.race),r]));
-  const cards=[...document.querySelectorAll('#resultList .race-card')];
-  for(const card of cards){
-    const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
-    const r=byRace.get(race);if(!r)continue;
-    const reason=esc(r.liveSuggestion?.reason||r.liveDataReason||'安全条件により見送り');
-    card.className='race-card no-prediction-race live-skip-result';
-    card.style.borderColor='rgba(255,96,120,.42)';
-    card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LIVE監査記録</div></div><div class="stake">SKIPPED</div></div><div class="no-prediction-panel" style="${bcLiveGateVisualV0251('SKIP')}"><div class="no-prediction-head"><b>NO PREDICTION｜見送り</b><span>投資対象外</span></div><div class="no-prediction-reason">${reason}</div><div class="no-prediction-rule">結果取得・投資・的中率・ROI・MISS集計の対象外です。</div></div>`;
-  }
-}
-
-function bcRenderLiveGateSummaryV0225(s){
-  if(!s||s.runType!=='LIVE')return;
-  const targets=bcLiveTargetsV0225(s);
-  const locked=targetLockedCount(s),target=targets.length,skips=bcLiveSkipsV0225(s).length,wait=bcLiveUnresolvedV0225(s).length;
-  const settledTargets=targets.filter(r=>r.settled).length;
-  const complete=wait===0&&isResultMode(s)&&settledTargets===target;
-  const note=document.getElementById('guardNote');
-  if(note){
-    note.textContent=isResultMode(s)
-      ?`予想対象 ${target}RをHARD LOCK済み。見送り ${skips}Rは成績対象外。POST-RACE解禁済み。`
-      :`HARD LOCK ${locked}/${target} · 見送り ${skips}R · WAIT ${wait}R。WAITが残る間はPOST-RACEを開きません。`;
-    note.style.borderLeftColor=wait?'#ffc24a':(isResultMode(s)?'#2be28f':'#8a63ff');
-  }
-  const sub=document.getElementById('summarySub');
-  if(sub){
-    if(complete)sub.textContent=`予想対象 ${target}R精算完了 · SKIP ${skips}`;
-    else if(settledTargets)sub.textContent=`精算 ${settledTargets}/${target} · SKIP ${skips} · WAIT ${wait}`;
-    else if(locked||skips||wait)sub.textContent=`LOCK ${locked}/${target} · SKIP ${skips} · WAIT ${wait}`;
-  }
-  const today=document.getElementById('todayStatus');
-  if(today){
-    today.textContent=complete?'COMPLETE':(isResultMode(s)?'RESULT MODE':wait?'WAIT':'OPEN');
-    today.classList.toggle('done',complete);
-    today.style.borderColor=complete?'#287253':wait?'rgba(255,194,74,.72)':'';
-    today.style.color=complete?'#7fffc0':wait?'#ffe09a':'';
-    today.style.background=complete?'#0c2c22':wait?'rgba(255,194,74,.08)':'';
-  }
-}
-
+function bcLiveGateVisualV0251(kind){if(kind==='READY')return 'border-color:rgba(43,226,143,.78);background:rgba(43,226,143,.08);box-shadow:inset 3px 0 0 rgba(43,226,143,.88);';if(kind==='SKIP')return 'border-color:rgba(255,96,120,.72);background:rgba(255,96,120,.07);border-style:dashed;box-shadow:inset 3px 0 0 rgba(255,96,120,.82);';return 'border-color:rgba(255,194,74,.78);background:rgba(255,194,74,.07);box-shadow:inset 3px 0 0 rgba(255,194,74,.88);'}
+function bcLiveCardVisualV0251(card,kind){if(!card)return;if(kind==='READY'){card.style.borderColor='rgba(43,226,143,.42)';card.style.boxShadow='inset 3px 0 0 rgba(43,226,143,.46)'}else if(kind==='SKIP'){card.style.borderColor='rgba(255,96,120,.42)';card.style.boxShadow='inset 3px 0 0 rgba(255,96,120,.45)'}else if(kind==='WAIT'){card.style.borderColor='rgba(255,194,74,.42)';card.style.boxShadow='inset 3px 0 0 rgba(255,194,74,.45)'}else{card.style.removeProperty('border-color');card.style.removeProperty('box-shadow')}}
+function bcSyncLiveCoreGateV0241(card,r,skip,wait){const gate=card?.querySelector('.prediction-gate-top');if(!gate||!r||r.locked)return;const x=bcFormalStateV0329(r);if(wait){gate.className='prediction-gate limited prediction-gate-top live-core-wait';gate.setAttribute('style',bcLiveGateVisualV0251('WAIT'));gate.innerHTML=`<b>WAIT｜予想保留</b><span>${esc(x?.reason||'公式PRE-RACEデータ待ち')}</span>`;return}if(skip){gate.className='prediction-gate limited prediction-gate-top live-core-skip';gate.setAttribute('style',bcLiveGateVisualV0251('SKIP'));gate.innerHTML=`<b>NO PREDICTION｜見送り</b><span>${esc(x?.reason||'安全条件により見送り')}</span>`;return}gate.className='prediction-gate ready prediction-gate-top live-core-ready';gate.setAttribute('style',bcLiveGateVisualV0251('READY'));gate.innerHTML=`<b>PREDICTION READY｜MAIN</b><span>${esc(x?.rationale||'正式メイン予想の安全条件を通過')}</span>`}
+function bcApplyLivePredictionControlsV0225(s){if(!s||s.runType!=='LIVE')return;for(const card of document.querySelectorAll('#predictionList .race-card')){const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));const r=(s.races||[]).find(x=>Number(x.race)===race);if(!r){bcLiveCardVisualV0251(card,'WAIT');continue}if(r.locked){card.classList.remove('live-skip-race','live-wait-race');bcLiveCardVisualV0251(card,'');continue}const skip=bcLiveSkipV0225(r),wait=bcLiveWaitV0225(r);card.classList.toggle('live-skip-race',skip);card.classList.toggle('live-wait-race',wait);bcLiveCardVisualV0251(card,wait?'WAIT':skip?'SKIP':'READY');bcSyncLiveCoreGateV0241(card,r,skip,wait);const controls=[...card.querySelectorAll('.pick,.pick-input,.rationale-input,[data-reason],[data-lock],[data-lock-race]')];if(skip||wait){controls.forEach(el=>{if(!el.disabled)el.dataset.bcV0225Disabled='1';el.disabled=true})}else controls.forEach(el=>{if(el.dataset.bcV0225Disabled==='1'){el.disabled=false;delete el.dataset.bcV0225Disabled}})}}}
+function bcApplyLiveResultSkipCardsV0225(s){if(!s||s.runType!=='LIVE'||!isResultMode(s))return;const byRace=new Map(bcLiveSkipsV0225(s).map(r=>[Number(r.race),r]));for(const card of document.querySelectorAll('#resultList .race-card')){const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,'')),r=byRace.get(race);if(!r)continue;const reason=esc(bcFormalStateV0329(r)?.reason||'安全条件により見送り');card.className='race-card no-prediction-race live-skip-result';card.style.borderColor='rgba(255,96,120,.42)';card.innerHTML=`<div class="race-head"><div><div class="race-no">${race}R</div><div class="race-meta">LIVE監査記録</div></div><div class="stake">SKIPPED</div></div><div class="no-prediction-panel" style="${bcLiveGateVisualV0251('SKIP')}"><div class="no-prediction-head"><b>NO PREDICTION｜見送り</b><span>投資対象外</span></div><div class="no-prediction-reason">${reason}</div><div class="no-prediction-rule">結果取得・投資・的中率・ROI・MISS集計の対象外です。</div></div>`}}
+function bcRenderLiveGateSummaryV0225(s){if(!s||s.runType!=='LIVE')return;const targets=bcLiveTargetsV0225(s),locked=targetLockedCount(s),target=targets.length,skips=bcLiveSkipsV0225(s).length,wait=bcLiveUnresolvedV0225(s).length,settledTargets=targets.filter(r=>r.settled).length,complete=wait===0&&isResultMode(s)&&settledTargets===target;const note=document.getElementById('guardNote');if(note){note.textContent=isResultMode(s)?`予想対象 ${target}RをHARD LOCK済み。見送り ${skips}Rは成績対象外。POST-RACE解禁済み。`:`HARD LOCK ${locked}/${target} · 見送り ${skips}R · WAIT ${wait}R。WAITが残る間はPOST-RACEを開きません。`;note.style.borderLeftColor=wait?'#ffc24a':(isResultMode(s)?'#2be28f':'#8a63ff')}const sub=document.getElementById('summarySub');if(sub){if(complete)sub.textContent=`予想対象 ${target}R精算完了 · SKIP ${skips}`;else if(settledTargets)sub.textContent=`精算 ${settledTargets}/${target} · SKIP ${skips} · WAIT ${wait}`;else if(locked||skips||wait)sub.textContent=`LOCK ${locked}/${target} · SKIP ${skips} · WAIT ${wait}`}const today=document.getElementById('todayStatus');if(today){today.textContent=complete?'COMPLETE':(isResultMode(s)?'RESULT MODE':wait?'WAIT':'OPEN');today.classList.toggle('done',complete);today.style.borderColor=complete?'#287253':wait?'rgba(255,194,74,.72)':'';today.style.color=complete?'#7fffc0':wait?'#ffe09a':'';today.style.background=complete?'#0c2c22':wait?'rgba(255,194,74,.08)':''}}
 const _bcRenderAllV0225=renderAll;
-renderAll=function(){
-  _bcRenderAllV0225();
-  const s=session();
-  bcApplyLivePredictionControlsV0225(s);
-  bcApplyLiveResultSkipCardsV0225(s);
-  bcRenderLiveGateSummaryV0225(s);
-};
-
+renderAll=function(){_bcRenderAllV0225();const s=session();bcApplyLivePredictionControlsV0225(s);bcApplyLiveResultSkipCardsV0225(s);bcRenderLiveGateSummaryV0225(s)};
 const _bcAnswerV0225=answer;
-answer=function(q){
-  const t=String(q||'').replace(/\s/g,'');
-  if(/見送り|SKIP|結果解禁|結果モード|POST-RACE|ロック状況|LOCK状況/.test(t)){
-    const s=session();
-    if(s?.runType==='LIVE'){
-      const locked=targetLockedCount(s),target=requiredReplayLocks(s),skips=bcLiveSkipsV0225(s),wait=bcLiveUnresolvedV0225(s);
-      if(isResultMode(s))return `LIVEは予想対象 <strong>${target}RをHARD LOCK済み</strong>。見送り ${skips.length}Rは投資・成績対象外として、POST-RACEを解禁できます。`;
-      return `LIVEは HARD LOCK <strong>${locked}/${target}</strong>、見送り ${skips.length}R、WAIT ${wait.length}Rです。WAITが残る間はPOST-RACEを開きません。`;
-    }
-  }
-  return _bcAnswerV0225(q);
-};
-
+answer=function(q){const t=String(q||'').replace(/\s/g,'');if(/見送り|SKIP|結果解禁|結果モード|POST-RACE|ロック状況|LOCK状況/.test(t)){const s=session();if(s?.runType==='LIVE'){const locked=targetLockedCount(s),target=requiredReplayLocks(s),skips=bcLiveSkipsV0225(s),wait=bcLiveUnresolvedV0225(s);if(isResultMode(s))return `LIVEは予想対象 <strong>${target}RをHARD LOCK済み</strong>。見送り ${skips.length}Rは投資・成績対象外として、POST-RACEを解禁できます。`;return `LIVEは HARD LOCK <strong>${locked}/${target}</strong>、見送り ${skips.length}R、WAIT ${wait.length}Rです。WAITが残る間はPOST-RACEを開きません。`}}return _bcAnswerV0225(q)};
 renderAll();
