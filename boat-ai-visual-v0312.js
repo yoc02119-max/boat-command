@@ -26,7 +26,7 @@ function sessionStats(){
   const s=getSession(),races=s?.races||[];
   return{
     first:races.filter(r=>r.firstSuggestion?.status==='CANDIDATE').length,
-    second:races.filter(r=>r.liveSuggestion?.status==='CANDIDATE').length,
+    history:window.BOAT_COMMAND_MAIN_PREDICTION_V0320?'4,071':'同期中',
     locked:races.filter(r=>r.locked).length,
     settled:races.filter(r=>r.settled).length
   };
@@ -34,7 +34,7 @@ function sessionStats(){
 function renderStats(){
   const root=document.querySelector('#bcVisualCore');if(!root)return;
   const st=sessionStats();
-  for(const [key,value] of Object.entries(st)){const el=root.querySelector(`[data-core-stat="${key}"]`);if(el)el.textContent=`${value}/12`}
+  for(const [key,value] of Object.entries(st)){const el=root.querySelector(`[data-core-stat="${key}"]`);if(el)el.textContent=key==='history'?String(value):`${value}/12`}
 }
 function setTranscript(text){const el=document.querySelector('[data-core-transcript]');if(el&&text)el.textContent=String(text).trim()}
 function latestLine(){
@@ -83,7 +83,7 @@ function install(){
   installStyle();
   for(const selector of ['#refreshReport','#reportRefreshStatus']){const legacy=host.querySelector(selector);if(legacy)legacy.hidden=true}
   const core=document.createElement('section');core.id='bcVisualCore';core.className='bc-ai-core';core.dataset.state='idle';core.setAttribute('aria-label','BOAT COMMAND専用AIコア');
-  core.innerHTML=`<div class="bc-core-top"><div class="bc-core-title"><small>BOAT COMMAND · SYSTEM CORE</small><strong>AI CORE</strong></div><div class="bc-core-online"><i></i>COMMAND CORE ONLINE</div></div><div class="bc-core-stage"><div class="bc-orb-wrap" aria-hidden="true"><div class="bc-ring r1"></div><div class="bc-ring r2"></div><div class="bc-ring r3"></div><div class="bc-orbit-dot"></div><div class="bc-orb"></div></div><div class="bc-core-caption"><strong data-core-state>待機中</strong><span data-core-line>強い会話はChatGPT AI、端末内確認は簡易音声を使用します</span></div></div><div class="bc-core-stats"><div class="bc-core-stat"><span>蒲郡 第一候補</span><b data-core-stat="first">0/12</b></div><div class="bc-core-stat"><span>蒲郡 第二候補</span><b data-core-stat="second">0/12</b></div><div class="bc-core-stat"><span>HARD LOCK</span><b data-core-stat="locked">0/12</b></div><div class="bc-core-stat"><span>精算</span><b data-core-stat="settled">0/12</b></div></div><div class="bc-core-actions"><button type="button" data-core-action="connect">🎙 ChatGPT AIと話す</button><button type="button" data-core-action="talk">簡易音声</button><button type="button" data-core-action="refresh">最新同期</button></div><div class="bc-core-transcript"><span>AI RESPONSE · 文字起こし</span><p data-core-transcript aria-live="polite">簡易音声の返答はここに表示します。ChatGPTの会話記録は接続先に残ります。</p></div><div class="bc-core-control"><span>APP CONTROL</span><div class="bc-core-nav"><button type="button" data-core-view="home">蒲郡</button><button type="button" data-core-view="predict">12R予想</button><button type="button" data-core-view="results">精算</button><button type="button" data-core-view="analytics">分析</button><button type="button" data-core-view="data">DATA</button></div></div>`;
+  core.innerHTML=`<div class="bc-core-top"><div class="bc-core-title"><small>BOAT COMMAND · SYSTEM CORE</small><strong>AI CORE</strong></div><div class="bc-core-online"><i></i>COMMAND CORE ONLINE</div></div><div class="bc-core-stage"><div class="bc-orb-wrap" aria-hidden="true"><div class="bc-ring r1"></div><div class="bc-ring r2"></div><div class="bc-ring r3"></div><div class="bc-orbit-dot"></div><div class="bc-orb"></div></div><div class="bc-core-caption"><strong data-core-state>待機中</strong><span data-core-line>強い会話はChatGPT AI、端末内確認は簡易音声を使用します</span></div></div><div class="bc-core-stats"><div class="bc-core-stat"><span>蒲郡 メイン予想</span><b data-core-stat="first">0/12</b></div><div class="bc-core-stat"><span>過去DB</span><b data-core-stat="history">同期中</b></div><div class="bc-core-stat"><span>HARD LOCK</span><b data-core-stat="locked">0/12</b></div><div class="bc-core-stat"><span>精算</span><b data-core-stat="settled">0/12</b></div></div><div class="bc-core-actions"><button type="button" data-core-action="connect">🎙 ChatGPT AIと話す</button><button type="button" data-core-action="talk">簡易音声</button><button type="button" data-core-action="refresh">最新同期</button></div><div class="bc-core-transcript"><span>AI RESPONSE · 文字起こし</span><p data-core-transcript aria-live="polite">簡易音声の返答はここに表示します。ChatGPTの会話記録は接続先に残ります。</p></div><div class="bc-core-control"><span>APP CONTROL</span><div class="bc-core-nav"><button type="button" data-core-view="home">蒲郡</button><button type="button" data-core-view="predict">12R予想</button><button type="button" data-core-view="results">精算</button><button type="button" data-core-view="analytics">分析</button><button type="button" data-core-view="data">DATA</button></div></div>`;
   const heading=host.querySelector('h2');heading?.insertAdjacentElement('afterend',core);
   core.querySelector('[data-core-action="talk"]').addEventListener('click',talk);
   core.querySelector('[data-core-action="refresh"]').addEventListener('click',refresh);

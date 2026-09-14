@@ -50,7 +50,7 @@ function bcFrozenSettlementContractV0213(r){
   const frozen=r?.liveLockSnapshot;
   if(!frozen)return {ok:false,reason:'LOCK SNAPSHOTなし'};
   const picks=Array.isArray(frozen.picks)?frozen.picks.filter(Boolean):[];
-  if(picks.length<1||picks.length>4)return {ok:false,reason:'FROZEN_PICKS_COUNT_INVALID'};
+  if(picks.length<1||picks.length>6)return {ok:false,reason:'FROZEN_PICKS_COUNT_INVALID'};
   if(picks.some(x=>!bcValidResultPickV0204(x)))return {ok:false,reason:'FROZEN_PICK_INVALID'};
   if(new Set(picks).size!==picks.length)return {ok:false,reason:'FROZEN_PICK_DUPLICATE'};
   const stakePerPick=500;

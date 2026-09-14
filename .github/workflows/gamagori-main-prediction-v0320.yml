@@ -1,0 +1,42 @@
+name: GAMAGORI main prediction v0.32.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - app.js
+      - gamagori-main-**
+      - live-main-**
+      - historical-replay-v0320.js
+      - baseline/**
+      - scripts/gamagori-main-**
+      - .github/workflows/gamagori-main-prediction-v0320.yml
+
+permissions:
+  contents: read
+
+jobs:
+  contract-and-backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Syntax and boundary contract
+        run: |
+          set -euo pipefail
+          for f in $(rg -o '<script src="[^"]*' index.html | cut -d'"' -f2 | cut -d'?' -f1); do node --check "$f"; done
+          node scripts/gamagori-main-contract-v0320.js
+      - name: Strict walk-forward comparison
+        run: |
+          set -euo pipefail
+          test -f gamagori-main-history-v0320.json
+          node scripts/gamagori-main-backtest-v0320.js gamagori-main-history-v0320.json /tmp/report.json >/dev/null
+          node - <<'NODE'
+          const r=require('/tmp/report.json');
+          if(!r.strictWalkForward||!r.sameDayRowsExcluded||!r.probabilityAudit.pass)throw new Error('BACKTEST_BOUNDARY_FAILED');
+          const live=require('fs').readFileSync('live-main-prediction-v0320.js','utf8');
+          if(!r.promotionEligible&&!live.includes("productionModel:'FROZEN_BASELINE_V0.29.1'"))throw new Error('FAILED_MODEL_MUST_REMAIN_SHADOW');
+          console.log(JSON.stringify({baseline:r.baseline,candidate:r.candidate,delta:r.delta,pointCountComparison:r.pointCountComparison,variable:r.variable}));
+          NODE

@@ -6,15 +6,13 @@ const VERSION='GAMAGORI-CHATGPT-VOICE-HANDOFF-V0.29.8';
 function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
 function appVersion(){return document.querySelector('.version')?.textContent?.trim()||document.title||'BOAT COMMAND'}
 function bankroll(){return document.querySelector('#bankrollNow')?.textContent?.trim()||'—'}
-function humanReason(v){const x=String(v||'');return /HTTP_404/i.test(x)?'展示データ未公開':x||'待機'}
 function raceSummary(r){
- const first=r?.firstSuggestion?.status==='CANDIDATE'?(r.firstSuggestion.picks||[]).join('/'):(r?.firstSuggestion?.reason||'未生成');
- const second=r?.liveSuggestion?.status==='CANDIDATE'?(r.liveSuggestion.picks||[]).join('/'):humanReason(r?.liveSuggestion?.reason||r?.liveDataReason||'展示待ち');
- return `${r.race}R 第一:${first} 第二:${second} LOCK:${r.locked?'済':'未'} 精算:${r.settled?'済':'未'}`
+ const main=r?.firstSuggestion?.status==='CANDIDATE'?(r.firstSuggestion.picks||[]).join('/'):(r?.firstSuggestion?.reason||'未生成');
+ return `${r.race}R メイン:${main} LOCK:${r.locked?'済':'未'} 精算:${r.settled?'済':'未'}`
 }
 function buildContext(question=''){const s=getSession();if(!s)return'';return[
  'BOAT COMMANDからChatGPTボイスへ接続しました。あなたはこの会話のBOAT COMMAND蒲郡担当です。以下の現在状態を前提に、固定応答ではなく質問の意図を読み、比較・理由・注意点まで自然な日本語で会話してください。',
- '厳守: 当日結果・払戻をPRE-RACE予想へ逆流させない。第一候補は展示不使用。第二候補のみ展示反映。HARD LOCK済み予想は後から書き換えない。出目は1-2-3のように数字だけで読む。',
+ '厳守: 当日結果・払戻・展示をPRE-RACE予想へ入れない。メイン予想は公式番組と対象日より前の履歴だけを使用。HARD LOCK済み予想は後から書き換えない。出目は1-2-3のように数字だけで読む。',
  '--- ChatGPTボイス操作権限 ---',
  'GitHub連携が利用可能なら、ユーザーの音声指示に従って yoc02119-max/boat-command を確認・更新できます。利用不能なら実行したふりをせず「このボイスではGitHub操作を利用できない」と明言してください。',
  '画面操作は repository=yoc02119-max/boat-command の boat-command-remote-command.json だけを更新します。schemaはboat-command-remote-command-v1、idは毎回一意、venueは蒲郡。許可actionはOPEN_VIEW、OPEN_RACE、REFRESH_LIVEのみです。',

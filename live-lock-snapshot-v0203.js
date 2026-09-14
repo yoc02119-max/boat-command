@@ -5,6 +5,7 @@
 const BC_LIVE_LOCK_SNAPSHOT_V0203={version:'GAMAGORI-LIVE-LOCK-SNAPSHOT-V0.20.3+DOM-BIND-V0.25.4'};
 
 function bcDeepCloneV0203(v){return v==null?v:JSON.parse(JSON.stringify(v));}
+function bcNormalizedMainPicksV0320(r){return (r?.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);}
 function bcBuildLiveLockSnapshotV0203(s,r){
   return {
     schema:'boat-command-live-lock-snapshot-v1',
@@ -13,14 +14,14 @@ function bcBuildLiveLockSnapshotV0203(s,r){
     lockedAt:r.lockedAt||new Date().toISOString(),
     lockHash:r.lockHash||null,
     strategyVersion:s.strategyVersion||null,
-    picks:bcNormalizedPicks(r),stake:Number(r.stake)||0,rationale:String(r.rationale||''),
+    picks:bcNormalizedMainPicksV0320(r),stake:Number(r.stake)||0,rationale:String(r.rationale||''),
     predictionStatus:r.predictionStatus||null,
     predictionGateReason:r.predictionGateReason||'',
-    liveSuggestion:bcDeepCloneV0203(r.liveSuggestion||null),
-    livePreRace:bcDeepCloneV0203(r.livePreRace||null),
-    liveVerifiedAt:r.liveVerifiedAt||null,
+    mainSuggestion:bcDeepCloneV0203(r.firstSuggestion||null),
+    programProfiles:bcDeepCloneV0203(r.preRaceProfiles||null),
+    programSnapshotAt:r.programSnapshotAt||null,
     finalLockAudit:bcDeepCloneV0203(r.liveLockAudit||null),
-    sourcePolicy:{preRaceOnly:true,resultEndpointsIncluded:false,mutableAfterLock:false}
+    sourcePolicy:{preRaceOnly:true,programOnly:true,exhibitionIncluded:false,resultEndpointsIncluded:false,mutableAfterLock:false}
   };
 }
 
@@ -47,7 +48,7 @@ function bcVerifyLiveLockSnapshotV0203(r){
   if(!x)return {ok:false,reason:'LOCK SNAPSHOTなし'};
   if(x.sourcePolicy?.mutableAfterLock!==false)return {ok:false,reason:'immutable policy不一致'};
   if(x.sourcePolicy?.resultEndpointsIncluded!==false)return {ok:false,reason:'result source混入'};
-  if(JSON.stringify(x.picks||[])!==JSON.stringify(bcNormalizedPicks(r)))return {ok:false,reason:'LOCK後の買い目差分'};
+  if(JSON.stringify(x.picks||[])!==JSON.stringify(bcNormalizedMainPicksV0320(r)))return {ok:false,reason:'LOCK後の買い目差分'};
   if(String(x.rationale||'')!==String(r.rationale||''))return {ok:false,reason:'LOCK後の根拠差分'};
   return {ok:true,reason:'IMMUTABLE'};
 }

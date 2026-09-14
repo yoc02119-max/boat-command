@@ -104,18 +104,25 @@ jobs:
                   mm=re.search(r'\d{4}\s*/\s*(?:A1|A2|B1|B2)\s+([^|/]+)',joined)
                   if mm:name=re.sub(r'\s+',' ',mm.group(1)).strip()
                   motor=boat=None
+                  motor2_rate=boat2_rate=None
                   # Current official desktop table places motor/boat in cells 6/7.
                   if len(row)>7:
                       mo=re.match(r'\s*(\d+)\s*/',row[6]); bo=re.match(r'\s*(\d+)\s*/',row[7])
                       motor=int(mo.group(1)) if mo else None
                       boat=int(bo.group(1)) if bo else None
-                  boats[lane]={'lane':lane,'registration':reg,'name':name,'class':cls,'motor':motor,'boat':boat}
+                      mr=re.search(r'/\s*([0-9]+(?:\.[0-9]+)?)',row[6])
+                      br=re.search(r'/\s*([0-9]+(?:\.[0-9]+)?)',row[7])
+                      motor2_rate=round(float(mr.group(1))/100,4) if mr else None
+                      boat2_rate=round(float(br.group(1))/100,4) if br else None
+                  boats[lane]={'lane':lane,'registration':reg,'name':name,'class':cls,'motor':motor,'boat':boat,'motor2Rate':motor2_rate,'boat2Rate':boat2_rate}
               if len(boats)!=6 or set(boats)!={1,2,3,4,5,6}:return None
+              race_types=['ドリーム戦','準優勝戦','準優進出戦','優勝戦','予選特選','一般特選','一般特賞','選抜戦','予選','一般戦','一般','特選']
+              race_type=next((x for x in race_types if x in plain),'')
               return {
                   'schema':'boat-command-program-pack-v1',
                   'venue':'GAMAGORI','venueCode':'07','date':date_s,'race':race,
                   'fetchedAt':datetime.datetime.now(JST).isoformat(),
-                  'deadline':deadline,
+                  'deadline':deadline,'raceType':race_type,
                   'boats':[boats[i] for i in range(1,7)],
                   'programReady':True,
                   'exhibitionIncluded':False,

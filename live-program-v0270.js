@@ -33,13 +33,14 @@ async function syncGamagoriProgramSnapshot({render=true}={}){
       const rec=s.races.find(x=>Number(x.race)===race);if(!rec)continue;
       try{
         const {raw,boats,path}=await loadOne(s.date,race);
-        const profiles=boats.map(b=>({lane:Number(b.lane),cls:String(b.class),class:String(b.class),registration:b.registration||null,name:b.name||'',motor:b.motor??null,boat:b.boat??null}));
+        const profiles=boats.map(b=>({lane:Number(b.lane),cls:String(b.class),class:String(b.class),registration:b.registration||null,name:b.name||'',motor:b.motor??null,boat:b.boat??null,motor2Rate:Number.isFinite(Number(b.motor2Rate))?Number(b.motor2Rate):null,boat2Rate:Number.isFinite(Number(b.boat2Rate))?Number(b.boat2Rate):null}));
         const before=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.programSnapshotReason,rec.preRaceProfiles]);
         rec.preRaceProfiles=profiles;
         rec.programSnapshotStatus='READY';
         rec.programSnapshotAt=raw.fetchedAt||new Date().toISOString();
         rec.programSnapshotPath=path;
         rec.programDeadline=raw.deadline||null;
+        rec.programRaceType=raw.raceType||'';
         rec.programSnapshotReason='';
         const after=JSON.stringify([rec.programSnapshotStatus,rec.programSnapshotAt,rec.programSnapshotReason,rec.preRaceProfiles]);
         if(before!==after)changed=true;

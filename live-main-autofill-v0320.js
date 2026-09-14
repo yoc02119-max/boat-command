@@ -1,0 +1,9 @@
+// Copies the official main candidate into unlocked empty/manual-unowned fields. Never locks or bets.
+(()=>{'use strict';
+function normalized(r){return (r?.picks||[]).map(x=>String(x||'').trim()).filter(Boolean)}
+function owned(r){return r?.mainAutoFill?.owned&&JSON.stringify(normalized(r))===JSON.stringify(r.mainAutoFill.picks||[])&&String(r.rationale||'')===String(r.mainAutoFill.rationale||'')}
+function applyMainCandidateAutoFill(){let s=null;try{s=session()}catch{}if(!s||s.runType!=='LIVE')return;let changed=false;for(const r of s.races||[]){if(r.locked)continue;if(r.liveAutoFill?.owned&&JSON.stringify(normalized(r))===JSON.stringify(r.liveAutoFill.picks||[])){r.picks=[];r.rationale='';delete r.liveAutoFill;changed=true}const x=r.firstSuggestion;if(x?.status!=='CANDIDATE')continue;const current=normalized(r),own=owned(r);if((current.length||String(r.rationale||'').trim())&&!own)continue;const picks=[...(x.picks||[])].slice(0,6),rationale=`${x.rationale} 自動入力・未LOCK。`;r.picks=picks;r.rationale=rationale;r.mainAutoFill={owned:true,picks:picks.filter(Boolean),rationale,filledAt:new Date().toISOString(),strategyVersion:x.strategyVersion,autoLock:false,autoBet:false,resultFetch:false};changed=true}if(changed&&typeof saveStore==='function')saveStore()}
+window.applyMainCandidateAutoFill=applyMainCandidateAutoFill;
+document.addEventListener('input',e=>{const el=e.target;if(!el?.matches?.('.pick[data-r], [data-reason]'))return;const n=Number(el.dataset.r??el.dataset.reason),r=session()?.races?.find(x=>Number(x.race)===n);if(r&&!r.locked&&r.mainAutoFill?.owned){r.mainAutoFill={...r.mainAutoFill,owned:false,status:'MANUAL_OVERRIDE'};saveStore()}},{capture:true});
+const prior=typeof renderAll==='function'?renderAll:null;if(prior)renderAll=function(){applyMainCandidateAutoFill();return prior.apply(this,arguments)};
+})();
