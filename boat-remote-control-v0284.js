@@ -1,100 +1,23 @@
-// BOAT COMMAND REMOTE DISPLAY CONTROL v0.28.4
+// BOAT COMMAND REMOTE DISPLAY CONTROL v0.28.5
 // Safe one-way control plane: ChatGPT/GitHub command -> BOAT COMMAND UI.
 // IMPORTANT: display/navigation only. This module cannot alter picks, HARD LOCK, results, payouts, bankroll or settlement.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-REMOTE-DISPLAY-V0.28.4';
+const VERSION='GAMAGORI-REMOTE-DISPLAY-V0.28.5';
 const ENDPOINT='./boat-command-remote-command.json';
 const LAST_KEY='boatCommand.remoteDisplay.lastCommandId';
 const POLL_MS=5000;
 const ALLOWED=new Set(['OPEN_VIEW','OPEN_RACE','REFRESH_LIVE']);
 let busy=false;
-
-function statusHost(){
-  let el=document.querySelector('#bcRemoteDisplayStatus');
-  if(el)return el;
-  const top=document.querySelector('.top-actions');
-  if(!top)return null;
-  el=document.createElement('div');
-  el.id='bcRemoteDisplayStatus';
-  el.textContent='REMOTE READY';
-  el.style.cssText='font-size:10px;color:#7fa4c4;border:1px solid #24475f;border-radius:999px;padding:5px 8px;white-space:nowrap';
-  top.appendChild(el);
-  return el;
-}
+function statusHost(){let el=document.querySelector('#bcRemoteDisplayStatus');if(el)return el;const top=document.querySelector('.top-actions');if(!top)return null;el=document.createElement('div');el.id='bcRemoteDisplayStatus';el.textContent='REMOTE READY';el.style.cssText='font-size:10px;color:#7fa4c4;border:1px solid #24475f;border-radius:999px;padding:5px 8px;white-space:nowrap';top.appendChild(el);return el}
 function setStatus(text){const el=statusHost();if(el)el.textContent=text}
 function lastId(){try{return localStorage.getItem(LAST_KEY)||''}catch{return ''}}
 function markDone(id){try{localStorage.setItem(LAST_KEY,String(id||''))}catch{}}
-function validCommand(c){
-  if(!c||c.schema!=='boat-command-remote-command-v1')return false;
-  if(!c.id||!ALLOWED.has(String(c.action||'')))return false;
-  if(c.venue&&c.venue!=='蒲郡'&&c.venue!=='GAMAGORI')return false;
-  if(c.expiresAt&&Date.now()>Date.parse(c.expiresAt))return false;
-  return true;
-}
-function openView(view){
-  const name=['home','predict','results','analytics','assistant','data'].includes(view)?view:'predict';
-  const btn=document.querySelector(`.nav[data-view="${name}"]`);
-  if(btn){btn.click();return true}
-  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===name));
-  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===name));
-  try{if(typeof renderAll==='function')renderAll()}catch{}
-  return !!document.getElementById(name);
-}
-function flashRace(card,mode){
-  if(!card)return;
-  const old=card.querySelector('.bc-remote-open-badge');if(old)old.remove();
-  const badge=document.createElement('div');badge.className='bc-remote-open-badge';
-  badge.textContent=`REMOTE · ${mode||'OPEN'}`;
-  badge.style.cssText='position:absolute;right:12px;top:10px;z-index:5;font-size:10px;font-weight:900;letter-spacing:.06em;border:1px solid #1ea2e3;background:#082a42;color:#dff6ff;border-radius:999px;padding:5px 8px';
-  card.style.position='relative';card.appendChild(badge);
-  card.style.boxShadow='0 0 0 2px rgba(30,162,227,.65)';
-  setTimeout(()=>{badge.remove();card.style.boxShadow=''},6000);
-}
-async function execute(c){
-  const p=c.payload||{};
-  if(c.action==='OPEN_VIEW'){
-    openView(String(p.view||'predict'));
-    setStatus(`REMOTE · ${String(p.view||'predict').toUpperCase()}`);
-    return true;
-  }
-  if(c.action==='OPEN_RACE'){
-    const race=Math.max(1,Math.min(12,Number(p.race)||1));
-    openView('predict');
-    await new Promise(r=>setTimeout(r,120));
-    const card=document.querySelector(`#predictionList .race-card[data-race="${race}"]`);
-    if(!card)return false;
-    card.scrollIntoView({behavior:'smooth',block:'start'});
-    flashRace(card,String(p.mode||'AUTO_W4'));
-    setStatus(`REMOTE · ${race}R ${String(p.mode||'AUTO_W4')}`);
-    return true;
-  }
-  if(c.action==='REFRESH_LIVE'){
-    const btn=document.querySelector('#bcLatestBtn');
-    if(btn&&!btn.disabled){btn.click();setStatus('REMOTE · LIVE REFRESH');return true}
-    if(typeof window.syncGamagoriProgramSnapshot==='function')await window.syncGamagoriProgramSnapshot({render:true});
-    if(typeof window.sweepVerifiedLiveRelays==='function')await window.sweepVerifiedLiveRelays({render:true,reason:'remote-display-refresh'});
-    try{if(typeof renderAll==='function')renderAll()}catch{}
-    setStatus('REMOTE · LIVE REFRESH');
-    return true;
-  }
-  return false;
-}
-async function poll(){
-  if(busy)return;busy=true;
-  try{
-    const res=await fetch(`${ENDPOINT}?t=${Date.now()}`,{cache:'no-store',credentials:'same-origin'});
-    if(!res.ok)throw new Error(`HTTP_${res.status}`);
-    const c=await res.json();
-    if(!validCommand(c)){setStatus('REMOTE READY');return}
-    if(String(c.id)===lastId())return;
-    const ok=await execute(c);
-    if(ok)markDone(c.id);else setStatus('REMOTE · TARGET WAIT');
-  }catch(e){setStatus('REMOTE · WAIT')}
-  finally{busy=false}
-}
+function validCommand(c){if(!c||c.schema!=='boat-command-remote-command-v1')return false;if(!c.id||!ALLOWED.has(String(c.action||'')))return false;if(c.venue&&c.venue!=='蒲郡'&&c.venue!=='GAMAGORI')return false;if(c.expiresAt&&Date.now()>Date.parse(c.expiresAt))return false;return true}
+function openView(view){const name=['home','predict','results','analytics','assistant','data'].includes(view)?view:'predict';const btn=document.querySelector(`.nav[data-view="${name}"]`);if(btn){btn.click();return true}document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===name));document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===name));try{if(typeof renderAll==='function')renderAll()}catch{}return!!document.getElementById(name)}
+function flashRace(card,mode){if(!card)return;const old=card.querySelector('.bc-remote-open-badge');if(old)old.remove();const badge=document.createElement('div');badge.className='bc-remote-open-badge';badge.textContent=`REMOTE · ${mode||'OPEN'}`;badge.style.cssText='position:absolute;right:12px;top:10px;z-index:5;font-size:10px;font-weight:900;letter-spacing:.06em;border:1px solid #1ea2e3;background:#082a42;color:#dff6ff;border-radius:999px;padding:5px 8px';card.style.position='relative';card.appendChild(badge);card.style.boxShadow='0 0 0 2px rgba(30,162,227,.65)';setTimeout(()=>{badge.remove();card.style.boxShadow=''},6000)}
+async function execute(c){const p=c.payload||{};if(c.action==='OPEN_VIEW'){openView(String(p.view||'predict'));setStatus(`REMOTE · ${String(p.view||'predict').toUpperCase()}`);return true}if(c.action==='OPEN_RACE'){const race=Math.max(1,Math.min(12,Number(p.race)||1));openView('predict');await new Promise(r=>setTimeout(r,120));const card=document.querySelector(`#predictionList .race-card[data-race="${race}"]`);if(!card)return false;card.scrollIntoView({behavior:'smooth',block:'start'});flashRace(card,String(p.mode||'AUTO_W4'));setStatus(`REMOTE · ${race}R ${String(p.mode||'AUTO_W4')}`);return true}if(c.action==='REFRESH_LIVE'){const api=window.BOAT_COMMAND_MANUAL_REFRESH_V0276;if(typeof api?.refresh==='function'){await api.refresh({user:true});setStatus('REMOTE · LIVE REFRESH');return true}const btn=document.querySelector('#bcManualRefreshBtn');if(btn&&!btn.disabled){btn.click();setStatus('REMOTE · LIVE REFRESH');return true}if(typeof window.syncGamagoriProgramSnapshot==='function')await window.syncGamagoriProgramSnapshot({render:true});if(typeof window.sweepVerifiedLiveRelays==='function')await window.sweepVerifiedLiveRelays({render:true,reason:'remote-display-refresh'});try{if(typeof renderAll==='function')renderAll()}catch{}setStatus('REMOTE · LIVE REFRESH');return true}return false}
+async function poll(){if(busy)return;busy=true;try{const res=await fetch(`${ENDPOINT}?t=${Date.now()}`,{cache:'no-store',credentials:'same-origin'});if(!res.ok)throw new Error(`HTTP_${res.status}`);const c=await res.json();if(!validCommand(c)){setStatus('REMOTE READY');return}if(String(c.id)===lastId())return;const ok=await execute(c);if(ok)markDone(c.id);else setStatus('REMOTE · TARGET WAIT')}catch(e){setStatus('REMOTE · WAIT')}finally{busy=false}}
 window.BOAT_COMMAND_REMOTE_DISPLAY=Object.freeze({version:VERSION,poll,displayOnly:true,allowed:[...ALLOWED]});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{statusHost();setTimeout(poll,600);setInterval(poll,POLL_MS)},{once:true});
-else{statusHost();setTimeout(poll,600);setInterval(poll,POLL_MS)}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{statusHost();setTimeout(poll,600);setInterval(poll,POLL_MS)},{once:true});else{statusHost();setTimeout(poll,600);setInterval(poll,POLL_MS)}document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
 })();
