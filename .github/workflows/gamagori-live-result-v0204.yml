@@ -119,12 +119,18 @@ jobs:
                   continue
 
               # No result endpoint request is made until this exact race has a fully
-              # verified PRE-RACE pack. WAIT remains fail-closed.
+              # verified PRE-RACE pack. WAIT remains fail-closed. Invalid/incomplete
+              # PRE-RACE evidence is an expected WAIT condition for that race, not a
+              # workflow-wide failure; do not touch the result endpoint in that case.
               pre_pack=pre_dir/f'race-{race}-pack.json'
               if not pre_pack.exists():
                   print('WAIT_PRE_RACE_PACK',race)
                   continue
-              validate_pre_pack(pre_pack,race)
+              try:
+                  validate_pre_pack(pre_pack,race)
+              except RuntimeError as e:
+                  print('WAIT_PRE_RACE_INVALID',race,str(e))
+                  continue
 
               url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=07&rno={race}'
               try:
