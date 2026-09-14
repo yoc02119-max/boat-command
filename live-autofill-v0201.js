@@ -1,8 +1,7 @@
-// BOAT COMMAND GAMAGORI LIVE AUTO-FILL v0.20.1
-// Auto-fills unlocked LIVE candidate picks/rationale only. Never auto-locks, auto-bets, or fetches results.
-// DOM binding hardening v0.23.6: prediction badges bind by explicit race number, never global card order.
-// Manual-edit hardening v0.23.8: current prediction DOM controls take ownership on input before change/blur persistence.
-const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-LIVE-AUTOFILL-V0.20.1+RACE-DOM-BIND-V0.23.6+MANUAL-EDIT-V0.23.8'};
+// BOAT COMMAND GAMAGORI MAIN PREDICTION AUTO-FILL v0.31.3
+// Auto-fills unlocked LIVE picks/rationale from the formal firstSuggestion only.
+// Never auto-locks, auto-bets, fetches exhibition data, or reads results.
+const BC_LIVE_AUTOFILL_V0201={version:'GAMAGORI-MAIN-AUTOFILL-V0.31.3'};
 
 function bcNormalizedPicks(r){
   return (r?.picks||[]).map(v=>String(v||'').trim()).filter(Boolean);
@@ -27,9 +26,9 @@ function applyLiveCandidateAutoFill(){
   let filled=0,cleared=0,preserved=0,changed=false;
   for(const r of s.races||[]){
     if(r.locked)continue;
-    const x=r.liveSuggestion;
-    if(x?.status!=='CANDIDATE'){
-      if(bcClearOwnedAutoFill(r,x?.reason||r.liveDataReason||'LIVE候補がREADYではない')){cleared++;changed=true;}
+    const x=r.firstSuggestion;
+    if(x?.status!=='CANDIDATE'||x.sessionDate!==s.date){
+      if(bcClearOwnedAutoFill(r,x?.reason||r.programSnapshotReason||'メイン予想がREADYではない')){cleared++;changed=true;}
       continue;
     }
 
@@ -52,8 +51,8 @@ function applyLiveCandidateAutoFill(){
     r.liveAutoFill={
       owned:true,status:'AUTO_FILLED',picks:picks.filter(Boolean),rationale,
       sourceGeneratedAt:x.generatedAt||null,filledAt:new Date().toISOString(),
-      strategyVersion:x.strategyVersion||null,version:BC_LIVE_AUTOFILL_V0201.version,
-      autoLock:false,autoBet:false,resultFetch:false
+      strategyVersion:x.strategyVersion||null,source:'firstSuggestion',version:BC_LIVE_AUTOFILL_V0201.version,
+      autoLock:false,autoBet:false,resultFetch:false,exhibitionUsed:false
     };
     const after=JSON.stringify([r.picks,r.rationale,r.liveAutoFill]);
     if(before!==after){filled++;changed=true;}
@@ -64,23 +63,17 @@ function applyLiveCandidateAutoFill(){
 function renderLiveAutoFillBadges(){
   const s=session();
   if(!s||s.runType!=='LIVE')return;
-  // PRE-RACE only. Never decorate result/settlement cards, and never infer race from DOM position.
   const cards=[...document.querySelectorAll('#predictionList .race-card')];
   cards.forEach(card=>{
     let box=card.querySelector('.live-autofill-v0201');
     if(!box){box=document.createElement('div');box.className='live-autofill-v0201';card.prepend(box);}
     const race=Number((card.querySelector('.race-no')?.textContent||'').replace(/\D/g,''));
-    const r=Number.isInteger(race)&&race>=1&&race<=12
-      ?s.races.find(x=>Number(x.race)===race)
-      :null;
-    if(!r){
-      box.innerHTML='<div class="prediction-gate limited"><b>WAIT｜AUTO FILL停止</b><span>レース番号を安全に特定できないため表示・入力連携を停止</span></div>';
-      return;
-    }
+    const r=Number.isInteger(race)&&race>=1&&race<=12?s.races.find(x=>Number(x.race)===race):null;
+    if(!r){box.innerHTML='<div class="prediction-gate limited"><b>WAIT｜AUTO FILL停止</b><span>レース番号を安全に特定できないため表示・入力連携を停止</span></div>';return;}
     const a=r.liveAutoFill;
     if(r.locked){box.innerHTML='<div class="snapshot-note">LOCK済み · 自動入力は停止</div>';return;}
     if(a?.status==='AUTO_FILLED'&&a.owned){
-      box.innerHTML='<div class="prediction-gate ready"><b>AUTO FILL｜入力済み・未LOCK</b><span>候補を買い目欄へ反映済み。HARD LOCKは手動です。</span></div>';
+      box.innerHTML='<div class="prediction-gate ready"><b>MAIN AUTO FILL｜入力済み・未LOCK</b><span>正式メイン予想を買い目欄へ反映済み。HARD LOCKは手動です。</span></div>';
     }else if(a?.status==='MANUAL_PRESERVED'){
       box.innerHTML='<div class="snapshot-note">MANUAL PRESERVED · 手入力を優先し、自動上書きしません。</div>';
     }else box.innerHTML='';
@@ -93,8 +86,6 @@ function bcManualEditRaceV0238(el){
   return Number.isInteger(race)&&race>=1&&race<=12?race:null;
 }
 
-// Any human edit takes ownership away from auto-fill immediately, before the core change handler persists the value.
-// Support both the current app DOM (.pick[data-r] / [data-reason]) and legacy LIVE DOM selectors.
 document.addEventListener('input',e=>{
   const el=e.target;
   if(!el?.matches?.('.pick[data-r], [data-reason], .pick-input[data-race], .rationale-input[data-race]'))return;
@@ -110,22 +101,10 @@ document.addEventListener('input',e=>{
 
 const _bcRenderAllV0201=renderAll;
 renderAll=function(){
-  if(typeof refreshLiveCandidates==='function')refreshLiveCandidates();
   applyLiveCandidateAutoFill();
   _bcRenderAllV0201();
   renderLiveAutoFillBadges();
 };
-
-const _bcSweepV0201=typeof sweepVerifiedLiveRelays==='function'?sweepVerifiedLiveRelays:null;
-if(_bcSweepV0201){
-  sweepVerifiedLiveRelays=async function(opts={}){
-    const out=await _bcSweepV0201(opts);
-    if(typeof refreshLiveCandidates==='function')refreshLiveCandidates();
-    applyLiveCandidateAutoFill();
-    renderAll();
-    return out;
-  };
-}
 
 const _bcAnswerV0201=answer;
 answer=function(q){
@@ -134,9 +113,9 @@ answer=function(q){
   if(/自動入力|入力済み|オートフィル|AUTOFILL|LOCKした/.test(t)){
     const r=session().races.find(x=>Number(x.race)===race),a=r?.liveAutoFill;
     if(r?.locked)return `${race}RはLOCK済みです。`;
-    if(a?.status==='AUTO_FILLED'&&a.owned)return `${race}Rは候補を買い目欄へ<strong>自動入力済み</strong>です。ただしHARD LOCKはしていません。`;
+    if(a?.status==='AUTO_FILLED'&&a.owned)return `${race}Rは正式メイン予想を買い目欄へ<strong>自動入力済み</strong>です。ただしHARD LOCKはしていません。`;
     if(a?.status==='MANUAL_OVERRIDE'||a?.status==='MANUAL_PRESERVED')return `${race}Rは手入力を優先しています。自動候補では上書きしません。`;
-    return `${race}Rはまだ自動入力していません。READYかつ予想候補が成立した時だけ入力します。`;
+    return `${race}Rはまだ自動入力していません。公式番組とメイン予想がREADYになった時だけ入力します。`;
   }
   return _bcAnswerV0201(q);
 };
