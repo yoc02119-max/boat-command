@@ -1,10 +1,10 @@
-// BOAT COMMAND GAMAGORI official main prediction v0.33.1
+// BOAT COMMAND GAMAGORI official main prediction v0.33.2
 // LIVE picks preserve the frozen v0.29.1 baseline. The 4,071-race model remains SHADOW until promotion passes.
 // Safety/usability: once an unlocked race is inside the final 3-minute lock cutoff, mark it SKIP.
 // READY integrity: missing/invalid deadline or snapshot timestamp must remain WAIT because final HARD LOCK would reject them.
 // Stability: identical unlocked candidates preserve generatedAt so render cycles do not churn storage revisions.
 (()=>{'use strict';
-const VERSION='GAMAGORI-MAIN-PREDICTION-V0.33.1',BASELINE_URL='./gamagori-2026-base-v131.json',SHADOW_URL='./gamagori-main-history-v0320.json',LOCK_MARGIN_MINUTES=3,MAX_FUTURE_SKEW_MINUTES=2;
+const VERSION='GAMAGORI-MAIN-PREDICTION-V0.33.2',BASELINE_URL='./gamagori-2026-base-v131.json',SHADOW_URL='./gamagori-main-history-v0320.json',LOCK_MARGIN_MINUTES=3,MAX_FUTURE_SKEW_MINUTES=2;
 let baselineHistory=[],shadowHistory=[],state='LOADING',pending=null;
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const escMain=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -17,7 +17,8 @@ function cutoffState(s,r,now=new Date()){
  return {closed:margin<LOCK_MARGIN_MINUTES,marginMinutes:margin,deadline:time};
 }
 function snapshotState(r,now=new Date()){
- const at=new Date(r?.programSnapshotAt);if(!Number.isFinite(at.getTime()))return {ok:false,reason:'番組取得時刻未確認'};
+ const raw=String(r?.programSnapshotAt||'').trim();if(!raw)return {ok:false,reason:'番組取得時刻未確認'};
+ const at=new Date(raw);if(!Number.isFinite(at.getTime()))return {ok:false,reason:'番組取得時刻未確認'};
  if((now-at)/60000 < -MAX_FUTURE_SKEW_MINUTES)return {ok:false,reason:'番組取得時刻異常'};
  return {ok:true};
 }
