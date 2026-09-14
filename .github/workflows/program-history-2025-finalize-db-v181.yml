@@ -2,15 +2,16 @@ name: PROGRAM HISTORY 2025 finalize DB v1.8.1
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/program-history-2025-finalize-db-v181.yml'
+  workflow_run:
+    workflows: ["PROGRAM HISTORY 2025 segmented year build v1.5.1"]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   finalize:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     name: finalize 2025 Gamagori DB
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -221,5 +222,5 @@ jobs:
           path: |
             patch/out/gamagori-2025.json
             patch/out/gamagori-2025-final-audit.json
-          retention-days: 7
+          retention-days: 30
           if-no-files-found: error
