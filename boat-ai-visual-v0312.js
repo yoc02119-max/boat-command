@@ -2,9 +2,9 @@
 // Free command-center UI. Reads state and delegates safe operations to existing app controls.
 (()=>{
 'use strict';
-const VERSION='BOAT-COMMAND-VISUAL-AI-CORE-V0.31.2';
-let pulseTimer=null;
-const VIEW_TITLES={assistant:['BOAT COMMAND AI CORE','SYSTEM INTELLIGENCE'],home:['蒲郡コマンドセンター','GAMAGORI ANALYST'],predict:['蒲郡 12R予想','GAMAGORI PREDICTION'],results:['蒲郡 結果・精算','GAMAGORI SETTLEMENT'],analytics:['蒲郡 分析','GAMAGORI ANALYTICS'],data:['BOAT COMMAND DATA','SYSTEM DATA']};
+const VERSION='BOAT-COMMAND-VISUAL-AI-CORE-V0.33.5';
+let pulseTimer=null,lastUser='';
+const VIEW_TITLES={assistant:['BOAT COMMAND AI CORE','SYSTEM INTELLIGENCE'],home:['蒲郡コマンドセンター','GAMAGORI ANALYST'],predict:['蒲郡 12R予想','GAMAGORI PREDICTION'],results:['蒲郡 結果・精算','GAMAGORI SETTLEMENT'],analytics:['蒲郡 分析','GAMAGORI ANALYTICS'],data:['BOAT COMMAND REPLAY','HISTORICAL REPLAY']};
 
 function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
 function stateFromText(value){
@@ -38,9 +38,22 @@ function renderStats(){
 }
 function setTranscript(text){const el=document.querySelector('[data-core-transcript]');if(el&&text)el.textContent=String(text).trim()}
 function latestLine(){
+  if(window.BOAT_COMMAND_AGENT_V0335)return;
   const replies=[...document.querySelectorAll('#chat .bubble.ai')];
   const text=replies.at(-1)?.textContent?.trim();
   if(text){setTranscript(text);setState(stateFromText(document.querySelector('#bcVoiceStatus')?.textContent),text)}
+}
+function agentEvent(event){
+  const d=event?.detail||{};
+  if(d.phase==='heard'){
+    lastUser=d.text||'';setTranscript(`YOU｜${lastUser}`);setState('listening','指示を受け取りました');
+  }else if(d.phase==='thinking'){
+    setState('thinking','BOAT COMMANDの状態と安全権限を確認中');
+  }else if(d.phase==='answered'){
+    setTranscript(`${lastUser?`YOU｜${lastUser}\n`:''}AI｜${d.text||''}`);setState('speaking',d.action?`安全操作 ${d.action} を実行しました`:'回答を生成しました');
+  }else if(d.phase==='error'){
+    setTranscript(`AI｜${d.text||'操作エラー'}`);setState('error','安全な操作を完了できませんでした');
+  }
 }
 function talk(){
   const btn=document.querySelector('#bcVoiceBtn');
@@ -83,7 +96,7 @@ function install(){
   installStyle();
   for(const selector of ['#refreshReport','#reportRefreshStatus']){const legacy=host.querySelector(selector);if(legacy)legacy.hidden=true}
   const core=document.createElement('section');core.id='bcVisualCore';core.className='bc-ai-core';core.dataset.state='idle';core.setAttribute('aria-label','BOAT COMMAND専用AIコア');
-  core.innerHTML=`<div class="bc-core-top"><div class="bc-core-title"><small>BOAT COMMAND · SYSTEM CORE</small><strong>AI CORE</strong></div><div class="bc-core-online"><i></i>COMMAND CORE ONLINE</div></div><div class="bc-core-stage"><div class="bc-orb-wrap" aria-hidden="true"><div class="bc-ring r1"></div><div class="bc-ring r2"></div><div class="bc-ring r3"></div><div class="bc-orbit-dot"></div><div class="bc-orb"></div></div><div class="bc-core-caption"><strong data-core-state>待機中</strong><span data-core-line>強い会話はChatGPT AI、端末内確認は簡易音声を使用します</span></div></div><div class="bc-core-stats"><div class="bc-core-stat"><span>蒲郡 メイン予想</span><b data-core-stat="first">0/12</b></div><div class="bc-core-stat"><span>過去DB</span><b data-core-stat="history">同期中</b></div><div class="bc-core-stat"><span>HARD LOCK</span><b data-core-stat="locked">0/12</b></div><div class="bc-core-stat"><span>精算</span><b data-core-stat="settled">0/12</b></div></div><div class="bc-core-actions"><button type="button" data-core-action="connect">🎙 ChatGPT AIと話す</button><button type="button" data-core-action="talk">簡易音声</button><button type="button" data-core-action="refresh">最新同期</button></div><div class="bc-core-transcript"><span>AI RESPONSE · 文字起こし</span><p data-core-transcript aria-live="polite">簡易音声の返答はここに表示します。ChatGPTの会話記録は接続先に残ります。</p></div><div class="bc-core-control"><span>APP CONTROL</span><div class="bc-core-nav"><button type="button" data-core-view="home">蒲郡</button><button type="button" data-core-view="predict">12R予想</button><button type="button" data-core-view="results">精算</button><button type="button" data-core-view="analytics">分析</button><button type="button" data-core-view="data">DATA</button></div></div>`;
+  core.innerHTML=`<div class="bc-core-top"><div class="bc-core-title"><small>BOAT COMMAND · PERSONAL AGENT</small><strong>AI CORE</strong></div><div class="bc-core-online"><i></i>SAFE AGENT ONLINE</div></div><div class="bc-core-stage"><div class="bc-orb-wrap" aria-hidden="true"><div class="bc-ring r1"></div><div class="bc-ring r2"></div><div class="bc-ring r3"></div><div class="bc-orbit-dot"></div><div class="bc-orb"></div></div><div class="bc-core-caption"><strong data-core-state>待機中</strong><span data-core-line>話すだけで状態確認・画面操作・開発依頼を振り分けます</span></div></div><div class="bc-core-stats"><div class="bc-core-stat"><span>蒲郡 メイン予想</span><b data-core-stat="first">0/12</b></div><div class="bc-core-stat"><span>過去DB</span><b data-core-stat="history">同期中</b></div><div class="bc-core-stat"><span>HARD LOCK</span><b data-core-stat="locked">0/12</b></div><div class="bc-core-stat"><span>精算</span><b data-core-stat="settled">0/12</b></div></div><div class="bc-core-actions"><button type="button" data-core-action="talk">🎙 AIコアと話す</button><button type="button" data-core-action="connect">ChatGPT / Codex</button><button type="button" data-core-action="refresh">最新同期</button></div><div class="bc-core-transcript"><span>VOICE / AI TRANSCRIPT</span><p data-core-transcript aria-live="polite">ここにあなたの指示とAIコアの返答を表示します。</p></div><div class="bc-core-control"><span>APP CONTROL</span><div class="bc-core-nav"><button type="button" data-core-view="home">蒲郡</button><button type="button" data-core-view="predict">12R予想</button><button type="button" data-core-view="results">精算</button><button type="button" data-core-view="analytics">分析</button><button type="button" data-core-view="data">REPLAY</button></div></div>`;
   const heading=host.querySelector('h2');heading?.insertAdjacentElement('afterend',core);
   core.querySelector('[data-core-action="talk"]').addEventListener('click',talk);
   core.querySelector('[data-core-action="refresh"]').addEventListener('click',refresh);
@@ -94,6 +107,7 @@ function install(){
   renderStats();latestLine();
   const voice=document.querySelector('#bcVoiceStatus');if(voice)new MutationObserver(()=>setState(stateFromText(voice.textContent),voice.textContent)).observe(voice,{childList:true,subtree:true,characterData:true});
   const chat=document.querySelector('#chat');if(chat)new MutationObserver(latestLine).observe(chat,{childList:true,subtree:true});
+  window.addEventListener('boat-command-agent-event',agentEvent);
   pulseTimer=setInterval(renderStats,5000);
 }
 window.BOAT_COMMAND_VISUAL_AI_CORE=Object.freeze({version:VERSION,free:true,commandCenter:true,transcript:true,protectedMutations:true,setState,setTranscript,renderStats,openView});
