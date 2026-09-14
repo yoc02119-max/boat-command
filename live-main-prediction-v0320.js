@@ -6,7 +6,7 @@
 const VERSION='GAMAGORI-MAIN-PREDICTION-V0.32.8',BASELINE_URL='./gamagori-2026-base-v131.json',SHADOW_URL='./gamagori-main-history-v0320.json',LOCK_MARGIN_MINUTES=3;
 let baselineHistory=[],shadowHistory=[],state='LOADING',pending=null;
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-const escMain=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const escMain=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function liveSession(){let s=null;try{s=session()}catch{}return s?.runType==='LIVE'&&s.venue==='蒲郡'&&String(s.date)===todayJst()?s:null}
 function program(r){if(r?.programSnapshotStatus!=='READY')return null;const profiles=Array.isArray(r.preRaceProfiles)?[...r.preRaceProfiles].sort((a,b)=>Number(a.lane)-Number(b.lane)):[];if(profiles.length!==6||profiles.some((x,i)=>Number(x.lane)!==i+1))return null;const classes=profiles.map(x=>String(x.cls||x.class||''));if(classes.some(x=>!['A1','A2','B1','B2'].includes(x)))return null;return{classes,profiles,race:Number(r.race),raceType:r.programRaceType||'',type:classes.join('-'),fingerprint:profiles.map(x=>[x.lane,x.registration,x.cls||x.class,x.motor,x.boat].join(':')).join('|')}}
 function cutoffState(s,r,now=new Date()){
