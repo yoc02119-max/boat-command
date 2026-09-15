@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const core=fs.readFileSync('boat-jarvis-core-v0336.js','utf8');
+const runtime=fs.readFileSync('boat-jarvis-runtime-v0336.js','utf8');
+const controller=fs.readFileSync('boat-jarvis-app-controller-v0336.js','utf8');
+const bridge=fs.readFileSync('boat-jarvis-development-bridge-v0336.js','utf8');
+const requiredCore=["return'DEVELOPMENT'","return'APP'","return'CONVERSATION'","PREDICTION_WRITE","HARD_LOCK_WRITE","RESULT_WRITE","PAYOUT_WRITE","BANKROLL_WRITE"];
+for(const token of requiredCore)if(!core.includes(token))throw new Error(`CORE_CONTRACT_MISSING:${token}`);
+if(!runtime.includes("if(plan.type==='APP')")||!runtime.includes("else if(plan.type==='DEVELOPMENT')"))throw new Error('RUNTIME_SINGLE_DISPATCH_MISSING');
+if(runtime.includes('core.run(')||runtime.includes('core.say('))throw new Error('DUPLICATE_EXECUTION_PATH_PRESENT');
+for(const action of ['OPEN_VIEW','OPEN_RACE','REFRESH_LIVE'])if(!controller.includes(action))throw new Error(`APP_ACTION_MISSING:${action}`);
+for(const forbidden of ['PREDICTION_WRITE','HARD_LOCK_WRITE','RESULT_WRITE','PAYOUT_WRITE','BANKROLL_WRITE'])if(!controller.includes(forbidden))throw new Error(`APP_GUARD_MISSING:${forbidden}`);
+for(const guard of ['noResultLeakToPreRace:true','noDirectLivePredictionOverwrite:true','noHardLockRewrite:true','noResultRewrite:true','noPayoutRewrite:true','noBankrollRewrite:true','runTestsBeforePromotion:true'])if(!bridge.includes(guard))throw new Error(`DEV_GUARD_MISSING:${guard}`);
+console.log('JARVIS_V0336_INTENT_CONTRACT_OK');
