@@ -1,0 +1,28 @@
+name: JARVIS v0.33.6 smoke
+
+on:
+  push:
+    branches: [jarvis-completion-v0336]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in boat-command-agent-v0335.js boat-jarvis-conversation-v0336.js boat-jarvis-core-v0336.js boat-jarvis-app-controller-v0336.js boat-jarvis-development-bridge-v0336.js boat-jarvis-executor-contract-v0336.js boat-jarvis-runtime-v0336.js boat-jarvis-ui-v0336.js; do
+            node --check "$f"
+          done
+      - name: JARVIS static smoke
+        run: node tests/jarvis-v0336-static-smoke.mjs
