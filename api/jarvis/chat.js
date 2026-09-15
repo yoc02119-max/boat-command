@@ -1,23 +1,27 @@
 // Vercel serverless endpoint for BOAT COMMAND JARVIS.
-// OPENAI_API_KEY must exist only in server environment variables.
-const SYSTEM=`You are JARVIS, the high-quality conversational core inside BOAT COMMAND. Speak natural, context-aware Japanese unless the user uses another language. Behave like a capable ongoing assistant, not a command parser: understand short follow-ups such as「続けて」「それで」「違う」「さっきのやつ」from conversation context, explain reasoning when useful, and do not repeat canned status text. Use supplied BOAT COMMAND state as live context. Distinguish discussion from execution: never claim an app action, GitHub change, commit, deployment, prediction update, result update, payout update, or bankroll update happened unless runtime/tool evidence explicitly reports it. Never use same-day result or payout information to influence PRE-RACE predictions. Never rewrite HARD LOCK predictions. Never mutate results, payouts, or bankroll. If a protected action is requested, explain the protected boundary while still helping with the non-mutating part of the request. Keep routine answers concise but allow detail when the user asks or the task needs it.`;
+// OPENAI_API_KEY and GitHub token remain server-side only.
+const SYSTEM=`You are JARVIS, the high-quality conversational core inside BOAT COMMAND. Speak natural, context-aware Japanese unless the user uses another language. Behave like a capable ongoing assistant, not a command parser. Understand short follow-ups such as「続けて」「それで」「違う」「さっきのやつ」from conversation context. You have safe tools for reading GitHub status, navigating BOAT COMMAND, opening a race, refreshing LIVE data, and queuing a development request. Use a tool only when the user actually wants an action or fresh tool-backed information; otherwise just converse. Never claim an action happened until tool output confirms it. Never use same-day result or payout information to influence PRE-RACE predictions. Never rewrite HARD LOCK predictions. Never mutate results, payouts, or bankroll. Development requests may be queued, but protected LIVE data must stay untouched. Keep routine answers concise but allow detail when useful.`;
+const TOOLS=[
+ {type:'function',name:'github_status',description:'Read the current BOAT COMMAND GitHub main branch status without changing code.',parameters:{type:'object',properties:{},additionalProperties:false},strict:true},
+ {type:'function',name:'open_view',description:'Navigate inside BOAT COMMAND to an allowed view.',parameters:{type:'object',properties:{view:{type:'string',enum:['HOME','LIVE','REPLAY','SETTINGS']}},required:['view'],additionalProperties:false},strict:true},
+ {type:'function',name:'open_race',description:'Open a specific race from 1R through 12R.',parameters:{type:'object',properties:{race:{type:'integer',minimum:1,maximum:12}},required:['race'],additionalProperties:false},strict:true},
+ {type:'function',name:'refresh_live',description:'Refresh current LIVE program/prediction source data without modifying protected locked predictions.',parameters:{type:'object',properties:{},additionalProperties:false},strict:true},
+ {type:'function',name:'queue_development',description:'Queue a BOAT COMMAND development request for the development bridge. This does not itself claim a code change or deployment.',parameters:{type:'object',properties:{request:{type:'string'}},required:['request'],additionalProperties:false},strict:true}
+];
 function textFromResponse(data){if(typeof data?.output_text==='string')return data.output_text.trim();const out=Array.isArray(data?.output)?data.output:[];return out.flatMap(x=>Array.isArray(x?.content)?x.content:[]).map(x=>x?.text||'').join('').trim();}
+function toolCalls(data){return (Array.isArray(data?.output)?data.output:[]).filter(x=>x?.type==='function_call').map(x=>{let args={};try{args=JSON.parse(x.arguments||'{}')}catch{}return {call_id:x.call_id||x.id||'',name:x.name||'',arguments:args};});}
 export default async function handler(req,res){
-  if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
-  if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:'JARVIS_LLM_NOT_CONFIGURED'});
-  const message=String(req.body?.message||'').trim().slice(0,8000);if(!message)return res.status(400).json({error:'EMPTY_MESSAGE'});
-  const state=req.body?.state??req.body?.context??null;
-  const history=Array.isArray(req.body?.history)?req.body.history.slice(-30):[];
-  const previousResponseId=String(req.body?.previous_response_id||'').trim();
-  const input=previousResponseId
-    ? [{role:'user',content:`Current BOAT COMMAND state:\n${JSON.stringify(state).slice(0,12000)}\n\nUser:\n${message}`}]
-    : [...history.map(x=>({role:x?.role==='assistant'?'assistant':'user',content:String(x?.text||'').slice(0,5000)})),{role:'user',content:`Current BOAT COMMAND state:\n${JSON.stringify(state).slice(0,12000)}\n\nUser:\n${message}`}];
-  try{
-    const body={model:process.env.JARVIS_OPENAI_MODEL||'gpt-5.6-sol',instructions:SYSTEM,input,max_output_tokens:1400,reasoning:{effort:'medium'},text:{verbosity:'medium'},store:true};
-    if(previousResponseId)body.previous_response_id=previousResponseId;
-    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${process.env.OPENAI_API_KEY}`},body:JSON.stringify(body)});
-    const data=await r.json();if(!r.ok)return res.status(502).json({error:'LLM_UPSTREAM_ERROR',status:r.status,detail:data?.error?.code||null});
-    const reply=textFromResponse(data);if(!reply)return res.status(502).json({error:'EMPTY_LLM_RESPONSE'});
-    return res.status(200).json({reply,message:reply,response_id:data.id||null,model:data.model||process.env.JARVIS_OPENAI_MODEL||'configured'});
-  }catch{return res.status(502).json({error:'LLM_REQUEST_FAILED'});}
+ if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
+ if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:'JARVIS_LLM_NOT_CONFIGURED'});
+ const message=String(req.body?.message||'').trim().slice(0,8000);if(!message)return res.status(400).json({error:'EMPTY_MESSAGE'});
+ const state=req.body?.state??req.body?.context??null;const history=Array.isArray(req.body?.history)?req.body.history.slice(-30):[];const previousResponseId=String(req.body?.previous_response_id||'').trim();
+ const input=previousResponseId?[{role:'user',content:`Current BOAT COMMAND state:\n${JSON.stringify(state).slice(0,12000)}\n\nUser:\n${message}`}]:[...history.map(x=>({role:x?.role==='assistant'?'assistant':'user',content:String(x?.text||'').slice(0,5000)})),{role:'user',content:`Current BOAT COMMAND state:\n${JSON.stringify(state).slice(0,12000)}\n\nUser:\n${message}`}];
+ try{
+  const body={model:process.env.JARVIS_OPENAI_MODEL||'gpt-5.6-sol',instructions:SYSTEM,input,tools:TOOLS,tool_choice:'auto',parallel_tool_calls:false,max_output_tokens:1400,reasoning:{effort:'medium'},text:{verbosity:'medium'},store:true};if(previousResponseId)body.previous_response_id=previousResponseId;
+  const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${process.env.OPENAI_API_KEY}`},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)return res.status(502).json({error:'LLM_UPSTREAM_ERROR',status:r.status,detail:data?.error?.code||null});
+  const calls=toolCalls(data);const reply=textFromResponse(data);
+  if(calls.length)return res.status(200).json({reply:reply||'',message:reply||'',response_id:data.id||null,model:data.model||body.model,tool_calls:calls});
+  if(!reply)return res.status(502).json({error:'EMPTY_LLM_RESPONSE'});
+  return res.status(200).json({reply,message:reply,response_id:data.id||null,model:data.model||body.model,tool_calls:[]});
+ }catch{return res.status(502).json({error:'LLM_REQUEST_FAILED'});}
 }
