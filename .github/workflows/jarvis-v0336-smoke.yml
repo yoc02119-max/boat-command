@@ -3,6 +3,14 @@ name: JARVIS v0.33.6 smoke
 on:
   push:
     branches: [jarvis-completion-v0336]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'boat-command-agent-v0335.js'
+      - 'boat-jarvis-*.js'
+      - 'index.html'
+      - 'tests/jarvis-v0336-static-smoke.mjs'
+      - '.github/workflows/jarvis-v0336-smoke.yml'
   workflow_dispatch:
 
 permissions:
