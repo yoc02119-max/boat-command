@@ -2,7 +2,7 @@
 // Zero-API handoff. Opens ChatGPT immediately from the user's tap, then hands over current state.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-CHATGPT-VOICE-HANDOFF-V0.29.8';
+const VERSION='GAMAGORI-CHATGPT-VOICE-HANDOFF-V0.33.5';
 function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
 function appVersion(){return document.querySelector('.version')?.textContent?.trim()||document.title||'BOAT COMMAND'}
 function bankroll(){return document.querySelector('#bankrollNow')?.textContent?.trim()||'—'}
@@ -31,11 +31,11 @@ function status(msg){const el=document.querySelector('#bcChatGPTVoiceStatus');if
 async function copyText(text){try{await navigator.clipboard.writeText(text);return true}catch{return false}}
 function openChatGPT(){try{return window.open('https://chatgpt.com/','_blank')}catch{return null}}
 async function handoff(){
- const q=document.querySelector('#prompt')?.value?.trim()||'',ctx=buildContext(q);
+ const agent=window.BOAT_COMMAND_AGENT_V0335,q=document.querySelector('#prompt')?.value?.trim()||agent?.pending?.()||'',ctx=buildContext(q);
  if(!ctx){status('LIVE状態を取得できません');return false}
  status('ChatGPTを開いています…');
  const opened=openChatGPT();
- const copied=await copyText(ctx);
+ const copied=await copyText(ctx);if(copied)agent?.clearPending?.();
  status(opened?(copied?'状態をコピー済み。Voice自動開始にはChatGPT設定をON':'ChatGPTを開きました'):(copied?'状態をコピー済み・ChatGPTへ貼り付け':'接続に失敗しました'));
  return!!opened
 }
