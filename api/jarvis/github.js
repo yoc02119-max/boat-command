@@ -1,23 +1,27 @@
 // BOAT COMMAND JARVIS -> GitHub executor bridge.
-// Token stays server-side in Vercel. This endpoint is read-only by default.
+// Token stays server-side in Vercel. Reads are allowed; development dispatch is constrained to a dedicated branch/issue.
 const REPO='yoc02119-max/boat-command';
 const API='https://api.github.com';
-
+const DEV_BRANCH='jarvis-completion-v0336';
+const DEV_ISSUE=2;
 function headers(token){return {'accept':'application/vnd.github+json','authorization':`Bearer ${token}`,'x-github-api-version':'2022-11-28','user-agent':'boat-command-jarvis'};}
-
+async function gh(token,path,options={}){const r=await fetch(`${API}${path}`,{...options,headers:{...headers(token),...(options.headers||{})}});let data=null;try{data=await r.json()}catch{}return {r,data};}
 export default async function handler(req,res){
-  if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
-  const token=process.env.JARVIS_GITHUB_EXECUTOR_TOKEN;
-  if(!token)return res.status(503).json({error:'JARVIS_GITHUB_EXECUTOR_NOT_CONFIGURED'});
-  const action=String(req.body?.action||'status');
-  if(action!=='status')return res.status(403).json({error:'ACTION_NOT_ALLOWED'});
-  try{
-    const [repoR,branchR]=await Promise.all([
-      fetch(`${API}/repos/${REPO}`,{headers:headers(token)}),
-      fetch(`${API}/repos/${REPO}/branches/main`,{headers:headers(token)})
-    ]);
-    const repo=await repoR.json();const branch=await branchR.json();
-    if(!repoR.ok||!branchR.ok)return res.status(502).json({error:'GITHUB_UPSTREAM_ERROR',repoStatus:repoR.status,branchStatus:branchR.status});
-    return res.status(200).json({ok:true,executor:'GITHUB',repository:REPO,branch:'main',sha:branch?.commit?.sha||null,defaultBranch:repo?.default_branch||null,private:Boolean(repo?.private),checkedAt:new Date().toISOString(),mode:'READ_ONLY_STATUS'});
-  }catch{return res.status(502).json({error:'GITHUB_REQUEST_FAILED'});}
+ if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
+ const token=process.env.JARVIS_GITHUB_EXECUTOR_TOKEN;if(!token)return res.status(503).json({error:'JARVIS_GITHUB_EXECUTOR_NOT_CONFIGURED'});
+ const action=String(req.body?.action||'status');
+ try{
+  if(action==='status'){
+   const [repoX,branchX]=await Promise.all([gh(token,`/repos/${REPO}`),gh(token,`/repos/${REPO}/branches/main`)]);if(!repoX.r.ok||!branchX.r.ok)return res.status(502).json({error:'GITHUB_UPSTREAM_ERROR',repoStatus:repoX.r.status,branchStatus:branchX.r.status});
+   return res.status(200).json({ok:true,executor:'GITHUB',repository:REPO,branch:'main',sha:branchX.data?.commit?.sha||null,defaultBranch:repoX.data?.default_branch||null,private:Boolean(repoX.data?.private),checkedAt:new Date().toISOString(),mode:'READ_ONLY_STATUS'});
+  }
+  if(action==='dispatch_development'){
+   const job=req.body?.job||{};const request=String(job.request||'').trim().slice(0,6000);if(!job.id||!request)return res.status(400).json({error:'INVALID_DEVELOPMENT_JOB'});
+   const forbidden=/(HARD\s*LOCK|払戻|精算|仮想資金|bankroll).*(書き換|変更|削除|解除|増や|減ら)|(当日結果|same.day.result).*(予想|PRE.?RACE)/i;if(forbidden.test(request))return res.status(403).json({error:'PROTECTED_DEVELOPMENT_REQUEST'});
+   const body=[`[JARVIS DEVELOPMENT JOB] ${job.id}`,'',request,'','Guardrails:','- No same-day result/payout leak into PRE-RACE','- No direct LIVE prediction overwrite','- No HARD LOCK rewrite','- No result/payout/bankroll rewrite',`- Target branch: ${DEV_BRANCH}`,'- Never auto-promote to main','','Return status, commit SHA, tests, and summary to JARVIS.'].join('\n');
+   const x=await gh(token,`/repos/${REPO}/issues/${DEV_ISSUE}/comments`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({body})});if(!x.r.ok)return res.status(502).json({error:'GITHUB_EXECUTOR_DISPATCH_FAILED',status:x.r.status});
+   return res.status(202).json({ok:true,status:'QUEUED',jobId:job.id,repository:REPO,branch:DEV_BRANCH,issue:DEV_ISSUE,commentId:x.data?.id||null,commentUrl:x.data?.html_url||null,dispatchedAt:new Date().toISOString(),promotion:'NEVER_AUTO_MAIN'});
+  }
+  return res.status(403).json({error:'ACTION_NOT_ALLOWED'});
+ }catch{return res.status(502).json({error:'GITHUB_REQUEST_FAILED'});}
 }
