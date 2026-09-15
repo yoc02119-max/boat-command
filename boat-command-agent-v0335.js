@@ -18,14 +18,13 @@ function snapshot(){
 function raceOf(st,n){return st.races.find(r=>r.race===Number(n))}
 function pickText(r){if(r?.mainStatus==='CANDIDATE')return r.firstCandidate.join(' / ');if(r?.mainStatus==='SKIP')return`見送り。${r.reason||''}`;return r?.reason||'準備中'}
 function requestedRace(text){const m=String(text).match(/(?:^|\D)(1[0-2]|[1-9])\s*(?:R|レース)/i);return m?Number(m[1]):null}
-function protectedMutation(text){
-  return /(予想|買い目|第一候補).*(変更|書き換|修正|追加|削除)|(HARD\s*LOCK|ロック).*(解除|変更|書き換|して)|(資金|残高).*(変更|入金|出金|増や|減ら)|(結果|払戻|精算).*(入力|変更|削除|確定)/i.test(text);
-}
+function protectedMutation(text){return /(予想|買い目|第一候補).*(変更|書き換|修正|追加|削除)|(HARD\s*LOCK|ロック).*(解除|変更|書き換|して)|(資金|残高).*(変更|入金|出金|増や|減ら)|(結果|払戻|精算).*(入力|変更|削除|確定)/i.test(text);}
 function viewIntent(text){if(/REPLAY|リプレイ|過去レース|データ画面/i.test(text))return'data';if(/分析画面/.test(text))return'analytics';if(/精算画面|結果画面/.test(text))return'results';if(/予想画面/.test(text))return'predict';if(/蒲郡画面|ホーム画面/.test(text))return'home';if(/AI\s*CORE|AIコア画面/i.test(text))return'assistant';return null}
 function plan(question){
   const text=String(question||'').normalize('NFKC').trim(),st=snapshot(),n=requestedRace(text);if(n)activeRace=n;const r=raceOf(st,activeRace);
   if(!text)return{intent:'EMPTY',action:null,text:'話しかけてください。'};
   if(protectedMutation(text))return{intent:'DENY_PROTECTED_MUTATION',action:null,text:'その操作はAIコアから変更できません。予想、HARD LOCK、結果、払戻、精算、仮想資金は保護されています。'};
+  if(/GitHub|ギットハブ/i.test(text)&&/(接続|状態|確認|ブランチ|SHA|コミット)/i.test(text)&&!/(変更|修正|作成|書き換|コミットして)/i.test(text))return{intent:'GITHUB_STATUS',action:'GITHUB_STATUS',payload:{},text:'GitHub接続状態を確認します。'};
   if(/(Codex|GitHub|不具合|バグ|実装|改修|開発).*(直|修正|作|追加|調査|確認|して|お願い)|(直して|実装して|改修して)/i.test(text))return{intent:'DEVELOPMENT_HANDOFF',action:'QUEUE_DEVELOPMENT',payload:{question:text},text:'開発依頼として安全境界を付けて準備しました。「ChatGPT / Codex」を押すと、現在状態と一緒に引き継ぎます。'};
   if(n&&/(開いて|表示して|見せて|移動)/.test(text))return{intent:'OPEN_RACE',action:'OPEN_RACE',payload:{race:n},text:`${n}Rの予想画面を開きます。`};
   const view=viewIntent(text);if(view&&/(開いて|表示して|見せて|移動)/.test(text))return{intent:'OPEN_VIEW',action:'OPEN_VIEW',payload:{view},text:`${view==='data'?'REPLAY':view==='home'?'蒲郡':view==='predict'?'12R予想':view==='results'?'精算':view==='analytics'?'分析':'AIコア'}を開きます。`};
@@ -42,10 +41,13 @@ async function act(command){
   if(command.action==='OPEN_RACE'){if(!openView('predict'))return false;await new Promise(resolve=>setTimeout(resolve,100));const card=document.querySelector(`#predictionList .race-card[data-race="${command.payload.race}"]`);card?.scrollIntoView?.({behavior:'smooth',block:'start'});return!!card}
   if(command.action==='REFRESH_LIVE'){const api=window.BOAT_COMMAND_MANUAL_REFRESH_V0276;if(typeof api?.refresh==='function'){await api.refresh({user:true});return true}return false}
   if(command.action==='QUEUE_DEVELOPMENT'){pendingDev=command.payload.question;return true}
+  if(command.action==='GITHUB_STATUS'){
+    const r=await fetch('/api/jarvis/github',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'status'})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'GITHUB_STATUS_FAILED');command.text=`GitHub接続OK。リポジトリ ${data.repository}、ブランチ ${data.branch}、現在SHA ${String(data.sha||'').slice(0,12)}。取得時刻 ${data.checkedAt}。コード変更はしていません。`;return true;
+  }
   return true;
 }
 async function execute(question){emit('heard',{role:'user',text:String(question||'')});emit('thinking',{intent:'ANALYZING'});const command=plan(question);let ok=true;try{ok=await act(command)}catch{ok=false}const text=ok?command.text:'安全な操作を完了できませんでした。現在状態を確認してください。';emit(ok?'answered':'error',{role:'assistant',text,intent:command.intent,action:command.action||null});return text}
 function pending(){return pendingDev}
 function clearPending(){pendingDev=''}
-window.BOAT_COMMAND_AGENT_V0335=Object.freeze({version:VERSION,plan,execute,snapshot,transcript,pending,clearPending,readOnlyState:true,allowedActions:Object.freeze(['OPEN_VIEW','OPEN_RACE','REFRESH_LIVE','QUEUE_DEVELOPMENT']),predictionMutation:false,hardLockMutation:false,resultMutation:false,payoutMutation:false,bankrollMutation:false,exhibitionFetch:false,resultFetch:false,payoutFetch:false});
+window.BOAT_COMMAND_AGENT_V0335=Object.freeze({version:VERSION,plan,execute,snapshot,transcript,pending,clearPending,readOnlyState:true,allowedActions:Object.freeze(['OPEN_VIEW','OPEN_RACE','REFRESH_LIVE','QUEUE_DEVELOPMENT','GITHUB_STATUS']),predictionMutation:false,hardLockMutation:false,resultMutation:false,payoutMutation:false,bankrollMutation:false,exhibitionFetch:false,resultFetch:false,payoutFetch:false});
 })();
