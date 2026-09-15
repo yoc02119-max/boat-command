@@ -9,7 +9,7 @@ on:
       - 'boat-command-agent-v0335.js'
       - 'boat-jarvis-*.js'
       - 'index.html'
-      - 'tests/jarvis-v0336-static-smoke.mjs'
+      - 'tests/jarvis-v0336-*.mjs'
       - '.github/workflows/jarvis-v0336-smoke.yml'
   workflow_dispatch:
 
@@ -34,3 +34,5 @@ jobs:
           done
       - name: JARVIS static smoke
         run: node tests/jarvis-v0336-static-smoke.mjs
+      - name: JARVIS intent and safety contract
+        run: node tests/jarvis-v0336-intent-contract.mjs
