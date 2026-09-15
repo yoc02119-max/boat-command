@@ -2,7 +2,7 @@
 // iPad/Safari safe speech sequencing + visible local-core status.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-VOICE-AGENT-V0.33.6';
+const VERSION='GAMAGORI-VOICE-AGENT-V0.33.7';
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const canSpeak='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
 let activeUtterance=null,speechPrimed=false,pendingTranscript='';
@@ -10,7 +10,7 @@ function getSession(){try{return typeof window.session==='function'?window.sessi
 function stats(){const s=getSession(),rs=s?.races||[];return{session:s,first:rs.filter(r=>r.firstSuggestion?.status==='CANDIDATE').length,locked:rs.filter(r=>r.locked).length,settled:rs.filter(r=>r.settled).length}}
 function picksFor(race){const r=getSession()?.races?.find(x=>Number(x.race)===Number(race));return r?{main:r.firstSuggestion}:null}
 async function doRefresh(){try{const api=window.BOAT_COMMAND_MANUAL_REFRESH_V0276;if(typeof api?.refresh==='function'){await api.refresh({user:true});return'予想データとアプリ最新版を同期しました。'}if(typeof window.syncGamagoriProgramSnapshot==='function')await window.syncGamagoriProgramSnapshot({render:true});return'公式番組とメイン予想を同期しました。'}catch(e){console.warn('[voice-refresh]',e);return'更新中にエラーが発生しました。'}}
-function fallbackAnswer(q){const t=String(q||'').trim(),a=t.replace(/\s/g,''),st=stats();if(!st.session)return'蒲郡LIVEセッションを確認できません。';const m=a.match(/(\d{1,2})R/),race=m?Number(m[1]):null;if(/今日どう|状況|進捗|予想でき/.test(a))return`メイン予想${st.first}レース、ハードロック${st.locked}レースです。`;if(/メイン予想|第一候補/.test(a)&&race){const x=picksFor(race)?.main;return x?.status==='CANDIDATE'?`${race}レースのメイン予想は、${x.picks.join('、')}です。`:`${race}レースのメイン予想は準備中です。`}if(/第二候補|展示/.test(a))return'展示予想と第二候補は廃止済みです。';if(/資金|残高/.test(a))return`現在の仮想資金は${document.querySelector('#bankrollNow')?.textContent?.trim()||'確認中'}です。`;if(/更新|同期/.test(a))return'__REFRESH__';return'ローカル会話エンジンで回答できない質問です。生成AIとの自由会話は、チャットジーピーティーを開くから利用できます。'}
+function fallbackAnswer(q){const t=String(q||'').trim(),a=t.replace(/\s/g,''),st=stats();if(!st.session)return'蒲郡LIVEセッションを確認できません。';const m=a.match(/(\d{1,2})R/),race=m?Number(m[1]):null;if(/今日どう|状況|進捗|予想でき/.test(a))return`メイン予想${st.first}レース、ハードロック${st.locked}レースです。`;if(/メイン予想|第一候補/.test(a)&&race){const x=picksFor(race)?.main;return x?.status==='CANDIDATE'?`${race}レースのメイン予想は、${x.picks.join('、')}です。`:`${race}レースのメイン予想は準備中です。`}if(/第二候補|展示/.test(a))return'展示予想と第二候補は廃止済みです。';if(/資金|残高/.test(a))return`現在の仮想資金は${document.querySelector('#bankrollNow')?.textContent?.trim()||'確認中'}です。`;if(/更新|同期/.test(a))return'__REFRESH__';return'クラウドAIは接続待ちです。接続後は、このAIコア画面のまま自由会話できます。'}
 function voiceStatus(text,tone='ready'){const el=document.querySelector('#bcVoiceStatus');if(el){el.textContent=text;el.dataset.tone=tone}}
 function primeSpeech(){if(!canSpeak)return false;try{speechSynthesis.resume();if(!speechPrimed){const u=new SpeechSynthesisUtterance('\u200b');u.volume=.01;u.lang='ja-JP';speechSynthesis.speak(u);speechPrimed=true}return true}catch(e){console.warn('[voice-prime]',e);return false}}
 function japaneseVoice(){try{const voices=speechSynthesis.getVoices();return voices.find(v=>/^ja(-|_)/i.test(v.lang))||voices.find(v=>/Japanese|Kyoko|Otoya/i.test(v.name))||null}catch{return null}}

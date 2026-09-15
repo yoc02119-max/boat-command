@@ -2,7 +2,7 @@
 // Uses only the read-only agent snapshot. Protected actions remain local and allow-listed.
 (()=>{
 'use strict';
-const VERSION='BOAT-COMMAND-CLOUD-AI-V0.33.6';
+const VERSION='BOAT-COMMAND-CLOUD-AI-V0.33.7';
 const HISTORY_KEY='boatCommand.cloudAi.history.v0336';
 const TOKEN_KEY='boatCommand.cloudAi.access.v0336';
 function config(){return window.BOAT_COMMAND_AI_RUNTIME_V0336||{}}
@@ -20,7 +20,9 @@ async function cloud(question,accessToken){
 }
 async function respond(question){
   const q=String(question||'').trim(),agent=window.BOAT_COMMAND_AGENT_V0335;if(!q)return'';
-  const command=agent?.plan?.(q);if(!agent||isLocal(command)||!config().endpoint)return agent?.execute?.(q)||'AIコアの準備待ちです。';
+  const command=agent?.plan?.(q);if(!agent)return'AIコアの準備待ちです。';
+  if(command?.action==='QUEUE_DEVELOPMENT'&&typeof window.BOAT_COMMAND_DEVELOPMENT_AGENT_V0337?.submit==='function')return window.BOAT_COMMAND_DEVELOPMENT_AGENT_V0337.submit(q);
+  if(isLocal(command)||!config().endpoint)return agent.execute(q);
   const accessToken=token();if(!accessToken)return agent.execute(q);
   emit('heard',{role:'user',text:q});emit('thinking',{intent:'CLOUD_CONVERSATION'});
   try{const text=await cloud(q,accessToken);append('user',q);append('assistant',text);emit('answered',{role:'assistant',text,intent:'CLOUD_CONVERSATION',action:null});return text}

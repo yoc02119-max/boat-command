@@ -3,8 +3,10 @@
 (()=>{
 'use strict';
 window.BOAT_COMMAND_AI_RUNTIME_V0336=Object.freeze({
-  version:'BOAT-COMMAND-AI-RUNTIME-V0.33.6',
+  version:'BOAT-COMMAND-AI-RUNTIME-V0.33.7',
   endpoint:'',
+  developmentEndpoint:'',
+  developmentStatusEndpoint:'',
   venue:'蒲郡'
 });
 })();

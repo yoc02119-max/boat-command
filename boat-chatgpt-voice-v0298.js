@@ -1,8 +1,8 @@
-// BOAT COMMAND -> CHATGPT VOICE HANDOFF v0.29.8
-// Zero-API handoff. Opens ChatGPT immediately from the user's tap, then hands over current state.
+// BOAT COMMAND embedded AI connection helper v0.33.7
+// Keeps conversation inside BOAT COMMAND. External ChatGPT handoff is intentionally disabled.
 (()=>{
 'use strict';
-const VERSION='GAMAGORI-CHATGPT-VOICE-HANDOFF-V0.33.5';
+const VERSION='GAMAGORI-EMBEDDED-AI-V0.33.7';
 function getSession(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
 function appVersion(){return document.querySelector('.version')?.textContent?.trim()||document.title||'BOAT COMMAND'}
 function bankroll(){return document.querySelector('#bankrollNow')?.textContent?.trim()||'—'}
@@ -29,26 +29,22 @@ function buildContext(question=''){const s=getSession();if(!s)return'';return[
 ].join('\n')}
 function status(msg){const el=document.querySelector('#bcChatGPTVoiceStatus');if(el)el.textContent=msg}
 async function copyText(text){try{await navigator.clipboard.writeText(text);return true}catch{return false}}
-function openChatGPT(){try{return window.open('https://chatgpt.com/','_blank')}catch{return null}}
 async function handoff(){
- const agent=window.BOAT_COMMAND_AGENT_V0335,q=document.querySelector('#prompt')?.value?.trim()||agent?.pending?.()||'',ctx=buildContext(q);
- if(!ctx){status('LIVE状態を取得できません');return false}
- status('ChatGPTを開いています…');
- const opened=openChatGPT();
- const copied=await copyText(ctx);if(copied)agent?.clearPending?.();
- status(opened?(copied?'状態をコピー済み。Voice自動開始にはChatGPT設定をON':'ChatGPTを開きました'):(copied?'状態をコピー済み・ChatGPTへ貼り付け':'接続に失敗しました'));
- return!!opened
+ const cloud=window.BOAT_COMMAND_CLOUD_AI_V0336,prompt=document.querySelector('#prompt');
+ if(prompt){prompt.focus();prompt.scrollIntoView?.({behavior:'smooth',block:'center'})}
+ status(cloud?.configured?.()?'アプリ内AI接続済み':'クラウドAI接続待ち');
+ return!!cloud?.configured?.()
 }
 function install(){
  const card=document.querySelector('.assistant-card'),head=card?.querySelector('.panel-head');
  if(!card||!head||document.querySelector('#bcChatGPTVoiceBtn'))return;
  const old=document.querySelector('.bc-gpt-bridge');if(old)old.remove();
  const wrap=document.createElement('div');wrap.className='bc-gpt-voice';
- wrap.innerHTML='<button id="bcChatGPTVoiceBtn" type="button">🎙 ChatGPTを開く</button><span id="bcChatGPTVoiceStatus">状態をコピーして空の会話を開く</span>';
+ wrap.innerHTML='<button id="bcChatGPTVoiceBtn" type="button">AIコアで話す</button><span id="bcChatGPTVoiceStatus">会話はアプリ内で完結します</span>';
  head.appendChild(wrap);
  const style=document.createElement('style');style.id='bc-gpt-voice-style';style.textContent='.bc-gpt-voice{margin-left:auto;display:flex;align-items:center;gap:8px}.bc-gpt-voice button{border:1px solid #66a0ff;background:#173265;color:#fff;border-radius:10px;padding:8px 11px;font-weight:900}.bc-gpt-voice span{font-size:10px;color:#8fb1ce}@media(max-width:720px){.bc-gpt-voice span{display:none}.bc-gpt-voice button{font-size:11px;padding:7px 9px}}';document.head.appendChild(style);
  wrap.querySelector('#bcChatGPTVoiceBtn').addEventListener('click',handoff)
 }
-window.BOAT_COMMAND_CHATGPT_VOICE=Object.freeze({version:VERSION,buildContext,handoff,zeroApi:true,embedded:false,autoStartsVoice:'requires-chatgpt-start-with-voice-setting'});
+window.BOAT_COMMAND_CHATGPT_VOICE=Object.freeze({version:VERSION,buildContext,handoff,zeroApi:false,embedded:true,opensExternalPage:false});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();

@@ -1,4 +1,4 @@
-name: BOAT COMMAND in-app AI v0.33.6
+name: BOAT COMMAND in-app AI v0.33.7
 
 on:
   push:
@@ -6,11 +6,15 @@ on:
       - 'index.html'
       - 'boat-ai-runtime-config-v0336.js'
       - 'boat-ai-cloud-v0336.js'
+      - 'boat-development-agent-v0337.js'
       - 'boat-voice-agent-v0296.js'
       - 'boat-ai-visual-v0312.js'
       - 'api/boat-agent.js'
+      - 'api/development-request.js'
+      - 'api/development-status.js'
       - 'vercel.json'
       - 'scripts/boat-ai-cloud-boundary-v0336.js'
+      - 'scripts/boat-development-agent-boundary-v0337.js'
       - '.github/workflows/boat-ai-cloud-v0336.yml'
   workflow_dispatch:
 
@@ -30,12 +34,18 @@ jobs:
         run: |
           node --check boat-ai-runtime-config-v0336.js
           node --check boat-ai-cloud-v0336.js
+          node --check boat-development-agent-v0337.js
           node --check boat-voice-agent-v0296.js
           node --check boat-ai-visual-v0312.js
           node --check api/boat-agent.js
+          node --check api/development-request.js
+          node --check api/development-status.js
           node --check scripts/boat-ai-cloud-boundary-v0336.js
+          node --check scripts/boat-development-agent-boundary-v0337.js
       - name: Cloud conversation security boundary
-        run: node scripts/boat-ai-cloud-boundary-v0336.js
+        run: |
+          node scripts/boat-ai-cloud-boundary-v0336.js
+          node scripts/boat-development-agent-boundary-v0337.js
       - name: Existing agent and LIVE freeze
         run: |
           node scripts/boat-command-agent-boundary-v0335.js
@@ -46,11 +56,12 @@ jobs:
           from pathlib import Path
           import re
           h=Path('index.html').read_text(encoding='utf-8')
-          required=['boat-ai-core-v0290.js','boat-command-agent-v0335.js','boat-ai-runtime-config-v0336.js','boat-ai-cloud-v0336.js','boat-voice-agent-v0296.js','boat-ai-visual-v0312.js']
+          required=['boat-ai-core-v0290.js','boat-command-agent-v0335.js','boat-ai-runtime-config-v0336.js','boat-development-agent-v0337.js','boat-ai-cloud-v0336.js','boat-voice-agent-v0296.js','boat-ai-visual-v0312.js']
           positions=[h.index(x) for x in required]
           assert positions==sorted(positions), positions
           assert h.count('boat-ai-cloud-v0336.js')==1
-          assert 'BOAT COMMAND v0.33.6' in h
+          assert h.count('boat-development-agent-v0337.js')==1
+          assert 'BOAT COMMAND v0.33.7' in h
           runtime=Path('boat-ai-runtime-config-v0336.js').read_text(encoding='utf-8')
           assert not re.search(r'(sk-[A-Za-z0-9_-]{10,}|BOAT_COMMAND_ACCESS_TOKEN\s*:\s*["\'][^"\']+)',runtime)
           print('IN_APP_AI_UI_CONTRACT_PASS')

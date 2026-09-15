@@ -26,7 +26,7 @@ function plan(question){
   const text=String(question||'').normalize('NFKC').trim(),st=snapshot(),n=requestedRace(text);if(n)activeRace=n;const r=raceOf(st,activeRace);
   if(!text)return{intent:'EMPTY',action:null,text:'話しかけてください。'};
   if(protectedMutation(text))return{intent:'DENY_PROTECTED_MUTATION',action:null,text:'その操作はAIコアから変更できません。予想、HARD LOCK、結果、払戻、精算、仮想資金は保護されています。'};
-  if(/(Codex|GitHub|不具合|バグ|実装|改修|開発).*(直|修正|作|追加|調査|確認|して|お願い)|(直して|実装して|改修して)/i.test(text))return{intent:'DEVELOPMENT_HANDOFF',action:'QUEUE_DEVELOPMENT',payload:{question:text},text:'開発依頼として安全境界を付けて準備しました。「ChatGPT / Codex」を押すと、現在状態と一緒に引き継ぎます。'};
+  if(/(Codex|GitHub|不具合|バグ|実装|改修|開発).*(直|修正|作|追加|調査|確認|して|お願い)|(直して|実装して|改修して)/i.test(text))return{intent:'DEVELOPMENT_HANDOFF',action:'QUEUE_DEVELOPMENT',payload:{question:text},text:'開発依頼を受け付けます。接続済みならSHADOW開発へ送り、未接続なら接続待ちとして保存します。'};
   if(n&&/(開いて|表示して|見せて|移動)/.test(text))return{intent:'OPEN_RACE',action:'OPEN_RACE',payload:{race:n},text:`${n}Rの予想画面を開きます。`};
   const view=viewIntent(text);if(view&&/(開いて|表示して|見せて|移動)/.test(text))return{intent:'OPEN_VIEW',action:'OPEN_VIEW',payload:{view},text:`${view==='data'?'REPLAY':view==='home'?'蒲郡':view==='predict'?'12R予想':view==='results'?'精算':view==='analytics'?'分析':'AIコア'}を開きます。`};
   if(/更新|同期|最新/.test(text))return{intent:'REFRESH_LIVE',action:'REFRESH_LIVE',payload:{},text:'公式番組とメイン予想を最新同期します。'};
@@ -34,7 +34,7 @@ function plan(question){
   if(/結果|払戻|未来|逆流|安全|ロック/.test(text))return{intent:'SAFETY_STATUS',action:null,text:`結果と払戻は予想生成経路から分離しています。HARD LOCKは${st.locked}R、精算は${st.settled}Rです。AIコアから固定済み予想は変更できません。`};
   if(/資金|残高/.test(text))return{intent:'BANKROLL',action:null,text:`現在の仮想資金は${st.bankroll}です。AIコアは参照だけで、金額は変更しません。`};
   if(/今日|状況|進捗|全部|どう/.test(text))return{intent:'LIVE_STATUS',action:null,text:`蒲郡はREADY ${st.ready}R、WAIT ${st.wait}R、SKIP ${st.skip}R。HARD LOCK ${st.locked}R、精算${st.settled}Rです。`};
-  return{intent:'HANDOFF_SUGGESTION',action:null,text:'現在状態を使った自由会話は「ChatGPT / Codex」から続けられます。画面操作、レース状況、予想理由、資金、安全状態はここで直接聞けます。'};
+  return{intent:'HANDOFF_SUGGESTION',action:null,text:'自由会話もこのAIコア内で続けられます。クラウドAI未接続時は、状態確認と安全な画面操作を端末内で行います。'};
 }
 function openView(view){if(!VIEWS.has(view))return false;const btn=document.querySelector(`.nav[data-view="${view}"]`);if(!btn)return false;btn.click();return true}
 async function act(command){
