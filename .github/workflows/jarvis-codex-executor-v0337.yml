@@ -1,0 +1,108 @@
+name: JARVIS Codex executor v0.33.7
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: jarvis-codex-executor
+  cancel-in-progress: false
+
+jobs:
+  execute-shadow-task:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.number == 2 &&
+      github.event.comment.user.login == 'yoc02119-max' &&
+      startsWith(github.event.comment.body, '[JARVIS DEVELOPMENT JOB] dev-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: jarvis-completion-v0336
+          fetch-depth: 0
+
+      - name: Validate and build task
+        id: task
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = String(context.payload.comment.body || '');
+            const id = body.match(/^\[JARVIS DEVELOPMENT JOB\]\s+(dev-[A-Za-z0-9.-]+)/)?.[1];
+            if (!id || body.length > 8000) core.setFailed('Invalid JARVIS job envelope');
+            const forbidden = /(HARD\s*LOCK|払戻|精算|仮想資金|bankroll).*(書き換|変更|削除|解除|増や|減ら)|(当日結果|same.day.result).*(予想|PRE.?RACE)/i;
+            if (forbidden.test(body)) core.setFailed('Protected mutation request');
+            core.setOutput('job_id', id);
+            core.setOutput('prompt', `You are the BOAT COMMAND Gamagori SHADOW developer.\n\n${body}\n\nMandatory boundaries:\n- Work only in this checked-out dedicated development branch.\n- Do not merge or push to main.\n- Do not edit current LIVE first-candidate prediction logic.\n- Never introduce exhibition, result, payout, finish order, odds, or future data into PRE-RACE.\n- Never rewrite HARD LOCK, result, payout, settlement, or bankroll records.\n- Do not touch LINE or other venues.\n- Preserve the existing UI unless the request explicitly needs a minimal UI change.\n- Inspect before editing, implement the narrow request, and run relevant syntax, boundary, and UI tests.\n- End with a concise Japanese summary and exact tests run.`);
+
+      - name: Run Codex in SHADOW
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt: ${{ steps.task.outputs.prompt }}
+          sandbox: workspace-write
+          safety-strategy: drop-sudo
+          allow-users: yoc02119-max
+          output-file: codex-output.md
+
+      - name: Reject protected LIVE changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          protected='^(app\.js|live-program-v0270\.js|gamagori-main-model-v0320\.js|live-main-autofill-v0320\.js|live-main-prediction-v0320\.js|live-main-lock-guard-v0320\.js|trial-lock-all-v0327\.js|live-lock-snapshot-v0203\.js|live-result-v0204\.js|live-snapshot-hash-guard-v0209\.js|live-session-today-v0263\.js|live-manual-refresh-v0276\.js|trial-readiness-v0272\.js|live-performance-v0323\.js)$'
+          if git diff --name-only | grep -E "$protected"; then
+            echo 'Protected LIVE file changed' >&2
+            exit 1
+          fi
+
+      - name: Run mandatory safety tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/jarvis-v0336-static-smoke.mjs
+          node tests/jarvis-v0336-intent-contract.mjs
+          node tests/jarvis-v0336-runtime-cases.mjs
+          node scripts/gamagori-live-freeze-contract-v0333.js
+
+      - name: Commit SHADOW result
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && test -z "$(git status --short --untracked-files=normal)"; then
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'boat-command-jarvis'
+          git config user.email 'boat-command-jarvis@users.noreply.github.com'
+          git add -A
+          git commit -m "jarvis: ${{ steps.task.outputs.job_id }}"
+          git push origin HEAD:jarvis-completion-v0336
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report completion to JARVIS
+        if: success()
+        uses: actions/github-script@v7
+        env:
+          JOB_ID: ${{ steps.task.outputs.job_id }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
+        with:
+          script: |
+            const summary = String(process.env.FINAL_MESSAGE || 'SHADOW development completed').replace(/\s+/g, ' ').slice(0, 500);
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 2, body: `${process.env.JOB_ID}\nstatus: COMPLETED\ncommit: ${process.env.COMMIT_SHA}\ntests: JARVIS smoke / intent / runtime / LIVE freeze PASS\nsummary: ${summary}`});
+
+      - name: Report failure to JARVIS
+        if: failure() && steps.task.outputs.job_id != ''
+        uses: actions/github-script@v7
+        env:
+          JOB_ID: ${{ steps.task.outputs.job_id }}
+        with:
+          script: |
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 2, body: `${process.env.JOB_ID}\nstatus: FAILED\ntests: GitHub Actions failed\nsummary: SHADOW development stopped before completion. LIVE/main was not promoted.`});

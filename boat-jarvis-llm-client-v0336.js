@@ -1,9 +1,8 @@
-// BOAT COMMAND JARVIS LLM CLIENT v0.33.6
+// BOAT COMMAND JARVIS LLM CLIENT v0.33.7
 // Conversation-first: app state is fetched only when JARVIS asks for it.
 (()=>{
 'use strict';
-const VERSION='BOAT-JARVIS-LLM-CLIENT-V0.33.6';
-const ENDPOINT='/api/jarvis/chat';
+const VERSION='BOAT-JARVIS-LLM-CLIENT-V0.33.7';
 const RESPONSE_STORE='boatCommand.jarvis.previousResponseId.v0336';
 function previous(){try{return sessionStorage.getItem(RESPONSE_STORE)||''}catch{return''}}
 function remember(id){try{if(id)sessionStorage.setItem(RESPONSE_STORE,String(id));}catch{}}
@@ -19,7 +18,7 @@ async function executeTool(call){const name=String(call?.name||'');const a=call?
   if(name==='queue_development'){if(!dev?.enqueue)throw new Error('DEVELOPMENT_BRIDGE_MISSING');const job=dev.enqueue(String(a.request||''));return {ok:Boolean(job?.id),name,job};}
   return {ok:false,error:'UNKNOWN_TOOL',name};
 }
-async function post(body){const res=await fetch(ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify(body)});if(!res.ok){if(res.status===400||res.status===404)clear();throw new Error(`JARVIS_LLM_HTTP_${res.status}`);}return await res.json();}
+async function post(body){const cloud=window.BOAT_JARVIS_CLOUD_V0337;if(!cloud?.configured?.())throw new Error('JARVIS_CLOUD_NOT_CONFIGURED');const res=await cloud.request('/api/jarvis/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!res.ok){if(res.status===400||res.status===404)clear();throw new Error(`JARVIS_LLM_HTTP_${res.status}`);}return await res.json();}
 async function chat(text,context={}){const q=String(text||'').normalize('NFKC').trim();if(!q)return'';const conversation=context?.conversation||context||{};const history=Array.isArray(conversation?.history)?conversation.history:[];
   // Do not push live app state into every conversational turn. The model can call app_status when it needs it.
   const base={message:q,history,capabilities:capabilities()};const prev=previous();if(prev)base.previous_response_id=prev;
@@ -30,5 +29,5 @@ async function chat(text,context={}){const q=String(text||'').normalize('NFKC').
   }
   const message=typeof data?.message==='string'?data.message:typeof data?.reply==='string'?data.reply:'';if(!message)throw new Error('JARVIS_LLM_BAD_RESPONSE');return message;
 }
-window.BOAT_JARVIS_LLM_CLIENT_V0336=Object.freeze({version:VERSION,chat,executeTool,clearConversationState:clear,previousResponseId:previous,capabilities,endpoint:ENDPOINT,clientApiKey:false,responseContinuity:true,toolAware:true,toolExecution:true,conversationFirst:true,onDemandAppState:true});
+window.BOAT_JARVIS_LLM_CLIENT_V0336=Object.freeze({version:VERSION,chat,executeTool,clearConversationState:clear,previousResponseId:previous,capabilities,endpoint:()=>window.BOAT_JARVIS_CLOUD_V0337?.endpoint?.('/api/jarvis/chat')||'',configured:()=>!!window.BOAT_JARVIS_CLOUD_V0337?.configured?.(),clientApiKey:false,responseContinuity:true,toolAware:true,toolExecution:true,conversationFirst:true,onDemandAppState:true});
 })();

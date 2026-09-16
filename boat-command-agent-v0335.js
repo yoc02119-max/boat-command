@@ -42,7 +42,7 @@ async function act(command){
   if(command.action==='REFRESH_LIVE'){const api=window.BOAT_COMMAND_MANUAL_REFRESH_V0276;if(typeof api?.refresh==='function'){await api.refresh({user:true});return true}return false}
   if(command.action==='QUEUE_DEVELOPMENT'){pendingDev=command.payload.question;return true}
   if(command.action==='GITHUB_STATUS'){
-    const r=await fetch('/api/jarvis/github',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'status'})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'GITHUB_STATUS_FAILED');command.text=`GitHub接続OK。リポジトリ ${data.repository}、ブランチ ${data.branch}、現在SHA ${String(data.sha||'').slice(0,12)}。取得時刻 ${data.checkedAt}。コード変更はしていません。`;return true;
+    const cloud=window.BOAT_JARVIS_CLOUD_V0337;if(!cloud?.configured?.())throw new Error('JARVIS_CLOUD_NOT_CONFIGURED');const r=await cloud.request('/api/jarvis/github',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'status'})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'GITHUB_STATUS_FAILED');command.text=`GitHub接続OK。リポジトリ ${data.repository}、ブランチ ${data.branch}、現在SHA ${String(data.sha||'').slice(0,12)}。取得時刻 ${data.checkedAt}。コード変更はしていません。`;return true;
   }
   return true;
 }
