@@ -25,7 +25,7 @@ async function input(text){
     }
   }
   const response=Object.freeze({ok:true,type,message,state:core.snapshot?.()||null});
-  const out=Object.freeze({ok:true,type,response,execution,at:new Date().toISOString()});
+  const out=Object.freeze({ok:true,type,input:q,response,execution,at:new Date().toISOString()});
   try{window.dispatchEvent(new CustomEvent('boat-jarvis-runtime-result',{detail:out}))}catch{}
   return out;
 }

@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in boat-command-agent-v0335.js boat-jarvis-cloud-v0337.js boat-jarvis-llm-client-v0336.js boat-jarvis-conversation-v0336.js boat-jarvis-core-v0336.js boat-jarvis-app-controller-v0336.js boat-jarvis-development-bridge-v0336.js boat-jarvis-executor-contract-v0336.js boat-jarvis-runtime-v0336.js boat-jarvis-ui-v0336.js api/jarvis/chat.js api/jarvis/github.js lib/jarvis-security.js tests/jarvis-v0337-cloud-boundary.mjs; do
+          for f in boat-command-agent-v0335.js boat-voice-agent-v0296.js boat-ai-visual-v0312.js boat-jarvis-cloud-v0337.js boat-jarvis-llm-client-v0336.js boat-jarvis-conversation-v0336.js boat-jarvis-core-v0336.js boat-jarvis-app-controller-v0336.js boat-jarvis-development-bridge-v0336.js boat-jarvis-executor-contract-v0336.js boat-jarvis-runtime-v0336.js boat-jarvis-ui-v0336.js api/jarvis/chat.js api/jarvis/github.js lib/jarvis-security.js tests/jarvis-v0337-cloud-boundary.mjs tests/jarvis-v0338-voice-route.mjs; do
             node --check "$f"
           done
       - name: JARVIS static smoke
@@ -45,5 +45,7 @@ jobs:
         run: node tests/jarvis-v0336-runtime-cases.mjs
       - name: JARVIS cloud security boundary
         run: node tests/jarvis-v0337-cloud-boundary.mjs
+      - name: JARVIS voice route
+        run: node tests/jarvis-v0338-voice-route.mjs
       - name: LIVE prediction freeze
         run: node scripts/gamagori-live-freeze-contract-v0333.js

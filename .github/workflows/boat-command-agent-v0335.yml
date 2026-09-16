@@ -33,8 +33,11 @@ jobs:
           node --check boat-voice-agent-v0296.js
           node --check boat-chatgpt-voice-v0298.js
           node --check scripts/boat-command-agent-boundary-v0335.js
+          node --check tests/jarvis-v0338-voice-route.mjs
       - name: Agent permission boundary
         run: node scripts/boat-command-agent-boundary-v0335.js
+      - name: JARVIS voice route
+        run: node tests/jarvis-v0338-voice-route.mjs
       - name: Current LIVE prediction files untouched
         run: |
           git diff --exit-code HEAD^ -- \
@@ -66,7 +69,7 @@ jobs:
           voice=Path('boat-voice-agent-v0296.js').read_text(encoding='utf-8')
           bridge=Path('boat-chatgpt-voice-v0298.js').read_text(encoding='utf-8')
           visual=Path('boat-ai-visual-v0312.js').read_text(encoding='utf-8')
-          assert 'BOAT_COMMAND_AGENT_V0335' in voice
+          assert "typeof runtime?.input==='function'" in voice and 'runtimeFirst:true' in voice
           assert 'agent?.pending?.()' in bridge and 'agent?.clearPending?.()' in bridge
           assert 'boat-command-agent-event' in visual and 'VOICE / AI TRANSCRIPT' in visual
           assert not __import__('re').search(r'(?:result|payout|exhibition)s?\\.json',agent,__import__('re').I)
