@@ -2,6 +2,17 @@ name: Gamagori Candidate V2.1 SHADOW v0.33.5
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'gamagori-candidate-model-v0334.js'
+      - 'gamagori-candidate-model-v0335.js'
+      - 'gamagori-shadow-pre-v0330.json'
+      - 'gamagori-replay-results-v0333.json'
+      - 'scripts/gamagori-candidate-v21-analysis-v0335.js'
+      - 'scripts/gamagori-candidate-v21-contract-v0335.js'
+      - '.github/workflows/gamagori-candidate-v21-v0335.yml'
   push:
     branches:
       - main
