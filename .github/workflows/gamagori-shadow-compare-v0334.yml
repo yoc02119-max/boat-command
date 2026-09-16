@@ -1,0 +1,49 @@
+name: Gamagori SHADOW compare v0.33.4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gamagori-candidate-model-v0334.js'
+      - 'gamagori-shadow-compare-v0334.js'
+      - 'scripts/gamagori-shadow-compare-v0334.js'
+      - 'gamagori-replay-predictions-v0333.json'
+      - 'gamagori-replay-results-v0333.json'
+      - '.github/workflows/gamagori-shadow-compare-v0334.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax
+        run: |
+          node --check gamagori-candidate-model-v0334.js
+          node --check gamagori-shadow-compare-v0334.js
+          node --check scripts/gamagori-shadow-compare-v0334.js
+      - name: Reproduce V1 vs Candidate V2 report
+        run: node scripts/gamagori-shadow-compare-v0334.js /tmp/gamagori-shadow-compare-v0334.json
+      - name: Contract
+        run: |
+          node - <<'NODE'
+          const r=require('/tmp/gamagori-shadow-compare-v0334.json');
+          if(r.races!==360) throw new Error(`expected 360, got ${r.races}`);
+          if(r.modelB!=='GAMAGORI-CANDIDATE-V0.33.4') throw new Error('candidate version mismatch');
+          if(!String(r.leakageGuard).includes('frozen before result')) throw new Error('leakage guard missing');
+          if(!Number.isFinite(r.v1.hitRate)||!Number.isFinite(r.v2.hitRate)) throw new Error('metrics invalid');
+          console.log('PASS 360-race leakage-safe V1 vs Candidate V2 comparison');
+          console.log(JSON.stringify(r.delta,null,2));
+          NODE
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-shadow-compare-v0334
+          path: /tmp/gamagori-shadow-compare-v0334.json
