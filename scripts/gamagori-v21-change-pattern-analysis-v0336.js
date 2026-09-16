@@ -1,5 +1,6 @@
 // BOAT COMMAND GAMAGORI V2 -> V2.1 changed-race pattern audit v0.33.6
 // Evaluation only. PRE-RACE predictions/features are frozen before results are opened.
+// CI trigger marker: v0336-pattern-audit-1
 'use strict';
 const fs=require('fs');
 const v2=require('../gamagori-candidate-model-v0334.js');
