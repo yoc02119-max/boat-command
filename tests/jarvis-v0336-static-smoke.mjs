@@ -7,5 +7,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(x=>x[1]);const dup=[...new S
 const core=fs.readFileSync('boat-jarvis-core-v0336.js','utf8');for(const token of ['PREDICTION_WRITE','HARD_LOCK_WRITE','RESULT_WRITE','PAYOUT_WRITE','BANKROLL_WRITE'])if(!core.includes(token))throw new Error(`MISSING_GUARD:${token}`);
 const executor=fs.readFileSync('boat-jarvis-executor-contract-v0336.js','utf8');if(!executor.includes("promotion:'NEVER_AUTO_MAIN'"))throw new Error('AUTO_MAIN_GUARD_MISSING');
 const cloud=fs.readFileSync('boat-jarvis-cloud-v0337.js','utf8');if(!cloud.includes('serverSecretsOnly:true')||cloud.includes('sk-'))throw new Error('CLOUD_SECRET_BOUNDARY_MISSING');
+const chatApi=fs.readFileSync('api/jarvis/chat.js','utf8');if(chatApi.includes('api.openai.com')||chatApi.includes('OPENAI_API_KEY')||!chatApi.includes("FREE_MODEL='poolside/laguna-s-2.1-free'")||!chatApi.includes("cost_mode:'FREE_ONLY'"))throw new Error('FREE_ONLY_GATEWAY_BOUNDARY_MISSING');
+if(!core.includes('JARVIS_FREE_AI_LIMIT_REACHED'))throw new Error('FREE_LIMIT_LOCAL_FALLBACK_MISSING');
 const voice=fs.readFileSync('boat-voice-agent-v0296.js','utf8');if(!voice.includes("typeof runtime?.input==='function'")||!voice.includes('runtimeFirst:true'))throw new Error('VOICE_JARVIS_ROUTE_MISSING');
 console.log('JARVIS_V0336_STATIC_SMOKE_OK');

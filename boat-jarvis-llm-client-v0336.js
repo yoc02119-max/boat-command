@@ -18,7 +18,7 @@ async function executeTool(call){const name=String(call?.name||'');const a=call?
   if(name==='queue_development'){if(!dev?.enqueue)throw new Error('DEVELOPMENT_BRIDGE_MISSING');const job=dev.enqueue(String(a.request||''));return {ok:Boolean(job?.id),name,job};}
   return {ok:false,error:'UNKNOWN_TOOL',name};
 }
-async function post(body){const cloud=window.BOAT_JARVIS_CLOUD_V0337;if(!cloud?.configured?.())throw new Error('JARVIS_CLOUD_NOT_CONFIGURED');const res=await cloud.request('/api/jarvis/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!res.ok){if(res.status===400||res.status===404)clear();throw new Error(`JARVIS_LLM_HTTP_${res.status}`);}return await res.json();}
+async function post(body){const cloud=window.BOAT_JARVIS_CLOUD_V0337;if(!cloud?.configured?.())throw new Error('JARVIS_CLOUD_NOT_CONFIGURED');const res=await cloud.request('/api/jarvis/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!res.ok){if(res.status===400||res.status===404)clear();let data={};try{data=await res.json()}catch{}if(res.status===429&&data?.error==='FREE_AI_LIMIT_REACHED')throw new Error('JARVIS_FREE_AI_LIMIT_REACHED');throw new Error(`JARVIS_LLM_HTTP_${res.status}`);}return await res.json();}
 async function chat(text,context={}){const q=String(text||'').normalize('NFKC').trim();if(!q)return'';const conversation=context?.conversation||context||{};const history=Array.isArray(conversation?.history)?conversation.history:[];
   // Do not push live app state into every conversational turn. The model can call app_status when it needs it.
   const base={message:q,history,capabilities:capabilities()};const prev=previous();if(prev)base.previous_response_id=prev;

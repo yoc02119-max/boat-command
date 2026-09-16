@@ -21,6 +21,8 @@ window.BOAT_JARVIS_LLM_CLIENT_V0336={chat:async q=>{bridge.enqueue(q);return'開
 out=await window.BOAT_JARVIS_V0336.input('この表示を追加して');
 const afterJobs=JSON.parse(localStorage.getItem('boatCommand.jarvis.development.jobs.v0336')||'[]').length;
 if(out.type!=='DEVELOPMENT'||afterJobs-beforeJobs!==1)throw new Error(`DEV_DUPLICATE_DISPATCH:${afterJobs-beforeJobs}`);
+window.BOAT_JARVIS_LLM_CLIENT_V0336={configured:()=>true,chat:async()=>{throw new Error('JARVIS_FREE_AI_LIMIT_REACHED')}};
+agentCalls=[];out=await window.BOAT_JARVIS_V0336.input('無料枠が終わった後も状態を教えて');if(out.type!=='CONVERSATION'||agentCalls.length!==1||!String(out.response?.message).startsWith('agent:'))throw new Error('FREE_LIMIT_LOCAL_FALLBACK_FAILED');
 delete window.BOAT_JARVIS_LLM_CLIENT_V0336;
 agentCalls=[];out=await window.BOAT_JARVIS_V0336.input('今日の状態を説明して');if(out.type!=='CONVERSATION'||agentCalls.length!==1)throw new Error(`CHAT_EXEC_COUNT:${agentCalls.length}`);
 for(const action of ['PREDICTION_WRITE','HARD_LOCK_WRITE','RESULT_WRITE','PAYOUT_WRITE','BANKROLL_WRITE'])if(core.can(action)!==false)throw new Error(`PROTECTED_ACTION_ALLOWED:${action}`);
