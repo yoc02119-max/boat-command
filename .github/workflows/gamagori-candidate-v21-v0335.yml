@@ -1,0 +1,44 @@
+name: Gamagori Candidate V2.1 SHADOW v0.33.5
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - shadow/gamagori-candidate-v21-v0335
+    paths:
+      - 'gamagori-candidate-model-v0334.js'
+      - 'gamagori-candidate-model-v0335.js'
+      - 'gamagori-shadow-pre-v0330.json'
+      - 'gamagori-replay-results-v0333.json'
+      - 'scripts/gamagori-candidate-v21-analysis-v0335.js'
+      - 'scripts/gamagori-candidate-v21-contract-v0335.js'
+      - '.github/workflows/gamagori-candidate-v21-v0335.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  strict-shadow-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax checks
+        run: |
+          node --check gamagori-candidate-model-v0335.js
+          node --check scripts/gamagori-candidate-v21-analysis-v0335.js
+          node --check scripts/gamagori-candidate-v21-contract-v0335.js
+      - name: Freeze predictions then score 360 races
+        run: node scripts/gamagori-candidate-v21-analysis-v0335.js gamagori-candidate-v21-analysis-v0335.json
+      - name: Enforce leakage, split, probability, and metric contracts
+        run: node scripts/gamagori-candidate-v21-contract-v0335.js gamagori-candidate-v21-analysis-v0335.json
+      - name: Upload SHADOW analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-candidate-v21-analysis-v0335
+          path: gamagori-candidate-v21-analysis-v0335.json
+          retention-days: 30
