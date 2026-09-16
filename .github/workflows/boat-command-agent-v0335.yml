@@ -67,7 +67,8 @@ jobs:
           bridge=Path('boat-chatgpt-voice-v0298.js').read_text(encoding='utf-8')
           visual=Path('boat-ai-visual-v0312.js').read_text(encoding='utf-8')
           assert 'BOAT_COMMAND_AGENT_V0335' in voice
-          assert 'agent?.pending?.()' in bridge and 'agent?.clearPending?.()' in bridge
+          assert 'embedded:true' in bridge and 'opensExternalPage:false' in bridge
+          assert 'window.open(' not in bridge
           assert 'boat-command-agent-event' in visual and 'VOICE / AI TRANSCRIPT' in visual
           assert not __import__('re').search(r'(?:result|payout|exhibition)s?\\.json',agent,__import__('re').I)
           print('AGENT_UI_CONTRACT_PASS')
