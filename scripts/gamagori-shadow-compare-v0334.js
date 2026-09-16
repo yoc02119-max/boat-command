@@ -1,5 +1,6 @@
 // BOAT COMMAND GAMAGORI SHADOW COMPARE v0.33.4 (Node reproducible report)
 // Evaluation only. Uses the exact strict 360-race shadow target; predictions freeze before outcomes are read.
+// CI rerun marker: strict-360-v2-20260916
 'use strict';
 const fs=require('fs');
 const cand=require('../gamagori-candidate-model-v0334.js');
