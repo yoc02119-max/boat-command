@@ -1,0 +1,24 @@
+// BOAT COMMAND GAMAGORI V2 -> V2.1 changed-race pattern audit v0.33.6
+// Evaluation only. PRE-RACE predictions/features are frozen before results are opened.
+'use strict';
+const fs=require('fs');
+const v2=require('../gamagori-candidate-model-v0334.js');
+const v21=require('../gamagori-candidate-model-v0335.js');
+const PRE='gamagori-shadow-pre-v0330.json';
+const RESULT='gamagori-replay-results-v0333.json';
+const OUT=process.argv[2]||'gamagori-v21-change-pattern-analysis-v0336.json';
+const num=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
+const mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
+const key=x=>`${x.date||x.d}|${x.race||x.r}`;
+function program(x){return {classes:x.boats.map(b=>b.class),profiles:x.boats.map(b=>({racerWinRate:b.nationalWinRate,localWinRate:b.localWinRate,motor2Rate:b.motor2Rate,averageST:b.averageST}))}}
+function preFeatures(x,a,b){const boats=x.boats,nat=boats.map(z=>num(z.nationalWinRate)),local=boats.map(z=>num(z.localWinRate)),motor=boats.map(z=>num(z.motor2Rate)),st=boats.map(z=>num(z.averageST,.18));return {raceNumber:Number(x.race),v2Top4:a.confidence.top4,v2Gap:a.confidence.gap,v21Top4:b.confidence.top4,v21Gap:b.confidence.gap,lane1NationalGap:nat[0]-mean(nat.slice(1)),lane1LocalGap:local[0]-mean(local.slice(1)),lane1MotorGap:motor[0]-mean(motor.slice(1)),lane1STEdge:mean(st.slice(1))-st[0],innerNationalGap:mean(nat.slice(0,3))-mean(nat.slice(3)),innerLocalGap:mean(local.slice(0,3))-mean(local.slice(3)),innerMotorGap:mean(motor.slice(0,3))-mean(motor.slice(3)),innerSTEdge:mean(st.slice(3))-mean(st.slice(0,3))};}
+function bucket(v,cuts){for(let i=0;i<cuts.length;i++)if(v<cuts[i])return `<${cuts[i]}`;return `>=${cuts[cuts.length-1]}`}
+function summarize(rows){let stake=0,ret=0,hits=0;for(const x of rows){stake+=4;const h=x.v21Hit;hits+=Number(h);if(h)ret+=x.odds;}return {races:rows.length,hits,hitRate:rows.length?hits/rows.length:0,roi:stake?ret/stake:0,totalReturn:ret};}
+function group(rows,fn){const m=new Map;for(const x of rows){const k=fn(x);if(!m.has(k))m.set(k,[]);m.get(k).push(x)}return [...m].map(([pattern,rs])=>({pattern,...summarize(rs),gained:rs.filter(x=>x.gained).length,lost:rs.filter(x=>x.lost).length,unchangedMiss:rs.filter(x=>!x.v2Hit&&!x.v21Hit).length})).sort((a,b)=>b.races-a.races)}
+const pre=JSON.parse(fs.readFileSync(PRE,'utf8'));if(pre.outcomeFieldsIncluded!==false||pre.resultOddsIncluded!==false||pre.exhibitionIncluded!==false)throw new Error('PRE_BOUNDARY_INVALID');
+const targets=[...pre.races].sort((a,b)=>String(a.date).localeCompare(String(b.date))||Number(a.race)-Number(b.race));if(targets.length!==360)throw new Error('TARGET_NOT_360');
+const frozen=targets.map((x,i)=>{const pg=program(x),a=v2.predict(pg,{count:4}),b=v21.predict(pg,{count:4});return {id:key(x),split:i<180?'DESIGN':'HOLDOUT',v2:a.fixed.map(z=>z.order),v21:b.fixed.map(z=>z.order),features:preFeatures(x,a,b)};});
+const result=JSON.parse(fs.readFileSync(RESULT,'utf8'));if(result.predictionInputsIncluded!==false)throw new Error('RESULT_BOUNDARY_INVALID');const by=new Map(result.races.map(x=>[key(x),x]));
+const changed=frozen.filter(x=>x.v2.join('|')!==x.v21.join('|')).map(x=>{const y=by.get(x.id);if(!y)throw new Error(`RESULT_MISSING_${x.id}`);const r=String(y.o),v2Hit=x.v2.includes(r),v21Hit=x.v21.includes(r);return {...x,result:r,odds:num(y.x),v2Hit,v21Hit,gained:!v2Hit&&v21Hit,lost:v2Hit&&!v21Hit,added:x.v21.filter(z=>!x.v2.includes(z)),removed:x.v2.filter(z=>!x.v21.includes(z))};});
+const safe=changed.filter(x=>!x.gained&&!x.lost);const report={schema:'boat-command-gamagori-v21-change-pattern-analysis-v0336',status:'SHADOW_ONLY',boundary:'All PRE-RACE V2/V2.1 predictions and features frozen before result read.',changed:summarize(changed),design:summarize(changed.filter(x=>x.split==='DESIGN')),holdout:summarize(changed.filter(x=>x.split==='HOLDOUT')),outcomeChanges:changed.filter(x=>x.gained||x.lost).map(x=>({id:x.id,split:x.split,result:x.result,odds:x.odds,gained:x.gained,lost:x.lost,added:x.added,removed:x.removed,features:x.features})),patterns:{split:group(changed,x=>x.split),v2Top4:group(changed,x=>bucket(x.features.v2Top4,[.30,.35,.40,.45])),v2Gap:group(changed,x=>bucket(x.features.v2Gap,[.005,.01,.02,.04])),lane1NationalGap:group(changed,x=>bucket(x.features.lane1NationalGap,[-1,0,1,2])),innerNationalGap:group(changed,x=>bucket(x.features.innerNationalGap,[-1,0,1])),raceNumber:group(changed,x=>x.features.raceNumber<=4?'R1-4':x.features.raceNumber<=8?'R5-8':'R9-12')},guardrail:{changedRaces:changed.length,outcomeChanged:changed.length-safe.length,note:'Pattern tables are diagnostic only. Do not create a betting gate from HOLDOUT outcomes; any next gate hypothesis must be frozen from DESIGN-only evidence and then evaluated once on HOLDOUT.'}};
+fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
