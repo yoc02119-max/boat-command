@@ -1,0 +1,38 @@
+name: Gamagori V2.1 change pattern audit v0.33.6
+on:
+  push:
+    branches: [shadow/gamagori-candidate-v21-v0335]
+    paths:
+      - 'scripts/gamagori-v21-change-pattern-analysis-v0336.js'
+      - '.github/workflows/gamagori-v21-change-pattern-analysis-v0336.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax
+        run: node --check scripts/gamagori-v21-change-pattern-analysis-v0336.js
+      - name: Analyze changed races
+        run: node scripts/gamagori-v21-change-pattern-analysis-v0336.js /tmp/gamagori-v21-change-pattern-analysis-v0336.json
+      - name: Contract
+        run: |
+          node - <<'NODE'
+          const r=require('/tmp/gamagori-v21-change-pattern-analysis-v0336.json');
+          if(r.status!=='SHADOW_ONLY') throw new Error('NOT_SHADOW');
+          if(r.guardrail.changedRaces!==73) throw new Error(`EXPECTED_73_CHANGED_GOT_${r.guardrail.changedRaces}`);
+          if(r.guardrail.outcomeChanged!==3) throw new Error(`EXPECTED_3_OUTCOME_CHANGED_GOT_${r.guardrail.outcomeChanged}`);
+          if(!String(r.boundary).includes('frozen before result')) throw new Error('LEAKAGE_GUARD_MISSING');
+          console.log('PASS V2.1 changed-race pattern audit');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-v21-change-pattern-analysis-v0336
+          path: /tmp/gamagori-v21-change-pattern-analysis-v0336.json
+          retention-days: 30
