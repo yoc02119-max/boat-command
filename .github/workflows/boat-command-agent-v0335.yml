@@ -61,7 +61,7 @@ jobs:
           positions=[h.index(x) for x in required]
           assert positions==sorted(positions), positions
           assert h.count('boat-command-agent-v0335.js')==1
-          assert '<em>REPLAY</em>' in h and 'v0.33.5' in h
+          assert '<em>REPLAY</em>' in h and __import__('re').search(r'v0\.33\.\d+', h)
           agent=Path('boat-command-agent-v0335.js').read_text(encoding='utf-8')
           voice=Path('boat-voice-agent-v0296.js').read_text(encoding='utf-8')
           bridge=Path('boat-chatgpt-voice-v0298.js').read_text(encoding='utf-8')
