@@ -1,0 +1,75 @@
+{
+  "schema": "boat-command-gamagori-candidate-v2-feature-policy-v1",
+  "version": "0.33.4",
+  "status": "SHADOW_ONLY",
+  "productionModelFrozen": "GAMAGORI-MAIN-MODEL-V0.32.0",
+  "purpose": "Define leakage-safe feature selection before Candidate V2 implementation.",
+  "hardBoundaries": {
+    "strictWalkForward": true,
+    "sameDayOutcomeExcluded": true,
+    "targetAndFutureOutcomeExcluded": true,
+    "firstCandidateUsesExhibition": false,
+    "productionPredictionMutation": false,
+    "hardLockMutation": false,
+    "promotionRequiresHoldoutImprovement": true
+  },
+  "featureDecision": {
+    "KEEP_PRIMARY": [
+      "top1Probability",
+      "top4Coverage",
+      "classInnerOuterGap"
+    ],
+    "KEEP_AS_INPUT_NOT_GATE": [
+      "lane1NationalWinRate",
+      "lane1LocalWinRate",
+      "lane1Motor2Rate",
+      "fieldNationalStrength",
+      "fieldLocalStrength",
+      "fieldMotor2Strength",
+      "avgST",
+      "stSpread"
+    ],
+    "DOWNWEIGHT": [
+      "nearestProgramDistance"
+    ],
+    "DEFER": [
+      "exhibitionTime",
+      "exhibitionST",
+      "weather",
+      "wind",
+      "wave"
+    ]
+  },
+  "candidateV2Plan": [
+    "Recalibrate lane-1 prior instead of removing lane prior.",
+    "Represent racer strength as relative field and inner-vs-outer gaps.",
+    "Represent ST as relative lane/field differences rather than raw value only.",
+    "Represent local performance and motor strength as relative gaps.",
+    "Build confidence from probability concentration plus structural strength, not nearest-distance alone.",
+    "Run old-vs-candidate strict walk-forward on identical historical targets.",
+    "Promote only if holdout improves without unacceptable ROI/drawdown deterioration."
+  ],
+  "evaluation": {
+    "primary": [
+      "fourPointHitRate",
+      "highConfidenceHitRate",
+      "betRaceCoverage"
+    ],
+    "secondary": [
+      "roi",
+      "maxDrawdown",
+      "lane1PickShare",
+      "calibration"
+    ],
+    "mustReportSeparately": [
+      "design",
+      "holdout",
+      "all"
+    ]
+  },
+  "notes": [
+    "Do not tune thresholds on holdout outcomes.",
+    "Do not use same-day results to alter PRE-RACE predictions.",
+    "Exhibition remains reserved for the separate second-candidate path."
+  ]
+}
