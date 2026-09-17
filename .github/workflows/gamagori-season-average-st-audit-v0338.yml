@@ -1,0 +1,39 @@
+name: Gamagori season averageST source audit v0.33.8
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-season-average-st-audit-v0338.py'
+      - '.github/workflows/gamagori-season-average-st-audit-v0338.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen ST reconstruction contract
+        run: python3 scripts/gamagori-season-average-st-contract-v0338.py
+      - name: Record official source policy
+        run: |
+          mkdir -p out
+          python3 scripts/gamagori-season-average-st-audit-v0338.py | tee out/gamagori-season-average-st-audit-v0338.json
+      - name: Contract
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('out/gamagori-season-average-st-audit-v0338.json'))
+          assert x['resultArchiveOpened'] is False
+          assert x['joinKey']=='registration'
+          assert x['field']=='averageST'
+          assert x['futureLeakageForbidden'] is True
+          assert x['missingImputationForbidden'] is True
+          print('PASS averageST PRE reconstruction policy')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gamagori-season-average-st-audit-v0338
+          path: out/gamagori-season-average-st-audit-v0338.json
+          retention-days: 30
