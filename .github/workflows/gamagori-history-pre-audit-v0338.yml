@@ -10,7 +10,7 @@ on:
       date:
         description: Official B archive date YYYYMMDD
         required: false
-        default: '20250917'
+        default: '20251215'
 permissions:
   contents: read
 jobs:
@@ -23,7 +23,7 @@ jobs:
       - name: Audit official B PRE layout only
         run: |
           mkdir -p out
-          DATE="${{ github.event.inputs.date || '20250917' }}"
+          DATE="${{ github.event.inputs.date || '20251215' }}"
           python3 scripts/gamagori-history-pre-audit-v0338.py --date "$DATE" | tee out/gamagori-history-pre-audit-v0338.json
       - name: Contract - result archive must stay unopened
         run: |
@@ -36,6 +36,7 @@ jobs:
           print('PASS PRE-only historical source audit')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: gamagori-history-pre-audit-v0338
           path: out/gamagori-history-pre-audit-v0338.json
