@@ -1,0 +1,1370 @@
+{
+  "schema": "boat-command-gamagori-roi-gate-analysis-v0340",
+  "analysisOnly": true,
+  "liveImported": false,
+  "decision": "SHADOW_ONLY",
+  "boundary": "Prediction picks and v0.33.9 candidate ordering are fixed before payout/result evaluation. Gates are not reordered by ROI or TEST. Equal 100-yen stake per frozen pick is used only as a neutral historical comparison.",
+  "sources": {
+    "predictions": "gamagori-replay-predictions-v0333.json",
+    "results": "gamagori-replay-results-v0333.json",
+    "pretestSelection": "gamagori-win-pattern-combo-v0339.json"
+  },
+  "assumptions": {
+    "ticketStakeYen": 100,
+    "payoutOddsField": "x",
+    "returnFormula": "100 yen * x only when the frozen exact order is in the frozen picks",
+    "stakeFormula": "100 yen * frozen pick count"
+  },
+  "baseline": {
+    "train": {
+      "races": 2033,
+      "raceCoverage": 1,
+      "tickets": 8132,
+      "stakeYenAt100PerTicket": 813200,
+      "exactHits": 549,
+      "exactHitRate": 0.27004426955238564,
+      "returnYenAt100PerTicket": 629490,
+      "roi": 0.7740900147565173,
+      "profitYenAt100PerTicket": -183710,
+      "averagePayoutOddsOnHit": 11.466120218579233
+    },
+    "validation": {
+      "races": 1020,
+      "raceCoverage": 1,
+      "tickets": 4080,
+      "stakeYenAt100PerTicket": 408000,
+      "exactHits": 287,
+      "exactHitRate": 0.28137254901960784,
+      "returnYenAt100PerTicket": 340020,
+      "roi": 0.8333823529411762,
+      "profitYenAt100PerTicket": -67980,
+      "averagePayoutOddsOnHit": 11.847386759581878
+    },
+    "test": {
+      "races": 1018,
+      "raceCoverage": 1,
+      "tickets": 4072,
+      "stakeYenAt100PerTicket": 407200,
+      "exactHits": 261,
+      "exactHitRate": 0.25638506876227896,
+      "returnYenAt100PerTicket": 284780,
+      "roi": 0.6993614931237714,
+      "profitYenAt100PerTicket": -122420,
+      "averagePayoutOddsOnHit": 10.911111111111099
+    }
+  },
+  "primaryPretestGate": {
+    "rank": 1,
+    "kind": "pair",
+    "label": "race=7 & aClassCount=3",
+    "parts": [
+      {
+        "name": "race",
+        "value": "7"
+      },
+      {
+        "name": "aClassCount",
+        "value": "3"
+      }
+    ],
+    "train": {
+      "races": 105,
+      "raceCoverage": 0.051647811116576486,
+      "tickets": 420,
+      "stakeYenAt100PerTicket": 42000,
+      "exactHits": 48,
+      "exactHitRate": 0.45714285714285713,
+      "returnYenAt100PerTicket": 43020,
+      "roi": 1.024285714285714,
+      "profitYenAt100PerTicket": 1020,
+      "averagePayoutOddsOnHit": 8.962499999999999
+    },
+    "validation": {
+      "races": 48,
+      "raceCoverage": 0.047058823529411764,
+      "tickets": 192,
+      "stakeYenAt100PerTicket": 19200,
+      "exactHits": 25,
+      "exactHitRate": 0.5208333333333334,
+      "returnYenAt100PerTicket": 15490,
+      "roi": 0.8067708333333332,
+      "profitYenAt100PerTicket": -3710,
+      "averagePayoutOddsOnHit": 6.195999999999999
+    },
+    "test": {
+      "races": 46,
+      "raceCoverage": 0.04518664047151277,
+      "tickets": 184,
+      "stakeYenAt100PerTicket": 18400,
+      "exactHits": 19,
+      "exactHitRate": 0.41304347826086957,
+      "returnYenAt100PerTicket": 20100,
+      "roi": 1.0923913043478262,
+      "profitYenAt100PerTicket": 1700,
+      "averagePayoutOddsOnHit": 10.578947368421053
+    }
+  },
+  "allPretestSelectedGates": [
+    {
+      "rank": 1,
+      "kind": "pair",
+      "label": "race=7 & aClassCount=3",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 105,
+        "raceCoverage": 0.051647811116576486,
+        "tickets": 420,
+        "stakeYenAt100PerTicket": 42000,
+        "exactHits": 48,
+        "exactHitRate": 0.45714285714285713,
+        "returnYenAt100PerTicket": 43020,
+        "roi": 1.024285714285714,
+        "profitYenAt100PerTicket": 1020,
+        "averagePayoutOddsOnHit": 8.962499999999999
+      },
+      "validation": {
+        "races": 48,
+        "raceCoverage": 0.047058823529411764,
+        "tickets": 192,
+        "stakeYenAt100PerTicket": 19200,
+        "exactHits": 25,
+        "exactHitRate": 0.5208333333333334,
+        "returnYenAt100PerTicket": 15490,
+        "roi": 0.8067708333333332,
+        "profitYenAt100PerTicket": -3710,
+        "averagePayoutOddsOnHit": 6.195999999999999
+      },
+      "test": {
+        "races": 46,
+        "raceCoverage": 0.04518664047151277,
+        "tickets": 184,
+        "stakeYenAt100PerTicket": 18400,
+        "exactHits": 19,
+        "exactHitRate": 0.41304347826086957,
+        "returnYenAt100PerTicket": 20100,
+        "roi": 1.0923913043478262,
+        "profitYenAt100PerTicket": 1700,
+        "averagePayoutOddsOnHit": 10.578947368421053
+      }
+    },
+    {
+      "rank": 2,
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & lane1Class=A1",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        }
+      ],
+      "train": {
+        "races": 176,
+        "raceCoverage": 0.08657156910969012,
+        "tickets": 704,
+        "stakeYenAt100PerTicket": 70400,
+        "exactHits": 70,
+        "exactHitRate": 0.3977272727272727,
+        "returnYenAt100PerTicket": 58550,
+        "roi": 0.8316761363636366,
+        "profitYenAt100PerTicket": -11850,
+        "averagePayoutOddsOnHit": 8.364285714285716
+      },
+      "validation": {
+        "races": 71,
+        "raceCoverage": 0.0696078431372549,
+        "tickets": 284,
+        "stakeYenAt100PerTicket": 28400,
+        "exactHits": 29,
+        "exactHitRate": 0.4084507042253521,
+        "returnYenAt100PerTicket": 23040,
+        "roi": 0.811267605633803,
+        "profitYenAt100PerTicket": -5360,
+        "averagePayoutOddsOnHit": 7.944827586206897
+      },
+      "test": {
+        "races": 87,
+        "raceCoverage": 0.08546168958742632,
+        "tickets": 348,
+        "stakeYenAt100PerTicket": 34800,
+        "exactHits": 31,
+        "exactHitRate": 0.3563218390804598,
+        "returnYenAt100PerTicket": 25790,
+        "roi": 0.7410919540229884,
+        "profitYenAt100PerTicket": -9010,
+        "averagePayoutOddsOnHit": 8.319354838709677
+      }
+    },
+    {
+      "rank": 3,
+      "kind": "single",
+      "label": "race=7",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        }
+      ],
+      "train": {
+        "races": 170,
+        "raceCoverage": 0.08362026561731431,
+        "tickets": 680,
+        "stakeYenAt100PerTicket": 68000,
+        "exactHits": 67,
+        "exactHitRate": 0.3941176470588235,
+        "returnYenAt100PerTicket": 57400,
+        "roi": 0.8441176470588238,
+        "profitYenAt100PerTicket": -10600,
+        "averagePayoutOddsOnHit": 8.567164179104479
+      },
+      "validation": {
+        "races": 85,
+        "raceCoverage": 0.08333333333333333,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 40,
+        "exactHitRate": 0.47058823529411764,
+        "returnYenAt100PerTicket": 30410,
+        "roi": 0.8944117647058822,
+        "profitYenAt100PerTicket": -3590,
+        "averagePayoutOddsOnHit": 7.602499999999999
+      },
+      "test": {
+        "races": 85,
+        "raceCoverage": 0.08349705304518663,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 31,
+        "exactHitRate": 0.36470588235294116,
+        "returnYenAt100PerTicket": 32020,
+        "roi": 0.9417647058823527,
+        "profitYenAt100PerTicket": -1980,
+        "averagePayoutOddsOnHit": 10.329032258064514
+      }
+    },
+    {
+      "rank": 4,
+      "kind": "pair",
+      "label": "race=7 & raceBand=MID_5_8",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        }
+      ],
+      "train": {
+        "races": 170,
+        "raceCoverage": 0.08362026561731431,
+        "tickets": 680,
+        "stakeYenAt100PerTicket": 68000,
+        "exactHits": 67,
+        "exactHitRate": 0.3941176470588235,
+        "returnYenAt100PerTicket": 57400,
+        "roi": 0.8441176470588238,
+        "profitYenAt100PerTicket": -10600,
+        "averagePayoutOddsOnHit": 8.567164179104479
+      },
+      "validation": {
+        "races": 85,
+        "raceCoverage": 0.08333333333333333,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 40,
+        "exactHitRate": 0.47058823529411764,
+        "returnYenAt100PerTicket": 30410,
+        "roi": 0.8944117647058822,
+        "profitYenAt100PerTicket": -3590,
+        "averagePayoutOddsOnHit": 7.602499999999999
+      },
+      "test": {
+        "races": 85,
+        "raceCoverage": 0.08349705304518663,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 31,
+        "exactHitRate": 0.36470588235294116,
+        "returnYenAt100PerTicket": 32020,
+        "roi": 0.9417647058823527,
+        "profitYenAt100PerTicket": -1980,
+        "averagePayoutOddsOnHit": 10.329032258064514
+      }
+    },
+    {
+      "rank": 5,
+      "kind": "pair",
+      "label": "race=7 & title=予選",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "title",
+          "value": "予選"
+        }
+      ],
+      "train": {
+        "races": 110,
+        "raceCoverage": 0.05410723069355632,
+        "tickets": 440,
+        "stakeYenAt100PerTicket": 44000,
+        "exactHits": 46,
+        "exactHitRate": 0.41818181818181815,
+        "returnYenAt100PerTicket": 38490,
+        "roi": 0.8747727272727274,
+        "profitYenAt100PerTicket": -5510,
+        "averagePayoutOddsOnHit": 8.367391304347827
+      },
+      "validation": {
+        "races": 54,
+        "raceCoverage": 0.052941176470588235,
+        "tickets": 216,
+        "stakeYenAt100PerTicket": 21600,
+        "exactHits": 28,
+        "exactHitRate": 0.5185185185185185,
+        "returnYenAt100PerTicket": 21490,
+        "roi": 0.9949074074074074,
+        "profitYenAt100PerTicket": -110,
+        "averagePayoutOddsOnHit": 7.674999999999999
+      },
+      "test": {
+        "races": 52,
+        "raceCoverage": 0.05108055009823183,
+        "tickets": 208,
+        "stakeYenAt100PerTicket": 20800,
+        "exactHits": 21,
+        "exactHitRate": 0.40384615384615385,
+        "returnYenAt100PerTicket": 20590,
+        "roi": 0.9899038461538462,
+        "profitYenAt100PerTicket": -210,
+        "averagePayoutOddsOnHit": 9.804761904761905
+      }
+    },
+    {
+      "rank": 6,
+      "kind": "pair",
+      "label": "race=7 & headCount=1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 109,
+        "raceCoverage": 0.05361534677816036,
+        "tickets": 436,
+        "stakeYenAt100PerTicket": 43600,
+        "exactHits": 43,
+        "exactHitRate": 0.3944954128440367,
+        "returnYenAt100PerTicket": 32210,
+        "roi": 0.7387614678899083,
+        "profitYenAt100PerTicket": -11390,
+        "averagePayoutOddsOnHit": 7.490697674418605
+      },
+      "validation": {
+        "races": 59,
+        "raceCoverage": 0.05784313725490196,
+        "tickets": 236,
+        "stakeYenAt100PerTicket": 23600,
+        "exactHits": 28,
+        "exactHitRate": 0.4745762711864407,
+        "returnYenAt100PerTicket": 22780,
+        "roi": 0.9652542372881356,
+        "profitYenAt100PerTicket": -820,
+        "averagePayoutOddsOnHit": 8.135714285714286
+      },
+      "test": {
+        "races": 51,
+        "raceCoverage": 0.05009823182711198,
+        "tickets": 204,
+        "stakeYenAt100PerTicket": 20400,
+        "exactHits": 17,
+        "exactHitRate": 0.3333333333333333,
+        "returnYenAt100PerTicket": 16940,
+        "roi": 0.8303921568627451,
+        "profitYenAt100PerTicket": -3460,
+        "averagePayoutOddsOnHit": 9.964705882352941
+      }
+    },
+    {
+      "rank": 7,
+      "kind": "single",
+      "label": "lane1Class=A1",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        }
+      ],
+      "train": {
+        "races": 692,
+        "raceCoverage": 0.34038366945400883,
+        "tickets": 2768,
+        "stakeYenAt100PerTicket": 276800,
+        "exactHits": 230,
+        "exactHitRate": 0.33236994219653176,
+        "returnYenAt100PerTicket": 223550,
+        "roi": 0.8076228323699427,
+        "profitYenAt100PerTicket": -53250,
+        "averagePayoutOddsOnHit": 9.71956521739131
+      },
+      "validation": {
+        "races": 313,
+        "raceCoverage": 0.30686274509803924,
+        "tickets": 1252,
+        "stakeYenAt100PerTicket": 125200,
+        "exactHits": 103,
+        "exactHitRate": 0.329073482428115,
+        "returnYenAt100PerTicket": 92830,
+        "roi": 0.7414536741214056,
+        "profitYenAt100PerTicket": -32370,
+        "averagePayoutOddsOnHit": 9.0126213592233
+      },
+      "test": {
+        "races": 338,
+        "raceCoverage": 0.3320235756385069,
+        "tickets": 1352,
+        "stakeYenAt100PerTicket": 135200,
+        "exactHits": 103,
+        "exactHitRate": 0.3047337278106509,
+        "returnYenAt100PerTicket": 91500,
+        "roi": 0.6767751479289943,
+        "profitYenAt100PerTicket": -43700,
+        "averagePayoutOddsOnHit": 8.88349514563107
+      }
+    },
+    {
+      "rank": 8,
+      "kind": "pair",
+      "label": "race=7 & a1Count=1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "a1Count",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 125,
+        "raceCoverage": 0.06148548942449582,
+        "tickets": 500,
+        "stakeYenAt100PerTicket": 50000,
+        "exactHits": 47,
+        "exactHitRate": 0.376,
+        "returnYenAt100PerTicket": 37930,
+        "roi": 0.7586,
+        "profitYenAt100PerTicket": -12070,
+        "averagePayoutOddsOnHit": 8.070212765957447
+      },
+      "validation": {
+        "races": 53,
+        "raceCoverage": 0.05196078431372549,
+        "tickets": 212,
+        "stakeYenAt100PerTicket": 21200,
+        "exactHits": 23,
+        "exactHitRate": 0.4339622641509434,
+        "returnYenAt100PerTicket": 15870,
+        "roi": 0.7485849056603773,
+        "profitYenAt100PerTicket": -5330,
+        "averagePayoutOddsOnHit": 6.8999999999999995
+      },
+      "test": {
+        "races": 62,
+        "raceCoverage": 0.060903732809430254,
+        "tickets": 248,
+        "stakeYenAt100PerTicket": 24800,
+        "exactHits": 28,
+        "exactHitRate": 0.45161290322580644,
+        "returnYenAt100PerTicket": 29350,
+        "roi": 1.1834677419354835,
+        "profitYenAt100PerTicket": 4550,
+        "averagePayoutOddsOnHit": 10.482142857142856
+      }
+    },
+    {
+      "rank": 9,
+      "kind": "pair",
+      "label": "lane1Class=A1 & aClassCount=3",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 200,
+        "raceCoverage": 0.09837678307919331,
+        "tickets": 800,
+        "stakeYenAt100PerTicket": 80000,
+        "exactHits": 75,
+        "exactHitRate": 0.375,
+        "returnYenAt100PerTicket": 63570,
+        "roi": 0.794625,
+        "profitYenAt100PerTicket": -16430,
+        "averagePayoutOddsOnHit": 8.476
+      },
+      "validation": {
+        "races": 83,
+        "raceCoverage": 0.08137254901960785,
+        "tickets": 332,
+        "stakeYenAt100PerTicket": 33200,
+        "exactHits": 30,
+        "exactHitRate": 0.3614457831325301,
+        "returnYenAt100PerTicket": 26400,
+        "roi": 0.7951807228915663,
+        "profitYenAt100PerTicket": -6800,
+        "averagePayoutOddsOnHit": 8.8
+      },
+      "test": {
+        "races": 92,
+        "raceCoverage": 0.09037328094302555,
+        "tickets": 368,
+        "stakeYenAt100PerTicket": 36800,
+        "exactHits": 31,
+        "exactHitRate": 0.33695652173913043,
+        "returnYenAt100PerTicket": 32300,
+        "roi": 0.8777173913043477,
+        "profitYenAt100PerTicket": -4500,
+        "averagePayoutOddsOnHit": 10.419354838709676
+      }
+    },
+    {
+      "rank": 10,
+      "kind": "pair",
+      "label": "lane1Class=A1 & headCount=1",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 660,
+        "raceCoverage": 0.3246433841613379,
+        "tickets": 2640,
+        "stakeYenAt100PerTicket": 264000,
+        "exactHits": 215,
+        "exactHitRate": 0.32575757575757575,
+        "returnYenAt100PerTicket": 212480,
+        "roi": 0.8048484848484853,
+        "profitYenAt100PerTicket": -51520,
+        "averagePayoutOddsOnHit": 9.882790697674423
+      },
+      "validation": {
+        "races": 306,
+        "raceCoverage": 0.3,
+        "tickets": 1224,
+        "stakeYenAt100PerTicket": 122400,
+        "exactHits": 99,
+        "exactHitRate": 0.3235294117647059,
+        "returnYenAt100PerTicket": 90650,
+        "roi": 0.7406045751633987,
+        "profitYenAt100PerTicket": -31750,
+        "averagePayoutOddsOnHit": 9.156565656565656
+      },
+      "test": {
+        "races": 334,
+        "raceCoverage": 0.3280943025540275,
+        "tickets": 1336,
+        "stakeYenAt100PerTicket": 133600,
+        "exactHits": 101,
+        "exactHitRate": 0.3023952095808383,
+        "returnYenAt100PerTicket": 86870,
+        "roi": 0.6502245508982037,
+        "profitYenAt100PerTicket": -46730,
+        "averagePayoutOddsOnHit": 8.600990099009902
+      }
+    },
+    {
+      "rank": 11,
+      "kind": "pair",
+      "label": "lane1Class=A1 & a1Count=1",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "a1Count",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 158,
+        "raceCoverage": 0.07771765863256272,
+        "tickets": 632,
+        "stakeYenAt100PerTicket": 63200,
+        "exactHits": 58,
+        "exactHitRate": 0.3670886075949367,
+        "returnYenAt100PerTicket": 51570,
+        "roi": 0.8159810126582275,
+        "profitYenAt100PerTicket": -11630,
+        "averagePayoutOddsOnHit": 8.891379310344824
+      },
+      "validation": {
+        "races": 77,
+        "raceCoverage": 0.07549019607843137,
+        "tickets": 308,
+        "stakeYenAt100PerTicket": 30800,
+        "exactHits": 28,
+        "exactHitRate": 0.36363636363636365,
+        "returnYenAt100PerTicket": 25320,
+        "roi": 0.822077922077922,
+        "profitYenAt100PerTicket": -5480,
+        "averagePayoutOddsOnHit": 9.042857142857141
+      },
+      "test": {
+        "races": 94,
+        "raceCoverage": 0.09233791748526522,
+        "tickets": 376,
+        "stakeYenAt100PerTicket": 37600,
+        "exactHits": 32,
+        "exactHitRate": 0.3404255319148936,
+        "returnYenAt100PerTicket": 27880,
+        "roi": 0.7414893617021275,
+        "profitYenAt100PerTicket": -9720,
+        "averagePayoutOddsOnHit": 8.712499999999999
+      }
+    },
+    {
+      "rank": 12,
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & aClassCount=3",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 387,
+        "raceCoverage": 0.19035907525823906,
+        "tickets": 1548,
+        "stakeYenAt100PerTicket": 154800,
+        "exactHits": 126,
+        "exactHitRate": 0.32558139534883723,
+        "returnYenAt100PerTicket": 130010,
+        "roi": 0.839857881136951,
+        "profitYenAt100PerTicket": -24790,
+        "averagePayoutOddsOnHit": 10.31825396825397
+      },
+      "validation": {
+        "races": 183,
+        "raceCoverage": 0.17941176470588235,
+        "tickets": 732,
+        "stakeYenAt100PerTicket": 73200,
+        "exactHits": 61,
+        "exactHitRate": 0.3333333333333333,
+        "returnYenAt100PerTicket": 46300,
+        "roi": 0.6325136612021857,
+        "profitYenAt100PerTicket": -26900,
+        "averagePayoutOddsOnHit": 7.590163934426228
+      },
+      "test": {
+        "races": 187,
+        "raceCoverage": 0.18369351669941061,
+        "tickets": 748,
+        "stakeYenAt100PerTicket": 74800,
+        "exactHits": 50,
+        "exactHitRate": 0.26737967914438504,
+        "returnYenAt100PerTicket": 51540,
+        "roi": 0.6890374331550804,
+        "profitYenAt100PerTicket": -23260,
+        "averagePayoutOddsOnHit": 10.308000000000002
+      }
+    },
+    {
+      "rank": 13,
+      "kind": "pair",
+      "label": "a1Count=2 & headCount=1",
+      "parts": [
+        {
+          "name": "a1Count",
+          "value": "2"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 281,
+        "raceCoverage": 0.1382193802262666,
+        "tickets": 1124,
+        "stakeYenAt100PerTicket": 112400,
+        "exactHits": 92,
+        "exactHitRate": 0.3274021352313167,
+        "returnYenAt100PerTicket": 90950,
+        "roi": 0.8091637010676157,
+        "profitYenAt100PerTicket": -21450,
+        "averagePayoutOddsOnHit": 9.88586956521739
+      },
+      "validation": {
+        "races": 138,
+        "raceCoverage": 0.13529411764705881,
+        "tickets": 552,
+        "stakeYenAt100PerTicket": 55200,
+        "exactHits": 47,
+        "exactHitRate": 0.34057971014492755,
+        "returnYenAt100PerTicket": 41600,
+        "roi": 0.7536231884057968,
+        "profitYenAt100PerTicket": -13600,
+        "averagePayoutOddsOnHit": 8.85106382978723
+      },
+      "test": {
+        "races": 135,
+        "raceCoverage": 0.13261296660117877,
+        "tickets": 540,
+        "stakeYenAt100PerTicket": 54000,
+        "exactHits": 34,
+        "exactHitRate": 0.2518518518518518,
+        "returnYenAt100PerTicket": 27770,
+        "roi": 0.5142592592592592,
+        "profitYenAt100PerTicket": -26230,
+        "averagePayoutOddsOnHit": 8.16764705882353
+      }
+    },
+    {
+      "rank": 14,
+      "kind": "pair",
+      "label": "race=7 & lane1Class=A2",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        }
+      ],
+      "train": {
+        "races": 97,
+        "raceCoverage": 0.04771273979340875,
+        "tickets": 388,
+        "stakeYenAt100PerTicket": 38800,
+        "exactHits": 35,
+        "exactHitRate": 0.36082474226804123,
+        "returnYenAt100PerTicket": 33240,
+        "roi": 0.8567010309278351,
+        "profitYenAt100PerTicket": -5560,
+        "averagePayoutOddsOnHit": 9.497142857142858
+      },
+      "validation": {
+        "races": 56,
+        "raceCoverage": 0.054901960784313725,
+        "tickets": 224,
+        "stakeYenAt100PerTicket": 22400,
+        "exactHits": 25,
+        "exactHitRate": 0.44642857142857145,
+        "returnYenAt100PerTicket": 18270,
+        "roi": 0.8156249999999999,
+        "profitYenAt100PerTicket": -4130,
+        "averagePayoutOddsOnHit": 7.308
+      },
+      "test": {
+        "races": 47,
+        "raceCoverage": 0.04616895874263261,
+        "tickets": 188,
+        "stakeYenAt100PerTicket": 18800,
+        "exactHits": 17,
+        "exactHitRate": 0.3617021276595745,
+        "returnYenAt100PerTicket": 19100,
+        "roi": 1.0159574468085104,
+        "profitYenAt100PerTicket": 300,
+        "averagePayoutOddsOnHit": 11.235294117647058
+      }
+    },
+    {
+      "rank": 15,
+      "kind": "pair",
+      "label": "lane1Class=A1 & a1Count=2",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "a1Count",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 252,
+        "raceCoverage": 0.12395474667978357,
+        "tickets": 1008,
+        "stakeYenAt100PerTicket": 100800,
+        "exactHits": 89,
+        "exactHitRate": 0.3531746031746032,
+        "returnYenAt100PerTicket": 85190,
+        "roi": 0.8451388888888889,
+        "profitYenAt100PerTicket": -15610,
+        "averagePayoutOddsOnHit": 9.57191011235955
+      },
+      "validation": {
+        "races": 116,
+        "raceCoverage": 0.11372549019607843,
+        "tickets": 464,
+        "stakeYenAt100PerTicket": 46400,
+        "exactHits": 39,
+        "exactHitRate": 0.33620689655172414,
+        "returnYenAt100PerTicket": 32680,
+        "roi": 0.704310344827586,
+        "profitYenAt100PerTicket": -13720,
+        "averagePayoutOddsOnHit": 8.379487179487176
+      },
+      "test": {
+        "races": 105,
+        "raceCoverage": 0.1031434184675835,
+        "tickets": 420,
+        "stakeYenAt100PerTicket": 42000,
+        "exactHits": 29,
+        "exactHitRate": 0.2761904761904762,
+        "returnYenAt100PerTicket": 24480,
+        "roi": 0.5828571428571427,
+        "profitYenAt100PerTicket": -17520,
+        "averagePayoutOddsOnHit": 8.441379310344827
+      }
+    },
+    {
+      "rank": 16,
+      "kind": "pair",
+      "label": "race=11 & lane1Class=A1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "11"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        }
+      ],
+      "train": {
+        "races": 154,
+        "raceCoverage": 0.07575012297097884,
+        "tickets": 616,
+        "stakeYenAt100PerTicket": 61600,
+        "exactHits": 52,
+        "exactHitRate": 0.33766233766233766,
+        "returnYenAt100PerTicket": 52990,
+        "roi": 0.8602272727272723,
+        "profitYenAt100PerTicket": -8610,
+        "averagePayoutOddsOnHit": 10.19038461538461
+      },
+      "validation": {
+        "races": 63,
+        "raceCoverage": 0.061764705882352944,
+        "tickets": 252,
+        "stakeYenAt100PerTicket": 25200,
+        "exactHits": 22,
+        "exactHitRate": 0.3492063492063492,
+        "returnYenAt100PerTicket": 17540,
+        "roi": 0.6960317460317459,
+        "profitYenAt100PerTicket": -7660,
+        "averagePayoutOddsOnHit": 7.972727272727272
+      },
+      "test": {
+        "races": 69,
+        "raceCoverage": 0.06777996070726916,
+        "tickets": 276,
+        "stakeYenAt100PerTicket": 27600,
+        "exactHits": 19,
+        "exactHitRate": 0.2753623188405797,
+        "returnYenAt100PerTicket": 18230,
+        "roi": 0.6605072463768116,
+        "profitYenAt100PerTicket": -9370,
+        "averagePayoutOddsOnHit": 9.594736842105263
+      }
+    },
+    {
+      "rank": 17,
+      "kind": "pair",
+      "label": "lane1Class=A2 & aClassCount=3",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 336,
+        "raceCoverage": 0.16527299557304476,
+        "tickets": 1344,
+        "stakeYenAt100PerTicket": 134400,
+        "exactHits": 105,
+        "exactHitRate": 0.3125,
+        "returnYenAt100PerTicket": 106250,
+        "roi": 0.7905505952380955,
+        "profitYenAt100PerTicket": -28150,
+        "averagePayoutOddsOnHit": 10.11904761904762
+      },
+      "validation": {
+        "races": 177,
+        "raceCoverage": 0.17352941176470588,
+        "tickets": 708,
+        "stakeYenAt100PerTicket": 70800,
+        "exactHits": 62,
+        "exactHitRate": 0.3502824858757062,
+        "returnYenAt100PerTicket": 54660,
+        "roi": 0.7720338983050847,
+        "profitYenAt100PerTicket": -16140,
+        "averagePayoutOddsOnHit": 8.816129032258065
+      },
+      "test": {
+        "races": 173,
+        "raceCoverage": 0.16994106090373282,
+        "tickets": 692,
+        "stakeYenAt100PerTicket": 69200,
+        "exactHits": 46,
+        "exactHitRate": 0.2658959537572254,
+        "returnYenAt100PerTicket": 41400,
+        "roi": 0.5982658959537575,
+        "profitYenAt100PerTicket": -27800,
+        "averagePayoutOddsOnHit": 9.000000000000004
+      }
+    },
+    {
+      "rank": 18,
+      "kind": "pair",
+      "label": "title=予選 & lane1Class=A2",
+      "parts": [
+        {
+          "name": "title",
+          "value": "予選"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        }
+      ],
+      "train": {
+        "races": 281,
+        "raceCoverage": 0.1382193802262666,
+        "tickets": 1124,
+        "stakeYenAt100PerTicket": 112400,
+        "exactHits": 89,
+        "exactHitRate": 0.3167259786476868,
+        "returnYenAt100PerTicket": 83100,
+        "roi": 0.7393238434163703,
+        "profitYenAt100PerTicket": -29300,
+        "averagePayoutOddsOnHit": 9.337078651685395
+      },
+      "validation": {
+        "races": 140,
+        "raceCoverage": 0.13725490196078433,
+        "tickets": 560,
+        "stakeYenAt100PerTicket": 56000,
+        "exactHits": 50,
+        "exactHitRate": 0.35714285714285715,
+        "returnYenAt100PerTicket": 39860,
+        "roi": 0.7117857142857144,
+        "profitYenAt100PerTicket": -16140,
+        "averagePayoutOddsOnHit": 7.972
+      },
+      "test": {
+        "races": 156,
+        "raceCoverage": 0.15324165029469547,
+        "tickets": 624,
+        "stakeYenAt100PerTicket": 62400,
+        "exactHits": 39,
+        "exactHitRate": 0.25,
+        "returnYenAt100PerTicket": 35790,
+        "roi": 0.5735576923076925,
+        "profitYenAt100PerTicket": -26610,
+        "averagePayoutOddsOnHit": 9.17692307692308
+      }
+    },
+    {
+      "rank": 19,
+      "kind": "pair",
+      "label": "raceBand=LATE_9_12 & lane1Class=A1",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "LATE_9_12"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        }
+      ],
+      "train": {
+        "races": 482,
+        "raceCoverage": 0.23708804722085589,
+        "tickets": 1928,
+        "stakeYenAt100PerTicket": 192800,
+        "exactHits": 153,
+        "exactHitRate": 0.31742738589211617,
+        "returnYenAt100PerTicket": 157100,
+        "roi": 0.814834024896266,
+        "profitYenAt100PerTicket": -35700,
+        "averagePayoutOddsOnHit": 10.267973856209156
+      },
+      "validation": {
+        "races": 221,
+        "raceCoverage": 0.21666666666666667,
+        "tickets": 884,
+        "stakeYenAt100PerTicket": 88400,
+        "exactHits": 70,
+        "exactHitRate": 0.3167420814479638,
+        "returnYenAt100PerTicket": 65410,
+        "roi": 0.7399321266968325,
+        "profitYenAt100PerTicket": -22990,
+        "averagePayoutOddsOnHit": 9.344285714285713
+      },
+      "test": {
+        "races": 236,
+        "raceCoverage": 0.2318271119842829,
+        "tickets": 944,
+        "stakeYenAt100PerTicket": 94400,
+        "exactHits": 67,
+        "exactHitRate": 0.2838983050847458,
+        "returnYenAt100PerTicket": 61490,
+        "roi": 0.651377118644068,
+        "profitYenAt100PerTicket": -32910,
+        "averagePayoutOddsOnHit": 9.17761194029851
+      }
+    },
+    {
+      "rank": 20,
+      "kind": "single",
+      "label": "title=準優勝戦",
+      "parts": [
+        {
+          "name": "title",
+          "value": "準優勝戦"
+        }
+      ],
+      "train": {
+        "races": 90,
+        "raceCoverage": 0.04426955238563699,
+        "tickets": 360,
+        "stakeYenAt100PerTicket": 36000,
+        "exactHits": 33,
+        "exactHitRate": 0.36666666666666664,
+        "returnYenAt100PerTicket": 27610,
+        "roi": 0.7669444444444443,
+        "profitYenAt100PerTicket": -8390,
+        "averagePayoutOddsOnHit": 8.366666666666665
+      },
+      "validation": {
+        "races": 39,
+        "raceCoverage": 0.03823529411764706,
+        "tickets": 156,
+        "stakeYenAt100PerTicket": 15600,
+        "exactHits": 14,
+        "exactHitRate": 0.358974358974359,
+        "returnYenAt100PerTicket": 9450,
+        "roi": 0.6057692307692307,
+        "profitYenAt100PerTicket": -6150,
+        "averagePayoutOddsOnHit": 6.75
+      },
+      "test": {
+        "races": 47,
+        "raceCoverage": 0.04616895874263261,
+        "tickets": 188,
+        "stakeYenAt100PerTicket": 18800,
+        "exactHits": 16,
+        "exactHitRate": 0.3404255319148936,
+        "returnYenAt100PerTicket": 14050,
+        "roi": 0.7473404255319149,
+        "profitYenAt100PerTicket": -4750,
+        "averagePayoutOddsOnHit": 8.78125
+      }
+    },
+    {
+      "rank": 21,
+      "kind": "pair",
+      "label": "raceBand=LATE_9_12 & title=準優勝戦",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "LATE_9_12"
+        },
+        {
+          "name": "title",
+          "value": "準優勝戦"
+        }
+      ],
+      "train": {
+        "races": 90,
+        "raceCoverage": 0.04426955238563699,
+        "tickets": 360,
+        "stakeYenAt100PerTicket": 36000,
+        "exactHits": 33,
+        "exactHitRate": 0.36666666666666664,
+        "returnYenAt100PerTicket": 27610,
+        "roi": 0.7669444444444443,
+        "profitYenAt100PerTicket": -8390,
+        "averagePayoutOddsOnHit": 8.366666666666665
+      },
+      "validation": {
+        "races": 39,
+        "raceCoverage": 0.03823529411764706,
+        "tickets": 156,
+        "stakeYenAt100PerTicket": 15600,
+        "exactHits": 14,
+        "exactHitRate": 0.358974358974359,
+        "returnYenAt100PerTicket": 9450,
+        "roi": 0.6057692307692307,
+        "profitYenAt100PerTicket": -6150,
+        "averagePayoutOddsOnHit": 6.75
+      },
+      "test": {
+        "races": 47,
+        "raceCoverage": 0.04616895874263261,
+        "tickets": 188,
+        "stakeYenAt100PerTicket": 18800,
+        "exactHits": 16,
+        "exactHitRate": 0.3404255319148936,
+        "returnYenAt100PerTicket": 14050,
+        "roi": 0.7473404255319149,
+        "profitYenAt100PerTicket": -4750,
+        "averagePayoutOddsOnHit": 8.78125
+      }
+    },
+    {
+      "rank": 22,
+      "kind": "pair",
+      "label": "lane1Class=A2 & headCount=2",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        },
+        {
+          "name": "headCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 168,
+        "raceCoverage": 0.08263649778652238,
+        "tickets": 672,
+        "stakeYenAt100PerTicket": 67200,
+        "exactHits": 54,
+        "exactHitRate": 0.32142857142857145,
+        "returnYenAt100PerTicket": 50580,
+        "roi": 0.7526785714285714,
+        "profitYenAt100PerTicket": -16620,
+        "averagePayoutOddsOnHit": 9.366666666666667
+      },
+      "validation": {
+        "races": 76,
+        "raceCoverage": 0.07450980392156863,
+        "tickets": 304,
+        "stakeYenAt100PerTicket": 30400,
+        "exactHits": 31,
+        "exactHitRate": 0.40789473684210525,
+        "returnYenAt100PerTicket": 23680,
+        "roi": 0.7789473684210526,
+        "profitYenAt100PerTicket": -6720,
+        "averagePayoutOddsOnHit": 7.638709677419354
+      },
+      "test": {
+        "races": 76,
+        "raceCoverage": 0.07465618860510806,
+        "tickets": 304,
+        "stakeYenAt100PerTicket": 30400,
+        "exactHits": 29,
+        "exactHitRate": 0.3815789473684211,
+        "returnYenAt100PerTicket": 28780,
+        "roi": 0.9467105263157893,
+        "profitYenAt100PerTicket": -1620,
+        "averagePayoutOddsOnHit": 9.924137931034481
+      }
+    },
+    {
+      "rank": 23,
+      "kind": "single",
+      "label": "race=11",
+      "parts": [
+        {
+          "name": "race",
+          "value": "11"
+        }
+      ],
+      "train": {
+        "races": 169,
+        "raceCoverage": 0.08312838170191834,
+        "tickets": 676,
+        "stakeYenAt100PerTicket": 67600,
+        "exactHits": 57,
+        "exactHitRate": 0.33727810650887574,
+        "returnYenAt100PerTicket": 57480,
+        "roi": 0.8502958579881653,
+        "profitYenAt100PerTicket": -10120,
+        "averagePayoutOddsOnHit": 10.084210526315784
+      },
+      "validation": {
+        "races": 85,
+        "raceCoverage": 0.08333333333333333,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 28,
+        "exactHitRate": 0.32941176470588235,
+        "returnYenAt100PerTicket": 25260,
+        "roi": 0.7429411764705881,
+        "profitYenAt100PerTicket": -8740,
+        "averagePayoutOddsOnHit": 9.02142857142857
+      },
+      "test": {
+        "races": 85,
+        "raceCoverage": 0.08349705304518663,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 25,
+        "exactHitRate": 0.29411764705882354,
+        "returnYenAt100PerTicket": 23270,
+        "roi": 0.6844117647058823,
+        "profitYenAt100PerTicket": -10730,
+        "averagePayoutOddsOnHit": 9.307999999999998
+      }
+    },
+    {
+      "rank": 24,
+      "kind": "pair",
+      "label": "race=11 & raceBand=LATE_9_12",
+      "parts": [
+        {
+          "name": "race",
+          "value": "11"
+        },
+        {
+          "name": "raceBand",
+          "value": "LATE_9_12"
+        }
+      ],
+      "train": {
+        "races": 169,
+        "raceCoverage": 0.08312838170191834,
+        "tickets": 676,
+        "stakeYenAt100PerTicket": 67600,
+        "exactHits": 57,
+        "exactHitRate": 0.33727810650887574,
+        "returnYenAt100PerTicket": 57480,
+        "roi": 0.8502958579881653,
+        "profitYenAt100PerTicket": -10120,
+        "averagePayoutOddsOnHit": 10.084210526315784
+      },
+      "validation": {
+        "races": 85,
+        "raceCoverage": 0.08333333333333333,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 28,
+        "exactHitRate": 0.32941176470588235,
+        "returnYenAt100PerTicket": 25260,
+        "roi": 0.7429411764705881,
+        "profitYenAt100PerTicket": -8740,
+        "averagePayoutOddsOnHit": 9.02142857142857
+      },
+      "test": {
+        "races": 85,
+        "raceCoverage": 0.08349705304518663,
+        "tickets": 340,
+        "stakeYenAt100PerTicket": 34000,
+        "exactHits": 25,
+        "exactHitRate": 0.29411764705882354,
+        "returnYenAt100PerTicket": 23270,
+        "roi": 0.6844117647058823,
+        "profitYenAt100PerTicket": -10730,
+        "averagePayoutOddsOnHit": 9.307999999999998
+      }
+    },
+    {
+      "rank": 25,
+      "kind": "pair",
+      "label": "race=7 & title=一般戦",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "title",
+          "value": "一般戦"
+        }
+      ],
+      "train": {
+        "races": 60,
+        "raceCoverage": 0.029513034923757994,
+        "tickets": 240,
+        "stakeYenAt100PerTicket": 24000,
+        "exactHits": 21,
+        "exactHitRate": 0.35,
+        "returnYenAt100PerTicket": 18910,
+        "roi": 0.7879166666666666,
+        "profitYenAt100PerTicket": -5090,
+        "averagePayoutOddsOnHit": 9.004761904761905
+      },
+      "validation": {
+        "races": 31,
+        "raceCoverage": 0.030392156862745098,
+        "tickets": 124,
+        "stakeYenAt100PerTicket": 12400,
+        "exactHits": 12,
+        "exactHitRate": 0.3870967741935484,
+        "returnYenAt100PerTicket": 8920,
+        "roi": 0.7193548387096775,
+        "profitYenAt100PerTicket": -3480,
+        "averagePayoutOddsOnHit": 7.4333333333333345
+      },
+      "test": {
+        "races": 31,
+        "raceCoverage": 0.030451866404715127,
+        "tickets": 124,
+        "stakeYenAt100PerTicket": 12400,
+        "exactHits": 9,
+        "exactHitRate": 0.2903225806451613,
+        "returnYenAt100PerTicket": 10470,
+        "roi": 0.8443548387096774,
+        "profitYenAt100PerTicket": -1930,
+        "averagePayoutOddsOnHit": 11.633333333333333
+      }
+    }
+  ],
+  "promotionRule": "Do not import into LIVE from this historical ROI report. Promotion requires fresh forward race-days with the gate frozen before race start.",
+  "note": "The final historical TEST was not used to create or rank the v0.33.9 candidates, but it has now been observed. Treat future race-days as the only pristine forward evidence."
+}
