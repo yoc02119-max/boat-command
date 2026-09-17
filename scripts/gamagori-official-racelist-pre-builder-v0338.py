@@ -35,7 +35,6 @@ def parse_boat_row(cells,lane):
  regm=re.search(r'(?<!\d)([3-5]\d{3})(?!\d)',joined); clsm=re.search(r'\b(A1|A2|B1|B2)\b',joined)
  stm=re.search(r'(?<!\d)(0\.\d{2})(?!\d)',joined)
  if not(regm and clsm and stm):return None
- # Racelist table order is racer, F/L/ST, national, local, motor, boat. Keep groups intact; never substitute local 2-rate for local win rate.
  start=next((i for i,c in enumerate(cells) if regm.group(1) in c),None)
  if start is None:return None
  tail=cells[start:]
@@ -46,8 +45,6 @@ def parse_boat_row(cells,lane):
  stidx=next((i for i,(c,ns) in enumerate(groups) if any(abs(x-float(stm.group(1)))<1e-9 for x in ns)),None)
  if stidx is None or len(groups)<stidx+5:return None
  nat=groups[stidx+1][1]; loc=groups[stidx+2][1]; mot=groups[stidx+3][1]
- # Required first statistic in national/local is win rate. Motor group contains motor number then 2-rate percentage.
- # Frozen 360 PRE stores motor2Rate as a fraction (e.g. 37.25% -> 0.3725), so normalize here before any model call.
  if not nat or not loc or len(mot)<2:return None
  motor2_fraction=mot[1]/100.0
  b={'lane':lane,'registration':regm.group(1),'class':clsm.group(1),'averageST':float(stm.group(1)),'nationalWinRate':nat[0],'localWinRate':loc[0],'motor2Rate':motor2_fraction}
@@ -66,6 +63,6 @@ def parse_page(date,race):
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--date',default='20251215');ap.add_argument('--races',type=int,default=12);a=ap.parse_args()
  races=[parse_page(a.date,r) for r in range(1,a.races+1)]
- out={'version':'GAMAGORI-OFFICIAL-RACELIST-PRE-BUILDER-V0.33.8','venue':'GAMAGORI','venueCode':'07','outcomeFieldsIncluded':False,'resultOddsIncluded':False,'exhibitionIncluded':False,'units':{'nationalWinRate':'0..10','localWinRate':'0..10','motor2Rate':'0..1 fraction','averageST':'seconds'},'requiredFields':FIELDS,'races':races,'raceCount':len(races),'boatCount':sum(len(r['boats']) for r in races),'resultEndpointOpened':False,'oddsEndpointOpened':False,'exhibitionEndpointOpened':False,'decision':'PRE_ROWS_FROZEN'}
+ out={'version':'GAMAGORI-OFFICIAL-RACELIST-PRE-BUILDER-V0.33.8','venue':'GAMAGORI','venueCode':'07','outcomeFieldsIncluded':False,'resultOddsIncluded':False,'exhibitionIncluded':False,'units':{'nationalWinRate':'0..10','localWinRate':'0..10','motor2Rate':'fraction_0_to_1','averageST':'seconds'},'requiredFields':FIELDS,'races':races,'raceCount':len(races),'boatCount':sum(len(r['boats']) for r in races),'resultEndpointOpened':False,'oddsEndpointOpened':False,'exhibitionEndpointOpened':False,'decision':'PRE_ROWS_FROZEN'}
  print(json.dumps(out,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()
