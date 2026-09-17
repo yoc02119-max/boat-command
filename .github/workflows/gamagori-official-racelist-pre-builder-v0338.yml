@@ -27,7 +27,7 @@ jobs:
       - name: Contract
         run: |
           python3 - <<'PY'
-          import json
+          import json, math
           x=json.load(open('out/gamagori-official-racelist-pre-v0338.json'))
           assert x['venueCode']=='07'
           assert x['outcomeFieldsIncluded'] is False
@@ -36,8 +36,15 @@ jobs:
           assert x['raceCount']==12 and x['boatCount']==72
           assert all(len(r['boats'])==6 for r in x['races'])
           req=['class','nationalWinRate','localWinRate','motor2Rate','averageST']
-          assert all(all(k in b for k in req) for r in x['races'] for b in r['boats'])
-          print('PASS 12R / 72 boats official PRE-only extraction')
+          boats=[b for r in x['races'] for b in r['boats']]
+          assert all(all(k in b for k in req) for b in boats)
+          assert all(b['class'] in ('A1','A2','B1','B2') for b in boats)
+          assert all(math.isfinite(float(b['nationalWinRate'])) and 0 <= float(b['nationalWinRate']) <= 10 for b in boats)
+          assert all(math.isfinite(float(b['localWinRate'])) and 0 <= float(b['localWinRate']) <= 10 for b in boats)
+          assert all(math.isfinite(float(b['motor2Rate'])) and 0 <= float(b['motor2Rate']) <= 1 for b in boats)
+          assert all(math.isfinite(float(b['averageST'])) and 0 <= float(b['averageST']) < 1 for b in boats)
+          assert x.get('units',{}).get('motor2Rate')=='fraction_0_to_1'
+          print('PASS 12R / 72 boats official PRE-only extraction + V2.1 unit contract')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
