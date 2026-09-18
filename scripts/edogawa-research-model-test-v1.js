@@ -35,14 +35,16 @@ for(let i=0;i<360;i++){
     p:500+(i%50)*100
   });
 }
+const z=model.distribution(program,hist,null,{mode:'CLASS_BASELINE',targetDate:'2026-09-19'});
 const a=model.distribution(program,hist,null,{mode:'PROGRAM_ONLY',targetDate:'2026-09-19'});
 const b=model.distribution(program,hist,fx,{mode:'FULL_PRE_RACE',targetDate:'2026-09-19'});
-for(const x of [a,b]){
+for(const x of [z,a,b]){
   if(Math.abs(x.sum-1)>1e-12)throw new Error('PROB_SUM');
   if(x.historyRows!==360)throw new Error('HISTORY_ROWS');
   if(x.researchOnly!==true||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('PROMOTION_BOUNDARY');
   if(x.resultInput!==false||x.payoutInput!==false||x.waterUsed!==false||x.tideUsed!==false)throw new Error('INPUT_BOUNDARY');
   if(model.select(x,{count:4}).length!==4)throw new Error('SELECT_COUNT');
 }
-if(a.mode!=='PROGRAM_ONLY'||b.mode!=='FULL_PRE_RACE')throw new Error('MODE');
+if(z.mode!=='CLASS_BASELINE'||a.mode!=='PROGRAM_ONLY'||b.mode!=='FULL_PRE_RACE')throw new Error('MODE');
+if(JSON.stringify(z.laneScores)===JSON.stringify(a.laneScores))throw new Error('CLASS_CONTROL_MUST_DIFFER_FROM_PROGRAM_ENRICHED');
 console.log('EDOGAWA_RESEARCH_MODEL_PASS');
