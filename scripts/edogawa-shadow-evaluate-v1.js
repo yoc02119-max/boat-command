@@ -21,11 +21,17 @@ const rows=[];
 for(let race=1;race<=12;race++){
   const result=read(path.join(root,'post',`race-${race}-result.json`));
   if(!validResult(result,race))continue;
+  const z=read(path.join(root,'shadow','class-baseline',`race-${race}.json`));
   const a=read(path.join(root,'shadow','program-only',`race-${race}.json`));
   const b=read(path.join(root,'shadow','full-pre',`race-${race}.json`));
   const actual=String(result.trifecta);
   rows.push({
     race,actual,payout100:Number(result.payout100)||0,
+    classBaseline:validShadow(z,race,'CLASS_BASELINE')?{
+      generatedAt:z.generatedAt,picks:z.picks,hit:z.picks.includes(actual),
+      modelVersion:z.modelVersion||null,
+      sources:z.sources||null
+    }:null,
     programOnly:validShadow(a,race,'PROGRAM_ONLY')?{
       generatedAt:a.generatedAt,picks:a.picks,hit:a.picks.includes(actual),
       modelVersion:a.modelVersion||null,
@@ -48,7 +54,7 @@ const out={
   venue:'EDOGAWA',venueCode:'03',date,
   generatedAt:new Date().toISOString(),
   rows,
-  summary:{programOnly:stats('programOnly'),fullPre:stats('fullPre')},
+  summary:{classBaseline:stats('classBaseline'),programOnly:stats('programOnly'),fullPre:stats('fullPre')},
   fundingScope:'NONE_RESEARCH_ONLY',
   bankrollAffected:false,
   tryAffected:false,
