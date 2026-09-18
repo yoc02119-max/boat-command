@@ -2,6 +2,9 @@ name: Edogawa history bootstrap recovery v2
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-history-bootstrap-recovery-v2.yml'
   workflow_run:
     workflows: ["Edogawa history bootstrap 180d v1"]
     types: [completed]
@@ -53,9 +56,9 @@ jobs:
             mkdir -p edogawa-hist-work/one/raw edogawa-hist-work/one/b edogawa-hist-work/one/k edogawa-hist-work/one/out
 
             bc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o edogawa-hist-work/one/raw/$b -w '%{http_code}' https://www1.mbrace.or.jp/od2/B/${ym}/$b || true)"
-            sleep 5
+            sleep 2
             kc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o edogawa-hist-work/one/raw/$k -w '%{http_code}' https://www1.mbrace.or.jp/od2/K/${ym}/$k || true)"
-            sleep 5
+            sleep 2
             if [[ "$bc" != "200" || "$kc" != "200" ]]; then
               echo "$d HTTP B=$bc K=$kc" >> edogawa-hist-work/exceptions.txt
               continue
@@ -175,10 +178,44 @@ jobs:
       - name: Commit audited Edogawa bootstrap history
         run: |
           set -euo pipefail
+          cp edogawa-history-bootstrap-v1.json /tmp/edogawa-history-bootstrap-v1.json
+          cp edogawa-history-audit-v1.json /tmp/edogawa-history-audit-v1.json
+
           git config user.name 'boat-command-edogawa-history'
           git config user.email 'boat-command-edogawa-history@users.noreply.github.com'
-          git add edogawa-history-bootstrap-v1.json edogawa-history-audit-v1.json
-          git diff --cached --quiet && { echo 'EDOGAWA_HISTORY_ALREADY_CURRENT'; exit 0; }
-          git commit -m 'data(edogawa): publish recovered audited 180-day history'
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            USE_NEW=$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          new=json.load(open('/tmp/edogawa-history-audit-v1.json',encoding='utf-8'))
+          oldp=Path('edogawa-history-audit-v1.json')
+          if not oldp.exists():
+              print('true'); raise SystemExit
+          old=json.loads(oldp.read_text(encoding='utf-8'))
+          nr=int(new.get('races',0)); orr=int(old.get('races',0))
+          nc=str(new.get('cutoff','')); oc=str(old.get('cutoff',''))
+          print('true' if (nc>oc or (nc==oc and nr>orr)) else 'false')
+          PY
+            )
+            if [ "$USE_NEW" != 'true' ]; then
+              echo 'EDOGAWA_HISTORY_EXISTING_IS_EQUAL_OR_BETTER'
+              exit 0
+            fi
+
+            cp /tmp/edogawa-history-bootstrap-v1.json edogawa-history-bootstrap-v1.json
+            cp /tmp/edogawa-history-audit-v1.json edogawa-history-audit-v1.json
+            git add edogawa-history-bootstrap-v1.json edogawa-history-audit-v1.json
+            git diff --cached --quiet && { echo 'EDOGAWA_HISTORY_ALREADY_CURRENT'; exit 0; }
+            git commit -m 'data(edogawa): publish recovered audited 180-day history'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "EDOGAWA_HISTORY_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'EDOGAWA_HISTORY_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
