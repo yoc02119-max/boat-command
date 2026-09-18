@@ -68,8 +68,8 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="research-progress" id="researchProgress">
  <div class="research-kpi"><small>HISTORY</small><b id="rpHistory">—</b></div>
  <div class="research-kpi"><small>HOLDOUT 4点</small><b id="rpHoldout">—</b></div>
- <div class="research-kpi"><small>PROGRAM SHADOW</small><b id="rpProgram">—</b></div>
- <div class="research-kpi"><small>FULL PRE</small><b id="rpFull">—</b></div>
+ <div class="research-kpi"><small>0 / A SHADOW</small><b id="rpProgram">—</b></div>
+ <div class="research-kpi"><small>B · FULL PRE</small><b id="rpFull">—</b></div>
 </div>
 <div class="research-gates" id="researchGates"></div>
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
@@ -115,7 +115,7 @@ else{
          document.getElementById('rpHistory').textContent=`${Number(x.history?.rows||0).toLocaleString('ja-JP')}R`;
          const hr=Number(x.baseline?.holdoutHitRate),roi=Number(x.baseline?.holdoutRoi),hold=Number(x.baseline?.holdoutRaces||0);
          document.getElementById('rpHoldout').textContent=hold&&Number.isFinite(hr)&&Number.isFinite(roi)?`${(hr*100).toFixed(1)}% / ROI ${(roi*100).toFixed(1)}%`:'待機';
-         document.getElementById('rpProgram').textContent=`${Number(x.current?.shadowProgramOnly||0)}/12 · 評価${Number(x.forward?.programOnlyRaces||0)}R`;
+         document.getElementById('rpProgram').textContent=`0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12`;
          document.getElementById('rpFull').textContent=`${Number(x.current?.shadowFullPre||0)}/12 · 評価${Number(x.forward?.fullPreRaces||0)}R`;
        }
        if(x.phase==='DATA_LAYER'){
@@ -132,8 +132,8 @@ else{
        }else if(x.phase==='SHADOW_VALIDATION'){
          const hist=Number(x.history?.rows||0),cls=Number(x.current?.shadowClassBaseline||0),prog=Number(x.current?.shadowProgramOnly||0),full=Number(x.current?.shadowFullPre||0);
          const hr=Number(x.baseline?.holdoutHitRate),hold=Number(x.baseline?.holdoutRaces||0);
-         data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 CLASS ${cls}/12 · PROGRAM ${prog}/12 · FULL ${full}/12`;
-         model.textContent=hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · FULL PRE待ち`:'PROGRAM / FULL PRE 前向き比較中';
+         data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 0:${cls}/12 · A:${prog}/12 · B:${full}/12`;
+         model.textContent=hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · B展示待ち`:'0 → A → B 前向き比較中';
        }else{
          data.textContent='検証ゲート完了';
          model.textContent='昇格レビュー待ち · 自動本番化なし';
@@ -142,8 +142,8 @@ else{
        const labels=[];
        if(bs.some(b=>b.startsWith('OFFICIAL_TIDE_MAPPING_')))labels.push('潮マッピング');
        if(bs.includes('WATER_FEATURE_VALIDATION_NOT_READY'))labels.push('風/波検証');
-       if(bs.some(b=>b.startsWith('PROGRAM_ONLY_FORWARD_')))labels.push('PROGRAM前向き30R');
-       if(bs.some(b=>b.startsWith('FULL_PRE_FORWARD_')))labels.push('FULL PRE前向き30R');
+       if(bs.some(b=>b.startsWith('PROGRAM_ONLY_FORWARD_')))labels.push('A前向き30R');
+       if(bs.some(b=>b.startsWith('FULL_PRE_FORWARD_')))labels.push('B前向き30R');
        if(bs.includes('FORWARD_MODEL_UPLIFT_NOT_READY'))labels.push('モデル改善確認');
        note.textContent=`江戸川専用モデルを検証中。結果先読みなし・TRY/資金連動なし。残り: ${labels.length?labels.join(' / '):'昇格レビュー'}。`;
        if(gates){
