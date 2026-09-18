@@ -38,7 +38,7 @@ jobs:
           rm -rf tmp_edogawa_tide
           mkdir -p tmp_edogawa_tide "live/edogawa/$DATE/pre"
 
-          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.1'             "$RACELIST" -o tmp_edogawa_tide/racelist.html; then
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.2'             "$RACELIST" -o tmp_edogawa_tide/racelist.html; then
             echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0
           fi
 
@@ -70,7 +70,15 @@ jobs:
           import datetime,hashlib,html,json,os,pathlib,re
           from zoneinfo import ZoneInfo
 
-          raw=pathlib.Path('tmp_edogawa_tide/source.html').read_text(encoding='utf-8',errors='replace')
+          raw_bytes=pathlib.Path('tmp_edogawa_tide/source.html').read_bytes()
+          raw=None; detected_encoding=None
+          for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+              try:
+                  raw=raw_bytes.decode(enc);detected_encoding=enc;break
+              except UnicodeDecodeError:
+                  pass
+          if raw is None:
+              raw=raw_bytes.decode('utf-8','replace');detected_encoding='unknown'
           plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',raw))).strip()
           marker_ok=('現在の潮と風向き' in plain and ('潮・風向き舟券攻略法' in plain or '舟券攻略ポイント' in plain))
           if not marker_ok:
@@ -105,6 +113,7 @@ jobs:
             'fallbackCurrentUrl':os.environ.get('URL_CURRENT'),
             'usedFallbackCurrentUrl':os.environ['URL']==os.environ.get('URL_CURRENT'),
             'sourceFingerprint':hashlib.sha256(region.encode('utf-8')).hexdigest(),
+            'detectedEncoding':detected_encoding,
             'markerVerified':True,
             'visibleSourceExcerpt':visible,
             'imageTokens':tags[:30],
