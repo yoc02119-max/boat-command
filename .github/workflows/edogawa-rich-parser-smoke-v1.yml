@@ -1,0 +1,49 @@
+name: Edogawa rich parser smoke v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-rich-parser-smoke-v1.yml'
+      - 'scripts/edogawa-rich-history-builder-v1.py'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install LZH extractor
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Parse known 12R archive
+        run: |
+          set -euo pipefail
+          python3 scripts/edogawa-rich-history-builder-v1.py --self-test
+          rm -rf /tmp/edogawa-rich-smoke
+          mkdir -p /tmp/edogawa-rich-smoke/{raw,b,k}
+          curl -fsSL -o /tmp/edogawa-rich-smoke/raw/b260824.lzh https://www1.mbrace.or.jp/od2/B/202608/b260824.lzh
+          curl -fsSL -o /tmp/edogawa-rich-smoke/raw/k260824.lzh https://www1.mbrace.or.jp/od2/K/202608/k260824.lzh
+          lha xw=/tmp/edogawa-rich-smoke/b /tmp/edogawa-rich-smoke/raw/b260824.lzh >/dev/null
+          lha xw=/tmp/edogawa-rich-smoke/k /tmp/edogawa-rich-smoke/raw/k260824.lzh >/dev/null
+          BFILE=$(find /tmp/edogawa-rich-smoke/b -type f | head -1)
+          KFILE=$(find /tmp/edogawa-rich-smoke/k -type f | head -1)
+          python3 scripts/edogawa-rich-history-builder-v1.py --b "$BFILE" --k "$KFILE" --out /tmp/edogawa-rich-smoke/day.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/edogawa-rich-smoke/day.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-edogawa-rich-day-v1'
+          assert x['venueCode']=='03' and x['date']=='2026-08-24'
+          assert len(x['races'])==12, len(x['races'])
+          ids=[r['id'] for r in x['races']]
+          assert len(ids)==len(set(ids))==12
+          for r in x['races']:
+              assert len(r['boats'])==6
+              assert r['o'].count('-')==2 and int(r['p'])>0
+              for b in r['boats']:
+                  for k in ('nationalWinRate','national2Rate','localWinRate','local2Rate','motor2Rate','boat2Rate'):
+                      assert isinstance(b[k],(int,float)), (r['id'],k,b.get(k))
+          print('EDOGAWA_RICH_PARSER_SMOKE_PASS 12/12')
+          PY
