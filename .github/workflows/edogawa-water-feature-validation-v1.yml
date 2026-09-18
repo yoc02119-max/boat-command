@@ -1,0 +1,71 @@
+name: Edogawa water feature validation v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Edogawa POST-RACE result collector v1"
+      - "Edogawa tide source probe v1"
+    types: [completed]
+  push:
+    paths:
+      - '.github/workflows/edogawa-water-feature-validation-v1.yml'
+      - 'scripts/edogawa-water-feature-validation-v1.js'
+      - 'venues/edogawa/config-v1.json'
+      - 'live/edogawa/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-water-feature-validation-v1
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Build forward water validation
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-water-feature-validation-v1.js
+          node scripts/edogawa-water-feature-validation-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-water-feature-validation-v1.json');
+          if(x.schema!=='boat-command-edogawa-water-feature-validation-v1')throw new Error('SCHEMA');
+          if(x.venue!=='EDOGAWA'||x.venueCode!=='03')throw new Error('TARGET');
+          if(x.researchOnly!==true||x.predictionInput!==false||x.resultUsedOnlyAfterRace!==true)throw new Error('BOUNDARY');
+          if(x.modelWeightsPromoted!==false)throw new Error('PROMOTION');
+          if(x.ready){
+            if(x.rows<x.thresholds.minimumCompletePreResultRows)throw new Error('ROW_GATE');
+            if(x.mappedTideRows<x.thresholds.minimumMappedTideRows)throw new Error('TIDE_GATE');
+          }
+          console.log('EDOGAWA_WATER_VALIDATION_PASS',x.rows,x.mappedTideRows,x.ready);
+          NODE
+
+      - name: Commit validation report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-water'
+          git config user.email 'boat-command-edogawa-water@users.noreply.github.com'
+          git add edogawa-water-feature-validation-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_WATER_VALIDATION_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): refresh forward water feature validation'
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; exit 1; }
+          done
+          exit 1
