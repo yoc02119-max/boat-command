@@ -187,3 +187,34 @@ main{padding:26px 30px 44px;min-width:0}.topbar{display:flex;justify-content:spa
   .forward-metrics{grid-template-columns:repeat(5,minmax(52px,1fr));overflow-x:auto}
   .forward-dashboard-compact{padding:11px}
 }
+
+
+/* v0.35.1 SIMPLE UI — keep advanced functionality mounted but remove it from daily operation */
+.simple-advanced{display:none!important}
+#home .hero-grid{display:block}
+#home .hero-grid>section:not(.simple-advanced){width:100%}
+#home .dashboard-grid{grid-template-columns:1fr}
+#home .dashboard-grid>.panel.wide{grid-column:1}
+.sidebar nav{gap:6px}
+.sidebar nav .nav{min-height:46px}
+.sidebar nav .nav em{font-weight:700}
+.brand-copy small{display:none}
+.topbar{min-height:auto;padding-top:14px;padding-bottom:12px}
+.topbar .eyebrow{display:none}
+.topbar h1{font-size:20px}
+#predict>.panel>.panel-head{position:sticky;top:0;z-index:4;background:rgba(6,16,28,.94);backdrop-filter:blur(10px);padding:10px 0}
+#lockAllBtn{min-width:110px}
+.race-card .rationale-input{display:none}
+.race-card .pick-grid{margin-top:8px}
+.race-card .prediction-gate-top span{font-size:11px}
+.race-card .race-actions{margin-top:8px}
+.forward-dashboard{margin-top:0}
+.forward-foot{opacity:.72}
+@media(max-width:760px){
+  .sidebar{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .sidebar nav{grid-template-columns:repeat(3,1fr)}
+  .sidebar nav .nav{padding:8px 5px}
+  .topbar{padding:10px 12px}
+  main{padding-bottom:78px}
+  #predict>.panel>.panel-head{top:0}
+}
