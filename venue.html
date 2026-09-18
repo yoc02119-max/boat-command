@@ -106,14 +106,22 @@ else{
          data.textContent=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 番組/当地/ST READY`;
          model.textContent=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済み · SHADOW準備`;
        }else if(x.phase==='SHADOW_VALIDATION'){
-         data.textContent=`A/B SHADOW検証中 · A ${Number(x.forward?.programOnlyRaces||0)}R / B ${Number(x.forward?.fullPreRaces||0)}R`;
-         model.textContent='PROGRAM ONLY / FULL PRE 比較中 · 本番未解禁';
+         const hist=Number(x.history?.rows||0),cls=Number(x.current?.shadowClassBaseline||0),prog=Number(x.current?.shadowProgramOnly||0),full=Number(x.current?.shadowFullPre||0);
+         const hr=Number(x.baseline?.holdoutHitRate),hold=Number(x.baseline?.holdoutRaces||0);
+         data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 CLASS ${cls}/12 · PROGRAM ${prog}/12 · FULL ${full}/12`;
+         model.textContent=hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · FULL PRE待ち`:'PROGRAM / FULL PRE 前向き比較中';
        }else{
          data.textContent='検証ゲート完了';
          model.textContent='昇格レビュー待ち · 自動本番化なし';
        }
-       const blockers=Array.isArray(x.blockers)?x.blockers.length:0;
-       note.textContent=`江戸川専用モデルを構築中。蒲郡モデルは流用せず、結果先読みなし・TRY/資金連動なしで検証しています。現在の未完了ゲート: ${blockers}件。`;
+       const bs=Array.isArray(x.blockers)?x.blockers:[];
+       const labels=[];
+       if(bs.some(b=>b.startsWith('OFFICIAL_TIDE_MAPPING_')))labels.push('潮マッピング');
+       if(bs.includes('WATER_FEATURE_VALIDATION_NOT_READY'))labels.push('風/波検証');
+       if(bs.some(b=>b.startsWith('PROGRAM_ONLY_FORWARD_')))labels.push('PROGRAM前向き30R');
+       if(bs.some(b=>b.startsWith('FULL_PRE_FORWARD_')))labels.push('FULL PRE前向き30R');
+       if(bs.includes('FORWARD_MODEL_UPLIFT_NOT_READY'))labels.push('モデル改善確認');
+       note.textContent=`江戸川専用モデルを検証中。結果先読みなし・TRY/資金連動なし。残り: ${labels.length?labels.join(' / '):'昇格レビュー'}。`;
        st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA LAYER'}`;
      }catch{}
    })();
