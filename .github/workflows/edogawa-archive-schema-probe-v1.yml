@@ -1,0 +1,99 @@
+name: Edogawa archive schema probe v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-archive-schema-probe-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install LZH extractor
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+
+      - name: Download known Edogawa race-day B archive
+        run: |
+          set -euo pipefail
+          DATE=2026-08-24
+          YMD=20260824
+          YY=26
+          MM=08
+          DD=24
+          FILE="b${YY}${MM}${DD}.lzh"
+          mkdir -p /tmp/edogawa-b/raw /tmp/edogawa-b/out
+          curl -fsSL --connect-timeout 20 --max-time 60             -o "/tmp/edogawa-b/raw/$FILE"             "https://www1.mbrace.or.jp/od2/B/202608/$FILE"
+          lha xw=/tmp/edogawa-b/out "/tmp/edogawa-b/raw/$FILE" >/dev/null
+
+          export DATE
+          python3 - <<'PY'
+          import importlib.util,json,os,pathlib,re
+
+          spec=importlib.util.spec_from_file_location('phb','program-history-builder-v121.py')
+          phb=importlib.util.module_from_spec(spec);spec.loader.exec_module(phb)
+          files=[p for p in pathlib.Path('/tmp/edogawa-b/out').glob('*') if p.is_file()]
+          if not files:raise SystemExit('NO_EXTRACTED_B_FILE')
+          text=phb.read_cp932(files[0])
+          blocks=phb.venue_blocks(text,'B')
+          if '03' not in blocks:raise SystemExit('EDOGAWA_BLOCK_NOT_FOUND')
+          block=blocks['03']
+          lines=[phb._norm_line(x) for x in block.splitlines() if phb._norm_line(x).strip()]
+
+          entry=[]
+          for i,line in enumerate(lines):
+              if re.match(r'^\s*[1-6]\s*\d{4}',line):
+                  entry.append({'index':i,'line':line})
+          race_heads=[]
+          for i,line in enumerate(lines):
+              if re.search(r'^\s*\d{1,2}\s*R\s*',line):
+                  race_heads.append({'index':i,'line':line})
+
+          out={
+            'schema':'boat-command-edogawa-archive-schema-probe-v1',
+            'venue':'EDOGAWA','venueCode':'03','date':os.environ['DATE'],
+            'source':'MBRACE B program archive',
+            'extractedFile':files[0].name,
+            'lineCount':len(lines),
+            'raceHeads':race_heads[:20],
+            'entrySamples':entry[:30],
+            'firstLines':lines[:180],
+            'resultDataIncluded':False,
+            'predictionEnabled':False
+          }
+          p=pathlib.Path('venues/edogawa/archive-schema-sample-v1.json')
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'lineCount':len(lines),'raceHeads':len(race_heads),'entries':len(entry)},ensure_ascii=False))
+          PY
+
+      - name: Audit PRE-RACE archive-only evidence
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('venues/edogawa/archive-schema-sample-v1.json',encoding='utf-8'))
+          assert x['venueCode']=='03'
+          assert x['resultDataIncluded'] is False
+          assert x['predictionEnabled'] is False
+          assert x['entrySamples']
+          print('EDOGAWA_ARCHIVE_SCHEMA_PROBE_PASS')
+          PY
+
+      - name: Commit archive schema evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-archive'
+          git config user.email 'boat-command-edogawa-archive@users.noreply.github.com'
+          git add venues/edogawa/archive-schema-sample-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(edogawa): capture historical B archive schema'
+          git pull --rebase origin main
+          git push origin HEAD:main
