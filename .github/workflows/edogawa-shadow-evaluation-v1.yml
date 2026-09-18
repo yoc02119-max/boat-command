@@ -1,0 +1,95 @@
+name: Edogawa SHADOW evaluation v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa POST-RACE result collector v1"]
+    types: [completed]
+  push:
+    paths:
+      - 'scripts/edogawa-shadow-evaluate-v1.js'
+      - 'live/edogawa/**/post/**'
+      - 'live/edogawa/**/shadow/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-shadow-evaluation-v1
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Resolve latest Edogawa result date
+        id: date
+        run: |
+          set -euo pipefail
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          dates=sorted(p.name for p in Path('live/edogawa').glob('20??-??-??') if (p/'post').exists())
+          print(dates[-1] if dates else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - name: Evaluate frozen A B snapshots
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-shadow-evaluate-v1.js
+          node scripts/edogawa-shadow-evaluate-v1.js "${{ steps.date.outputs.date }}"
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=process.env.DATE;
+          const x=JSON.parse(fs.readFileSync(`live/edogawa/${d}/research-evaluation-v1.json`,'utf8'));
+          if(x.schema!=='boat-command-edogawa-shadow-evaluation-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03')throw new Error('TARGET');
+          if(x.fundingScope!=='NONE_RESEARCH_ONLY'||x.bankrollAffected!==false||x.tryAffected!==false||x.productionAffected!==false)throw new Error('FUNDING_BOUNDARY');
+          for(const r of x.rows){
+            for(const k of ['programOnly','fullPre']){
+              if(!r[k])continue;
+              if(!Array.isArray(r[k].picks)||r[k].picks.length!==4)throw new Error('PICKS');
+              if(typeof r[k].hit!=='boolean')throw new Error('HIT');
+            }
+          }
+          console.log('EDOGAWA_SHADOW_EVALUATION_PASS',x.summary);
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+
+      - name: Commit evaluation report
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          FILE="live/edogawa/$DATE/research-evaluation-v1.json"
+          git config user.name 'boat-command-edogawa-eval'
+          git config user.email 'boat-command-edogawa-eval@users.noreply.github.com'
+          git add "$FILE"
+          git diff --cached --quiet && { echo 'EDOGAWA_EVALUATION_CURRENT'; exit 0; }
+          git commit -m "analysis(edogawa): refresh cash-neutral A B evaluation"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; exit 1; }
+          done
+          exit 1
