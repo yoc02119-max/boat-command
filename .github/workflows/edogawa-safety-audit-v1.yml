@@ -79,6 +79,16 @@ jobs:
           node --check scripts/edogawa-feature-contract-test-v1.js
           node scripts/edogawa-feature-contract-test-v1.js
 
+      - name: Verify pure Edogawa research contracts
+        run: |
+          set -euo pipefail
+          node --check edogawa-feature-contract-v1.js
+          node --check edogawa-research-model-v1.js
+          node --check scripts/edogawa-feature-contract-test-v1.js
+          node --check scripts/edogawa-research-model-test-v1.js
+          node scripts/edogawa-feature-contract-test-v1.js
+          node scripts/edogawa-research-model-test-v1.js
+
       - name: Verify current stored Edogawa assets
         run: |
           set -euo pipefail
