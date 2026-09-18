@@ -70,6 +70,7 @@ const venues=[
 venues.forEach(v=>{
  const btn=document.createElement('button'),active=v.code==='07',building=v.code==='03';
  btn.className='venue '+(active?'active':building?'prep building':'prep');
+ btn.dataset.venue=v.code;
  btn.innerHTML=active
   ?`<strong>${v.name}</strong><small>${gs.live?'<span class="live-dot"></span>':''}${gs.top}</small><div class="venue-live ${gs.live?'':'wait'}"><b>${gs.detail}</b></div><span class="arrow">→</span>`
   :building
@@ -78,6 +79,22 @@ venues.forEach(v=>{
  btn.onclick=()=>{location.href=active?'./?venue=gamagori':`./venue.html?jcd=${v.code}`};
  grid.appendChild(btn)
 });
+async function refreshEdogawaBuildStatus(){
+ const card=document.querySelector('.venue[data-venue="03"]');if(!card)return;
+ const day=todayJst();
+ try{
+   const r=await fetch(`./live/edogawa/${day}/program/manifest.json?t=${Date.now()}`,{cache:'no-store'});
+   if(!r.ok)throw new Error('WAIT');
+   const x=await r.json();
+   if(x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12){
+     card.querySelector('small').innerHTML='<span class="live-dot"></span>構築中';
+     card.querySelector('.venue-live').className='venue-live';
+     card.querySelector('.venue-live').innerHTML='<b>番組 12/12 · DATA収集中</b>';
+   }
+ }catch{}
+}
+refreshEdogawaBuildStatus();
+setInterval(refreshEdogawaBuildStatus,300000);
 setInterval(()=>{const card=document.querySelector('.venue.active');if(!card)return;const s=gamagoriStatus();card.querySelector('small').innerHTML=`${s.live?'<span class="live-dot"></span>':''}${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`;renderPortalStats()},60000);
 </script>
 </body>
