@@ -72,6 +72,13 @@ jobs:
           print('EDOGAWA_SAFETY_AUDIT_PASS')
           PY
 
+      - name: Verify pure feature contract
+        run: |
+          set -euo pipefail
+          node --check edogawa-feature-contract-v1.js
+          node --check scripts/edogawa-feature-contract-test-v1.js
+          node scripts/edogawa-feature-contract-test-v1.js
+
       - name: Verify current stored Edogawa assets
         run: |
           set -euo pipefail
