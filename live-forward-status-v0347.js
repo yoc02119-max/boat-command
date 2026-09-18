@@ -1,7 +1,7 @@
-// BOAT COMMAND GAMAGORI forward strategy dashboard v0.34.7
+// BOAT COMMAND GAMAGORI forward strategy dashboard v0.35.4
 // Display-only. Reads separated SHADOW status and never writes LIVE predictions, locks, stakes, or results.
 (()=>{'use strict';
-const VERSION='GAMAGORI-FORWARD-DASHBOARD-V0.34.7';
+const VERSION='GAMAGORI-FORWARD-DASHBOARD-V0.35.4';
 const URL='./live/gamagori/forward-status-v0347.json';
 let last=null,timer=null;
 
@@ -124,7 +124,7 @@ async function load(){
     last=x;render(x);
   }catch(e){
     if(last)render(last);else renderWait('ステータス待ち');
-    console.warn('[FORWARD v0.34.7]',e);
+    console.warn('[FORWARD v0.35.4]',e);
   }
 }
 function start(){
