@@ -198,6 +198,21 @@ jobs:
           print('RESULT_FILES_CREATED',made)
           PY
 
+      - name: Refresh forward TRY status from newly collected POST-RACE results
+        env:
+          INPUT_DATE: ${{ inputs.date }}
+        run: |
+          set -euo pipefail
+          DATE="${INPUT_DATE:-}"
+          if [ -z "$DATE" ]; then DATE="$(TZ=Asia/Tokyo date +%F)"; fi
+          GATE="live/gamagori/$DATE/shadow/all-race-try-gates-v0349.json"
+          if [ -f "$GATE" ]; then
+            node --check scripts/gamagori-forward-status-v0347.js
+            node scripts/gamagori-forward-status-v0347.js
+          else
+            echo "TRY_GATE_NOT_READY $GATE"
+          fi
+
       - name: Commit app enablement and POST-RACE relay files
         run: |
           set -euo pipefail
