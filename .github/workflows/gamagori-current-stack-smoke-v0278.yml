@@ -110,6 +110,8 @@ jobs:
           assert 'id="forwardTryResults"' in h, 'TRY_RESULTS_VIEW_MISSING'
           assert 'function programSummary(r)' in a and 'program-brief' in a, 'PROGRAM_TIME_COMPOSITION_MISSING'
           assert 'function relativeRankMap(r,ps)' in a and '総合${rank}位' in a, 'RACER_STRENGTH_VIEW_MISSING'
+          assert 'lane-${lane}' in a and 'grid-template-columns:repeat(6,minmax(104px,1fr))' in c, 'RACER_HORIZONTAL_STRIP_MISSING'
+          assert '.racer-brief.lane-3' in c and '.racer-brief.lane-6' in c, 'BOAT_LANE_COLORS_MISSING'
           assert 'resultGateBadge" class="badge blind simple-advanced' in h, 'LEGACY_RESULT_BADGE_VISIBLE'
           print('USER_SAFE_SIMPLE_MODE_PASS')
       - name: Verify today's result-free 12R program snapshot when present
