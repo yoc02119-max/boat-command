@@ -13,6 +13,7 @@ on:
       - 'edogawa-history-audit-v1.json'
       - 'edogawa-history-analysis-v1.json'
       - 'edogawa-baseline-backtest-v1.json'
+      - 'edogawa-water-feature-validation-v1.json'
   workflow_run:
     workflows:
       - "Edogawa history bootstrap 180d v1"
@@ -23,6 +24,7 @@ on:
       - "Edogawa PRE-RACE collector v1"
       - "Edogawa POST-RACE result collector v1"
       - "Edogawa SHADOW evaluation v1"
+      - "Edogawa water feature validation v1"
     types: [completed]
 
 permissions:
