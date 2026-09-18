@@ -1,0 +1,76 @@
+name: Edogawa rich backtest v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa rich history bootstrap v1"]
+    types: [completed]
+  push:
+    paths:
+      - '.github/workflows/edogawa-rich-backtest-v1.yml'
+      - 'scripts/edogawa-rich-backtest-v1.js'
+      - 'edogawa-rich-history-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-rich-backtest-v1
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Wait for rich history commit
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            git fetch origin main
+            git reset --hard origin/main
+            if [ -f edogawa-rich-history-v1.json ] && [ -f edogawa-rich-history-audit-v1.json ]; then
+              exit 0
+            fi
+            sleep 4
+          done
+          echo 'EDOGAWA_RICH_HISTORY_NOT_READY' >&2
+          exit 1
+
+      - name: Run rich strict holdout
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-rich-backtest-v1.js
+          node scripts/edogawa-rich-backtest-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-rich-backtest-v1.json');
+          if(x.schema!=='boat-command-edogawa-rich-backtest-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03')throw new Error('TARGET');
+          if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
+          if(x.productionEnabled!==false||x.tryEnabled!==false||x.promotionEligible!==false)throw new Error('PROMOTION_BOUNDARY');
+          if(!x.holdout?.pointCounts?.['4']?.races)throw new Error('NO_HOLDOUT');
+          console.log('EDOGAWA_RICH_BACKTEST_PASS',x.holdout.pointCounts['4'],x.comparisonToClassBaseline);
+          NODE
+
+      - name: Commit rich backtest
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-rich-model'
+          git config user.email 'boat-command-edogawa-rich-model@users.noreply.github.com'
+          git add edogawa-rich-backtest-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_RICH_BACKTEST_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): publish rich historical holdout v1'
+          git pull --rebase origin main
+          git push origin HEAD:main
