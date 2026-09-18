@@ -1,0 +1,2523 @@
+{
+  "schema": "boat-command-gamagori-exacta-win-pattern-v0343",
+  "generatedAt": "2026-09-18T13:10:18.482815+09:00",
+  "analysisOnly": true,
+  "liveImported": false,
+  "decision": "SHADOW_ONLY",
+  "boundary": "PRE-only features and exacta picks are frozen before official exacta payout pages are read. Candidate selection/order uses TRAIN+VALIDATION only. TEST is attached after selection freezes.",
+  "sourceCounts": {
+    "locked": 4071,
+    "payoutRows": 4071,
+    "cacheRows": 4071,
+    "fetchFailures": 0
+  },
+  "baseline": {
+    "train": {
+      "races": 2033,
+      "coverage": 1.0,
+      "tickets": 5420,
+      "averagePicksPerRace": 2.6660108214461387,
+      "hits": 906,
+      "hitRate": 0.4456468273487457,
+      "stakeYen": 542000,
+      "returnYen": 409680,
+      "profitYen": -132320,
+      "roi": 0.7558671586715867,
+      "averagePayout100OnHit": 452.18543046357615
+    },
+    "validation": {
+      "races": 1020,
+      "coverage": 1.0,
+      "tickets": 2617,
+      "averagePicksPerRace": 2.565686274509804,
+      "hits": 455,
+      "hitRate": 0.44607843137254904,
+      "stakeYen": 261700,
+      "returnYen": 205550,
+      "profitYen": -56150,
+      "roi": 0.7854413450515858,
+      "averagePayout100OnHit": 451.75824175824175
+    },
+    "test": {
+      "races": 1018,
+      "coverage": 1.0,
+      "tickets": 2645,
+      "averagePicksPerRace": 2.5982318271119844,
+      "hits": 437,
+      "hitRate": 0.4292730844793713,
+      "stakeYen": 264500,
+      "returnYen": 199810,
+      "profitYen": -64690,
+      "roi": 0.7554253308128545,
+      "averagePayout100OnHit": 457.23112128146454
+    }
+  },
+  "selectionRule": {
+    "candidateFamily": "single + pair over predefined PRE-only features",
+    "minTrainRaces": 80,
+    "minValidationRaces": 40,
+    "robustPositive": "TRAIN ROI >= 100% AND VALIDATION ROI >= 100%",
+    "testUsedForSelection": false
+  },
+  "robustPositiveCount": 0,
+  "selectedBeforeTest": [],
+  "diagnosticLeadersBeforeTest": [
+    {
+      "kind": "pair",
+      "label": "race=7 & title=予選",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "title",
+          "value": "予選"
+        }
+      ],
+      "train": {
+        "races": 110,
+        "coverage": 0.05410723069355632,
+        "tickets": 337,
+        "averagePicksPerRace": 3.0636363636363635,
+        "hits": 73,
+        "hitRate": 0.6636363636363637,
+        "stakeYen": 33700,
+        "returnYen": 31560,
+        "profitYen": -2140,
+        "roi": 0.9364985163204748,
+        "averagePayout100OnHit": 432.32876712328766
+      },
+      "validation": {
+        "races": 54,
+        "coverage": 0.052941176470588235,
+        "tickets": 154,
+        "averagePicksPerRace": 2.8518518518518516,
+        "hits": 38,
+        "hitRate": 0.7037037037037037,
+        "stakeYen": 15400,
+        "returnYen": 14870,
+        "profitYen": -530,
+        "roi": 0.9655844155844155,
+        "averagePayout100OnHit": 391.3157894736842
+      },
+      "trainRoiUplift": 0.18063135764888805,
+      "validationRoiUplift": 0.18014307053282974,
+      "trainHitUplift": 0.21798953628761797,
+      "validationHitUplift": 0.2576252723311547,
+      "meanDesignRoi": 0.9510414659524451,
+      "minDesignRoi": 0.9364985163204748,
+      "selectionScore": 0.9267068095109637,
+      "test": {
+        "races": 52,
+        "coverage": 0.05108055009823183,
+        "tickets": 146,
+        "averagePicksPerRace": 2.8076923076923075,
+        "hits": 35,
+        "hitRate": 0.6730769230769231,
+        "stakeYen": 14600,
+        "returnYen": 12090,
+        "profitYen": -2510,
+        "roi": 0.8280821917808219,
+        "averagePayout100OnHit": 345.42857142857144
+      },
+      "testRoiUplift": 0.07265686096796742,
+      "testHitUplift": 0.24380383859755184
+    },
+    {
+      "kind": "pair",
+      "label": "race=3 & title=予選",
+      "parts": [
+        {
+          "name": "race",
+          "value": "3"
+        },
+        {
+          "name": "title",
+          "value": "予選"
+        }
+      ],
+      "train": {
+        "races": 110,
+        "coverage": 0.05410723069355632,
+        "tickets": 302,
+        "averagePicksPerRace": 2.7454545454545456,
+        "hits": 45,
+        "hitRate": 0.4090909090909091,
+        "stakeYen": 30200,
+        "returnYen": 26930,
+        "profitYen": -3270,
+        "roi": 0.8917218543046358,
+        "averagePayout100OnHit": 598.4444444444445
+      },
+      "validation": {
+        "races": 54,
+        "coverage": 0.052941176470588235,
+        "tickets": 130,
+        "averagePicksPerRace": 2.4074074074074074,
+        "hits": 23,
+        "hitRate": 0.42592592592592593,
+        "stakeYen": 13000,
+        "returnYen": 18610,
+        "profitYen": 5610,
+        "roi": 1.4315384615384616,
+        "averagePayout100OnHit": 809.1304347826087
+      },
+      "trainRoiUplift": 0.13585469563304908,
+      "validationRoiUplift": 0.6460971164868758,
+      "trainHitUplift": -0.036555918257836606,
+      "validationHitUplift": -0.020152505446623115,
+      "meanDesignRoi": 1.1616301579215487,
+      "minDesignRoi": 0.8917218543046358,
+      "selectionScore": 0.9240478858889455,
+      "test": {
+        "races": 52,
+        "coverage": 0.05108055009823183,
+        "tickets": 140,
+        "averagePicksPerRace": 2.6923076923076925,
+        "hits": 22,
+        "hitRate": 0.4230769230769231,
+        "stakeYen": 14000,
+        "returnYen": 13760,
+        "profitYen": -240,
+        "roi": 0.9828571428571429,
+        "averagePayout100OnHit": 625.4545454545455
+      },
+      "testRoiUplift": 0.22743181204428842,
+      "testHitUplift": -0.006196161402448219
+    },
+    {
+      "kind": "pair",
+      "label": "race=6 & a1Count=1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "6"
+        },
+        {
+          "name": "a1Count",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 102,
+        "coverage": 0.05017215937038859,
+        "tickets": 278,
+        "averagePicksPerRace": 2.7254901960784315,
+        "hits": 40,
+        "hitRate": 0.39215686274509803,
+        "stakeYen": 27800,
+        "returnYen": 24890,
+        "profitYen": -2910,
+        "roi": 0.8953237410071943,
+        "averagePayout100OnHit": 622.25
+      },
+      "validation": {
+        "races": 56,
+        "coverage": 0.054901960784313725,
+        "tickets": 151,
+        "averagePicksPerRace": 2.6964285714285716,
+        "hits": 26,
+        "hitRate": 0.4642857142857143,
+        "stakeYen": 15100,
+        "returnYen": 13470,
+        "profitYen": -1630,
+        "roi": 0.8920529801324504,
+        "averagePayout100OnHit": 518.0769230769231
+      },
+      "trainRoiUplift": 0.13945658233560754,
+      "validationRoiUplift": 0.10661163508086458,
+      "trainHitUplift": -0.05348996460364769,
+      "validationHitUplift": 0.018207282913165257,
+      "meanDesignRoi": 0.8936883605698223,
+      "minDesignRoi": 0.8920529801324504,
+      "selectionScore": 0.8707906522464148,
+      "test": {
+        "races": 52,
+        "coverage": 0.05108055009823183,
+        "tickets": 134,
+        "averagePicksPerRace": 2.576923076923077,
+        "hits": 22,
+        "hitRate": 0.4230769230769231,
+        "stakeYen": 13400,
+        "returnYen": 11940,
+        "profitYen": -1460,
+        "roi": 0.891044776119403,
+        "averagePayout100OnHit": 542.7272727272727
+      },
+      "testRoiUplift": 0.13561944530654857,
+      "testHitUplift": -0.006196161402448219
+    },
+    {
+      "kind": "pair",
+      "label": "race=7 & lane1Class=A2",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        }
+      ],
+      "train": {
+        "races": 97,
+        "coverage": 0.04771273979340875,
+        "tickets": 299,
+        "averagePicksPerRace": 3.082474226804124,
+        "hits": 56,
+        "hitRate": 0.5773195876288659,
+        "stakeYen": 29900,
+        "returnYen": 26370,
+        "profitYen": -3530,
+        "roi": 0.8819397993311037,
+        "averagePayout100OnHit": 470.89285714285717
+      },
+      "validation": {
+        "races": 56,
+        "coverage": 0.054901960784313725,
+        "tickets": 162,
+        "averagePicksPerRace": 2.892857142857143,
+        "hits": 36,
+        "hitRate": 0.6428571428571429,
+        "stakeYen": 16200,
+        "returnYen": 14170,
+        "profitYen": -2030,
+        "roi": 0.8746913580246913,
+        "averagePayout100OnHit": 393.6111111111111
+      },
+      "trainRoiUplift": 0.12607264065951695,
+      "validationRoiUplift": 0.08925001297310553,
+      "trainHitUplift": 0.1316727602801202,
+      "validationHitUplift": 0.19677871148459386,
+      "meanDesignRoi": 0.8783155786778976,
+      "minDesignRoi": 0.8746913580246913,
+      "selectionScore": 0.8503544737602708,
+      "test": {
+        "races": 47,
+        "coverage": 0.04616895874263261,
+        "tickets": 138,
+        "averagePicksPerRace": 2.9361702127659575,
+        "hits": 31,
+        "hitRate": 0.6595744680851063,
+        "stakeYen": 13800,
+        "returnYen": 12860,
+        "profitYen": -940,
+        "roi": 0.9318840579710145,
+        "averagePayout100OnHit": 414.83870967741933
+      },
+      "testRoiUplift": 0.17645872715816002,
+      "testHitUplift": 0.23030138360573504
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & a1Count=2",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "a1Count",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 164,
+        "coverage": 0.08066896212493851,
+        "tickets": 466,
+        "averagePicksPerRace": 2.841463414634146,
+        "hits": 80,
+        "hitRate": 0.4878048780487805,
+        "stakeYen": 46600,
+        "returnYen": 40030,
+        "profitYen": -6570,
+        "roi": 0.8590128755364806,
+        "averagePayout100OnHit": 500.375
+      },
+      "validation": {
+        "races": 59,
+        "coverage": 0.05784313725490196,
+        "tickets": 162,
+        "averagePicksPerRace": 2.7457627118644066,
+        "hits": 36,
+        "hitRate": 0.6101694915254238,
+        "stakeYen": 16200,
+        "returnYen": 16790,
+        "profitYen": 590,
+        "roi": 1.0364197530864196,
+        "averagePayout100OnHit": 466.3888888888889
+      },
+      "trainRoiUplift": 0.10314571686489393,
+      "validationRoiUplift": 0.25097840803483384,
+      "trainHitUplift": 0.042158050700034755,
+      "validationHitUplift": 0.16409106015287472,
+      "meanDesignRoi": 0.9477163143114502,
+      "minDesignRoi": 0.8590128755364806,
+      "selectionScore": 0.8485561383987706,
+      "test": {
+        "races": 62,
+        "coverage": 0.060903732809430254,
+        "tickets": 175,
+        "averagePicksPerRace": 2.8225806451612905,
+        "hits": 29,
+        "hitRate": 0.46774193548387094,
+        "stakeYen": 17500,
+        "returnYen": 12190,
+        "profitYen": -5310,
+        "roi": 0.6965714285714286,
+        "averagePayout100OnHit": 420.3448275862069
+      },
+      "testRoiUplift": -0.05885390224142584,
+      "testHitUplift": 0.03846885100449965
+    },
+    {
+      "kind": "single",
+      "label": "race=7",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        }
+      ],
+      "train": {
+        "races": 170,
+        "coverage": 0.08362026561731431,
+        "tickets": 499,
+        "averagePicksPerRace": 2.9352941176470586,
+        "hits": 105,
+        "hitRate": 0.6176470588235294,
+        "stakeYen": 49900,
+        "returnYen": 43660,
+        "profitYen": -6240,
+        "roi": 0.8749498997995993,
+        "averagePayout100OnHit": 415.8095238095238
+      },
+      "validation": {
+        "races": 85,
+        "coverage": 0.08333333333333333,
+        "tickets": 244,
+        "averagePicksPerRace": 2.8705882352941177,
+        "hits": 58,
+        "hitRate": 0.6823529411764706,
+        "stakeYen": 24400,
+        "returnYen": 21210,
+        "profitYen": -3190,
+        "roi": 0.8692622950819672,
+        "averagePayout100OnHit": 365.6896551724138
+      },
+      "trainRoiUplift": 0.11908274112801254,
+      "validationRoiUplift": 0.08382095003038137,
+      "trainHitUplift": 0.17200023147478372,
+      "validationHitUplift": 0.23627450980392156,
+      "meanDesignRoi": 0.8721060974407833,
+      "minDesignRoi": 0.8692622950819672,
+      "selectionScore": 0.8436835145701238,
+      "test": {
+        "races": 85,
+        "coverage": 0.08349705304518663,
+        "tickets": 241,
+        "averagePicksPerRace": 2.835294117647059,
+        "hits": 52,
+        "hitRate": 0.611764705882353,
+        "stakeYen": 24100,
+        "returnYen": 19820,
+        "profitYen": -4280,
+        "roi": 0.8224066390041493,
+        "averagePayout100OnHit": 381.15384615384613
+      },
+      "testRoiUplift": 0.06698130819129489,
+      "testHitUplift": 0.1824916214029817
+    },
+    {
+      "kind": "pair",
+      "label": "race=7 & aClassCount=3",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 105,
+        "coverage": 0.051647811116576486,
+        "tickets": 326,
+        "averagePicksPerRace": 3.104761904761905,
+        "hits": 73,
+        "hitRate": 0.6952380952380952,
+        "stakeYen": 32600,
+        "returnYen": 32890,
+        "profitYen": 290,
+        "roi": 1.0088957055214725,
+        "averagePayout100OnHit": 450.54794520547944
+      },
+      "validation": {
+        "races": 48,
+        "coverage": 0.047058823529411764,
+        "tickets": 143,
+        "averagePicksPerRace": 2.9791666666666665,
+        "hits": 35,
+        "hitRate": 0.7291666666666666,
+        "stakeYen": 14300,
+        "returnYen": 12210,
+        "profitYen": -2090,
+        "roi": 0.8538461538461538,
+        "averagePayout100OnHit": 348.85714285714283
+      },
+      "trainRoiUplift": 0.25302854684988574,
+      "validationRoiUplift": 0.068404808794568,
+      "trainHitUplift": 0.2495912678893495,
+      "validationHitUplift": 0.2830882352941176,
+      "meanDesignRoi": 0.9313709296838131,
+      "minDesignRoi": 0.8538461538461538,
+      "selectionScore": 0.8401203397829164,
+      "test": {
+        "races": 46,
+        "coverage": 0.04518664047151277,
+        "tickets": 137,
+        "averagePicksPerRace": 2.9782608695652173,
+        "hits": 33,
+        "hitRate": 0.717391304347826,
+        "stakeYen": 13700,
+        "returnYen": 11280,
+        "profitYen": -2420,
+        "roi": 0.8233576642335766,
+        "averagePayout100OnHit": 341.8181818181818
+      },
+      "testRoiUplift": 0.06793233342072214,
+      "testHitUplift": 0.28811821986845476
+    },
+    {
+      "kind": "pair",
+      "label": "race=3 & aClassCount=2",
+      "parts": [
+        {
+          "name": "race",
+          "value": "3"
+        },
+        {
+          "name": "aClassCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 122,
+        "coverage": 0.06000983767830792,
+        "tickets": 343,
+        "averagePicksPerRace": 2.8114754098360657,
+        "hits": 49,
+        "hitRate": 0.4016393442622951,
+        "stakeYen": 34300,
+        "returnYen": 29570,
+        "profitYen": -4730,
+        "roi": 0.8620991253644315,
+        "averagePayout100OnHit": 603.469387755102
+      },
+      "validation": {
+        "races": 50,
+        "coverage": 0.049019607843137254,
+        "tickets": 127,
+        "averagePicksPerRace": 2.54,
+        "hits": 18,
+        "hitRate": 0.36,
+        "stakeYen": 12700,
+        "returnYen": 11450,
+        "profitYen": -1250,
+        "roi": 0.9015748031496063,
+        "averagePayout100OnHit": 636.1111111111111
+      },
+      "trainRoiUplift": 0.10623196669284474,
+      "validationRoiUplift": 0.11613345809802045,
+      "trainHitUplift": -0.04400748308645064,
+      "validationHitUplift": -0.08607843137254906,
+      "meanDesignRoi": 0.8818369642570189,
+      "minDesignRoi": 0.8620991253644315,
+      "selectionScore": 0.8384665182158352,
+      "test": {
+        "races": 58,
+        "coverage": 0.05697445972495088,
+        "tickets": 155,
+        "averagePicksPerRace": 2.6724137931034484,
+        "hits": 24,
+        "hitRate": 0.41379310344827586,
+        "stakeYen": 15500,
+        "returnYen": 15020,
+        "profitYen": -480,
+        "roi": 0.9690322580645161,
+        "averagePayout100OnHit": 625.8333333333334
+      },
+      "testRoiUplift": 0.21360692725166164,
+      "testHitUplift": -0.015479981031095436
+    },
+    {
+      "kind": "pair",
+      "label": "race=7 & exactaPickCount=3",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 119,
+        "coverage": 0.05853418593212002,
+        "tickets": 357,
+        "averagePicksPerRace": 3.0,
+        "hits": 78,
+        "hitRate": 0.6554621848739496,
+        "stakeYen": 35700,
+        "returnYen": 30760,
+        "profitYen": -4940,
+        "roi": 0.861624649859944,
+        "averagePayout100OnHit": 394.35897435897436
+      },
+      "validation": {
+        "races": 74,
+        "coverage": 0.07254901960784314,
+        "tickets": 222,
+        "averagePicksPerRace": 3.0,
+        "hits": 50,
+        "hitRate": 0.6756756756756757,
+        "stakeYen": 22200,
+        "returnYen": 18720,
+        "profitYen": -3480,
+        "roi": 0.8432432432432433,
+        "averagePayout100OnHit": 374.4
+      },
+      "trainRoiUplift": 0.10575749118835731,
+      "validationRoiUplift": 0.057801898191657486,
+      "trainHitUplift": 0.20981535752520386,
+      "validationHitUplift": 0.2295972443031266,
+      "meanDesignRoi": 0.8524339465515937,
+      "minDesignRoi": 0.8432432432432433,
+      "selectionScore": 0.813730032553562,
+      "test": {
+        "races": 68,
+        "coverage": 0.06679764243614932,
+        "tickets": 204,
+        "averagePicksPerRace": 3.0,
+        "hits": 47,
+        "hitRate": 0.6911764705882353,
+        "stakeYen": 20400,
+        "returnYen": 17880,
+        "profitYen": -2520,
+        "roi": 0.8764705882352941,
+        "averagePayout100OnHit": 380.4255319148936
+      },
+      "testRoiUplift": 0.12104525742243966,
+      "testHitUplift": 0.261903386108864
+    },
+    {
+      "kind": "pair",
+      "label": "race=3 & a1Count=1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "3"
+        },
+        {
+          "name": "a1Count",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 129,
+        "coverage": 0.06345302508607968,
+        "tickets": 358,
+        "averagePicksPerRace": 2.7751937984496124,
+        "hits": 50,
+        "hitRate": 0.3875968992248062,
+        "stakeYen": 35800,
+        "returnYen": 30130,
+        "profitYen": -5670,
+        "roi": 0.8416201117318436,
+        "averagePayout100OnHit": 602.6
+      },
+      "validation": {
+        "races": 42,
+        "coverage": 0.041176470588235294,
+        "tickets": 103,
+        "averagePicksPerRace": 2.4523809523809526,
+        "hits": 14,
+        "hitRate": 0.3333333333333333,
+        "stakeYen": 10300,
+        "returnYen": 8880,
+        "profitYen": -1420,
+        "roi": 0.8621359223300971,
+        "averagePayout100OnHit": 634.2857142857143
+      },
+      "trainRoiUplift": 0.08575295306025688,
+      "validationRoiUplift": 0.07669457727851126,
+      "trainHitUplift": -0.0580499281239395,
+      "validationHitUplift": -0.11274509803921573,
+      "meanDesignRoi": 0.8518780170309703,
+      "minDesignRoi": 0.8416201117318436,
+      "selectionScore": 0.8119957151380377,
+      "test": {
+        "races": 59,
+        "coverage": 0.05795677799607073,
+        "tickets": 165,
+        "averagePicksPerRace": 2.7966101694915255,
+        "hits": 26,
+        "hitRate": 0.4406779661016949,
+        "stakeYen": 16500,
+        "returnYen": 15460,
+        "profitYen": -1040,
+        "roi": 0.936969696969697,
+        "averagePayout100OnHit": 594.6153846153846
+      },
+      "testRoiUplift": 0.18154436615684255,
+      "testHitUplift": 0.011404881622323615
+    },
+    {
+      "kind": "pair",
+      "label": "aClassCount=2 & headCount=1",
+      "parts": [
+        {
+          "name": "aClassCount",
+          "value": "2"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 314,
+        "coverage": 0.1544515494343335,
+        "tickets": 802,
+        "averagePicksPerRace": 2.554140127388535,
+        "hits": 142,
+        "hitRate": 0.45222929936305734,
+        "stakeYen": 80200,
+        "returnYen": 69930,
+        "profitYen": -10270,
+        "roi": 0.8719451371571072,
+        "averagePayout100OnHit": 492.46478873239437
+      },
+      "validation": {
+        "races": 177,
+        "coverage": 0.17352941176470588,
+        "tickets": 453,
+        "averagePicksPerRace": 2.559322033898305,
+        "hits": 75,
+        "hitRate": 0.423728813559322,
+        "stakeYen": 45300,
+        "returnYen": 38010,
+        "profitYen": -7290,
+        "roi": 0.8390728476821192,
+        "averagePayout100OnHit": 506.8
+      },
+      "trainRoiUplift": 0.11607797848552048,
+      "validationRoiUplift": 0.0536315026305334,
+      "trainHitUplift": 0.006582472014311613,
+      "validationHitUplift": -0.02234961781322703,
+      "meanDesignRoi": 0.8555089924196132,
+      "minDesignRoi": 0.8390728476821192,
+      "selectionScore": 0.8101746461660418,
+      "test": {
+        "races": 135,
+        "coverage": 0.13261296660117877,
+        "tickets": 348,
+        "averagePicksPerRace": 2.577777777777778,
+        "hits": 61,
+        "hitRate": 0.45185185185185184,
+        "stakeYen": 34800,
+        "returnYen": 31310,
+        "profitYen": -3490,
+        "roi": 0.899712643678161,
+        "averagePayout100OnHit": 513.2786885245902
+      },
+      "testRoiUplift": 0.1442873128653065,
+      "testHitUplift": 0.022578767372480546
+    },
+    {
+      "kind": "pair",
+      "label": "race=10 & exactaPickCount=2",
+      "parts": [
+        {
+          "name": "race",
+          "value": "10"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 84,
+        "coverage": 0.04131824889326119,
+        "tickets": 168,
+        "averagePicksPerRace": 2.0,
+        "hits": 42,
+        "hitRate": 0.5,
+        "stakeYen": 16800,
+        "returnYen": 14010,
+        "profitYen": -2790,
+        "roi": 0.8339285714285715,
+        "averagePayout100OnHit": 333.57142857142856
+      },
+      "validation": {
+        "races": 53,
+        "coverage": 0.05196078431372549,
+        "tickets": 106,
+        "averagePicksPerRace": 2.0,
+        "hits": 33,
+        "hitRate": 0.6226415094339622,
+        "stakeYen": 10600,
+        "returnYen": 9330,
+        "profitYen": -1270,
+        "roi": 0.880188679245283,
+        "averagePayout100OnHit": 282.72727272727275
+      },
+      "trainRoiUplift": 0.07806141275698475,
+      "validationRoiUplift": 0.09474733419369719,
+      "trainHitUplift": 0.05435317265125428,
+      "validationHitUplift": 0.1765630780614132,
+      "meanDesignRoi": 0.8570586253369272,
+      "minDesignRoi": 0.8339285714285715,
+      "selectionScore": 0.805340296495957,
+      "test": {
+        "races": 42,
+        "coverage": 0.0412573673870334,
+        "tickets": 84,
+        "averagePicksPerRace": 2.0,
+        "hits": 21,
+        "hitRate": 0.5,
+        "stakeYen": 8400,
+        "returnYen": 6510,
+        "profitYen": -1890,
+        "roi": 0.775,
+        "averagePayout100OnHit": 310.0
+      },
+      "testRoiUplift": 0.019574669187145566,
+      "testHitUplift": 0.07072691552062871
+    },
+    {
+      "kind": "pair",
+      "label": "race=3 & lane1Class=B1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "3"
+        },
+        {
+          "name": "lane1Class",
+          "value": "B1"
+        }
+      ],
+      "train": {
+        "races": 145,
+        "coverage": 0.07132316773241515,
+        "tickets": 398,
+        "averagePicksPerRace": 2.7448275862068967,
+        "hits": 53,
+        "hitRate": 0.36551724137931035,
+        "stakeYen": 39800,
+        "returnYen": 32550,
+        "profitYen": -7250,
+        "roi": 0.8178391959798995,
+        "averagePayout100OnHit": 614.1509433962265
+      },
+      "validation": {
+        "races": 73,
+        "coverage": 0.07156862745098039,
+        "tickets": 186,
+        "averagePicksPerRace": 2.547945205479452,
+        "hits": 26,
+        "hitRate": 0.3561643835616438,
+        "stakeYen": 18600,
+        "returnYen": 17580,
+        "profitYen": -1020,
+        "roi": 0.9451612903225807,
+        "averagePayout100OnHit": 676.1538461538462
+      },
+      "trainRoiUplift": 0.0619720373083128,
+      "validationRoiUplift": 0.15971994527099487,
+      "trainHitUplift": -0.08012958596943537,
+      "validationHitUplift": -0.08991404781090523,
+      "meanDesignRoi": 0.8815002431512401,
+      "minDesignRoi": 0.8178391959798995,
+      "selectionScore": 0.7941392446101475,
+      "test": {
+        "races": 66,
+        "coverage": 0.06483300589390963,
+        "tickets": 177,
+        "averagePicksPerRace": 2.6818181818181817,
+        "hits": 28,
+        "hitRate": 0.42424242424242425,
+        "stakeYen": 17700,
+        "returnYen": 17020,
+        "profitYen": -680,
+        "roi": 0.9615819209039548,
+        "averagePayout100OnHit": 607.8571428571429
+      },
+      "testRoiUplift": 0.20615659009110032,
+      "testHitUplift": -0.005030660236947038
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & title=一般戦",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "title",
+          "value": "一般戦"
+        }
+      ],
+      "train": {
+        "races": 239,
+        "coverage": 0.11756025577963601,
+        "tickets": 629,
+        "averagePicksPerRace": 2.6317991631799162,
+        "hits": 112,
+        "hitRate": 0.4686192468619247,
+        "stakeYen": 62900,
+        "returnYen": 51500,
+        "profitYen": -11400,
+        "roi": 0.8187599364069952,
+        "averagePayout100OnHit": 459.82142857142856
+      },
+      "validation": {
+        "races": 120,
+        "coverage": 0.11764705882352941,
+        "tickets": 319,
+        "averagePicksPerRace": 2.658333333333333,
+        "hits": 66,
+        "hitRate": 0.55,
+        "stakeYen": 31900,
+        "returnYen": 28090,
+        "profitYen": -3810,
+        "roi": 0.8805642633228841,
+        "averagePayout100OnHit": 425.6060606060606
+      },
+      "trainRoiUplift": 0.06289277773540847,
+      "validationRoiUplift": 0.09512291827129826,
+      "trainHitUplift": 0.022972419513178965,
+      "validationHitUplift": 0.103921568627451,
+      "meanDesignRoi": 0.8496620998649396,
+      "minDesignRoi": 0.8187599364069952,
+      "selectionScore": 0.7886923563799831,
+      "test": {
+        "races": 122,
+        "coverage": 0.11984282907662082,
+        "tickets": 331,
+        "averagePicksPerRace": 2.7131147540983607,
+        "hits": 55,
+        "hitRate": 0.45081967213114754,
+        "stakeYen": 33100,
+        "returnYen": 26820,
+        "profitYen": -6280,
+        "roi": 0.8102719033232628,
+        "averagePayout100OnHit": 487.6363636363636
+      },
+      "testRoiUplift": 0.054846572510408365,
+      "testHitUplift": 0.02154658765177625
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=A1 & aClassCount=6",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "aClassCount",
+          "value": "6"
+        }
+      ],
+      "train": {
+        "races": 125,
+        "coverage": 0.06148548942449582,
+        "tickets": 278,
+        "averagePicksPerRace": 2.224,
+        "hits": 70,
+        "hitRate": 0.56,
+        "stakeYen": 27800,
+        "returnYen": 25950,
+        "profitYen": -1850,
+        "roi": 0.9334532374100719,
+        "averagePayout100OnHit": 370.7142857142857
+      },
+      "validation": {
+        "races": 66,
+        "coverage": 0.06470588235294118,
+        "tickets": 139,
+        "averagePicksPerRace": 2.106060606060606,
+        "hits": 28,
+        "hitRate": 0.42424242424242425,
+        "stakeYen": 13900,
+        "returnYen": 11250,
+        "profitYen": -2650,
+        "roi": 0.8093525179856115,
+        "averagePayout100OnHit": 401.7857142857143
+      },
+      "trainRoiUplift": 0.1775860787384852,
+      "validationRoiUplift": 0.02391117293402567,
+      "trainHitUplift": 0.11435317265125433,
+      "validationHitUplift": -0.02183600713012479,
+      "meanDesignRoi": 0.8714028776978417,
+      "minDesignRoi": 0.8093525179856115,
+      "selectionScore": 0.7836330935251798,
+      "test": {
+        "races": 89,
+        "coverage": 0.08742632612966601,
+        "tickets": 199,
+        "averagePicksPerRace": 2.235955056179775,
+        "hits": 45,
+        "hitRate": 0.5056179775280899,
+        "stakeYen": 19900,
+        "returnYen": 15460,
+        "profitYen": -4440,
+        "roi": 0.7768844221105528,
+        "averagePayout100OnHit": 343.55555555555554
+      },
+      "testRoiUplift": 0.021459091297698296,
+      "testHitUplift": 0.07634489304871861
+    },
+    {
+      "kind": "single",
+      "label": "aClassCount=6",
+      "parts": [
+        {
+          "name": "aClassCount",
+          "value": "6"
+        }
+      ],
+      "train": {
+        "races": 131,
+        "coverage": 0.06443679291687161,
+        "tickets": 296,
+        "averagePicksPerRace": 2.2595419847328246,
+        "hits": 73,
+        "hitRate": 0.5572519083969466,
+        "stakeYen": 29600,
+        "returnYen": 27140,
+        "profitYen": -2460,
+        "roi": 0.9168918918918919,
+        "averagePayout100OnHit": 371.7808219178082
+      },
+      "validation": {
+        "races": 69,
+        "coverage": 0.06764705882352941,
+        "tickets": 147,
+        "averagePicksPerRace": 2.130434782608696,
+        "hits": 30,
+        "hitRate": 0.43478260869565216,
+        "stakeYen": 14700,
+        "returnYen": 11790,
+        "profitYen": -2910,
+        "roi": 0.8020408163265306,
+        "averagePayout100OnHit": 393.0
+      },
+      "trainRoiUplift": 0.1610247332203052,
+      "validationRoiUplift": 0.016599471274944766,
+      "trainHitUplift": 0.11160508104820088,
+      "validationHitUplift": -0.011295822676896883,
+      "meanDesignRoi": 0.8594663541092112,
+      "minDesignRoi": 0.8020408163265306,
+      "selectionScore": 0.7739340871483729,
+      "test": {
+        "races": 119,
+        "coverage": 0.1168958742632613,
+        "tickets": 274,
+        "averagePicksPerRace": 2.302521008403361,
+        "hits": 53,
+        "hitRate": 0.44537815126050423,
+        "stakeYen": 27400,
+        "returnYen": 19960,
+        "profitYen": -7440,
+        "roi": 0.7284671532846715,
+        "averagePayout100OnHit": 376.60377358490564
+      },
+      "testRoiUplift": -0.02695817752818297,
+      "testHitUplift": 0.016105066781132937
+    },
+    {
+      "kind": "pair",
+      "label": "aClassCount=6 & headCount=1",
+      "parts": [
+        {
+          "name": "aClassCount",
+          "value": "6"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 128,
+        "coverage": 0.06296114117068372,
+        "tickets": 286,
+        "averagePicksPerRace": 2.234375,
+        "hits": 73,
+        "hitRate": 0.5703125,
+        "stakeYen": 28600,
+        "returnYen": 27140,
+        "profitYen": -1460,
+        "roi": 0.948951048951049,
+        "averagePayout100OnHit": 371.7808219178082
+      },
+      "validation": {
+        "races": 67,
+        "coverage": 0.06568627450980392,
+        "tickets": 141,
+        "averagePicksPerRace": 2.1044776119402986,
+        "hits": 28,
+        "hitRate": 0.417910447761194,
+        "stakeYen": 14100,
+        "returnYen": 11250,
+        "profitYen": -2850,
+        "roi": 0.7978723404255319,
+        "averagePayout100OnHit": 401.7857142857143
+      },
+      "trainRoiUplift": 0.19308389027946227,
+      "validationRoiUplift": 0.012430995373946097,
+      "trainHitUplift": 0.12466567265125428,
+      "validationHitUplift": -0.02816798361135503,
+      "meanDesignRoi": 0.8734116946882904,
+      "minDesignRoi": 0.7978723404255319,
+      "selectionScore": 0.77255467936319,
+      "test": {
+        "races": 112,
+        "coverage": 0.1100196463654224,
+        "tickets": 254,
+        "averagePicksPerRace": 2.267857142857143,
+        "hits": 50,
+        "hitRate": 0.44642857142857145,
+        "stakeYen": 25400,
+        "returnYen": 18300,
+        "profitYen": -7100,
+        "roi": 0.7204724409448819,
+        "averagePayout100OnHit": 366.0
+      },
+      "testRoiUplift": -0.034952889867972514,
+      "testHitUplift": 0.01715548694920016
+    },
+    {
+      "kind": "single",
+      "label": "race=3",
+      "parts": [
+        {
+          "name": "race",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 170,
+        "coverage": 0.08362026561731431,
+        "tickets": 466,
+        "averagePicksPerRace": 2.7411764705882353,
+        "hits": 63,
+        "hitRate": 0.37058823529411766,
+        "stakeYen": 46600,
+        "returnYen": 36700,
+        "profitYen": -9900,
+        "roi": 0.7875536480686696,
+        "averagePayout100OnHit": 582.5396825396825
+      },
+      "validation": {
+        "races": 85,
+        "coverage": 0.08333333333333333,
+        "tickets": 215,
+        "averagePicksPerRace": 2.5294117647058822,
+        "hits": 32,
+        "hitRate": 0.3764705882352941,
+        "stakeYen": 21500,
+        "returnYen": 21730,
+        "profitYen": 230,
+        "roi": 1.0106976744186047,
+        "averagePayout100OnHit": 679.0625
+      },
+      "trainRoiUplift": 0.03168648939708285,
+      "validationRoiUplift": 0.2252563293670189,
+      "trainHitUplift": -0.07505859205462806,
+      "validationHitUplift": -0.06960784313725493,
+      "meanDesignRoi": 0.8991256612436371,
+      "minDesignRoi": 0.7875536480686696,
+      "selectionScore": 0.767378780317397,
+      "test": {
+        "races": 85,
+        "coverage": 0.08349705304518663,
+        "tickets": 229,
+        "averagePicksPerRace": 2.6941176470588237,
+        "hits": 34,
+        "hitRate": 0.4,
+        "stakeYen": 22900,
+        "returnYen": 20010,
+        "profitYen": -2890,
+        "roi": 0.8737991266375545,
+        "averagePayout100OnHit": 588.5294117647059
+      },
+      "testRoiUplift": 0.11837379582470009,
+      "testHitUplift": -0.02927308447937127
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=A2 & a1Count=2",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        },
+        {
+          "name": "a1Count",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 90,
+        "coverage": 0.04426955238563699,
+        "tickets": 257,
+        "averagePicksPerRace": 2.8555555555555556,
+        "hits": 46,
+        "hitRate": 0.5111111111111111,
+        "stakeYen": 25700,
+        "returnYen": 20460,
+        "profitYen": -5240,
+        "roi": 0.7961089494163424,
+        "averagePayout100OnHit": 444.7826086956522
+      },
+      "validation": {
+        "races": 42,
+        "coverage": 0.041176470588235294,
+        "tickets": 121,
+        "averagePicksPerRace": 2.880952380952381,
+        "hits": 27,
+        "hitRate": 0.6428571428571429,
+        "stakeYen": 12100,
+        "returnYen": 10980,
+        "profitYen": -1120,
+        "roi": 0.9074380165289256,
+        "averagePayout100OnHit": 406.6666666666667
+      },
+      "trainRoiUplift": 0.040241790744755646,
+      "validationRoiUplift": 0.12199667147733984,
+      "trainHitUplift": 0.06546428376236535,
+      "validationHitUplift": 0.19677871148459386,
+      "meanDesignRoi": 0.851773482972634,
+      "minDesignRoi": 0.7961089494163424,
+      "selectionScore": 0.7664636460108691,
+      "test": {
+        "races": 51,
+        "coverage": 0.05009823182711198,
+        "tickets": 141,
+        "averagePicksPerRace": 2.764705882352941,
+        "hits": 24,
+        "hitRate": 0.47058823529411764,
+        "stakeYen": 14100,
+        "returnYen": 10810,
+        "profitYen": -3290,
+        "roi": 0.7666666666666667,
+        "averagePayout100OnHit": 450.4166666666667
+      },
+      "testRoiUplift": 0.011241335853812262,
+      "testHitUplift": 0.04131515081474635
+    },
+    {
+      "kind": "pair",
+      "label": "race=6 & exactaPickCount=3",
+      "parts": [
+        {
+          "name": "race",
+          "value": "6"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 96,
+        "coverage": 0.04722085587801279,
+        "tickets": 288,
+        "averagePicksPerRace": 3.0,
+        "hits": 47,
+        "hitRate": 0.4895833333333333,
+        "stakeYen": 28800,
+        "returnYen": 22550,
+        "profitYen": -6250,
+        "roi": 0.7829861111111112,
+        "averagePayout100OnHit": 479.78723404255317
+      },
+      "validation": {
+        "races": 51,
+        "coverage": 0.05,
+        "tickets": 153,
+        "averagePicksPerRace": 3.0,
+        "hits": 27,
+        "hitRate": 0.5294117647058824,
+        "stakeYen": 15300,
+        "returnYen": 15640,
+        "profitYen": 340,
+        "roi": 1.0222222222222221,
+        "averagePayout100OnHit": 579.2592592592592
+      },
+      "trainRoiUplift": 0.027118952439524446,
+      "validationRoiUplift": 0.23678087717063634,
+      "trainHitUplift": 0.04393650598458759,
+      "validationHitUplift": 0.08333333333333331,
+      "meanDesignRoi": 0.9026041666666667,
+      "minDesignRoi": 0.7829861111111112,
+      "selectionScore": 0.7635069444444444,
+      "test": {
+        "races": 41,
+        "coverage": 0.04027504911591356,
+        "tickets": 123,
+        "averagePicksPerRace": 3.0,
+        "hits": 22,
+        "hitRate": 0.5365853658536586,
+        "stakeYen": 12300,
+        "returnYen": 9450,
+        "profitYen": -2850,
+        "roi": 0.7682926829268293,
+        "averagePayout100OnHit": 429.54545454545456
+      },
+      "testRoiUplift": 0.012867352113974828,
+      "testHitUplift": 0.10731228137428728
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=B1 & headCount=1",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "B1"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 289,
+        "coverage": 0.14215445154943435,
+        "tickets": 739,
+        "averagePicksPerRace": 2.557093425605536,
+        "hits": 96,
+        "hitRate": 0.33217993079584773,
+        "stakeYen": 73900,
+        "returnYen": 58600,
+        "profitYen": -15300,
+        "roi": 0.7929634641407307,
+        "averagePayout100OnHit": 610.4166666666666
+      },
+      "validation": {
+        "races": 206,
+        "coverage": 0.2019607843137255,
+        "tickets": 508,
+        "averagePicksPerRace": 2.466019417475728,
+        "hits": 76,
+        "hitRate": 0.36893203883495146,
+        "stakeYen": 50800,
+        "returnYen": 44380,
+        "profitYen": -6420,
+        "roi": 0.8736220472440945,
+        "averagePayout100OnHit": 583.9473684210526
+      },
+      "trainRoiUplift": 0.037096305469144,
+      "validationRoiUplift": 0.08818070219250873,
+      "trainHitUplift": -0.11346689655289799,
+      "validationHitUplift": -0.07714639253759759,
+      "meanDesignRoi": 0.8332927556924126,
+      "minDesignRoi": 0.7929634641407307,
+      "selectionScore": 0.7596220152792132,
+      "test": {
+        "races": 170,
+        "coverage": 0.16699410609037327,
+        "tickets": 407,
+        "averagePicksPerRace": 2.3941176470588235,
+        "hits": 60,
+        "hitRate": 0.35294117647058826,
+        "stakeYen": 40700,
+        "returnYen": 39710,
+        "profitYen": -990,
+        "roi": 0.9756756756756757,
+        "averagePayout100OnHit": 661.8333333333334
+      },
+      "testRoiUplift": 0.22025034486282125,
+      "testHitUplift": -0.07633190800878303
+    },
+    {
+      "kind": "pair",
+      "label": "title=一般戦 & a1Count=0",
+      "parts": [
+        {
+          "name": "title",
+          "value": "一般戦"
+        },
+        {
+          "name": "a1Count",
+          "value": "0"
+        }
+      ],
+      "train": {
+        "races": 168,
+        "coverage": 0.08263649778652238,
+        "tickets": 454,
+        "averagePicksPerRace": 2.7023809523809526,
+        "hits": 69,
+        "hitRate": 0.4107142857142857,
+        "stakeYen": 45400,
+        "returnYen": 36280,
+        "profitYen": -9120,
+        "roi": 0.7991189427312775,
+        "averagePayout100OnHit": 525.7971014492754
+      },
+      "validation": {
+        "races": 105,
+        "coverage": 0.10294117647058823,
+        "tickets": 272,
+        "averagePicksPerRace": 2.5904761904761906,
+        "hits": 47,
+        "hitRate": 0.44761904761904764,
+        "stakeYen": 27200,
+        "returnYen": 21800,
+        "profitYen": -5400,
+        "roi": 0.8014705882352942,
+        "averagePayout100OnHit": 463.82978723404256
+      },
+      "trainRoiUplift": 0.04325178405969077,
+      "validationRoiUplift": 0.016029243183708353,
+      "trainHitUplift": -0.034932541634460024,
+      "validationHitUplift": 0.001540616246498594,
+      "meanDesignRoi": 0.8002947654832858,
+      "minDesignRoi": 0.7991189427312775,
+      "selectionScore": 0.7591778958279346,
+      "test": {
+        "races": 80,
+        "coverage": 0.07858546168958742,
+        "tickets": 201,
+        "averagePicksPerRace": 2.5125,
+        "hits": 32,
+        "hitRate": 0.4,
+        "stakeYen": 20100,
+        "returnYen": 19400,
+        "profitYen": -700,
+        "roi": 0.9651741293532339,
+        "averagePayout100OnHit": 606.25
+      },
+      "testRoiUplift": 0.20974879854037942,
+      "testHitUplift": -0.02927308447937127
+    },
+    {
+      "kind": "single",
+      "label": "raceBand=MID_5_8",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        }
+      ],
+      "train": {
+        "races": 679,
+        "coverage": 0.3339891785538613,
+        "tickets": 1865,
+        "averagePicksPerRace": 2.7466863033873343,
+        "hits": 322,
+        "hitRate": 0.4742268041237113,
+        "stakeYen": 186500,
+        "returnYen": 148740,
+        "profitYen": -37760,
+        "roi": 0.7975335120643432,
+        "averagePayout100OnHit": 461.9254658385093
+      },
+      "validation": {
+        "races": 340,
+        "coverage": 0.3333333333333333,
+        "tickets": 905,
+        "averagePicksPerRace": 2.661764705882353,
+        "hits": 163,
+        "hitRate": 0.47941176470588237,
+        "stakeYen": 90500,
+        "returnYen": 73210,
+        "profitYen": -17290,
+        "roi": 0.8089502762430939,
+        "averagePayout100OnHit": 449.1411042944785
+      },
+      "trainRoiUplift": 0.04166635339275648,
+      "validationRoiUplift": 0.023508931191508098,
+      "trainHitUplift": 0.0285799767749656,
+      "validationHitUplift": 0.033333333333333326,
+      "meanDesignRoi": 0.8032418941537185,
+      "minDesignRoi": 0.7975335120643432,
+      "selectionScore": 0.7581818908950869,
+      "test": {
+        "races": 339,
+        "coverage": 0.3330058939096267,
+        "tickets": 913,
+        "averagePicksPerRace": 2.6932153392330385,
+        "hits": 156,
+        "hitRate": 0.46017699115044247,
+        "stakeYen": 91300,
+        "returnYen": 67440,
+        "profitYen": -23860,
+        "roi": 0.7386637458926616,
+        "averagePayout100OnHit": 432.3076923076923
+      },
+      "testRoiUplift": -0.016761584920192862,
+      "testHitUplift": 0.03090390667107118
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & lane1Class=A1",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        }
+      ],
+      "train": {
+        "races": 176,
+        "coverage": 0.08657156910969012,
+        "tickets": 450,
+        "averagePicksPerRace": 2.5568181818181817,
+        "hits": 107,
+        "hitRate": 0.6079545454545454,
+        "stakeYen": 45000,
+        "returnYen": 37310,
+        "profitYen": -7690,
+        "roi": 0.8291111111111111,
+        "averagePayout100OnHit": 348.69158878504675
+      },
+      "validation": {
+        "races": 71,
+        "coverage": 0.0696078431372549,
+        "tickets": 183,
+        "averagePicksPerRace": 2.5774647887323945,
+        "hits": 41,
+        "hitRate": 0.5774647887323944,
+        "stakeYen": 18300,
+        "returnYen": 14540,
+        "profitYen": -3760,
+        "roi": 0.7945355191256831,
+        "averagePayout100OnHit": 354.6341463414634
+      },
+      "trainRoiUplift": 0.07324395243952442,
+      "validationRoiUplift": 0.009094174074097294,
+      "trainHitUplift": 0.1623077181057997,
+      "validationHitUplift": 0.13138635735984533,
+      "meanDesignRoi": 0.8118233151183971,
+      "minDesignRoi": 0.7945355191256831,
+      "selectionScore": 0.7569001821493625,
+      "test": {
+        "races": 87,
+        "coverage": 0.08546168958742632,
+        "tickets": 227,
+        "averagePicksPerRace": 2.6091954022988504,
+        "hits": 53,
+        "hitRate": 0.6091954022988506,
+        "stakeYen": 22700,
+        "returnYen": 17610,
+        "profitYen": -5090,
+        "roi": 0.7757709251101321,
+        "averagePayout100OnHit": 332.2641509433962
+      },
+      "testRoiUplift": 0.02034559429727767,
+      "testHitUplift": 0.17992231781947932
+    },
+    {
+      "kind": "single",
+      "label": "race=6",
+      "parts": [
+        {
+          "name": "race",
+          "value": "6"
+        }
+      ],
+      "train": {
+        "races": 170,
+        "coverage": 0.08362026561731431,
+        "tickets": 463,
+        "averagePicksPerRace": 2.723529411764706,
+        "hits": 70,
+        "hitRate": 0.4117647058823529,
+        "stakeYen": 46300,
+        "returnYen": 36420,
+        "profitYen": -9880,
+        "roi": 0.786609071274298,
+        "averagePayout100OnHit": 520.2857142857143
+      },
+      "validation": {
+        "races": 85,
+        "coverage": 0.08333333333333333,
+        "tickets": 226,
+        "averagePicksPerRace": 2.6588235294117646,
+        "hits": 39,
+        "hitRate": 0.4588235294117647,
+        "stakeYen": 22600,
+        "returnYen": 20370,
+        "profitYen": -2230,
+        "roi": 0.9013274336283186,
+        "averagePayout100OnHit": 522.3076923076923
+      },
+      "trainRoiUplift": 0.030741912602711308,
+      "validationRoiUplift": 0.11588608857673277,
+      "trainHitUplift": -0.0338821214663928,
+      "validationHitUplift": 0.012745098039215641,
+      "meanDesignRoi": 0.8439682524513084,
+      "minDesignRoi": 0.786609071274298,
+      "selectionScore": 0.7554027217645597,
+      "test": {
+        "races": 85,
+        "coverage": 0.08349705304518663,
+        "tickets": 220,
+        "averagePicksPerRace": 2.588235294117647,
+        "hits": 36,
+        "hitRate": 0.4235294117647059,
+        "stakeYen": 22000,
+        "returnYen": 17320,
+        "profitYen": -4680,
+        "roi": 0.7872727272727272,
+        "averagePayout100OnHit": 481.1111111111111
+      },
+      "testRoiUplift": 0.03184739645987278,
+      "testHitUplift": -0.005743672714665415
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & lane1Class=B1",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "lane1Class",
+          "value": "B1"
+        }
+      ],
+      "train": {
+        "races": 174,
+        "coverage": 0.08558780127889817,
+        "tickets": 501,
+        "averagePicksPerRace": 2.8793103448275863,
+        "hits": 64,
+        "hitRate": 0.367816091954023,
+        "stakeYen": 50100,
+        "returnYen": 39530,
+        "profitYen": -10570,
+        "roi": 0.7890219560878243,
+        "averagePayout100OnHit": 617.65625
+      },
+      "validation": {
+        "races": 90,
+        "coverage": 0.08823529411764706,
+        "tickets": 244,
+        "averagePicksPerRace": 2.7111111111111112,
+        "hits": 34,
+        "hitRate": 0.37777777777777777,
+        "stakeYen": 24400,
+        "returnYen": 19910,
+        "profitYen": -4490,
+        "roi": 0.815983606557377,
+        "averagePayout100OnHit": 585.5882352941177
+      },
+      "trainRoiUplift": 0.033154797416237614,
+      "validationRoiUplift": 0.0305422615057912,
+      "trainHitUplift": -0.07783073539472274,
+      "validationHitUplift": -0.06830065359477128,
+      "meanDesignRoi": 0.8025027813226007,
+      "minDesignRoi": 0.7890219560878243,
+      "selectionScore": 0.7495225123523445,
+      "test": {
+        "races": 87,
+        "coverage": 0.08546168958742632,
+        "tickets": 236,
+        "averagePicksPerRace": 2.7126436781609193,
+        "hits": 27,
+        "hitRate": 0.3103448275862069,
+        "stakeYen": 23600,
+        "returnYen": 14270,
+        "profitYen": -9330,
+        "roi": 0.6046610169491525,
+        "averagePayout100OnHit": 528.5185185185185
+      },
+      "testRoiUplift": -0.15076431386370193,
+      "testHitUplift": -0.11892825689316439
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & aClassCount=3",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 387,
+        "coverage": 0.19035907525823906,
+        "tickets": 1070,
+        "averagePicksPerRace": 2.764857881136951,
+        "hits": 184,
+        "hitRate": 0.4754521963824289,
+        "stakeYen": 107000,
+        "returnYen": 87920,
+        "profitYen": -19080,
+        "roi": 0.8216822429906542,
+        "averagePayout100OnHit": 477.82608695652175
+      },
+      "validation": {
+        "races": 183,
+        "coverage": 0.17941176470588235,
+        "tickets": 479,
+        "averagePicksPerRace": 2.6174863387978142,
+        "hits": 91,
+        "hitRate": 0.4972677595628415,
+        "stakeYen": 47900,
+        "returnYen": 37620,
+        "profitYen": -10280,
+        "roi": 0.7853862212943633,
+        "averagePayout100OnHit": 413.4065934065934
+      },
+      "trainRoiUplift": 0.06581508431906746,
+      "validationRoiUplift": -5.512375722249718e-05,
+      "trainHitUplift": 0.029805369033683193,
+      "validationHitUplift": 0.05118932819029248,
+      "meanDesignRoi": 0.8035342321425087,
+      "minDesignRoi": 0.7853862212943633,
+      "selectionScore": 0.7460930677228651,
+      "test": {
+        "races": 187,
+        "coverage": 0.18369351669941061,
+        "tickets": 518,
+        "averagePicksPerRace": 2.770053475935829,
+        "hits": 87,
+        "hitRate": 0.46524064171123,
+        "stakeYen": 51800,
+        "returnYen": 34730,
+        "profitYen": -17070,
+        "roi": 0.6704633204633205,
+        "averagePayout100OnHit": 399.1954022988506
+      },
+      "testRoiUplift": -0.08496201034953399,
+      "testHitUplift": 0.03596755723185868
+    },
+    {
+      "kind": "pair",
+      "label": "a1Count=0 & exactaPickCount=2",
+      "parts": [
+        {
+          "name": "a1Count",
+          "value": "0"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 112,
+        "coverage": 0.055090998524348254,
+        "tickets": 224,
+        "averagePicksPerRace": 2.0,
+        "hits": 42,
+        "hitRate": 0.375,
+        "stakeYen": 22400,
+        "returnYen": 17460,
+        "profitYen": -4940,
+        "roi": 0.7794642857142857,
+        "averagePayout100OnHit": 415.7142857142857
+      },
+      "validation": {
+        "races": 116,
+        "coverage": 0.11372549019607843,
+        "tickets": 232,
+        "averagePicksPerRace": 2.0,
+        "hits": 43,
+        "hitRate": 0.3706896551724138,
+        "stakeYen": 23200,
+        "returnYen": 19870,
+        "profitYen": -3330,
+        "roi": 0.8564655172413793,
+        "averagePayout100OnHit": 462.09302325581393
+      },
+      "trainRoiUplift": 0.023597127042699007,
+      "validationRoiUplift": 0.07102417218979351,
+      "trainHitUplift": -0.07064682734874572,
+      "validationHitUplift": -0.07538877620013523,
+      "meanDesignRoi": 0.8179649014778325,
+      "minDesignRoi": 0.7794642857142857,
+      "selectionScore": 0.7430572660098522,
+      "test": {
+        "races": 98,
+        "coverage": 0.0962671905697446,
+        "tickets": 196,
+        "averagePicksPerRace": 2.0,
+        "hits": 32,
+        "hitRate": 0.32653061224489793,
+        "stakeYen": 19600,
+        "returnYen": 18090,
+        "profitYen": -1510,
+        "roi": 0.9229591836734694,
+        "averagePayout100OnHit": 565.3125
+      },
+      "testRoiUplift": 0.16753385286061495,
+      "testHitUplift": -0.10274247223447336
+    },
+    {
+      "kind": "single",
+      "label": "aClassCount=2",
+      "parts": [
+        {
+          "name": "aClassCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 645,
+        "coverage": 0.3172651254303984,
+        "tickets": 1800,
+        "averagePicksPerRace": 2.7906976744186047,
+        "hits": 271,
+        "hitRate": 0.4201550387596899,
+        "stakeYen": 180000,
+        "returnYen": 140550,
+        "profitYen": -39450,
+        "roi": 0.7808333333333334,
+        "averagePayout100OnHit": 518.6346863468634
+      },
+      "validation": {
+        "races": 299,
+        "coverage": 0.2931372549019608,
+        "tickets": 814,
+        "averagePicksPerRace": 2.722408026755853,
+        "hits": 121,
+        "hitRate": 0.40468227424749165,
+        "stakeYen": 81400,
+        "returnYen": 64620,
+        "profitYen": -16780,
+        "roi": 0.7938574938574938,
+        "averagePayout100OnHit": 534.0495867768595
+      },
+      "trainRoiUplift": 0.024966174661746665,
+      "validationRoiUplift": 0.00841614880590802,
+      "trainHitUplift": -0.02549178858905582,
+      "validationHitUplift": -0.0413961571250574,
+      "meanDesignRoi": 0.7873454135954137,
+      "minDesignRoi": 0.7808333333333334,
+      "selectionScore": 0.7383024160524161,
+      "test": {
+        "races": 274,
+        "coverage": 0.2691552062868369,
+        "tickets": 747,
+        "averagePicksPerRace": 2.7262773722627736,
+        "hits": 114,
+        "hitRate": 0.41605839416058393,
+        "stakeYen": 74700,
+        "returnYen": 60440,
+        "profitYen": -14260,
+        "roi": 0.809103078982597,
+        "averagePayout100OnHit": 530.1754385964912
+      },
+      "testRoiUplift": 0.05367774816974258,
+      "testHitUplift": -0.013214690318787359
+    },
+    {
+      "kind": "pair",
+      "label": "race=8 & exactaPickCount=2",
+      "parts": [
+        {
+          "name": "race",
+          "value": "8"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "2"
+        }
+      ],
+      "train": {
+        "races": 87,
+        "coverage": 0.04279390063944909,
+        "tickets": 174,
+        "averagePicksPerRace": 2.0,
+        "hits": 34,
+        "hitRate": 0.39080459770114945,
+        "stakeYen": 17400,
+        "returnYen": 13560,
+        "profitYen": -3840,
+        "roi": 0.7793103448275862,
+        "averagePayout100OnHit": 398.8235294117647
+      },
+      "validation": {
+        "races": 46,
+        "coverage": 0.045098039215686274,
+        "tickets": 92,
+        "averagePicksPerRace": 2.0,
+        "hits": 19,
+        "hitRate": 0.41304347826086957,
+        "stakeYen": 9200,
+        "returnYen": 7440,
+        "profitYen": -1760,
+        "roi": 0.808695652173913,
+        "averagePayout100OnHit": 391.57894736842104
+      },
+      "trainRoiUplift": 0.023443186155999496,
+      "validationRoiUplift": 0.023254307122327234,
+      "trainHitUplift": -0.054842229647596274,
+      "validationHitUplift": -0.03303495311167948,
+      "meanDesignRoi": 0.7940029985007496,
+      "minDesignRoi": 0.7793103448275862,
+      "selectionScore": 0.7381109445277362,
+      "test": {
+        "races": 35,
+        "coverage": 0.0343811394891945,
+        "tickets": 70,
+        "averagePicksPerRace": 2.0,
+        "hits": 12,
+        "hitRate": 0.34285714285714286,
+        "stakeYen": 7000,
+        "returnYen": 3800,
+        "profitYen": -3200,
+        "roi": 0.5428571428571428,
+        "averagePayout100OnHit": 316.6666666666667
+      },
+      "testRoiUplift": -0.21256818795571164,
+      "testHitUplift": -0.08641594162222843
+    },
+    {
+      "kind": "pair",
+      "label": "a1Count=1 & headCount=1",
+      "parts": [
+        {
+          "name": "a1Count",
+          "value": "1"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 507,
+        "coverage": 0.24938514510575505,
+        "tickets": 1260,
+        "averagePicksPerRace": 2.485207100591716,
+        "hits": 223,
+        "hitRate": 0.43984220907297833,
+        "stakeYen": 126000,
+        "returnYen": 101430,
+        "profitYen": -24570,
+        "roi": 0.805,
+        "averagePayout100OnHit": 454.84304932735427
+      },
+      "validation": {
+        "races": 250,
+        "coverage": 0.24509803921568626,
+        "tickets": 624,
+        "averagePicksPerRace": 2.496,
+        "hits": 108,
+        "hitRate": 0.432,
+        "stakeYen": 62400,
+        "returnYen": 48620,
+        "profitYen": -13780,
+        "roi": 0.7791666666666667,
+        "averagePayout100OnHit": 450.18518518518516
+      },
+      "trainRoiUplift": 0.049132841328413335,
+      "validationRoiUplift": -0.00627467838491913,
+      "trainHitUplift": -0.0058046182757673925,
+      "validationHitUplift": -0.01407843137254905,
+      "meanDesignRoi": 0.7920833333333334,
+      "minDesignRoi": 0.7791666666666667,
+      "selectionScore": 0.7375833333333334,
+      "test": {
+        "races": 273,
+        "coverage": 0.2681728880157171,
+        "tickets": 703,
+        "averagePicksPerRace": 2.5750915750915753,
+        "hits": 122,
+        "hitRate": 0.4468864468864469,
+        "stakeYen": 70300,
+        "returnYen": 56950,
+        "profitYen": -13350,
+        "roi": 0.810099573257468,
+        "averagePayout100OnHit": 466.8032786885246
+      },
+      "testRoiUplift": 0.0546742424446135,
+      "testHitUplift": 0.017613362407075617
+    },
+    {
+      "kind": "pair",
+      "label": "race=7 & a1Count=1",
+      "parts": [
+        {
+          "name": "race",
+          "value": "7"
+        },
+        {
+          "name": "a1Count",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 125,
+        "coverage": 0.06148548942449582,
+        "tickets": 370,
+        "averagePicksPerRace": 2.96,
+        "hits": 74,
+        "hitRate": 0.592,
+        "stakeYen": 37000,
+        "returnYen": 29450,
+        "profitYen": -7550,
+        "roi": 0.7959459459459459,
+        "averagePayout100OnHit": 397.97297297297297
+      },
+      "validation": {
+        "races": 53,
+        "coverage": 0.05196078431372549,
+        "tickets": 155,
+        "averagePicksPerRace": 2.9245283018867925,
+        "hits": 34,
+        "hitRate": 0.6415094339622641,
+        "stakeYen": 15500,
+        "returnYen": 12080,
+        "profitYen": -3420,
+        "roi": 0.7793548387096774,
+        "averagePayout100OnHit": 355.29411764705884
+      },
+      "trainRoiUplift": 0.04007878727435921,
+      "validationRoiUplift": -0.0060865063419084375,
+      "trainHitUplift": 0.14635317265125425,
+      "validationHitUplift": 0.19543100258971507,
+      "meanDesignRoi": 0.7876503923278116,
+      "minDesignRoi": 0.7793548387096774,
+      "selectionScore": 0.7368849171752397,
+      "test": {
+        "races": 62,
+        "coverage": 0.060903732809430254,
+        "tickets": 183,
+        "averagePicksPerRace": 2.9516129032258065,
+        "hits": 41,
+        "hitRate": 0.6612903225806451,
+        "stakeYen": 18300,
+        "returnYen": 15900,
+        "profitYen": -2400,
+        "roi": 0.8688524590163934,
+        "averagePayout100OnHit": 387.8048780487805
+      },
+      "testRoiUplift": 0.11342712820353895,
+      "testHitUplift": 0.23201723810127384
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=A2 & aClassCount=3",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A2"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 336,
+        "coverage": 0.16527299557304476,
+        "tickets": 887,
+        "averagePicksPerRace": 2.6398809523809526,
+        "hits": 158,
+        "hitRate": 0.47023809523809523,
+        "stakeYen": 88700,
+        "returnYen": 69050,
+        "profitYen": -19650,
+        "roi": 0.7784667418263811,
+        "averagePayout100OnHit": 437.0253164556962
+      },
+      "validation": {
+        "races": 177,
+        "coverage": 0.17352941176470588,
+        "tickets": 455,
+        "averagePicksPerRace": 2.5706214689265536,
+        "hits": 86,
+        "hitRate": 0.4858757062146893,
+        "stakeYen": 45500,
+        "returnYen": 35710,
+        "profitYen": -9790,
+        "roi": 0.7848351648351648,
+        "averagePayout100OnHit": 415.2325581395349
+      },
+      "trainRoiUplift": 0.022599583154794378,
+      "validationRoiUplift": -0.000606180216421004,
+      "trainHitUplift": 0.02459126788934951,
+      "validationHitUplift": 0.03979727484214024,
+      "meanDesignRoi": 0.781650953330773,
+      "minDesignRoi": 0.7784667418263811,
+      "selectionScore": 0.7347969324925356,
+      "test": {
+        "races": 173,
+        "coverage": 0.16994106090373282,
+        "tickets": 456,
+        "averagePicksPerRace": 2.6358381502890174,
+        "hits": 81,
+        "hitRate": 0.4682080924855491,
+        "stakeYen": 45600,
+        "returnYen": 31750,
+        "profitYen": -13850,
+        "roi": 0.6962719298245614,
+        "averagePayout100OnHit": 391.9753086419753
+      },
+      "testRoiUplift": -0.059153400988293026,
+      "testHitUplift": 0.03893500800617783
+    },
+    {
+      "kind": "pair",
+      "label": "race=10 & title=予選",
+      "parts": [
+        {
+          "name": "race",
+          "value": "10"
+        },
+        {
+          "name": "title",
+          "value": "予選"
+        }
+      ],
+      "train": {
+        "races": 84,
+        "coverage": 0.04131824889326119,
+        "tickets": 198,
+        "averagePicksPerRace": 2.357142857142857,
+        "hits": 42,
+        "hitRate": 0.5,
+        "stakeYen": 19800,
+        "returnYen": 15040,
+        "profitYen": -4760,
+        "roi": 0.7595959595959596,
+        "averagePayout100OnHit": 358.0952380952381
+      },
+      "validation": {
+        "races": 41,
+        "coverage": 0.04019607843137255,
+        "tickets": 94,
+        "averagePicksPerRace": 2.292682926829268,
+        "hits": 25,
+        "hitRate": 0.6097560975609756,
+        "stakeYen": 9400,
+        "returnYen": 9320,
+        "profitYen": -80,
+        "roi": 0.9914893617021276,
+        "averagePayout100OnHit": 372.8
+      },
+      "trainRoiUplift": 0.003728800924372888,
+      "validationRoiUplift": 0.20604801665054184,
+      "trainHitUplift": 0.05435317265125428,
+      "validationHitUplift": 0.16367766618842655,
+      "meanDesignRoi": 0.8755426606490436,
+      "minDesignRoi": 0.7595959595959596,
+      "selectionScore": 0.7347044917257683,
+      "test": {
+        "races": 43,
+        "coverage": 0.04223968565815324,
+        "tickets": 108,
+        "averagePicksPerRace": 2.511627906976744,
+        "hits": 22,
+        "hitRate": 0.5116279069767442,
+        "stakeYen": 10800,
+        "returnYen": 8180,
+        "profitYen": -2620,
+        "roi": 0.7574074074074074,
+        "averagePayout100OnHit": 371.8181818181818
+      },
+      "testRoiUplift": 0.0019820765945529617,
+      "testHitUplift": 0.08235482249737291
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=MID_5_8 & title=予選",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "MID_5_8"
+        },
+        {
+          "name": "title",
+          "value": "予選"
+        }
+      ],
+      "train": {
+        "races": 439,
+        "coverage": 0.2159370388588293,
+        "tickets": 1234,
+        "averagePicksPerRace": 2.8109339407744875,
+        "hits": 210,
+        "hitRate": 0.4783599088838269,
+        "stakeYen": 123400,
+        "returnYen": 97240,
+        "profitYen": -26160,
+        "roi": 0.7880064829821718,
+        "averagePayout100OnHit": 463.04761904761904
+      },
+      "validation": {
+        "races": 216,
+        "coverage": 0.21176470588235294,
+        "tickets": 574,
+        "averagePicksPerRace": 2.6574074074074074,
+        "hits": 95,
+        "hitRate": 0.4398148148148148,
+        "stakeYen": 57400,
+        "returnYen": 44570,
+        "profitYen": -12830,
+        "roi": 0.7764808362369338,
+        "averagePayout100OnHit": 469.1578947368421
+      },
+      "trainRoiUplift": 0.03213932431058508,
+      "validationRoiUplift": -0.008960508814652046,
+      "trainHitUplift": 0.03271308153508118,
+      "validationHitUplift": -0.0062636165577342195,
+      "meanDesignRoi": 0.7822436596095528,
+      "minDesignRoi": 0.7764808362369338,
+      "selectionScore": 0.7329295681588444,
+      "test": {
+        "races": 208,
+        "coverage": 0.2043222003929273,
+        "tickets": 559,
+        "averagePicksPerRace": 2.6875,
+        "hits": 95,
+        "hitRate": 0.4567307692307692,
+        "stakeYen": 55900,
+        "returnYen": 37490,
+        "profitYen": -18410,
+        "roi": 0.6706618962432916,
+        "averagePayout100OnHit": 394.63157894736844
+      },
+      "testRoiUplift": -0.08476343456956281,
+      "testHitUplift": 0.027457684751397926
+    },
+    {
+      "kind": "pair",
+      "label": "raceBand=EARLY_1_4 & a1Count=0",
+      "parts": [
+        {
+          "name": "raceBand",
+          "value": "EARLY_1_4"
+        },
+        {
+          "name": "a1Count",
+          "value": "0"
+        }
+      ],
+      "train": {
+        "races": 221,
+        "coverage": 0.10870634530250861,
+        "tickets": 615,
+        "averagePicksPerRace": 2.7828054298642533,
+        "hits": 85,
+        "hitRate": 0.38461538461538464,
+        "stakeYen": 61500,
+        "returnYen": 47150,
+        "profitYen": -14350,
+        "roi": 0.7666666666666667,
+        "averagePayout100OnHit": 554.7058823529412
+      },
+      "validation": {
+        "races": 157,
+        "coverage": 0.153921568627451,
+        "tickets": 408,
+        "averagePicksPerRace": 2.5987261146496814,
+        "hits": 59,
+        "hitRate": 0.37579617834394907,
+        "stakeYen": 40800,
+        "returnYen": 36400,
+        "profitYen": -4400,
+        "roi": 0.8921568627450981,
+        "averagePayout100OnHit": 616.9491525423729
+      },
+      "trainRoiUplift": 0.010799507995080004,
+      "validationRoiUplift": 0.10671551769351229,
+      "trainHitUplift": -0.061031442733361085,
+      "validationHitUplift": -0.07028225302859997,
+      "meanDesignRoi": 0.8294117647058824,
+      "minDesignRoi": 0.7666666666666667,
+      "selectionScore": 0.7325490196078432,
+      "test": {
+        "races": 114,
+        "coverage": 0.11198428290766209,
+        "tickets": 282,
+        "averagePicksPerRace": 2.473684210526316,
+        "hits": 42,
+        "hitRate": 0.3684210526315789,
+        "stakeYen": 28200,
+        "returnYen": 26800,
+        "profitYen": -1400,
+        "roi": 0.950354609929078,
+        "averagePayout100OnHit": 638.0952380952381
+      },
+      "testRoiUplift": 0.1949292791162236,
+      "testHitUplift": -0.060852031847792365
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=A1 & exactaPickCount=3",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "exactaPickCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 318,
+        "coverage": 0.15641908509591737,
+        "tickets": 954,
+        "averagePicksPerRace": 3.0,
+        "hits": 199,
+        "hitRate": 0.6257861635220126,
+        "stakeYen": 95400,
+        "returnYen": 73620,
+        "profitYen": -21780,
+        "roi": 0.7716981132075472,
+        "averagePayout100OnHit": 369.9497487437186
+      },
+      "validation": {
+        "races": 111,
+        "coverage": 0.10882352941176471,
+        "tickets": 333,
+        "averagePicksPerRace": 3.0,
+        "hits": 68,
+        "hitRate": 0.6126126126126126,
+        "stakeYen": 33300,
+        "returnYen": 27360,
+        "profitYen": -5940,
+        "roi": 0.8216216216216217,
+        "averagePayout100OnHit": 402.3529411764706
+      },
+      "trainRoiUplift": 0.015830954535960506,
+      "validationRoiUplift": 0.03618027657003586,
+      "trainHitUplift": 0.18013933617326683,
+      "validationHitUplift": 0.16653418124006353,
+      "meanDesignRoi": 0.7966598674145844,
+      "minDesignRoi": 0.7716981132075472,
+      "selectionScore": 0.7310300866904641,
+      "test": {
+        "races": 152,
+        "coverage": 0.14931237721021612,
+        "tickets": 456,
+        "averagePicksPerRace": 3.0,
+        "hits": 95,
+        "hitRate": 0.625,
+        "stakeYen": 45600,
+        "returnYen": 33390,
+        "profitYen": -12210,
+        "roi": 0.7322368421052632,
+        "averagePayout100OnHit": 351.4736842105263
+      },
+      "testRoiUplift": -0.02318848870759127,
+      "testHitUplift": 0.1957269155206287
+    },
+    {
+      "kind": "pair",
+      "label": "title=予選 & aClassCount=3",
+      "parts": [
+        {
+          "name": "title",
+          "value": "予選"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 456,
+        "coverage": 0.22429906542056074,
+        "tickets": 1226,
+        "averagePicksPerRace": 2.68859649122807,
+        "hits": 208,
+        "hitRate": 0.45614035087719296,
+        "stakeYen": 122600,
+        "returnYen": 94630,
+        "profitYen": -27970,
+        "roi": 0.7718597063621534,
+        "averagePayout100OnHit": 454.9519230769231
+      },
+      "validation": {
+        "races": 207,
+        "coverage": 0.20294117647058824,
+        "tickets": 533,
+        "averagePicksPerRace": 2.57487922705314,
+        "hits": 97,
+        "hitRate": 0.46859903381642515,
+        "stakeYen": 53300,
+        "returnYen": 43370,
+        "profitYen": -9930,
+        "roi": 0.8136960600375235,
+        "averagePayout100OnHit": 447.11340206185565
+      },
+      "trainRoiUplift": 0.015992547690566683,
+      "validationRoiUplift": 0.02825471498593768,
+      "trainHitUplift": 0.010493523528447235,
+      "validationHitUplift": 0.022520602443876103,
+      "meanDesignRoi": 0.7927778831998384,
+      "minDesignRoi": 0.7718597063621534,
+      "selectionScore": 0.7304152830021211,
+      "test": {
+        "races": 221,
+        "coverage": 0.21709233791748528,
+        "tickets": 602,
+        "averagePicksPerRace": 2.723981900452489,
+        "hits": 106,
+        "hitRate": 0.4796380090497738,
+        "stakeYen": 60200,
+        "returnYen": 49560,
+        "profitYen": -10640,
+        "roi": 0.8232558139534883,
+        "averagePayout100OnHit": 467.54716981132077
+      },
+      "testRoiUplift": 0.06783048314063389,
+      "testHitUplift": 0.05036492457040248
+    },
+    {
+      "kind": "pair",
+      "label": "lane1Class=A1 & headCount=1",
+      "parts": [
+        {
+          "name": "lane1Class",
+          "value": "A1"
+        },
+        {
+          "name": "headCount",
+          "value": "1"
+        }
+      ],
+      "train": {
+        "races": 660,
+        "coverage": 0.3246433841613379,
+        "tickets": 1609,
+        "averagePicksPerRace": 2.437878787878788,
+        "hits": 358,
+        "hitRate": 0.5424242424242425,
+        "stakeYen": 160900,
+        "returnYen": 128100,
+        "profitYen": -32800,
+        "roi": 0.7961466749533872,
+        "averagePayout100OnHit": 357.8212290502793
+      },
+      "validation": {
+        "races": 306,
+        "coverage": 0.3,
+        "tickets": 719,
+        "averagePicksPerRace": 2.349673202614379,
+        "hits": 154,
+        "hitRate": 0.5032679738562091,
+        "stakeYen": 71900,
+        "returnYen": 55610,
+        "profitYen": -16290,
+        "roi": 0.7734353268428372,
+        "averagePayout100OnHit": 361.1038961038961
+      },
+      "trainRoiUplift": 0.04027951628180049,
+      "validationRoiUplift": -0.012006018208748581,
+      "trainHitUplift": 0.09677741507549675,
+      "validationHitUplift": 0.057189542483660094,
+      "meanDesignRoi": 0.7847910008981123,
+      "minDesignRoi": 0.7734353268428372,
+      "selectionScore": 0.7303935270224596,
+      "test": {
+        "races": 334,
+        "coverage": 0.3280943025540275,
+        "tickets": 812,
+        "averagePicksPerRace": 2.431137724550898,
+        "hits": 173,
+        "hitRate": 0.5179640718562875,
+        "stakeYen": 81200,
+        "returnYen": 57560,
+        "profitYen": -23640,
+        "roi": 0.7088669950738916,
+        "averagePayout100OnHit": 332.71676300578036
+      },
+      "testRoiUplift": -0.04655833573896284,
+      "testHitUplift": 0.08869098737691616
+    },
+    {
+      "kind": "pair",
+      "label": "a1Count=2 & aClassCount=3",
+      "parts": [
+        {
+          "name": "a1Count",
+          "value": "2"
+        },
+        {
+          "name": "aClassCount",
+          "value": "3"
+        }
+      ],
+      "train": {
+        "races": 232,
+        "coverage": 0.11411706837186424,
+        "tickets": 625,
+        "averagePicksPerRace": 2.6939655172413794,
+        "hits": 106,
+        "hitRate": 0.45689655172413796,
+        "stakeYen": 62500,
+        "returnYen": 47500,
+        "profitYen": -15000,
+        "roi": 0.76,
+        "averagePayout100OnHit": 448.1132075471698
+      },
+      "validation": {
+        "races": 90,
+        "coverage": 0.08823529411764706,
+        "tickets": 241,
+        "averagePicksPerRace": 2.6777777777777776,
+        "hits": 54,
+        "hitRate": 0.6,
+        "stakeYen": 24100,
+        "returnYen": 22620,
+        "profitYen": -1480,
+        "roi": 0.9385892116182573,
+        "averagePayout100OnHit": 418.8888888888889
+      },
+      "trainRoiUplift": 0.004132841328413295,
+      "validationRoiUplift": 0.15314786656667145,
+      "trainHitUplift": 0.011249724375392234,
+      "validationHitUplift": 0.15392156862745093,
+      "meanDesignRoi": 0.8492946058091286,
+      "minDesignRoi": 0.76,
+      "selectionScore": 0.7298589211618257,
+      "test": {
+        "races": 93,
+        "coverage": 0.09135559921414538,
+        "tickets": 257,
+        "averagePicksPerRace": 2.763440860215054,
+        "hits": 41,
+        "hitRate": 0.44086021505376344,
+        "stakeYen": 25700,
+        "returnYen": 17620,
+        "profitYen": -8080,
+        "roi": 0.6856031128404669,
+        "averagePayout100OnHit": 429.7560975609756
+      },
+      "testRoiUplift": -0.06982221797238752,
+      "testHitUplift": 0.011587130574392146
+    }
+  ],
+  "promotionRule": "Historical selection cannot change LIVE betting. Fresh forward matched races are required before promotion."
+}
