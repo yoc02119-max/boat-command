@@ -8,6 +8,7 @@ on:
   push:
     paths:
       - 'scripts/edogawa-shadow-evaluate-v1.js'
+      - 'scripts/edogawa-shadow-evaluation-v1.js'
       - 'live/edogawa/**/post/**'
       - 'live/edogawa/**/shadow/**'
 
@@ -56,7 +57,9 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/edogawa-shadow-evaluate-v1.js
+          node --check scripts/edogawa-shadow-evaluation-v1.js
           node scripts/edogawa-shadow-evaluate-v1.js "${{ steps.date.outputs.date }}"
+          node scripts/edogawa-shadow-evaluation-v1.js
           node - <<'NODE'
           const fs=require('fs');
           const d=process.env.DATE;
@@ -72,6 +75,11 @@ jobs:
             }
           }
           console.log('EDOGAWA_SHADOW_EVALUATION_PASS',x.summary);
+          const all=JSON.parse(fs.readFileSync('edogawa-shadow-evaluation-v1.json','utf8'));
+          if(all.schema!=='boat-command-edogawa-shadow-evaluation-v1')throw new Error('AGG_SCHEMA');
+          if(all.fundingScope!=='NONE'||all.cashNeutral!==true||all.realMoney!==false)throw new Error('AGG_FUNDING');
+          if(all.boundaries?.predictionMutation!==false||all.boundaries?.bankrollMutation!==false||all.boundaries?.tryMutation!==false)throw new Error('AGG_BOUNDARY');
+          console.log('EDOGAWA_SHADOW_CUMULATIVE_PASS',all.evaluatedRows);
           NODE
         env:
           DATE: ${{ steps.date.outputs.date }}
@@ -84,7 +92,7 @@ jobs:
           FILE="live/edogawa/$DATE/research-evaluation-v1.json"
           git config user.name 'boat-command-edogawa-eval'
           git config user.email 'boat-command-edogawa-eval@users.noreply.github.com'
-          git add "$FILE"
+          git add "$FILE" edogawa-shadow-evaluation-v1.json
           git diff --cached --quiet && { echo 'EDOGAWA_EVALUATION_CURRENT'; exit 0; }
           git commit -m "analysis(edogawa): refresh cash-neutral A B evaluation"
           for attempt in 1 2 3; do
