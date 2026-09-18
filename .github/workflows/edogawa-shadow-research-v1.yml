@@ -58,7 +58,7 @@ jobs:
               x=json.load(open(p,encoding='utf-8'))
               assert x['schema']=='boat-command-edogawa-shadow-research-v1'
               assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
-              assert x['mode'] in {'PROGRAM_ONLY','FULL_PRE_RACE'}
+              assert x['mode'] in {'CLASS_BASELINE','PROGRAM_ONLY','FULL_PRE_RACE'}
               assert x['resultInput'] is False and x['payoutInput'] is False
               assert x['researchOnly'] is True
               assert x['productionEnabled'] is False and x['tryEnabled'] is False
