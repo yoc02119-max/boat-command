@@ -109,6 +109,12 @@ jobs:
               assert x['resultInput'] is False
               assert x['payoutInput'] is False
               assert x['immutableAfterFirstWrite'] is True
+              from datetime import datetime,timezone,timedelta
+              g=datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(timezone(timedelta(hours=9)))
+              hh,mm=map(int,str(x['deadline']).split(':'))
+              deadline=datetime.fromisoformat(str(x['date'])).replace(hour=hh,minute=mm,tzinfo=timezone(timedelta(hours=9)))
+              margin=(deadline-g).total_seconds()/60
+              assert margin>=3, (p,margin)
               src=x.get('sources') or {}
               assert isinstance(src.get('programSha256'),str) and re.fullmatch(r'[0-9a-f]{64}',src['programSha256'])
               assert isinstance(src.get('programPath'),str) and src['programPath'].startswith('live/edogawa/')
