@@ -87,6 +87,17 @@ else{
    document.getElementById('dataStatus').textContent='番組・展示・風・波 収集中';
    document.getElementById('modelStatus').textContent='データ蓄積後に江戸川専用で構築';
    document.getElementById('venueNote').textContent='江戸川はDATA LAYER構築中。蒲郡モデルは流用せず、潮・風・波・当地適性を分離して検証します。予想とTRYはまだ無効です。';
+   (async()=>{
+     const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+     try{
+       const r=await fetch(`./live/edogawa/${p}/program/manifest.json?t=${Date.now()}`,{cache:'no-store'});
+       if(!r.ok)return;
+       const x=await r.json();
+       if(x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12){
+         document.getElementById('dataStatus').textContent='番組 12/12取得済み · 展示/風/波 待機中';
+       }
+     }catch{}
+   })();
  }
 }
 document.getElementById('backBtn').onclick=()=>location.href='./portal.html';
