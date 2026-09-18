@@ -163,7 +163,7 @@ rows=[]
 for x in locked:
     p=cache.get(x["id"])
     if not p: continue
-    rows.append({...x,"exactaPayout100":int(p["exactaPayout100"])})
+    rows.append({**x,"exactaPayout100":int(p["exactaPayout100"])})
 
 def money_stats(rs,total):
     tickets=sum(len(x["exactaPicks"]) for x in rs)
