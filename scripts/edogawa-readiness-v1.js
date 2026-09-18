@@ -69,6 +69,10 @@ const histAudit=read(path.join(root,'edogawa-history-audit-v1.json'));
 const histAnalysis=read(path.join(root,'edogawa-history-analysis-v1.json'));
 const baseline=read(path.join(root,'edogawa-baseline-backtest-v1.json'));
 const comparison=read(path.join(root,'edogawa-forward-model-comparison-v1.json'));
+const lanePriorGate=read(path.join(root,'edogawa-lane-prior-v2-backtest-v1.json'));
+const lanePriorV2Eligible=lanePriorGate?.venueCode==='03'&&
+  lanePriorGate?.strictWalkForward===true&&lanePriorGate?.sameDayRowsExcluded===true&&
+  lanePriorGate?.eligibleForForwardTest===true;
 const historyRows=Number(histAudit?.races)||0;
 const historyDays=Number(histAudit?.raceDays)||0;
 const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=MIN_HISTORY;
@@ -171,6 +175,19 @@ const out={
     autoTryEnable:policy.autoTryEnable===true
   },
   waterValidation:{ready:waterValidated},
+  candidateModel:{
+    v2ForwardEligible:lanePriorV2Eligible,
+    modelVersion:lanePriorGate?.v2?.modelVersion??null,
+    holdoutRaces:Number(lanePriorGate?.v2?.races)||0,
+    v1HitRate:lanePriorGate?.v1?.hitRate??null,
+    v2HitRate:lanePriorGate?.v2?.hitRate??null,
+    hitRateDelta:lanePriorGate?.delta?.hitRate??null,
+    v1Roi:lanePriorGate?.v1?.roi??null,
+    v2Roi:lanePriorGate?.v2?.roi??null,
+    roiDelta:lanePriorGate?.delta?.roi??null,
+    productionEnabled:false,
+    tryEnabled:false
+  },
   promotionReviewRequired:blockers.length===0,
   modelEnabled:false,
   tryEnabled:false,
