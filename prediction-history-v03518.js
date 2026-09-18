@@ -75,7 +75,7 @@ function installStyle(){
 .history-empty{padding:22px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:12px;color:#728da1;font-size:11px}
 #historyLoading{font-size:10px;color:#7893a7}
 @media(max-width:760px){
- .sidebar nav{grid-template-columns:repeat(4,1fr)}
+ .sidebar nav{grid-template-columns:repeat(5,1fr)}
  .history-day-head{align-items:flex-start;flex-direction:column}
  .history-row{grid-template-columns:42px 1fr auto;gap:8px;padding:11px 10px}
  .history-main{grid-column:2/4}.history-result{grid-column:2}.history-eval{grid-column:3;grid-row:2}.history-try{grid-column:2/4;border-top:1px solid rgba(255,255,255,.045);padding-top:7px}
