@@ -3,7 +3,8 @@
 const fs=require('fs');
 const path=require('path');
 const crypto=require('crypto');
-const model=require('../edogawa-research-model-v1.js');
+const modelV1=require('../edogawa-research-model-v1.js');
+const modelV2=require('../edogawa-research-model-v2.js');
 const feature=require('../edogawa-feature-contract-v1.js');
 
 const date=process.argv[2]||new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -12,6 +13,24 @@ const historyPath=path.join(root,'edogawa-history-bootstrap-v1.json');
 if(!fs.existsSync(historyPath)){console.log('EDOGAWA_SHADOW_WAIT_HISTORY');process.exit(0)}
 const historyDb=JSON.parse(fs.readFileSync(historyPath,'utf8'));
 if(historyDb.venueCode!=='03'||!Array.isArray(historyDb.races)||historyDb.races.length<300){console.log('EDOGAWA_SHADOW_WAIT_HISTORY_300');process.exit(0)}
+
+function readExistingModelVersion(date){
+  const base=path.join(root,'live','edogawa',date,'shadow','program-only');
+  if(!fs.existsSync(base))return null;
+  for(const name of fs.readdirSync(base).filter(x=>/^race-\d+\.json$/.test(x)).sort()){
+    try{
+      const x=JSON.parse(fs.readFileSync(path.join(base,name),'utf8'));
+      if(x?.modelVersion)return String(x.modelVersion);
+    }catch{}
+  }
+  return null;
+}
+const existingModelVersion=readExistingModelVersion(date);
+const model=existingModelVersion===modelV1.version?modelV1:modelV2;
+if(existingModelVersion&&existingModelVersion!==model.version){
+  throw new Error('EDOGAWA_SAME_DAY_MODEL_VERSION_MISMATCH '+existingModelVersion+' vs '+model.version);
+}
+console.log('EDOGAWA_SHADOW_MODEL_VERSION',model.version,existingModelVersion?'SAME_DAY_PINNED':'NEW_DAY_LATEST');
 
 function nowJst(){
   const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
@@ -53,6 +72,7 @@ function snapshot(program,fx,mode,generatedAt,sources){
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
     probabilitySum:d.sum,
     nearestDistance:d.nearestDistance,
+    lanePriorSource:d.lanePriorSource||null,
     preRaceComplete:!!fx?.preRaceComplete,
     waterUsed:false,tideUsed:false,
     resultInput:false,payoutInput:false,
