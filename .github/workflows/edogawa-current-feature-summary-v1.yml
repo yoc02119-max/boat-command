@@ -1,0 +1,78 @@
+name: Edogawa current feature summary v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa 12R program snapshot v1"]
+    types: [completed]
+  push:
+    paths:
+      - 'scripts/edogawa-current-feature-summary-v1.js'
+      - 'edogawa-feature-contract-v1.js'
+      - 'live/edogawa/**/program/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-current-feature-summary-v1
+  cancel-in-progress: true
+
+jobs:
+  summarize:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve latest Edogawa program date
+        id: date
+        run: |
+          set -euo pipefail
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          dates=sorted(p.name for p in Path('live/edogawa').glob('20??-??-??') if (p/'program'/'manifest.json').exists())
+          print(dates[-1] if dates else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - name: Build current feature summary
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check edogawa-feature-contract-v1.js
+          node --check scripts/edogawa-current-feature-summary-v1.js
+          node scripts/edogawa-current-feature-summary-v1.js "${{ steps.date.outputs.date }}"
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=process.env.DATE;
+          const x=JSON.parse(fs.readFileSync(`live/edogawa/${d}/research-feature-summary-v1.json`,'utf8'));
+          if(x.schema!=='boat-command-edogawa-research-feature-summary-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.audit.raceCount!==12||!x.audit.allSixBoats)throw new Error('TARGET');
+          if(x.audit.resultInput!==false||x.audit.payoutInput!==false||x.audit.predictionEnabled!==false)throw new Error('BOUNDARY');
+          if(!x.audit.localStatsReady||!x.audit.avgSTReady)throw new Error('PROGRAM_FEATURES_NOT_READY');
+          console.log('EDOGAWA_CURRENT_FEATURE_SUMMARY_PASS');
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+
+      - name: Commit research summary
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-features'
+          git config user.email 'boat-command-edogawa-features@users.noreply.github.com'
+          git add "live/edogawa/${{ steps.date.outputs.date }}/research-feature-summary-v1.json"
+          git diff --cached --quiet && { echo 'EDOGAWA_FEATURE_SUMMARY_CURRENT'; exit 0; }
+          git commit -m "analysis(edogawa): refresh current 12R feature summary"
+          git pull --rebase origin main
+          git push origin HEAD:main
