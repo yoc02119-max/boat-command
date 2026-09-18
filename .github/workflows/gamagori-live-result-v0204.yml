@@ -109,6 +109,12 @@ jobs:
               if x.get('preRaceDataIncluded') is not False or x.get('resultEndpointsIncluded') is not True: raise RuntimeError(f'EXISTING_RESULT_BOUNDARY_INVALID race={race}')
               if not re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta',''))): raise RuntimeError(f'EXISTING_RESULT_TRIFECTA_INVALID race={race}')
               if not isinstance(x.get('payout100'),int) or x.get('payout100')<0: raise RuntimeError(f'EXISTING_RESULT_PAYOUT_INVALID race={race}')
+              if x.get('exacta') is not None:
+                  if not re.fullmatch(r'[1-6]-[1-6]',str(x.get('exacta',''))): raise RuntimeError(f'EXISTING_RESULT_EXACTA_INVALID race={race}')
+                  if not isinstance(x.get('exactaPayout100'),int) or x.get('exactaPayout100')<0: raise RuntimeError(f'EXISTING_RESULT_EXACTA_PAYOUT_INVALID race={race}')
+              if x.get('win') is not None:
+                  if not re.fullmatch(r'[1-6]',str(x.get('win',''))): raise RuntimeError(f'EXISTING_RESULT_WIN_INVALID race={race}')
+                  if not isinstance(x.get('winPayout100'),int) or x.get('winPayout100')<0: raise RuntimeError(f'EXISTING_RESULT_WIN_PAYOUT_INVALID race={race}')
               method=x.get('winningMethod')
               if method is not None and method not in valid_methods: raise RuntimeError(f'EXISTING_RESULT_METHOD_INVALID race={race}')
 
@@ -159,6 +165,8 @@ jobs:
                   'schema':'boat-command-live-result-v1','version':'0.32.0','venue':'GAMAGORI','date':date,'race':race,
                   'fetchedAt':datetime.now(JST).isoformat(),'officialSource':url,
                   'trifecta':trifecta,'payout100':payout,'finishOrder':finish[:6],
+                  'exacta':exacta,'exactaPayout100':exacta_payout,
+                  'win':win,'winPayout100':win_payout,
                   'winningMethod':winning_method,
                   'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
                   'predictionEnabled':False,'hardLockEnabled':False,
