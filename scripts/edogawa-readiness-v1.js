@@ -11,6 +11,7 @@ const policy=config.promotionPolicy||{};
 const MIN_HISTORY=Number(policy.minimumHistoricalRaces)||300;
 const MIN_A=Number(policy.minimumProgramOnlyForwardRaces)||30;
 const MIN_B=Number(policy.minimumFullPreForwardRaces)||30;
+const MIN_TIDE=Number(policy.minimumOfficialTideMappedRaces)||1;
 
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
 function dirs(p){try{return fs.readdirSync(p,{withFileTypes:true}).filter(x=>x.isDirectory()).map(x=>x.name)}catch{return[]}}
@@ -21,7 +22,7 @@ const latestDate=dates.at(-1)||null;
 const latest=latestDate?path.join(liveRoot,latestDate):null;
 
 let programReady=false,programRaceCount=0,featureSummaryReady=false,featureLocalReady=false,featureSTReady=false;
-let preComplete=0,tideSources=0,postResults=0,shadowProgram=0,shadowFull=0,evaluatedProgram=0,evaluatedFull=0;
+let preComplete=0,tideSources=0,mappedTide=0,postResults=0,shadowProgram=0,shadowFull=0,evaluatedProgram=0,evaluatedFull=0;
 
 if(latest){
   const manifest=read(path.join(latest,'program','manifest.json'));
@@ -37,9 +38,18 @@ if(latest){
     const x=read(path.join(latest,'pre',name));
     if(x?.venueCode==='03'&&x?.boatMappingVerified===true&&x?.weatherMappingVerified===true&&x?.resultEndpointsIncluded===false)preComplete++;
   }
-  tideSources=files(path.join(latest,'pre'),/^race-\d+-tide-source\.json$/).filter(name=>{
+  const tideFiles=files(path.join(latest,'pre'),/^race-\d+-tide-source\.json$/);
+  tideSources=tideFiles.filter(name=>{
     const x=read(path.join(latest,'pre',name));
     return x?.venueCode==='03'&&x?.markerVerified===true&&x?.resultEndpointsIncluded===false;
+  }).length;
+  mappedTide=tideFiles.filter(name=>{
+    const x=read(path.join(latest,'pre',name));
+    return x?.venueCode==='03'&&x?.markerVerified===true&&
+      x?.mapping?.status==='EXPLICIT_TEXT_ONLY'&&
+      typeof x?.mapping?.tideDirection==='string'&&!!x.mapping.tideDirection&&
+      x?.mapping?.inferredFromImageCode===false&&
+      x?.resultEndpointsIncluded===false;
   }).length;
   postResults=files(path.join(latest,'post'),/^race-\d+-result\.json$/).filter(name=>{
     const x=read(path.join(latest,'post',name));
@@ -79,7 +89,10 @@ if(!featureSTReady)blockers.push('AVERAGE_ST_FEATURES_NOT_READY');
 if(!historyReady)blockers.push('HISTORICAL_300_RACE_MINIMUM_NOT_READY');
 if(!analysisReady)blockers.push('HISTORICAL_STRUCTURE_ANALYSIS_NOT_READY');
 if(!baselineReady)blockers.push('STRICT_WALK_FORWARD_BASELINE_NOT_READY');
-if(policy.requireOfficialTideMapping!==false&&tideSources===0)blockers.push('OFFICIAL_TIDE_MAPPING_NOT_READY');
+if(policy.requireOfficialTideMapping!==false&&mappedTide<MIN_TIDE)blockers.push(`OFFICIAL_TIDE_MAPPING_${MIN_TIDE}_RACES_NOT_READY`);
+const waterValidation=read(path.join(root,'edogawa-water-feature-validation-v1.json'));
+const waterValidated=waterValidation?.venueCode==='03'&&waterValidation?.ready===true;
+if(policy.requireWaterFeatureValidation===true&&!waterValidated)blockers.push('WATER_FEATURE_VALIDATION_NOT_READY');
 if(forwardProgramRaces<MIN_A)blockers.push(`PROGRAM_ONLY_FORWARD_${MIN_A}_RACES_NOT_READY`);
 if(forwardFullRaces<MIN_B)blockers.push(`FULL_PRE_FORWARD_${MIN_B}_RACES_NOT_READY`);
 
@@ -101,6 +114,7 @@ const out={
     featureSummaryReady,featureLocalReady,featureSTReady,
     completePreRacePacks:preComplete,
     officialTideSourcePacks:tideSources,
+    explicitlyMappedTidePacks:mappedTide,
     postResults,
     shadowProgramOnly:shadowProgram,
     shadowFullPre:shadowFull,
@@ -127,10 +141,13 @@ const out={
     minimumProgramOnlyForwardRaces:MIN_A,
     minimumFullPreForwardRaces:MIN_B,
     requireOfficialTideMapping:policy.requireOfficialTideMapping!==false,
+    minimumOfficialTideMappedRaces:MIN_TIDE,
+    requireWaterFeatureValidation:policy.requireWaterFeatureValidation===true,
     requireHumanReview:policy.requireHumanReview!==false,
     autoPromotion:policy.autoPromotion===true,
     autoTryEnable:policy.autoTryEnable===true
   },
+  waterValidation:{ready:waterValidated},
   promotionReviewRequired:blockers.length===0,
   modelEnabled:false,
   tryEnabled:false,
