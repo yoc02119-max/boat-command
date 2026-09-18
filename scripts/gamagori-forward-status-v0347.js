@@ -7,6 +7,7 @@ const ROOT=path.join(__dirname,'..');
 const LIVE=path.join(ROOT,'live','gamagori');
 const POLICY_PATH=path.join(ROOT,'gamagori-forward-validation-policy-v0346.json');
 const STATUS_PATH=path.join(LIVE,'forward-status-v0347.json');
+const VIRTUAL_STAKE_PER_PICK_YEN=500;
 
 function readJson(p){return JSON.parse(fs.readFileSync(p,'utf8'))}
 function writeJson(p,x){fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n')}
@@ -38,12 +39,12 @@ function summarize(kind,dates,latestDate){
       if(!m?.matched)continue;
       const picks=Array.isArray(m.frozenPicks)?m.frozenPicks:[];
       const post=loadPost(date,Number(row.race));
-      let settled=false,hit=false,stake=0,ret=0,result=null,payout100=null;
+      let settled=false,hit=false,stake=picks.length*VIRTUAL_STAKE_PER_PICK_YEN,ret=0,result=null,payout100=null;
       if(post){
         if(exacta&&/^[1-6]-[1-6]$/.test(String(post.exacta||''))&&Number.isFinite(Number(post.exactaPayout100))){
-          settled=true;result=String(post.exacta);payout100=Number(post.exactaPayout100);stake=picks.length*100;hit=picks.includes(result);ret=hit?payout100:0;
+          settled=true;result=String(post.exacta);payout100=Number(post.exactaPayout100);hit=picks.includes(result);ret=hit?payout100*(VIRTUAL_STAKE_PER_PICK_YEN/100):0;
         }else if(!exacta&&/^[1-6]-[1-6]-[1-6]$/.test(String(post.trifecta||''))&&Number.isFinite(Number(post.payout100))){
-          settled=true;result=String(post.trifecta);payout100=Number(post.payout100);stake=picks.length*100;hit=picks.includes(result);ret=hit?payout100:0;
+          settled=true;result=String(post.trifecta);payout100=Number(post.payout100);hit=picks.includes(result);ret=hit?payout100*(VIRTUAL_STAKE_PER_PICK_YEN/100):0;
         }
       }
       obs.push({date,race:Number(row.race),picks,settled,hit,stakeYen:stake,returnYen:ret,result,payout100});
@@ -52,11 +53,14 @@ function summarize(kind,dates,latestDate){
   const startDate=allDays[0]||latestDate;
   const day=daysInclusive(startDate,latestDate);
   const settled=obs.filter(x=>x.settled);
+  const pending=obs.filter(x=>!x.settled);
   const stake=settled.reduce((s,x)=>s+x.stakeYen,0),ret=settled.reduce((s,x)=>s+x.returnYen,0);
+  const committedStake=obs.reduce((s,x)=>s+x.stakeYen,0),pendingStake=pending.reduce((s,x)=>s+x.stakeYen,0);
   const currentGate=loadGate(latestDate);
   const currentTry=(currentGate?.races||[]).filter(x=>(exacta?x.exacta:x.trifecta)?.matched).map(x=>{
     const m=exacta?x.exacta:x.trifecta;
-    return {race:Number(x.race),deadline:x.deadline||null,raceType:x.raceType||'',aClassCount:Number(x.aClassCount),picks:m.frozenPicks||[]};
+    const picks=m.frozenPicks||[];
+    return {race:Number(x.race),deadline:x.deadline||null,raceType:x.raceType||'',aClassCount:Number(x.aClassCount),picks,stakeYen:picks.length*VIRTUAL_STAKE_PER_PICK_YEN,virtualCommitted:true};
   });
   return {
     method:exacta?'2連単':'3連単',
@@ -73,7 +77,10 @@ function summarize(kind,dates,latestDate){
     settledMatchedRaces:settled.length,
     hits:settled.filter(x=>x.hit).length,
     hitRate:settled.length?settled.filter(x=>x.hit).length/settled.length:null,
+    virtualStakePerPickYen:VIRTUAL_STAKE_PER_PICK_YEN,
     stakeYen:stake,
+    committedStakeYen:committedStake,
+    pendingStakeYen:pendingStake,
     returnYen:ret,
     profitYen:ret-stake,
     roi:stake?ret/stake:null,
@@ -98,7 +105,7 @@ const manifestPath=path.join(LIVE,latestDate,'program','manifest.json');
 const manifest=fs.existsSync(manifestPath)?readJson(manifestPath):null;
 const status={
   schema:'boat-command-gamagori-forward-status-v0347',
-  version:'0.35.0',
+  version:'0.35.15',
   venue:'GAMAGORI',
   date:latestDate,
   updatedAt:manifest?.fetchedAt||new Date().toISOString(),
@@ -106,10 +113,11 @@ const status={
   tryOnly:true,
   liveBettingEnabled:false,
   raceNumberRestricted:false,
+  virtualStakePerPickYen:VIRTUAL_STAKE_PER_PICK_YEN,
   policy:{source:'gamagori-forward-validation-policy-v0346.json',cycleDays:Number(policy?.evaluation?.cycleDays)||30,cycleType:policy?.evaluation?.cycleType||'FIXED_CALENDAR_WINDOW'},
   program:{races:manifest?.races||null,allProgramReady:manifest?.allProgramReady===true,fetchedAt:manifest?.fetchedAt||null},
   methods:{exacta:summarize('EXACTA',dates,latestDate),trifecta:summarize('TRIFECTA',dates,latestDate)},
-  note:'Display-only all-race TRY validation. Race number restrictions are removed. TRY methods cannot alter official LIVE predictions, HARD LOCKs, or stakes.'
+  note:'Display-only all-race TRY validation. TRY commitments use virtual funds only at 500 yen per pick. Real-money betting remains disabled and official LIVE predictions/HARD LOCKs are unchanged.'
 };
 writeJson(STATUS_PATH,status);
 console.log(JSON.stringify(status,null,2));
