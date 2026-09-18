@@ -80,7 +80,8 @@
     "潮・風・波の相互作用をモデル昇格前の必須検証項目にする。",
     "予想は履歴検証とPRE-RACE境界監査が通るまで無効。",
     "当地適性は公式出走表の当地勝率・当地2連率・当地3連率を使用する。",
-    "昇格にはCLASS_BASELINE→PROGRAM_ONLY→FULL_PREの同一レース前向き比較で、許容範囲内かつ少なくとも1指標の改善を要求する。"
+    "昇格にはCLASS_BASELINE→PROGRAM_ONLY→FULL_PREの同一レース前向き比較で、許容範囲内かつ少なくとも1指標の改善を要求する。",
+    "RICH_PROGRAMは過去ホールドアウト改善だけでは昇格しない。30R以上の前向きSHADOW比較と人間レビューを必須とする。"
   ],
   "promotionPolicy": {
     "minimumHistoricalRaces": 300,
@@ -99,6 +100,9 @@
     "requireForwardModelUplift": true,
     "maxAllowedHitRateRegression": 0.02,
     "maxAllowedResearchRoiRegression": 0.1,
-    "requireOneForwardMetricImprovement": true
+    "requireOneForwardMetricImprovement": true,
+    "minimumRichProgramForwardRaces": 30,
+    "requireRichHistoricalUplift": true,
+    "requireRichForwardValidation": true
   }
 }
