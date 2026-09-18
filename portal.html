@@ -90,7 +90,7 @@ async function refreshEdogawaBuildStatus(){
      if(x?.venueCode==='03'){
        let detail='DATA LAYER';
        if(x.phase==='PROMOTION_REVIEW_REQUIRED')detail='検証ゲート完了 · 昇格レビュー待ち';
-       else if(x.phase==='SHADOW_VALIDATION')detail=`SHADOW固定 P ${Number(x.current?.shadowProgramOnly||0)}/12 · FULL ${Number(x.current?.shadowFullPre||0)}/12`;
+       else if(x.phase==='SHADOW_VALIDATION')detail=`SHADOW 0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12 · B ${Number(x.current?.shadowFullPre||0)}/12`;
        else if(x.phase==='BASELINE_READY')detail=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`;
        else if(x.phase==='HISTORY_READY')detail=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 基準評価中`;
        else if(x.current?.featureLocalReady&&x.current?.featureSTReady)detail='番組 12/12 · 当地/ST READY · 履歴構築中';
