@@ -1,0 +1,74 @@
+{
+  "schema": "boat-command-venue-config-v1",
+  "version": "EDOGAWA-CONFIG-V0.1.0",
+  "venue": "EDOGAWA",
+  "venueName": "江戸川",
+  "venueCode": "03",
+  "slug": "edogawa",
+  "state": "BUILDING_DATA_LAYER",
+  "modelEnabled": false,
+  "tryEnabled": false,
+  "realMoneyEnabled": false,
+  "predictionPolicy": {
+    "strictPreRaceOnly": true,
+    "resultLookahead": false,
+    "payoutLookahead": false,
+    "noGamagoriModelReuse": true,
+    "promotionRequiresHistoricalValidation": true
+  },
+  "featurePlan": {
+    "program": [
+      "lane",
+      "class",
+      "registration",
+      "motor",
+      "boat",
+      "motor2Rate",
+      "boat2Rate",
+      "raceType"
+    ],
+    "exhibition": [
+      "exhibitionTime",
+      "startExhibitionST",
+      "tilt"
+    ],
+    "water": [
+      "windSpeedMps",
+      "windDirectionCode",
+      "waveHeightCm",
+      "airTempC",
+      "waterTempC"
+    ],
+    "edogawaSpecific": [
+      "tideDirection",
+      "tideStrength",
+      "flowSpeed",
+      "windTideInteraction",
+      "localCourseExperience"
+    ],
+    "status": {
+      "program": "COLLECTOR_READY",
+      "exhibition": "COLLECTOR_BUILDING",
+      "water": "COLLECTOR_BUILDING",
+      "tide": "SOURCE_MAPPING_REQUIRED",
+      "localCourseExperience": "HISTORY_BUILD_REQUIRED"
+    }
+  },
+  "ui": {
+    "entranceOpen": true,
+    "label": "構築中",
+    "phase": "DATA",
+    "commonViews": [
+      "今日",
+      "12R",
+      "結果",
+      "履歴",
+      "場選択"
+    ]
+  },
+  "notes": [
+    "江戸川専用モデル。蒲郡の予想重みを流用しない。",
+    "潮・風・波の相互作用をモデル昇格前の必須検証項目にする。",
+    "予想は履歴検証とPRE-RACE境界監査が通るまで無効。"
+  ]
+}
