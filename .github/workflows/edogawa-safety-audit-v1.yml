@@ -1,0 +1,102 @@
+name: Edogawa safety audit v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'venues/edogawa/**'
+      - 'scripts/edogawa-**'
+      - '.github/workflows/edogawa-**'
+      - 'live/edogawa/**'
+      - 'venue.html'
+      - 'portal.html'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify Edogawa venue boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,re
+          cfg=json.loads(pathlib.Path('venues/edogawa/config-v1.json').read_text(encoding='utf-8'))
+          assert cfg['venue']=='EDOGAWA' and cfg['venueCode']=='03'
+          assert cfg['modelEnabled'] is False
+          assert cfg['tryEnabled'] is False
+          assert cfg['realMoneyEnabled'] is False
+          p=cfg['predictionPolicy']
+          assert p['strictPreRaceOnly'] is True
+          assert p['resultLookahead'] is False
+          assert p['payoutLookahead'] is False
+          assert p['noGamagoriModelReuse'] is True
+
+          pre=pathlib.Path('.github/workflows/edogawa-pre-race-collector-v1.yml').read_text(encoding='utf-8')
+          assert 'jcd=$CODE' in pre and 'CODE=03' in pre
+          assert 'raceresult' not in pre
+          assert "'predictionEnabled':False" in pre
+          assert "'hardLockEnabled':False" in pre
+          assert "'resultEndpointsIncluded':False" in pre
+          assert "'payoutEndpointsIncluded':False" in pre
+
+          program=pathlib.Path('.github/workflows/edogawa-program-snapshot-v1.yml').read_text(encoding='utf-8')
+          assert 'jcd=03' in program
+          assert 'raceresult' not in program
+          assert "'resultEndpointsIncluded':False" in program
+          assert "'resultIncluded':False" in program
+          assert "'exhibitionIncluded':False" in program
+
+          result=pathlib.Path('.github/workflows/edogawa-result-collector-v1.yml').read_text(encoding='utf-8')
+          assert 'raceresult?hd=' in result and 'jcd=03' in result
+          assert "'preRaceDataIncluded':False" in result
+          assert "'predictionEnabled':False" in result
+          assert "'hardLockEnabled':False" in result
+
+          tide=pathlib.Path('.github/workflows/edogawa-tide-source-probe-v1.yml').read_text(encoding='utf-8')
+          assert 'boatrace-edogawa.com' in tide
+          assert 'raceresult' not in tide
+          assert "'predictionEnabled':False" in tide
+          assert "'resultEndpointsIncluded':False" in tide
+
+          for pth in pathlib.Path('scripts').glob('edogawa-*'):
+              s=pth.read_text(encoding='utf-8')
+              if 'gamagori-main-model' in s.lower():
+                  raise SystemExit(f'GAMAGORI_MODEL_REUSE_BLOCKED {pth}')
+
+          print('EDOGAWA_SAFETY_AUDIT_PASS')
+          PY
+
+      - name: Verify current stored Edogawa assets
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,re
+          for p in glob.glob('live/edogawa/*/program/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['resultEndpointsIncluded'] is False
+              assert x['resultIncluded'] is False
+              assert x['exhibitionIncluded'] is False
+          for p in glob.glob('live/edogawa/*/pre/race-*-pack.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['predictionEnabled'] is False
+              assert x['hardLockEnabled'] is False
+              assert x['resultEndpointsIncluded'] is False
+              assert x['payoutEndpointsIncluded'] is False
+          for p in glob.glob('live/edogawa/*/post/race-*-result.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['preRaceDataIncluded'] is False
+              assert x['resultEndpointsIncluded'] is True
+              assert x['predictionEnabled'] is False
+              assert x['hardLockEnabled'] is False
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
+          print('EDOGAWA_STORED_ASSET_AUDIT_PASS')
+          PY
