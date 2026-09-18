@@ -216,6 +216,9 @@ jobs:
 
           boat_ok=(len(boats)==6 and len(ex)==6 and len(st)==6 and all(x['motor'] is not None and x['boat'] is not None for x in final))
           weather_ok=all(x is not None for x in (air,wind,water,wave))
+          if not (boat_ok and weather_ok):
+              print(json.dumps({'status':'WAIT_PRE_RACE_VALUES','race':race,'exhibition':len(ex),'startExhibition':len(st),'weatherReady':weather_ok},ensure_ascii=False))
+              raise SystemExit(0)
           pack={
             'schema':'boat-command-edogawa-pre-race-pack-v1',
             'venue':'EDOGAWA','venueCode':'03','date':date,'race':race,
