@@ -1,11 +1,13 @@
 {
   "schema": "boat-command-gamagori-forward-status-v0347",
-  "version": "0.34.7",
+  "version": "0.35.0",
   "venue": "GAMAGORI",
   "date": "2026-09-18",
   "updatedAt": "2026-09-18T13:28:59.923082+09:00",
   "shadowOnly": true,
+  "tryOnly": true,
   "liveBettingEnabled": false,
+  "raceNumberRestricted": false,
   "policy": {
     "source": "gamagori-forward-validation-policy-v0346.json",
     "cycleDays": 30,
@@ -19,8 +21,9 @@
   "methods": {
     "exacta": {
       "method": "2連単",
-      "label": "3R × 予選 × TOP1",
-      "race": 3,
+      "label": "予選 × TOP1｜1〜12R",
+      "raceRestriction": false,
+      "tryOnly": true,
       "cycleStartDate": "2026-09-18",
       "cycleDays": 30,
       "cycleDay": 1,
@@ -35,30 +38,28 @@
       "returnYen": 0,
       "profitYen": 0,
       "roi": null,
+      "currentTry": [],
       "current": {
         "date": "2026-09-18",
         "matched": false,
         "decision": "FORWARD_SHADOW_SKIP",
         "picks": [],
-        "settled": false,
-        "hit": false,
-        "stakeYen": 0,
-        "returnYen": 0,
-        "result": null,
-        "payout100": null
+        "tryRaces": [],
+        "settled": false
       }
     },
     "trifecta": {
       "method": "3連単",
-      "label": "7R × A級3人 × 4点",
-      "race": 7,
+      "label": "A級3人 × 4点｜1〜12R",
+      "raceRestriction": false,
+      "tryOnly": true,
       "cycleStartDate": "2026-09-18",
       "cycleDays": 30,
       "cycleDay": 1,
       "daysRemaining": 29,
       "cycleStatus": "COLLECTING",
       "observedDays": 1,
-      "matchedRaces": 0,
+      "matchedRaces": 2,
       "settledMatchedRaces": 0,
       "hits": 0,
       "hitRate": null,
@@ -66,19 +67,53 @@
       "returnYen": 0,
       "profitYen": 0,
       "roi": null,
+      "currentTry": [
+        {
+          "race": 8,
+          "deadline": "18:48",
+          "raceType": "一般戦",
+          "aClassCount": 3,
+          "picks": [
+            "1-3-5",
+            "1-5-3",
+            "1-3-2",
+            "1-5-2"
+          ]
+        },
+        {
+          "race": 9,
+          "deadline": "19:16",
+          "raceType": "一般特選",
+          "aClassCount": 3,
+          "picks": [
+            "1-3-2",
+            "1-3-6",
+            "1-2-3",
+            "1-6-3"
+          ]
+        }
+      ],
       "current": {
         "date": "2026-09-18",
-        "matched": false,
-        "decision": "FORWARD_SHADOW_SKIP",
-        "picks": [],
-        "settled": false,
-        "hit": false,
-        "stakeYen": 0,
-        "returnYen": 0,
-        "result": null,
-        "payout100": null
+        "matched": true,
+        "decision": "FORWARD_SHADOW_TRY",
+        "picks": [
+          "1-3-5",
+          "1-5-3",
+          "1-3-2",
+          "1-5-2",
+          "1-3-2",
+          "1-3-6",
+          "1-2-3",
+          "1-6-3"
+        ],
+        "tryRaces": [
+          8,
+          9
+        ],
+        "settled": false
       }
     }
   },
-  "note": "Display-only forward validation status. SHADOW methods cannot alter official LIVE predictions, HARD LOCKs, or stakes."
+  "note": "Display-only all-race TRY validation. Race number restrictions are removed. TRY methods cannot alter official LIVE predictions, HARD LOCKs, or stakes."
 }
