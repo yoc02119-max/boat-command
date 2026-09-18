@@ -84,7 +84,7 @@ function programSummary(r){
  const counts={A1:0,A2:0,B1:0,B2:0};for(const p of ps){const c=String(p?.class||p?.cls||'');if(counts[c]!=null)counts[c]++}
  const countText=['A1','A2','B1','B2'].filter(k=>counts[k]).map(k=>`${k}×${counts[k]}`).join('・')||'構成待ち';
  const ranks=relativeRankMap(r,ps);
- const racers=ps.length===6?ps.map(p=>{const lane=Number(p.lane),rank=ranks.get(lane),name=cleanRacerName(p.name);return `<div class="racer-brief"><div class="racer-main"><i>${lane}</i><strong>${esc(name||'—')}</strong></div><div class="racer-meta"><b>${esc(p.class||p.cls||'—')}</b>${rank?`<span>総合${rank}位</span>`:''}</div></div>`}).join(''):'';
+ const racers=ps.length===6?ps.map(p=>{const lane=Number(p.lane),rank=ranks.get(lane),name=cleanRacerName(p.name);return `<div class="racer-brief lane-${lane}"><div class="racer-main"><i>${lane}</i><strong>${esc(name||'—')}</strong></div><div class="racer-meta"><b>${esc(p.class||p.cls||'—')}</b>${rank?`<span>総合${rank}位</span>`:''}</div></div>`}).join(''):'';
  const time=r?.programDeadline?`${esc(r.programDeadline)}`:'時刻待ち';
  const type=String(r?.programRaceType||'').trim()||'種別待ち';
  return `<div class="program-brief"><div class="program-brief-main"><strong>${time}</strong><span>${esc(type)}</span><em>${esc(countText)}</em></div>${racers?`<div class="racer-brief-grid">${racers}</div>`:''}</div>`;
