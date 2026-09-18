@@ -44,7 +44,7 @@ jobs:
           if(x.schema!=='boat-command-edogawa-forward-model-comparison-v1')throw new Error('SCHEMA');
           if(x.venueCode!=='03')throw new Error('TARGET');
           if(x.fundingScope!=='NONE_RESEARCH_ONLY'||x.bankrollAffected!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('BOUNDARY');
-          for(const k of ['classBaselineVsProgramOnly','programOnlyVsFullPre']){
+          for(const k of ['classBaselineVsProgramOnly','classBaselineVsRichProgram','programOnlyVsRichProgram','richProgramVsFullPre','programOnlyVsFullPre']){
             const y=x[k];
             if(typeof y.rows!=='number'||typeof y.pass!=='boolean')throw new Error('PAIR');
           }
