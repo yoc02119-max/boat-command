@@ -16,7 +16,9 @@
     const m=s.match(/^(F)?\.?(\d{2})$/i);
     if(!m)return null;
     const n=Number(m[2])/100;
-    return m[1]?-n:n;
+    // F is an invalid/too-early start, so it must rank worse than every normal ST.
+    // Keep a numeric contract by moving F values above the normal 0.xx range.
+    return m[1]?1+n:n;
   }
   function ranks(values,{lowerBetter=false}={}){
     const a=values.map(finite);
