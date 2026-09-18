@@ -357,3 +357,23 @@ main{padding:26px 30px 44px;min-width:0}.topbar{display:flex;justify-content:spa
   .racer-brief{min-width:104px}
   .racer-main strong{font-size:10px}
 }
+
+/* v0.35.8 POST-RACE RESULT + ODDS */
+.post-race-card-result{margin-top:10px;padding:10px;border:1px solid rgba(90,220,180,.24);border-radius:10px;background:rgba(31,111,86,.08)}
+.post-result-head{display:flex;align-items:center;gap:8px}
+.post-result-head strong{font-size:9px;letter-spacing:.12em;color:#73d9bd}
+.post-result-head>b{font-size:15px}
+.post-result-head span{margin-left:auto;font-size:9px;color:#91a9ba}
+.post-result-odds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
+.post-result-odds>div{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;background:rgba(255,255,255,.035)}
+.post-result-odds small{font-size:9px;color:#829aae}
+.post-result-odds b{font-size:13px;color:#eef8ff}
+.post-result-odds em{font-style:normal;font-size:10px;color:#82dcbf}
+.post-finish-order{display:flex;gap:8px;overflow-x:auto;margin-top:7px;padding-bottom:1px;white-space:nowrap;scrollbar-width:none}
+.post-finish-order::-webkit-scrollbar{display:none}
+.post-finish-order span{font-size:8px;color:#70899d}
+.post-finish-order b{color:#bcd0dd;font-weight:700}
+@media(max-width:760px){
+ .post-result-odds{grid-template-columns:1fr}
+ .post-result-head>b{font-size:14px}
+}
