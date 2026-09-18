@@ -1,3 +1,5 @@
+// BOAT COMMAND GAMAGORI virtual bankroll v0.35.17
+// TRY-only simulated bankroll. MAIN predictions are evaluation-only and never move funds.
 (()=>{
   'use strict';
   const DEPOSIT_KEY='boatCommand.portalDeposits.v1';
@@ -12,25 +14,14 @@
     }
   }
 
-  function settledProfit(r){
-    const saved=Number(r?.profit);
-    if(Number.isFinite(saved))return saved;
-    const returned=Number(r?.returnAmount)||0;
-    const stake=Number(r?.stake)||0;
-    return returned-stake;
-  }
-
-  function liveSessions(){
-    return (typeof allSessions==='function'
-      ?allSessions()
-      :(typeof store!=='undefined'?Object.values(store?.sessions||{}):[]))
-      .filter(s=>s&&!s.retestMode&&s.runType==='LIVE');
-  }
-
   function virtualTryLedger(){
     let data=null;
     try{data=window.BOAT_COMMAND_FORWARD_V0347?.state||null}catch(_){}
-    const empty={settledStakeYen:0,returnYen:0,settledProfitYen:0,committedStakeYen:0,pendingStakeYen:0,todayCommittedStakeYen:0,todayPendingStakeYen:0,todaySettledStakeYen:0,todayReturnYen:0,todayProfitYen:0,todayHits:0,todaySettledRaces:0,todayPendingRaces:0,currentTryRaces:[]};
+    const empty={
+      settledStakeYen:0,returnYen:0,settledProfitYen:0,committedStakeYen:0,pendingStakeYen:0,
+      todayCommittedStakeYen:0,todayPendingStakeYen:0,todaySettledStakeYen:0,todayReturnYen:0,
+      todayProfitYen:0,todayHits:0,todaySettledRaces:0,todayPendingRaces:0,currentTryRaces:[]
+    };
     if(!data||data.shadowOnly!==true||data.liveBettingEnabled!==false)return empty;
     const methods=Object.values(data.methods||{}).filter(Boolean);
     let settledStakeYen=0,returnYen=0,committedStakeYen=0,pendingStakeYen=0;
@@ -65,44 +56,24 @@
 
   function virtualBankrollNow(){
     const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
-    let bal=base+virtualDepositTotal();
-    for(const s of liveSessions()){
-      for(const r of (s.races||[])){
-        if(r?.settled)bal+=settledProfit(r);
-        else if(r?.locked)bal-=Number(r?.stake)||0;
-      }
-    }
     const t=virtualTryLedger();
-    bal+=t.settledProfitYen-t.pendingStakeYen;
-    return bal;
+    return base+virtualDepositTotal()+t.settledProfitYen-t.pendingStakeYen;
   }
 
-  // Virtual-cash ledger: official MAIN locks and SHADOW TRY commitments are simulated only.
-  // TRY commitment is deducted immediately; official POST-RACE return is added after settlement.
+  // Only SHADOW TRY moves the simulated bankroll.
+  // MAIN predictions/results stay available for accuracy evaluation but are cash-neutral.
   window.bankrollSeries=function(){
     const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
     let bal=base+virtualDepositTotal();
     const out=[{label:'START + DEPOSIT',value:bal}];
-    const events=[];
-    for(const s of liveSessions()){
-      for(const r of (s.races||[])){
-        const stake=Number(r?.stake)||0;
-        const ret=Number(r?.returnAmount)||0;
-        if(r?.locked&&stake>0&&r?.lockedAt)events.push({at:Date.parse(r.lockedAt)||0,label:`${String(s.date||'').slice(5)} ${r.race}R LOCK`,delta:-stake});
-        if(r?.settled&&r?.settledAt)events.push({at:Date.parse(r.settledAt)||0,label:`${String(s.date||'').slice(5)} ${r.race}R RESULT`,delta:ret});
-        else if(r?.settled&&!r?.lockedAt)events.push({at:Date.parse(r.settledAt||'')||0,label:`${String(s.date||'').slice(5)} ${r.race}R`,delta:settledProfit(r)});
-      }
-    }
-    events.sort((a,b)=>a.at-b.at);
-    for(const e of events){bal+=e.delta;out.push({label:e.label,value:bal});}
     const t=virtualTryLedger();
     if(t.settledStakeYen>0){
       bal+=t.settledProfitYen;
-      out.push({label:'SHADOW TRY 精算',value:bal});
+      out.push({label:'TRY 精算',value:bal});
     }
     if(t.pendingStakeYen>0){
       bal-=t.pendingStakeYen;
-      out.push({label:'SHADOW TRY 投入中',value:bal});
+      out.push({label:'TRY 投入中',value:bal});
     }
     return out;
   };
@@ -110,6 +81,9 @@
   window.bcVirtualTryLedger=virtualTryLedger;
   window.bcVirtualBankrollNow=virtualBankrollNow;
   window.bcVirtualDepositTotal=virtualDepositTotal;
+  window.BOAT_COMMAND_VIRTUAL_BANKROLL_V0250=Object.freeze({
+    version:'0.35.17',fundingScope:'TRY_ONLY',mainPredictionCashNeutral:true,realMoney:false
+  });
   window.addEventListener('storage',e=>{
     if(e.key===DEPOSIT_KEY&&typeof renderAll==='function')renderAll();
   });
