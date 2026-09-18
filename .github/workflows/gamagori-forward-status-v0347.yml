@@ -1,0 +1,62 @@
+name: Gamagori forward strategy dashboard v0.34.7
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live/gamagori/**/program/race-3.json'
+      - 'live/gamagori/**/program/race-7.json'
+      - 'live/gamagori/**/program/manifest.json'
+      - 'live/gamagori/**/shadow/race-3-exacta-gate-v0345.json'
+      - 'live/gamagori/**/post/race-3-result.json'
+      - 'live/gamagori/**/post/race-7-result.json'
+      - 'scripts/gamagori-forward-status-v0347.js'
+      - 'gamagori-main-model-v0320.js'
+      - 'gamagori-main-history-v0320.json'
+      - 'gamagori-forward-validation-policy-v0346.json'
+      - '.github/workflows/gamagori-forward-status-v0347.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-forward-status-v0347
+  cancel-in-progress: true
+
+jobs:
+  build-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build forward strategy status
+        run: |
+          node --check scripts/gamagori-forward-status-v0347.js
+          node scripts/gamagori-forward-status-v0347.js
+
+      - name: Commit frozen gate and dashboard status
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- live/gamagori)" ]; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git config user.name 'boat-command-shadow'
+          git config user.email 'boat-command-shadow@users.noreply.github.com'
+          git add live/gamagori/forward-status-v0347.json
+          git add live/gamagori/*/shadow/race-7-trifecta-gate-v0347.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'NO_STATUS_CHANGES'
+            exit 0
+          fi
+          git commit -m 'shadow(gamagori): update forward strategy dashboard v0.34.7'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort || true
+            if [ "$attempt" -lt 3 ]; then sleep 3; fi
+          done
+          exit 1
