@@ -1,0 +1,67 @@
+name: Edogawa forward model comparison v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa SHADOW evaluation v1"]
+    types: [completed]
+  push:
+    paths:
+      - 'scripts/edogawa-forward-model-comparison-v1.js'
+      - 'live/edogawa/**/research-evaluation-v1.json'
+      - 'venues/edogawa/config-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-forward-model-comparison-v1
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Compare paired forward models
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-forward-model-comparison-v1.js
+          node scripts/edogawa-forward-model-comparison-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-forward-model-comparison-v1.json');
+          if(x.schema!=='boat-command-edogawa-forward-model-comparison-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03')throw new Error('TARGET');
+          if(x.fundingScope!=='NONE_RESEARCH_ONLY'||x.bankrollAffected!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('BOUNDARY');
+          for(const k of ['classBaselineVsProgramOnly','programOnlyVsFullPre']){
+            const y=x[k];
+            if(typeof y.rows!=='number'||typeof y.pass!=='boolean')throw new Error('PAIR');
+          }
+          console.log('EDOGAWA_FORWARD_MODEL_COMPARISON_PASS',x.ready);
+          NODE
+
+      - name: Commit comparison report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-comparison'
+          git config user.email 'boat-command-edogawa-comparison@users.noreply.github.com'
+          git add edogawa-forward-model-comparison-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_FORWARD_COMPARISON_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): refresh paired forward model comparison'
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; exit 1; }
+          done
+          exit 1
