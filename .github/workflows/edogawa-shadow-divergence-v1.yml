@@ -1,0 +1,93 @@
+name: Edogawa SHADOW divergence v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa SHADOW research v1"]
+    types: [completed]
+  push:
+    paths:
+      - 'scripts/edogawa-shadow-divergence-v1.js'
+      - 'live/edogawa/**/shadow/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-shadow-divergence-v1
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Resolve latest shadow date
+        id: date
+        run: |
+          set -euo pipefail
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          dates=sorted(p.name for p in Path('live/edogawa').glob('20??-??-??') if (p/'shadow').exists())
+          print(dates[-1] if dates else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - name: Build divergence diagnostic
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-shadow-divergence-v1.js
+          node scripts/edogawa-shadow-divergence-v1.js "${{ steps.date.outputs.date }}"
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=process.env.DATE;
+          const x=JSON.parse(fs.readFileSync(`live/edogawa/${d}/shadow-divergence-v1.json`,'utf8'));
+          if(x.schema!=='boat-command-edogawa-shadow-divergence-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.resultInput!==false||x.payoutInput!==false)throw new Error('BOUNDARY');
+          if(x.bankrollAffected!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('PROMOTION');
+          console.log('EDOGAWA_SHADOW_DIVERGENCE_PASS');
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+
+      - name: Commit diagnostic
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          FILE="live/edogawa/$DATE/shadow-divergence-v1.json"
+          cp "$FILE" /tmp/edogawa-shadow-divergence-v1.json
+
+          git config user.name 'boat-command-edogawa-diagnostic'
+          git config user.email 'boat-command-edogawa-diagnostic@users.noreply.github.com'
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "live/edogawa/$DATE"
+            cp /tmp/edogawa-shadow-divergence-v1.json "$FILE"
+            git add "$FILE"
+            git diff --cached --quiet && { echo 'EDOGAWA_SHADOW_DIVERGENCE_CURRENT'; exit 0; }
+            git commit -m 'analysis(edogawa): refresh SHADOW divergence diagnostic'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          exit 1
