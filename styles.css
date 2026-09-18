@@ -272,3 +272,17 @@ main{padding:26px 30px 44px;min-width:0}.topbar{display:flex;justify-content:spa
  .program-brief-main em{margin-left:0}
  .program-brief-lanes{gap:3px}
 }
+
+/* v0.35.6 RACER NAME + RELATIVE STRENGTH */
+.racer-brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:8px}
+.racer-brief{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 7px;border-radius:8px;background:rgba(255,255,255,.035);min-width:0}
+.racer-main{display:flex;align-items:center;gap:6px;min-width:0}
+.racer-main i{font-style:normal;display:grid;place-items:center;width:18px;height:18px;border-radius:6px;background:rgba(255,255,255,.07);font-size:9px;color:#8fa7b9;flex:0 0 auto}
+.racer-main strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.racer-meta{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.racer-meta b{font-size:10px;color:#dcecf6}
+.racer-meta span{font-size:9px;color:#73d9bd}
+@media(max-width:760px){
+ .racer-brief-grid{grid-template-columns:1fr}
+ .racer-main strong{font-size:11px}
+}
