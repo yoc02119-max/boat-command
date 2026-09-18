@@ -115,7 +115,7 @@ else{
          document.getElementById('rpHistory').textContent=`${Number(x.history?.rows||0).toLocaleString('ja-JP')}R`;
          const hr=Number(x.baseline?.holdoutHitRate),roi=Number(x.baseline?.holdoutRoi),hold=Number(x.baseline?.holdoutRaces||0);
          document.getElementById('rpHoldout').textContent=hold&&Number.isFinite(hr)&&Number.isFinite(roi)?`${(hr*100).toFixed(1)}% / ROI ${(roi*100).toFixed(1)}%`:'待機';
-         document.getElementById('rpProgram').textContent=`0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12`;
+         document.getElementById('rpProgram').textContent=`0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12 · R ${Number(x.current?.shadowRichProgram||0)}/12`;
          document.getElementById('rpFull').textContent=`${Number(x.current?.shadowFullPre||0)}/12 · 評価${Number(x.forward?.fullPreRaces||0)}R`;
        }
        if(x.phase==='DATA_LAYER'){
@@ -130,13 +130,21 @@ else{
          data.textContent=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 番組/当地/ST READY`;
          model.textContent=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済み · SHADOW準備`;
        }else if(x.phase==='SHADOW_VALIDATION'){
-         const hist=Number(x.history?.rows||0),cls=Number(x.current?.shadowClassBaseline||0),prog=Number(x.current?.shadowProgramOnly||0),full=Number(x.current?.shadowFullPre||0);
+         const hist=Number(x.history?.rows||0),cls=Number(x.current?.shadowClassBaseline||0),prog=Number(x.current?.shadowProgramOnly||0),rich=Number(x.current?.shadowRichProgram||0),full=Number(x.current?.shadowFullPre||0);
          const hr=Number(x.baseline?.holdoutHitRate),hold=Number(x.baseline?.holdoutRaces||0);
-         data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 0:${cls}/12 · A:${prog}/12 · B:${full}/12`;
-         const cand=x.candidateModel;
-         model.textContent=cand?.v2ForwardEligible===true&&Number.isFinite(Number(cand?.roiDelta))
-           ?`v2候補 HOLDOUT PASS · ROI差 +${(Number(cand.roiDelta)*100).toFixed(1)}pt · B展示待ち`
-           :(hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · B展示待ち`:'0 → A → B 前向き比較中');
+         data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 0:${cls}/12 · A:${prog}/12 · R:${rich}/12 · B:${full}/12`;
+          const richModel=x.richModel,cand=x.candidateModel;
+          if(richModel?.ready===true&&Number.isFinite(Number(richModel?.holdoutHitRate))&&Number.isFinite(Number(richModel?.holdoutRoi))){
+            const dh=Number(richModel.hitRateDeltaVsBaseline),dr=Number(richModel.roiDeltaVsBaseline);
+            const delta=(Number.isFinite(dh)&&Number.isFinite(dr))
+              ?` · 基準差 HIT ${dh>=0?'+':''}${(dh*100).toFixed(1)}pt / ROI ${dr>=0?'+':''}${(dr*100).toFixed(1)}pt`
+              :'';
+            model.textContent=`RICH HOLDOUT ${Number(richModel.holdoutRaces||0)}R · ${(Number(richModel.holdoutHitRate)*100).toFixed(1)}% / ROI ${(Number(richModel.holdoutRoi)*100).toFixed(1)}%${delta}`;
+          }else{
+            model.textContent=cand?.v2ForwardEligible===true&&Number.isFinite(Number(cand?.roiDelta))
+              ?`v2候補 HOLDOUT PASS · ROI差 +${(Number(cand.roiDelta)*100).toFixed(1)}pt · RICH構築中`
+              :(hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · RICH構築中`:'0 → A → R → B 前向き比較中');
+          }
        }else{
          data.textContent='検証ゲート完了';
          model.textContent='昇格レビュー待ち · 自動本番化なし';
