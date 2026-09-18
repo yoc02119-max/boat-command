@@ -108,6 +108,7 @@ jobs:
           assert '.simple-advanced{display:none!important}' in c, 'ADVANCED_CONTROLS_NOT_HIDDEN'
           assert '.simple-shadow-lock{display:none!important}' in c, 'GLOBAL_LOCK_VISIBLE_IN_SHADOW'
           assert 'id="forwardTryResults"' in h, 'TRY_RESULTS_VIEW_MISSING'
+          assert 'function programSummary(r)' in a and 'program-brief' in a, 'PROGRAM_TIME_COMPOSITION_MISSING'
           assert 'resultGateBadge" class="badge blind simple-advanced' in h, 'LEGACY_RESULT_BADGE_VISIBLE'
           print('USER_SAFE_SIMPLE_MODE_PASS')
       - name: Verify today's result-free 12R program snapshot when present
