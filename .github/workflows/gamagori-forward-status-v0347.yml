@@ -4,12 +4,9 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'live/gamagori/**/program/race-3.json'
-      - 'live/gamagori/**/program/race-7.json'
       - 'live/gamagori/**/program/manifest.json'
-      - 'live/gamagori/**/shadow/race-3-exacta-gate-v0345.json'
-      - 'live/gamagori/**/post/race-3-result.json'
-      - 'live/gamagori/**/post/race-7-result.json'
+      - 'live/gamagori/**/shadow/all-race-try-gates-v0349.json'
+      - 'live/gamagori/**/post/**'
       - 'scripts/gamagori-forward-status-v0347.js'
       - 'gamagori-main-model-v0320.js'
       - 'gamagori-main-history-v0320.json'
@@ -47,12 +44,11 @@ jobs:
           git config user.name 'boat-command-shadow'
           git config user.email 'boat-command-shadow@users.noreply.github.com'
           git add live/gamagori/forward-status-v0347.json
-          git add live/gamagori/*/shadow/race-7-trifecta-gate-v0347.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo 'NO_STATUS_CHANGES'
             exit 0
           fi
-          git commit -m 'shadow(gamagori): update forward strategy dashboard v0.34.7'
+          git commit -m 'shadow(gamagori): update all-race TRY dashboard'
           for attempt in 1 2 3; do
             git fetch origin main
             if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
