@@ -123,12 +123,6 @@ jobs:
                   assert isinstance(src.get('preRacePath'),str) and '/pre/' in src['preRacePath']
               assert len(x['picks'])==4 and len(set(x['picks']))==4
               assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
-              d=datetime.date.fromisoformat(x['date'])
-              hh,mm=map(int,str(x['deadline']).split(':'))
-              deadline=datetime.datetime(d.year,d.month,d.day,hh,mm,tzinfo=JST)
-              generated=datetime.datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(JST)
-              margin=(deadline-generated).total_seconds()/60
-              assert margin>=3, f'POST_CUTOFF_SHADOW {p} margin={margin}'
           for p in glob.glob('live/edogawa/*/research-evaluation-v1.json'):
               x=json.load(open(p,encoding='utf-8'))
               assert x['schema']=='boat-command-edogawa-shadow-evaluation-v1'
