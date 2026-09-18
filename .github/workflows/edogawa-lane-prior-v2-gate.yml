@@ -1,0 +1,66 @@
+name: Edogawa learned lane prior gate v2
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'edogawa-research-model-v2.js'
+      - 'scripts/edogawa-lane-prior-v2-backtest-v1.js'
+      - 'edogawa-history-bootstrap-v1.json'
+  workflow_run:
+    workflows: ["Edogawa history bootstrap recovery v2"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-lane-prior-v2-gate
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Strict holdout compare v1 vs v2
+        run: |
+          set -euo pipefail
+          node --check edogawa-research-model-v1.js
+          node --check edogawa-research-model-v2.js
+          node --check scripts/edogawa-lane-prior-v2-backtest-v1.js
+          node scripts/edogawa-lane-prior-v2-backtest-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-lane-prior-v2-backtest-v1.json');
+          if(x.schema!=='boat-command-edogawa-lane-prior-v2-backtest-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.strictWalkForward!==true||x.sameDayRowsExcluded!==true)throw new Error('BOUNDARY');
+          if(x.productionEnabled!==false||x.tryEnabled!==false||x.bankrollAffected!==false)throw new Error('PROMOTION');
+          if(x.v1.races!==x.v2.races||x.v2.races<200)throw new Error('SAMPLE');
+          console.log('EDOGAWA_LANE_PRIOR_V2_GATE',x.eligibleForForwardTest,x.delta);
+          NODE
+
+      - name: Commit gate report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-lane-prior'
+          git config user.email 'boat-command-edogawa-lane-prior@users.noreply.github.com'
+          git add edogawa-lane-prior-v2-backtest-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_LANE_PRIOR_REPORT_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): publish learned lane prior holdout gate'
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; exit 1; }
+          done
+          exit 1
