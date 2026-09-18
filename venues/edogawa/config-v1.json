@@ -21,6 +21,15 @@
       "lane",
       "class",
       "registration",
+      "fCount",
+      "lCount",
+      "avgST",
+      "nationalWinRate",
+      "national2Rate",
+      "national3Rate",
+      "localWinRate",
+      "local2Rate",
+      "local3Rate",
       "motor",
       "boat",
       "motor2Rate",
@@ -47,11 +56,11 @@
       "localCourseExperience"
     ],
     "status": {
-      "program": "COLLECTOR_READY",
+      "program": "COLLECTOR_READY_WITH_LOCAL_STATS",
       "exhibition": "COLLECTOR_BUILDING",
       "water": "COLLECTOR_BUILDING",
       "tide": "SOURCE_MAPPING_REQUIRED",
-      "localCourseExperience": "HISTORY_BUILD_REQUIRED"
+      "localCourseExperience": "PROGRAM_LOCAL_STATS_READY"
     }
   },
   "ui": {
@@ -69,6 +78,7 @@
   "notes": [
     "江戸川専用モデル。蒲郡の予想重みを流用しない。",
     "潮・風・波の相互作用をモデル昇格前の必須検証項目にする。",
-    "予想は履歴検証とPRE-RACE境界監査が通るまで無効。"
+    "予想は履歴検証とPRE-RACE境界監査が通るまで無効。",
+    "当地適性は公式出走表の当地勝率・当地2連率・当地3連率を使用する。"
   ]
 }
