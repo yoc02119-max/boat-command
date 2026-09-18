@@ -6,6 +6,11 @@ const path=require('path');
 const root=path.join(__dirname,'..');
 const liveRoot=path.join(root,'live','edogawa');
 const output=process.argv[2]||path.join(root,'venues','edogawa','readiness-v1.json');
+const config=JSON.parse(fs.readFileSync(path.join(root,'venues','edogawa','config-v1.json'),'utf8'));
+const policy=config.promotionPolicy||{};
+const MIN_HISTORY=Number(policy.minimumHistoricalRaces)||300;
+const MIN_A=Number(policy.minimumProgramOnlyForwardRaces)||30;
+const MIN_B=Number(policy.minimumFullPreForwardRaces)||30;
 
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
 function dirs(p){try{return fs.readdirSync(p,{withFileTypes:true}).filter(x=>x.isDirectory()).map(x=>x.name)}catch{return[]}}
@@ -52,7 +57,7 @@ const histAnalysis=read(path.join(root,'edogawa-history-analysis-v1.json'));
 const baseline=read(path.join(root,'edogawa-baseline-backtest-v1.json'));
 const historyRows=Number(histAudit?.races)||0;
 const historyDays=Number(histAudit?.raceDays)||0;
-const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=300;
+const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=MIN_HISTORY;
 const analysisReady=histAnalysis?.venueCode==='03'&&Number(histAnalysis?.races)>=300;
 const baselineReady=baseline?.venueCode==='03'&&baseline?.strictWalkForward===true&&baseline?.sameDayRowsExcluded===true&&Number(baseline?.holdout?.metrics4?.races)>0;
 
@@ -74,9 +79,9 @@ if(!featureSTReady)blockers.push('AVERAGE_ST_FEATURES_NOT_READY');
 if(!historyReady)blockers.push('HISTORICAL_300_RACE_MINIMUM_NOT_READY');
 if(!analysisReady)blockers.push('HISTORICAL_STRUCTURE_ANALYSIS_NOT_READY');
 if(!baselineReady)blockers.push('STRICT_WALK_FORWARD_BASELINE_NOT_READY');
-if(tideSources===0)blockers.push('OFFICIAL_TIDE_MAPPING_NOT_READY');
-if(forwardProgramRaces<30)blockers.push('PROGRAM_ONLY_FORWARD_30_RACES_NOT_READY');
-if(forwardFullRaces<30)blockers.push('FULL_PRE_FORWARD_30_RACES_NOT_READY');
+if(policy.requireOfficialTideMapping!==false&&tideSources===0)blockers.push('OFFICIAL_TIDE_MAPPING_NOT_READY');
+if(forwardProgramRaces<MIN_A)blockers.push(`PROGRAM_ONLY_FORWARD_${MIN_A}_RACES_NOT_READY`);
+if(forwardFullRaces<MIN_B)blockers.push(`FULL_PRE_FORWARD_${MIN_B}_RACES_NOT_READY`);
 
 let phase='DATA_LAYER';
 if(historyReady)phase='HISTORY_READY';
@@ -117,6 +122,15 @@ const out={
     fullPreRaces:forwardFullRaces
   },
   blockers,
+  policy:{
+    minimumHistoricalRaces:MIN_HISTORY,
+    minimumProgramOnlyForwardRaces:MIN_A,
+    minimumFullPreForwardRaces:MIN_B,
+    requireOfficialTideMapping:policy.requireOfficialTideMapping!==false,
+    requireHumanReview:policy.requireHumanReview!==false,
+    autoPromotion:policy.autoPromotion===true,
+    autoTryEnable:policy.autoTryEnable===true
+  },
   promotionReviewRequired:blockers.length===0,
   modelEnabled:false,
   tryEnabled:false,
