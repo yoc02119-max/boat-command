@@ -26,11 +26,22 @@ function readExistingModelVersion(date){
   return null;
 }
 const existingModelVersion=readExistingModelVersion(date);
-const model=existingModelVersion===modelV1.version?modelV1:modelV2;
-if(existingModelVersion&&existingModelVersion!==model.version){
-  throw new Error('EDOGAWA_SAME_DAY_MODEL_VERSION_MISMATCH '+existingModelVersion+' vs '+model.version);
+const gatePath=path.join(root,'edogawa-lane-prior-v2-backtest-v1.json');
+let v2Eligible=false;
+if(fs.existsSync(gatePath)){
+  try{
+    const gate=JSON.parse(fs.readFileSync(gatePath,'utf8'));
+    v2Eligible=gate?.schema==='boat-command-edogawa-lane-prior-v2-backtest-v1'&&
+      gate?.venueCode==='03'&&gate?.strictWalkForward===true&&
+      gate?.eligibleForForwardTest===true;
+  }catch{}
 }
-console.log('EDOGAWA_SHADOW_MODEL_VERSION',model.version,existingModelVersion?'SAME_DAY_PINNED':'NEW_DAY_LATEST');
+let model;
+if(existingModelVersion===modelV1.version)model=modelV1;
+else if(existingModelVersion===modelV2.version)model=modelV2;
+else if(existingModelVersion)throw new Error('EDOGAWA_UNKNOWN_SAME_DAY_MODEL_VERSION '+existingModelVersion);
+else model=v2Eligible?modelV2:modelV1;
+console.log('EDOGAWA_SHADOW_MODEL_VERSION',model.version,existingModelVersion?'SAME_DAY_PINNED':(v2Eligible?'V2_GATE_PASS':'V2_GATE_NOT_READY'));
 
 function nowJst(){
   const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
