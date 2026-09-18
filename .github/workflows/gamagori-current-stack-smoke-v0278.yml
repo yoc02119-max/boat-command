@@ -113,6 +113,7 @@ jobs:
           assert 'lane-${lane}' in a and 'grid-template-columns:repeat(6,minmax(104px,1fr))' in c, 'RACER_HORIZONTAL_STRIP_MISSING'
           assert '.racer-brief.lane-3' in c and '.racer-brief.lane-6' in c, 'BOAT_LANE_COLORS_MISSING'
           assert 'post-race-card-v0358.js?v=' in h, 'POST_RACE_CARD_SCRIPT_MISSING'
+          p=Path('post-race-card-v0358.js').read_text(encoding='utf-8'); assert 'function renderCached()' in p and 'priorRenderAll' in p and 'Promise.all' in p, 'POST_RACE_REDRAW_RESILIENCE_MISSING'
           assert '.post-race-card-result' in c, 'POST_RACE_RESULT_STYLE_MISSING'
           assert 'resultGateBadge" class="badge blind simple-advanced' in h, 'LEGACY_RESULT_BADGE_VISIBLE'
           print('USER_SAFE_SIMPLE_MODE_PASS')
