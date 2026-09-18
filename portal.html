@@ -73,7 +73,7 @@ venues.forEach(v=>{
  btn.innerHTML=active
   ?`<strong>${v.name}</strong><small>${gs.live?'<span class="live-dot"></span>':''}${gs.top}</small><div class="venue-live ${gs.live?'':'wait'}"><b>${gs.detail}</b></div><span class="arrow">→</span>`
   :`<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
- btn.onclick=()=>{location.href=active?'./':`./venue.html?jcd=${v.code}`};
+ btn.onclick=()=>{location.href=active?'./?venue=gamagori':`./venue.html?jcd=${v.code}`};
  grid.appendChild(btn)
 });
 setInterval(()=>{const card=document.querySelector('.venue.active');if(!card)return;const s=gamagoriStatus();card.querySelector('small').innerHTML=`${s.live?'<span class="live-dot"></span>':''}${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`;renderPortalStats()},60000);
