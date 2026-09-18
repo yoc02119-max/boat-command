@@ -74,11 +74,16 @@ for(let race=1;race<=12;race++){
   const dm=deadlineMinutes(program.deadline);
   if(dm==null||dm-now.minutes<3){console.log('EDOGAWA_SHADOW_CUTOFF',race,program.deadline);continue}
 
-  const programOut=path.join(root,'live','edogawa',date,'shadow','program-only',`race-${race}.json`);
   const programSource={
     programPath:path.relative(root,programPath).replace(/\\/g,'/'),
     programSha256:sha256File(programPath)
   };
+
+  const classOut=path.join(root,'live','edogawa',date,'shadow','class-baseline',`race-${race}.json`);
+  const z=snapshot(program,null,'CLASS_BASELINE',now.iso,programSource);
+  if(writeOnce(classOut,z))writes++;
+
+  const programOut=path.join(root,'live','edogawa',date,'shadow','program-only',`race-${race}.json`);
   const a=snapshot(program,null,'PROGRAM_ONLY',now.iso,programSource);
   if(writeOnce(programOut,a))writes++;
 
