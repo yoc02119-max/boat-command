@@ -76,12 +76,12 @@ const report={
     historicalResearch:'v0.34.4',
     historicalAllThreeSplitsRoiAbove100:true,
     promotionStatus:'NOT_PROMOTED',
-    freshForwardRequired:true
+    freshForwardRequired:true,forwardEvaluationMode:'FIXED_30_CALENDAR_DAYS',forwardCycleDays:30
   },
   frozenExactaPicks:matched?[top1]:[],
   decision:matched?'FORWARD_SHADOW_TRACK':'FORWARD_SHADOW_SKIP',
   frozenAt:pack.fetchedAt||new Date().toISOString(),
-  note:'Eligibility and TOP1 exacta are frozen from PRE-only target data. This file never changes LIVE predictions, stakes, or hard locks and never reads the target race result/payout.'
+  note:'Eligibility and TOP1 exacta are frozen from PRE-only target data. Forward performance is reviewed after a fixed 30-calendar-day cycle; profitable/stable methods go to adoption review, unstable/unprofitable methods are retuned, sparse evidence remains shadow. This file never changes LIVE predictions, stakes, or hard locks and never reads the target race result/payout.'
 };
 fs.mkdirSync(path.dirname(out),{recursive:true});
 fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');
