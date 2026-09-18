@@ -1,0 +1,204 @@
+name: Edogawa rich history bootstrap v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-rich-history-bootstrap-v1.yml'
+      - 'scripts/edogawa-rich-history-builder-v1.py'
+      - 'edogawa-history-bootstrap-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-rich-history-bootstrap-v1
+  cancel-in-progress: true
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      matrix:
+        block: [0, 1, 2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Install LZH extractor
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+
+      - name: Build rich historical feature block
+        env:
+          BLOCK: ${{ matrix.block }}
+        run: |
+          set -euo pipefail
+          python3 scripts/edogawa-rich-history-builder-v1.py --self-test
+          rm -rf /tmp/edogawa-rich
+          mkdir -p /tmp/edogawa-rich/days /tmp/edogawa-rich/work
+
+          python3 - <<'PY' > /tmp/edogawa-rich/dates.txt
+          import json,os
+          x=json.load(open('edogawa-history-bootstrap-v1.json',encoding='utf-8'))
+          dates=sorted({r['d'] for r in x.get('races',[])})
+          block=int(os.environ['BLOCK'])
+          for i,d in enumerate(dates):
+              if i%3==block: print(d)
+          PY
+
+          : > /tmp/edogawa-rich/exceptions.txt
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="$yyyy$mm"
+            b="b$yy$mm$dd.lzh"; k="k$yy$mm$dd.lzh"
+            rm -rf /tmp/edogawa-rich/work/*
+            mkdir -p /tmp/edogawa-rich/work/raw /tmp/edogawa-rich/work/b /tmp/edogawa-rich/work/k
+
+            bc=$(curl -sS -L --connect-timeout 20 --max-time 60 -o "/tmp/edogawa-rich/work/raw/$b" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/B/$ym/$b" || true)
+            kc=$(curl -sS -L --connect-timeout 20 --max-time 60 -o "/tmp/edogawa-rich/work/raw/$k" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/K/$ym/$k" || true)
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then
+              echo "$d HTTP B=$bc K=$kc" >> /tmp/edogawa-rich/exceptions.txt
+              continue
+            fi
+
+            lha xw=/tmp/edogawa-rich/work/b "/tmp/edogawa-rich/work/raw/$b" >/dev/null 2>&1 || { echo "$d B_EXTRACT" >> /tmp/edogawa-rich/exceptions.txt; continue; }
+            lha xw=/tmp/edogawa-rich/work/k "/tmp/edogawa-rich/work/raw/$k" >/dev/null 2>&1 || { echo "$d K_EXTRACT" >> /tmp/edogawa-rich/exceptions.txt; continue; }
+
+            BFILE=$(find /tmp/edogawa-rich/work/b -type f | head -1)
+            KFILE=$(find /tmp/edogawa-rich/work/k -type f | head -1)
+            if [ -z "$BFILE" ] || [ -z "$KFILE" ]; then
+              echo "$d EXTRACT_EMPTY" >> /tmp/edogawa-rich/exceptions.txt
+              continue
+            fi
+
+            if ! python3 scripts/edogawa-rich-history-builder-v1.py               --b "$BFILE" --k "$KFILE" --out "/tmp/edogawa-rich/days/$d.json"; then
+              echo "$d PARSE_FAIL" >> /tmp/edogawa-rich/exceptions.txt
+              continue
+            fi
+            sleep 1
+          done < /tmp/edogawa-rich/dates.txt
+
+          python3 - <<'PY'
+          import json,os,pathlib
+          rows=[]
+          for p in sorted(pathlib.Path('/tmp/edogawa-rich/days').glob('*.json')):
+              x=json.loads(p.read_text(encoding='utf-8')); rows+=x.get('races',[])
+          report={
+            'block':int(os.environ['BLOCK']),
+            'races':len(rows),
+            'dates':len({r['d'] for r in rows}),
+            'exceptions':[x for x in pathlib.Path('/tmp/edogawa-rich/exceptions.txt').read_text().splitlines() if x.strip()]
+          }
+          pathlib.Path('/tmp/edogawa-rich/segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          pathlib.Path('/tmp/edogawa-rich/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(report,ensure_ascii=False))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edogawa-rich-block-${{ matrix.block }}
+          path: |
+            /tmp/edogawa-rich/segment.json
+            /tmp/edogawa-rich/report.json
+          retention-days: 7
+
+  merge:
+    needs: block
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: edogawa-rich-block-*
+          path: /tmp/edogawa-rich-blocks
+
+      - name: Merge and exact-audit against base history
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          base=json.load(open('edogawa-history-bootstrap-v1.json',encoding='utf-8'))
+          base_rows={r['id']:r for r in base.get('races',[])}
+          rows=[];reports=[]
+          for p in pathlib.Path('/tmp/edogawa-rich-blocks').rglob('segment.json'):
+              rows+=json.loads(p.read_text(encoding='utf-8')).get('races',[])
+          for p in pathlib.Path('/tmp/edogawa-rich-blocks').rglob('report.json'):
+              reports.append(json.loads(p.read_text(encoding='utf-8')))
+
+          rich={r['id']:r for r in rows}
+          assert len(rich)==len(rows), 'DUPLICATE_RICH_IDS'
+          missing=sorted(set(base_rows)-set(rich))
+          extra=sorted(set(rich)-set(base_rows))
+          mismatch=[]
+          for rid in sorted(set(base_rows)&set(rich)):
+              b=base_rows[rid];r=rich[rid]
+              if b['o']!=r['o'] or int(b['p'])!=int(r['p']) or b['c']!=r['c']:
+                  mismatch.append(rid)
+              boats=r.get('boats',[])
+              if len(boats)!=6:
+                  mismatch.append(rid+':BOATS')
+                  continue
+              for i,x in enumerate(boats,1):
+                  if int(x.get('lane',0))!=i or x.get('class') not in {'A1','A2','B1','B2'}:
+                      mismatch.append(rid+':LANE')
+                  for k in ('nationalWinRate','national2Rate','localWinRate','local2Rate','motor2Rate','boat2Rate'):
+                      if not isinstance(x.get(k),(int,float)):
+                          mismatch.append(rid+':'+k)
+
+          audit={
+            'schema':'boat-command-edogawa-rich-history-audit-v1',
+            'venueCode':'03',
+            'baseRaces':len(base_rows),'richRaces':len(rich),
+            'coverage':len(rich)/len(base_rows) if base_rows else 0,
+            'missingIds':missing[:100],
+            'extraIds':extra[:100],
+            'mismatchIds':mismatch[:100],
+            'blockExceptions':sum((x.get('exceptions',[]) for x in reports),[]),
+            'exactBaseCoverage':not missing and not extra and not mismatch,
+            'readyForRichBacktest':not missing and not extra and not mismatch and len(rich)>=500
+          }
+          if not audit['readyForRichBacktest']:
+              print(json.dumps(audit,ensure_ascii=False,indent=2))
+              raise SystemExit('EDOGAWA_RICH_HISTORY_AUDIT_FAILED')
+
+          payload={
+            'schema':'boat-command-edogawa-rich-history-v1',
+            'venue':'EDOGAWA','venueCode':'03',
+            'cutoff':base.get('cutoff'),
+            'resultUse':'HISTORICAL_LABEL_ONLY_STRICTLY_BEFORE_TARGET_DATE',
+            'features':['class','nationalWinRate','national2Rate','localWinRate','local2Rate','motor2Rate','boat2Rate','raceType','raceNumber'],
+            'races':sorted(rich.values(),key=lambda x:(x['d'],x['r']))
+          }
+          pathlib.Path('edogawa-rich-history-v1.json').write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          pathlib.Path('edogawa-rich-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit rich history
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-rich-history'
+          git config user.email 'boat-command-edogawa-rich-history@users.noreply.github.com'
+          git add edogawa-rich-history-v1.json edogawa-rich-history-audit-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_RICH_HISTORY_CURRENT'; exit 0; }
+          git commit -m 'data(edogawa): publish audited rich historical features'
+          git pull --rebase origin main
+          git push origin HEAD:main
