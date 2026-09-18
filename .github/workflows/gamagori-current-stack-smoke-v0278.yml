@@ -106,6 +106,9 @@ jobs:
           assert 'const preflight=[]' in a and '予想確定はまだできません' in a, 'GLOBAL_LOCK_PREFLIGHT_MISSING'
           assert '.race-card .race-actions{display:none!important}' in c, 'PER_RACE_LOCK_NOT_HIDDEN'
           assert '.simple-advanced{display:none!important}' in c, 'ADVANCED_CONTROLS_NOT_HIDDEN'
+          assert '.simple-shadow-lock{display:none!important}' in c, 'GLOBAL_LOCK_VISIBLE_IN_SHADOW'
+          assert 'id="forwardTryResults"' in h, 'TRY_RESULTS_VIEW_MISSING'
+          assert 'resultGateBadge" class="badge blind simple-advanced' in h, 'LEGACY_RESULT_BADGE_VISIBLE'
           print('USER_SAFE_SIMPLE_MODE_PASS')
       - name: Verify today's result-free 12R program snapshot when present
         shell: python
