@@ -77,6 +77,8 @@ function summarize(kind,dates,latestDate){
     returnYen:ret,
     profitYen:ret-stake,
     roi:stake?ret/stake:null,
+    todayResults:obs.filter(x=>x.date===latestDate),
+    recentResults:obs.slice(-20),
     currentTry,
     current:{
       date:latestDate,
