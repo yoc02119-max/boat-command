@@ -93,6 +93,20 @@ jobs:
           for f,needles in checks.items():
             text=Path(f).read_text(encoding='utf-8'); missing=[n for n in needles if n not in text]; assert not missing, f'SAFETY_CONTRACT_MISSING:{f}:{missing}'
           print('SAFETY_CONTRACT_PASS')
+      - name: Verify user-safe simple-mode contract
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('index.html').read_text(encoding='utf-8')
+          a=Path('app.js').read_text(encoding='utf-8')
+          c=Path('styles.css').read_text(encoding='utf-8')
+          assert 'simple-advanced' in h, 'SIMPLE_MODE_MARKER_MISSING'
+          assert 'data-view="analytics"' in h and 'data-view="data"' in h, 'ADVANCED_VIEWS_MISSING'
+          assert 'readonly tabindex="-1"' in a, 'LIVE_PICKS_NOT_READONLY'
+          assert 'const preflight=[]' in a and '予想確定はまだできません' in a, 'GLOBAL_LOCK_PREFLIGHT_MISSING'
+          assert '.race-card .race-actions{display:none!important}' in c, 'PER_RACE_LOCK_NOT_HIDDEN'
+          assert '.simple-advanced{display:none!important}' in c, 'ADVANCED_CONTROLS_NOT_HIDDEN'
+          print('USER_SAFE_SIMPLE_MODE_PASS')
       - name: Verify today's result-free 12R program snapshot when present
         shell: python
         run: |
