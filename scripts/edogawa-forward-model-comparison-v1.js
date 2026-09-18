@@ -52,6 +52,9 @@ function paired(a,b){
   return {rows:rows.length,a:ma,b:mb,hitRateDelta:hitDelta,roiDelta,sampleReady,noBadHit,noBadRoi,oneImproved,pass:sampleReady&&noBadHit&&noBadRoi&&oneImproved};
 }
 const classVsProgram=paired('classBaseline','programOnly');
+const classVsRich=paired('classBaseline','richProgram');
+const programVsRich=paired('programOnly','richProgram');
+const richVsFull=paired('richProgram','fullPre');
 const programVsFull=paired('programOnly','fullPre');
 const out={
   schema:'boat-command-edogawa-forward-model-comparison-v1',
@@ -65,6 +68,9 @@ const out={
     requireOneForwardMetricImprovement:requireOneImprovement
   },
   classBaselineVsProgramOnly:classVsProgram,
+  classBaselineVsRichProgram:classVsRich,
+  programOnlyVsRichProgram:programVsRich,
+  richProgramVsFullPre:richVsFull,
   programOnlyVsFullPre:programVsFull,
   ready:classVsProgram.pass&&programVsFull.pass,
   fundingScope:'NONE_RESEARCH_ONLY',
@@ -73,4 +79,4 @@ const out={
   tryEnabled:false
 };
 fs.writeFileSync(path.join(root,'edogawa-forward-model-comparison-v1.json'),JSON.stringify(out,null,2)+'\n');
-console.log(JSON.stringify({classVsProgram,programVsFull,ready:out.ready},null,2));
+console.log(JSON.stringify({classVsProgram,classVsRich,programVsRich,richVsFull,programVsFull,ready:out.ready},null,2));
