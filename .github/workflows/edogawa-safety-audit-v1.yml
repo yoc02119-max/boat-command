@@ -107,6 +107,12 @@ jobs:
               assert x['resultInput'] is False
               assert x['payoutInput'] is False
               assert x['immutableAfterFirstWrite'] is True
+              src=x.get('sources') or {}
+              assert isinstance(src.get('programSha256'),str) and re.fullmatch(r'[0-9a-f]{64}',src['programSha256'])
+              assert isinstance(src.get('programPath'),str) and src['programPath'].startswith('live/edogawa/')
+              if x['mode']=='FULL_PRE_RACE':
+                  assert isinstance(src.get('preRaceSha256'),str) and re.fullmatch(r'[0-9a-f]{64}',src['preRaceSha256'])
+                  assert isinstance(src.get('preRacePath'),str) and '/pre/' in src['preRacePath']
               assert len(x['picks'])==4 and len(set(x['picks']))==4
               assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
           for p in glob.glob('live/edogawa/*/research-evaluation-v1.json'):
