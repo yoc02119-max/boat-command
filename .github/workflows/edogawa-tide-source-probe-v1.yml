@@ -2,11 +2,14 @@ name: Edogawa tide source probe v1
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa PRE-RACE collector v1"]
+    types: [completed]
   push:
     paths:
       - '.github/workflows/edogawa-tide-source-probe-v1.yml'
   schedule:
-    - cron: '5,35 0-9 * * *'
+    - cron: '*/10 0-9 * * *'
 
 permissions:
   contents: write
@@ -17,6 +20,7 @@ concurrency:
 
 jobs:
   probe:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -195,10 +199,34 @@ jobs:
         run: |
           set -euo pipefail
           DATE=$(TZ=Asia/Tokyo date +%F)
+          RACE=$(python3 - <<'PY'
+          import glob,re
+          fs=sorted(glob.glob('live/edogawa/*/pre/race-*-tide-source.json'))
+          if fs:
+              m=re.search(r'race-(\d+)-tide-source\.json,fs[-1])
+              print(m.group(1) if m else '')
+          PY
+          )
+          [ -n "$RACE" ] || { echo 'NO_EDOGAWA_TIDE_TARGET'; exit 0; }
+          FILE="live/edogawa/$DATE/pre/race-$RACE-tide-source.json"
+          cp "$FILE" /tmp/edogawa-tide-source.json
+
           git config user.name 'boat-command-edogawa-tide'
           git config user.email 'boat-command-edogawa-tide@users.noreply.github.com'
-          git add "live/edogawa/$DATE/pre/"*-tide-source.json
-          git diff --cached --quiet && { echo 'NO_EDOGAWA_TIDE_SOURCE_CHANGE'; exit 0; }
-          git commit -m "live: edogawa $DATE official tide source evidence"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "live/edogawa/$DATE/pre"
+            cp /tmp/edogawa-tide-source.json "$FILE"
+            git add "$FILE"
+            git diff --cached --quiet && { echo 'NO_EDOGAWA_TIDE_SOURCE_CHANGE'; exit 0; }
+            git commit -m "live: edogawa $DATE official tide source evidence"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "EDOGAWA_TIDE_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'EDOGAWA_TIDE_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
