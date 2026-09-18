@@ -65,7 +65,7 @@ jobs:
           if(x.venueCode!=='03')throw new Error('TARGET');
           if(x.fundingScope!=='NONE_RESEARCH_ONLY'||x.bankrollAffected!==false||x.tryAffected!==false||x.productionAffected!==false)throw new Error('FUNDING_BOUNDARY');
           for(const r of x.rows){
-            for(const k of ['programOnly','fullPre']){
+            for(const k of ['classBaseline','programOnly','fullPre']){
               if(!r[k])continue;
               if(!Array.isArray(r[k].picks)||r[k].picks.length!==4)throw new Error('PICKS');
               if(typeof r[k].hit!=='boolean')throw new Error('HIT');
