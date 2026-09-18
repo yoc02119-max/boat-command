@@ -1,7 +1,7 @@
-// BOAT COMMAND GAMAGORI forward strategy dashboard v0.35.4
+// BOAT COMMAND GAMAGORI forward strategy dashboard v0.35.15
 // Display-only. Reads separated SHADOW status and never writes LIVE predictions, locks, stakes, or results.
 (()=>{'use strict';
-const VERSION='GAMAGORI-FORWARD-DASHBOARD-V0.35.4';
+const VERSION='GAMAGORI-FORWARD-DASHBOARD-V0.35.15';
 const URL='./live/gamagori/forward-status-v0347.json';
 let last=null,timer=null;
 
@@ -25,7 +25,7 @@ function methodCard(m){
   const hit=Number.isFinite(Number(m?.hitRate))?pct(m.hitRate):'—';
   const tries=Array.isArray(m?.currentTry)?m.currentTry:[];
   const reason=s==='TRY'
-    ?tries.map(x=>`${Number(x.race)}R：${(x.picks||[]).join(' / ')}`).join('<br>')
+    ?tries.map(x=>`${Number(x.race)}R：${(x.picks||[]).join(' / ')}｜仮投入 ${yen(x.stakeYen||0)}`).join('<br>')
     :s==='SKIP'?'本日は条件該当なし。':'本日のSHADOW判定待ち';
   return `<article class="forward-method ${s.toLowerCase()}">
     <div class="forward-method-head">
@@ -54,7 +54,7 @@ function body(data,compact=false){
     ${methodCard(data?.methods?.exacta)}
     ${methodCard(data?.methods?.trifecta)}
   </div>
-  <div class="forward-foot">SHADOW TRY専用｜1〜12Rを走査し条件一致レースを記録。30日終了時に「継続採用 / 練り直し / データ不足で延長」を判定。LIVE買い目・賭け金・HARD LOCKは変更しません。</div>`;
+  <div class="forward-foot">SHADOW TRY専用｜条件一致時に1点¥500を仮資金から投入済みとして計上。実金は使わず、LIVE買い目・HARD LOCKは変更しません。</div>`;
 }
 function resultRow(x,method){
   const settled=Boolean(x?.settled),hit=Boolean(x?.hit);
@@ -67,7 +67,7 @@ function resultRow(x,method){
   return `<div class="try-result-row ${cls}">
     <div class="try-result-main"><b>${Number(x?.race)||0}R</b><span>${esc(method)}</span><em>${state}</em></div>
     <div class="try-result-picks">${esc(picks)}</div>
-    <div class="try-result-meta"><span>結果 ${esc(result)}</span><span>払戻/100円 ${payout}</span><span>返還 ${ret}</span></div>
+    <div class="try-result-meta"><span>仮投入 ${yen(x?.stakeYen||0)}</span><span>結果 ${esc(result)}</span><span>払戻/100円 ${payout}</span><span>返還 ${ret}</span></div>
   </div>`;
 }
 function resultsBody(data){
@@ -108,6 +108,7 @@ function render(data){
   if(a)a.innerHTML=body(data,false);
   if(b)b.innerHTML=body(data,true);
   if(r)r.innerHTML=resultsBody(data);
+  window.dispatchEvent(new CustomEvent('boatcommand:forward-status',{detail:{date:data?.date||null,virtualStakePerPickYen:Number(data?.virtualStakePerPickYen)||0}}));
 }
 function renderWait(msg='SHADOWステータス同期中'){
   ensure();
@@ -124,7 +125,7 @@ async function load(){
     last=x;render(x);
   }catch(e){
     if(last)render(last);else renderWait('ステータス待ち');
-    console.warn('[FORWARD v0.35.4]',e);
+    console.warn('[FORWARD v0.35.15]',e);
   }
 }
 function start(){
