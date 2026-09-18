@@ -88,37 +88,34 @@ else{
    document.getElementById('modelStatus').textContent='データ蓄積後に江戸川専用で構築';
    document.getElementById('venueNote').textContent='江戸川はDATA LAYER構築中。蒲郡モデルは流用せず、潮・風・波・当地適性を分離して検証します。予想とTRYはまだ無効です。';
    (async()=>{
-     const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-     let programReady=false,historyAudit=null,baseline=null;
      try{
-       const r=await fetch(`./live/edogawa/${p}/program/manifest.json?t=${Date.now()}`,{cache:'no-store'});
-       if(r.ok){
-         const x=await r.json();
-         programReady=x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12;
+       const r=await fetch(`./venues/edogawa/readiness-v1.json?t=${Date.now()}`,{cache:'no-store'});
+       if(!r.ok)return;
+       const x=await r.json();
+       if(x?.venueCode!=='03')return;
+       const data=document.getElementById('dataStatus'),model=document.getElementById('modelStatus'),note=document.getElementById('venueNote');
+       if(x.phase==='DATA_LAYER'){
+         data.textContent=x.current?.featureLocalReady&&x.current?.featureSTReady
+           ? '番組 12/12 · 当地/ST READY · 180日履歴構築中'
+           : x.current?.programReady?'番組 12/12取得済み · DATA収集中':'番組同期中 · DATA収集中';
+         model.textContent='江戸川専用モデル研究中 · 本番未解禁';
+       }else if(x.phase==='HISTORY_READY'){
+         data.textContent=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R取得 · 基礎分析済み`;
+         model.textContent='STRICT WALK-FORWARD 評価中';
+       }else if(x.phase==='BASELINE_READY'){
+         data.textContent=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 番組/当地/ST READY`;
+         model.textContent=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済み · SHADOW準備`;
+       }else if(x.phase==='SHADOW_VALIDATION'){
+         data.textContent=`A/B SHADOW検証中 · A ${Number(x.forward?.programOnlyRaces||0)}R / B ${Number(x.forward?.fullPreRaces||0)}R`;
+         model.textContent='PROGRAM ONLY / FULL PRE 比較中 · 本番未解禁';
+       }else{
+         data.textContent='検証ゲート完了';
+         model.textContent='昇格レビュー待ち · 自動本番化なし';
        }
+       const blockers=Array.isArray(x.blockers)?x.blockers.length:0;
+       note.textContent=`江戸川専用モデルを構築中。蒲郡モデルは流用せず、結果先読みなし・TRY/資金連動なしで検証しています。現在の未完了ゲート: ${blockers}件。`;
+       st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA LAYER'}`;
      }catch{}
-     try{
-       const r=await fetch(`./edogawa-history-audit-v1.json?t=${Date.now()}`,{cache:'no-store'});
-       if(r.ok)historyAudit=await r.json();
-     }catch{}
-     try{
-       const r=await fetch(`./edogawa-baseline-backtest-v1.json?t=${Date.now()}`,{cache:'no-store'});
-       if(r.ok)baseline=await r.json();
-     }catch{}
-
-     const data=document.getElementById('dataStatus'),model=document.getElementById('modelStatus'),note=document.getElementById('venueNote');
-     if(historyAudit?.venueCode==='03'&&Number(historyAudit?.races)>0){
-       data.textContent=`履歴 ${Number(historyAudit.races).toLocaleString('ja-JP')}R取得 · 本日番組 ${programReady?'12/12':'同期中'}`;
-     }else if(programReady){
-       data.textContent='番組 12/12取得済み · 180日履歴構築中';
-     }else{
-       data.textContent='番組同期中 · 180日履歴構築中';
-     }
-     if(baseline?.venueCode==='03'&&baseline?.strictWalkForward===true){
-       const m=baseline?.holdout?.metrics4;
-       model.textContent=m?.races?`基準評価済み · HOLDOUT ${m.races}R · 本番未解禁`:'基準評価済み · 本番未解禁';
-       note.textContent='江戸川専用の時系列バックテストまで完了。潮・風・波・当地適性の追加検証が終わるまでは、メイン予想とTRYを解禁しません。';
-     }
    })();
  }
 }
