@@ -81,31 +81,26 @@ venues.forEach(v=>{
 });
 async function refreshEdogawaBuildStatus(){
  const card=document.querySelector('.venue[data-venue="03"]');if(!card)return;
- const day=todayJst();let program=false,features=false,history=null,baseline=null;
- try{
-   const r=await fetch(`./live/edogawa/${day}/program/manifest.json?t=${Date.now()}`,{cache:'no-store'});
-   if(r.ok){const x=await r.json();program=x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12}
- }catch{}
- try{
-   const r=await fetch(`./live/edogawa/${day}/research-feature-summary-v1.json?t=${Date.now()}`,{cache:'no-store'});
-   if(r.ok){const x=await r.json();features=x?.venueCode==='03'&&x?.audit?.raceCount===12&&x?.audit?.localStatsReady===true&&x?.audit?.avgSTReady===true}
- }catch{}
- try{
-   const r=await fetch(`./edogawa-history-audit-v1.json?t=${Date.now()}`,{cache:'no-store'});
-   if(r.ok){const x=await r.json();if(x?.venueCode==='03')history=x}
- }catch{}
- try{
-   const r=await fetch(`./edogawa-baseline-backtest-v1.json?t=${Date.now()}`,{cache:'no-store'});
-   if(r.ok){const x=await r.json();if(x?.venueCode==='03'&&x?.strictWalkForward===true)baseline=x}
- }catch{}
  card.querySelector('small').innerHTML='<span class="live-dot"></span>構築中';
  card.querySelector('.venue-live').className='venue-live';
- let detail='DATA LAYER';
- if(baseline?.holdout?.metrics4?.races)detail=`HOLDOUT ${baseline.holdout.metrics4.races}R評価済 · PRE検証中`;
- else if(history?.races)detail=`履歴 ${Number(history.races).toLocaleString('ja-JP')}R · 基準評価中`;
- else if(features)detail='番組 12/12 · 当地/ST READY · 履歴構築中';
- else if(program)detail='番組 12/12 · DATA収集中';
- card.querySelector('.venue-live').innerHTML=`<b>${detail}</b>`;
+ try{
+   const r=await fetch(`./venues/edogawa/readiness-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){
+     const x=await r.json();
+     if(x?.venueCode==='03'){
+       let detail='DATA LAYER';
+       if(x.phase==='PROMOTION_REVIEW_REQUIRED')detail='検証ゲート完了 · 昇格レビュー待ち';
+       else if(x.phase==='SHADOW_VALIDATION')detail=`SHADOW検証 ${Number(x.forward?.programOnlyRaces||0)}R · FULL ${Number(x.forward?.fullPreRaces||0)}R`;
+       else if(x.phase==='BASELINE_READY')detail=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`;
+       else if(x.phase==='HISTORY_READY')detail=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 基準評価中`;
+       else if(x.current?.featureLocalReady&&x.current?.featureSTReady)detail='番組 12/12 · 当地/ST READY · 履歴構築中';
+       else if(x.current?.programReady)detail='番組 12/12 · DATA収集中';
+       card.querySelector('.venue-live').innerHTML=`<b>${detail}</b>`;
+       return;
+     }
+   }
+ }catch{}
+ card.querySelector('.venue-live').innerHTML='<b>DATA LAYER</b>';
 }
 refreshEdogawaBuildStatus();
 setInterval(refreshEdogawaBuildStatus,300000);
