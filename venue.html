@@ -30,6 +30,14 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.tab{border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:12px 8px;text-align:center;color:#6f879b;background:rgba(255,255,255,.025);font-size:11px}.tab:first-child{color:#d8e8f4;border-color:#315675}
 .note{margin-top:14px;padding:14px 16px;border:1px dashed rgba(255,255,255,.11);border-radius:13px;color:#7892a6;font-size:11px;line-height:1.6}
 .actions{display:flex;gap:10px;margin-top:16px}.primary,.ghost{border-radius:11px;padding:11px 14px;font-weight:900;cursor:pointer}.primary{border:0;background:linear-gradient(135deg,#087dbb,#5c54ff);color:white}.ghost{border:1px solid #294c68;background:#091927;color:#d8e7f2}
+.research-progress{display:none;margin-top:14px;grid-template-columns:repeat(4,1fr);gap:8px}
+.research-progress.show{display:grid}
+.research-kpi{padding:11px 10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}
+.research-kpi small{display:block;font-size:8px;color:#6f899d;margin-bottom:5px}
+.research-kpi b{font-size:14px;letter-spacing:.01em}
+.research-gates{display:none;margin-top:8px;padding:10px 12px;border:1px dashed rgba(255,255,255,.1);border-radius:11px;color:#8099ac;font-size:9px;line-height:1.55}
+.research-gates.show{display:block}
+@media(max-width:720px){.research-progress{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.grid{grid-template-columns:1fr}.shell{padding:16px 12px 90px}.hero{padding:18px}.tabs{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
@@ -57,6 +65,13 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <p>蒲郡で固めた構成を土台に、各場へ順次接続します。未完成の予想を共通モデルで無理に出すことはしません。</p>
 <div class="tabs"><div class="tab">今日</div><div class="tab">12R</div><div class="tab">結果</div><div class="tab">履歴</div></div>
 <div class="note" id="venueNote">現在は入口のみ。予想・結果取得・TRY・仮資金処理はこの場ではまだ動きません。</div>
+<div class="research-progress" id="researchProgress">
+ <div class="research-kpi"><small>HISTORY</small><b id="rpHistory">—</b></div>
+ <div class="research-kpi"><small>HOLDOUT 4点</small><b id="rpHoldout">—</b></div>
+ <div class="research-kpi"><small>PROGRAM SHADOW</small><b id="rpProgram">—</b></div>
+ <div class="research-kpi"><small>FULL PRE</small><b id="rpFull">—</b></div>
+</div>
+<div class="research-gates" id="researchGates"></div>
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
 </div>
 </section>
@@ -94,6 +109,15 @@ else{
        const x=await r.json();
        if(x?.venueCode!=='03')return;
        const data=document.getElementById('dataStatus'),model=document.getElementById('modelStatus'),note=document.getElementById('venueNote');
+       const progress=document.getElementById('researchProgress'),gates=document.getElementById('researchGates');
+       if(progress){
+         progress.classList.add('show');
+         document.getElementById('rpHistory').textContent=`${Number(x.history?.rows||0).toLocaleString('ja-JP')}R`;
+         const hr=Number(x.baseline?.holdoutHitRate),roi=Number(x.baseline?.holdoutRoi),hold=Number(x.baseline?.holdoutRaces||0);
+         document.getElementById('rpHoldout').textContent=hold&&Number.isFinite(hr)&&Number.isFinite(roi)?`${(hr*100).toFixed(1)}% / ROI ${(roi*100).toFixed(1)}%`:'待機';
+         document.getElementById('rpProgram').textContent=`${Number(x.current?.shadowProgramOnly||0)}/12 · 評価${Number(x.forward?.programOnlyRaces||0)}R`;
+         document.getElementById('rpFull').textContent=`${Number(x.current?.shadowFullPre||0)}/12 · 評価${Number(x.forward?.fullPreRaces||0)}R`;
+       }
        if(x.phase==='DATA_LAYER'){
          data.textContent=x.current?.featureLocalReady&&x.current?.featureSTReady
            ? '番組 12/12 · 当地/ST READY · 180日履歴構築中'
@@ -122,6 +146,10 @@ else{
        if(bs.some(b=>b.startsWith('FULL_PRE_FORWARD_')))labels.push('FULL PRE前向き30R');
        if(bs.includes('FORWARD_MODEL_UPLIFT_NOT_READY'))labels.push('モデル改善確認');
        note.textContent=`江戸川専用モデルを検証中。結果先読みなし・TRY/資金連動なし。残り: ${labels.length?labels.join(' / '):'昇格レビュー'}。`;
+       if(gates){
+         gates.classList.add('show');
+         gates.textContent=`昇格ゲート · ${bs.length?bs.length+'項目未完了':'条件クリア・人間レビュー待ち'} · 自動本番化なし`;
+       }
        st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA LAYER'}`;
      }catch{}
    })();
