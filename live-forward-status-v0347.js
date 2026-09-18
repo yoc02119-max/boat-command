@@ -8,11 +8,11 @@ let last=null,timer=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pct=v=>Number.isFinite(Number(v))?(Number(v)*100).toFixed(1)+'%':'—';
 const yen=v=>Number.isFinite(Number(v))?(Number(v)<0?'-':'')+'¥'+Math.abs(Math.round(Number(v))).toLocaleString('ja-JP'):'—';
-const stateOf=m=>m?.current?.decision==='FORWARD_SHADOW_TRACK'?'TRACK':m?.current?.decision==='FORWARD_SHADOW_SKIP'?'SKIP':'WAIT';
-const stateLabel=s=>s==='TRACK'?'TRACK｜検証対象':s==='SKIP'?'SKIP｜条件外':'WAIT｜判定待ち';
+const stateOf=m=>m?.current?.decision==='FORWARD_SHADOW_TRY'?'TRY':m?.current?.decision==='FORWARD_SHADOW_TRACK'?'TRY':m?.current?.decision==='FORWARD_SHADOW_SKIP'?'SKIP':'WAIT';
+const stateLabel=s=>s==='TRY'?'TRY｜検証対象':s==='SKIP'?'SKIP｜条件外':'WAIT｜判定待ち';
 function picksText(m){
   const p=m?.current?.picks||[];
-  if(stateOf(m)!=='TRACK')return '—';
+  if(stateOf(m)!=='TRY')return '—';
   return p.length?p.join(' / '):'固定買い目なし';
 }
 function progress(m){
@@ -23,9 +23,10 @@ function methodCard(m){
   const s=stateOf(m),settled=Number(m?.settledMatchedRaces)||0,matched=Number(m?.matchedRaces)||0;
   const roi=Number.isFinite(Number(m?.roi))?pct(m.roi):'—';
   const hit=Number.isFinite(Number(m?.hitRate))?pct(m.hitRate):'—';
-  const reason=s==='TRACK'
-    ?`本日の固定買い目：${esc(picksText(m))}`
-    :s==='SKIP'?'本日は条件外。実戦候補にしません。':'本日のSHADOW判定待ち';
+  const tries=Array.isArray(m?.currentTry)?m.currentTry:[];
+  const reason=s==='TRY'
+    ?tries.map(x=>`${Number(x.race)}R：${(x.picks||[]).join(' / ')}`).join('<br>')
+    :s==='SKIP'?'本日は条件該当なし。':'本日のSHADOW判定待ち';
   return `<article class="forward-method ${s.toLowerCase()}">
     <div class="forward-method-head">
       <div><small>${esc(m?.method||'')}</small><b>${esc(m?.label||'')}</b></div>
@@ -35,7 +36,7 @@ function methodCard(m){
     <div class="forward-progress-line"><span style="width:${progress(m)}%"></span></div>
     <div class="forward-cycle"><b>${Number(m?.cycleDay)||0}/${Number(m?.cycleDays)||30}日</b><span>残り ${Number(m?.daysRemaining)||0}日</span></div>
     <div class="forward-metrics">
-      <div><small>TRACK</small><b>${matched}</b></div>
+      <div><small>TRY累計</small><b>${matched}</b></div>
       <div><small>精算済</small><b>${settled}</b></div>
       <div><small>的中率</small><b>${hit}</b></div>
       <div><small>ROI</small><b>${roi}</b></div>
@@ -53,7 +54,7 @@ function body(data,compact=false){
     ${methodCard(data?.methods?.exacta)}
     ${methodCard(data?.methods?.trifecta)}
   </div>
-  <div class="forward-foot">SHADOW専用｜30日終了時に「継続採用 / 練り直し / データ不足で延長」を判定。LIVE買い目・賭け金・HARD LOCKは変更しません。</div>`;
+  <div class="forward-foot">SHADOW TRY専用｜1〜12Rを走査し条件一致レースを記録。30日終了時に「継続採用 / 練り直し / データ不足で延長」を判定。LIVE買い目・賭け金・HARD LOCKは変更しません。</div>`;
 }
 function ensure(){
   const homeGrid=document.querySelector('#home .dashboard-grid');
