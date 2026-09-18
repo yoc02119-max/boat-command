@@ -1,0 +1,153 @@
+name: Edogawa tide source probe v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-tide-source-probe-v1.yml'
+  schedule:
+    - cron: '5,35 0-9 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-tide-source-probe-v1
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Capture official Edogawa tide/wind source tokens
+        id: probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          CODE=03
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=1"
+
+          rm -rf tmp_edogawa_tide
+          mkdir -p tmp_edogawa_tide "live/edogawa/$DATE/pre"
+
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.0'             "$RACELIST" -o tmp_edogawa_tide/racelist.html; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          export DATE
+          RACE=$(python3 - <<'PY'
+          import datetime,html,os,pathlib,re
+          from zoneinfo import ZoneInfo
+          date=os.environ['DATE']
+          raw=pathlib.Path('tmp_edogawa_tide/racelist.html').read_text(encoding='utf-8',errors='replace')
+          plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',raw)))
+          times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)[:12]
+          now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+          for i,t in enumerate(times,1):
+              hh,mm=map(int,t.split(':'))
+              dt=datetime.datetime.fromisoformat(date).replace(hour=hh,minute=mm,tzinfo=ZoneInfo('Asia/Tokyo'))
+              if (dt-now).total_seconds()/60>=5:
+                  print(i);break
+          PY
+          )
+          if [ -z "$RACE" ]; then echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; fi
+
+          URL="https://www.boatrace-edogawa.com/sp/index.php?day=$HD&page=yosou-kouryaku&race=$RACE"
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.0'             "$URL" -o tmp_edogawa_tide/source.html; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          export RACE URL
+          python3 - <<'PY'
+          import datetime,hashlib,html,json,os,pathlib,re
+          from zoneinfo import ZoneInfo
+
+          raw=pathlib.Path('tmp_edogawa_tide/source.html').read_text(encoding='utf-8',errors='replace')
+          plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',raw))).strip()
+          if '現在の潮と風向き' not in plain or '舟券攻略ポイント' not in plain:
+              print('EDOGAWA_TIDE_MARKERS_NOT_READY')
+              raise SystemExit(0)
+
+          marker=raw.find('現在の潮と風向き')
+          region=raw[max(0,marker-3000):marker+10000] if marker>=0 else raw[:12000]
+          tags=[]
+          for m in re.finditer(r'<img\b([^>]+)>',region,re.I|re.S):
+              attrs=m.group(1)
+              def attr(name):
+                  q=re.search(rf'\b{name}\s*=\s*["\']([^"\']*)["\']',attrs,re.I)
+                  return html.unescape(q.group(1)).strip() if q else None
+              item={'src':attr('src'),'alt':attr('alt'),'class':attr('class')}
+              if any(item.values()):tags.append(item)
+
+          tips=[]
+          for li in re.findall(r'<li[^>]*>(.*?)</li>',raw,re.I|re.S):
+              t=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',li))).strip()
+              if t and len(t)<=180:tips.append(t)
+          tips=list(dict.fromkeys(tips))[:20]
+
+          heading_index=plain.find('現在の潮と風向き')
+          visible=plain[heading_index:heading_index+1200] if heading_index>=0 else ''
+          payload={
+            'schema':'boat-command-edogawa-tide-source-v1',
+            'venue':'EDOGAWA','venueCode':'03','date':os.environ['DATE'],'race':int(os.environ['RACE']),
+            'fetchedAt':datetime.datetime.now(ZoneInfo('Asia/Tokyo')).isoformat(),
+            'sourceUrl':os.environ['URL'],
+            'sourceFingerprint':hashlib.sha256(region.encode('utf-8')).hexdigest(),
+            'markerVerified':True,
+            'visibleSourceExcerpt':visible,
+            'imageTokens':tags[:30],
+            'strategyTips':tips,
+            'mapping':{
+              'tideDirection':None,'tideStrength':None,'flowSpeed':None,
+              'windDirection':None,'status':'RAW_OFFICIAL_TOKENS_ONLY'
+            },
+            'predictionEnabled':False,'hardLockEnabled':False,
+            'resultEndpointsIncluded':False,'payoutEndpointsIncluded':False
+          }
+          out=pathlib.Path(f'live/edogawa/{os.environ["DATE"]}/pre/race-{int(os.environ["RACE"])}-tide-source.json')
+          out.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'out':str(out),'tokens':len(payload['imageTokens']),'tips':len(tips)},ensure_ascii=False))
+          PY
+
+          TARGET="live/edogawa/$DATE/pre/race-$RACE-tide-source.json"
+          if [ ! -f "$TARGET" ]; then echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo 'wrote=true' >> "$GITHUB_OUTPUT"
+
+      - name: Safety audit
+        if: steps.probe.outputs.wrote == 'true'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json
+          files=sorted(glob.glob('live/edogawa/*/pre/race-*-tide-source.json'))
+          assert files
+          x=json.load(open(files[-1],encoding='utf-8'))
+          assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+          assert x['markerVerified'] is True
+          assert x['mapping']['status']=='RAW_OFFICIAL_TOKENS_ONLY'
+          assert x['mapping']['tideDirection'] is None
+          assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False
+          assert x['resultEndpointsIncluded'] is False and x['payoutEndpointsIncluded'] is False
+          print('EDOGAWA_TIDE_SOURCE_SAFETY_PASS')
+          PY
+
+      - name: Commit source mapping evidence
+        if: steps.probe.outputs.wrote == 'true'
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git config user.name 'boat-command-edogawa-tide'
+          git config user.email 'boat-command-edogawa-tide@users.noreply.github.com'
+          git add "live/edogawa/$DATE/pre/"*-tide-source.json
+          git diff --cached --quiet && { echo 'NO_EDOGAWA_TIDE_SOURCE_CHANGE'; exit 0; }
+          git commit -m "live: edogawa $DATE official tide source evidence"
+          git pull --rebase origin main
+          git push origin HEAD:main
