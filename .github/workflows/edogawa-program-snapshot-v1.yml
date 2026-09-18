@@ -224,10 +224,39 @@ jobs:
       - name: Commit program snapshots
         run: |
           set -euo pipefail
+          rm -rf /tmp/edogawa-program-publish
+          mkdir -p /tmp/edogawa-program-publish
+          cp -a live/edogawa/. /tmp/edogawa-program-publish/
+
           git config user.name 'boat-command-program-relay'
           git config user.email 'boat-command-program-relay@users.noreply.github.com'
-          git add live/edogawa/*/program/ 2>/dev/null || true
-          git diff --cached --quiet && { echo 'NO_EDOGAWA_PROGRAM_CHANGE'; exit 0; }
-          git commit -m 'live: publish Edogawa result-free 12R program snapshot'
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Re-apply only collector-owned program directories on top of the newest main.
+            for d in /tmp/edogawa-program-publish/20??-??-??; do
+              [ -d "$d/program" ] || continue
+              date=$(basename "$d")
+              mkdir -p "live/edogawa/$date"
+              rm -rf "live/edogawa/$date/program"
+              cp -a "$d/program" "live/edogawa/$date/program"
+            done
+
+            git add live/edogawa/*/program/ 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo 'NO_EDOGAWA_PROGRAM_CHANGE'
+              exit 0
+            fi
+
+            git commit -m 'live: publish Edogawa result-free 12R program snapshot'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "PROGRAM_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+
+          echo 'EDOGAWA_PROGRAM_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
