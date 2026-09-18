@@ -2,7 +2,7 @@
 // Past-date read-only view. Never fetches today's POST-RACE data.
 (()=>{'use strict';
 const VERSION='GAMAGORI-PREDICTION-HISTORY-V0.35.18';
-const MAX_DAYS=30;
+const VISIBLE_WINDOW_DAYS=30;
 const cache=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const yen=v=>{const n=Number(v)||0;return (n<0?'-':'')+'¥'+Math.abs(Math.round(n)).toLocaleString('ja-JP')};
@@ -39,9 +39,12 @@ function tryRows(){
 }
 function pastDates(){
  const t=todayJst(),set=new Set();
- for(const d of Object.keys(sessionMap()))if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<t)set.add(d);
- for(const key of tryRows().keys()){const d=key.split(':')[0];if(d<t)set.add(d)}
- return [...set].sort().reverse().slice(0,MAX_DAYS);
+ const today=new Date(`${t}T00:00:00+09:00`);
+ const cutoff=new Date(today.getTime()-VISIBLE_WINDOW_DAYS*86400000);
+ const cutoffDate=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(cutoff);
+ for(const d of Object.keys(sessionMap()))if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<t&&d>=cutoffDate)set.add(d);
+ for(const key of tryRows().keys()){const d=key.split(':')[0];if(d<t&&d>=cutoffDate)set.add(d)}
+ return [...set].sort().reverse();
 }
 async function result(date,race){
  const key=`${date}:${race}`;if(cache.has(key))return cache.get(key);
@@ -124,7 +127,7 @@ async function render(){
  installStyle();
  const root=document.getElementById('predictionHistory');if(!root)return;
  const dates=pastDates();
- if(!dates.length){root.innerHTML='<div class="history-empty">まだ履歴はありません。前日以前の予想と結果がここに残ります。</div>';return}
+ if(!dates.length){root.innerHTML='<div class="history-empty">直近30日に表示できる履歴はありません。古いデータは削除せず保持しています。</div>';return}
  root.innerHTML='<div id="historyLoading">履歴を読み込み中…</div>';
  const tmap=tryRows();
  const html=[];
@@ -138,6 +141,6 @@ function start(){
  window.addEventListener('boatcommand:forward-status',()=>{if(document.querySelector('#history.view.active'))render()});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.querySelector('#history.view.active'))render()});
 }
-window.BOAT_COMMAND_PREDICTION_HISTORY_V03518=Object.freeze({version:VERSION,render,pastOnly:true,maxDays:MAX_DAYS,mainCashNeutral:true,tryFundsOnly:true});
+window.BOAT_COMMAND_PREDICTION_HISTORY_V03518=Object.freeze({version:VERSION,render,pastOnly:true,visibleWindowDays:VISIBLE_WINDOW_DAYS,dataRetention:'PRESERVE_ALL',mainCashNeutral:true,tryFundsOnly:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
