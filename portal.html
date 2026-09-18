@@ -81,17 +81,31 @@ venues.forEach(v=>{
 });
 async function refreshEdogawaBuildStatus(){
  const card=document.querySelector('.venue[data-venue="03"]');if(!card)return;
- const day=todayJst();
+ const day=todayJst();let program=false,features=false,history=null,baseline=null;
  try{
    const r=await fetch(`./live/edogawa/${day}/program/manifest.json?t=${Date.now()}`,{cache:'no-store'});
-   if(!r.ok)throw new Error('WAIT');
-   const x=await r.json();
-   if(x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12){
-     card.querySelector('small').innerHTML='<span class="live-dot"></span>構築中';
-     card.querySelector('.venue-live').className='venue-live';
-     card.querySelector('.venue-live').innerHTML='<b>番組 12/12 · DATA収集中</b>';
-   }
+   if(r.ok){const x=await r.json();program=x?.venue==='EDOGAWA'&&x?.allProgramReady===true&&Number(x?.races)===12}
  }catch{}
+ try{
+   const r=await fetch(`./live/edogawa/${day}/research-feature-summary-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const x=await r.json();features=x?.venueCode==='03'&&x?.audit?.raceCount===12&&x?.audit?.localStatsReady===true&&x?.audit?.avgSTReady===true}
+ }catch{}
+ try{
+   const r=await fetch(`./edogawa-history-audit-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const x=await r.json();if(x?.venueCode==='03')history=x}
+ }catch{}
+ try{
+   const r=await fetch(`./edogawa-baseline-backtest-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const x=await r.json();if(x?.venueCode==='03'&&x?.strictWalkForward===true)baseline=x}
+ }catch{}
+ card.querySelector('small').innerHTML='<span class="live-dot"></span>構築中';
+ card.querySelector('.venue-live').className='venue-live';
+ let detail='DATA LAYER';
+ if(baseline?.holdout?.metrics4?.races)detail=`HOLDOUT ${baseline.holdout.metrics4.races}R評価済 · PRE検証中`;
+ else if(history?.races)detail=`履歴 ${Number(history.races).toLocaleString('ja-JP')}R · 基準評価中`;
+ else if(features)detail='番組 12/12 · 当地/ST READY · 履歴構築中';
+ else if(program)detail='番組 12/12 · DATA収集中';
+ card.querySelector('.venue-live').innerHTML=`<b>${detail}</b>`;
 }
 refreshEdogawaBuildStatus();
 setInterval(refreshEdogawaBuildStatus,300000);
