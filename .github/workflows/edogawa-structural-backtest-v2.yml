@@ -1,0 +1,61 @@
+name: Edogawa structural backtest v2
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/edogawa-structural-backtest-v2.js'
+      - 'edogawa-history-bootstrap-v1.json'
+  workflow_run:
+    workflows: ["Edogawa history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-structural-backtest-v2
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Run strict structural holdout
+        run: |
+          set -euo pipefail
+          test -f edogawa-history-bootstrap-v1.json
+          node --check scripts/edogawa-structural-backtest-v2.js
+          node scripts/edogawa-structural-backtest-v2.js
+          node - <<'NODE'
+          const x=require('./edogawa-structural-backtest-v2.json');
+          if(x.schema!=='boat-command-edogawa-structural-backtest-v2')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.gamagoriWeightsReused!==false)throw new Error('TARGET');
+          if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
+          if(x.productionEnabled!==false||x.tryEnabled!==false||x.promotionEligible!==false)throw new Error('PROMOTION');
+          if(!x.holdout?.pointCounts?.['4']?.races)throw new Error('NO_HOLDOUT');
+          console.log('EDOGAWA_STRUCTURAL_V2_PASS',x.holdout.pointCounts['4']);
+          NODE
+
+      - name: Commit structural report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-structural'
+          git config user.email 'boat-command-edogawa-structural@users.noreply.github.com'
+          git add edogawa-structural-backtest-v2.json
+          git diff --cached --quiet && { echo 'EDOGAWA_STRUCTURAL_V2_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): publish race-number structural holdout v2'
+          git pull --rebase origin main
+          git push origin HEAD:main
