@@ -1,0 +1,65 @@
+name: Edogawa baseline backtest v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-baseline-backtest-v1
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Wait for history artifact commit
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 36); do
+            git fetch origin main
+            git reset --hard origin/main
+            if [ -f edogawa-history-bootstrap-v1.json ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'EDOGAWA_HISTORY_NOT_READY' >&2
+          exit 1
+
+      - name: Strict walk-forward baseline
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-baseline-backtest-v1.js
+          node scripts/edogawa-baseline-backtest-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-baseline-backtest-v1.json');
+          if(x.schema!=='boat-command-edogawa-baseline-backtest-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.gamagoriWeightsReused!==false)throw new Error('VENUE_BOUNDARY');
+          if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
+          if(x.productionEnabled!==false||x.tryEnabled!==false||x.promotionEligible!==false)throw new Error('PROMOTION_BLOCK');
+          if(!x.holdout?.metrics4?.races)throw new Error('NO_HOLDOUT');
+          console.log('EDOGAWA_BASELINE_BACKTEST_PASS',x.holdout.metrics4);
+          NODE
+
+      - name: Commit research backtest
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-model'
+          git config user.email 'boat-command-edogawa-model@users.noreply.github.com'
+          git add edogawa-baseline-backtest-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_BASELINE_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): publish strict walk-forward baseline'
+          git pull --rebase origin main
+          git push origin HEAD:main
