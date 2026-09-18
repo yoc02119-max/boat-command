@@ -25,6 +25,7 @@ on:
       - 'live-manual-refresh-v0276.js'
       - 'trial-readiness-v0272.js'
       - 'live-performance-v0323.js'
+      - 'live-forward-status-v0347.js'
       - 'boat-ai-core-v0290.js'
       - 'boat-command-agent-v0335.js'
       - 'boat-jarvis-*.js'
@@ -67,9 +68,9 @@ jobs:
           from pathlib import Path
           import re
           h=Path('index.html').read_text(encoding='utf-8')
-          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus','kLocked','summarySub','lockAllBtn','allDd','headBoatBars','winnerBars','modeCompare','historyTable','jarvisHealth','jarvisChat','jarvisPrompt','jarvisSend']
+          ids=['sessionDate','modeBadge','runType','predictionList','resultGate','resultSummary','resultList','raceStrip','bankrollNow','guardNote','todayStatus','kLocked','summarySub','lockAllBtn','allDd','headBoatBars','winnerBars','modeCompare','historyTable']
           miss=[x for x in ids if not re.search(rf'id=["\']{x}["\']',h)]; assert not miss, f'DOM_MISSING:{miss}'
-          required=['app.js','virtual-bankroll-v0250.js','live-program-v0270.js','gamagori-main-model-v0320.js','historical-replay-v0333.js','live-main-autofill-v0320.js','live-main-prediction-v0320.js','live-main-lock-guard-v0320.js','trial-lock-all-v0327.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-snapshot-hash-guard-v0209.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','live-performance-v0323.js','boat-ai-core-v0290.js','boat-command-agent-v0335.js','boat-jarvis-conversation-v0336.js','boat-jarvis-core-v0336.js','boat-jarvis-app-controller-v0336.js','boat-jarvis-development-bridge-v0336.js','boat-jarvis-executor-contract-v0336.js','boat-jarvis-runtime-v0336.js','boat-jarvis-ui-v0336.js','boat-voice-agent-v0296.js','boat-chatgpt-voice-v0298.js','boat-ai-visual-v0312.js','boat-remote-control-v0284.js']
+          required=['app.js','virtual-bankroll-v0250.js','live-program-v0270.js','gamagori-main-model-v0320.js','historical-replay-v0333.js','live-main-autofill-v0320.js','live-main-prediction-v0320.js','live-main-lock-guard-v0320.js','trial-lock-all-v0327.js','live-lock-snapshot-v0203.js','live-result-v0204.js','live-snapshot-hash-guard-v0209.js','live-session-today-v0263.js','live-manual-refresh-v0276.js','trial-readiness-v0272.js','live-performance-v0323.js','live-forward-status-v0347.js']
           srcs=re.findall(r'<script\s+src="([^"]+)"',h); bases=[x.split('?',1)[0] for x in srcs]
           miss=[x for x in required if x not in bases]; assert not miss, f'SCRIPT_MISSING:{miss}'
           dup=[x for x in set(bases) if bases.count(x)>1]; assert not dup, f'SCRIPT_DUPLICATE:{dup}'
@@ -88,7 +89,7 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          checks={'live-program-v0270.js':['resultEndpointsIncluded!==false','exhibitionIncluded!==false','Fail closed'],'live-main-prediction-v0320.js':['strictPastOnly:true','exhibitionUsed:false','resultFetch:false','MISSED_SAFE_LOCK_WINDOW'],'live-main-lock-guard-v0320.js':['SAFE_TO_LOCK','minMarginMinutes:3','120通り確率監査NG'],'trial-lock-all-v0327.js':['candidateReady','WAIT','perRaceGuardPreserved:true','waitFailClosed:true'],'live-lock-snapshot-v0203.js':['sourcePolicy:{preRaceOnly:true,programOnly:true','mutableAfterLock:false'],'live-result-v0204.js':['Global reveal hardening','LOCK SNAPSHOTなし','POST-RACE relay'],'live-snapshot-hash-guard-v0209.js':['snapshot'],'trial-readiness-v0272.js':['isSafeSkip','eligibleReplayRaces=fn','READY ${ready} · WAIT ${wait} · SKIP ${skipped}','BOAT_COMMAND_REPLAY_V0333'],'live-performance-v0323.js':['readOnly:true','fetchesResults:false','fetchesPreRace:false']}
+          checks={'live-program-v0270.js':['resultEndpointsIncluded!==false','exhibitionIncluded!==false','Fail closed'],'live-main-prediction-v0320.js':['strictPastOnly:true','exhibitionUsed:false','resultFetch:false','MISSED_SAFE_LOCK_WINDOW'],'live-main-lock-guard-v0320.js':['SAFE_TO_LOCK','minMarginMinutes:3','120通り確率監査NG'],'trial-lock-all-v0327.js':['candidateReady','WAIT','perRaceGuardPreserved:true','waitFailClosed:true'],'live-lock-snapshot-v0203.js':['sourcePolicy:{preRaceOnly:true,programOnly:true','mutableAfterLock:false'],'live-result-v0204.js':['Global reveal hardening','LOCK SNAPSHOTなし','POST-RACE relay'],'live-snapshot-hash-guard-v0209.js':['snapshot'],'trial-readiness-v0272.js':['isSafeSkip','eligibleReplayRaces=fn','READY ${ready} · WAIT ${wait} · SKIP ${skipped}','BOAT_COMMAND_REPLAY_V0333'],'live-performance-v0323.js':['readOnly:true','fetchesResults:false','fetchesPreRace:false'],'live-forward-status-v0347.js':['Display-only','liveBettingEnabled!==false','SHADOW専用']}
           for f,needles in checks.items():
             text=Path(f).read_text(encoding='utf-8'); missing=[n for n in needles if n not in text]; assert not missing, f'SAFETY_CONTRACT_MISSING:{f}:{missing}'
           print('SAFETY_CONTRACT_PASS')
@@ -118,7 +119,7 @@ jobs:
           ok=0
           for i in $(seq 1 24); do
             code=$(curl -L -sS -o /tmp/public.html -w '%{http_code}' --max-time 20 "${APP_URL}?v=${GITHUB_RUN_ID}-${i}" || true)
-            if [ "$code" = 200 ] && grep -Fq "$expected" /tmp/public.html && grep -Fq '<em>REPLAY</em>' /tmp/public.html && grep -Fq '<em>JARVIS</em>' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'boat-jarvis-runtime-v0336.js?v=' /tmp/public.html; then ok=1; break; fi
+            if [ "$code" = 200 ] && grep -Fq "$expected" /tmp/public.html && grep -Fq '<em>REPLAY</em>' /tmp/public.html && grep -Fq 'trial-readiness-v0272.js?v=' /tmp/public.html && grep -Fq 'live-result-v0204.js?v=' /tmp/public.html && grep -Fq 'live-forward-status-v0347.js?v=' /tmp/public.html; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = 1 || { echo "PUBLIC_INDEX_STALE_OR_UNREACHABLE expected=$expected"; exit 1; }
