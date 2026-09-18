@@ -286,3 +286,74 @@ main{padding:26px 30px 44px;min-width:0}.topbar{display:flex;justify-content:spa
  .racer-brief-grid{grid-template-columns:1fr}
  .racer-main strong{font-size:11px}
 }
+
+/* v0.35.7 HORIZONTAL RACER STRIP + BOAT COLORS */
+.racer-brief-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(104px,1fr));
+  gap:6px;
+  margin-top:8px;
+  overflow-x:auto;
+  padding-bottom:2px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none
+}
+.racer-brief-grid::-webkit-scrollbar{display:none}
+.racer-brief{
+  position:relative;
+  display:block;
+  min-width:104px;
+  padding:7px 7px 6px;
+  border:1px solid rgba(255,255,255,.08);
+  border-top:3px solid rgba(255,255,255,.2);
+  border-radius:9px;
+  background:rgba(255,255,255,.035);
+  overflow:hidden
+}
+.racer-main{display:flex;align-items:center;gap:5px;min-width:0}
+.racer-main i{
+  display:grid;
+  place-items:center;
+  width:20px;height:20px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,.18);
+  font-style:normal;font-size:10px;font-weight:900;
+  flex:0 0 auto
+}
+.racer-main strong{
+  min-width:0;
+  font-size:10px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.racer-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:4px;
+  margin-top:6px
+}
+.racer-meta b{font-size:10px}
+.racer-meta span{font-size:8px;white-space:nowrap}
+
+/* standard BOAT RACE lane colors */
+.racer-brief.lane-1{border-top-color:#f5f7fa}
+.racer-brief.lane-1 .racer-main i{background:#f5f7fa;color:#111}
+.racer-brief.lane-2{border-top-color:#15191f}
+.racer-brief.lane-2 .racer-main i{background:#15191f;color:#fff}
+.racer-brief.lane-3{border-top-color:#e84545}
+.racer-brief.lane-3 .racer-main i{background:#e84545;color:#fff}
+.racer-brief.lane-4{border-top-color:#4285f4}
+.racer-brief.lane-4 .racer-main i{background:#4285f4;color:#fff}
+.racer-brief.lane-5{border-top-color:#f2d64b}
+.racer-brief.lane-5 .racer-main i{background:#f2d64b;color:#111}
+.racer-brief.lane-6{border-top-color:#41b869}
+.racer-brief.lane-6 .racer-main i{background:#41b869;color:#fff}
+
+@media(max-width:760px){
+  .racer-brief-grid{grid-template-columns:repeat(6,104px)}
+  .racer-brief{min-width:104px}
+  .racer-main strong{font-size:10px}
+}
