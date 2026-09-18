@@ -2,9 +2,6 @@ name: Edogawa history bootstrap recovery v2
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/edogawa-history-bootstrap-recovery-v2.yml'
   workflow_run:
     workflows: ["Edogawa history bootstrap 180d v1"]
     types: [completed]
@@ -14,7 +11,7 @@ permissions:
 
 jobs:
   block:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'success'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success')
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
-      - name: Build 60-day Edogawa history block
+      - name: Build 30-day Edogawa history block
         env:
           BLOCK: ${{ matrix.block }}
         run: |
