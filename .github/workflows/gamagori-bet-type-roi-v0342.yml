@@ -35,7 +35,7 @@ jobs:
       - name: Commit audit output
         run: |
           set -euo pipefail
-          if git diff --quiet -- gamagori-bet-type-roi-v0342.json; then
+          if [ -z "$(git status --porcelain -- gamagori-bet-type-roi-v0342.json)" ]; then
             echo 'NO_CHANGES'
             exit 0
           fi
