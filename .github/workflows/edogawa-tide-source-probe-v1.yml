@@ -38,7 +38,7 @@ jobs:
           rm -rf tmp_edogawa_tide
           mkdir -p tmp_edogawa_tide "live/edogawa/$DATE/pre"
 
-          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.2'             "$RACELIST" -o tmp_edogawa_tide/racelist.html; then
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.3'             "$RACELIST" -o tmp_edogawa_tide/racelist.html; then
             echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0
           fi
 
@@ -60,12 +60,33 @@ jobs:
           )
           if [ -z "$RACE" ]; then echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; fi
 
-          URL="https://www.boatrace-edogawa.com/sp/index.php?day=$HD&page=yosou-kouryaku&race=$RACE"
-          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.0'             "$URL" -o tmp_edogawa_tide/source.html; then
-            echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0
+          URL_SPECIFIC="https://www.boatrace-edogawa.com/sp/index.php?day=$HD&page=yosou-kouryaku&race=$RACE"
+          URL_CURRENT="https://www.boatrace-edogawa.com/sp/index.php?page=yosou-kouryaku"
+          URL="$URL_SPECIFIC"
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.3'             "$URL" -o tmp_edogawa_tide/source.html; then
+            URL="$URL_CURRENT"
+            curl -fsSL --connect-timeout 20 --max-time 60               --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.3'               "$URL" -o tmp_edogawa_tide/source.html || { echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; }
           fi
 
-          export RACE URL
+          HAS_MARKER=$(python3 - <<'PY'
+          from pathlib import Path
+          b=Path('tmp_edogawa_tide/source.html').read_bytes()
+          text=None
+          for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+              try:
+                  text=b.decode(enc);break
+              except UnicodeDecodeError:
+                  pass
+          if text is None:text=b.decode('utf-8','replace')
+          print('true' if '現在の潮と風向き' in text else 'false')
+          PY
+          )
+          if [ "$HAS_MARKER" != 'true' ]; then
+            URL="$URL_CURRENT"
+            curl -fsSL --connect-timeout 20 --max-time 60               --user-agent 'BOAT-COMMAND-EDOGAWA-TIDE/1.3'               "$URL" -o tmp_edogawa_tide/source.html || { echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; }
+          fi
+
+          export RACE URL URL_SPECIFIC URL_CURRENT
           python3 - <<'PY'
           import datetime,hashlib,html,json,os,pathlib,re
           from zoneinfo import ZoneInfo
