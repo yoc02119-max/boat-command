@@ -27,6 +27,8 @@ async function load(date,race){
 function odds(v){const n=Number(v);return Number.isFinite(n)&&n>=0?`${(n/100).toFixed(1)}倍`:'—'}
 function yen(v){const n=Number(v);return Number.isFinite(n)?`¥${Math.round(n).toLocaleString('ja-JP')}`:'—'}
 function mainPicks(r){
+ const evalPicks=Array.isArray(r?.mainEvaluationSnapshot?.picks)?r.mainEvaluationSnapshot.picks.filter(Boolean):[];
+ if(evalPicks.length)return evalPicks;
  const frozen=Array.isArray(r?.liveLockSnapshot?.picks)?r.liveLockSnapshot.picks.filter(Boolean):[];
  if(frozen.length)return frozen;
  const x=r?.firstSuggestion;
