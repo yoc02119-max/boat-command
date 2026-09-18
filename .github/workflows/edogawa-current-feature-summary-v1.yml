@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: edogawa-current-feature-summary-v1
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   summarize:
@@ -69,10 +69,26 @@ jobs:
         if: steps.date.outputs.ready == 'true'
         run: |
           set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          FILE="live/edogawa/$DATE/research-feature-summary-v1.json"
+          cp "$FILE" /tmp/edogawa-research-feature-summary-v1.json
+
           git config user.name 'boat-command-edogawa-features'
           git config user.email 'boat-command-edogawa-features@users.noreply.github.com'
-          git add "live/edogawa/${{ steps.date.outputs.date }}/research-feature-summary-v1.json"
-          git diff --cached --quiet && { echo 'EDOGAWA_FEATURE_SUMMARY_CURRENT'; exit 0; }
-          git commit -m "analysis(edogawa): refresh current 12R feature summary"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "live/edogawa/$DATE"
+            cp /tmp/edogawa-research-feature-summary-v1.json "$FILE"
+            git add "$FILE"
+            git diff --cached --quiet && { echo 'EDOGAWA_FEATURE_SUMMARY_CURRENT'; exit 0; }
+            git commit -m "analysis(edogawa): refresh current 12R feature summary"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "EDOGAWA_FEATURE_SUMMARY_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'EDOGAWA_FEATURE_SUMMARY_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
