@@ -32,7 +32,10 @@ function candidate(s,r){
  const cutoff=cutoffState(s,r);if(!cutoff)return{status:'WAIT',stage:'MAIN',reason:'締切時刻未確認',sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION};
  if(cutoff.closed){
    const priorPicks=Array.isArray(prior?.picks)?prior.picks:[];
-   const preserve=prior?.status==='CANDIDATE'&&prior?.stage==='MAIN'&&String(prior?.sessionDate)===String(s.date)&&prior?.programFingerprint===p.fingerprint&&prior?.strategyVersion===VERSION&&priorPicks.length>0&&priorPicks.every(x=>BOAT_COMMAND_MAIN_MODEL_V0320.validPick(x));
+   const priorAt=new Date(String(prior?.generatedAt||''));
+   const deadlineAt=new Date(`${s.date}T${cutoff.deadline}:00+09:00`);
+   const generatedPreCutoff=Number.isFinite(priorAt.getTime())&&Number.isFinite(deadlineAt.getTime())&&priorAt.getTime()<=deadlineAt.getTime()-LOCK_MARGIN_MINUTES*60000;
+   const preserve=prior?.status==='CANDIDATE'&&prior?.stage==='MAIN'&&String(prior?.sessionDate)===String(s.date)&&prior?.programFingerprint===p.fingerprint&&generatedPreCutoff&&priorPicks.length>0&&priorPicks.every(x=>BOAT_COMMAND_MAIN_MODEL_V0320.validPick(x));
    if(preserve)return{...prior,postCutoffPreserved:true,lockAllowed:false,archiveNote:'締切前生成済みメイン予想を評価用に保存',resultFetch:false,payoutFetch:false};
    return{status:'SKIP',stage:'MAIN',reason:`HARD LOCK安全余裕を下回ったため予想対象外（締切 ${cutoff.deadline} / 余裕 ${Math.max(0,cutoff.marginMinutes).toFixed(1)}分）`,sessionDate:s.date,programFingerprint:p.fingerprint,strategyVersion:VERSION,skipPolicy:'MISSED_SAFE_LOCK_WINDOW',resultFetch:false};
  }
