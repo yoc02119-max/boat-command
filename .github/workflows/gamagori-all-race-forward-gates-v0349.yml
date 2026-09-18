@@ -1,0 +1,55 @@
+name: Gamagori all-race TRY gates v0.34.9
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'live/gamagori/**/program/**'
+      - 'scripts/gamagori-all-race-forward-gates-v0349.js'
+      - 'gamagori-main-model-v0320.js'
+      - 'gamagori-main-history-v0320.json'
+      - '.github/workflows/gamagori-all-race-forward-gates-v0349.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-all-race-try-gates-v0349
+  cancel-in-progress: true
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Freeze all-race TRY gates
+        run: |
+          node --check scripts/gamagori-all-race-forward-gates-v0349.js
+          node scripts/gamagori-all-race-forward-gates-v0349.js
+
+      - name: Commit frozen TRY gates
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- live/gamagori)" ]; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git config user.name 'boat-command-shadow'
+          git config user.email 'boat-command-shadow@users.noreply.github.com'
+          git add live/gamagori/*/shadow/all-race-try-gates-v0349.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo NO_GATE_CHANGES
+            exit 0
+          fi
+          git commit -m 'shadow(gamagori): freeze all-race TRY gates v0.34.9'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort || true
+            sleep 3
+          done
+          exit 1
