@@ -27,10 +27,14 @@ for(let race=1;race<=12;race++){
   rows.push({
     race,actual,payout100:Number(result.payout100)||0,
     programOnly:validShadow(a,race,'PROGRAM_ONLY')?{
-      generatedAt:a.generatedAt,picks:a.picks,hit:a.picks.includes(actual)
+      generatedAt:a.generatedAt,picks:a.picks,hit:a.picks.includes(actual),
+      modelVersion:a.modelVersion||null,
+      sources:a.sources||null
     }:null,
     fullPre:validShadow(b,race,'FULL_PRE_RACE')?{
-      generatedAt:b.generatedAt,picks:b.picks,hit:b.picks.includes(actual)
+      generatedAt:b.generatedAt,picks:b.picks,hit:b.picks.includes(actual),
+      modelVersion:b.modelVersion||null,
+      sources:b.sources||null
     }:null
   });
 }
