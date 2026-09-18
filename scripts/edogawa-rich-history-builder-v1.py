@@ -12,7 +12,7 @@ ENTRY=re.compile(
  r"(\d+)\s+([0-9]+(?:\.[0-9]+)?)\s+(\d+)\s+([0-9]+(?:\.[0-9]+)?)(.*)$"
 )
 RACE_HEAD=re.compile(r"^\s*(\d{1,2})R\s+(.*?)\s+H\s*\d+",re.I)
-TRIFECTA=re.compile(r"３連単\s+([1-6])-([1-6])-([1-6])\s+([0-9,]+)円?",re.I)
+TRIFECTA=re.compile(r"(?:３|3)連単\s+([1-6])-([1-6])-([1-6])\s+([0-9,]+)円?",re.I)
 RESULT_HEAD=re.compile(r"^\s*(\d{1,2})R\s+",re.I)
 
 def read(path:Path)->str:
@@ -109,6 +109,11 @@ def main():
   assert int(m.group(1))==1 and m.group(3)=="B1"
   assert float(m.group(4))==4.09 and float(m.group(6))==4.85
   assert int(m.group(8))==25 and int(m.group(10))==40
+  k="1R 予選 H1800m\n [払戻金] ３連単 1-2-3 8,820円"
+  kr=parse_results(k)
+  assert kr[1]==("1-2-3",8820)
+  kn=norm(k)
+  assert TRIFECTA.search(kn)
   print("EDOGAWA_RICH_PARSER_SELF_TEST_PASS");return
  rows=build(args.b,args.k)
  payload={
