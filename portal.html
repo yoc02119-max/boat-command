@@ -68,11 +68,13 @@ const venues=[
  {code:'22',name:'福岡',slug:'fukuoka'},{code:'23',name:'唐津',slug:'karatsu'},{code:'24',name:'大村',slug:'omura'}
 ],grid=document.getElementById('venueGrid'),gs=gamagoriStatus();
 venues.forEach(v=>{
- const btn=document.createElement('button'),active=v.code==='07';
- btn.className='venue '+(active?'active':'prep');
+ const btn=document.createElement('button'),active=v.code==='07',building=v.code==='03';
+ btn.className='venue '+(active?'active':building?'prep building':'prep');
  btn.innerHTML=active
   ?`<strong>${v.name}</strong><small>${gs.live?'<span class="live-dot"></span>':''}${gs.top}</small><div class="venue-live ${gs.live?'':'wait'}"><b>${gs.detail}</b></div><span class="arrow">→</span>`
-  :`<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
+  :building
+   ?`<strong>${v.name}</strong><small><span class="live-dot"></span>構築中</small><div class="venue-live"><b>DATA LAYER</b></div><span class="arrow">→</span>`
+   :`<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
  btn.onclick=()=>{location.href=active?'./?venue=gamagori':`./venue.html?jcd=${v.code}`};
  grid.appendChild(btn)
 });
