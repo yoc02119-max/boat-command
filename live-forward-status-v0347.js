@@ -56,6 +56,36 @@ function body(data,compact=false){
   </div>
   <div class="forward-foot">SHADOW TRY専用｜1〜12Rを走査し条件一致レースを記録。30日終了時に「継続採用 / 練り直し / データ不足で延長」を判定。LIVE買い目・賭け金・HARD LOCKは変更しません。</div>`;
 }
+function resultRow(x,method){
+  const settled=Boolean(x?.settled),hit=Boolean(x?.hit);
+  const state=!settled?'WAIT':hit?'HIT':'MISS';
+  const cls=state.toLowerCase();
+  const picks=Array.isArray(x?.picks)?x.picks.join(' / '):'—';
+  const result=x?.result||'—';
+  const payout=Number.isFinite(Number(x?.payout100))?yen(Number(x.payout100)):'—';
+  const ret=Number.isFinite(Number(x?.returnYen))?yen(Number(x.returnYen)):'—';
+  return `<div class="try-result-row ${cls}">
+    <div class="try-result-main"><b>${Number(x?.race)||0}R</b><span>${esc(method)}</span><em>${state}</em></div>
+    <div class="try-result-picks">${esc(picks)}</div>
+    <div class="try-result-meta"><span>結果 ${esc(result)}</span><span>払戻/100円 ${payout}</span><span>返還 ${ret}</span></div>
+  </div>`;
+}
+function resultsBody(data){
+  const methods=[data?.methods?.exacta,data?.methods?.trifecta].filter(Boolean);
+  const today=methods.flatMap(m=>(m.todayResults||[]).map(x=>({...x,method:m.method}))).sort((a,b)=>Number(a.race)-Number(b.race));
+  const stake=methods.reduce((s,m)=>s+(Number(m.stakeYen)||0),0);
+  const ret=methods.reduce((s,m)=>s+(Number(m.returnYen)||0),0);
+  const settled=methods.reduce((s,m)=>s+(Number(m.settledMatchedRaces)||0),0);
+  const hits=methods.reduce((s,m)=>s+(Number(m.hits)||0),0);
+  const roi=stake?ret/stake:null;
+  const content=today.length?today.map(x=>resultRow(x,x.method)).join(''):'<div class="try-result-empty">今日のTRY結果はまだありません。</div>';
+  return `<div class="try-result-summary">
+    <div><small>30日累計</small><b>${settled}戦 ${hits}的中</b></div>
+    <div><small>ROI</small><b>${roi==null?'—':pct(roi)}</b></div>
+    <div><small>損益</small><b>${settled?yen(ret-stake):'—'}</b></div>
+  </div>
+  <div class="try-result-list">${content}</div>`;
+}
 function ensure(){
   const homeGrid=document.querySelector('#home .dashboard-grid');
   if(homeGrid&&!document.getElementById('forwardDashboardV0347')){
@@ -63,6 +93,7 @@ function ensure(){
     const racePanel=document.querySelector('#raceStrip')?.closest('.panel');
     homeGrid.insertBefore(el,racePanel||null);
   }
+  const results=document.getElementById('forwardTryResults');if(results&&last)results.innerHTML=resultsBody(last);
   const predictPanel=document.querySelector('#predict > .panel');
   if(predictPanel&&!document.getElementById('forwardPredictV0347')){
     const el=document.createElement('div');el.id='forwardPredictV0347';el.className='forward-dashboard forward-dashboard-compact';
@@ -72,10 +103,11 @@ function ensure(){
   }
 }
 function render(data){
-  ensure();
-  const a=document.getElementById('forwardDashboardV0347'),b=document.getElementById('forwardPredictV0347');
+  last=data;ensure();
+  const a=document.getElementById('forwardDashboardV0347'),b=document.getElementById('forwardPredictV0347'),r=document.getElementById('forwardTryResults');
   if(a)a.innerHTML=body(data,false);
   if(b)b.innerHTML=body(data,true);
+  if(r)r.innerHTML=resultsBody(data);
 }
 function renderWait(msg='SHADOWステータス同期中'){
   ensure();
