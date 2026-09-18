@@ -1,0 +1,49 @@
+{
+  "schema": "boat-command-edogawa-lane-prior-v2-backtest-v1",
+  "venue": "EDOGAWA",
+  "venueCode": "03",
+  "generatedAt": "2026-09-18T18:25:54.752Z",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "holdout": {
+    "firstDate": "2026-07-26",
+    "dateCount": 21
+  },
+  "v1": {
+    "modelVersion": "EDOGAWA-RESEARCH-MODEL-V1",
+    "races": 239,
+    "hits": 41,
+    "hitRate": 0.17154811715481172,
+    "stake": 95600,
+    "returns": 67030,
+    "roi": 0.7011506276150627
+  },
+  "v2": {
+    "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
+    "races": 239,
+    "hits": 41,
+    "hitRate": 0.17154811715481172,
+    "stake": 95600,
+    "returns": 73390,
+    "roi": 0.7676778242677824
+  },
+  "delta": {
+    "hitRate": 0,
+    "roi": 0.06652719665271967
+  },
+  "policy": {
+    "minimumHoldoutRaces": 200,
+    "maxAllowedHitRateRegression": 0.01,
+    "maxAllowedRoiRegression": 0.05,
+    "requireOneImprovement": true
+  },
+  "sampleReady": true,
+  "noBadHit": true,
+  "noBadRoi": true,
+  "oneImproved": true,
+  "eligibleForForwardTest": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "bankrollAffected": false,
+  "note": "V2 changes only the lane prior source for this historical class-baseline gate."
+}
