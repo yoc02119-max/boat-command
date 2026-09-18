@@ -3,6 +3,7 @@
 # Historical research only. Gate/picks are frozen from PRE-derived replay predictions
 # before official payout/result pages are read.
 import json, re, time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
@@ -93,8 +94,52 @@ cache = {}
 missing = []
 rows = []
 
-for i, x in enumerate(locked, 1):
+def fetch_official(x):
     date, race = x["date"], x["race"]
+    hd = date.replace("-", "")
+    url = f"https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=07&rno={race}"
+    last_err = None
+    for attempt in range(3):
+        try:
+            res = requests.get(url, headers=headers, timeout=20)
+            res.raise_for_status()
+            soup = BeautifulSoup(res.text, "html.parser")
+            exacta, exacta_payout = parse_row(soup, "2連単", r"([1-6])-([1-6])")
+            win, win_payout = parse_row(soup, "単勝", r"([1-6])")
+            if exacta and exacta_payout is not None and win and win_payout is not None:
+                return x["id"], {
+                    "officialSource": url,
+                    "exacta": exacta,
+                    "exactaPayout100": exacta_payout,
+                    "win": win,
+                    "winPayout100": win_payout,
+                }, None
+            last_err = "PAYOUT_ROWS_NOT_FOUND"
+        except Exception as e:
+            last_err = str(e)
+        time.sleep(0.7 + attempt * 0.8)
+    return x["id"], None, last_err or "OFFICIAL_FETCH_FAILED"
+
+print("OFFICIAL_FETCH_START", len(locked))
+with ThreadPoolExecutor(max_workers=6) as ex:
+    futs = {ex.submit(fetch_official, x): x for x in locked}
+    done = 0
+    for fut in as_completed(futs):
+        x = futs[fut]
+        done += 1
+        try:
+            key, payload, err = fut.result()
+        except Exception as e:
+            key, payload, err = x["id"], None, str(e)
+        if payload is not None:
+            cache[key] = payload
+        else:
+            missing.append({"id": key, "reason": err})
+        if done % 25 == 0 or done == len(locked):
+            print("FETCH_PROGRESS", done, "/", len(locked))
+
+# Combine frozen picks with already-separated historical result data.
+for x in locked:
     existing = by_result.get(x["id"])
     if not existing:
         missing.append({"id": x["id"], "reason": "TRIFECTA_RESULT_MISSING"})
@@ -104,39 +149,9 @@ for i, x in enumerate(locked, 1):
     if not re.fullmatch(r"[1-6]-[1-6]-[1-6]", outcome3) or not isinstance(payout_odds3, (int, float)):
         missing.append({"id": x["id"], "reason": "TRIFECTA_RESULT_INVALID"})
         continue
-
-    key = x["id"]
-    if key not in cache:
-        hd = date.replace("-", "")
-        url = f"https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=07&rno={race}"
-        last_err = None
-        for attempt in range(3):
-            try:
-                res = session.get(url, timeout=20)
-                res.raise_for_status()
-                soup = BeautifulSoup(res.text, "html.parser")
-                exacta, exacta_payout = parse_row(soup, "2連単", r"([1-6])-([1-6])")
-                win, win_payout = parse_row(soup, "単勝", r"([1-6])")
-                if exacta and exacta_payout is not None and win and win_payout is not None:
-                    cache[key] = {
-                        "officialSource": url,
-                        "exacta": exacta,
-                        "exactaPayout100": exacta_payout,
-                        "win": win,
-                        "winPayout100": win_payout,
-                    }
-                    last_err = None
-                    break
-                last_err = "PAYOUT_ROWS_NOT_FOUND"
-            except Exception as e:
-                last_err = str(e)
-            time.sleep(1.0 + attempt)
-        if key not in cache:
-            missing.append({"id": key, "reason": last_err or "OFFICIAL_FETCH_FAILED"})
-            continue
-        time.sleep(0.15)
-
-    p = cache[key]
+    p = cache.get(x["id"])
+    if p is None:
+        continue
     rows.append({
         **x,
         "trifecta": outcome3,
@@ -147,8 +162,6 @@ for i, x in enumerate(locked, 1):
         "winPayout100": p["winPayout100"],
         "officialSource": p["officialSource"],
     })
-    if i % 25 == 0:
-        print("FETCH_PROGRESS", i, "/", len(locked))
 
 def bet_stats(rs, pick_key, outcome_key, payout_key):
     tickets = sum(len(x[pick_key]) for x in rs)
