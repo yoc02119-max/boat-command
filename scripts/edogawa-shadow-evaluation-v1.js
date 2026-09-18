@@ -5,8 +5,8 @@ const path=require('path');
 
 const root=process.argv[2]||path.join(__dirname,'..','live','edogawa');
 const output=process.argv[3]||path.join(__dirname,'..','edogawa-shadow-evaluation-v1.json');
-const MODES=['CLASS_BASELINE','PROGRAM_ONLY','FULL_PRE_RACE'];
-const DIRS={CLASS_BASELINE:'class-baseline',PROGRAM_ONLY:'program-only',FULL_PRE_RACE:'full-pre'};
+const MODES=['CLASS_BASELINE','PROGRAM_ONLY','RICH_PROGRAM','FULL_PRE_RACE'];
+const DIRS={CLASS_BASELINE:'class-baseline',PROGRAM_ONLY:'program-only',RICH_PROGRAM:'rich-program',FULL_PRE_RACE:'full-pre'};
 
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
 function exists(p){try{return fs.existsSync(p)}catch{return false}}
