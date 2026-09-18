@@ -144,13 +144,27 @@ jobs:
                   print('WAIT_FETCH',race,e);continue
               soup=BeautifulSoup(res.text,'html.parser')
               trifecta=None;payout=None
+              exacta=None;exacta_payout=None
+              win=None;win_payout=None
               for tr in soup.find_all('tr'):
                   cells=[' '.join(td.stripped_strings) for td in tr.find_all(['th','td'])]
-                  if len(cells)>=3 and cells[0].replace(' ','')=='3連単':
-                      m=re.search(r'([1-6])\s*[-–—]\s*([1-6])\s*[-–—]\s*([1-6])',cells[1])
-                      pm=re.search(r'([\d,]+)',cells[2].replace('¥','').replace('￥',''))
+                  if len(cells)<3:
+                      continue
+                  label=cells[0].replace(' ','')
+                  raw_pick=cells[1]
+                  pm=re.search(r'([\d,]+)',cells[2].replace('¥','').replace('￥',''))
+                  if label=='3連単':
+                      m=re.search(r'([1-6])\s*[-–—]\s*([1-6])\s*[-–—]\s*([1-6])',raw_pick)
                       if m and pm:
-                          trifecta='-'.join(m.groups());payout=int(pm.group(1).replace(',',''));break
+                          trifecta='-'.join(m.groups());payout=int(pm.group(1).replace(',',''))
+                  elif label=='2連単':
+                      m=re.search(r'([1-6])\s*[-–—]\s*([1-6])',raw_pick)
+                      if m and pm:
+                          exacta='-'.join(m.groups());exacta_payout=int(pm.group(1).replace(',',''))
+                  elif label=='単勝':
+                      m=re.search(r'([1-6])',raw_pick)
+                      if m and pm:
+                          win=m.group(1);win_payout=int(pm.group(1).replace(',',''))
               if not trifecta or payout is None:
                   print('WAIT_RESULT',race);continue
               finish=[]
