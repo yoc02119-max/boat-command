@@ -133,7 +133,10 @@ else{
          const hist=Number(x.history?.rows||0),cls=Number(x.current?.shadowClassBaseline||0),prog=Number(x.current?.shadowProgramOnly||0),full=Number(x.current?.shadowFullPre||0);
          const hr=Number(x.baseline?.holdoutHitRate),hold=Number(x.baseline?.holdoutRaces||0);
          data.textContent=`履歴 ${hist.toLocaleString('ja-JP')}R · 事前固定 0:${cls}/12 · A:${prog}/12 · B:${full}/12`;
-         model.textContent=hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · B展示待ち`:'0 → A → B 前向き比較中';
+         const cand=x.candidateModel;
+         model.textContent=cand?.v2ForwardEligible===true&&Number.isFinite(Number(cand?.roiDelta))
+           ?`v2候補 HOLDOUT PASS · ROI差 +${(Number(cand.roiDelta)*100).toFixed(1)}pt · B展示待ち`
+           :(hold&&Number.isFinite(hr)?`HOLDOUT ${hold}R · 基準4点的中率 ${(hr*100).toFixed(1)}% · B展示待ち`:'0 → A → B 前向き比較中');
        }else{
          data.textContent='検証ゲート完了';
          model.textContent='昇格レビュー待ち · 自動本番化なし';
@@ -148,7 +151,8 @@ else{
        note.textContent=`江戸川専用モデルを検証中。結果先読みなし・TRY/資金連動なし。残り: ${labels.length?labels.join(' / '):'昇格レビュー'}。`;
        if(gates){
          gates.classList.add('show');
-         gates.textContent=`昇格ゲート · ${bs.length?bs.length+'項目未完了':'条件クリア・人間レビュー待ち'} · 自動本番化なし`;
+         const v2=x.candidateModel?.v2ForwardEligible===true?' · v2前向き候補PASS':'';
+         gates.textContent=`昇格ゲート · ${bs.length?bs.length+'項目未完了':'条件クリア・人間レビュー待ち'}${v2} · 自動本番化なし`;
        }
        st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA LAYER'}`;
      }catch{}
