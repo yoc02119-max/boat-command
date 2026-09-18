@@ -201,7 +201,7 @@ jobs:
       - name: Commit app enablement and POST-RACE relay files
         run: |
           set -euo pipefail
-          if git diff --quiet -- index.html live/gamagori; then
+          if [ -z "$(git status --porcelain -- index.html live/gamagori)" ]; then
             echo 'NO_CHANGES'
             exit 0
           fi
