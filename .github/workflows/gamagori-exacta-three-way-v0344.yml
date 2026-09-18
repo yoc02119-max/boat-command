@@ -1,0 +1,48 @@
+name: Gamagori exacta three-way isolation v0.34.4
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/gamagori-exacta-three-way-v0344.py'
+      - 'gamagori-replay-predictions-v0333.json'
+      - 'gamagori-replay-results-v0333.json'
+      - 'gamagori-win-pattern-combo-v0339.json'
+      - 'gamagori-exacta-payouts-v0343.json'
+      - '.github/workflows/gamagori-exacta-three-way-v0344.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-exacta-three-way-v0344
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run exacta three-way isolation
+        run: python scripts/gamagori-exacta-three-way-v0344.py
+      - name: Commit report
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- gamagori-exacta-three-way-v0344.json)" ]; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git config user.name 'boat-command-analysis'
+          git config user.email 'boat-command-analysis@users.noreply.github.com'
+          git add gamagori-exacta-three-way-v0344.json
+          git commit -m 'analysis(gamagori): publish exacta three-way isolation v0.34.4'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort || true
+            if [ "$attempt" -lt 3 ]; then sleep 3; fi
+          done
+          exit 1
