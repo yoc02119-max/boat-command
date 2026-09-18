@@ -1,0 +1,75 @@
+name: Edogawa readiness gate v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/edogawa-readiness-v1.js'
+      - 'venues/edogawa/**'
+      - 'live/edogawa/**'
+      - 'edogawa-history-audit-v1.json'
+      - 'edogawa-history-analysis-v1.json'
+      - 'edogawa-baseline-backtest-v1.json'
+  workflow_run:
+    workflows:
+      - "Edogawa history bootstrap 180d v1"
+      - "Edogawa history analysis v1"
+      - "Edogawa baseline backtest v1"
+      - "Edogawa 12R program snapshot v1"
+      - "Edogawa PRE-RACE collector v1"
+      - "Edogawa POST-RACE result collector v1"
+      - "Edogawa SHADOW evaluation v1"
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-readiness-v1
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Build readiness gate
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-readiness-v1.js
+          node scripts/edogawa-readiness-v1.js
+          node - <<'NODE'
+          const x=require('./venues/edogawa/readiness-v1.json');
+          if(x.schema!=='boat-command-edogawa-readiness-v1')throw new Error('SCHEMA');
+          if(x.venue!=='EDOGAWA'||x.venueCode!=='03')throw new Error('TARGET');
+          if(x.modelEnabled!==false||x.tryEnabled!==false||x.realMoneyEnabled!==false)throw new Error('PROMOTION_BOUNDARY');
+          if(!Array.isArray(x.blockers))throw new Error('BLOCKERS');
+          if(x.promotionReviewRequired && x.blockers.length!==0)throw new Error('PROMOTION_GATE');
+          console.log('EDOGAWA_READINESS_GATE_PASS',x.phase,x.blockers);
+          NODE
+
+      - name: Commit readiness
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-readiness'
+          git config user.email 'boat-command-edogawa-readiness@users.noreply.github.com'
+          git add venues/edogawa/readiness-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_READINESS_CURRENT'; exit 0; }
+          git commit -m 'status(edogawa): refresh centralized readiness gate'
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; exit 1; }
+          done
+          exit 1
