@@ -1,0 +1,115 @@
+name: Edogawa SHADOW research v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa history bootstrap 180d v1", "Edogawa 12R program snapshot v1", "Edogawa PRE-RACE collector v1"]
+    types: [completed]
+  schedule:
+    - cron: '*/5 0-12 * * *'
+  push:
+    paths:
+      - 'scripts/edogawa-shadow-research-v1.js'
+      - 'edogawa-research-model-v1.js'
+      - 'edogawa-feature-contract-v1.js'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-shadow-research-v1
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Resolve JST date
+        id: date
+        run: |
+          echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Create immutable research snapshots
+        run: |
+          set -euo pipefail
+          node --check edogawa-feature-contract-v1.js
+          node --check edogawa-research-model-v1.js
+          node --check scripts/edogawa-shadow-research-v1.js
+          node scripts/edogawa-shadow-research-v1.js "${{ steps.date.outputs.date }}"
+
+      - name: Audit research-only boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,re
+          for p in glob.glob('live/edogawa/*/shadow/*/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-shadow-research-v1'
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['mode'] in {'PROGRAM_ONLY','FULL_PRE_RACE'}
+              assert x['resultInput'] is False and x['payoutInput'] is False
+              assert x['researchOnly'] is True
+              assert x['productionEnabled'] is False and x['tryEnabled'] is False
+              assert x['cashNeutral'] is True and x['immutableAfterFirstWrite'] is True
+              assert x['waterUsed'] is False and x['tideUsed'] is False
+              assert len(x['picks'])==4 and all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
+              assert len(set(x['picks']))==4
+              assert abs(float(x['probabilitySum'])-1)<1e-9
+          print('EDOGAWA_SHADOW_BOUNDARY_PASS')
+          PY
+
+      - name: Publish only new immutable shadow files
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          SHADOW="live/edogawa/$DATE/shadow"
+          [ -d "$SHADOW" ] || { echo 'NO_EDOGAWA_SHADOW_FILES'; exit 0; }
+
+          rm -rf /tmp/edogawa-shadow-publish
+          mkdir -p /tmp/edogawa-shadow-publish
+          cp -a "$SHADOW/." /tmp/edogawa-shadow-publish/
+
+          git config user.name 'boat-command-edogawa-shadow'
+          git config user.email 'boat-command-edogawa-shadow@users.noreply.github.com'
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$SHADOW"
+
+            while IFS= read -r src; do
+              rel="${src#/tmp/edogawa-shadow-publish/}"
+              dst="$SHADOW/$rel"
+              if [ -f "$dst" ]; then
+                continue
+              fi
+              mkdir -p "$(dirname "$dst")"
+              cp "$src" "$dst"
+            done < <(find /tmp/edogawa-shadow-publish -type f -name '*.json' | sort)
+
+            git add "$SHADOW"
+            if git diff --cached --quiet; then
+              echo 'EDOGAWA_SHADOW_ALREADY_CURRENT'
+              exit 0
+            fi
+            git commit -m "shadow(edogawa): freeze result-free research snapshots"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "EDOGAWA_SHADOW_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'EDOGAWA_SHADOW_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
