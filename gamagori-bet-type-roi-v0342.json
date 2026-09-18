@@ -1,6 +1,6 @@
 {
   "schema": "boat-command-gamagori-bet-type-roi-v0342",
-  "generatedAt": "2026-09-18T13:02:21.945167+09:00",
+  "generatedAt": "2026-09-18T13:03:35.195433+09:00",
   "analysisOnly": true,
   "liveImported": false,
   "decision": "SHADOW_ONLY",
@@ -10,15 +10,27 @@
   "missingCount": 0,
   "boundary": "Primary gate and frozen PRE-derived picks are fixed before official result/payout pages are read. Same 100-yen stake per unique bet is used for win, exacta and trifecta.",
   "method": {
-    "win": "Unique first-place heads derived from the frozen trifecta picks.",
-    "exacta": "Unique first-two ordered pairs derived from the frozen trifecta picks.",
+    "win": "First-place heads are derived from frozen probability-ranked trifecta picks; Top1 and all-unique variants are reported.",
+    "exacta": "First-two ordered pairs are derived in first-appearance order from frozen probability-ranked trifecta picks; Top1/Top2/Top3/all variants are reported.",
     "trifecta": "Original frozen four trifecta picks.",
     "ticketStakeYen": 100,
     "selectionOrRankingChangedAfterPayoutRead": false
   },
   "split": {
     "train": {
-      "win": {
+      "winTop1": {
+        "races": 105,
+        "tickets": 105,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 68,
+        "hitRate": 0.6476190476190476,
+        "stakeYen": 10500,
+        "returnYen": 9220,
+        "profitYen": -1280,
+        "roi": 0.878095238095238,
+        "averageWinningPayout100": 135.58823529411765
+      },
+      "winAll": {
         "races": 105,
         "tickets": 161,
         "averagePicksPerRace": 1.5333333333333334,
@@ -30,7 +42,43 @@
         "roi": 0.8136645962732919,
         "averageWinningPayout100": 157.83132530120483
       },
-      "exacta": {
+      "exactaTop1": {
+        "races": 105,
+        "tickets": 105,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 30,
+        "hitRate": 0.2857142857142857,
+        "stakeYen": 10500,
+        "returnYen": 8390,
+        "profitYen": -2110,
+        "roi": 0.799047619047619,
+        "averageWinningPayout100": 279.6666666666667
+      },
+      "exactaTop2": {
+        "races": 105,
+        "tickets": 210,
+        "averagePicksPerRace": 2.0,
+        "hitRaces": 51,
+        "hitRate": 0.4857142857142857,
+        "stakeYen": 21000,
+        "returnYen": 18950,
+        "profitYen": -2050,
+        "roi": 0.9023809523809524,
+        "averageWinningPayout100": 371.5686274509804
+      },
+      "exactaTop3": {
+        "races": 105,
+        "tickets": 307,
+        "averagePicksPerRace": 2.9238095238095236,
+        "hitRaces": 70,
+        "hitRate": 0.6666666666666666,
+        "stakeYen": 30700,
+        "returnYen": 30070,
+        "profitYen": -630,
+        "roi": 0.9794788273615636,
+        "averageWinningPayout100": 429.57142857142856
+      },
+      "exactaAll": {
         "races": 105,
         "tickets": 326,
         "averagePicksPerRace": 3.104761904761905,
@@ -56,7 +104,19 @@
       }
     },
     "validation": {
-      "win": {
+      "winTop1": {
+        "races": 48,
+        "tickets": 48,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 32,
+        "hitRate": 0.6666666666666666,
+        "stakeYen": 4800,
+        "returnYen": 4470,
+        "profitYen": -330,
+        "roi": 0.93125,
+        "averageWinningPayout100": 139.6875
+      },
+      "winAll": {
         "races": 48,
         "tickets": 71,
         "averagePicksPerRace": 1.4791666666666667,
@@ -68,7 +128,43 @@
         "roi": 0.971830985915493,
         "averageWinningPayout100": 176.92307692307693
       },
-      "exacta": {
+      "exactaTop1": {
+        "races": 48,
+        "tickets": 48,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 19,
+        "hitRate": 0.3958333333333333,
+        "stakeYen": 4800,
+        "returnYen": 4450,
+        "profitYen": -350,
+        "roi": 0.9270833333333334,
+        "averageWinningPayout100": 234.21052631578948
+      },
+      "exactaTop2": {
+        "races": 48,
+        "tickets": 96,
+        "averagePicksPerRace": 2.0,
+        "hitRaces": 27,
+        "hitRate": 0.5625,
+        "stakeYen": 9600,
+        "returnYen": 7670,
+        "profitYen": -1930,
+        "roi": 0.7989583333333333,
+        "averageWinningPayout100": 284.0740740740741
+      },
+      "exactaTop3": {
+        "races": 48,
+        "tickets": 143,
+        "averagePicksPerRace": 2.9791666666666665,
+        "hitRaces": 35,
+        "hitRate": 0.7291666666666666,
+        "stakeYen": 14300,
+        "returnYen": 12210,
+        "profitYen": -2090,
+        "roi": 0.8538461538461538,
+        "averageWinningPayout100": 348.85714285714283
+      },
+      "exactaAll": {
         "races": 48,
         "tickets": 143,
         "averagePicksPerRace": 2.9791666666666665,
@@ -94,7 +190,19 @@
       }
     },
     "test": {
-      "win": {
+      "winTop1": {
+        "races": 46,
+        "tickets": 46,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 28,
+        "hitRate": 0.6086956521739131,
+        "stakeYen": 4600,
+        "returnYen": 4050,
+        "profitYen": -550,
+        "roi": 0.8804347826086957,
+        "averageWinningPayout100": 144.64285714285714
+      },
+      "winAll": {
         "races": 46,
         "tickets": 71,
         "averagePicksPerRace": 1.5434782608695652,
@@ -106,7 +214,43 @@
         "roi": 0.7943661971830986,
         "averageWinningPayout100": 161.14285714285714
       },
-      "exacta": {
+      "exactaTop1": {
+        "races": 46,
+        "tickets": 46,
+        "averagePicksPerRace": 1.0,
+        "hitRaces": 16,
+        "hitRate": 0.34782608695652173,
+        "stakeYen": 4600,
+        "returnYen": 3370,
+        "profitYen": -1230,
+        "roi": 0.7326086956521739,
+        "averageWinningPayout100": 210.625
+      },
+      "exactaTop2": {
+        "races": 46,
+        "tickets": 92,
+        "averagePicksPerRace": 2.0,
+        "hitRaces": 22,
+        "hitRate": 0.4782608695652174,
+        "stakeYen": 9200,
+        "returnYen": 5790,
+        "profitYen": -3410,
+        "roi": 0.6293478260869565,
+        "averageWinningPayout100": 263.1818181818182
+      },
+      "exactaTop3": {
+        "races": 46,
+        "tickets": 137,
+        "averagePicksPerRace": 2.9782608695652173,
+        "hitRaces": 33,
+        "hitRate": 0.717391304347826,
+        "stakeYen": 13700,
+        "returnYen": 11280,
+        "profitYen": -2420,
+        "roi": 0.8233576642335766,
+        "averageWinningPayout100": 341.8181818181818
+      },
+      "exactaAll": {
         "races": 46,
         "tickets": 137,
         "averagePicksPerRace": 2.9782608695652173,
@@ -133,7 +277,19 @@
     }
   },
   "overall": {
-    "win": {
+    "winTop1": {
+      "races": 199,
+      "tickets": 199,
+      "averagePicksPerRace": 1.0,
+      "hitRaces": 128,
+      "hitRate": 0.6432160804020101,
+      "stakeYen": 19900,
+      "returnYen": 17740,
+      "profitYen": -2160,
+      "roi": 0.8914572864321608,
+      "averageWinningPayout100": 138.59375
+    },
+    "winAll": {
       "races": 199,
       "tickets": 303,
       "averagePicksPerRace": 1.5226130653266332,
@@ -145,7 +301,43 @@
       "roi": 0.8462046204620463,
       "averageWinningPayout100": 163.31210191082803
     },
-    "exacta": {
+    "exactaTop1": {
+      "races": 199,
+      "tickets": 199,
+      "averagePicksPerRace": 1.0,
+      "hitRaces": 65,
+      "hitRate": 0.32663316582914576,
+      "stakeYen": 19900,
+      "returnYen": 16210,
+      "profitYen": -3690,
+      "roi": 0.814572864321608,
+      "averageWinningPayout100": 249.3846153846154
+    },
+    "exactaTop2": {
+      "races": 199,
+      "tickets": 398,
+      "averagePicksPerRace": 2.0,
+      "hitRaces": 100,
+      "hitRate": 0.5025125628140703,
+      "stakeYen": 39800,
+      "returnYen": 32410,
+      "profitYen": -7390,
+      "roi": 0.814321608040201,
+      "averageWinningPayout100": 324.1
+    },
+    "exactaTop3": {
+      "races": 199,
+      "tickets": 587,
+      "averagePicksPerRace": 2.949748743718593,
+      "hitRaces": 138,
+      "hitRate": 0.6934673366834171,
+      "stakeYen": 58700,
+      "returnYen": 53560,
+      "profitYen": -5140,
+      "roi": 0.9124361158432709,
+      "averageWinningPayout100": 388.1159420289855
+    },
+    "exactaAll": {
       "races": 199,
       "tickets": 606,
       "averagePicksPerRace": 3.0452261306532664,
@@ -171,5 +363,6 @@
     }
   },
   "missing": [],
+  "variantRule": "Top-N variants preserve the original PRE-RACE probability order. They are exploratory historical comparisons and are not promoted from this audit.",
   "promotionRule": "Do not promote or change LIVE staking from this historical audit. Fresh forward evidence remains required."
 }
