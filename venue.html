@@ -71,7 +71,7 @@ const VENUES={
  '21':['芦屋','ASHIYA'],'22':['福岡','FUKUOKA'],'23':['唐津','KARATSU'],'24':['大村','OMURA']
 };
 const q=new URLSearchParams(location.search),jcd=String(q.get('jcd')||'').padStart(2,'0'),v=VENUES[jcd];
-if(jcd==='07'){location.replace('./')}
+if(jcd==='07'){location.replace('./?venue=gamagori')}
 else if(!v){location.replace('./portal.html')}
 else{
  document.title=`BOAT COMMAND | ${v[0]}`;
