@@ -1,0 +1,56 @@
+name: Edogawa research dataset v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa POST-RACE result collector v1"]
+    types: [completed]
+  push:
+    paths:
+      - 'scripts/edogawa-research-dataset-v1.js'
+      - 'live/edogawa/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-research-dataset-v1
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Build leak-safe research dataset
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-research-dataset-v1.js
+          node scripts/edogawa-research-dataset-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-research-dataset-v1.json');
+          if(x.schema!=='boat-command-edogawa-research-dataset-v1')throw new Error('SCHEMA');
+          if(x.venue!=='EDOGAWA'||x.venueCode!=='03')throw new Error('TARGET');
+          if(x.noSameRaceResultInPrediction!==true)throw new Error('BOUNDARY');
+          if(x.audit.duplicateIds!==0||x.audit.predictionEnabled!==false)throw new Error('AUDIT');
+          for(const r of x.races){
+            if(!r.sourceBoundary?.programPreRaceOnly||!r.sourceBoundary?.resultSeparated)throw new Error('ROW_BOUNDARY '+r.id);
+          }
+          console.log('EDOGAWA_RESEARCH_DATASET_PASS rows='+x.audit.rows+' completePre='+x.audit.completePreRaceRows);
+          NODE
+
+      - name: Commit dataset when changed
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-research'
+          git config user.email 'boat-command-edogawa-research@users.noreply.github.com'
+          git add edogawa-research-dataset-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_RESEARCH_DATASET_CURRENT'; exit 0; }
+          git commit -m 'data(edogawa): refresh leak-safe research dataset'
+          git pull --rebase origin main
+          git push origin HEAD:main
