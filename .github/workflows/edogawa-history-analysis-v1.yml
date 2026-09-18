@@ -1,0 +1,66 @@
+name: Edogawa history analysis v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-history-analysis-v1
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Wait for history commit to reach main
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            git fetch origin main
+            git reset --hard origin/main
+            if [ -f edogawa-history-bootstrap-v1.json ] && [ -f edogawa-history-audit-v1.json ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'EDOGAWA_HISTORY_NOT_COMMITTED' >&2
+          exit 1
+
+      - name: Analyze Edogawa historical structure
+        run: |
+          set -euo pipefail
+          test -f edogawa-history-bootstrap-v1.json
+          node --check scripts/edogawa-history-analysis-v1.js
+          node scripts/edogawa-history-analysis-v1.js
+          node - <<'NODE'
+          const x=require('./edogawa-history-analysis-v1.json');
+          if(x.schema!=='boat-command-edogawa-history-analysis-v1')throw new Error('SCHEMA');
+          if(x.venueCode!=='03'||x.races<300)throw new Error('INSUFFICIENT_HISTORY');
+          if(!(x.lane.lane1FirstRate>=0&&x.lane.lane1FirstRate<=1))throw new Error('LANE1_RATE');
+          if(!(x.lane.outerFirstRate>=0&&x.lane.outerFirstRate<=1))throw new Error('OUTER_RATE');
+          if(x.modelPolicy.productionEnabled!==false||x.modelPolicy.gamagoriWeightsReused!==false)throw new Error('MODEL_BOUNDARY');
+          console.log('EDOGAWA_HISTORY_ANALYSIS_PASS');
+          NODE
+
+      - name: Commit analysis report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-analysis'
+          git config user.email 'boat-command-edogawa-analysis@users.noreply.github.com'
+          git add edogawa-history-analysis-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_ANALYSIS_ALREADY_CURRENT'; exit 0; }
+          git commit -m 'analysis(edogawa): publish historical baseline structure'
+          git pull --rebase origin main
+          git push origin HEAD:main
