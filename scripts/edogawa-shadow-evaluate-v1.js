@@ -23,6 +23,7 @@ for(let race=1;race<=12;race++){
   if(!validResult(result,race))continue;
   const z=read(path.join(root,'shadow','class-baseline',`race-${race}.json`));
   const a=read(path.join(root,'shadow','program-only',`race-${race}.json`));
+  const r=read(path.join(root,'shadow','rich-program',`race-${race}.json`));
   const b=read(path.join(root,'shadow','full-pre',`race-${race}.json`));
   const actual=String(result.trifecta);
   rows.push({
@@ -36,6 +37,11 @@ for(let race=1;race<=12;race++){
       generatedAt:a.generatedAt,picks:a.picks,hit:a.picks.includes(actual),
       modelVersion:a.modelVersion||null,
       sources:a.sources||null
+    }:null,
+    richProgram:validShadow(r,race,'RICH_PROGRAM')?{
+      generatedAt:r.generatedAt,picks:r.picks,hit:r.picks.includes(actual),
+      modelVersion:r.modelVersion||null,
+      sources:r.sources||null
     }:null,
     fullPre:validShadow(b,race,'FULL_PRE_RACE')?{
       generatedAt:b.generatedAt,picks:b.picks,hit:b.picks.includes(actual),
@@ -54,7 +60,7 @@ const out={
   venue:'EDOGAWA',venueCode:'03',date,
   generatedAt:new Date().toISOString(),
   rows,
-  summary:{classBaseline:stats('classBaseline'),programOnly:stats('programOnly'),fullPre:stats('fullPre')},
+  summary:{classBaseline:stats('classBaseline'),programOnly:stats('programOnly'),richProgram:stats('richProgram'),fullPre:stats('fullPre')},
   fundingScope:'NONE_RESEARCH_ONLY',
   bankrollAffected:false,
   tryAffected:false,
