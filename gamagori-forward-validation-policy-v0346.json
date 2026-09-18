@@ -1,0 +1,35 @@
+{
+  "schema": "boat-command-gamagori-forward-validation-policy-v0346",
+  "version": "0.34.6",
+  "effectiveDate": "2026-09-18",
+  "venue": "GAMAGORI",
+  "mode": "SHADOW_ONLY",
+  "evaluation": {
+    "cycleType": "FIXED_CALENDAR_WINDOW",
+    "cycleDays": 30,
+    "cycleStart": "FIRST_FROZEN_FORWARD_OBSERVATION_PER_METHOD",
+    "minimumMatchedRaces": null,
+    "minimumObservationDays": 30
+  },
+  "cycleEndDecision": {
+    "stableProfitable": "ADOPTION_REVIEW",
+    "unstableOrUnprofitable": "RETUNE_MODEL_OR_GATE",
+    "tooSparse": "EXTEND_SHADOW_WITHOUT_CHANGING_RULE"
+  },
+  "stabilityPrinciple": [
+    "Judge the whole 30-day forward window, not a hand-picked subset.",
+    "Do not rewrite frozen picks after results are known.",
+    "Do not promote from historical backtests alone.",
+    "Adoption is not a permanent guarantee; continue post-adoption monitoring."
+  ],
+  "liveSafety": {
+    "liveStakeChangeAllowedDuringShadow": false,
+    "hardLockRewriteAllowed": false,
+    "resultLeakageAllowed": false
+  },
+  "replacedPolicy": {
+    "minimumForwardMatchedRaces": 30,
+    "minimumForwardObservationDays": 10,
+    "status": "RETIRED_2026-09-18"
+  }
+}
