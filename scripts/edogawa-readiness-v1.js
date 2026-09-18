@@ -12,6 +12,7 @@ const MIN_HISTORY=Number(policy.minimumHistoricalRaces)||300;
 const MIN_A=Number(policy.minimumProgramOnlyForwardRaces)||30;
 const MIN_B=Number(policy.minimumFullPreForwardRaces)||30;
 const MIN_TIDE=Number(policy.minimumOfficialTideMappedRaces)||1;
+const MIN_PAIRED=Number(policy.minimumPairedForwardRaces)||30;
 
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
 function dirs(p){try{return fs.readdirSync(p,{withFileTypes:true}).filter(x=>x.isDirectory()).map(x=>x.name)}catch{return[]}}
@@ -67,11 +68,15 @@ if(latest){
 const histAudit=read(path.join(root,'edogawa-history-audit-v1.json'));
 const histAnalysis=read(path.join(root,'edogawa-history-analysis-v1.json'));
 const baseline=read(path.join(root,'edogawa-baseline-backtest-v1.json'));
+const comparison=read(path.join(root,'edogawa-forward-model-comparison-v1.json'));
 const historyRows=Number(histAudit?.races)||0;
 const historyDays=Number(histAudit?.raceDays)||0;
 const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=MIN_HISTORY;
 const analysisReady=histAnalysis?.venueCode==='03'&&Number(histAnalysis?.races)>=300;
 const baselineReady=baseline?.venueCode==='03'&&baseline?.strictWalkForward===true&&baseline?.sameDayRowsExcluded===true&&Number(baseline?.holdout?.metrics4?.races)>0;
+const comparisonReady=comparison?.venueCode==='03'&&comparison?.ready===true&&
+  Number(comparison?.classBaselineVsProgramOnly?.rows)>=MIN_PAIRED&&
+  Number(comparison?.programOnlyVsFullPre?.rows)>=MIN_PAIRED;
 
 const forwardDates=dates.filter(d=>{
   const e=read(path.join(liveRoot,d,'research-evaluation-v1.json'));
@@ -100,6 +105,7 @@ const waterValidated=waterValidation?.venueCode==='03'&&waterValidation?.ready==
 if(policy.requireWaterFeatureValidation===true&&!waterValidated)blockers.push('WATER_FEATURE_VALIDATION_NOT_READY');
 if(forwardProgramRaces<MIN_A)blockers.push(`PROGRAM_ONLY_FORWARD_${MIN_A}_RACES_NOT_READY`);
 if(forwardFullRaces<MIN_B)blockers.push(`FULL_PRE_FORWARD_${MIN_B}_RACES_NOT_READY`);
+if(policy.requireForwardModelUplift===true&&!comparisonReady)blockers.push('FORWARD_MODEL_UPLIFT_NOT_READY');
 
 let phase='DATA_LAYER';
 if(historyReady)phase='HISTORY_READY';
@@ -141,13 +147,22 @@ const out={
     evaluationDays:forwardDates.length,
     classBaselineRaces:forwardClassRaces,
     programOnlyRaces:forwardProgramRaces,
-    fullPreRaces:forwardFullRaces
+    fullPreRaces:forwardFullRaces,
+    comparisonReady,
+    pairedClassVsProgram:Number(comparison?.classBaselineVsProgramOnly?.rows)||0,
+    pairedProgramVsFull:Number(comparison?.programOnlyVsFullPre?.rows)||0,
+    classVsProgramHitDelta:comparison?.classBaselineVsProgramOnly?.hitRateDelta??null,
+    classVsProgramRoiDelta:comparison?.classBaselineVsProgramOnly?.roiDelta??null,
+    programVsFullHitDelta:comparison?.programOnlyVsFullPre?.hitRateDelta??null,
+    programVsFullRoiDelta:comparison?.programOnlyVsFullPre?.roiDelta??null
   },
   blockers,
   policy:{
     minimumHistoricalRaces:MIN_HISTORY,
     minimumProgramOnlyForwardRaces:MIN_A,
     minimumFullPreForwardRaces:MIN_B,
+    minimumPairedForwardRaces:MIN_PAIRED,
+    requireForwardModelUplift:policy.requireForwardModelUplift===true,
     requireOfficialTideMapping:policy.requireOfficialTideMapping!==false,
     minimumOfficialTideMappedRaces:MIN_TIDE,
     requireWaterFeatureValidation:policy.requireWaterFeatureValidation===true,
@@ -163,4 +178,4 @@ const out={
 };
 fs.mkdirSync(path.dirname(output),{recursive:true});
 fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n');
-console.log(JSON.stringify({phase,latestDate,historyRows,baselineReady,forwardProgramRaces,forwardFullRaces,blockers},null,2));
+console.log(JSON.stringify({phase,latestDate,historyRows,baselineReady,forwardProgramRaces,forwardFullRaces,comparisonReady,blockers},null,2));
