@@ -125,6 +125,24 @@ jobs:
           print('EDOGAWA_SHADOW_EVALUATION_BOUNDARY_PASS')
           PY
 
+      - name: Verify water validation boundary
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-water-feature-validation-v1.js
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('edogawa-water-feature-validation-v1.json')
+          if p.exists():
+              x=json.loads(p.read_text(encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-water-feature-validation-v1'
+              assert x['venueCode']=='03'
+              assert x['researchOnly'] is True
+              assert x['predictionInput'] is False
+              assert x['resultUsedOnlyAfterRace'] is True
+              assert x['modelWeightsPromoted'] is False
+          print('EDOGAWA_WATER_VALIDATION_BOUNDARY_PASS')
+          PY
+
       - name: Verify promotion remains blocked
         run: |
           set -euo pipefail
