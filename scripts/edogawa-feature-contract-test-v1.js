@@ -27,4 +27,7 @@ if(x.boundaries.resultInput!==false||x.boundaries.payoutInput!==false||x.boundar
 if(x.lanes[0].localVsNationalWinDelta!==.5)throw new Error('LOCAL_DELTA');
 if(x.lanes[0].exhibitionRank!==1||x.lanes[5].exhibitionRank!==6)throw new Error('EXHIBITION_RANK');
 if(x.preRaceComplete!==true)throw new Error('PRE_COMPLETE');
+if(!(f.stValue('F.03')>f.stValue('.25')))throw new Error('F_MUST_RANK_WORSE');
+const rr=f.ranks([f.stValue('F.03'),f.stValue('.12'),f.stValue('.20')],{lowerBetter:true});
+if(rr[0]!==3||rr[1]!==1||rr[2]!==2)throw new Error('F_RANK_REGRESSION');
 console.log('EDOGAWA_FEATURE_CONTRACT_PASS');
