@@ -1,0 +1,110 @@
+name: Edogawa RICH SHADOW v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Edogawa rich backtest v1"]
+    types: [completed]
+  schedule:
+    - cron: '*/5 0-12 * * *'
+  push:
+    paths:
+      - '.github/workflows/edogawa-rich-shadow-v1.yml'
+      - 'scripts/edogawa-rich-shadow-v1.js'
+      - 'edogawa-rich-model-v2.js'
+      - 'edogawa-rich-history-v1.json'
+      - 'edogawa-rich-backtest-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edogawa-rich-shadow-v1
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Resolve JST date
+        id: date
+        run: |
+          echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Freeze rich-program research snapshots
+        run: |
+          set -euo pipefail
+          node --check edogawa-rich-model-v2.js
+          node --check scripts/edogawa-rich-model-test-v2.js
+          node --check scripts/edogawa-rich-shadow-v1.js
+          node scripts/edogawa-rich-model-test-v2.js
+          node scripts/edogawa-rich-shadow-v1.js "${{ steps.date.outputs.date }}"
+
+      - name: Audit rich shadow boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,re
+          for p in glob.glob('live/edogawa/*/shadow/rich-program/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-shadow-research-v1'
+              assert x['mode']=='RICH_PROGRAM'
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['resultInput'] is False and x['payoutInput'] is False
+              assert x['exhibitionUsed'] is False and x['waterUsed'] is False and x['tideUsed'] is False
+              assert x['researchOnly'] is True and x['productionEnabled'] is False and x['tryEnabled'] is False
+              assert x['cashNeutral'] is True and x['immutableAfterFirstWrite'] is True
+              assert len(x['picks'])==4 and len(set(x['picks']))==4
+              assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
+              assert abs(float(x['probabilitySum'])-1)<1e-9
+          print('EDOGAWA_RICH_SHADOW_BOUNDARY_PASS')
+          PY
+
+      - name: Publish only new immutable rich snapshots
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          DIR="live/edogawa/$DATE/shadow/rich-program"
+          [ -d "$DIR" ] || { echo 'NO_EDOGAWA_RICH_SHADOW_FILES'; exit 0; }
+
+          rm -rf /tmp/edogawa-rich-shadow
+          mkdir -p /tmp/edogawa-rich-shadow
+          cp -a "$DIR/." /tmp/edogawa-rich-shadow/
+
+          git config user.name 'boat-command-edogawa-rich-shadow'
+          git config user.email 'boat-command-edogawa-rich-shadow@users.noreply.github.com'
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$DIR"
+            while IFS= read -r src; do
+              name=$(basename "$src")
+              dst="$DIR/$name"
+              [ -f "$dst" ] && continue
+              cp "$src" "$dst"
+            done < <(find /tmp/edogawa-rich-shadow -type f -name 'race-*.json' | sort)
+
+            git add "$DIR"
+            if git diff --cached --quiet; then
+              echo 'EDOGAWA_RICH_SHADOW_CURRENT'
+              exit 0
+            fi
+            git commit -m 'shadow(edogawa): freeze rich-program result-free snapshots'
+            if git push origin HEAD:main; then exit 0; fi
+            echo "EDOGAWA_RICH_SHADOW_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          exit 1
