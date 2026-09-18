@@ -84,6 +84,8 @@ jobs:
           set -euo pipefail
           node --check edogawa-feature-contract-v1.js
           node --check edogawa-research-model-v1.js
+          node --check edogawa-research-model-v2.js
+          node --check scripts/edogawa-lane-prior-v2-backtest-v1.js
           node --check scripts/edogawa-feature-contract-test-v1.js
           node --check scripts/edogawa-research-model-test-v1.js
           node scripts/edogawa-feature-contract-test-v1.js
@@ -149,6 +151,25 @@ jobs:
               assert x['resultUsedOnlyAfterRace'] is True
               assert x['modelWeightsPromoted'] is False
           print('EDOGAWA_WATER_VALIDATION_BOUNDARY_PASS')
+          PY
+
+      - name: Verify v2 forward-candidate gate remains research only
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('edogawa-lane-prior-v2-backtest-v1.json')
+          if p.exists():
+              x=json.loads(p.read_text(encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-lane-prior-v2-backtest-v1'
+              assert x['venueCode']=='03'
+              assert x['strictWalkForward'] is True
+              assert x['sameDayRowsExcluded'] is True
+              assert x['productionEnabled'] is False
+              assert x['tryEnabled'] is False
+              assert x['bankrollAffected'] is False
+              assert isinstance(x['eligibleForForwardTest'],bool)
+          print('EDOGAWA_V2_FORWARD_GATE_BOUNDARY_PASS')
           PY
 
       - name: Verify promotion remains blocked
