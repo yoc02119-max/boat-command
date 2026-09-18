@@ -22,7 +22,7 @@ const latestDate=dates.at(-1)||null;
 const latest=latestDate?path.join(liveRoot,latestDate):null;
 
 let programReady=false,programRaceCount=0,featureSummaryReady=false,featureLocalReady=false,featureSTReady=false;
-let preComplete=0,tideSources=0,mappedTide=0,postResults=0,shadowProgram=0,shadowFull=0,evaluatedProgram=0,evaluatedFull=0;
+let preComplete=0,tideSources=0,mappedTide=0,postResults=0,shadowClass=0,shadowProgram=0,shadowFull=0,evaluatedClass=0,evaluatedProgram=0,evaluatedFull=0;
 
 if(latest){
   const manifest=read(path.join(latest,'program','manifest.json'));
@@ -55,9 +55,11 @@ if(latest){
     const x=read(path.join(latest,'post',name));
     return x?.venueCode==='03'&&x?.resultEndpointsIncluded===true&&x?.preRaceDataIncluded===false;
   }).length;
+  shadowClass=files(path.join(latest,'shadow','class-baseline'),/^race-\d+\.json$/).length;
   shadowProgram=files(path.join(latest,'shadow','program-only'),/^race-\d+\.json$/).length;
   shadowFull=files(path.join(latest,'shadow','full-pre'),/^race-\d+\.json$/).length;
   const ev=read(path.join(latest,'research-evaluation-v1.json'));
+  evaluatedClass=Number(ev?.summary?.classBaseline?.evaluated)||0;
   evaluatedProgram=Number(ev?.summary?.programOnly?.evaluated)||0;
   evaluatedFull=Number(ev?.summary?.fullPre?.evaluated)||0;
 }
@@ -75,6 +77,9 @@ const forwardDates=dates.filter(d=>{
   const e=read(path.join(liveRoot,d,'research-evaluation-v1.json'));
   return e?.venueCode==='03'&&(Number(e?.summary?.programOnly?.evaluated)>0||Number(e?.summary?.fullPre?.evaluated)>0);
 });
+const forwardClassRaces=forwardDates.reduce((n,d)=>{
+  const e=read(path.join(liveRoot,d,'research-evaluation-v1.json')); return n+(Number(e?.summary?.classBaseline?.evaluated)||0);
+},0);
 const forwardProgramRaces=forwardDates.reduce((n,d)=>{
   const e=read(path.join(liveRoot,d,'research-evaluation-v1.json')); return n+(Number(e?.summary?.programOnly?.evaluated)||0);
 },0);
@@ -116,8 +121,10 @@ const out={
     officialTideSourcePacks:tideSources,
     explicitlyMappedTidePacks:mappedTide,
     postResults,
+    shadowClassBaseline:shadowClass,
     shadowProgramOnly:shadowProgram,
     shadowFullPre:shadowFull,
+    evaluatedClassBaseline:evaluatedClass,
     evaluatedProgramOnly:evaluatedProgram,
     evaluatedFullPre:evaluatedFull
   },
@@ -132,6 +139,7 @@ const out={
   },
   forward:{
     evaluationDays:forwardDates.length,
+    classBaselineRaces:forwardClassRaces,
     programOnlyRaces:forwardProgramRaces,
     fullPreRaces:forwardFullRaces
   },
