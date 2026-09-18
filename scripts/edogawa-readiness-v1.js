@@ -23,7 +23,7 @@ const latestDate=dates.at(-1)||null;
 const latest=latestDate?path.join(liveRoot,latestDate):null;
 
 let programReady=false,programRaceCount=0,featureSummaryReady=false,featureLocalReady=false,featureSTReady=false;
-let preComplete=0,tideSources=0,mappedTide=0,postResults=0,shadowClass=0,shadowProgram=0,shadowFull=0,evaluatedClass=0,evaluatedProgram=0,evaluatedFull=0;
+let preComplete=0,tideSources=0,mappedTide=0,postResults=0,shadowClass=0,shadowProgram=0,shadowRich=0,shadowFull=0,evaluatedClass=0,evaluatedProgram=0,evaluatedRich=0,evaluatedFull=0;
 
 if(latest){
   const manifest=read(path.join(latest,'program','manifest.json'));
@@ -58,16 +58,20 @@ if(latest){
   }).length;
   shadowClass=files(path.join(latest,'shadow','class-baseline'),/^race-\d+\.json$/).length;
   shadowProgram=files(path.join(latest,'shadow','program-only'),/^race-\d+\.json$/).length;
+  shadowRich=files(path.join(latest,'shadow','rich-program'),/^race-\d+\.json$/).length;
   shadowFull=files(path.join(latest,'shadow','full-pre'),/^race-\d+\.json$/).length;
   const ev=read(path.join(latest,'research-evaluation-v1.json'));
   evaluatedClass=Number(ev?.summary?.classBaseline?.evaluated)||0;
   evaluatedProgram=Number(ev?.summary?.programOnly?.evaluated)||0;
+  evaluatedRich=Number(ev?.summary?.richProgram?.evaluated)||0;
   evaluatedFull=Number(ev?.summary?.fullPre?.evaluated)||0;
 }
 
 const histAudit=read(path.join(root,'edogawa-history-audit-v1.json'));
 const histAnalysis=read(path.join(root,'edogawa-history-analysis-v1.json'));
 const baseline=read(path.join(root,'edogawa-baseline-backtest-v1.json'));
+const richAudit=read(path.join(root,'edogawa-rich-history-audit-v1.json'));
+const richBacktest=read(path.join(root,'edogawa-rich-backtest-v1.json'));
 const comparison=read(path.join(root,'edogawa-forward-model-comparison-v1.json'));
 const lanePriorGate=read(path.join(root,'edogawa-lane-prior-v2-backtest-v1.json'));
 const lanePriorV2Eligible=lanePriorGate?.venueCode==='03'&&
@@ -78,6 +82,8 @@ const historyDays=Number(histAudit?.raceDays)||0;
 const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=MIN_HISTORY;
 const analysisReady=histAnalysis?.venueCode==='03'&&Number(histAnalysis?.races)>=300;
 const baselineReady=baseline?.venueCode==='03'&&baseline?.strictWalkForward===true&&baseline?.sameDayRowsExcluded===true&&Number(baseline?.holdout?.metrics4?.races)>0;
+const richHistoryReady=richAudit?.venueCode==='03'&&richAudit?.readyForRichBacktest===true&&richAudit?.exactBaseCoverage===true;
+const richBacktestReady=richBacktest?.venueCode==='03'&&richBacktest?.strictWalkForward===true&&richBacktest?.sameDayRowsExcluded===true&&Number(richBacktest?.holdout?.pointCounts?.['4']?.races)>0;
 const comparisonReady=comparison?.venueCode==='03'&&comparison?.ready===true&&
   Number(comparison?.classBaselineVsProgramOnly?.rows)>=MIN_PAIRED&&
   Number(comparison?.programOnlyVsFullPre?.rows)>=MIN_PAIRED;
@@ -91,6 +97,9 @@ const forwardClassRaces=forwardDates.reduce((n,d)=>{
 },0);
 const forwardProgramRaces=forwardDates.reduce((n,d)=>{
   const e=read(path.join(liveRoot,d,'research-evaluation-v1.json')); return n+(Number(e?.summary?.programOnly?.evaluated)||0);
+},0);
+const forwardRichRaces=forwardDates.reduce((n,d)=>{
+  const e=read(path.join(liveRoot,d,'research-evaluation-v1.json')); return n+(Number(e?.summary?.richProgram?.evaluated)||0);
 },0);
 const forwardFullRaces=forwardDates.reduce((n,d)=>{
   const e=read(path.join(liveRoot,d,'research-evaluation-v1.json')); return n+(Number(e?.summary?.fullPre?.evaluated)||0);
@@ -133,9 +142,11 @@ const out={
     postResults,
     shadowClassBaseline:shadowClass,
     shadowProgramOnly:shadowProgram,
+    shadowRichProgram:shadowRich,
     shadowFullPre:shadowFull,
     evaluatedClassBaseline:evaluatedClass,
     evaluatedProgramOnly:evaluatedProgram,
+    evaluatedRichProgram:evaluatedRich,
     evaluatedFullPre:evaluatedFull
   },
   history:{
@@ -147,10 +158,27 @@ const out={
     holdoutHitRate:Number(baseline?.holdout?.metrics4?.hitRate)||null,
     holdoutRoi:Number(baseline?.holdout?.metrics4?.roi)||null
   },
+  richHistory:{
+    ready:richHistoryReady,
+    rows:Number(richAudit?.richRaces)||0,
+    coverage:Number(richAudit?.coverage)||0,
+    exactBaseCoverage:richAudit?.exactBaseCoverage===true
+  },
+  richModel:{
+    ready:richBacktestReady,
+    holdoutRaces:Number(richBacktest?.holdout?.pointCounts?.['4']?.races)||0,
+    holdoutHitRate:Number(richBacktest?.holdout?.pointCounts?.['4']?.hitRate)||null,
+    holdoutRoi:Number(richBacktest?.holdout?.pointCounts?.['4']?.roi)||null,
+    hitRateDeltaVsBaseline:richBacktest?.comparisonToClassBaseline?.hitRateDelta??null,
+    roiDeltaVsBaseline:richBacktest?.comparisonToClassBaseline?.roiDelta??null,
+    productionEnabled:false,
+    tryEnabled:false
+  },
   forward:{
     evaluationDays:forwardDates.length,
     classBaselineRaces:forwardClassRaces,
     programOnlyRaces:forwardProgramRaces,
+    richProgramRaces:forwardRichRaces,
     fullPreRaces:forwardFullRaces,
     comparisonReady,
     pairedClassVsProgram:Number(comparison?.classBaselineVsProgramOnly?.rows)||0,
