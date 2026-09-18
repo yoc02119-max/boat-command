@@ -1,0 +1,183 @@
+name: Edogawa history bootstrap 180d v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-history-bootstrap-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      matrix:
+        block: [0, 1, 2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build 60-day Edogawa history block
+        env:
+          BLOCK: ${{ matrix.block }}
+        run: |
+          set -euo pipefail
+          rm -rf edogawa-hist-work edogawa-hist-out
+          mkdir -p edogawa-hist-work edogawa-hist-out
+          python3 program-history-builder-v121.py --self-test
+
+          python3 - <<'PY' > edogawa-hist-work/dates.txt
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          today=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()
+          start=today-datetime.timedelta(days=180)
+          block=int(os.environ['BLOCK'])
+          a=start+datetime.timedelta(days=block*60)
+          b=min(a+datetime.timedelta(days=60),today)
+          d=a
+          while d<b:
+              print(d.isoformat());d+=datetime.timedelta(days=1)
+          PY
+
+          : > edogawa-hist-work/exceptions.txt
+          mkdir -p edogawa-hist-work/days
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            rm -rf edogawa-hist-work/one
+            mkdir -p edogawa-hist-work/one/raw edogawa-hist-work/one/b edogawa-hist-work/one/k edogawa-hist-work/one/out
+
+            bc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o edogawa-hist-work/one/raw/$b -w '%{http_code}' https://www1.mbrace.or.jp/od2/B/${ym}/$b || true)"
+            sleep 5
+            kc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o edogawa-hist-work/one/raw/$k -w '%{http_code}' https://www1.mbrace.or.jp/od2/K/${ym}/$k || true)"
+            sleep 5
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then
+              echo "$d HTTP B=$bc K=$kc" >> edogawa-hist-work/exceptions.txt
+              continue
+            fi
+
+            lha xw=edogawa-hist-work/one/b edogawa-hist-work/one/raw/$b >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
+            lha xw=edogawa-hist-work/one/k edogawa-hist-work/one/raw/$k >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
+
+            python3 program-history-builder-v121.py               --b-dir edogawa-hist-work/one/b               --k-dir edogawa-hist-work/one/k               --out edogawa-hist-work/one/out               --venue 03 >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
+
+            python3 - "$d" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d=sys.argv[1]
+          p=Path('edogawa-hist-work/one/out/03/2026.json')
+          if not p.exists():
+              raise SystemExit(0)
+          x=json.loads(p.read_text(encoding='utf-8'))
+          day=[r for r in x.get('races',[]) if r.get('d')==d]
+          if not day:
+              raise SystemExit(0)
+          ids=[r.get('id') for r in day]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit('DUPLICATE_DAY_IDS')
+          if any(str(r.get('o','')).count('-')!=2 for r in day):
+              raise SystemExit('INVALID_RESULT')
+          Path(f'edogawa-hist-work/days/{d}.json').write_text(json.dumps(day,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
+          done < edogawa-hist-work/dates.txt
+
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          rows=[]
+          for p in sorted(Path('edogawa-hist-work/days').glob('*.json')):
+              rows+=json.loads(p.read_text(encoding='utf-8'))
+          report={
+            'block':int(os.environ['BLOCK']),
+            'daysWithRaces':len({r['d'] for r in rows}),
+            'races':len(rows),
+            'exceptions':[x for x in Path('edogawa-hist-work/exceptions.txt').read_text().splitlines() if x.strip()]
+          }
+          Path('edogawa-hist-out/segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('edogawa-hist-out/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(report)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edogawa-history-block-${{ matrix.block }}
+          path: edogawa-hist-out/*.json
+          retention-days: 14
+
+  merge:
+    needs: block
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: edogawa-history-block-*
+          path: edogawa-history-blocks
+      - name: Merge and audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json
+          from collections import Counter
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          rows=[];reports=[]
+          for p in Path('edogawa-history-blocks').rglob('segment.json'):
+              rows+=json.loads(p.read_text(encoding='utf-8')).get('races',[])
+          for p in Path('edogawa-history-blocks').rglob('report.json'):
+              reports.append(json.loads(p.read_text(encoding='utf-8')))
+
+          rows.sort(key=lambda r:(r['d'],int(r['r'])))
+          ids=[r['id'] for r in rows]
+          assert len(ids)==len(set(ids))
+          assert all(str(r.get('id','')).split('-')[3]=='03' for r in rows)
+          assert all(len(r.get('c',[]))==6 for r in rows)
+          assert all(str(r.get('o','')).count('-')==2 for r in rows)
+
+          by=Counter(r['d'] for r in rows)
+          cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
+          partial={d:n for d,n in by.items() if n!=12}
+          out={
+            'schema':'boat-command-program-history-v2',
+            'builder':'EDOGAWA-HISTORY-BOOTSTRAP-V1',
+            'venueCode':'03','cutoff':cutoff,
+            'resultUse':'HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE',
+            'exhibitionIncluded':False,
+            'waterFeaturesIncluded':False,
+            'races':rows
+          }
+          audit={
+            'schema':'boat-command-edogawa-history-audit-v1',
+            'venueCode':'03','windowDays':180,'cutoff':cutoff,
+            'races':len(rows),'raceDays':len(by),
+            'complete12RaceDays':sum(1 for n in by.values() if n==12),
+            'partialOrCancelledDays':len(partial),
+            'partialRaceCounts':partial,
+            'exceptions':sum((r.get('exceptions',[]) for r in reports),[]),
+            'duplicateIds':len(ids)-len(set(ids)),
+            'readyForResearch':len(rows)>=300,
+            'readyForProductionPrediction':False
+          }
+          Path('edogawa-history-bootstrap-v1.json').write_text(json.dumps(out,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('edogawa-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit audited Edogawa bootstrap history
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-history'
+          git config user.email 'boat-command-edogawa-history@users.noreply.github.com'
+          git add edogawa-history-bootstrap-v1.json edogawa-history-audit-v1.json
+          git diff --cached --quiet && { echo 'EDOGAWA_HISTORY_ALREADY_CURRENT'; exit 0; }
+          git commit -m 'data(edogawa): publish audited 180-day history bootstrap'
+          git pull --rebase origin main
+          git push origin HEAD:main
