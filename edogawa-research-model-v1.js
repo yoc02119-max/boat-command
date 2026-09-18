@@ -43,26 +43,28 @@
     if(a!=='UNKNOWN'&&b!=='UNKNOWN'&&a!==b)d+=.85;
     return d;
   }
-  function currentScores(program,feature=null,{fullPreRace=false}={}){
+  function currentScores(program,feature=null,{fullPreRace=false,classOnly=false}={}){
     const b=[...program.boats].sort((a,b)=>Number(a.lane)-Number(b.lane));
     // These are RESEARCH priors only. Production promotion remains false until forward validation.
     const lanePrior=[.72,.24,.08,-.05,-.18,-.27];
     const lanes=feature?.lanes||[];
     return b.map((x,i)=>{
       let s=lanePrior[i]+.36*CLASS[String(x.class)];
-      const nat=finite(x.nationalWinRate),loc=finite(x.localWinRate);
-      const nat2=finite(x.national2Rate),loc2=finite(x.local2Rate);
-      const motor=finite(x.motor2Rate),boat=finite(x.boat2Rate),avgST=finite(x.avgST);
-      if(nat!=null)s+=.12*(nat-5);
-      if(loc!=null)s+=.17*(loc-5);
-      if(nat!=null&&loc!=null)s+=.08*clamp(loc-nat,-3,3);
-      if(nat2!=null)s+=.42*(nat2-.30);
-      if(loc2!=null)s+=.58*(loc2-.30);
-      if(motor!=null)s+=.42*(motor-.35);
-      if(boat!=null)s+=.18*(boat-.35);
-      if(avgST!=null)s+=.75*(.18-avgST);
+      if(!classOnly){
+        const nat=finite(x.nationalWinRate),loc=finite(x.localWinRate);
+        const nat2=finite(x.national2Rate),loc2=finite(x.local2Rate);
+        const motor=finite(x.motor2Rate),boat=finite(x.boat2Rate),avgST=finite(x.avgST);
+        if(nat!=null)s+=.12*(nat-5);
+        if(loc!=null)s+=.17*(loc-5);
+        if(nat!=null&&loc!=null)s+=.08*clamp(loc-nat,-3,3);
+        if(nat2!=null)s+=.42*(nat2-.30);
+        if(loc2!=null)s+=.58*(loc2-.30);
+        if(motor!=null)s+=.42*(motor-.35);
+        if(boat!=null)s+=.18*(boat-.35);
+        if(avgST!=null)s+=.75*(.18-avgST);
+      }
 
-      if(fullPreRace){
+      if(fullPreRace&&!classOnly){
         const f=lanes[i]||{};
         const er=finite(f.exhibitionRank),sr=finite(f.exhibitionSTRank);
         if(er!=null)s+=.10*(3.5-er);
@@ -92,9 +94,11 @@
     const safe=(history||[]).filter(r=>validOrder(r.o)&&Array.isArray(r.c)&&r.c.length===6&&(!targetDate||String(r.d)<String(targetDate)));
     if(safe.length<300)throw new Error('EDOGAWA_HISTORY_MIN_300_REQUIRED');
 
+    if(!['CLASS_BASELINE','PROGRAM_ONLY','FULL_PRE_RACE'].includes(mode))throw new Error('EDOGAWA_RESEARCH_MODE_INVALID');
     const full=mode==='FULL_PRE_RACE';
+    const classOnly=mode==='CLASS_BASELINE';
     if(full&&!feature?.preRaceComplete)throw new Error('FULL_PRE_RACE_NOT_READY');
-    const scores=currentScores(program,feature,{fullPreRace:full});
+    const scores=currentScores(program,feature,{fullPreRace:full,classOnly});
     const prior=pl(scores);
     const nearest=safe.map(r=>({r,d:historyDistance(program,r)})).filter(x=>Number.isFinite(x.d)).sort((a,b)=>a.d-b.d).slice(0,neighborLimit);
     const obs=new Map(ORDERS.map(o=>[o,0]));let mass=0;
