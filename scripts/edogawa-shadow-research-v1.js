@@ -2,6 +2,7 @@
 'use strict';
 const fs=require('fs');
 const path=require('path');
+const crypto=require('crypto');
 const model=require('../edogawa-research-model-v1.js');
 const feature=require('../edogawa-feature-contract-v1.js');
 
@@ -19,6 +20,7 @@ function nowJst(){
 }
 function deadlineMinutes(hm){const m=String(hm||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null}
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
+function sha256File(p){return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')}
 function writeOnce(p,payload){
   if(fs.existsSync(p)){console.log('EDOGAWA_SHADOW_KEEP_IMMUTABLE',path.relative(root,p));return false}
   fs.mkdirSync(path.dirname(p),{recursive:true});
@@ -26,7 +28,7 @@ function writeOnce(p,payload){
   console.log('EDOGAWA_SHADOW_WRITE',path.relative(root,p));
   return true;
 }
-function snapshot(program,fx,mode,generatedAt){
+function snapshot(program,fx,mode,generatedAt,sources){
   const d=model.distribution(program,historyDb.races,fx,{mode,targetDate:date});
   const picks=model.select(d,{count:4});
   return {
@@ -39,6 +41,14 @@ function snapshot(program,fx,mode,generatedAt){
     featureVersion:feature.version,
     historyRows:d.historyRows,
     historyCutoff:historyDb.cutoff||null,
+    sources:{
+      programPath:sources.programPath,
+      programSha256:sources.programSha256,
+      programFetchedAt:program.fetchedAt||null,
+      preRacePath:sources.preRacePath||null,
+      preRaceSha256:sources.preRaceSha256||null,
+      preRaceFetchedAt:sources.preRaceFetchedAt||null
+    },
     picks:picks.map(x=>x.order),
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
     probabilitySum:d.sum,
@@ -65,7 +75,11 @@ for(let race=1;race<=12;race++){
   if(dm==null||dm-now.minutes<3){console.log('EDOGAWA_SHADOW_CUTOFF',race,program.deadline);continue}
 
   const programOut=path.join(root,'live','edogawa',date,'shadow','program-only',`race-${race}.json`);
-  const a=snapshot(program,null,'PROGRAM_ONLY',now.iso);
+  const programSource={
+    programPath:path.relative(root,programPath).replace(/\\/g,'/'),
+    programSha256:sha256File(programPath)
+  };
+  const a=snapshot(program,null,'PROGRAM_ONLY',now.iso,programSource);
   if(writeOnce(programOut,a))writes++;
 
   const prePath=path.join(root,'live','edogawa',date,'pre',`race-${race}-pack.json`);
@@ -74,7 +88,12 @@ for(let race=1;race<=12;race++){
     const fx=feature.extract(program,pre);
     if(fx.preRaceComplete){
       const fullOut=path.join(root,'live','edogawa',date,'shadow','full-pre',`race-${race}.json`);
-      const b=snapshot(program,fx,'FULL_PRE_RACE',now.iso);
+      const b=snapshot(program,fx,'FULL_PRE_RACE',now.iso,{
+        ...programSource,
+        preRacePath:path.relative(root,prePath).replace(/\\/g,'/'),
+        preRaceSha256:sha256File(prePath),
+        preRaceFetchedAt:pre.fetchedAt||null
+      });
       if(writeOnce(fullOut,b))writes++;
     }
   }
