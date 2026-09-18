@@ -1,0 +1,103 @@
+name: Edogawa racelist schema probe v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/edogawa-racelist-schema-probe-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Capture PRE-RACE racelist table structure
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          URL="https://www.boatrace.jp/owpc/pc/race/racelist?hd=$HD&jcd=03&rno=1"
+          curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-EDOGAWA-SCHEMA/1.0'             "$URL" -o /tmp/edogawa-racelist.html
+          export DATE URL
+          python3 - <<'PY'
+          import html,json,os,pathlib,re
+          from html.parser import HTMLParser
+
+          raw=pathlib.Path('/tmp/edogawa-racelist.html').read_bytes()
+          text=None;enc=None
+          for e in ('utf-8','cp932','shift_jis','euc_jp'):
+              try:text=raw.decode(e);enc=e;break
+              except UnicodeDecodeError:pass
+          if text is None:text=raw.decode('utf-8','replace');enc='unknown'
+
+          class P(HTMLParser):
+              def __init__(self):
+                  super().__init__();self.depth=0;self.in_cell=False;self.cell=[];self.row=[];self.table=[];self.tables=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=='table':
+                      if self.depth==0:self.table=[]
+                      self.depth+=1
+                  elif tag in ('td','th') and self.depth:self.in_cell=True;self.cell=[]
+                  elif tag=='tr' and self.depth:self.row=[]
+                  elif tag=='br' and self.in_cell:self.cell.append(' / ')
+              def handle_data(self,data):
+                  if self.in_cell:self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ('td','th') and self.in_cell:
+                      self.row.append(re.sub(r'\s+',' ',html.unescape(''.join(self.cell))).strip());self.in_cell=False;self.cell=[]
+                  elif tag=='tr' and self.depth:
+                      if self.row and any(self.row):self.table.append(self.row)
+                      self.row=[]
+                  elif tag=='table' and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:self.tables.append(self.table);self.table=[]
+
+          p=P();p.feed(text)
+          candidates=[]
+          for ti,t in enumerate(p.tables):
+              joined=' '.join(' '.join(r) for r in t[:8])
+              if all(k in joined for k in ('級別','モーター','ボート')):
+                  candidates.append({'tableIndex':ti,'rows':t[:10]})
+          if not candidates:raise SystemExit('EDOGAWA_RACELIST_TABLE_NOT_FOUND')
+          out={
+            'schema':'boat-command-edogawa-racelist-schema-probe-v1',
+            'venue':'EDOGAWA','venueCode':'03','date':os.environ['DATE'],'race':1,
+            'sourceUrl':os.environ['URL'],'detectedEncoding':enc,
+            'candidateTables':candidates,
+            'resultEndpointsIncluded':False,'predictionEnabled':False
+          }
+          path=pathlib.Path('venues/edogawa/racelist-schema-sample.json')
+          path.parent.mkdir(parents=True,exist_ok=True)
+          path.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'tables':len(candidates),'firstRows':len(candidates[0]['rows'])},ensure_ascii=False))
+          PY
+
+      - name: Safety audit
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('venues/edogawa/racelist-schema-sample.json',encoding='utf-8'))
+          assert x['venueCode']=='03'
+          assert x['resultEndpointsIncluded'] is False
+          assert x['predictionEnabled'] is False
+          assert x['candidateTables']
+          print('EDOGAWA_RACELIST_SCHEMA_PASS')
+          PY
+
+      - name: Commit schema evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-edogawa-schema'
+          git config user.email 'boat-command-edogawa-schema@users.noreply.github.com'
+          git add venues/edogawa/racelist-schema-sample.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(edogawa): capture PRE-RACE racelist schema evidence'
+          git pull --rebase origin main
+          git push origin HEAD:main
