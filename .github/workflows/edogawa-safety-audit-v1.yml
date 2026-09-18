@@ -89,6 +89,55 @@ jobs:
           node scripts/edogawa-feature-contract-test-v1.js
           node scripts/edogawa-research-model-test-v1.js
 
+      - name: Verify SHADOW evaluation boundary
+        run: |
+          set -euo pipefail
+          node --check scripts/edogawa-shadow-research-v1.js
+          node --check scripts/edogawa-shadow-evaluate-v1.js
+          python3 - <<'PY'
+          import glob,json,re
+          for p in glob.glob('live/edogawa/*/shadow/*/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-shadow-research-v1'
+              assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
+              assert x['researchOnly'] is True
+              assert x['productionEnabled'] is False
+              assert x['tryEnabled'] is False
+              assert x['cashNeutral'] is True
+              assert x['resultInput'] is False
+              assert x['payoutInput'] is False
+              assert x['immutableAfterFirstWrite'] is True
+              assert len(x['picks'])==4 and len(set(x['picks']))==4
+              assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
+          for p in glob.glob('live/edogawa/*/research-evaluation-v1.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-edogawa-shadow-evaluation-v1'
+              assert x['fundingScope']=='NONE_RESEARCH_ONLY'
+              assert x['bankrollAffected'] is False
+              assert x['tryAffected'] is False
+              assert x['productionAffected'] is False
+          print('EDOGAWA_SHADOW_EVALUATION_BOUNDARY_PASS')
+          PY
+
+      - name: Verify promotion remains blocked
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          cfg=json.loads(pathlib.Path('venues/edogawa/config-v1.json').read_text(encoding='utf-8'))
+          assert cfg['modelEnabled'] is False
+          assert cfg['tryEnabled'] is False
+          assert cfg['realMoneyEnabled'] is False
+          if pathlib.Path('edogawa-baseline-backtest-v1.json').exists():
+              x=json.loads(pathlib.Path('edogawa-baseline-backtest-v1.json').read_text(encoding='utf-8'))
+              assert x['venueCode']=='03'
+              assert x['productionEnabled'] is False
+              assert x['tryEnabled'] is False
+              assert x['promotionEligible'] is False
+              assert len(x.get('promotionBlockers',[]))>=1
+          print('EDOGAWA_PROMOTION_BLOCK_PASS')
+          PY
+
       - name: Verify current stored Edogawa assets
         run: |
           set -euo pipefail
