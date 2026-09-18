@@ -39,8 +39,8 @@ const report={
  primaryGateLabel:src.primaryPretestGate?.label||null,
  tierCounts:counts,
  rows,
- promotionPolicy:{historicalDataCanPromote:false,freshForwardEvidenceRequired:true,minimumForwardMatchedRaces:30,minimumForwardObservationDays:10,liveStakeChangeAllowed:false},
- note:'The tier labels are diagnostics, not betting recommendations. Future forward matches must be frozen pre-race and accumulated separately before any LIVE promotion decision.'
+ promotionPolicy:{historicalDataCanPromote:false,freshForwardEvidenceRequired:true,forwardEvaluationMode:'FIXED_30_CALENDAR_DAYS',forwardCycleDays:30,minimumForwardMatchedRaces:null,minimumForwardObservationDays:30,endOfCycleDecision:['ADOPT_IF_STABLE_PROFITABLE','RETUNE_IF_UNPROFITABLE_OR_UNSTABLE','EXTEND_SHADOW_IF_TOO_SPARSE'],liveStakeChangeAllowed:false},
+ note:'The tier labels are diagnostics, not betting recommendations. Forward validation is evaluated in fixed 30-calendar-day cycles. At cycle end, stable profitable performance can move the method to adoption review; unstable/unprofitable performance triggers retuning; sparse evidence stays shadow. Historical data alone never promotes.'
 };
 fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({primaryGateLabel:report.primaryGateLabel,tierCounts:counts,topPretestRows:rows.slice(0,10).map(x=>({rank:x.rank,label:x.label,tier:x.tier,roi:x.segmentRoi,combinedRoi:x.combined.roi}))},null,2));
