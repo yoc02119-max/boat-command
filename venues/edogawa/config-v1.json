@@ -5,7 +5,7 @@
   "venueName": "江戸川",
   "venueCode": "03",
   "slug": "edogawa",
-  "state": "BUILDING_DATA_LAYER",
+  "state": "BUILDING_AND_VALIDATING",
   "modelEnabled": false,
   "tryEnabled": false,
   "realMoneyEnabled": false,
@@ -80,5 +80,17 @@
     "潮・風・波の相互作用をモデル昇格前の必須検証項目にする。",
     "予想は履歴検証とPRE-RACE境界監査が通るまで無効。",
     "当地適性は公式出走表の当地勝率・当地2連率・当地3連率を使用する。"
-  ]
+  ],
+  "promotionPolicy": {
+    "minimumHistoricalRaces": 300,
+    "minimumProgramOnlyForwardRaces": 30,
+    "minimumFullPreForwardRaces": 30,
+    "requireHistoricalStructureAnalysis": true,
+    "requireStrictWalkForwardHoldout": true,
+    "requireOfficialTideMapping": true,
+    "requireHumanReview": true,
+    "autoPromotion": false,
+    "autoTryEnable": false,
+    "realMoneyEnable": false
+  }
 }
