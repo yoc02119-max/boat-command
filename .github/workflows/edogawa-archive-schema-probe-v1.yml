@@ -36,10 +36,12 @@ jobs:
 
           export DATE
           python3 - <<'PY'
-          import importlib.util,json,os,pathlib,re
+          import importlib.util,json,os,pathlib,re,sys
 
           spec=importlib.util.spec_from_file_location('phb','program-history-builder-v121.py')
-          phb=importlib.util.module_from_spec(spec);spec.loader.exec_module(phb)
+          phb=importlib.util.module_from_spec(spec)
+          sys.modules['phb']=phb
+          spec.loader.exec_module(phb)
           files=[p for p in pathlib.Path('/tmp/edogawa-b/out').glob('*') if p.is_file()]
           if not files:raise SystemExit('NO_EXTRACTED_B_FILE')
           text=phb.read_cp932(files[0])
