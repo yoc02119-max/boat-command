@@ -40,15 +40,15 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="code" id="venueCode">VENUE --</div>
 <h1 id="venueName">競艇場</h1>
 <p>この競艇場専用の入口です。画面構成は先に共通化し、予想ロジックは場ごとに検証してから接続します。</p>
-<div class="status"><i></i><span>MODEL準備中</span></div>
+<div class="status" id="buildStatus"><i></i><span>MODEL準備中</span></div>
 </section>
 <section class="grid">
 <div class="panel">
 <h2>この場の進行</h2>
 <div class="steps">
  <div class="step"><span>1</span><div><b>入口・共通UI</b><small>OPEN</small></div></div>
- <div class="step"><span>2</span><div><b>場別データ収集・特性分析</b><small>未接続</small></div></div>
- <div class="step"><span>3</span><div><b>メイン予想モデル</b><small>場ごとに構築</small></div></div>
+ <div class="step"><span>2</span><div><b>場別データ収集・特性分析</b><small id="dataStatus">未接続</small></div></div>
+ <div class="step"><span>3</span><div><b>メイン予想モデル</b><small id="modelStatus">場ごとに構築</small></div></div>
  <div class="step"><span>4</span><div><b>TRY検証・資金連動</b><small>モデル検証後に解禁</small></div></div>
 </div>
 </div>
@@ -56,7 +56,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <h2>共通画面</h2>
 <p>蒲郡で固めた構成を土台に、各場へ順次接続します。未完成の予想を共通モデルで無理に出すことはしません。</p>
 <div class="tabs"><div class="tab">今日</div><div class="tab">12R</div><div class="tab">結果</div><div class="tab">履歴</div></div>
-<div class="note">現在は入口のみ。予想・結果取得・TRY・仮資金処理はこの場ではまだ動きません。</div>
+<div class="note" id="venueNote">現在は入口のみ。予想・結果取得・TRY・仮資金処理はこの場ではまだ動きません。</div>
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
 </div>
 </section>
@@ -78,6 +78,16 @@ else{
  document.getElementById('venueCode').textContent=`VENUE ${jcd} · ${v[1]}`;
  document.getElementById('venueName').textContent=v[0];
  document.getElementById('topVenue').textContent=v[0];
+ if(jcd==='03'){
+   const st=document.getElementById('buildStatus');
+   st.querySelector('span').textContent='構築中 · DATA LAYER';
+   st.querySelector('i').style.background='#20e0c7';
+   st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
+   st.style.color='#9be7dc';
+   document.getElementById('dataStatus').textContent='番組・展示・風・波 収集中';
+   document.getElementById('modelStatus').textContent='データ蓄積後に江戸川専用で構築';
+   document.getElementById('venueNote').textContent='江戸川はDATA LAYER構築中。蒲郡モデルは流用せず、潮・風・波・当地適性を分離して検証します。予想とTRYはまだ無効です。';
+ }
 }
 document.getElementById('backBtn').onclick=()=>location.href='./portal.html';
 document.getElementById('portalBtn').onclick=()=>location.href='./portal.html';
