@@ -20,9 +20,9 @@ const report={
  sourceFetchedAt:pack.fetchedAt||null,
  deadline:pack.deadline||null,
  classes,aClassCount,
- primaryGate:{label:'race=7 & aClassCount=3',matched:primaryMatched,historicalStatus:'candidate-only',promotionStatus:'NOT_PROMOTED'},
+ primaryGate:{label:'race=7 & aClassCount=3',matched:primaryMatched,historicalStatus:'candidate-only',promotionStatus:'NOT_PROMOTED',forwardEvaluationMode:'FIXED_30_CALENDAR_DAYS',forwardCycleDays:30},
  decision:primaryMatched?'FORWARD_SHADOW_TRACK':'FORWARD_SHADOW_SKIP',
- note:'This gate records eligibility only. It must not alter LIVE predictions, stakes, or hard locks. No result or payout endpoint is read.'
+ note:'This gate records eligibility only. Forward performance is reviewed after a fixed 30-calendar-day cycle under gamagori-forward-validation-policy-v0346.json. It must not alter LIVE predictions, stakes, or hard locks. No result or payout endpoint is read.'
 };
 const out=output||input.replace(/\.json$/,'-shadow-gate-v0340.json');
 fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');
