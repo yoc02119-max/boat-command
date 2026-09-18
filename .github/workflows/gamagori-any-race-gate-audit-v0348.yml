@@ -1,0 +1,48 @@
+name: Gamagori any-race gate audit v0.34.8
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/gamagori-any-race-gate-audit-v0348.py'
+      - 'gamagori-replay-predictions-v0333.json'
+      - 'gamagori-replay-results-v0333.json'
+      - 'gamagori-win-pattern-combo-v0339.json'
+      - 'gamagori-exacta-payouts-v0343.json'
+      - '.github/workflows/gamagori-any-race-gate-audit-v0348.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamagori-any-race-gate-audit-v0348
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run any-race audit
+        run: python scripts/gamagori-any-race-gate-audit-v0348.py
+      - name: Commit report
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- gamagori-any-race-gate-audit-v0348.json)" ]; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git config user.name 'boat-command-analysis'
+          git config user.email 'boat-command-analysis@users.noreply.github.com'
+          git add gamagori-any-race-gate-audit-v0348.json
+          git commit -m 'analysis(gamagori): publish any-race gate audit v0.34.8'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort || true
+            sleep 3
+          done
+          exit 1
