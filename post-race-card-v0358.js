@@ -1,7 +1,7 @@
 // BOAT COMMAND GAMAGORI POST-RACE CARD DISPLAY v0.35.8
 // Display-only layer. Reads separated POST-RACE relay files and never mutates PRE-RACE prediction/session data.
 (()=>{'use strict';
-const VERSION='GAMAGORI-POST-RACE-CARD-V0.35.8';
+const VERSION='GAMAGORI-POST-RACE-CARD-V0.35.9';
 let running=false,timer=null;
 const cache=new Map();
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -43,17 +43,26 @@ function renderRace(r,x){
  let box=card.querySelector('.post-race-card-result');if(box)box.remove();
  card.insertAdjacentHTML('beforeend',html(x))
 }
+function renderCached(){
+ const s=liveSession();if(!s)return;
+ for(const r of s.races||[]){const x=cache.get(`${s.date}:${Number(r.race)}`);if(x)renderRace(r,x)}
+}
 async function sync(){
  if(running)return;const s=liveSession();if(!s)return;running=true;
  try{
-  for(const r of s.races||[]){
-   const x=await load(s.date,Number(r.race));if(x)renderRace(r,x)
-  }
+  const rows=await Promise.all((s.races||[]).map(async r=>({r,x:await load(s.date,Number(r.race))})));
+  for(const {r,x} of rows)if(x)renderRace(r,x)
  }finally{running=false}
 }
-function start(){setTimeout(sync,500);timer=setInterval(sync,60000)}
-window.addEventListener('boatcommand:program-sync',()=>setTimeout(sync,150));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
-window.BOAT_COMMAND_POST_RACE_CARD_V0358=Object.freeze({version:VERSION,sync,displayOnly:true,mutatesPrediction:false});
+const priorRenderAll=typeof renderAll==='function'?renderAll:null;
+if(priorRenderAll)renderAll=function(){
+ const out=priorRenderAll.apply(this,arguments);
+ setTimeout(renderCached,0);
+ return out
+};
+function start(){setTimeout(sync,250);setTimeout(sync,1600);timer=setInterval(sync,60000)}
+window.addEventListener('boatcommand:program-sync',()=>setTimeout(sync,120));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderCached();sync()}});
+window.BOAT_COMMAND_POST_RACE_CARD_V0358=Object.freeze({version:VERSION,sync,renderCached,displayOnly:true,mutatesPrediction:false});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
