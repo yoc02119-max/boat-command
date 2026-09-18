@@ -42,6 +42,15 @@ def split_of(date):
 def a_class_count(classes):
     return sum(1 for c in classes if str(c).upper() in {"A1", "A2"})
 
+def ordered_unique(values):
+    seen = set()
+    out = []
+    for v in values:
+        if v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out
+
 # Freeze the primary gate + all candidate picks BEFORE touching official result pages.
 locked = []
 for x in pred.get("races", []):
@@ -54,8 +63,8 @@ for x in pred.get("races", []):
     split = split_of(date)
     if split is None:
         continue
-    picks2 = sorted(set("-".join(p.split("-")[:2]) for p in picks3 if len(p.split("-")) == 3))
-    picks1 = sorted(set(p.split("-")[0] for p in picks3 if len(p.split("-")) == 3))
+    picks2 = ordered_unique(["-".join(p.split("-")[:2]) for p in picks3 if len(p.split("-")) == 3])
+    picks1 = ordered_unique([p.split("-")[0] for p in picks3 if len(p.split("-")) == 3])
     locked.append({
         "id": f"{date}|{race}",
         "date": date,
@@ -64,7 +73,11 @@ for x in pred.get("races", []):
         "classes": classes,
         "trifectaPicks": picks3,
         "exactaPicks": picks2,
+        "exactaTop1Picks": picks2[:1],
+        "exactaTop2Picks": picks2[:2],
+        "exactaTop3Picks": picks2[:3],
         "winPicks": picks1,
+        "winTop1Picks": picks1[:1],
     })
 
 if len(locked) != 199:
@@ -184,8 +197,12 @@ def bet_stats(rs, pick_key, outcome_key, payout_key):
 def split_report(name):
     rs = [x for x in rows if x["split"] == name]
     return {
-        "win": bet_stats(rs, "winPicks", "win", "winPayout100"),
-        "exacta": bet_stats(rs, "exactaPicks", "exacta", "exactaPayout100"),
+        "winTop1": bet_stats(rs, "winTop1Picks", "win", "winPayout100"),
+        "winAll": bet_stats(rs, "winPicks", "win", "winPayout100"),
+        "exactaTop1": bet_stats(rs, "exactaTop1Picks", "exacta", "exactaPayout100"),
+        "exactaTop2": bet_stats(rs, "exactaTop2Picks", "exacta", "exactaPayout100"),
+        "exactaTop3": bet_stats(rs, "exactaTop3Picks", "exacta", "exactaPayout100"),
+        "exactaAll": bet_stats(rs, "exactaPicks", "exacta", "exactaPayout100"),
         "trifecta": bet_stats(rs, "trifectaPicks", "trifecta", "trifectaPayout100"),
     }
 
@@ -201,8 +218,8 @@ report = {
     "missingCount": len(missing),
     "boundary": "Primary gate and frozen PRE-derived picks are fixed before official result/payout pages are read. Same 100-yen stake per unique bet is used for win, exacta and trifecta.",
     "method": {
-        "win": "Unique first-place heads derived from the frozen trifecta picks.",
-        "exacta": "Unique first-two ordered pairs derived from the frozen trifecta picks.",
+        "win": "First-place heads are derived from frozen probability-ranked trifecta picks; Top1 and all-unique variants are reported.",
+        "exacta": "First-two ordered pairs are derived in first-appearance order from frozen probability-ranked trifecta picks; Top1/Top2/Top3/all variants are reported.",
         "trifecta": "Original frozen four trifecta picks.",
         "ticketStakeYen": 100,
         "selectionOrRankingChangedAfterPayoutRead": False,
@@ -213,11 +230,16 @@ report = {
         "test": split_report("test"),
     },
     "overall": {
-        "win": bet_stats(rows, "winPicks", "win", "winPayout100"),
-        "exacta": bet_stats(rows, "exactaPicks", "exacta", "exactaPayout100"),
+        "winTop1": bet_stats(rows, "winTop1Picks", "win", "winPayout100"),
+        "winAll": bet_stats(rows, "winPicks", "win", "winPayout100"),
+        "exactaTop1": bet_stats(rows, "exactaTop1Picks", "exacta", "exactaPayout100"),
+        "exactaTop2": bet_stats(rows, "exactaTop2Picks", "exacta", "exactaPayout100"),
+        "exactaTop3": bet_stats(rows, "exactaTop3Picks", "exacta", "exactaPayout100"),
+        "exactaAll": bet_stats(rows, "exactaPicks", "exacta", "exactaPayout100"),
         "trifecta": bet_stats(rows, "trifectaPicks", "trifecta", "trifectaPayout100"),
     },
     "missing": missing,
+    "variantRule": "Top-N variants preserve the original PRE-RACE probability order. They are exploratory historical comparisons and are not promoted from this audit.",
     "promotionRule": "Do not promote or change LIVE staking from this historical audit. Fresh forward evidence remains required.",
 }
 OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
