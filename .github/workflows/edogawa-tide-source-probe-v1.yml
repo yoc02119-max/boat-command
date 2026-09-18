@@ -125,6 +125,21 @@ jobs:
 
           heading_index=plain.find('現在の潮と風向き')
           visible=plain[heading_index:heading_index+1200] if heading_index>=0 else ''
+
+          def explicit(patterns):
+              for value,pattern in patterns:
+                  m=re.search(pattern,visible)
+                  if m:return value,m.group(0)
+              return None,None
+          tide,tide_evidence=explicit([
+              ('UP_STOP',r'上げ止まり'),('DOWN_STOP',r'下げ止まり'),
+              ('UP',r'上げ潮'),('DOWN',r'下げ潮'),('STOP',r'潮止まり|潮どまり')
+          ])
+          wind,wind_evidence=explicit([
+              ('HEAD',r'向かい風'),('TAIL',r'追い風'),('CALM',r'無風')
+          ])
+          mapping_status='EXPLICIT_TEXT_ONLY' if (tide or wind) else 'UNMAPPED_NO_EXPLICIT_TEXT'
+
           payload={
             'schema':'boat-command-edogawa-tide-source-v1',
             'venue':'EDOGAWA','venueCode':'03','date':os.environ['DATE'],'race':int(os.environ['RACE']),
@@ -140,8 +155,10 @@ jobs:
             'imageTokens':tags[:30],
             'strategyTips':tips,
             'mapping':{
-              'tideDirection':None,'tideStrength':None,'flowSpeed':None,
-              'windDirection':None,'status':'RAW_OFFICIAL_TOKENS_ONLY'
+              'tideDirection':tide,'tideStrength':None,'flowSpeed':None,
+              'windDirection':wind,'status':mapping_status,
+              'inferredFromImageCode':False,
+              'explicitEvidence':{'tide':tide_evidence,'wind':wind_evidence}
             },
             'predictionEnabled':False,'hardLockEnabled':False,
             'resultEndpointsIncluded':False,'payoutEndpointsIncluded':False
@@ -166,8 +183,8 @@ jobs:
           x=json.load(open(files[-1],encoding='utf-8'))
           assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
           assert x['markerVerified'] is True
-          assert x['mapping']['status']=='RAW_OFFICIAL_TOKENS_ONLY'
-          assert x['mapping']['tideDirection'] is None
+          assert x['mapping']['status'] in {'EXPLICIT_TEXT_ONLY','UNMAPPED_NO_EXPLICIT_TEXT'}
+          assert x['mapping']['inferredFromImageCode'] is False
           assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False
           assert x['resultEndpointsIncluded'] is False and x['payoutEndpointsIncluded'] is False
           print('EDOGAWA_TIDE_SOURCE_SAFETY_PASS')
