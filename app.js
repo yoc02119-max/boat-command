@@ -66,14 +66,28 @@ function settleRace(){return false}
 
 function sessionStats(s=session()){const targets=(s.races||[]).filter(r=>r.locked),settled=targets.filter(r=>r.settled),invested=settled.reduce((a,r)=>a+Number(r.stake||0),0),returned=settled.reduce((a,r)=>a+Number(r.returnAmount||0),0),hits=settled.filter(r=>r.hit).length;return {locked:targets.length,settled:settled.length,invested,returned,hits,profit:returned-invested,roi:invested?returned/invested*100:null,hitRate:settled.length?hits/settled.length*100:null}}
 function allStats(){const settled=Object.values(store.sessions||{}).flatMap(s=>s.races||[]).filter(r=>r.settled),invested=settled.reduce((a,r)=>a+Number(r.stake||0),0),returned=settled.reduce((a,r)=>a+Number(r.returnAmount||0),0),hits=settled.filter(r=>r.hit).length;return {races:settled.length,hits,invested,returned,profit:returned-invested,roi:invested?returned/invested*100:null,hitRate:settled.length?hits/settled.length*100:null}}
+function cleanRacerName(v){
+ return String(v||'').replace(/\s+(北海道|青森|岩手|宮城|秋田|山形|福島|茨城|栃木|群馬|埼玉|千葉|東京|神奈川|新潟|富山|石川|福井|山梨|長野|岐阜|静岡|愛知|三重|滋賀|京都|大阪|兵庫|奈良|和歌山|鳥取|島根|岡山|広島|山口|徳島|香川|愛媛|高知|福岡|佐賀|長崎|熊本|大分|宮崎|鹿児島|沖縄)$/,'').trim()
+}
+function relativeRankMap(r,ps){
+ try{
+  const model=window.BOAT_COMMAND_MAIN_MODEL_V0320;
+  if(!model?.relativeBoatScores||ps.length!==6)return new Map();
+  const scores=model.relativeBoatScores({classes:ps.map(p=>String(p.class||p.cls||'')),profiles:ps,race:Number(r.race),raceType:r.programRaceType||''});
+  if(!Array.isArray(scores)||scores.length!==6||scores.some(x=>!Number.isFinite(Number(x))))return new Map();
+  const order=scores.map((score,i)=>({lane:i+1,score:Number(score)})).sort((x,y)=>y.score-x.score);
+  return new Map(order.map((x,i)=>[x.lane,i+1]))
+ }catch{return new Map()}
+}
 function programSummary(r){
  const ps=Array.isArray(r?.preRaceProfiles)?[...r.preRaceProfiles].sort((a,b)=>Number(a.lane)-Number(b.lane)):[];
  const counts={A1:0,A2:0,B1:0,B2:0};for(const p of ps){const c=String(p?.class||p?.cls||'');if(counts[c]!=null)counts[c]++}
  const countText=['A1','A2','B1','B2'].filter(k=>counts[k]).map(k=>`${k}×${counts[k]}`).join('・')||'構成待ち';
- const lanes=ps.length===6?ps.map(p=>`<span><i>${Number(p.lane)}</i><b>${esc(p.class||p.cls||'—')}</b></span>`).join(''):'';
+ const ranks=relativeRankMap(r,ps);
+ const racers=ps.length===6?ps.map(p=>{const lane=Number(p.lane),rank=ranks.get(lane),name=cleanRacerName(p.name);return `<div class="racer-brief"><div class="racer-main"><i>${lane}</i><strong>${esc(name||'—')}</strong></div><div class="racer-meta"><b>${esc(p.class||p.cls||'—')}</b>${rank?`<span>総合${rank}位</span>`:''}</div></div>`}).join(''):'';
  const time=r?.programDeadline?`${esc(r.programDeadline)}`:'時刻待ち';
  const type=String(r?.programRaceType||'').trim()||'種別待ち';
- return `<div class="program-brief"><div class="program-brief-main"><strong>${time}</strong><span>${esc(type)}</span><em>${esc(countText)}</em></div>${lanes?`<div class="program-brief-lanes">${lanes}</div>`:''}</div>`;
+ return `<div class="program-brief"><div class="program-brief-main"><strong>${time}</strong><span>${esc(type)}</span><em>${esc(countText)}</em></div>${racers?`<div class="racer-brief-grid">${racers}</div>`:''}</div>`;
 }
 function predictionCard(r){const picks=[...r.picks];while(picks.length<MAX_PICKS)picks.push('');const main=r.firstSuggestion,skip=isSafeSkippedRace(r),disabled=(r.locked||skip)?'disabled':'',status=r.locked?'HARD LOCK':skip?'SKIP':main?.status==='CANDIDATE'?'READY':'WAIT';const gateReady=main?.status==='CANDIDATE'&&!skip;const gateTitle=r.locked?'HARD LOCK':skip?'SKIP｜安全締切超過':gateReady?'MAIN PREDICTION READY':'WAIT｜予想保留';return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><span>${esc(status)}</span></div>${programSummary(r)}<div class="prediction-gate prediction-gate-top ${gateReady?'ready':'limited'}"><b>${gateTitle}</b><span>${esc(main?.rationale||main?.reason||r.programSnapshotReason||'公式番組データ待ち')}</span></div><div class="pick-grid">${picks.slice(0,MAX_PICKS).map((p,i)=>`<input class="pick" data-r="${r.race}" data-i="${i}" value="${esc(p)}" placeholder="1-2-3" readonly tabindex="-1" ${disabled}>`).join('')}</div><textarea class="rationale-input" data-reason="${r.race}" placeholder="予想根拠" ${disabled}>${esc(r.rationale||'')}</textarea><div class="race-actions"><button class="lock-btn" data-lock="${r.race}" ${disabled}>${r.locked?'LOCK済み':skip?'予想対象外':'HARD LOCK'}</button></div></article>`}
 function resultCard(r){if(r.settled)return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><div class="stake">${r.hit?'HIT':'MISS'}</div></div><div class="snapshot-note">結果 ${esc(r.result)} · 払戻 ${money(r.returnAmount)} · 損益 ${money(r.profit)}</div></article>`;return `<article class="race-card" data-race="${r.race}"><div class="race-head"><div class="race-no">${r.race}R</div><div class="stake">${r.locked?'POST-RACE WAIT':'LOCK待ち'}</div></div><div class="result-fields"><div class="snapshot-note">公式POST-RACE relayのみで自動精算します。</div></div></article>`}
