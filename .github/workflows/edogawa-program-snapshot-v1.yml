@@ -25,6 +25,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Refresh queued run to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Collect result-free Edogawa 12R program snapshots
         run: |
           set -euo pipefail
@@ -157,6 +163,24 @@ jobs:
                 'source':'BOAT RACE official racelist'
               }
 
+          def stable(x):
+              if isinstance(x,dict):
+                  return {k:stable(v) for k,v in x.items() if k!='fetchedAt'}
+              if isinstance(x,list):
+                  return [stable(v) for v in x]
+              return x
+
+          def write_if_changed(path,payload):
+              if path.exists():
+                  try:
+                      old=json.loads(path.read_text(encoding='utf-8'))
+                      if stable(old)==stable(payload):
+                          return False
+                  except Exception:
+                      pass
+              path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              return True
+
           wrote=[]
           for d in targets:
               date_s=d.isoformat(); hd=date_s.replace('-',''); packs=[]
@@ -176,18 +200,21 @@ jobs:
 
               base=pathlib.Path('live/edogawa')/date_s/'program'
               base.mkdir(parents=True,exist_ok=True)
+              changed=False
               for pack in packs:
-                  (base/f'race-{pack["race"]}.json').write_text(
-                    json.dumps(pack,ensure_ascii=False,indent=2)+'\n',encoding='utf-8'
-                  )
+                  changed=write_if_changed(base/f'race-{pack["race"]}.json',pack) or changed
               manifest={
                 'schema':'boat-command-program-manifest-v1','venue':'EDOGAWA','venueCode':'03',
                 'date':date_s,'fetchedAt':datetime.datetime.now(JST).isoformat(),'races':12,
                 'allProgramReady':True,'exhibitionIncluded':False,
                 'resultEndpointsIncluded':False,'resultIncluded':False
               }
-              (base/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-              wrote.append(date_s)
+              changed=write_if_changed(base/'manifest.json',manifest) or changed
+              if changed:
+                  wrote.append(date_s)
+                  print(f'EDOGAWA_PROGRAM_CHANGED date={date_s}')
+              else:
+                  print(f'EDOGAWA_PROGRAM_UNCHANGED date={date_s}')
               print(f'EDOGAWA_PROGRAM_READY_12_OF_12 date={date_s}')
 
           pathlib.Path('/tmp/edogawa-program-dates.txt').write_text('\n'.join(wrote),encoding='utf-8')
