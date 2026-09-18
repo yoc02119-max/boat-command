@@ -1,0 +1,817 @@
+{
+  "schema": "boat-command-edogawa-structural-backtest-v2",
+  "venue": "EDOGAWA",
+  "venueCode": "03",
+  "source": "edogawa-history-bootstrap-v1.json",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "gamagoriWeightsReused": false,
+  "featureScope": [
+    "laneClassVector",
+    "raceNumber",
+    "raceTypeGroup",
+    "aCount",
+    "historicalRecency"
+  ],
+  "calibration": {
+    "lastDate": "2026-07-25",
+    "dateCount": 47,
+    "tested": [
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.25,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 55,
+          "hitRate": 0.13647642679900746,
+          "stake": 161200,
+          "returns": 123010,
+          "roi": 0.7630893300248139
+        },
+        "m6": {
+          "races": 403,
+          "hits": 71,
+          "hitRate": 0.1761786600496278,
+          "stake": 241800,
+          "returns": 155750,
+          "roi": 0.6441273779983457
+        },
+        "score": 0.286552729528536
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.25,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 55,
+          "hitRate": 0.13647642679900746,
+          "stake": 161200,
+          "returns": 119250,
+          "roi": 0.7397642679900744
+        },
+        "m6": {
+          "races": 403,
+          "hits": 72,
+          "hitRate": 0.17866004962779156,
+          "stake": 241800,
+          "returns": 162880,
+          "roi": 0.6736145574855252
+        },
+        "score": 0.2815601736972705
+      },
+      {
+        "cfg": {
+          "neighbors": 480,
+          "decay": 0.25,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 56,
+          "hitRate": 0.13895781637717122,
+          "stake": 161200,
+          "returns": 117530,
+          "roi": 0.7290942928039702
+        },
+        "m6": {
+          "races": 403,
+          "hits": 72,
+          "hitRate": 0.17866004962779156,
+          "stake": 241800,
+          "returns": 150610,
+          "roi": 0.6228701406120761
+        },
+        "score": 0.28064454094292807
+      },
+      {
+        "cfg": {
+          "neighbors": 480,
+          "decay": 0.25,
+          "halfLife": 90,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 55,
+          "hitRate": 0.13647642679900746,
+          "stake": 161200,
+          "returns": 117340,
+          "roi": 0.7279156327543425
+        },
+        "m6": {
+          "races": 403,
+          "hits": 72,
+          "hitRate": 0.17866004962779156,
+          "stake": 241800,
+          "returns": 154890,
+          "roi": 0.6405707196029776
+        },
+        "score": 0.27883498759305214
+      },
+      {
+        "cfg": {
+          "neighbors": 240,
+          "decay": 0.25,
+          "halfLife": 90,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 55,
+          "hitRate": 0.13647642679900746,
+          "stake": 161200,
+          "returns": 116250,
+          "roi": 0.7211538461538461
+        },
+        "m6": {
+          "races": 403,
+          "hits": 71,
+          "hitRate": 0.1761786600496278,
+          "stake": 241800,
+          "returns": 158090,
+          "roi": 0.6538047973531844
+        },
+        "score": 0.2769075682382134
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.4,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 118840,
+          "roi": 0.7372208436724565
+        },
+        "m6": {
+          "races": 403,
+          "hits": 69,
+          "hitRate": 0.17121588089330025,
+          "stake": 241800,
+          "returns": 156510,
+          "roi": 0.6472704714640198
+        },
+        "score": 0.27678163771712155
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.4,
+          "halfLife": 90,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 118840,
+          "roi": 0.7372208436724565
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 155480,
+          "roi": 0.6430107526881721
+        },
+        "score": 0.27640942928039697
+      },
+      {
+        "cfg": {
+          "neighbors": 480,
+          "decay": 0.6,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 117410,
+          "roi": 0.7283498759305211
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 144580,
+          "roi": 0.5979321753515302
+        },
+        "score": 0.2743691066997519
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.25,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 12,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 115420,
+          "roi": 0.7160049627791564
+        },
+        "m6": {
+          "races": 403,
+          "hits": 75,
+          "hitRate": 0.18610421836228289,
+          "stake": 241800,
+          "returns": 159300,
+          "roi": 0.6588089330024814
+        },
+        "score": 0.27413523573200993
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.4,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 52,
+          "hitRate": 0.12903225806451613,
+          "stake": 161200,
+          "returns": 118270,
+          "roi": 0.7336848635235732
+        },
+        "m6": {
+          "races": 403,
+          "hits": 67,
+          "hitRate": 0.1662531017369727,
+          "stake": 241800,
+          "returns": 147440,
+          "roi": 0.6097601323407775
+        },
+        "score": 0.27368548387096775
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.6,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 52,
+          "hitRate": 0.12903225806451613,
+          "stake": 161200,
+          "returns": 117880,
+          "roi": 0.7312655086848635
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 150270,
+          "roi": 0.6214640198511167
+        },
+        "score": 0.2735012406947891
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.6,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 52,
+          "hitRate": 0.12903225806451613,
+          "stake": 161200,
+          "returns": 117880,
+          "roi": 0.7312655086848635
+        },
+        "m6": {
+          "races": 403,
+          "hits": 67,
+          "hitRate": 0.1662531017369727,
+          "stake": 241800,
+          "returns": 143480,
+          "roi": 0.5933829611248966
+        },
+        "score": 0.27312903225806456
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.25,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 12,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 114960,
+          "roi": 0.713151364764268
+        },
+        "m6": {
+          "races": 403,
+          "hits": 73,
+          "hitRate": 0.18114143920595532,
+          "stake": 241800,
+          "returns": 154720,
+          "roi": 0.6398676592224979
+        },
+        "score": 0.27273449131513644
+      },
+      {
+        "cfg": {
+          "neighbors": 240,
+          "decay": 0.6,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 52,
+          "hitRate": 0.12903225806451613,
+          "stake": 161200,
+          "returns": 116540,
+          "roi": 0.7229528535980149
+        },
+        "m6": {
+          "races": 403,
+          "hits": 69,
+          "hitRate": 0.17121588089330025,
+          "stake": 241800,
+          "returns": 146520,
+          "roi": 0.605955334987593
+        },
+        "score": 0.2719615384615385
+      },
+      {
+        "cfg": {
+          "neighbors": 240,
+          "decay": 0.6,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 52,
+          "hitRate": 0.12903225806451613,
+          "stake": 161200,
+          "returns": 116540,
+          "roi": 0.7229528535980149
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 144580,
+          "roi": 0.5979321753515302
+        },
+        "score": 0.2715893300248139
+      },
+      {
+        "cfg": {
+          "neighbors": 120,
+          "decay": 0.25,
+          "halfLife": 90,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 54,
+          "hitRate": 0.13399503722084366,
+          "stake": 161200,
+          "returns": 112460,
+          "roi": 0.6976426799007445
+        },
+        "m6": {
+          "races": 403,
+          "hits": 72,
+          "hitRate": 0.17866004962779156,
+          "stake": 241800,
+          "returns": 166080,
+          "roi": 0.686848635235732
+        },
+        "score": 0.27033374689826306
+      },
+      {
+        "cfg": {
+          "neighbors": 240,
+          "decay": 0.4,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 114340,
+          "roi": 0.7093052109181142
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 155600,
+          "roi": 0.6435070306038048
+        },
+        "score": 0.26998883374689825
+      },
+      {
+        "cfg": {
+          "neighbors": 480,
+          "decay": 0.4,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 114340,
+          "roi": 0.7093052109181142
+        },
+        "m6": {
+          "races": 403,
+          "hits": 68,
+          "hitRate": 0.1687344913151365,
+          "stake": 241800,
+          "returns": 148200,
+          "roi": 0.6129032258064516
+        },
+        "score": 0.26998883374689825
+      },
+      {
+        "cfg": {
+          "neighbors": 480,
+          "decay": 0.4,
+          "halfLife": null,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 114070,
+          "roi": 0.7076302729528536
+        },
+        "m6": {
+          "races": 403,
+          "hits": 69,
+          "hitRate": 0.17121588089330025,
+          "stake": 241800,
+          "returns": 151690,
+          "roi": 0.6273366418527709
+        },
+        "score": 0.2699758064516129
+      },
+      {
+        "cfg": {
+          "neighbors": 240,
+          "decay": 0.25,
+          "halfLife": 180,
+          "racePenalty": 0.65,
+          "typePenalty": 0.7,
+          "aCountPenalty": 0.35,
+          "globalMass": 14,
+          "raceMass": 30,
+          "typeMass": 10,
+          "aMass": 8
+        },
+        "m4": {
+          "races": 403,
+          "hits": 53,
+          "hitRate": 0.1315136476426799,
+          "stake": 161200,
+          "returns": 113230,
+          "roi": 0.7024193548387097
+        },
+        "m6": {
+          "races": 403,
+          "hits": 72,
+          "hitRate": 0.17866004962779156,
+          "stake": 241800,
+          "returns": 157000,
+          "roi": 0.6492969396195203
+        },
+        "score": 0.26989392059553347
+      }
+    ],
+    "selected": {
+      "neighbors": 120,
+      "decay": 0.25,
+      "halfLife": null,
+      "racePenalty": 0.65,
+      "typePenalty": 0.7,
+      "aCountPenalty": 0.35,
+      "globalMass": 14,
+      "raceMass": 30,
+      "typeMass": 10,
+      "aMass": 8
+    },
+    "selected4": {
+      "races": 403,
+      "hits": 55,
+      "hitRate": 0.13647642679900746,
+      "stake": 161200,
+      "returns": 123010,
+      "roi": 0.7630893300248139
+    },
+    "selected6": {
+      "races": 403,
+      "hits": 71,
+      "hitRate": 0.1761786600496278,
+      "stake": 241800,
+      "returns": 155750,
+      "roi": 0.6441273779983457
+    }
+  },
+  "holdout": {
+    "firstDate": "2026-07-26",
+    "dateCount": 21,
+    "pointCounts": {
+      "1": {
+        "races": 239,
+        "hits": 9,
+        "hitRate": 0.03765690376569038,
+        "stake": 23900,
+        "returns": 11700,
+        "roi": 0.4895397489539749
+      },
+      "2": {
+        "races": 239,
+        "hits": 15,
+        "hitRate": 0.06276150627615062,
+        "stake": 47800,
+        "returns": 20560,
+        "roi": 0.4301255230125523
+      },
+      "3": {
+        "races": 239,
+        "hits": 21,
+        "hitRate": 0.08786610878661087,
+        "stake": 71700,
+        "returns": 26740,
+        "roi": 0.37294281729428175
+      },
+      "4": {
+        "races": 239,
+        "hits": 29,
+        "hitRate": 0.12133891213389121,
+        "stake": 95600,
+        "returns": 42420,
+        "roi": 0.44372384937238496
+      },
+      "5": {
+        "races": 239,
+        "hits": 36,
+        "hitRate": 0.1506276150627615,
+        "stake": 119500,
+        "returns": 66680,
+        "roi": 0.5579916317991632
+      },
+      "6": {
+        "races": 239,
+        "hits": 38,
+        "hitRate": 0.1589958158995816,
+        "stake": 143400,
+        "returns": 70060,
+        "roi": 0.4885634588563459
+      },
+      "7": {
+        "races": 239,
+        "hits": 46,
+        "hitRate": 0.19246861924686193,
+        "stake": 167300,
+        "returns": 87270,
+        "roi": 0.5216377764494919
+      },
+      "8": {
+        "races": 239,
+        "hits": 52,
+        "hitRate": 0.2175732217573222,
+        "stake": 191200,
+        "returns": 100840,
+        "roi": 0.5274058577405858
+      }
+    }
+  },
+  "allWalkForward": {
+    "pointCounts": {
+      "1": {
+        "races": 642,
+        "hits": 28,
+        "hitRate": 0.04361370716510903,
+        "stake": 64200,
+        "returns": 48420,
+        "roi": 0.7542056074766356
+      },
+      "2": {
+        "races": 642,
+        "hits": 48,
+        "hitRate": 0.07476635514018691,
+        "stake": 128400,
+        "returns": 90090,
+        "roi": 0.7016355140186916
+      },
+      "3": {
+        "races": 642,
+        "hits": 63,
+        "hitRate": 0.09813084112149532,
+        "stake": 192600,
+        "returns": 126380,
+        "roi": 0.6561786085150572
+      },
+      "4": {
+        "races": 642,
+        "hits": 84,
+        "hitRate": 0.1308411214953271,
+        "stake": 256800,
+        "returns": 165430,
+        "roi": 0.6441978193146417
+      },
+      "5": {
+        "races": 642,
+        "hits": 97,
+        "hitRate": 0.15109034267912771,
+        "stake": 321000,
+        "returns": 202070,
+        "roi": 0.6295015576323988
+      },
+      "6": {
+        "races": 642,
+        "hits": 109,
+        "hitRate": 0.16978193146417445,
+        "stake": 385200,
+        "returns": 225810,
+        "roi": 0.586214953271028
+      },
+      "7": {
+        "races": 642,
+        "hits": 130,
+        "hitRate": 0.20249221183800623,
+        "stake": 449400,
+        "returns": 280350,
+        "roi": 0.6238317757009346
+      },
+      "8": {
+        "races": 642,
+        "hits": 141,
+        "hitRate": 0.21962616822429906,
+        "stake": 513600,
+        "returns": 320730,
+        "roi": 0.6244742990654205
+      }
+    }
+  },
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "promotionEligible": false,
+  "promotionBlockers": [
+    "RICH_PRE_RACE_HISTORY_NOT_VALIDATED",
+    "WATER_NOT_VALIDATED",
+    "EXHIBITION_NOT_VALIDATED"
+  ]
+}
