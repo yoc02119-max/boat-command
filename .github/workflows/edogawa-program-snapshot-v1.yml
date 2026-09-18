@@ -104,6 +104,26 @@ jobs:
                   mm=re.search(r'\d{4}\s*/\s*(?:A1|A2|B1|B2)\s+([^|/]+)',joined)
                   if mm:name=re.sub(r'\s+',' ',mm.group(1)).strip()
                   motor=boat=None; motor2_rate=boat2_rate=None
+                  f_count=l_count=None; avg_st=None
+                  national_win=national2=national3=None
+                  local_win=local2=local3=None
+
+                  if len(row)>3:
+                      fls=re.match(r'\s*F(\d+)\s*/\s*L(\d+)\s*/\s*([0-9]+(?:\.[0-9]+)?)',row[3])
+                      if fls:
+                          f_count=int(fls.group(1)); l_count=int(fls.group(2)); avg_st=float(fls.group(3))
+
+                  def rates(cell):
+                      nums=re.findall(r'([0-9]+(?:\.[0-9]+)?)',cell or '')
+                      if len(nums)>=3:
+                          return float(nums[0]),round(float(nums[1])/100,4),round(float(nums[2])/100,4)
+                      return None,None,None
+
+                  if len(row)>4:
+                      national_win,national2,national3=rates(row[4])
+                  if len(row)>5:
+                      local_win,local2,local3=rates(row[5])
+
                   if len(row)>7:
                       mo=re.match(r'\s*(\d+)\s*/',row[6]); bo=re.match(r'\s*(\d+)\s*/',row[7])
                       motor=int(mo.group(1)) if mo else None
@@ -112,8 +132,12 @@ jobs:
                       br=re.search(r'/\s*([0-9]+(?:\.[0-9]+)?)',row[7])
                       motor2_rate=round(float(mr.group(1))/100,4) if mr else None
                       boat2_rate=round(float(br.group(1))/100,4) if br else None
+
                   boats[lane]={
                     'lane':lane,'registration':reg,'name':name,'class':cls,
+                    'fCount':f_count,'lCount':l_count,'avgST':avg_st,
+                    'nationalWinRate':national_win,'national2Rate':national2,'national3Rate':national3,
+                    'localWinRate':local_win,'local2Rate':local2,'local3Rate':local3,
                     'motor':motor,'boat':boat,'motor2Rate':motor2_rate,'boat2Rate':boat2_rate
                   }
 
@@ -188,6 +212,10 @@ jobs:
                   assert p['race']==n and len(p['boats'])==6
                   assert [b['lane'] for b in p['boats']]==[1,2,3,4,5,6]
                   assert all(b['class'] in ('A1','A2','B1','B2') for b in p['boats'])
+                  assert all(b.get('avgST') is None or 0 <= b['avgST'] <= 1 for b in p['boats'])
+                  assert all(b.get('localWinRate') is None or 0 <= b['localWinRate'] <= 10 for b in p['boats'])
+                  assert all(b.get('local2Rate') is None or 0 <= b['local2Rate'] <= 1 for b in p['boats'])
+                  assert all(b.get('nationalWinRate') is None or 0 <= b['nationalWinRate'] <= 10 for b in p['boats'])
                   assert p['exhibitionIncluded'] is False
                   assert p['resultEndpointsIncluded'] is False and p['resultIncluded'] is False
           print(f'EDOGAWA_PROGRAM_SAFETY_PASS dates={dates}')
