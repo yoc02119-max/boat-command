@@ -54,7 +54,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import glob,json,re
+          import datetime,glob,json,re
+          from zoneinfo import ZoneInfo
+          JST=ZoneInfo('Asia/Tokyo')
           for p in glob.glob('live/edogawa/*/shadow/*/race-*.json'):
               x=json.load(open(p,encoding='utf-8'))
               assert x['schema']=='boat-command-edogawa-shadow-research-v1'
@@ -68,6 +70,12 @@ jobs:
               assert len(x['picks'])==4 and all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
               assert len(set(x['picks']))==4
               assert abs(float(x['probabilitySum'])-1)<1e-9
+              d=datetime.date.fromisoformat(x['date'])
+              hh,mm=map(int,str(x['deadline']).split(':'))
+              deadline=datetime.datetime(d.year,d.month,d.day,hh,mm,tzinfo=JST)
+              generated=datetime.datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(JST)
+              margin=(deadline-generated).total_seconds()/60
+              assert margin>=3, f'POST_CUTOFF_SHADOW {p} margin={margin}'
           print('EDOGAWA_SHADOW_BOUNDARY_PASS')
           PY
 
