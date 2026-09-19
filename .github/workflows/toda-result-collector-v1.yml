@@ -1,0 +1,171 @@
+name: Toda POST-RACE result collector v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/toda-result-collector-v1.yml'
+  schedule:
+    # Daytime venue: 10:30-19:30 JST, every 30 minutes.
+    - cron: '0,30 1-10 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-result-collector-v1
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install parser
+        run: python -m pip install --quiet requests beautifulsoup4
+
+      - name: Collect immutable official results
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          from datetime import datetime,timezone,timedelta
+          import requests
+          from bs4 import BeautifulSoup
+
+          JST=timezone(timedelta(hours=9))
+          date=datetime.now(JST).strftime('%Y-%m-%d')
+          hd=date.replace('-','')
+          base=Path('live/toda')/date
+          program_dir=base/'program'
+          if not program_dir.exists():
+              print('TODA_NO_PROGRAM_EVIDENCE',date)
+              raise SystemExit(0)
+
+          outdir=base/'post';outdir.mkdir(parents=True,exist_ok=True)
+          made=[]
+          headers={'User-Agent':'Mozilla/5.0 BOAT-COMMAND-TODA/1.0'}
+          valid_methods={'逃げ','差し','まくり','まくり差し','抜き','恵まれ'}
+
+          def program_pack(race):
+              path=program_dir/f'race-{race}.json'
+              if not path.exists():return None
+              x=json.loads(path.read_text(encoding='utf-8'))
+              if x.get('schema')!='boat-command-program-pack-v1':return None
+              if x.get('venue')!='TODA' or x.get('venueCode')!='02':return None
+              if x.get('date')!=date or int(x.get('race',0))!=race:return None
+              if x.get('programReady') is not True:return None
+              if x.get('resultEndpointsIncluded') is not False or x.get('resultIncluded') is not False or x.get('exhibitionIncluded') is not False:return None
+              boats=x.get('boats') if isinstance(x.get('boats'),list) else []
+              if len(boats)!=6:return None
+              return x
+
+          def validate_existing(path,race):
+              x=json.loads(path.read_text(encoding='utf-8'))
+              assert x.get('schema')=='boat-command-live-result-v1'
+              assert x.get('venue')=='TODA' and x.get('venueCode')=='03'
+              assert x.get('date')==date and int(x.get('race',0))==race
+              assert x.get('preRaceDataIncluded') is False and x.get('resultEndpointsIncluded') is True
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta','')))
+              assert isinstance(x.get('payout100'),int) and x.get('payout100')>=0
+              if x.get('winningMethod') is not None:assert x['winningMethod'] in valid_methods
+
+          for race in range(1,13):
+              path=outdir/f'race-{race}-result.json'
+              if path.exists():
+                  validate_existing(path,race)
+                  print('TODA_KEEP_IMMUTABLE_RESULT',race)
+                  continue
+
+              evidence=program_pack(race)
+              if not evidence:
+                  print('TODA_WAIT_PROGRAM_EVIDENCE',race)
+                  continue
+
+              url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=02&rno={race}'
+              try:
+                  res=requests.get(url,headers=headers,timeout=20);res.raise_for_status()
+              except Exception as e:
+                  print('TODA_WAIT_FETCH',race,e);continue
+
+              soup=BeautifulSoup(res.text,'html.parser')
+              trifecta=payout=exacta=exacta_payout=win=win_payout=None
+              for tr in soup.find_all('tr'):
+                  cells=[' '.join(td.stripped_strings) for td in tr.find_all(['th','td'])]
+                  if len(cells)<3:continue
+                  label=cells[0].replace(' ','');raw_pick=cells[1]
+                  pm=re.search(r'([\d,]+)',cells[2].replace('¥','').replace('￥',''))
+                  if label=='3連単':
+                      m=re.search(r'([1-6])\s*[-–—]\s*([1-6])\s*[-–—]\s*([1-6])',raw_pick)
+                      if m and pm:trifecta='-'.join(m.groups());payout=int(pm.group(1).replace(',',''))
+                  elif label=='2連単':
+                      m=re.search(r'([1-6])\s*[-–—]\s*([1-6])',raw_pick)
+                      if m and pm:exacta='-'.join(m.groups());exacta_payout=int(pm.group(1).replace(',',''))
+                  elif label=='単勝':
+                      m=re.search(r'([1-6])',raw_pick)
+                      if m and pm:win=m.group(1);win_payout=int(pm.group(1).replace(',',''))
+
+              if not trifecta or payout is None:
+                  print('TODA_WAIT_RESULT',race);continue
+
+              finish=[]
+              for tr in soup.find_all('tr'):
+                  cells=[' '.join(td.stripped_strings) for td in tr.find_all(['th','td'])]
+                  if len(cells)>=2 and cells[0] in {'１','２','３','４','５','６','1','2','3','4','5','6'} and re.fullmatch(r'[1-6]',cells[1].strip()):
+                      finish.append(int(cells[1].strip()))
+              plain=' '.join(soup.stripped_strings)
+              mm=re.search(r'決まり手\s*(まくり差し|まくり|逃げ|差し|抜き|恵まれ)(?:\s|$)',plain)
+              method=mm.group(1) if mm else None
+
+              payload={
+                'schema':'boat-command-live-result-v1','version':'TODA-RESULT-V1',
+                'venue':'TODA','venueCode':'02','date':date,'race':race,
+                'fetchedAt':datetime.now(JST).isoformat(),'officialSource':url,
+                'trifecta':trifecta,'payout100':payout,'finishOrder':finish[:6],
+                'exacta':exacta,'exactaPayout100':exacta_payout,
+                'win':win,'winPayout100':win_payout,'winningMethod':method,
+                'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
+                'predictionEnabled':False,'hardLockEnabled':False,
+                'immutableAfterFirstWrite':True,
+                'preRaceEvidenceRequired':True,'preRaceEvidenceType':'PROGRAM_ONLY',
+                'preRaceEvidencePath':str(program_dir/f'race-{race}.json').replace('\\','/'),
+                'preRaceEvidenceFetchedAt':evidence.get('fetchedAt')
+              }
+              path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              made.append(race)
+          print('TODA_RESULT_FILES_CREATED',made)
+          PY
+
+      - name: Safety audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,re
+          for p in glob.glob('live/toda/*/post/race-*-result.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['venue']=='TODA' and x['venueCode']=='02'
+              assert x['preRaceDataIncluded'] is False and x['resultEndpointsIncluded'] is True
+              assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False
+              assert x['immutableAfterFirstWrite'] is True
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
+          print('TODA_POST_RACE_SAFETY_PASS')
+          PY
+
+      - name: Commit separated POST-RACE relay files
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- live/toda)" ]; then
+            echo 'NO_TODA_RESULT_CHANGE'
+            exit 0
+          fi
+          git config user.name 'boat-command-toda-result-relay'
+          git config user.email 'boat-command-toda-result-relay@users.noreply.github.com'
+          git add live/toda
+          git commit -m 'live: collect immutable Toda POST-RACE results'
+          git pull --rebase origin main
+          git push origin HEAD:main
