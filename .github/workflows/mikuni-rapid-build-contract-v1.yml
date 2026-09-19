@@ -1,0 +1,42 @@
+name: Mikuni rapid build contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'mikuni-research-model-v1.js'
+      - 'scripts/mikuni-*.js'
+      - 'venues/mikuni/**'
+      - '.github/workflows/mikuni-*.yml'
+      - 'venue-registry-v1.js'
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/mikuni-rapid-build-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mikuni-research-model-v1.js'
+      - 'scripts/mikuni-*.js'
+      - 'venues/mikuni/**'
+      - '.github/workflows/mikuni-*.yml'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check mikuni-research-model-v1.js
+      - run: node --check scripts/mikuni-history-analysis-v1.js
+      - run: node --check scripts/mikuni-baseline-backtest-v1.js
+      - run: node --check scripts/mikuni-shadow-research-v1.js
+      - run: node --check scripts/mikuni-shadow-evaluate-v1.js
+      - run: node --check scripts/mikuni-shadow-evaluation-v1.js
+      - run: node --check scripts/mikuni-readiness-v1.js
+      - run: node scripts/mikuni-rapid-build-contract-v1.js
