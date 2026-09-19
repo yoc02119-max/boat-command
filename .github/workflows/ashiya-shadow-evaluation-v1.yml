@@ -1,0 +1,88 @@
+name: Ashiya SHADOW evaluation v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Ashiya POST-RACE result collector v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/ashiya-shadow-evaluate-v1.js'
+      - 'scripts/ashiya-shadow-evaluation-v1.js'
+      - 'live/ashiya/**/post/**'
+      - 'live/ashiya/**/shadow/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ashiya-shadow-evaluation-v1
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Resolve latest Ashiya result date
+        id: date
+        run: |
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          d=sorted(p.name for p in Path('live/ashiya').glob('20??-??-??') if (p/'post').exists())
+          print(d[-1] if d else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then echo 'ready=false' >> "$GITHUB_OUTPUT"; else echo "date=$DATE" >> "$GITHUB_OUTPUT"; echo 'ready=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Evaluate immutable Ashiya snapshots
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/ashiya-shadow-evaluate-v1.js
+          node --check scripts/ashiya-shadow-evaluation-v1.js
+          node scripts/ashiya-shadow-evaluate-v1.js "${{ steps.date.outputs.date }}"
+          node scripts/ashiya-shadow-evaluation-v1.js
+          node - <<'NODE'
+          const fs=require('fs'),d=process.env.DATE;
+          const day=JSON.parse(fs.readFileSync(`live/ashiya/${d}/research-evaluation-v1.json`,'utf8'));
+          if(day.venueCode!=='21'||day.bankrollAffected!==false||day.tryAffected!==false||day.productionAffected!==false)throw new Error('DAY_BOUNDARY');
+          const all=require('./ashiya-shadow-evaluation-v1.json');
+          if(all.venueCode!=='21'||all.cashNeutral!==true||all.realMoney!==false)throw new Error('AGG_BOUNDARY');
+          if(typeof all.forwardUpliftReady!=='boolean')throw new Error('UPLIFT_FLAG');
+          if(!all.classBaseline||!all.programOnly)throw new Error('PAIRED_STATS');
+          console.log('ASHIYA_SHADOW_EVALUATION_PASS',{classBaseline:all.classBaseline,programOnly:all.programOnly,pairedRaces:all.pairedRaces,hitRateDelta:all.hitRateDelta,roiDelta:all.roiDelta,forwardUpliftReady:all.forwardUpliftReady});
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+      - name: Commit evaluation
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          cp "live/ashiya/$DATE/research-evaluation-v1.json" /tmp/ashiya-day-evaluation.json
+          cp ashiya-shadow-evaluation-v1.json /tmp/ashiya-shadow-evaluation-v1.json
+          git config user.name 'boat-command-ashiya-eval'
+          git config user.email 'boat-command-ashiya-eval@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "live/ashiya/$DATE"
+            cp /tmp/ashiya-day-evaluation.json "live/ashiya/$DATE/research-evaluation-v1.json"
+            cp /tmp/ashiya-shadow-evaluation-v1.json ashiya-shadow-evaluation-v1.json
+            git add "live/ashiya/$DATE/research-evaluation-v1.json" ashiya-shadow-evaluation-v1.json
+            git diff --cached --quiet && { echo 'ASHIYA_EVALUATION_CURRENT'; exit 0; }
+            git commit -m 'analysis(ashiya): refresh cash-neutral SHADOW evaluation'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
