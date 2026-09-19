@@ -1,0 +1,55 @@
+name: Toda readiness v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda history bootstrap 180d v1", "Toda history analysis v1", "Toda baseline backtest v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/toda-readiness-v1.js'
+      - 'venues/toda/config-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-readiness-v1
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh current main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Synthesize Toda readiness
+        run: |
+          set -euo pipefail
+          node --check scripts/toda-readiness-v1.js
+          node scripts/toda-readiness-v1.js
+          node - <<'NODE'
+          const x=require('./venues/toda/readiness-v1.json');
+          if(x.venueCode!=='02'||x.modelEnabled!==false||x.tryEnabled!==false||x.realMoneyEnabled!==false)throw new Error('TODA_SAFETY');
+          if(Number(x.history?.rows||0)<300&&x.history?.ready===true)throw new Error('FALSE_HISTORY_READY');
+          console.log('TODA_READINESS_PASS',x.phase,x.history.rows,x.baseline.holdoutRaces);
+          NODE
+      - name: Commit readiness when changed
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-toda-readiness'
+          git config user.email 'boat-command-toda-readiness@users.noreply.github.com'
+          git add venues/toda/readiness-v1.json
+          git diff --cached --quiet && { echo 'TODA_READINESS_CURRENT'; exit 0; }
+          git commit -m 'status(toda): refresh centralized readiness gate'
+          git pull --rebase origin main
+          git push origin HEAD:main
