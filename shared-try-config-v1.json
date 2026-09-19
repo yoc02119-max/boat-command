@@ -1,0 +1,36 @@
+{
+  "schema": "boat-command-shared-try-config-v1",
+  "version": "SHARED-TRY-CONFIG-V1",
+  "startingBankrollYen": 1000000,
+  "realMoney": false,
+  "operationWindowDays": 30,
+  "stakePerPickYen": 100,
+  "picksPerTry": 4,
+  "selectionFraction": 0.25,
+  "maxTryRacesPerDay": 8,
+  "deadlineSafetyMinutes": 5,
+  "selectionPolicy": "WITHIN_VENUE_PICK_COVERAGE_RATIO_V1",
+  "activeAdapters": [
+    {
+      "venueCode": "02",
+      "venue": "TODA",
+      "slug": "toda",
+      "predictionDir": "program-only"
+    },
+    {
+      "venueCode": "03",
+      "venue": "EDOGAWA",
+      "slug": "edogawa",
+      "predictionDir": "program-only"
+    }
+  ],
+  "futureScope": "24_VENUES_SINGLE_SHARED_BANKROLL",
+  "bankruptcyPolicy": "STOP_NEW_TRY_KEEP_PREDICTIONS_RUNNING",
+  "notes": [
+    "24場で共有する仮資金の初期値は100万円。実金は扱わない。",
+    "現段階は戸田・江戸川の標準SHADOW予想を共通TRY選抜へ接続する。",
+    "TRY選抜は各場内の相対的な4点カバー確率で正規化し、場ごとの確率スケール差をそのまま比較しない。",
+    "予想ファイルは結果前固定のみを使用し、結果・払戻を選抜入力に使わない。",
+    "30日運用中は本線ロジックを固定し、改良版は別SHADOWで比較する。"
+  ]
+}
