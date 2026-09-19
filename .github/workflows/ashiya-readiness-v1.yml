@@ -1,0 +1,69 @@
+name: Ashiya readiness v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Ashiya history bootstrap 180d v1", "Ashiya history analysis v1", "Ashiya baseline backtest v1", "Ashiya 12R program snapshot v1", "Ashiya PRE-RACE collector v1", "Ashiya SHADOW research v1", "Ashiya POST-RACE result collector v1", "Ashiya SHADOW evaluation v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ashiya-readiness-v1.yml'
+      - 'scripts/ashiya-readiness-v1.js'
+      - 'venues/ashiya/config-v1.json'
+      - 'ashiya-shadow-evaluation-v1.json'
+      - 'live/ashiya/**/program/**'
+      - 'live/ashiya/**/shadow/**'
+      - 'live/ashiya/**/post/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ashiya-readiness-v1
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh current main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Synthesize Ashiya readiness
+        run: |
+          set -euo pipefail
+          node --check scripts/ashiya-readiness-v1.js
+          node scripts/ashiya-readiness-v1.js
+          node - <<'NODE'
+          const x=require('./venues/ashiya/readiness-v1.json');
+          if(x.venueCode!=='21'||x.modelEnabled!==true||x.tryEnabled!==true||x.realMoneyEnabled!==false)throw new Error('ASHIYA_VIRTUAL_OPERATION_SAFETY');
+          if(x.operation?.active!==true||x.operation?.mainLogicFrozen!==true||x.operation?.sharedBankrollStartYen!==1000000)throw new Error('ASHIYA_OPERATION_CONTRACT');
+          if(Number(x.history?.rows||0)<300&&x.history?.ready===true)throw new Error('FALSE_HISTORY_READY');
+          console.log('ASHIYA_READINESS_PASS',x.phase,x.history.rows,x.baseline.holdoutRaces);
+          NODE
+      - name: Commit readiness when changed
+        run: |
+          set -euo pipefail
+          cp venues/ashiya/readiness-v1.json /tmp/ashiya-readiness-v1.json
+          git config user.name 'boat-command-ashiya-readiness'
+          git config user.email 'boat-command-ashiya-readiness@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/ashiya-readiness-v1.json venues/ashiya/readiness-v1.json
+            git add venues/ashiya/readiness-v1.json
+            git diff --cached --quiet && { echo 'ASHIYA_READINESS_CURRENT'; exit 0; }
+            git commit -m 'status(ashiya): refresh centralized readiness gate'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          echo 'ASHIYA_READINESS_PUBLISH_FAILED'
+          exit 1
