@@ -1,13 +1,13 @@
 {
   "schema": "boat-command-venue-config-v1",
-  "version": "TODA-CONFIG-V0.1.0",
+  "version": "TODA-CONFIG-V0.2.0",
   "venue": "TODA",
   "venueName": "戸田",
   "venueCode": "02",
   "slug": "toda",
-  "state": "DATA_COLLECTION",
-  "modelEnabled": false,
-  "tryEnabled": false,
+  "state": "LIVE_SIMULATION",
+  "modelEnabled": true,
+  "tryEnabled": true,
   "realMoneyEnabled": false,
   "predictionPolicy": {
     "strictPreRaceOnly": true,
@@ -74,11 +74,21 @@
     "realMoneyEnable": false
   },
   "notes": [
-    "戸田専用モデル。蒲郡・江戸川の予想重みを流用しない。",
-    "300R以上を確保し、直近300Rを主軸に場別特徴量を評価する。",
-    "場特性は事前に決め打ちせず、戸田履歴の検証結果から重みを確定する。",
-    "結果・払戻はPRE-RACE予想入力へ逆流させない。",
-    "3開催日相当36Rで一次評価、標準5開催日相当60Rで本判定する。",
-    "展示・風・波は研究用PRE-RACEパックとして保存し、PROGRAM_ONLY本線への採用は別途前向き検証で決める。"
-  ]
+    "戸田専用PROGRAM_ONLYモデルを30日仮想運用の本線として固定する。",
+    "蒲郡・江戸川の予想重みは流用しない。",
+    "結果・払戻はPRE-RACE予想またはTRY選抜入力へ逆流させない。",
+    "TRYは24場共通100万円口座の共通選抜エンジンが決める。1点500円・4点固定で開始する。",
+    "30日中の本線ロジック変更は禁止。不具合修正とデータ取得修正のみ許可し、改良版は別SHADOWで比較する。",
+    "実金は扱わない。"
+  ],
+  "operationPolicy": {
+    "mode": "30_DAY_VIRTUAL_OPERATION",
+    "mainLogicFrozen": true,
+    "sharedBankroll": true,
+    "sharedBankrollStartYen": 1000000,
+    "trySelection": "SHARED_CROSS_VENUE_SELECTOR_V1",
+    "stakePerPickYen": 500,
+    "realMoney": false,
+    "improvementsRunAsSeparateShadow": true
+  }
 }
