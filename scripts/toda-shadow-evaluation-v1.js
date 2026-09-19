@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
-const fs=require('fs'),path=require('path');
-const root=path.join(__dirname,'..','live','toda'),rows=[];
+const fs=require('fs'),path=require('path'),root=path.join(__dirname,'..','live','toda'),rows=[];
 if(fs.existsSync(root))for(const date of fs.readdirSync(root).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort()){const p=path.join(root,date,'research-evaluation-v1.json');if(!fs.existsSync(p))continue;try{const x=JSON.parse(fs.readFileSync(p,'utf8'));if(x.venueCode==='02')for(const r of x.rows||[])rows.push({date,...r})}catch{}}
-const hits=rows.filter(x=>x.hit).length,stake=rows.length*400,returns=rows.filter(x=>x.hit).reduce((s,x)=>s+Number(x.payout100||0),0);
-const out={schema:'boat-command-toda-shadow-evaluation-v1',venue:'TODA',venueCode:'02',generatedAt:new Date().toISOString(),evaluatedRows:rows.length,evaluationDays:new Set(rows.map(x=>x.date)).size,hits,hitRate:rows.length?hits/rows.length:null,stake,returns,roi:stake?returns/stake:null,earlyReviewReady:rows.length>=36,targetReviewReady:rows.length>=60,fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}};
+function stats(key){const x=rows.filter(r=>r[key]),hits=x.filter(r=>r[key].hit).length,stake=x.length*400,returns=x.filter(r=>r[key].hit).reduce((s,r)=>s+Number(r.payout100||0),0);return{evaluated:x.length,hits,hitRate:x.length?hits/x.length:null,stake,returns,roi:stake?returns/stake:null}}
+const c=stats('classBaseline'),p=stats('programOnly'),paired=rows.filter(r=>r.classBaseline&&r.programOnly),hitDelta=paired.length&&c.hitRate!=null&&p.hitRate!=null?p.hitRate-c.hitRate:null,roiDelta=paired.length&&c.roi!=null&&p.roi!=null?p.roi-c.roi:null;
+const out={schema:'boat-command-toda-shadow-evaluation-v1',venue:'TODA',venueCode:'02',generatedAt:new Date().toISOString(),evaluationDays:new Set(rows.map(x=>x.date)).size,classBaseline:c,programOnly:p,pairedRaces:paired.length,hitRateDelta:hitDelta,roiDelta,earlyReviewReady:p.evaluated>=36,targetReviewReady:p.evaluated>=60,forwardUpliftReady:paired.length>=60&&hitDelta>=0&&roiDelta>0,fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}};
 fs.writeFileSync(path.join(__dirname,'..','toda-shadow-evaluation-v1.json'),JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
