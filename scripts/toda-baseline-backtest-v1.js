@@ -55,7 +55,7 @@ function empirical(target,history,cfg){
   return rowsOut.map(x=>({order:x.order,p:x.p/sum})).sort((a,b)=>b.p-a.p);
 }
 const configs=[];
-for(const recencyWindow of [300,480])
+for(const recencyWindow of [300])
 for(const classScale of [.18,.28,.38])
 for(const neighborMix of [.25,.45,.65])
 configs.push({recencyWindow,classScale,neighborMix,neighborLimit:240,decay:.55,laplace:1});
