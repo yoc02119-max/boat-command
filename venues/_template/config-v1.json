@@ -1,0 +1,56 @@
+{
+  "schema": "boat-command-venue-onboarding-template-v1",
+  "version": "VENUE-ONBOARDING-TEMPLATE-V1",
+  "venue": "REPLACE_WITH_UPPERCASE_KEY",
+  "venueName": "競艇場名",
+  "venueCode": "00",
+  "slug": "replace-me",
+  "state": "ENTRY_ONLY",
+  "runtime": "ENTRY_ONLY",
+  "model": {
+    "script": null,
+    "global": null,
+    "version": null
+  },
+  "paths": {
+    "config": "./venues/replace-me/config-v1.json",
+    "readiness": "./venues/replace-me/readiness-v1.json",
+    "dataRoot": "./live/replace-me"
+  },
+  "isolationPolicy": {
+    "strictPreRaceOnly": true,
+    "resultLookahead": false,
+    "payoutLookahead": false,
+    "crossVenueModelFallback": false,
+    "crossVenueHistoryMixing": false,
+    "promotionRequiresVenueSpecificValidation": true
+  },
+  "dataPolicy": {
+    "minimumHistoricalRaces": 300,
+    "primaryRecencyWindowRaces": 300,
+    "retainOlderHistory": true
+  },
+  "forwardValidation": {
+    "earlyReviewRaces": 36,
+    "standardObservationDays": 5,
+    "targetReviewRaces": 60,
+    "humanReviewRequired": true,
+    "autoPromotion": false
+  },
+  "capabilitiesBeforePromotion": {
+    "predictionUi": false,
+    "shadow": true,
+    "try": false,
+    "bankroll": false,
+    "postResultInput": false
+  },
+  "onboardingOrder": [
+    "HISTORY",
+    "VENUE_FEATURES",
+    "VENUE_MODEL",
+    "STRICT_BACKTEST",
+    "PRE_RACE_SHADOW",
+    "FORWARD_EVALUATION",
+    "HUMAN_PROMOTION_REVIEW"
+  ]
+}
