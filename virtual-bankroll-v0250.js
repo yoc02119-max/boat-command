@@ -3,6 +3,45 @@
 (()=>{
   'use strict';
   const DEPOSIT_KEY='boatCommand.portalDeposits.v1';
+  let sharedPortfolio=null;
+
+  function todayJst(){
+    return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  }
+  function sharedTryLedger(){
+    if(!sharedPortfolio||!Array.isArray(sharedPortfolio.ledger))return null;
+    const day=todayJst(),rows=sharedPortfolio.ledger.filter(r=>r?.date===day),settled=rows.filter(r=>r?.settled),pending=rows.filter(r=>!r?.settled);
+    const todayCommittedStakeYen=rows.reduce((s,r)=>s+(Number(r?.stakeYen)||0),0);
+    const todayPendingStakeYen=pending.reduce((s,r)=>s+(Number(r?.stakeYen)||0),0);
+    const todaySettledStakeYen=settled.reduce((s,r)=>s+(Number(r?.stakeYen)||0),0);
+    const todayReturnYen=settled.reduce((s,r)=>s+(Number(r?.returnYen)||0),0);
+    return {
+      settledStakeYen:Number(sharedPortfolio.settledStakeYen)||0,
+      returnYen:Number(sharedPortfolio.returnYen)||0,
+      settledProfitYen:Number(sharedPortfolio.profitYen)||0,
+      committedStakeYen:Number(sharedPortfolio.committedStakeYen)||0,
+      pendingStakeYen:Number(sharedPortfolio.pendingStakeYen)||0,
+      todayCommittedStakeYen,todayPendingStakeYen,todaySettledStakeYen,todayReturnYen,
+      todayProfitYen:todayReturnYen-todaySettledStakeYen,
+      todayHits:settled.filter(r=>r?.hit).length,
+      todaySettledRaces:settled.length,
+      todayPendingRaces:pending.length,
+      currentTryRaces:rows.filter(r=>r?.venueCode==='07'&&!r?.settled).map(r=>Number(r.race)).filter(Number.isFinite)
+    };
+  }
+  async function refreshSharedPortfolio(){
+    try{
+      const r=await fetch(`./shared-try-portfolio-v1.json?t=${Date.now()}`,{cache:'no-store'});
+      if(!r.ok)return false;
+      const x=await r.json();
+      if(x?.schema!=='boat-command-shared-try-portfolio-v1'||x?.realMoney!==false)return false;
+      sharedPortfolio=x;
+      window.BOAT_COMMAND_SHARED_PORTFOLIO_CACHE=x;
+      window.dispatchEvent(new Event('boatcommand:shared-portfolio'));
+      if(typeof renderAll==='function')renderAll();
+      return true;
+    }catch(_){return false}
+  }
 
   function virtualDepositTotal(){
     try{
@@ -55,6 +94,7 @@
   }
 
   function virtualBankrollNow(){
+    if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.bankrollYen)))return Number(sharedPortfolio.bankrollYen);
     const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
     const t=virtualTryLedger();
     return base+t.settledProfitYen-t.pendingStakeYen;
@@ -64,21 +104,18 @@
   // MAIN predictions/results stay available for accuracy evaluation but are cash-neutral.
   window.bankrollSeries=function(){
     const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
+    if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.bankrollYen)))return [{label:'SHARED START',value:base},{label:'24場共通 現在',value:Number(sharedPortfolio.bankrollYen)}];
     let bal=base;
     const out=[{label:'SHARED START',value:bal}];
     const t=virtualTryLedger();
-    if(t.settledStakeYen>0){
-      bal+=t.settledProfitYen;
-      out.push({label:'TRY 精算',value:bal});
-    }
-    if(t.pendingStakeYen>0){
-      bal-=t.pendingStakeYen;
-      out.push({label:'TRY 投入中',value:bal});
-    }
+    if(t.settledStakeYen>0){bal+=t.settledProfitYen;out.push({label:'TRY 精算',value:bal})}
+    if(t.pendingStakeYen>0){bal-=t.pendingStakeYen;out.push({label:'TRY 投入中',value:bal})}
     return out;
   };
 
   window.bcVirtualTryLedger=virtualTryLedger;
+  window.bcSharedTryLedger=sharedTryLedger;
+  window.bcRefreshSharedPortfolio=refreshSharedPortfolio;
   window.bcVirtualBankrollNow=virtualBankrollNow;
   window.bcVirtualDepositTotal=virtualDepositTotal;
   window.BOAT_COMMAND_VIRTUAL_BANKROLL_V0250=Object.freeze({
@@ -88,4 +125,6 @@
     if(e.key===DEPOSIT_KEY&&typeof renderAll==='function')renderAll();
   });
   if(typeof renderAll==='function')renderAll();
+  refreshSharedPortfolio();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshSharedPortfolio()});
 })();
