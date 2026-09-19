@@ -1,15 +1,15 @@
-// BOAT COMMAND research race board v1
+// BOAT COMMAND venue operation board v1
 (function(root,factory){
   const api=factory();
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.BOAT_COMMAND_RESEARCH_BOARD_V1=Object.freeze(api);
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const VERSION='VENUE-RESEARCH-BOARD-V1';
+  const VERSION='VENUE-OPERATION-BOARD-V1';
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:'—';
   const money=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
+  const signedMoney=v=>Number.isFinite(Number(v))?`${Number(v)>0?'+':''}${money(v)}`:'—';
 
   async function fetchJson(path){
     const sep=path.includes('?')?'&':'?';
@@ -29,7 +29,7 @@
   function picksHtml(shadow,label,primary=false){
     if(!shadow)return `<div class="rrb-model ${primary?'primary':''}"><span>${esc(label)}</span><b>未固定</b></div>`;
     const picks=(shadow.picks||[]).map(x=>`<i>${esc(x)}</i>`).join('');
-    return `<div class="rrb-model ${primary?'primary':''}"><span>${esc(label)}</span><div class="rrb-picks">${picks||'<b>—</b>'}</div><small>${shadow.immutableAfterFirstWrite===true&&shadow.resultInput===false?'結果前固定':'境界確認中'}</small></div>`;
+    return `<div class="rrb-model ${primary?'primary':''}"><span>${esc(label)}</span><div class="rrb-picks">${picks||'<b>—</b>'}</div><small>${shadow.immutableAfterFirstWrite===true&&shadow.resultInput===false?'結果前固定済み':'境界確認中'}</small></div>`;
   }
 
   function hitText(shadow,result){
@@ -37,21 +37,35 @@
     return (shadow.picks||[]).includes(result.trifecta)?'的中':'不的中';
   }
 
-  function raceCard(row){
+  function tryHtml(row){
+    const t=row.tryRow;
+    if(!row.selectionReady)return '<div class="rrb-try waiting"><span>AUTO TRY</span><b>選抜待ち</b><small>共通100万円 · 実金なし</small></div>';
+    if(!t)return '<div class="rrb-try skip"><span>AUTO TRY</span><b>見送り</b><small>予想は成績検証に保存</small></div>';
+    const settled=row.result;
+    let tail='共通100万円から仮投入';
+    if(settled){
+      const hit=(t.picks||[]).includes(settled.trifecta);
+      const ret=hit?Number(settled.payout100||0)*(Number(t.stakePerPickYen||500)/100):0;
+      tail=`${hit?'的中':'不的中'} · ${signedMoney(ret-Number(t.stakeYen||0))}`;
+    }
+    return `<div class="rrb-try selected"><span>AUTO TRY · #${Number(t.rank)||'—'}</span><b>${t.picks.length}点 × ${money(t.stakePerPickYen)} = ${money(t.stakeYen)}</b><small>${tail}</small></div>`;
+  }
+
+  function raceCard(row,opts){
     const p=row.program||{},r=row.result;
     const primaryHit=hitText(row.primary,r),baseHit=hitText(row.baseline,r);
     const resultHtml=r
-      ?`<div class="rrb-result"><span>RESULT</span><b>${esc(r.trifecta||'—')} · ${money(r.payout100)}</b><small>戸田 ${primaryHit||'—'} / 基準 ${baseHit||'—'}</small></div>`
-      :'<div class="rrb-result pending"><span>RESULT</span><b>結果待ち</b><small>予想は結果前に固定済み</small></div>';
-    return `<article class="rrb-card" data-race="${row.race}" data-settled="${r?'1':'0'}">
+      ?`<div class="rrb-result"><span>RESULT</span><b>${esc(r.trifecta||'—')} · ${money(r.payout100)}</b><small>${esc(opts.venueName||'専用')} ${primaryHit||'—'} / 基準 ${baseHit||'—'}</small></div>`
+      :'<div class="rrb-result pending"><span>RESULT</span><b>結果待ち</b><small>予想とTRY判定は結果前に固定</small></div>';
+    return `<article class="rrb-card" data-race="${row.race}" data-settled="${r?'1':'0'}" data-try="${row.tryRow?'1':'0'}">
       <header><div><strong>${row.race}R</strong><span>${esc(p.raceType||'')}</span></div><time>締切 ${esc(p.deadline||'—')}</time></header>
       <div class="rrb-boats">${boatRows(p)}</div>
       <div class="rrb-models">
-        ${picksHtml(row.primary,'戸田専用 SHADOW',true)}
-        ${picksHtml(row.baseline,'基準比較')}
+        ${picksHtml(row.primary,`${opts.venueName||'場'}専用 · 30日固定本線`,true)}
+        ${picksHtml(row.baseline,'比較用ベースライン')}
       </div>
+      ${tryHtml(row)}
       ${resultHtml}
-      <button class="rrb-lock" type="button" disabled>TRY LOCK · 検証中</button>
     </article>`;
   }
 
@@ -65,34 +79,43 @@
     const empty=root.querySelector('.rrb-empty');
     if(empty)empty.hidden=!(view==='results'&&![...root.querySelectorAll('.rrb-card')].some(x=>!x.hidden));
     const title=root.querySelector('.rrb-view-title');
-    if(title)title.textContent=view==='results'?'確定結果':'12R SHADOW';
+    if(title)title.textContent=view==='results'?'確定結果':'12R 運用';
   }
 
   async function mount(opts){
     const root=typeof opts.root==='string'?document.querySelector(opts.root):opts.root;
-    if(!root)throw new Error('RESEARCH_BOARD_ROOT_MISSING');
+    if(!root)throw new Error('OPERATION_BOARD_ROOT_MISSING');
     const readiness=opts.readiness||{},date=readiness.latestDate||opts.date;
-    if(!date)throw new Error('RESEARCH_BOARD_DATE_MISSING');
+    if(!date)throw new Error('OPERATION_BOARD_DATE_MISSING');
     const dataRoot=String(opts.dataRoot||'').replace(/\/$/,'');
-    if(!dataRoot)throw new Error('RESEARCH_BOARD_DATA_ROOT_MISSING');
+    if(!dataRoot)throw new Error('OPERATION_BOARD_DATA_ROOT_MISSING');
+    const venueCode=String(opts.venueCode||readiness.venueCode||'').padStart(2,'0');
     const modes=opts.modes||{};
     const programOnlyPath=r=>`${dataRoot}/${date}/program/race-${r}.json`;
     const modePath=(dir,r)=>dir?`${dataRoot}/${date}/shadow/${dir}/race-${r}.json`:null;
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
 
+    const [portfolio,selection]=await Promise.all([
+      maybe('./shared-try-portfolio-v1.json'),
+      maybe(`./live/portfolio/${date}/try-selection-v1.json`)
+    ]);
+    const selected=new Map((selection?.selected||[]).filter(x=>String(x.venueCode).padStart(2,'0')===venueCode).map(x=>[Number(x.race),x]));
+    const selectionReady=selection?.immutableAfterFirstWrite===true;
+
     root.hidden=false;
     root.innerHTML=`<div class="rrb-shell">
       <div class="rrb-head">
-        <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R SHADOW</span></h2><p>結果前に固定した研究予想です。TRY・資金連動は無効です。</p></div>
+        <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R 運用</span></h2><p>本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。</p></div>
         <div class="rrb-head-stats">
-          <span>HISTORY <b>${Number(readiness.history?.rows||0).toLocaleString('ja-JP')}R</b></span>
-          <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??0)}/${Number(readiness.forward?.targetReviewRaces||60)}R</b></span>
+          <span>共通仮資金 <b>${money(portfolio?.bankrollYen??1000000)}</b></span>
+          <span>本日TRY <b>${selected.size}R</b></span>
+          <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??0)}/${Number(readiness.forward?.targetReviewRaces||readiness.policy?.minimumProgramOnlyForwardRaces||60)}R</b></span>
         </div>
       </div>
       <div class="rrb-subtabs">
         <button class="rrb-subtab active" type="button" data-view="all">12R</button>
         <button class="rrb-subtab" type="button" data-view="results">結果</button>
-        <span class="rrb-safe">RESULT-BLIND · CASH NEUTRAL</span>
+        <span class="rrb-safe">RESULT-BLIND · VIRTUAL ONLY</span>
       </div>
       <div class="rrb-loading">12Rを読み込み中…</div>
       <div class="rrb-grid"></div>
@@ -108,12 +131,12 @@
         maybe(modePath(modes.baselineDir||'class-baseline',race)),
         shouldLoadResults?maybe(resultPath(race)):Promise.resolve(null)
       ]);
-      rows.push({race,program,primary,baseline,result});
+      rows.push({race,program,primary,baseline,result,tryRow:selected.get(race)||null,selectionReady});
     }));
     rows.sort((a,b)=>a.race-b.race);
 
     const grid=root.querySelector('.rrb-grid');
-    grid.innerHTML=rows.filter(x=>x.program).map(raceCard).join('');
+    grid.innerHTML=rows.filter(x=>x.program).map(row=>raceCard(row,opts)).join('');
     root.querySelector('.rrb-loading').hidden=true;
     if(!grid.children.length){
       root.querySelector('.rrb-empty').hidden=false;
@@ -122,7 +145,7 @@
 
     const state={root,rows,view:'all'};
     root.querySelectorAll('.rrb-subtab').forEach(btn=>btn.addEventListener('click',()=>setView(state,btn.dataset.view)));
-    return Object.freeze({version:VERSION,date,rows,setView:view=>setView(state,view)});
+    return Object.freeze({version:VERSION,date,rows,portfolio,selection,setView:view=>setView(state,view)});
   }
 
   return Object.freeze({version:VERSION,mount});

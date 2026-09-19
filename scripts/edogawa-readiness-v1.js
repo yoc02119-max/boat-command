@@ -217,8 +217,17 @@ const out={
     tryEnabled:false
   },
   promotionReviewRequired:blockers.length===0,
-  modelEnabled:false,
-  tryEnabled:false,
+  operation:{
+    mode:config.operationPolicy?.mode||null,
+    active:config.state==='LIVE_SIMULATION',
+    mainModelVersion:config.operationPolicy?.mainModelVersion||null,
+    mainLogicFrozen:config.operationPolicy?.mainLogicFrozen===true,
+    sharedBankroll:config.operationPolicy?.sharedBankroll===true,
+    sharedBankrollStartYen:Number(config.operationPolicy?.sharedBankrollStartYen||0),
+    realMoney:false
+  },
+  modelEnabled:config.modelEnabled===true,
+  tryEnabled:config.tryEnabled===true,
   realMoneyEnabled:false
 };
 fs.mkdirSync(path.dirname(output),{recursive:true});

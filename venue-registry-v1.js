@@ -20,7 +20,7 @@
 
   const overrides={
     '02':{
-      state:'RESEARCH_BUILD',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
       model:{
         script:'./toda-research-model-v1.js',
@@ -30,10 +30,10 @@
       configPath:'./venues/toda/config-v1.json',
       readinessPath:'./venues/toda/readiness-v1.json',
       dataRoot:'./live/toda',
-      capabilities:{predictionUi:false,shadow:true,try:false,bankroll:false,postResultInput:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '03':{
-      state:'SHADOW_VALIDATION',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
       model:{
         script:'./edogawa-research-model-v2.js',
@@ -43,7 +43,7 @@
       configPath:'./venues/edogawa/config-v1.json',
       readinessPath:'./venues/edogawa/readiness-v1.json',
       dataRoot:'./live/edogawa',
-      capabilities:{predictionUi:false,shadow:true,try:false,bankroll:false,postResultInput:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '07':{
       state:'LIVE',

@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+'use strict';
+const fs=require('fs');
+const cp=require('child_process');
+
+const env={...process.env,BOAT_COMMAND_NOW_ISO:'2026-09-20T06:00:00+09:00'};
+cp.execFileSync(process.execPath,['scripts/shared-try-portfolio-v1.js','2026-09-20'],{stdio:'inherit',env});
+
+const cfg=JSON.parse(fs.readFileSync('shared-try-config-v1.json','utf8'));
+const sel=JSON.parse(fs.readFileSync('live/portfolio/2026-09-20/try-selection-v1.json','utf8'));
+const p=JSON.parse(fs.readFileSync('shared-try-portfolio-v1.json','utf8'));
+
+if(cfg.startingBankrollYen!==1000000)throw new Error('CONFIG_1M');
+if(cfg.operationStartDate!=='2026-09-20'||cfg.operationWindowDays!==30)throw new Error('WINDOW');
+if(sel.resultInput!==false||sel.payoutInput!==false||sel.realMoney!==false||sel.immutableAfterFirstWrite!==true)throw new Error('SELECTION_BOUNDARY');
+if(!(sel.selectedCount>0))throw new Error('NO_TRY_SELECTED');
+if(sel.selectedCount>cfg.maxTryRacesPerDay)throw new Error('TRY_CAP');
+for(const x of sel.selected){
+  if(!['02','03','07'].includes(String(x.venueCode)))throw new Error('VENUE_SCOPE');
+  if(!Array.isArray(x.picks)||x.picks.length!==4)throw new Error('PICKS');
+  if(x.stakePerPickYen!==500||x.stakeYen!==2000)throw new Error('STAKE');
+  if(x.resultInput!==false||x.payoutInput!==false)throw new Error('LEAKAGE');
+}
+if(p.startingBankrollYen!==1000000||p.realMoney!==false)throw new Error('PORTFOLIO_BOUNDARY');
+if(p.bankrollYen!==1000000-Number(p.committedStakeYen||0)+Number(p.returnYen||0))throw new Error('BANKROLL_IDENTITY');
+if(Number(p.pendingTries||0)+Number(p.settledTries||0)!==sel.selectedCount)throw new Error('TRY_COUNT');
+if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('PORTFOLIO_LEAKAGE');
+console.log('SHARED_TRY_CONTRACT_PASS',JSON.stringify({selected:sel.selectedCount,bankroll:p.bankrollYen,venues:[...new Set(sel.selected.map(x=>x.venueCode))]}));

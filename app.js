@@ -1,7 +1,7 @@
 const APP_KEY="boatCommand.v05";
 const MIRROR_KEY="boatCommand.v05.mirror";
 const SESSION_MIRROR_KEY="boatCommand.v05.sessionMirror";
-const START_BANKROLL=100000;
+const START_BANKROLL=1000000;
 const PICK_PRICE=500;
 const MAX_PICKS=6;
 const STARTUP_FORCE_TODAY_LIVE=true;

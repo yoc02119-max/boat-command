@@ -1,0 +1,93 @@
+name: Shared 24-venue virtual TRY portfolio v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-portfolio-v1.js'
+      - '.github/workflows/shared-try-portfolio-v1.yml'
+      - 'venue-registry-v1.js'
+      - 'venues/toda/config-v1.json'
+      - 'venues/edogawa/config-v1.json'
+  schedule:
+    # Freeze daily TRY selections at 06:00 JST, after early PRE-RACE model generation.
+    - cron: '0 21 * * *'
+  workflow_run:
+    workflows:
+      - 'Toda POST-RACE result collector v1'
+      - 'Edogawa POST-RACE result collector v1'
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shared-try-portfolio-v1
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build immutable TRY selection and settle shared virtual bankroll
+        run: |
+          set -euo pipefail
+          node --check scripts/shared-try-portfolio-v1.js
+          node scripts/shared-try-portfolio-v1.js
+
+      - name: Boundary audit
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('shared-try-portfolio-v1.json','utf8'));
+          if(p.realMoney!==false)throw new Error('REAL_MONEY_MUST_BE_FALSE');
+          if(p.startingBankrollYen!==1000000)throw new Error('START_BANKROLL_MUST_BE_1M');
+          if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('SELECTION_LEAKAGE');
+          for(const row of p.ledger||[]){
+            if(!Array.isArray(row.picks)||row.picks.length!==4)throw new Error('TRY_PICKS');
+            if(Number(row.stakeYen)!==2000)throw new Error('FIXED_STAKE');
+          }
+          console.log('SHARED_TRY_PORTFOLIO_BOUNDARY_PASS');
+          NODE
+
+      - name: Publish generated simulation state
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- shared-try-portfolio-v1.json live/portfolio)" ]; then
+            echo 'NO_SHARED_TRY_CHANGE'
+            exit 0
+          fi
+          cp shared-try-portfolio-v1.json /tmp/shared-try-portfolio-v1.json
+          rm -rf /tmp/portfolio-day
+          if [ -d "live/portfolio/$(TZ=Asia/Tokyo date +%F)" ]; then
+            cp -R "live/portfolio/$(TZ=Asia/Tokyo date +%F)" /tmp/portfolio-day
+          fi
+          git config user.name 'boat-command-shared-try'
+          git config user.email 'boat-command-shared-try@users.noreply.github.com'
+          for i in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/shared-try-portfolio-v1.json shared-try-portfolio-v1.json
+            if [ -d /tmp/portfolio-day ]; then
+              mkdir -p "live/portfolio/$(TZ=Asia/Tokyo date +%F)"
+              cp -R /tmp/portfolio-day/. "live/portfolio/$(TZ=Asia/Tokyo date +%F)/"
+            fi
+            git add shared-try-portfolio-v1.json live/portfolio
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'sim: update shared 1M virtual TRY portfolio'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((i*2))
+          done
+          echo 'SHARED_TRY_PUBLISH_FAILED'
+          exit 1
