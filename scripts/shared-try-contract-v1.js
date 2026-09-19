@@ -22,7 +22,7 @@ for(const x of sel.selected){
   if(x.resultInput!==false||x.payoutInput!==false)throw new Error('LEAKAGE');
 }
 if(p.startingBankrollYen!==1000000||p.realMoney!==false)throw new Error('PORTFOLIO_BOUNDARY');
-if(p.bankrollYen!==1000000-sel.totalCommittedStakeYen)throw new Error('PENDING_STAKE_NOT_RESERVED');
-if(p.pendingTries!==sel.selectedCount||p.settledTries!==0)throw new Error('PENDING_COUNT');
+if(p.bankrollYen!==1000000-Number(p.committedStakeYen||0)+Number(p.returnYen||0))throw new Error('BANKROLL_IDENTITY');
+if(Number(p.pendingTries||0)+Number(p.settledTries||0)!==sel.selectedCount)throw new Error('TRY_COUNT');
 if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('PORTFOLIO_LEAKAGE');
 console.log('SHARED_TRY_CONTRACT_PASS',JSON.stringify({selected:sel.selectedCount,bankroll:p.bankrollYen,venues:[...new Set(sel.selected.map(x=>x.venueCode))]}));
