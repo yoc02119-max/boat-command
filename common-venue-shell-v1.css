@@ -1,0 +1,56 @@
+/* BOAT COMMAND common venue shell v1
+   Presentation-only. Keeps venue logic and PRE/POST boundaries untouched. */
+body.bc-common-shell .app{display:block;min-height:100vh}
+body.bc-common-shell .sidebar,
+body.bc-common-shell .topbar{display:none!important}
+body.bc-common-shell .app>main{max-width:1180px;margin:0 auto;padding:22px 18px 120px}
+#bcCommonVenueShell{margin-bottom:14px}
+.bc-shell-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.bc-shell-back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;border:1px solid #244765;background:#0a1a2b;color:#dbeaf5;border-radius:12px;padding:10px 13px;font-weight:800;font-size:12px}
+.bc-shell-brand{font-size:10px;letter-spacing:.12em;color:#7e9ab0;text-align:right}
+.bc-shell-brand b{display:block;font-size:17px;letter-spacing:0;color:#f3f8fc;margin-top:2px}
+.bc-shell-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;border:1px solid #1c3d5f;border-radius:20px;padding:19px 20px;background:radial-gradient(circle at 88% 12%,rgba(32,224,199,.09),transparent 27%),linear-gradient(135deg,#0a1a2b,#0b2238)}
+.bc-shell-code{font-size:9px;color:#6f8ba1;letter-spacing:.14em}
+.bc-shell-hero h1{font-size:clamp(28px,5vw,43px);margin:5px 0 4px}
+.bc-shell-hero p{margin:0;color:#8ea8ba;font-size:11px;line-height:1.55}
+.bc-shell-status{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 10px;border:1px solid rgba(32,224,199,.28);border-radius:999px;color:#9be7dc;font-size:10px;font-weight:900}
+.bc-shell-status i{width:8px;height:8px;border-radius:50%;background:#20e0c7;box-shadow:0 0 14px #20e0c7}
+.bc-shell-bank{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:9px;margin-top:11px}
+.bc-shell-kpi{min-width:0;padding:12px 13px;border:1px solid #1a3a56;border-radius:13px;background:linear-gradient(180deg,#0d2236,#091826)}
+.bc-shell-kpi small{display:block;font-size:8px;color:#748fa4;margin-bottom:4px}
+.bc-shell-kpi b{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-shell-kpi.bank b{font-size:25px;color:#8fe8ff}
+.bc-shell-kpi.profit.positive b{color:#79e7bb}.bc-shell-kpi.profit.negative b{color:#ff8997}
+.bc-shell-bank-note{grid-column:1/-1;padding:0 3px;color:#617e94;font-size:8px;line-height:1.45}
+.bc-shell-tabs{position:sticky;top:6px;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px;padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(7,21,34,.94);backdrop-filter:blur(14px)}
+.bc-shell-tab{appearance:none;border:1px solid #244762;background:#081725;color:#8199ac;border-radius:10px;padding:10px 8px;font-weight:850;font-size:11px}
+.bc-shell-tab.active{border-color:#2b98ff;color:white;background:#0a3150}
+.bc-shell-details{margin-top:8px;color:#6c879b;font-size:9px}
+.bc-shell-details summary{cursor:pointer;list-style:none;width:max-content;padding:5px 2px}
+.bc-shell-details summary::-webkit-details-marker{display:none}
+.bc-shell-detail-actions{display:flex;gap:7px;flex-wrap:wrap;padding:9px 0}
+.bc-shell-detail-actions button{border:1px solid #203d55;background:#071827;color:#91a8b9;border-radius:9px;padding:7px 9px;font-size:9px}
+body.bc-common-shell #bcVirtualBankrollStrip,
+body.bc-common-shell #bcVirtualHome,
+body.bc-common-shell #forwardDashboardV0347,
+body.bc-common-shell #forwardPredictV0347{display:none!important}
+body.bc-common-shell #home .dashboard-grid{margin-top:10px}
+body.bc-common-shell #home .dashboard-grid>.panel.wide{margin-top:0}
+body.bc-common-shell #predict>.panel>.panel-head{top:62px}
+.bc-common-try{margin:9px 0 0;padding:9px 10px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.025)}
+.bc-common-try span{display:block;font-size:8px;color:#6f8aa1;font-weight:900;letter-spacing:.06em}
+.bc-common-try b{display:block;font-size:11px;margin-top:3px}
+.bc-common-try small{display:block;font-size:8px;color:#7893a7;margin-top:3px}
+.bc-common-try.selected{border-color:rgba(32,224,199,.38);background:rgba(32,224,199,.06)}
+.bc-common-try.selected b{color:#aafff5}.bc-common-try.skip{opacity:.72}.bc-common-try.wait{border-style:dashed}
+@media(max-width:760px){
+ body.bc-common-shell .app>main{padding:14px 10px 86px}
+ .bc-shell-top{margin-bottom:11px}.bc-shell-back{padding:8px 10px}
+ .bc-shell-brand{font-size:8px}.bc-shell-brand b{font-size:14px}
+ .bc-shell-hero{padding:15px 14px;align-items:flex-start}.bc-shell-hero h1{font-size:29px}.bc-shell-hero p{font-size:9px}
+ .bc-shell-status{font-size:8px;padding:6px 8px}
+ .bc-shell-bank{grid-template-columns:1fr 1fr;gap:6px}
+ .bc-shell-kpi{padding:9px 10px}.bc-shell-kpi b{font-size:14px}.bc-shell-kpi.bank b{font-size:21px}
+ .bc-shell-tabs{top:4px;margin-top:9px}.bc-shell-tab{padding:9px 4px}
+ body.bc-common-shell #predict>.panel>.panel-head{top:58px}
+}
