@@ -1,0 +1,217 @@
+name: Toda history bootstrap recovery v2
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  block:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success')
+    strategy:
+      fail-fast: false
+      matrix:
+        block: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build 30-day Toda history block
+        env:
+          BLOCK: ${{ matrix.block }}
+        run: |
+          set -euo pipefail
+          rm -rf toda-hist-work toda-hist-out
+          mkdir -p toda-hist-work toda-hist-out
+          python3 program-history-builder-v121.py --self-test
+
+          python3 - <<'PY' > toda-hist-work/dates.txt
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          today=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()
+          start=today-datetime.timedelta(days=180)
+          block=int(os.environ['BLOCK'])
+          a=start+datetime.timedelta(days=block*30)
+          b=min(a+datetime.timedelta(days=30),today)
+          d=a
+          while d<b:
+              print(d.isoformat());d+=datetime.timedelta(days=1)
+          PY
+
+          : > toda-hist-work/exceptions.txt
+          mkdir -p toda-hist-work/days
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            rm -rf toda-hist-work/one
+            mkdir -p toda-hist-work/one/raw toda-hist-work/one/b toda-hist-work/one/k toda-hist-work/one/out
+
+            bc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o toda-hist-work/one/raw/$b -w '%{http_code}' https://www1.mbrace.or.jp/od2/B/${ym}/$b || true)"
+            sleep 2
+            kc="$(curl -sS -L --connect-timeout 20 --max-time 60 -o toda-hist-work/one/raw/$k -w '%{http_code}' https://www1.mbrace.or.jp/od2/K/${ym}/$k || true)"
+            sleep 2
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then
+              echo "$d HTTP B=$bc K=$kc" >> toda-hist-work/exceptions.txt
+              continue
+            fi
+
+            lha xw=toda-hist-work/one/b toda-hist-work/one/raw/$b >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> toda-hist-work/exceptions.txt; continue; }
+            lha xw=toda-hist-work/one/k toda-hist-work/one/raw/$k >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> toda-hist-work/exceptions.txt; continue; }
+
+            python3 program-history-builder-v121.py               --b-dir toda-hist-work/one/b               --k-dir toda-hist-work/one/k               --out toda-hist-work/one/out               --venue 02 >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> toda-hist-work/exceptions.txt; continue; }
+
+            python3 - "$d" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d=sys.argv[1]
+          day=[]
+          for p in Path('toda-hist-work/one/out/02').glob('*.json'):
+              x=json.loads(p.read_text(encoding='utf-8'))
+              day += [r for r in x.get('races',[]) if r.get('d')==d]
+          if not day:
+              raise SystemExit(0)
+          ids=[r.get('id') for r in day]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit('DUPLICATE_DAY_IDS')
+          if any(str(r.get('o','')).count('-')!=2 for r in day):
+              raise SystemExit('INVALID_RESULT')
+          Path(f'toda-hist-work/days/{d}.json').write_text(json.dumps(day,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
+          done < toda-hist-work/dates.txt
+
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          rows=[]
+          for p in sorted(Path('toda-hist-work/days').glob('*.json')):
+              rows+=json.loads(p.read_text(encoding='utf-8'))
+          report={
+            'block':int(os.environ['BLOCK']),
+            'daysWithRaces':len({r['d'] for r in rows}),
+            'races':len(rows),
+            'exceptions':[x for x in Path('toda-hist-work/exceptions.txt').read_text().splitlines() if x.strip()]
+          }
+          Path('toda-hist-out/segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('toda-hist-out/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(report)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toda-history-recovery-block-${{ matrix.block }}
+          path: toda-hist-out/*.json
+          retention-days: 14
+
+  merge:
+    needs: block
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: toda-history-recovery-block-*
+          path: toda-history-recovery-blocks
+      - name: Merge and audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json
+          from collections import Counter
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          rows=[];reports=[]
+          for p in Path('toda-history-recovery-blocks').rglob('segment.json'):
+              rows+=json.loads(p.read_text(encoding='utf-8')).get('races',[])
+          for p in Path('toda-history-recovery-blocks').rglob('report.json'):
+              reports.append(json.loads(p.read_text(encoding='utf-8')))
+
+          rows.sort(key=lambda r:(r['d'],int(r['r'])))
+          ids=[r['id'] for r in rows]
+          assert len(ids)==len(set(ids))
+          assert all(str(r.get('id','')).split('-')[3]=='02' for r in rows)
+          assert all(len(r.get('c',[]))==6 for r in rows)
+          assert all(str(r.get('o','')).count('-')==2 for r in rows)
+
+          by=Counter(r['d'] for r in rows)
+          cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
+          partial={d:n for d,n in by.items() if n!=12}
+          out={
+            'schema':'boat-command-program-history-v2',
+            'builder':'TODA-HISTORY-BOOTSTRAP-RECOVERY-V2',
+            'venueCode':'02','cutoff':cutoff,
+            'resultUse':'HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE',
+            'exhibitionIncluded':False,
+            'waterFeaturesIncluded':False,
+            'races':rows
+          }
+          audit={
+            'schema':'boat-command-toda-history-audit-v1',
+            'venueCode':'02','windowDays':180,'cutoff':cutoff,
+            'races':len(rows),'raceDays':len(by),
+            'complete12RaceDays':sum(1 for n in by.values() if n==12),
+            'partialOrCancelledDays':len(partial),
+            'partialRaceCounts':partial,
+            'exceptions':sum((r.get('exceptions',[]) for r in reports),[]),
+            'duplicateIds':len(ids)-len(set(ids)),
+            'readyForResearch':len(rows)>=300,
+            'readyForProductionPrediction':False
+          }
+          Path('toda-history-bootstrap-v1.json').write_text(json.dumps(out,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('toda-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit audited Toda bootstrap history
+        run: |
+          set -euo pipefail
+          cp toda-history-bootstrap-v1.json /tmp/toda-history-bootstrap-v1.json
+          cp toda-history-audit-v1.json /tmp/toda-history-audit-v1.json
+
+          git config user.name 'boat-command-toda-history'
+          git config user.email 'boat-command-toda-history@users.noreply.github.com'
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            USE_NEW=$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          new=json.load(open('/tmp/toda-history-audit-v1.json',encoding='utf-8'))
+          oldp=Path('toda-history-audit-v1.json')
+          if not oldp.exists():
+              print('true'); raise SystemExit
+          old=json.loads(oldp.read_text(encoding='utf-8'))
+          nr=int(new.get('races',0)); orr=int(old.get('races',0))
+          nc=str(new.get('cutoff','')); oc=str(old.get('cutoff',''))
+          print('true' if (nc>oc or (nc==oc and nr>orr)) else 'false')
+          PY
+            )
+            if [ "$USE_NEW" != 'true' ]; then
+              echo 'TODA_HISTORY_EXISTING_IS_EQUAL_OR_BETTER'
+              exit 0
+            fi
+
+            cp /tmp/toda-history-bootstrap-v1.json toda-history-bootstrap-v1.json
+            cp /tmp/toda-history-audit-v1.json toda-history-audit-v1.json
+            git add toda-history-bootstrap-v1.json toda-history-audit-v1.json
+            git diff --cached --quiet && { echo 'TODA_HISTORY_ALREADY_CURRENT'; exit 0; }
+            git commit -m 'data(toda): publish recovered audited 180-day history'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "TODA_HISTORY_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'TODA_HISTORY_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
