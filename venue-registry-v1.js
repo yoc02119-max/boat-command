@@ -19,6 +19,15 @@
   ];
 
   const overrides={
+    '02':{
+      state:'DATA_COLLECTION',
+      runtime:'ENTRY_ONLY',
+      model:null,
+      configPath:'./venues/toda/config-v1.json',
+      readinessPath:'./venues/toda/readiness-v1.json',
+      dataRoot:'./live/toda',
+      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:false,postResultInput:false}
+    },
     '03':{
       state:'SHADOW_VALIDATION',
       runtime:'RESEARCH',
