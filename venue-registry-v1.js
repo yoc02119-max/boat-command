@@ -58,6 +58,19 @@
       dataRoot:'./live/mikuni',
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
+    '21':{
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
+      model:{
+        script:'./ashiya-research-model-v1.js',
+        global:'BOAT_COMMAND_ASHIYA_RESEARCH_MODEL_V1',
+        version:'ASHIYA-RESEARCH-MODEL-V1'
+      },
+      configPath:'./venues/ashiya/config-v1.json',
+      readinessPath:'./venues/ashiya/readiness-v1.json',
+      dataRoot:'./live/ashiya',
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
+    },
     '23':{
       state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
