@@ -1,0 +1,71 @@
+name: Toda current feature summary v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda 12R program snapshot v1", "Toda PRE-RACE collector v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/toda-current-feature-summary-v1.js'
+      - 'toda-feature-contract-v1.js'
+      - 'live/toda/**/program/**'
+      - 'live/toda/**/pre/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-current-feature-summary-v1
+  cancel-in-progress: true
+
+jobs:
+  summarize:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with: {fetch-depth: 0}
+      - name: Refresh latest main
+        run: git fetch origin main && git reset --hard origin/main
+      - name: Resolve latest Toda program date
+        id: date
+        run: |
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          d=sorted(p.name for p in Path('live/toda').glob('20??-??-??') if (p/'program'/'manifest.json').exists())
+          print(d[-1] if d else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then echo 'ready=false' >> "$GITHUB_OUTPUT"; else echo "date=$DATE" >> "$GITHUB_OUTPUT"; echo 'ready=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Build result-free feature summary
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check toda-feature-contract-v1.js
+          node --check scripts/toda-current-feature-summary-v1.js
+          node scripts/toda-current-feature-summary-v1.js "${{ steps.date.outputs.date }}"
+          node - <<'NODE'
+          const fs=require('fs'),d=process.env.DATE,x=JSON.parse(fs.readFileSync(`live/toda/${d}/research-feature-summary-v1.json`,'utf8'));
+          if(x.schema!=='boat-command-toda-research-feature-summary-v1'||x.venueCode!=='02'||x.audit.raceCount!==12||!x.audit.allSixBoats)throw new Error('TARGET');
+          if(x.audit.resultInput!==false||x.audit.payoutInput!==false||x.audit.predictionEnabled!==false)throw new Error('BOUNDARY');
+          console.log('TODA_FEATURE_SUMMARY_PASS',x.audit);
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+      - name: Commit summary
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"; FILE="live/toda/$DATE/research-feature-summary-v1.json"
+          cp "$FILE" /tmp/toda-feature-summary.json
+          git config user.name 'boat-command-toda-features'
+          git config user.email 'boat-command-toda-features@users.noreply.github.com'
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p "live/toda/$DATE"; cp /tmp/toda-feature-summary.json "$FILE"; git add "$FILE"
+          git diff --cached --quiet && { echo 'TODA_FEATURE_SUMMARY_CURRENT'; exit 0; }
+          git commit -m 'analysis(toda): refresh current 12R feature summary'
+          git pull --rebase origin main
+          git push origin HEAD:main
