@@ -1,0 +1,230 @@
+{
+  "schema": "boat-command-karatsu-baseline-backtest-v1",
+  "version": "KARATSU-BASELINE-BACKTEST-V1",
+  "venue": "KARATSU",
+  "venueCode": "23",
+  "source": "karatsu-history-bootstrap-v1.json",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "crossVenueWeightsReused": false,
+  "primaryRecencyWindowRaces": 300,
+  "baselineArchitecture": "KARATSU_CLASS_NEIGHBOR_BASELINE",
+  "candidateArchitecture": "KARATSU_EMPIRICAL_FIRST_SECOND_TRANSITION_PLUS_CLASS_NEIGHBORS",
+  "calibration": {
+    "lastDate": "2026-07-21",
+    "dateCount": 67,
+    "selected": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    },
+    "candidates": [
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 108,
+          "hitRate": 0.21951219512195122,
+          "stake": 196800,
+          "returns": 144860,
+          "roi": 0.7360772357723577
+        },
+        "score": 0.3744817073170732
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 108,
+          "hitRate": 0.21951219512195122,
+          "stake": 196800,
+          "returns": 140860,
+          "roi": 0.7157520325203252
+        },
+        "score": 0.3683841463414634
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 116,
+          "hitRate": 0.23577235772357724,
+          "stake": 196800,
+          "returns": 126980,
+          "roi": 0.6452235772357724
+        },
+        "score": 0.3586077235772358
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 111,
+          "hitRate": 0.22560975609756098,
+          "stake": 196800,
+          "returns": 123870,
+          "roi": 0.629420731707317
+        },
+        "score": 0.3467530487804878
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 112,
+          "hitRate": 0.22764227642276422,
+          "stake": 196800,
+          "returns": 121200,
+          "roi": 0.6158536585365854
+        },
+        "score": 0.3441056910569106
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 110,
+          "hitRate": 0.22357723577235772,
+          "stake": 196800,
+          "returns": 121870,
+          "roi": 0.6192581300813008
+        },
+        "score": 0.34228150406504065
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 110,
+          "hitRate": 0.22357723577235772,
+          "stake": 196800,
+          "returns": 121320,
+          "roi": 0.6164634146341463
+        },
+        "score": 0.3414430894308943
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 108,
+          "hitRate": 0.21951219512195122,
+          "stake": 196800,
+          "returns": 121380,
+          "roi": 0.6167682926829269
+        },
+        "score": 0.3386890243902439
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 492,
+          "hits": 107,
+          "hitRate": 0.21747967479674796,
+          "stake": 196800,
+          "returns": 116350,
+          "roi": 0.5912093495934959
+        },
+        "score": 0.32959857723577235
+      }
+    ]
+  },
+  "holdout": {
+    "firstDate": "2026-07-22",
+    "dateCount": 29,
+    "classBaseline4": {
+      "races": 343,
+      "hits": 78,
+      "hitRate": 0.22740524781341107,
+      "stake": 137200,
+      "returns": 96030,
+      "roi": 0.699927113702624
+    },
+    "programOnly4": {
+      "races": 343,
+      "hits": 81,
+      "hitRate": 0.23615160349854228,
+      "stake": 137200,
+      "returns": 107870,
+      "roi": 0.7862244897959184
+    },
+    "hitRateDelta": 0.008746355685131213,
+    "roiDelta": 0.08629737609329446,
+    "candidateUplift": true
+  },
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "promotionEligible": false,
+  "promotionBlockers": [
+    "KARATSU_FORWARD_36_RACES_NOT_READY",
+    "KARATSU_FORWARD_60_RACES_NOT_READY",
+    "KARATSU_FORWARD_MODEL_UPLIFT_NOT_READY"
+  ]
+}
