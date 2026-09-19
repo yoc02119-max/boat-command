@@ -70,11 +70,10 @@ jobs:
           import json,sys
           from pathlib import Path
           d=sys.argv[1]
-          p=Path('toda-hist-work/one/out/02/2026.json')
-          if not p.exists():
-              raise SystemExit(0)
-          x=json.loads(p.read_text(encoding='utf-8'))
-          day=[r for r in x.get('races',[]) if r.get('d')==d]
+          day=[]
+          for p in Path('toda-hist-work/one/out/02').glob('*.json'):
+              x=json.loads(p.read_text(encoding='utf-8'))
+              day += [r for r in x.get('races',[]) if r.get('d')==d]
           if not day:
               raise SystemExit(0)
           ids=[r.get('id') for r in day]
