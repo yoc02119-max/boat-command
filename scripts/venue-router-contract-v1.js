@@ -29,20 +29,25 @@ assert.equal(gamagori.capabilities.try,true);
 
 assert.equal(edogawa.runtime,'RESEARCH');
 assert.equal(edogawa.model.global,'BOAT_COMMAND_EDOGAWA_RESEARCH_MODEL_V2');
-assert.equal(edogawa.capabilities.predictionUi,false);
-assert.equal(edogawa.capabilities.try,false);
+assert.equal(edogawa.state,'LIVE_SIMULATION');
+assert.equal(edogawa.capabilities.predictionUi,true);
+assert.equal(edogawa.capabilities.try,true);
+assert.equal(edogawa.capabilities.bankroll,true);
+assert.equal(edogawa.capabilities.realMoney,false);
 assert.notEqual(edogawa.model.script,gamagori.model.script,'venue models must remain isolated');
 
 assert.equal(toda.runtime,'RESEARCH');
-assert.equal(toda.state,'RESEARCH_BUILD');
+assert.equal(toda.state,'LIVE_SIMULATION');
 assert.equal(toda.model.global,'BOAT_COMMAND_TODA_RESEARCH_MODEL_V1');
 assert.equal(toda.model.version,'TODA-RESEARCH-MODEL-V1');
 assert.equal(toda.configPath,'./venues/toda/config-v1.json');
 assert.equal(toda.readinessPath,'./venues/toda/readiness-v1.json');
 assert.equal(toda.dataRoot,'./live/toda');
 assert.equal(toda.capabilities.shadow,true);
-assert.equal(toda.capabilities.try,false);
-assert.equal(toda.capabilities.bankroll,false);
+assert.equal(toda.capabilities.predictionUi,true);
+assert.equal(toda.capabilities.try,true);
+assert.equal(toda.capabilities.bankroll,true);
+assert.equal(toda.capabilities.realMoney,false);
 assert.notEqual(toda.model.script,gamagori.model.script);
 assert.notEqual(toda.model.script,edogawa.model.script);
 
@@ -52,8 +57,8 @@ assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02');
 
 assert.equal(runtime.resolveVenue('03')?.code,'03');
 assert.equal(runtime.resolveVenue('gamagori')?.code,'07');
-assert.equal(runtime.capabilities(toda).predictionUi,false);
-assert.equal(runtime.capabilities(toda).try,false);
+assert.equal(runtime.capabilities(toda).predictionUi,true);
+assert.equal(runtime.capabilities(toda).try,true);
 
 for(const v of venues.filter(x=>x.runtime!=='ENTRY_ONLY')){
   assert.ok(v.model?.script,`${v.slug}: active runtime requires a model script`);
