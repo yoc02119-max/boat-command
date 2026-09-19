@@ -53,7 +53,8 @@
       shadow:venue?.capabilities?.shadow===true,
       try:venue?.capabilities?.try===true,
       bankroll:venue?.capabilities?.bankroll===true,
-      postResultInput:venue?.capabilities?.postResultInput===true
+      postResultInput:venue?.capabilities?.postResultInput===true,
+      realMoney:venue?.capabilities?.realMoney===true
     });
   }
   async function boot(input,{loadModel:shouldLoadModel=true}={}){
