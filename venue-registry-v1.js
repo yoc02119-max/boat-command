@@ -45,6 +45,19 @@
       dataRoot:'./live/edogawa',
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
+    '23':{
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
+      model:{
+        script:'./karatsu-research-model-v1.js',
+        global:'BOAT_COMMAND_KARATSU_RESEARCH_MODEL_V1',
+        version:'KARATSU-RESEARCH-MODEL-V1'
+      },
+      configPath:'./venues/karatsu/config-v1.json',
+      readinessPath:'./venues/karatsu/readiness-v1.json',
+      dataRoot:'./live/karatsu',
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
+    },
     '07':{
       state:'LIVE',
       runtime:'PRODUCTION',
