@@ -51,11 +51,14 @@ jobs:
           import datetime,glob,json,re
           from zoneinfo import ZoneInfo
           JST=ZoneInfo('Asia/Tokyo')
-          for p in glob.glob('live/toda/*/shadow/program-only/race-*.json'):
+          paths=glob.glob('live/toda/*/shadow/class-baseline/race-*.json')+glob.glob('live/toda/*/shadow/program-only/race-*.json')
+          for p in paths:
               x=json.load(open(p,encoding='utf-8'))
               assert x['schema']=='boat-command-toda-shadow-research-v1'
               assert x['venue']=='TODA' and x['venueCode']=='02'
-              assert x['mode']=='PROGRAM_ONLY'
+              assert x['mode'] in {'CLASS_BASELINE','PROGRAM_ONLY'}
+              if '/class-baseline/' in p: assert x['mode']=='CLASS_BASELINE'
+              if '/program-only/' in p: assert x['mode']=='PROGRAM_ONLY'
               assert x['resultInput'] is False and x['payoutInput'] is False
               assert x['researchOnly'] is True and x['productionEnabled'] is False and x['tryEnabled'] is False
               assert x['cashNeutral'] is True and x['immutableAfterFirstWrite'] is True
@@ -90,7 +93,7 @@ jobs:
             done < <(find /tmp/toda-shadow-publish -type f -name '*.json' | sort)
             git add "$SHADOW"
             git diff --cached --quiet && { echo 'TODA_SHADOW_CURRENT'; exit 0; }
-            git commit -m 'shadow(toda): freeze result-free program-only snapshots'
+            git commit -m 'shadow(toda): freeze paired result-free research snapshots'
             git push origin HEAD:main && exit 0
             sleep 3
           done
