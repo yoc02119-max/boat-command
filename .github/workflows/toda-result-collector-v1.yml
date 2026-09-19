@@ -68,7 +68,7 @@ jobs:
           def validate_existing(path,race):
               x=json.loads(path.read_text(encoding='utf-8'))
               assert x.get('schema')=='boat-command-live-result-v1'
-              assert x.get('venue')=='TODA' and x.get('venueCode')=='03'
+              assert x.get('venue')=='TODA' and x.get('venueCode')=='02'
               assert x.get('date')==date and int(x.get('race',0))==race
               assert x.get('preRaceDataIncluded') is False and x.get('resultEndpointsIncluded') is True
               assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta','')))
