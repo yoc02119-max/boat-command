@@ -1,0 +1,39 @@
+name: Shared virtual TRY contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'shared-try-config-v1.json'
+      - 'shared-try-portfolio-v1.json'
+      - 'scripts/shared-try-portfolio-v1.js'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/shared-try-contract-v1.yml'
+      - 'venue-registry-v1.js'
+      - 'venues/toda/config-v1.json'
+      - 'venues/edogawa/config-v1.json'
+      - 'portal.html'
+      - 'venue.html'
+      - 'venue-research-board-v1.js'
+  push:
+    branches: [main]
+    paths:
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-portfolio-v1.js'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/shared-try-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/shared-try-portfolio-v1.js
+      - run: node --check scripts/shared-try-contract-v1.js
+      - run: node scripts/shared-try-contract-v1.js
