@@ -45,6 +45,19 @@
       dataRoot:'./live/edogawa',
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
+    '10':{
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
+      model:{
+        script:'./mikuni-research-model-v1.js',
+        global:'BOAT_COMMAND_MIKUNI_RESEARCH_MODEL_V1',
+        version:'MIKUNI-RESEARCH-MODEL-V1'
+      },
+      configPath:'./venues/mikuni/config-v1.json',
+      readinessPath:'./venues/mikuni/readiness-v1.json',
+      dataRoot:'./live/mikuni',
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
+    },
     '23':{
       state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
