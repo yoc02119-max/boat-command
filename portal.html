@@ -84,7 +84,14 @@ async function refreshResearchBuildStatus(code){
      if(x?.venueCode===code){
        let detail='DATA LAYER';
        if(x.phase==='PROMOTION_REVIEW_REQUIRED')detail='検証ゲート完了 · 昇格レビュー待ち';
-       else if(x.phase==='SHADOW_VALIDATION')detail=`SHADOW 0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12 · B ${Number(x.current?.shadowFullPre||0)}/12`;
+       else if(x.phase==='SHADOW_VALIDATION'){
+         if(code==='02'){
+           const base=Number(x.current?.shadowClassBaseline||0),venue=Number(x.current?.shadowProgramOnly||0),done=Number(x.forward?.programOnlyRaces||0),target=Number(x.forward?.targetReviewRaces||60);
+           detail=`SHADOW 基準 ${base}/12 · 戸田 ${venue}/12 · 評価 ${done}/${target}R`;
+         }else{
+           detail=`SHADOW 0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12 · B ${Number(x.current?.shadowFullPre||0)}/12`;
+         }
+       }
        else if(x.phase==='BASELINE_READY')detail=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`;
        else if(x.phase==='HISTORY_READY')detail=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 基準評価中`;
        else if(Number(x.history?.rows||0)>0)detail=`履歴 ${Number(x.history.rows).toLocaleString('ja-JP')}R · DATA収集中`;
