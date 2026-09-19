@@ -34,7 +34,11 @@ assert.equal(edogawa.capabilities.try,false);
 assert.notEqual(edogawa.model.script,gamagori.model.script,'venue models must remain isolated');
 
 assert.equal(toda.runtime,'ENTRY_ONLY');
+assert.equal(toda.state,'DATA_COLLECTION');
 assert.equal(toda.model,null,'unfinished venues must not inherit another venue model');
+assert.equal(toda.configPath,'./venues/toda/config-v1.json');
+assert.equal(toda.readinessPath,'./venues/toda/readiness-v1.json');
+assert.equal(toda.dataRoot,'./live/toda');
 assert.equal(toda.capabilities.try,false);
 assert.equal(toda.capabilities.bankroll,false);
 

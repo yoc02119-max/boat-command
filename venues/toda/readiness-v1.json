@@ -1,0 +1,45 @@
+{
+  "schema": "boat-command-toda-readiness-v1",
+  "version": "TODA-READINESS-V1",
+  "venue": "TODA",
+  "venueCode": "02",
+  "phase": "DATA_LAYER",
+  "current": {
+    "programReady": false,
+    "programRaceCount": 0,
+    "postResults": 0,
+    "shadowPredictions": 0,
+    "evaluatedPredictions": 0
+  },
+  "history": {
+    "rows": 0,
+    "minimumRows": 300,
+    "primaryRecencyWindowRaces": 300,
+    "ready": false,
+    "analysisReady": false
+  },
+  "baseline": {
+    "ready": false,
+    "holdoutRaces": 0,
+    "holdoutHitRate": null,
+    "holdoutRoi": null
+  },
+  "forward": {
+    "evaluationDays": 0,
+    "races": 0,
+    "earlyReviewRaces": 36,
+    "targetReviewRaces": 60,
+    "ready": false
+  },
+  "blockers": [
+    "HISTORY_300_RACES_NOT_READY",
+    "VENUE_FEATURE_ANALYSIS_NOT_READY",
+    "STRICT_HOLDOUT_NOT_READY",
+    "FORWARD_36_RACES_NOT_READY",
+    "FORWARD_60_RACES_NOT_READY",
+    "HUMAN_REVIEW_NOT_READY"
+  ],
+  "modelEnabled": false,
+  "tryEnabled": false,
+  "realMoneyEnabled": false
+}

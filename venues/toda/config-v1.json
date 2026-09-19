@@ -1,0 +1,83 @@
+{
+  "schema": "boat-command-venue-config-v1",
+  "version": "TODA-CONFIG-V0.1.0",
+  "venue": "TODA",
+  "venueName": "戸田",
+  "venueCode": "02",
+  "slug": "toda",
+  "state": "DATA_COLLECTION",
+  "modelEnabled": false,
+  "tryEnabled": false,
+  "realMoneyEnabled": false,
+  "predictionPolicy": {
+    "strictPreRaceOnly": true,
+    "resultLookahead": false,
+    "payoutLookahead": false,
+    "crossVenueModelFallback": false,
+    "crossVenueHistoryMixing": false,
+    "promotionRequiresVenueSpecificValidation": true
+  },
+  "featurePlan": {
+    "program": [
+      "lane",
+      "class",
+      "registration",
+      "fCount",
+      "lCount",
+      "avgST",
+      "nationalWinRate",
+      "national2Rate",
+      "national3Rate",
+      "localWinRate",
+      "local2Rate",
+      "local3Rate",
+      "motor",
+      "boat",
+      "motor2Rate",
+      "boat2Rate",
+      "raceType"
+    ],
+    "water": [
+      "windSpeedMps",
+      "windDirectionCode",
+      "waveHeightCm",
+      "airTempC",
+      "waterTempC"
+    ],
+    "todaResearch": [
+      "laneSpecificFirstRate",
+      "laneSpecificSecondRate",
+      "insideVsCenterBalance",
+      "courseEntryStability",
+      "localCourseExperience",
+      "motorRelativeRank",
+      "windLaneInteraction"
+    ],
+    "status": {
+      "program": "PLANNED",
+      "water": "PLANNED",
+      "history": "BOOTSTRAP_REQUIRED",
+      "venueSpecificFeatures": "RESEARCH_ONLY"
+    }
+  },
+  "promotionPolicy": {
+    "minimumHistoricalRaces": 300,
+    "primaryRecencyWindowRaces": 300,
+    "earlyReviewRaces": 36,
+    "standardObservationDays": 5,
+    "targetReviewRaces": 60,
+    "requireStrictWalkForwardHoldout": true,
+    "requireVenueSpecificForwardValidation": true,
+    "requireHumanReview": true,
+    "autoPromotion": false,
+    "autoTryEnable": false,
+    "realMoneyEnable": false
+  },
+  "notes": [
+    "戸田専用モデル。蒲郡・江戸川の予想重みを流用しない。",
+    "300R以上を確保し、直近300Rを主軸に場別特徴量を評価する。",
+    "場特性は事前に決め打ちせず、戸田履歴の検証結果から重みを確定する。",
+    "結果・払戻はPRE-RACE予想入力へ逆流させない。",
+    "3開催日相当36Rで一次評価、標準5開催日相当60Rで本判定する。"
+  ]
+}

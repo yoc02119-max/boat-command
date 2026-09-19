@@ -60,7 +60,7 @@ function gamagoriStatus(){const day=todayJst(),now=parseMinutes(nowJstHM()),live
 syncDepositsIntoAppStore();renderPortalStats();setupDeposit();
 const venues=(window.BOAT_COMMAND_VENUE_REGISTRY?.list?.()||[]),grid=document.getElementById('venueGrid'),gs=gamagoriStatus();
 venues.forEach(v=>{
- const btn=document.createElement('button'),active=v.code==='07',building=v.code==='03';
+ const btn=document.createElement('button'),active=v.code==='07',building=!active&&v.state!=='ENTRY_OPEN';
  btn.className='venue '+(active?'active':building?'prep building':'prep');
  btn.dataset.venue=v.code;
  btn.innerHTML=active
@@ -71,22 +71,25 @@ venues.forEach(v=>{
  btn.onclick=()=>{location.href=window.BOAT_COMMAND_VENUE_REGISTRY?.routeFor?.(v)||(active?'./?venue=gamagori':`./venue.html?jcd=${v.code}`)};
  grid.appendChild(btn)
 });
-async function refreshEdogawaBuildStatus(){
- const card=document.querySelector('.venue[data-venue="03"]');if(!card)return;
+async function refreshResearchBuildStatus(code){
+ const meta=window.BOAT_COMMAND_VENUE_REGISTRY?.resolve?.(code);
+ const card=document.querySelector(`.venue[data-venue="${code}"]`);
+ if(!meta?.readinessPath||!card)return;
  card.querySelector('small').innerHTML='<span class="live-dot"></span>構築中';
  card.querySelector('.venue-live').className='venue-live';
  try{
-   const r=await fetch(`./venues/edogawa/readiness-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   const r=await fetch(`${meta.readinessPath}?t=${Date.now()}`,{cache:'no-store'});
    if(r.ok){
      const x=await r.json();
-     if(x?.venueCode==='03'){
+     if(x?.venueCode===code){
        let detail='DATA LAYER';
        if(x.phase==='PROMOTION_REVIEW_REQUIRED')detail='検証ゲート完了 · 昇格レビュー待ち';
        else if(x.phase==='SHADOW_VALIDATION')detail=`SHADOW 0 ${Number(x.current?.shadowClassBaseline||0)}/12 · A ${Number(x.current?.shadowProgramOnly||0)}/12 · B ${Number(x.current?.shadowFullPre||0)}/12`;
        else if(x.phase==='BASELINE_READY')detail=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`;
        else if(x.phase==='HISTORY_READY')detail=`履歴 ${Number(x.history?.rows||0).toLocaleString('ja-JP')}R · 基準評価中`;
-       else if(x.current?.featureLocalReady&&x.current?.featureSTReady)detail='番組 12/12 · 当地/ST READY · 履歴構築中';
-       else if(x.current?.programReady)detail='番組 12/12 · DATA収集中';
+       else if(Number(x.history?.rows||0)>0)detail=`履歴 ${Number(x.history.rows).toLocaleString('ja-JP')}R · DATA収集中`;
+       else if(x.current?.programReady)detail=`番組 ${Number(x.current?.programRaceCount||0)}/12 · DATA収集中`;
+       else detail='専用DATA LAYER準備中';
        card.querySelector('.venue-live').innerHTML=`<b>${detail}</b>`;
        return;
      }
@@ -94,8 +97,11 @@ async function refreshEdogawaBuildStatus(){
  }catch{}
  card.querySelector('.venue-live').innerHTML='<b>DATA LAYER</b>';
 }
-refreshEdogawaBuildStatus();
-setInterval(refreshEdogawaBuildStatus,300000);
+async function refreshAllResearchBuildStatus(){
+ for(const v of venues.filter(x=>x.code!=='07'&&x.readinessPath))await refreshResearchBuildStatus(v.code);
+}
+refreshAllResearchBuildStatus();
+setInterval(refreshAllResearchBuildStatus,300000);
 setInterval(()=>{const card=document.querySelector('.venue.active');if(!card)return;const s=gamagoriStatus();card.querySelector('small').innerHTML=`${s.live?'<span class="live-dot"></span>':''}${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`;renderPortalStats()},60000);
 </script>
 </body>
