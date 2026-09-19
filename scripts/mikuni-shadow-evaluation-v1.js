@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+'use strict';
+const fs=require('fs'),path=require('path'),root=path.join(__dirname,'..','live','mikuni'),rows=[];
+if(fs.existsSync(root))for(const date of fs.readdirSync(root).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort()){const p=path.join(root,date,'research-evaluation-v1.json');if(!fs.existsSync(p))continue;try{const x=JSON.parse(fs.readFileSync(p,'utf8'));if(x.venueCode==='10')for(const r of x.rows||[])rows.push({date,...r})}catch{}}
+function stats(key){const x=rows.filter(r=>r[key]),hits=x.filter(r=>r[key].hit).length,stake=x.length*400,returns=x.filter(r=>r[key].hit).reduce((s,r)=>s+Number(r.payout100||0),0);return{evaluated:x.length,hits,hitRate:x.length?hits/x.length:null,stake,returns,roi:stake?returns/stake:null}}
+const c=stats('classBaseline'),p=stats('programOnly'),paired=rows.filter(r=>r.classBaseline&&r.programOnly),hitDelta=paired.length&&c.hitRate!=null&&p.hitRate!=null?p.hitRate-c.hitRate:null,roiDelta=paired.length&&c.roi!=null&&p.roi!=null?p.roi-c.roi:null;
+const out={schema:'boat-command-mikuni-shadow-evaluation-v1',venue:'MIKUNI',venueCode:'10',generatedAt:new Date().toISOString(),evaluationDays:new Set(rows.map(x=>x.date)).size,classBaseline:c,programOnly:p,pairedRaces:paired.length,hitRateDelta:hitDelta,roiDelta,earlyReviewReady:p.evaluated>=36,targetReviewReady:p.evaluated>=60,forwardUpliftReady:paired.length>=60&&hitDelta>=0&&roiDelta>0,fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}};
+fs.writeFileSync(path.join(__dirname,'..','mikuni-shadow-evaluation-v1.json'),JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
