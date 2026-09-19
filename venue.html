@@ -176,29 +176,42 @@ else{
        const x=ctx?.readiness;
        if(!x||x.venueCode!==meta.code||ctx?.venue?.code!==meta.code)return;
        const historyRows=Number(x.history?.rows||0),historyMin=Number(x.history?.minimumRows||300);
-       const forwardRaces=Number(x.forward?.races||0),targetRaces=Number(x.forward?.targetReviewRaces||60);
+       const forwardRaces=Number(x.forward?.programOnlyRaces??x.forward?.races??0),targetRaces=Number(x.forward?.targetReviewRaces||60);
+       const shadowBase=Number(x.current?.shadowClassBaseline||0),shadowVenue=Number(x.current?.shadowProgramOnly??x.current?.shadowPredictions??0);
        const data=document.getElementById('dataStatus'),model=document.getElementById('modelStatus'),note=document.getElementById('venueNote');
        const progress=document.getElementById('researchProgress'),gates=document.getElementById('researchGates');
+       const hold=Number(x.baseline?.holdoutRaces||0),programHit=Number(x.baseline?.programHitRate),programRoi=Number(x.baseline?.programRoi),hitDelta=Number(x.baseline?.hitRateDelta),roiDelta=Number(x.baseline?.roiDelta);
        data.textContent=historyRows>=historyMin
-         ?`履歴 ${historyRows.toLocaleString('ja-JP')}R · 基礎分析へ`
+         ?`履歴 ${historyRows.toLocaleString('ja-JP')}R / ${Number(x.history?.raceDays||0)}日 · ${x.phase==='SHADOW_VALIDATION'?'SHADOW検証中':'基礎分析済み'}`
          :`履歴 ${historyRows.toLocaleString('ja-JP')}/${historyMin.toLocaleString('ja-JP')}R · 収集中`;
        model.textContent=x.baseline?.ready
-         ?`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`
+         ?(Number.isFinite(programHit)&&Number.isFinite(programRoi)
+           ?`HOLDOUT ${hold}R · 専用 ${(programHit*100).toFixed(1)}% / ROI ${(programRoi*100).toFixed(1)}%`
+           :`HOLDOUT ${hold}R評価済 · SHADOW検証`)
          :`${meta.name}専用モデル 未昇格 · 他場フォールバック禁止`;
-       note.textContent=`${meta.name}専用ライン。直近300Rを主軸に履歴を蓄積し、36Rで一次評価・標準60Rで本判定します。TRY/資金連動は昇格まで無効です。`;
+       note.textContent=x.phase==='SHADOW_VALIDATION'
+         ?`${meta.name}専用モデルを前向き検証中。基準 ${shadowBase}/12・専用 ${shadowVenue}/12を結果前に固定済み。36Rで一次評価、60Rで本判定。TRY/資金連動は無効です。`
+         :`${meta.name}専用ライン。直近300Rを主軸に履歴を蓄積し、36Rで一次評価・標準60Rで本判定します。TRY/資金連動は昇格まで無効です。`;
        if(progress){
          progress.classList.add('show');
-         document.getElementById('rpHistory').textContent=`${historyRows.toLocaleString('ja-JP')}R`;
-         document.getElementById('rpHoldout').textContent=x.baseline?.ready&&Number.isFinite(Number(x.baseline?.holdoutHitRate))
-           ?`${(Number(x.baseline.holdoutHitRate)*100).toFixed(1)}%`
+         document.querySelector('#rpHistory').previousElementSibling.textContent='HISTORY';
+         document.getElementById('rpHistory').textContent=`${historyRows.toLocaleString('ja-JP')}R / ${Number(x.history?.raceDays||0)}日`;
+         document.querySelector('#rpHoldout').previousElementSibling.textContent='HOLDOUT 4点';
+         document.getElementById('rpHoldout').textContent=x.baseline?.ready&&Number.isFinite(programHit)&&Number.isFinite(programRoi)
+           ?`${(programHit*100).toFixed(1)}% / ROI ${(programRoi*100).toFixed(1)}%`
            :'待機';
-         document.getElementById('rpProgram').textContent=`SHADOW ${Number(x.current?.shadowPredictions||0)}R`;
+         document.querySelector('#rpProgram').previousElementSibling.textContent='PRE-RACE SHADOW';
+         document.getElementById('rpProgram').textContent=`基準 ${shadowBase}/12 · 専用 ${shadowVenue}/12`;
+         document.querySelector('#rpFull').previousElementSibling.textContent='FORWARD';
          document.getElementById('rpFull').textContent=`${forwardRaces}/${targetRaces}R`;
        }
        if(gates){
          const blockers=Array.isArray(x.blockers)?x.blockers:[];
+         const uplift=x.baseline?.candidateUplift===true&&Number.isFinite(hitDelta)&&Number.isFinite(roiDelta)
+           ?` · HOLDOUT改善 HIT +${(hitDelta*100).toFixed(1)}pt / ROI +${(roiDelta*100).toFixed(1)}pt`
+           :'';
          gates.classList.add('show');
-         gates.textContent=`昇格ゲート · ${blockers.length?blockers.length+'項目未完了':'人間レビュー待ち'} · 自動本番化なし`;
+         gates.textContent=`昇格ゲート · ${blockers.length?blockers.length+'項目未完了':'人間レビュー待ち'}${uplift} · 自動本番化なし`;
        }
        st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA_LAYER'}`;
      }catch{}
