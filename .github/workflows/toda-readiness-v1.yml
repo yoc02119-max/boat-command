@@ -44,7 +44,8 @@ jobs:
           node scripts/toda-readiness-v1.js
           node - <<'NODE'
           const x=require('./venues/toda/readiness-v1.json');
-          if(x.venueCode!=='02'||x.modelEnabled!==false||x.tryEnabled!==false||x.realMoneyEnabled!==false)throw new Error('TODA_SAFETY');
+          if(x.venueCode!=='02'||x.modelEnabled!==true||x.tryEnabled!==true||x.realMoneyEnabled!==false)throw new Error('TODA_VIRTUAL_OPERATION_SAFETY');
+          if(x.operation?.active!==true||x.operation?.mainLogicFrozen!==true||x.operation?.sharedBankrollStartYen!==1000000)throw new Error('TODA_OPERATION_CONTRACT');
           if(Number(x.history?.rows||0)<300&&x.history?.ready===true)throw new Error('FALSE_HISTORY_READY');
           console.log('TODA_READINESS_PASS',x.phase,x.history.rows,x.baseline.holdoutRaces);
           NODE
