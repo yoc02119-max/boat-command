@@ -21,6 +21,7 @@ for(const v of venues){
 const gamagori=registry.resolve('07');
 const edogawa=registry.resolve('03');
 const toda=registry.resolve('02');
+const karatsu=registry.resolve('23');
 
 assert.equal(gamagori.runtime,'PRODUCTION');
 assert.equal(gamagori.model.global,'BOAT_COMMAND_MAIN_MODEL_V0320');
@@ -51,9 +52,25 @@ assert.equal(toda.capabilities.realMoney,false);
 assert.notEqual(toda.model.script,gamagori.model.script);
 assert.notEqual(toda.model.script,edogawa.model.script);
 
+assert.equal(karatsu.runtime,'RESEARCH');
+assert.equal(karatsu.state,'LIVE_SIMULATION');
+assert.equal(karatsu.model.global,'BOAT_COMMAND_KARATSU_RESEARCH_MODEL_V1');
+assert.equal(karatsu.model.version,'KARATSU-RESEARCH-MODEL-V1');
+assert.equal(karatsu.configPath,'./venues/karatsu/config-v1.json');
+assert.equal(karatsu.readinessPath,'./venues/karatsu/readiness-v1.json');
+assert.equal(karatsu.dataRoot,'./live/karatsu');
+assert.equal(karatsu.capabilities.predictionUi,true);
+assert.equal(karatsu.capabilities.try,true);
+assert.equal(karatsu.capabilities.bankroll,true);
+assert.equal(karatsu.capabilities.realMoney,false);
+assert.notEqual(karatsu.model.script,gamagori.model.script);
+assert.notEqual(karatsu.model.script,toda.model.script);
+assert.notEqual(karatsu.model.script,edogawa.model.script);
+
 assert.equal(registry.routeFor('07'),'./?venue=gamagori');
 assert.equal(registry.routeFor('03'),'./venue.html?jcd=03');
 assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02');
+assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23');
 
 assert.equal(runtime.resolveVenue('03')?.code,'03');
 assert.equal(runtime.resolveVenue('gamagori')?.code,'07');

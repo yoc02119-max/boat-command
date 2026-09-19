@@ -1,0 +1,42 @@
+name: Karatsu rapid build contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'karatsu-research-model-v1.js'
+      - 'scripts/karatsu-*.js'
+      - 'venues/karatsu/**'
+      - '.github/workflows/karatsu-*.yml'
+      - 'venue-registry-v1.js'
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/karatsu-rapid-build-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'karatsu-research-model-v1.js'
+      - 'scripts/karatsu-*.js'
+      - 'venues/karatsu/**'
+      - '.github/workflows/karatsu-*.yml'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check karatsu-research-model-v1.js
+      - run: node --check scripts/karatsu-history-analysis-v1.js
+      - run: node --check scripts/karatsu-baseline-backtest-v1.js
+      - run: node --check scripts/karatsu-shadow-research-v1.js
+      - run: node --check scripts/karatsu-shadow-evaluate-v1.js
+      - run: node --check scripts/karatsu-shadow-evaluation-v1.js
+      - run: node --check scripts/karatsu-readiness-v1.js
+      - run: node scripts/karatsu-rapid-build-contract-v1.js

@@ -1,0 +1,70 @@
+name: Karatsu baseline backtest v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Karatsu history bootstrap 180d v1", "Karatsu history bootstrap recovery v2"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: karatsu-baseline-backtest-v1
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh main after bootstrap
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            git fetch origin main && git reset --hard origin/main
+            test -f karatsu-history-bootstrap-v1.json && exit 0
+            sleep 5
+          done
+          exit 1
+      - name: Strict Karatsu walk-forward baseline
+        run: |
+          set -euo pipefail
+          node --check scripts/karatsu-baseline-backtest-v1.js
+          node scripts/karatsu-baseline-backtest-v1.js
+          node - <<'NODE'
+          const x=require('./karatsu-baseline-backtest-v1.json');
+          if(x.schema!=='boat-command-karatsu-baseline-backtest-v1'||x.venueCode!=='23')throw new Error('KARATSU_TARGET');
+          if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
+          if(x.crossVenueWeightsReused!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('MODEL_BOUNDARY');
+          if(!x.holdout?.programOnly4?.races||!x.holdout?.classBaseline4?.races)throw new Error('NO_PAIRED_HOLDOUT');
+          if(x.primaryRecencyWindowRaces!==300)throw new Error('RECENCY_WINDOW');
+          if(typeof x.holdout.candidateUplift!=='boolean')throw new Error('UPLIFT_FLAG');
+          console.log('KARATSU_BASELINE_PASS',{classBaseline4:x.holdout.classBaseline4,programOnly4:x.holdout.programOnly4,hitRateDelta:x.holdout.hitRateDelta,roiDelta:x.holdout.roiDelta,candidateUplift:x.holdout.candidateUplift});
+          NODE
+      - name: Commit Karatsu baseline
+        run: |
+          set -euo pipefail
+          cp karatsu-baseline-backtest-v1.json /tmp/karatsu-baseline-backtest-v1.json
+          git config user.name 'boat-command-karatsu-model'
+          git config user.email 'boat-command-karatsu-model@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/karatsu-baseline-backtest-v1.json karatsu-baseline-backtest-v1.json
+            git add karatsu-baseline-backtest-v1.json
+            git diff --cached --quiet && { echo 'KARATSU_BASELINE_CURRENT'; exit 0; }
+            git commit -m 'analysis(karatsu): publish strict venue-specific baseline'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "KARATSU_BASELINE_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'KARATSU_BASELINE_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
