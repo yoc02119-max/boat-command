@@ -74,14 +74,18 @@ jobs:
       - name: Commit readiness
         run: |
           set -euo pipefail
+          cp venues/edogawa/readiness-v1.json /tmp/edogawa-readiness-v1.json
           git config user.name 'boat-command-edogawa-readiness'
           git config user.email 'boat-command-edogawa-readiness@users.noreply.github.com'
-          git add venues/edogawa/readiness-v1.json
-          git diff --cached --quiet && { echo 'EDOGAWA_READINESS_CURRENT'; exit 0; }
-          git commit -m 'status(edogawa): refresh centralized readiness gate'
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then exit 0; fi
+          for attempt in 1 2 3 4 5 6 7 8; do
             git fetch origin main
-            git rebase origin/main || { git rebase --abort || true; exit 1; }
+            git reset --hard origin/main
+            cp /tmp/edogawa-readiness-v1.json venues/edogawa/readiness-v1.json
+            git add venues/edogawa/readiness-v1.json
+            git diff --cached --quiet && { echo 'EDOGAWA_READINESS_CURRENT'; exit 0; }
+            git commit -m 'status(edogawa): refresh centralized readiness gate'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt*2))
           done
+          echo 'EDOGAWA_READINESS_PUBLISH_FAILED'
           exit 1
