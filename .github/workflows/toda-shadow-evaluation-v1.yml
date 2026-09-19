@@ -58,7 +58,9 @@ jobs:
           if(day.venueCode!=='02'||day.bankrollAffected!==false||day.tryAffected!==false||day.productionAffected!==false)throw new Error('DAY_BOUNDARY');
           const all=require('./toda-shadow-evaluation-v1.json');
           if(all.venueCode!=='02'||all.cashNeutral!==true||all.realMoney!==false)throw new Error('AGG_BOUNDARY');
-          console.log('TODA_SHADOW_EVALUATION_PASS',all.evaluatedRows,all.hitRate,all.roi);
+          if(typeof all.forwardUpliftReady!=='boolean')throw new Error('UPLIFT_FLAG');
+          if(!all.classBaseline||!all.programOnly)throw new Error('PAIRED_STATS');
+          console.log('TODA_SHADOW_EVALUATION_PASS',{classBaseline:all.classBaseline,programOnly:all.programOnly,pairedRaces:all.pairedRaces,hitRateDelta:all.hitRateDelta,roiDelta:all.roiDelta,forwardUpliftReady:all.forwardUpliftReady});
           NODE
         env:
           DATE: ${{ steps.date.outputs.date }}

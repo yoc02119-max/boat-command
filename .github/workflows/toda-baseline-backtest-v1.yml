@@ -42,8 +42,10 @@ jobs:
           if(x.schema!=='boat-command-toda-baseline-backtest-v1'||x.venueCode!=='02')throw new Error('TODA_TARGET');
           if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
           if(x.crossVenueWeightsReused!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('MODEL_BOUNDARY');
-          if(!x.holdout?.metrics4?.races)throw new Error('NO_HOLDOUT');
-          console.log('TODA_BASELINE_PASS',x.holdout.metrics4);
+          if(!x.holdout?.programOnly4?.races||!x.holdout?.classBaseline4?.races)throw new Error('NO_PAIRED_HOLDOUT');
+          if(x.primaryRecencyWindowRaces!==300)throw new Error('RECENCY_WINDOW');
+          if(typeof x.holdout.candidateUplift!=='boolean')throw new Error('UPLIFT_FLAG');
+          console.log('TODA_BASELINE_PASS',{classBaseline4:x.holdout.classBaseline4,programOnly4:x.holdout.programOnly4,hitRateDelta:x.holdout.hitRateDelta,roiDelta:x.holdout.roiDelta,candidateUplift:x.holdout.candidateUplift});
           NODE
       - name: Commit Toda baseline
         run: |
