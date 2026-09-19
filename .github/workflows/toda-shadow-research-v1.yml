@@ -1,0 +1,97 @@
+name: Toda SHADOW research v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda history bootstrap 180d v1", "Toda baseline backtest v1", "Toda 12R program snapshot v1"]
+    types: [completed]
+  schedule:
+    - cron: '*/5 0-12 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/toda-shadow-research-v1.yml'
+      - 'scripts/toda-shadow-research-v1.js'
+      - 'toda-research-model-v1.js'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-shadow-research-v1
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Resolve JST date
+        id: date
+        run: echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Create immutable Toda research snapshots
+        run: |
+          set -euo pipefail
+          node --check toda-research-model-v1.js
+          node --check scripts/toda-shadow-research-v1.js
+          node scripts/toda-shadow-research-v1.js "${{ steps.date.outputs.date }}"
+      - name: Audit research boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,glob,json,re
+          from zoneinfo import ZoneInfo
+          JST=ZoneInfo('Asia/Tokyo')
+          for p in glob.glob('live/toda/*/shadow/program-only/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-toda-shadow-research-v1'
+              assert x['venue']=='TODA' and x['venueCode']=='02'
+              assert x['mode']=='PROGRAM_ONLY'
+              assert x['resultInput'] is False and x['payoutInput'] is False
+              assert x['researchOnly'] is True and x['productionEnabled'] is False and x['tryEnabled'] is False
+              assert x['cashNeutral'] is True and x['immutableAfterFirstWrite'] is True
+              assert len(x['picks'])==4 and len(set(x['picks']))==4
+              assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
+              assert abs(float(x['probabilitySum'])-1)<1e-9
+              d=datetime.date.fromisoformat(x['date']);hh,mm=map(int,str(x['deadline']).split(':'))
+              deadline=datetime.datetime(d.year,d.month,d.day,hh,mm,tzinfo=JST)
+              generated=datetime.datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(JST)
+              assert (deadline-generated).total_seconds()/60>=3
+          print('TODA_SHADOW_BOUNDARY_PASS')
+          PY
+      - name: Publish only new immutable shadow files
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          SHADOW="live/toda/$DATE/shadow"
+          [ -d "$SHADOW" ] || { echo 'NO_TODA_SHADOW_FILES'; exit 0; }
+          rm -rf /tmp/toda-shadow-publish
+          mkdir -p /tmp/toda-shadow-publish
+          cp -a "$SHADOW/." /tmp/toda-shadow-publish/
+          git config user.name 'boat-command-toda-shadow'
+          git config user.email 'boat-command-toda-shadow@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$SHADOW"
+            while IFS= read -r src; do
+              rel="${src#/tmp/toda-shadow-publish/}"; dst="$SHADOW/$rel"
+              [ -f "$dst" ] && continue
+              mkdir -p "$(dirname "$dst")"; cp "$src" "$dst"
+            done < <(find /tmp/toda-shadow-publish -type f -name '*.json' | sort)
+            git add "$SHADOW"
+            git diff --cached --quiet && { echo 'TODA_SHADOW_CURRENT'; exit 0; }
+            git commit -m 'shadow(toda): freeze result-free program-only snapshots'
+            git push origin HEAD:main && exit 0
+            sleep 3
+          done
+          exit 1

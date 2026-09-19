@@ -33,14 +33,18 @@ assert.equal(edogawa.capabilities.predictionUi,false);
 assert.equal(edogawa.capabilities.try,false);
 assert.notEqual(edogawa.model.script,gamagori.model.script,'venue models must remain isolated');
 
-assert.equal(toda.runtime,'ENTRY_ONLY');
-assert.equal(toda.state,'DATA_COLLECTION');
-assert.equal(toda.model,null,'unfinished venues must not inherit another venue model');
+assert.equal(toda.runtime,'RESEARCH');
+assert.equal(toda.state,'RESEARCH_BUILD');
+assert.equal(toda.model.global,'BOAT_COMMAND_TODA_RESEARCH_MODEL_V1');
+assert.equal(toda.model.version,'TODA-RESEARCH-MODEL-V1');
 assert.equal(toda.configPath,'./venues/toda/config-v1.json');
 assert.equal(toda.readinessPath,'./venues/toda/readiness-v1.json');
 assert.equal(toda.dataRoot,'./live/toda');
+assert.equal(toda.capabilities.shadow,true);
 assert.equal(toda.capabilities.try,false);
 assert.equal(toda.capabilities.bankroll,false);
+assert.notEqual(toda.model.script,gamagori.model.script);
+assert.notEqual(toda.model.script,edogawa.model.script);
 
 assert.equal(registry.routeFor('07'),'./?venue=gamagori');
 assert.equal(registry.routeFor('03'),'./venue.html?jcd=03');

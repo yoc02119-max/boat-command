@@ -1,0 +1,76 @@
+name: Toda SHADOW evaluation v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda POST-RACE result collector v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/toda-shadow-evaluate-v1.js'
+      - 'scripts/toda-shadow-evaluation-v1.js'
+      - 'live/toda/**/post/**'
+      - 'live/toda/**/shadow/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-shadow-evaluation-v1
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Resolve latest Toda result date
+        id: date
+        run: |
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          d=sorted(p.name for p in Path('live/toda').glob('20??-??-??') if (p/'post').exists())
+          print(d[-1] if d else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then echo 'ready=false' >> "$GITHUB_OUTPUT"; else echo "date=$DATE" >> "$GITHUB_OUTPUT"; echo 'ready=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Evaluate immutable Toda snapshots
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/toda-shadow-evaluate-v1.js
+          node --check scripts/toda-shadow-evaluation-v1.js
+          node scripts/toda-shadow-evaluate-v1.js "${{ steps.date.outputs.date }}"
+          node scripts/toda-shadow-evaluation-v1.js
+          node - <<'NODE'
+          const fs=require('fs'),d=process.env.DATE;
+          const day=JSON.parse(fs.readFileSync(`live/toda/${d}/research-evaluation-v1.json`,'utf8'));
+          if(day.venueCode!=='02'||day.bankrollAffected!==false||day.tryAffected!==false||day.productionAffected!==false)throw new Error('DAY_BOUNDARY');
+          const all=require('./toda-shadow-evaluation-v1.json');
+          if(all.venueCode!=='02'||all.cashNeutral!==true||all.realMoney!==false)throw new Error('AGG_BOUNDARY');
+          console.log('TODA_SHADOW_EVALUATION_PASS',all.evaluatedRows,all.hitRate,all.roi);
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+      - name: Commit evaluation
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          git config user.name 'boat-command-toda-eval'
+          git config user.email 'boat-command-toda-eval@users.noreply.github.com'
+          git add "live/toda/$DATE/research-evaluation-v1.json" toda-shadow-evaluation-v1.json
+          git diff --cached --quiet && { echo 'TODA_EVALUATION_CURRENT'; exit 0; }
+          git commit -m 'analysis(toda): refresh cash-neutral SHADOW evaluation'
+          git pull --rebase origin main
+          git push origin HEAD:main
