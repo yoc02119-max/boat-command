@@ -20,13 +20,17 @@
 
   const overrides={
     '02':{
-      state:'DATA_COLLECTION',
-      runtime:'ENTRY_ONLY',
-      model:null,
+      state:'RESEARCH_BUILD',
+      runtime:'RESEARCH',
+      model:{
+        script:'./toda-research-model-v1.js',
+        global:'BOAT_COMMAND_TODA_RESEARCH_MODEL_V1',
+        version:'TODA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/toda/config-v1.json',
       readinessPath:'./venues/toda/readiness-v1.json',
       dataRoot:'./live/toda',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:false,postResultInput:false}
+      capabilities:{predictionUi:false,shadow:true,try:false,bankroll:false,postResultInput:false}
     },
     '03':{
       state:'SHADOW_VALIDATION',
