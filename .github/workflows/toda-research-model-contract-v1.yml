@@ -1,0 +1,30 @@
+name: Toda research model contract v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'toda-research-model-v1.js'
+      - 'scripts/toda-research-model-test-v1.js'
+      - '.github/workflows/toda-research-model-contract-v1.yml'
+  pull_request:
+    paths:
+      - 'toda-research-model-v1.js'
+      - 'scripts/toda-research-model-test-v1.js'
+      - '.github/workflows/toda-research-model-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check toda-research-model-v1.js
+      - run: node --check scripts/toda-research-model-test-v1.js
+      - run: node scripts/toda-research-model-test-v1.js
