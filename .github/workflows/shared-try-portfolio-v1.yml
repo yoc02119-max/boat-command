@@ -2,6 +2,15 @@ name: Shared 24-venue virtual TRY portfolio v1
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-portfolio-v1.js'
+      - '.github/workflows/shared-try-portfolio-v1.yml'
+      - 'venue-registry-v1.js'
+      - 'venues/toda/config-v1.json'
+      - 'venues/edogawa/config-v1.json'
   schedule:
     # Freeze daily TRY selections at 06:00 JST, after early PRE-RACE model generation.
     - cron: '0 21 * * *'
@@ -47,7 +56,7 @@ jobs:
           if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('SELECTION_LEAKAGE');
           for(const row of p.ledger||[]){
             if(!Array.isArray(row.picks)||row.picks.length!==4)throw new Error('TRY_PICKS');
-            if(Number(row.stakeYen)!==400)throw new Error('FIXED_STAKE');
+            if(Number(row.stakeYen)!==2000)throw new Error('FIXED_STAKE');
           }
           console.log('SHARED_TRY_PORTFOLIO_BOUNDARY_PASS');
           NODE
