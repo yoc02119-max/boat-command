@@ -3,8 +3,8 @@
   "version": "TODA-READINESS-V1",
   "venue": "TODA",
   "venueCode": "02",
-  "generatedAt": "2026-09-19T19:26:57.802Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-19T19:27:13.438Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": true,
@@ -26,16 +26,23 @@
     "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 310,
+    "classHitRate": 0.11935483870967742,
+    "programHitRate": 0.15483870967741936,
+    "classRoi": 0.7492741935483871,
+    "programRoi": 0.8792741935483871,
+    "hitRateDelta": 0.03548387096774194,
+    "roiDelta": 0.13,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
