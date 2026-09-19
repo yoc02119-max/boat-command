@@ -50,10 +50,21 @@ jobs:
       - name: Commit Toda baseline
         run: |
           set -euo pipefail
+          cp toda-baseline-backtest-v1.json /tmp/toda-baseline-backtest-v1.json
           git config user.name 'boat-command-toda-model'
           git config user.email 'boat-command-toda-model@users.noreply.github.com'
-          git add toda-baseline-backtest-v1.json
-          git diff --cached --quiet && { echo 'TODA_BASELINE_CURRENT'; exit 0; }
-          git commit -m 'analysis(toda): publish strict venue-specific baseline'
-          git pull --rebase origin main
-          git push origin HEAD:main
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/toda-baseline-backtest-v1.json toda-baseline-backtest-v1.json
+            git add toda-baseline-backtest-v1.json
+            git diff --cached --quiet && { echo 'TODA_BASELINE_CURRENT'; exit 0; }
+            git commit -m 'analysis(toda): publish strict venue-specific baseline'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "TODA_BASELINE_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+          echo 'TODA_BASELINE_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
