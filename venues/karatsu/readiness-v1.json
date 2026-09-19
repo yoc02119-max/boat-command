@@ -3,8 +3,8 @@
   "version": "KARATSU-READINESS-V1",
   "venue": "KARATSU",
   "venueCode": "23",
-  "generatedAt": "2026-09-19T22:54:42.938Z",
-  "phase": "RAPID_BOOTSTRAP",
+  "generatedAt": "2026-09-19T22:59:01.587Z",
+  "phase": "DATA_LAYER",
   "latestDate": null,
   "current": {
     "programReady": false,
@@ -17,7 +17,9 @@
   "history": {
     "rows": 0,
     "raceDays": 0,
-    "windowDays": 180,
+    "windowDays": 0,
+    "complete12RaceDays": 0,
+    "partialOrCancelledDays": 0,
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": false,
@@ -41,6 +43,12 @@
     "pairedRaces": 0,
     "earlyReviewRaces": 36,
     "targetReviewRaces": 60,
+    "classHitRate": null,
+    "programHitRate": null,
+    "classRoi": null,
+    "programRoi": null,
+    "hitRateDelta": null,
+    "roiDelta": null,
     "earlyReviewReady": false,
     "ready": false,
     "forwardUpliftReady": false
@@ -50,8 +58,21 @@
     "VENUE_FEATURE_ANALYSIS_NOT_READY",
     "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
-    "FORWARD_60_RACES_NOT_READY"
+    "FORWARD_60_RACES_NOT_READY",
+    "FORWARD_MODEL_UPLIFT_NOT_READY",
+    "HUMAN_REVIEW_NOT_READY"
   ],
+  "policy": {
+    "minimumHistoricalRaces": 300,
+    "primaryRecencyWindowRaces": 300,
+    "earlyReviewRaces": 36,
+    "targetReviewRaces": 60,
+    "requireHoldoutUplift": true,
+    "requireForwardUplift": true,
+    "requireHumanReview": true,
+    "autoPromotion": false,
+    "autoTryEnable": false
+  },
   "operation": {
     "mode": "30_DAY_VIRTUAL_OPERATION",
     "active": true,
