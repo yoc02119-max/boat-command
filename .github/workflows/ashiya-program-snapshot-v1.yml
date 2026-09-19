@@ -1,0 +1,290 @@
+name: Ashiya 12R program snapshot v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ashiya-program-snapshot-v1.yml'
+      - 'venues/ashiya/config-v1.json'
+  schedule:
+    - cron: '1 0-8,21-23 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ashiya-program-snapshot-v1
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh queued run to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Collect result-free Ashiya 12R program snapshots
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime, html, json, pathlib, re, time, urllib.request
+          from html.parser import HTMLParser
+          from zoneinfo import ZoneInfo
+
+          JST=ZoneInfo('Asia/Tokyo')
+          now=datetime.datetime.now(JST)
+          targets=[now.date()]
+          if now.hour >= 21:
+              targets.append(now.date()+datetime.timedelta(days=1))
+
+          class Tables(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.depth=0; self.in_cell=False
+                  self.cell=[]; self.row=[]; self.table=[]; self.tables=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=='table':
+                      if self.depth==0:self.table=[]
+                      self.depth+=1
+                  elif tag in ('td','th') and self.depth:
+                      self.in_cell=True; self.cell=[]
+                  elif tag=='tr' and self.depth:
+                      self.row=[]
+                  elif tag=='br' and self.in_cell:
+                      self.cell.append(' / ')
+              def handle_data(self,data):
+                  if self.in_cell:self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ('td','th') and self.in_cell:
+                      self.row.append(re.sub(r'\s+',' ',html.unescape(''.join(self.cell))).strip())
+                      self.in_cell=False; self.cell=[]
+                  elif tag=='tr' and self.depth:
+                      if self.row and any(self.row): self.table.append(self.row)
+                      self.row=[]
+                  elif tag=='table' and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:
+                          self.tables.append(self.table); self.table=[]
+
+          def fetch(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'BOAT-COMMAND-ASHIYA-PROGRAM/1.0'})
+              with urllib.request.urlopen(req,timeout=45) as r:
+                  raw=r.read()
+              for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+                  try:return raw.decode(enc)
+                  except UnicodeDecodeError: pass
+              return raw.decode('utf-8','replace')
+
+          def parse_race(text,date_s,race):
+              p=Tables(); p.feed(text)
+              plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',text)))
+              times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)
+              deadline=times[race-1] if len(times)>=12 else None
+
+              racer=None
+              for t in p.tables:
+                  joined=' '.join(' '.join(r) for r in t[:8])
+                  if all(k in joined for k in ('級別','モーター','ボート')):
+                      racer=t; break
+              if racer is None:return None
+
+              lane_map={'１':1,'２':2,'３':3,'４':4,'５':5,'６':6}
+              boats={}
+              for row in racer:
+                  if not row:continue
+                  raw_lane=row[0].strip()
+                  if raw_lane not in set(lane_map)|set('123456'):continue
+                  lane=lane_map.get(raw_lane,int(raw_lane) if raw_lane.isdigit() else None)
+                  joined=' | '.join(row)
+                  m=re.search(r'(\d{4})\s*/\s*(A1|A2|B1|B2)',joined)
+                  if not m:continue
+                  reg=int(m.group(1)); cls=m.group(2)
+                  name=''
+                  mm=re.search(r'\d{4}\s*/\s*(?:A1|A2|B1|B2)\s+([^|/]+)',joined)
+                  if mm:name=re.sub(r'\s+',' ',mm.group(1)).strip()
+                  motor=boat=None; motor2_rate=boat2_rate=None
+                  f_count=l_count=None; avg_st=None
+                  national_win=national2=national3=None
+                  local_win=local2=local3=None
+
+                  if len(row)>3:
+                      fls=re.match(r'\s*F(\d+)\s*/\s*L(\d+)\s*/\s*([0-9]+(?:\.[0-9]+)?)',row[3])
+                      if fls:
+                          f_count=int(fls.group(1)); l_count=int(fls.group(2)); avg_st=float(fls.group(3))
+
+                  def rates(cell):
+                      nums=re.findall(r'([0-9]+(?:\.[0-9]+)?)',cell or '')
+                      if len(nums)>=3:
+                          return float(nums[0]),round(float(nums[1])/100,4),round(float(nums[2])/100,4)
+                      return None,None,None
+
+                  if len(row)>4:
+                      national_win,national2,national3=rates(row[4])
+                  if len(row)>5:
+                      local_win,local2,local3=rates(row[5])
+
+                  if len(row)>7:
+                      mo=re.match(r'\s*(\d+)\s*/',row[6]); bo=re.match(r'\s*(\d+)\s*/',row[7])
+                      motor=int(mo.group(1)) if mo else None
+                      boat=int(bo.group(1)) if bo else None
+                      mr=re.search(r'/\s*([0-9]+(?:\.[0-9]+)?)',row[6])
+                      br=re.search(r'/\s*([0-9]+(?:\.[0-9]+)?)',row[7])
+                      motor2_rate=round(float(mr.group(1))/100,4) if mr else None
+                      boat2_rate=round(float(br.group(1))/100,4) if br else None
+
+                  boats[lane]={
+                    'lane':lane,'registration':reg,'name':name,'class':cls,
+                    'fCount':f_count,'lCount':l_count,'avgST':avg_st,
+                    'nationalWinRate':national_win,'national2Rate':national2,'national3Rate':national3,
+                    'localWinRate':local_win,'local2Rate':local2,'local3Rate':local3,
+                    'motor':motor,'boat':boat,'motor2Rate':motor2_rate,'boat2Rate':boat2_rate
+                  }
+
+              if len(boats)!=6 or set(boats)!={1,2,3,4,5,6}:return None
+              race_types=['ドリーム戦','準優勝戦','準優進出戦','優勝戦','予選特選','一般特選','一般特賞','選抜戦','予選','一般戦','一般','特選']
+              race_type=next((x for x in race_types if x in plain),'')
+              return {
+                'schema':'boat-command-program-pack-v1',
+                'venue':'ASHIYA','venueCode':'21','date':date_s,'race':race,
+                'fetchedAt':datetime.datetime.now(JST).isoformat(),
+                'deadline':deadline,'raceType':race_type,
+                'boats':[boats[i] for i in range(1,7)],
+                'programReady':True,
+                'exhibitionIncluded':False,
+                'resultEndpointsIncluded':False,
+                'resultIncluded':False,
+                'source':'BOAT RACE official racelist'
+              }
+
+          def stable(x):
+              if isinstance(x,dict):
+                  return {k:stable(v) for k,v in x.items() if k!='fetchedAt'}
+              if isinstance(x,list):
+                  return [stable(v) for v in x]
+              return x
+
+          def write_if_changed(path,payload):
+              if path.exists():
+                  try:
+                      old=json.loads(path.read_text(encoding='utf-8'))
+                      if stable(old)==stable(payload):
+                          return False
+                  except Exception:
+                      pass
+              path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              return True
+
+          wrote=[]
+          for d in targets:
+              date_s=d.isoformat(); hd=date_s.replace('-',''); packs=[]
+              for race in range(1,13):
+                  url=f'https://www.boatrace.jp/owpc/pc/race/racelist?hd={hd}&jcd=10&rno={race}'
+                  try:
+                      text=fetch(url); pack=parse_race(text,date_s,race)
+                  except Exception as e:
+                      print(f'ASHIYA_PROGRAM_FETCH_ERROR date={date_s} race={race} error={e}')
+                      pack=None
+                  if not pack:
+                      packs=[]
+                      print(f'ASHIYA_PROGRAM_WAIT date={date_s} race={race} reason=incomplete_official_racelist')
+                      break
+                  packs.append(pack); time.sleep(.35)
+              if len(packs)!=12:continue
+
+              base=pathlib.Path('live/ashiya')/date_s/'program'
+              base.mkdir(parents=True,exist_ok=True)
+              changed=False
+              for pack in packs:
+                  changed=write_if_changed(base/f'race-{pack["race"]}.json',pack) or changed
+              manifest={
+                'schema':'boat-command-program-manifest-v1','venue':'ASHIYA','venueCode':'21',
+                'date':date_s,'fetchedAt':datetime.datetime.now(JST).isoformat(),'races':12,
+                'allProgramReady':True,'exhibitionIncluded':False,
+                'resultEndpointsIncluded':False,'resultIncluded':False
+              }
+              changed=write_if_changed(base/'manifest.json',manifest) or changed
+              if changed:
+                  wrote.append(date_s)
+                  print(f'ASHIYA_PROGRAM_CHANGED date={date_s}')
+              else:
+                  print(f'ASHIYA_PROGRAM_UNCHANGED date={date_s}')
+              print(f'ASHIYA_PROGRAM_READY_12_OF_12 date={date_s}')
+
+          pathlib.Path('/tmp/ashiya-program-dates.txt').write_text('\n'.join(wrote),encoding='utf-8')
+          PY
+
+      - name: Safety audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          dates=[x for x in pathlib.Path('/tmp/ashiya-program-dates.txt').read_text().splitlines() if x]
+          for date in dates:
+              base=pathlib.Path('live/ashiya')/date/'program'
+              m=json.load(open(base/'manifest.json',encoding='utf-8'))
+              assert m['venue']=='ASHIYA' and m['venueCode']=='21'
+              assert m['races']==12 and m['allProgramReady'] is True
+              assert m['exhibitionIncluded'] is False
+              assert m['resultEndpointsIncluded'] is False and m['resultIncluded'] is False
+              for n in range(1,13):
+                  p=json.load(open(base/f'race-{n}.json',encoding='utf-8'))
+                  assert p['venue']=='ASHIYA' and p['venueCode']=='21'
+                  assert p['race']==n and len(p['boats'])==6
+                  assert [b['lane'] for b in p['boats']]==[1,2,3,4,5,6]
+                  assert all(b['class'] in ('A1','A2','B1','B2') for b in p['boats'])
+                  assert all(b.get('avgST') is None or 0 <= b['avgST'] <= 1 for b in p['boats'])
+                  assert all(b.get('localWinRate') is None or 0 <= b['localWinRate'] <= 10 for b in p['boats'])
+                  assert all(b.get('local2Rate') is None or 0 <= b['local2Rate'] <= 1 for b in p['boats'])
+                  assert all(b.get('nationalWinRate') is None or 0 <= b['nationalWinRate'] <= 10 for b in p['boats'])
+                  assert p['exhibitionIncluded'] is False
+                  assert p['resultEndpointsIncluded'] is False and p['resultIncluded'] is False
+          print(f'ASHIYA_PROGRAM_SAFETY_PASS dates={dates}')
+          PY
+
+      - name: Commit program snapshots
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ashiya-program-publish
+          mkdir -p /tmp/ashiya-program-publish
+          cp -a live/ashiya/. /tmp/ashiya-program-publish/
+
+          git config user.name 'boat-command-program-relay'
+          git config user.email 'boat-command-program-relay@users.noreply.github.com'
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Re-apply only collector-owned program directories on top of the newest main.
+            for d in /tmp/ashiya-program-publish/20??-??-??; do
+              [ -d "$d/program" ] || continue
+              date=$(basename "$d")
+              mkdir -p "live/ashiya/$date"
+              rm -rf "live/ashiya/$date/program"
+              cp -a "$d/program" "live/ashiya/$date/program"
+            done
+
+            git add live/ashiya/*/program/ 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo 'NO_ASHIYA_PROGRAM_CHANGE'
+              exit 0
+            fi
+
+            git commit -m 'live: publish Ashiya result-free 12R program snapshot'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "PROGRAM_PUSH_RETRY attempt=$attempt"
+            sleep 3
+          done
+
+          echo 'ASHIYA_PROGRAM_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
