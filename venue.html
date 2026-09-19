@@ -27,7 +27,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px}.panel{border:1px solid var(--line);border-radius:16px;padding:18px;background:linear-gradient(180deg,#0c1f33,#091725)}
 .panel h2{margin:0 0 12px;font-size:18px}.panel p{margin:0;color:#9eb3c4;font-size:13px;line-height:1.65}
 .steps{display:grid;gap:8px}.step{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)}.step span{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#0b2941;color:#8fcdeb;font-weight:900}.step b{display:block;font-size:12px}.step small{display:block;color:#708ba1;margin-top:2px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.tab{border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:12px 8px;text-align:center;color:#6f879b;background:rgba(255,255,255,.025);font-size:11px}.tab:first-child{color:#d8e8f4;border-color:#315675}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.tab{appearance:none;border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:12px 8px;text-align:center;color:#6f879b;background:rgba(255,255,255,.025);font:inherit;font-size:11px}.tab.active{color:#d8e8f4;border-color:#315675;background:rgba(23,140,255,.08)}.tabs.interactive .tab{cursor:pointer}
 .note{margin-top:14px;padding:14px 16px;border:1px dashed rgba(255,255,255,.11);border-radius:13px;color:#7892a6;font-size:11px;line-height:1.6}
 .actions{display:flex;gap:10px;margin-top:16px}.primary,.ghost{border-radius:11px;padding:11px 14px;font-weight:900;cursor:pointer}.primary{border:0;background:linear-gradient(135deg,#087dbb,#5c54ff);color:white}.ghost{border:1px solid #294c68;background:#091927;color:#d8e7f2}
 .research-progress{display:none;margin-top:14px;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -37,8 +37,10 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 .research-kpi b{font-size:14px;letter-spacing:.01em}
 .research-gates{display:none;margin-top:8px;padding:10px 12px;border:1px dashed rgba(255,255,255,.1);border-radius:11px;color:#8099ac;font-size:9px;line-height:1.55}
 .research-gates.show{display:block}
+.research-board{margin-top:16px}.research-board[hidden]{display:none}.rrb-shell{border:1px solid var(--line);border-radius:18px;padding:18px;background:linear-gradient(180deg,#0b1e31,#071522)}.rrb-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end}.rrb-head small{color:#6f8aa1;font-size:10px;letter-spacing:.08em}.rrb-head h2{margin:4px 0 4px;font-size:24px}.rrb-head p{margin:0;color:#8fa8bb;font-size:12px}.rrb-head-stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.rrb-head-stats span{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;color:#708da3;font-size:9px}.rrb-head-stats b{display:block;color:#eaf4fb;font-size:13px;margin-top:2px}.rrb-subtabs{display:flex;gap:8px;align-items:center;margin:16px 0 12px}.rrb-subtab{appearance:none;border:1px solid #244762;background:#081725;color:#8199ac;border-radius:10px;padding:8px 14px;font-weight:800;font-size:11px;cursor:pointer}.rrb-subtab.active{border-color:#2b98ff;color:white;background:#0a3150}.rrb-safe{margin-left:auto;color:#5f7d93;font-size:9px;letter-spacing:.08em}.rrb-loading,.rrb-empty{padding:22px;text-align:center;color:#7893a8;border:1px dashed rgba(255,255,255,.08);border-radius:12px}.rrb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rrb-card{border:1px solid #1a3a56;border-radius:14px;background:linear-gradient(180deg,#0d2236,#091826);overflow:hidden}.rrb-card>header{display:flex;justify-content:space-between;align-items:center;padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.07)}.rrb-card>header strong{font-size:19px}.rrb-card>header span{margin-left:7px;color:#7f9aaf;font-size:10px}.rrb-card>header time{color:#a8c1d3;font-size:10px;font-weight:800}.rrb-boats{padding:8px 10px;display:grid;gap:4px}.rrb-boat{display:grid;grid-template-columns:22px 1fr auto;gap:7px;align-items:center;min-width:0}.rrb-boat b{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rrb-boat small{font-size:8px;color:#718da3;white-space:nowrap}.rrb-lane{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#132c42;font-size:10px;font-weight:900}.rrb-models{padding:8px 10px;display:grid;gap:6px;background:rgba(0,0,0,.12)}.rrb-model{border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px}.rrb-model.primary{border-color:rgba(32,224,199,.28);background:rgba(32,224,199,.035)}.rrb-model>span{display:block;color:#7894a9;font-size:8px;font-weight:900;margin-bottom:6px}.rrb-model>small{display:block;color:#58758b;font-size:7px;margin-top:5px}.rrb-picks{display:flex;gap:4px;flex-wrap:wrap}.rrb-picks i{font-style:normal;background:#112b41;border-radius:6px;padding:4px 6px;color:#f4f8fc;font-size:10px;font-weight:900}.rrb-model.primary .rrb-picks i{background:#0d3b46;color:#b9fff6}.rrb-result{margin:8px 10px 0;border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:8px 9px}.rrb-result span{display:block;color:#678399;font-size:7px}.rrb-result b{display:block;font-size:12px;margin-top:2px}.rrb-result small{display:block;color:#7791a5;font-size:8px;margin-top:2px}.rrb-result.pending{opacity:.72}.rrb-lock{width:calc(100% - 20px);margin:8px 10px 10px;border:1px solid #293e50;background:#101b25;color:#637889;border-radius:9px;padding:8px;font-size:9px;font-weight:900;letter-spacing:.03em}.rrb-lock:disabled{opacity:1}.rrb-card[hidden]{display:none}
+@media(max-width:900px){.rrb-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.research-progress{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.shell{padding:16px 12px 90px}.hero{padding:18px}.tabs{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.shell{padding:16px 12px 90px}.hero{padding:18px}.tabs{grid-template-columns:repeat(4,1fr)}.rrb-grid{grid-template-columns:1fr}.rrb-head{align-items:flex-start;flex-direction:column}.rrb-head-stats{justify-content:flex-start}.rrb-safe{display:none}.rrb-boat b{font-size:11px}}
 </style>
 </head>
 <body>
@@ -56,14 +58,14 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="steps">
  <div class="step"><span>1</span><div><b>入口・共通UI</b><small>OPEN</small></div></div>
  <div class="step"><span>2</span><div><b>場別データ収集・特性分析</b><small id="dataStatus">未接続</small></div></div>
- <div class="step"><span>3</span><div><b>メイン予想モデル</b><small id="modelStatus">場ごとに構築</small></div></div>
- <div class="step"><span>4</span><div><b>TRY検証・資金連動</b><small>モデル検証後に解禁</small></div></div>
+ <div class="step"><span>3</span><div><b id="modelStepTitle">メイン予想モデル</b><small id="modelStatus">場ごとに構築</small></div></div>
+ <div class="step"><span>4</span><div><b>TRY検証・資金連動</b><small id="tryStatus">モデル検証後に解禁</small></div></div>
 </div>
 </div>
 <div class="panel">
 <h2>共通画面</h2>
 <p>蒲郡で固めた構成を土台に、各場へ順次接続します。未完成の予想を共通モデルで無理に出すことはしません。</p>
-<div class="tabs"><div class="tab">今日</div><div class="tab">12R</div><div class="tab">結果</div><div class="tab">履歴</div></div>
+<div class="tabs" id="venueTabs"><button class="tab active" type="button" data-view="today">今日</button><button class="tab" type="button" data-view="races">12R</button><button class="tab" type="button" data-view="results">結果</button><button class="tab" type="button" data-view="history">履歴</button></div>
 <div class="note" id="venueNote">現在は入口のみ。予想・結果取得・TRY・仮資金処理はこの場ではまだ動きません。</div>
 <div class="research-progress" id="researchProgress">
  <div class="research-kpi"><small>HISTORY</small><b id="rpHistory">—</b></div>
@@ -75,9 +77,11 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
 </div>
 </section>
+<section class="research-board" id="researchBoard" hidden></section>
 </main>
 <script src="venue-registry-v1.js?v=1"></script>
 <script src="venue-runtime-v1.js?v=1"></script>
+<script src="venue-research-board-v1.js?v=1"></script>
 <script>
 const REG=window.BOAT_COMMAND_VENUE_REGISTRY;
 const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
@@ -214,6 +218,34 @@ else{
          gates.textContent=`昇格ゲート · ${blockers.length?blockers.length+'項目未完了':'人間レビュー待ち'}${uplift} · 自動本番化なし`;
        }
        st.querySelector('span').textContent=`構築中 · ${x.phase||'DATA_LAYER'}`;
+       if(meta.code==='02'){
+         document.getElementById('modelStepTitle').textContent='戸田専用モデル・SHADOW検証';
+         document.getElementById('tryStatus').textContent='SHADOW中はLOCK';
+         const tabs=document.getElementById('venueTabs');
+         tabs?.classList.add('interactive');
+         const boardApi=await window.BOAT_COMMAND_RESEARCH_BOARD_V1?.mount?.({
+           root:'#researchBoard',
+           venueName:meta.name,
+           readiness:x,
+           dataRoot:meta.dataRoot,
+           modes:{primaryDir:'program-only',baselineDir:'class-baseline'}
+         });
+         const activate=view=>{
+           tabs?.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+           if(view==='races'){
+             boardApi?.setView?.('all');
+             document.getElementById('researchBoard')?.scrollIntoView({behavior:'smooth',block:'start'});
+           }else if(view==='results'){
+             boardApi?.setView?.('results');
+             document.getElementById('researchBoard')?.scrollIntoView({behavior:'smooth',block:'start'});
+           }else if(view==='history'){
+             document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'});
+           }else{
+             document.querySelector('.hero')?.scrollIntoView({behavior:'smooth',block:'start'});
+           }
+         };
+         tabs?.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>activate(t.dataset.view)));
+       }
      }catch{}
    })();
  }
