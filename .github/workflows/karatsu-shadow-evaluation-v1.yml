@@ -1,0 +1,78 @@
+name: Karatsu SHADOW evaluation v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Karatsu POST-RACE result collector v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/karatsu-shadow-evaluate-v1.js'
+      - 'scripts/karatsu-shadow-evaluation-v1.js'
+      - 'live/karatsu/**/post/**'
+      - 'live/karatsu/**/shadow/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: karatsu-shadow-evaluation-v1
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Resolve latest Karatsu result date
+        id: date
+        run: |
+          DATE=$(python3 - <<'PY'
+          from pathlib import Path
+          d=sorted(p.name for p in Path('live/karatsu').glob('20??-??-??') if (p/'post').exists())
+          print(d[-1] if d else '')
+          PY
+          )
+          if [ -z "$DATE" ]; then echo 'ready=false' >> "$GITHUB_OUTPUT"; else echo "date=$DATE" >> "$GITHUB_OUTPUT"; echo 'ready=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Evaluate immutable Karatsu snapshots
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/karatsu-shadow-evaluate-v1.js
+          node --check scripts/karatsu-shadow-evaluation-v1.js
+          node scripts/karatsu-shadow-evaluate-v1.js "${{ steps.date.outputs.date }}"
+          node scripts/karatsu-shadow-evaluation-v1.js
+          node - <<'NODE'
+          const fs=require('fs'),d=process.env.DATE;
+          const day=JSON.parse(fs.readFileSync(`live/karatsu/${d}/research-evaluation-v1.json`,'utf8'));
+          if(day.venueCode!=='23'||day.bankrollAffected!==false||day.tryAffected!==false||day.productionAffected!==false)throw new Error('DAY_BOUNDARY');
+          const all=require('./karatsu-shadow-evaluation-v1.json');
+          if(all.venueCode!=='23'||all.cashNeutral!==true||all.realMoney!==false)throw new Error('AGG_BOUNDARY');
+          if(typeof all.forwardUpliftReady!=='boolean')throw new Error('UPLIFT_FLAG');
+          if(!all.classBaseline||!all.programOnly)throw new Error('PAIRED_STATS');
+          console.log('KARATSU_SHADOW_EVALUATION_PASS',{classBaseline:all.classBaseline,programOnly:all.programOnly,pairedRaces:all.pairedRaces,hitRateDelta:all.hitRateDelta,roiDelta:all.roiDelta,forwardUpliftReady:all.forwardUpliftReady});
+          NODE
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+      - name: Commit evaluation
+        if: steps.date.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          git config user.name 'boat-command-karatsu-eval'
+          git config user.email 'boat-command-karatsu-eval@users.noreply.github.com'
+          git add "live/karatsu/$DATE/research-evaluation-v1.json" karatsu-shadow-evaluation-v1.json
+          git diff --cached --quiet && { echo 'KARATSU_EVALUATION_CURRENT'; exit 0; }
+          git commit -m 'analysis(karatsu): refresh cash-neutral SHADOW evaluation'
+          git pull --rebase origin main
+          git push origin HEAD:main
