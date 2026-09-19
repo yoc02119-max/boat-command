@@ -1,0 +1,56 @@
+name: Karatsu history analysis v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Karatsu history bootstrap 180d v1", "Karatsu history bootstrap recovery v2"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: karatsu-history-analysis-v1
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh main after bootstrap
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            git fetch origin main && git reset --hard origin/main
+            test -f karatsu-history-bootstrap-v1.json && exit 0
+            sleep 5
+          done
+          exit 1
+      - name: Analyze Karatsu venue structure
+        run: |
+          set -euo pipefail
+          node --check scripts/karatsu-history-analysis-v1.js
+          node scripts/karatsu-history-analysis-v1.js
+          node - <<'NODE'
+          const x=require('./karatsu-history-analysis-v1.json');
+          if(x.schema!=='boat-command-karatsu-history-analysis-v1'||x.venueCode!=='23'||x.races<300)throw new Error('KARATSU_ANALYSIS_TARGET');
+          if(x.modelPolicy.crossVenueWeightsReused!==false||x.modelPolicy.productionEnabled!==false)throw new Error('KARATSU_MODEL_BOUNDARY');
+          if(!x.firstToSecond?.['1']||!Number.isFinite(x.trifecta?.entropyBits))throw new Error('KARATSU_TRANSITION_FEATURES');
+          console.log('KARATSU_HISTORY_ANALYSIS_PASS',x.races);
+          NODE
+      - name: Commit Karatsu analysis
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-karatsu-analysis'
+          git config user.email 'boat-command-karatsu-analysis@users.noreply.github.com'
+          git add karatsu-history-analysis-v1.json
+          git diff --cached --quiet && { echo 'KARATSU_ANALYSIS_CURRENT'; exit 0; }
+          git commit -m 'analysis(karatsu): publish venue-specific historical structure'
+          git pull --rebase origin main
+          git push origin HEAD:main
