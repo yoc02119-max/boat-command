@@ -115,9 +115,12 @@ async function refreshResearchBuildStatus(code){
          if(code==='02'){
            const venue=Number(x.current?.shadowProgramOnly||0),done=Number(x.forward?.programOnlyRaces||0),target=Number(x.forward?.targetReviewRaces||60);
            detail=`本線 ${venue}/12 · TRY ${tryCount==null?'待ち':tryCount+'R'} · 30日評価 ${done}/${target}R`;
-         }else{
+         }else if(code==='03'){
            const prog=Number(x.current?.shadowProgramOnly||0),full=Number(x.current?.shadowFullPre||0);
            detail=`V2本線 ${prog}/12 · TRY ${tryCount==null?'待ち':tryCount+'R'} · 改良SHADOW ${full}/12`;
+         }else{
+           const venue=Number(x.current?.shadowProgramOnly||0),done=Number(x.forward?.programOnlyRaces||x.forward?.races||0),target=Number(x.forward?.targetReviewRaces||60);
+           detail=`本線 ${venue}/12 · TRY ${tryCount==null?'待ち':tryCount+'R'} · 30日評価 ${done}/${target}R`;
          }
        }
        else if(x.phase==='BASELINE_READY')detail=`HOLDOUT ${Number(x.baseline?.holdoutRaces||0)}R評価済 · SHADOW準備`;
