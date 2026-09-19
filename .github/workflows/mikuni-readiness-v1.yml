@@ -1,0 +1,69 @@
+name: Mikuni readiness v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Mikuni history bootstrap 180d v1", "Mikuni history analysis v1", "Mikuni baseline backtest v1", "Mikuni 12R program snapshot v1", "Mikuni PRE-RACE collector v1", "Mikuni SHADOW research v1", "Mikuni POST-RACE result collector v1", "Mikuni SHADOW evaluation v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mikuni-readiness-v1.yml'
+      - 'scripts/mikuni-readiness-v1.js'
+      - 'venues/mikuni/config-v1.json'
+      - 'mikuni-shadow-evaluation-v1.json'
+      - 'live/mikuni/**/program/**'
+      - 'live/mikuni/**/shadow/**'
+      - 'live/mikuni/**/post/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mikuni-readiness-v1
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh current main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Synthesize Mikuni readiness
+        run: |
+          set -euo pipefail
+          node --check scripts/mikuni-readiness-v1.js
+          node scripts/mikuni-readiness-v1.js
+          node - <<'NODE'
+          const x=require('./venues/mikuni/readiness-v1.json');
+          if(x.venueCode!=='10'||x.modelEnabled!==true||x.tryEnabled!==true||x.realMoneyEnabled!==false)throw new Error('MIKUNI_VIRTUAL_OPERATION_SAFETY');
+          if(x.operation?.active!==true||x.operation?.mainLogicFrozen!==true||x.operation?.sharedBankrollStartYen!==1000000)throw new Error('MIKUNI_OPERATION_CONTRACT');
+          if(Number(x.history?.rows||0)<300&&x.history?.ready===true)throw new Error('FALSE_HISTORY_READY');
+          console.log('MIKUNI_READINESS_PASS',x.phase,x.history.rows,x.baseline.holdoutRaces);
+          NODE
+      - name: Commit readiness when changed
+        run: |
+          set -euo pipefail
+          cp venues/mikuni/readiness-v1.json /tmp/mikuni-readiness-v1.json
+          git config user.name 'boat-command-mikuni-readiness'
+          git config user.email 'boat-command-mikuni-readiness@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mikuni-readiness-v1.json venues/mikuni/readiness-v1.json
+            git add venues/mikuni/readiness-v1.json
+            git diff --cached --quiet && { echo 'MIKUNI_READINESS_CURRENT'; exit 0; }
+            git commit -m 'status(mikuni): refresh centralized readiness gate'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          echo 'MIKUNI_READINESS_PUBLISH_FAILED'
+          exit 1
