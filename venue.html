@@ -76,16 +76,13 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 </div>
 </section>
 </main>
+<script src="venue-registry-v1.js?v=1"></script>
+<script src="venue-runtime-v1.js?v=1"></script>
 <script>
-const VENUES={
- '01':['桐生','KIRYU'],'02':['戸田','TODA'],'03':['江戸川','EDOGAWA'],'04':['平和島','HEIWAJIMA'],
- '05':['多摩川','TAMAGAWA'],'06':['浜名湖','HAMANAKO'],'07':['蒲郡','GAMAGORI'],'08':['常滑','TOKONAME'],
- '09':['津','TSU'],'10':['三国','MIKUNI'],'11':['びわこ','BIWAKO'],'12':['住之江','SUMINOE'],
- '13':['尼崎','AMAGASAKI'],'14':['鳴門','NARUTO'],'15':['丸亀','MARUGAME'],'16':['児島','KOJIMA'],
- '17':['宮島','MIYAJIMA'],'18':['徳山','TOKUYAMA'],'19':['下関','SHIMONOSEKI'],'20':['若松','WAKAMATSU'],
- '21':['芦屋','ASHIYA'],'22':['福岡','FUKUOKA'],'23':['唐津','KARATSU'],'24':['大村','OMURA']
-};
-const q=new URLSearchParams(location.search),jcd=String(q.get('jcd')||'').padStart(2,'0'),v=VENUES[jcd];
+const REG=window.BOAT_COMMAND_VENUE_REGISTRY;
+const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
+const q=new URLSearchParams(location.search),meta=REG?.resolve(q.get('jcd')||q.get('venue')||''),jcd=meta?.code||'',v=meta?[meta.name,meta.key]:null;
+const runtimePromise=meta&&RUNTIME?.boot?RUNTIME.boot(meta,{loadModel:meta.runtime!=='ENTRY_ONLY'}).catch(()=>null):Promise.resolve(null);
 if(jcd==='07'){location.replace('./?venue=gamagori')}
 else if(!v){location.replace('./portal.html')}
 else{
@@ -104,10 +101,9 @@ else{
    document.getElementById('venueNote').textContent='江戸川はDATA LAYER構築中。蒲郡モデルは流用せず、潮・風・波・当地適性を分離して検証します。予想とTRYはまだ無効です。';
    (async()=>{
      try{
-       const r=await fetch(`./venues/edogawa/readiness-v1.json?t=${Date.now()}`,{cache:'no-store'});
-       if(!r.ok)return;
-       const x=await r.json();
-       if(x?.venueCode!=='03')return;
+       const ctx=await runtimePromise;
+       const x=ctx?.readiness;
+       if(x?.venueCode!=='03'||ctx?.venue?.code!=='03')return;
        const data=document.getElementById('dataStatus'),model=document.getElementById('modelStatus'),note=document.getElementById('venueNote');
        const progress=document.getElementById('researchProgress'),gates=document.getElementById('researchGates');
        if(progress){
