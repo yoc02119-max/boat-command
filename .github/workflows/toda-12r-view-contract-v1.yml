@@ -1,0 +1,32 @@
+name: Toda 12R view contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'venue.html'
+      - 'venue-research-board-v1.js'
+      - 'scripts/toda-12r-view-contract-v1.js'
+      - '.github/workflows/toda-12r-view-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'venue.html'
+      - 'venue-research-board-v1.js'
+      - 'scripts/toda-12r-view-contract-v1.js'
+      - '.github/workflows/toda-12r-view-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check venue-research-board-v1.js
+      - run: node --check scripts/toda-12r-view-contract-v1.js
+      - run: node scripts/toda-12r-view-contract-v1.js
