@@ -3,39 +3,46 @@
   "version": "KARATSU-READINESS-V1",
   "venue": "KARATSU",
   "venueCode": "23",
-  "generatedAt": "2026-09-19T23:20:28.402Z",
-  "phase": "DATA_LAYER",
+  "generatedAt": "2026-09-19T23:29:24.961Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": true,
     "programRaceCount": 12,
     "postResults": 0,
-    "shadowClassBaseline": 0,
-    "shadowProgramOnly": 0,
+    "shadowClassBaseline": 12,
+    "shadowProgramOnly": 12,
     "evaluatedProgramOnly": 0
   },
   "history": {
-    "rows": 0,
-    "raceDays": 0,
-    "windowDays": 0,
-    "complete12RaceDays": 0,
-    "partialOrCancelledDays": 0,
+    "rows": 1138,
+    "raceDays": 96,
+    "windowDays": 180,
+    "complete12RaceDays": 93,
+    "partialOrCancelledDays": 3,
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
-    "ready": false,
-    "analysisReady": false
+    "ready": true,
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 343,
+    "classHitRate": 0.22740524781341107,
+    "programHitRate": 0.23615160349854228,
+    "classRoi": 0.699927113702624,
+    "programRoi": 0.7862244897959184,
+    "hitRateDelta": 0.008746355685131213,
+    "roiDelta": 0.08629737609329446,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,9 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "HISTORY_300_RACES_NOT_READY",
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
