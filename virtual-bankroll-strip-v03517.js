@@ -28,13 +28,14 @@ function ensure(){
 function render(){
  installStyle();const el=ensure();if(!el)return;
  let s=null;try{s=session()}catch{}if(!s)return;
- const t=typeof bcVirtualTryLedger==='function'?bcVirtualTryLedger():{todayCommittedStakeYen:0,todayPendingStakeYen:0,todayProfitYen:0};
+ const shared=typeof bcSharedTryLedger==='function'?bcSharedTryLedger():null;
+ const t=shared||(typeof bcVirtualTryLedger==='function'?bcVirtualTryLedger():{todayCommittedStakeYen:0,todayPendingStakeYen:0,todayProfitYen:0});
  const invested=Number(t.todayCommittedStakeYen)||0;
  const profit=Number(t.todayProfitYen)||0;
  const pending=Number(t.todayPendingStakeYen)||0;
- const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||100000)+profit-pending;
+ const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||1000000)+profit-pending;
  const cls=profit>0?'positive':profit<0?'negative':'';
- el.innerHTML=`<div class="bankroll"><small>仮資金</small><b>${yen(bankroll)}</b></div><div><small>本日投入</small><b>${yen(invested)}</b></div><div class="profit ${cls}"><small>確定損益</small><b>${profit>0?'+':''}${yen(profit)}</b></div><div class="sub">仮想運用のみ · TRY未精算 ${yen(pending)} は仮資金から差引済み · MAINは資金反映なし</div>`;
+ el.innerHTML=`<div class="bankroll"><small>24場共通 仮資金</small><b>${yen(bankroll)}</b></div><div><small>本日AUTO TRY</small><b>${yen(invested)}</b></div><div class="profit ${cls}"><small>本日確定損益</small><b>${profit>0?'+':''}${yen(profit)}</b></div><div class="sub">30日仮想運用 · 未精算TRY ${yen(pending)} は共通100万円から差引済み · 実金なし</div>`;
 }
 const prior=typeof renderAll==='function'?renderAll:null;
 if(prior)renderAll=function(){const out=prior.apply(this,arguments);render();return out};
@@ -42,4 +43,5 @@ window.BOAT_COMMAND_VIRTUAL_BANKROLL_STRIP_V03517=Object.freeze({version:VERSION
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render,{once:true});else render();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
 window.addEventListener('boatcommand:forward-status',render);
+window.addEventListener('boatcommand:shared-portfolio',render);
 })();
