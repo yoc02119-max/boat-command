@@ -1,0 +1,42 @@
+name: Ashiya rapid build contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'ashiya-research-model-v1.js'
+      - 'scripts/ashiya-*.js'
+      - 'venues/ashiya/**'
+      - '.github/workflows/ashiya-*.yml'
+      - 'venue-registry-v1.js'
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/ashiya-rapid-build-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ashiya-research-model-v1.js'
+      - 'scripts/ashiya-*.js'
+      - 'venues/ashiya/**'
+      - '.github/workflows/ashiya-*.yml'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check ashiya-research-model-v1.js
+      - run: node --check scripts/ashiya-history-analysis-v1.js
+      - run: node --check scripts/ashiya-baseline-backtest-v1.js
+      - run: node --check scripts/ashiya-shadow-research-v1.js
+      - run: node --check scripts/ashiya-shadow-evaluate-v1.js
+      - run: node --check scripts/ashiya-shadow-evaluation-v1.js
+      - run: node --check scripts/ashiya-readiness-v1.js
+      - run: node scripts/ashiya-rapid-build-contract-v1.js
