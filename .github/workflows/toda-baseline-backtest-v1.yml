@@ -1,0 +1,57 @@
+name: Toda baseline backtest v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Toda history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-baseline-backtest-v1
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh main after bootstrap
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            git fetch origin main && git reset --hard origin/main
+            test -f toda-history-bootstrap-v1.json && exit 0
+            sleep 5
+          done
+          exit 1
+      - name: Strict Toda walk-forward baseline
+        run: |
+          set -euo pipefail
+          node --check scripts/toda-baseline-backtest-v1.js
+          node scripts/toda-baseline-backtest-v1.js
+          node - <<'NODE'
+          const x=require('./toda-baseline-backtest-v1.json');
+          if(x.schema!=='boat-command-toda-baseline-backtest-v1'||x.venueCode!=='02')throw new Error('TODA_TARGET');
+          if(x.strictWalkForward!==true||x.sameDayRowsExcluded!==true||x.resultBlockedUntilPrediction!==true)throw new Error('TIME_BOUNDARY');
+          if(x.crossVenueWeightsReused!==false||x.productionEnabled!==false||x.tryEnabled!==false)throw new Error('MODEL_BOUNDARY');
+          if(!x.holdout?.metrics4?.races)throw new Error('NO_HOLDOUT');
+          console.log('TODA_BASELINE_PASS',x.holdout.metrics4);
+          NODE
+      - name: Commit Toda baseline
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-toda-model'
+          git config user.email 'boat-command-toda-model@users.noreply.github.com'
+          git add toda-baseline-backtest-v1.json
+          git diff --cached --quiet && { echo 'TODA_BASELINE_CURRENT'; exit 0; }
+          git commit -m 'analysis(toda): publish strict venue-specific baseline'
+          git pull --rebase origin main
+          git push origin HEAD:main
