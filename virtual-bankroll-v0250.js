@@ -55,17 +55,17 @@
   }
 
   function virtualBankrollNow(){
-    const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
+    const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
     const t=virtualTryLedger();
-    return base+virtualDepositTotal()+t.settledProfitYen-t.pendingStakeYen;
+    return base+t.settledProfitYen-t.pendingStakeYen;
   }
 
   // Only SHADOW TRY moves the simulated bankroll.
   // MAIN predictions/results stay available for accuracy evaluation but are cash-neutral.
   window.bankrollSeries=function(){
-    const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
-    let bal=base+virtualDepositTotal();
-    const out=[{label:'START + DEPOSIT',value:bal}];
+    const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
+    let bal=base;
+    const out=[{label:'SHARED START',value:bal}];
     const t=virtualTryLedger();
     if(t.settledStakeYen>0){
       bal+=t.settledProfitYen;
@@ -82,7 +82,7 @@
   window.bcVirtualBankrollNow=virtualBankrollNow;
   window.bcVirtualDepositTotal=virtualDepositTotal;
   window.BOAT_COMMAND_VIRTUAL_BANKROLL_V0250=Object.freeze({
-    version:'0.35.17',fundingScope:'TRY_ONLY',mainPredictionCashNeutral:true,realMoney:false
+    version:'0.35.17',fundingScope:'SHARED_24_VENUES_VIRTUAL',mainPredictionCashNeutral:true,fixedStartBankrollYen:1000000,manualDepositsExcluded:true,realMoney:false
   });
   window.addEventListener('storage',e=>{
     if(e.key===DEPOSIT_KEY&&typeof renderAll==='function')renderAll();
