@@ -64,7 +64,8 @@ jobs:
           const x=require('./venues/edogawa/readiness-v1.json');
           if(x.schema!=='boat-command-edogawa-readiness-v1')throw new Error('SCHEMA');
           if(x.venue!=='EDOGAWA'||x.venueCode!=='03')throw new Error('TARGET');
-          if(x.modelEnabled!==false||x.tryEnabled!==false||x.realMoneyEnabled!==false)throw new Error('PROMOTION_BOUNDARY');
+          if(x.modelEnabled!==true||x.tryEnabled!==true||x.realMoneyEnabled!==false)throw new Error('VIRTUAL_OPERATION_BOUNDARY');
+          if(x.operation?.active!==true||x.operation?.mainLogicFrozen!==true||x.operation?.sharedBankrollStartYen!==1000000)throw new Error('EDOGAWA_OPERATION_CONTRACT');
           if(!Array.isArray(x.blockers))throw new Error('BLOCKERS');
           if(x.promotionReviewRequired && x.blockers.length!==0)throw new Error('PROMOTION_GATE');
           console.log('EDOGAWA_READINESS_GATE_PASS',x.phase,x.blockers);
