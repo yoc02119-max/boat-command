@@ -1,0 +1,31 @@
+name: venue-router-contract-v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'venue-registry-v1.js'
+      - 'venue-runtime-v1.js'
+      - 'scripts/venue-router-contract-v1.js'
+      - '.github/workflows/venue-router-contract-v1.yml'
+  pull_request:
+    paths:
+      - 'venue-registry-v1.js'
+      - 'venue-runtime-v1.js'
+      - 'scripts/venue-router-contract-v1.js'
+      - '.github/workflows/venue-router-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify isolated venue routing
+        run: node scripts/venue-router-contract-v1.js
