@@ -1,0 +1,281 @@
+name: Toda PRE-RACE collector v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/toda-pre-race-collector-v1.yml'
+  schedule:
+    - cron: '*/5 0-12 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toda-pre-race-collector-v1
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Select next Toda race and collect PRE-RACE only
+        id: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          HD="${DATE//-/}"
+          CODE=02
+          BASE='https://www.boatrace.jp/owpc/pc/race'
+          RACELIST="$BASE/racelist?hd=$HD&jcd=$CODE&rno=1"
+
+          rm -rf tmp_toda_pre
+          mkdir -p tmp_toda_pre "live/toda/$DATE/pre"
+
+          if ! curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-TODA-PRE-RACE/1.0'             "$RACELIST" -o tmp_toda_pre/racelist.html; then
+            echo 'TODA_NO_RACELIST'
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          export DATE RACELIST
+          python3 - <<'PY'
+          import datetime,html,json,os,pathlib,re
+          from zoneinfo import ZoneInfo
+          date=os.environ['DATE']
+          raw=pathlib.Path('tmp_toda_pre/racelist.html').read_bytes()
+          text=None
+          for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+              try:text=raw.decode(enc);break
+              except UnicodeDecodeError:pass
+          if text is None:text=raw.decode('utf-8','replace')
+          plain=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',text)))
+          times=re.findall(r'(?<!\d)([0-2]?\d:[0-5]\d)(?!\d)',plain)
+          deadlines=times[:12] if len(times)>=12 else []
+          now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+          selected=None
+          for race,t in enumerate(deadlines,1):
+              hh,mm=map(int,t.split(':'))
+              dt=datetime.datetime.fromisoformat(date).replace(hour=hh,minute=mm,tzinfo=ZoneInfo('Asia/Tokyo'))
+              margin=(dt-now).total_seconds()/60
+              if margin>=5:
+                  selected={'race':race,'deadline':t,'marginMinutes':round(margin,1)}
+                  break
+          state={
+            'schema':'boat-command-toda-pre-race-state-v1',
+            'venue':'TODA','venueCode':'02','date':date,
+            'fetchedAt':now.isoformat(),'deadlineCount':len(deadlines),
+            'selected':selected,
+            'status':'RACE_SELECTED' if selected and len(deadlines)==12 else ('NO_MORE_RACES_TODAY' if len(deadlines)==12 else 'SCHEDULE_UNVERIFIED'),
+            'resultEndpointsIncluded':False,'predictionEnabled':False,'hardLockEnabled':False
+          }
+          pathlib.Path('tmp_toda_pre/state.json').write_text(json.dumps(state,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(state,ensure_ascii=False))
+          PY
+
+          RACE=$(python3 -c 'import json; x=json.load(open("tmp_toda_pre/state.json")); print(x["selected"]["race"] if x.get("selected") else "")')
+          DEADLINE=$(python3 -c 'import json; x=json.load(open("tmp_toda_pre/state.json")); print(x["selected"]["deadline"] if x.get("selected") else "")')
+          if [ -z "$RACE" ]; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BEFOREINFO="$BASE/beforeinfo?hd=$HD&jcd=$CODE&rno=$RACE"
+          curl -fsSL --connect-timeout 20 --max-time 60             --user-agent 'BOAT-COMMAND-TODA-PRE-RACE/1.0'             "$BEFOREINFO" -o tmp_toda_pre/beforeinfo.html
+
+          export RACE DEADLINE BEFOREINFO
+          python3 - <<'PY'
+          import datetime,html,json,os,pathlib,re
+          from html.parser import HTMLParser
+          from zoneinfo import ZoneInfo
+
+          date=os.environ['DATE']; race=int(os.environ['RACE']); deadline=os.environ['DEADLINE']
+          now=datetime.datetime.now(ZoneInfo('Asia/Tokyo'))
+
+          def decode(path):
+              b=pathlib.Path(path).read_bytes()
+              for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+                  try:return b.decode(enc)
+                  except UnicodeDecodeError:pass
+              return b.decode('utf-8','replace')
+
+          rl=decode('tmp_toda_pre/racelist.html')
+          bi=decode('tmp_toda_pre/beforeinfo.html')
+
+          hh,mm=map(int,deadline.split(':'))
+          deadline_dt=datetime.datetime.fromisoformat(date).replace(hour=hh,minute=mm,tzinfo=ZoneInfo('Asia/Tokyo'))
+          if (deadline_dt-now).total_seconds()/60 < 3:
+              print('TODA_FAIL_CLOSED_LOCK_MARGIN')
+              raise SystemExit(0)
+
+          class P(HTMLParser):
+              def __init__(self):
+                  super().__init__();self.depth=0;self.in_cell=False;self.cell=[];self.row=[];self.table=[];self.tables=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=='table':
+                      if self.depth==0:self.table=[]
+                      self.depth+=1
+                  elif tag in ('td','th') and self.depth:self.in_cell=True;self.cell=[]
+                  elif tag=='tr' and self.depth:self.row=[]
+                  elif tag=='br' and self.in_cell:self.cell.append(' / ')
+              def handle_data(self,data):
+                  if self.in_cell:self.cell.append(data)
+              def handle_endtag(self,tag):
+                  if tag in ('td','th') and self.in_cell:
+                      self.row.append(re.sub(r'\s+',' ',html.unescape(''.join(self.cell))).strip());self.in_cell=False;self.cell=[]
+                  elif tag=='tr' and self.depth:
+                      if self.row and any(self.row):self.table.append(self.row)
+                      self.row=[]
+                  elif tag=='table' and self.depth:
+                      self.depth-=1
+                      if self.depth==0 and self.table:self.tables.append(self.table);self.table=[]
+
+          def tables(text):
+              p=P();p.feed(text);return p.tables
+
+          rlt=tables(rl); bit=tables(bi)
+
+          racer=None
+          for t in rlt:
+              joined=' '.join(' '.join(r) for r in t[:8])
+              if all(k in joined for k in ('級別','モーター','ボート')):
+                  racer=t;break
+
+          lane_map={'１':1,'２':2,'３':3,'４':4,'５':5,'６':6}
+          boats={}
+          if racer:
+              for row in racer:
+                  if not row:continue
+                  raw=row[0].strip()
+                  if raw not in set(lane_map)|set('123456'):continue
+                  lane=lane_map.get(raw,int(raw) if raw.isdigit() else None)
+                  joined=' | '.join(row)
+                  m=re.search(r'(\d{4})\s*/\s*(A1|A2|B1|B2)\s+([^|/]+)',joined)
+                  if not m:continue
+                  motor=boat=None
+                  if len(row)>7:
+                      mm=re.match(r'\s*(\d+)\s*/',row[6]);bb=re.match(r'\s*(\d+)\s*/',row[7])
+                      motor=int(mm.group(1)) if mm else None;boat=int(bb.group(1)) if bb else None
+                  boats[lane]={
+                    'lane':lane,'registration':int(m.group(1)),'class':m.group(2),
+                    'name':re.sub(r'\s+',' ',m.group(3)).strip(),'motor':motor,'boat':boat
+                  }
+
+          ex={};st={}
+          for t in bit:
+              joined=' '.join(' '.join(r) for r in t[:6])
+              if '展示' in joined and 'タイム' in joined and '体重' in joined:
+                  for row in t:
+                      if not row or row[0] not in set('123456'):continue
+                      lane=int(row[0]);et=tilt=None
+                      if len(row)>4 and re.fullmatch(r'\d+\.\d+',row[4].strip()):et=float(row[4])
+                      if len(row)>5 and re.fullmatch(r'-?\d+(?:\.\d+)?',row[5].strip()):tilt=float(row[5])
+                      ex[lane]={'exhibitionTime':et,'tilt':tilt}
+                  break
+
+          for t in bit:
+              joined=' '.join(' '.join(r) for r in t)
+              if 'スタート展示' not in joined:continue
+              for row in t:
+                  s=' '.join(row)
+                  m=re.search(r'([1-6])\s+(F)?\.?([0-9]{2})',s)
+                  if m:st[int(m.group(1))]=('F.' if m.group(2) else '.')+m.group(3)
+              if st:break
+
+          title_m=re.search(r'<p class="weather1_title">([^<]+)</p>',bi)
+          weather_ref=html.unescape(title_m.group(1)).strip() if title_m else None
+
+          def wx(kind,label,unit):
+              block=re.search(rf'<div class="weather1_bodyUnit {re.escape(kind)}">(.*?)</div>\s*</div>',bi,re.S)
+              source=block.group(1) if block else bi
+              m=re.search(
+                rf'<span class="weather1_bodyUnitLabelTitle">\s*{label}\s*</span>\s*'
+                rf'<span class="weather1_bodyUnitLabelData">\s*([0-9]+(?:\.[0-9]+)?)\s*{unit}\s*</span>',
+                source,re.S
+              )
+              return float(m.group(1)) if m else None
+
+          air=wx('is-direction','気温','℃')
+          wind=wx('is-wind','風速','m')
+          water=wx('is-waterTemperature','水温','℃')
+          wave=wx('is-wave','波高','cm')
+          dm=re.search(r'weather1_bodyUnitImage\s+(is-wind[0-9]{1,2})',bi)
+          wm=re.search(r'weather1_bodyUnitImage\s+(is-weather[0-9]{1,2})',bi)
+
+          final=[]
+          for lane in range(1,7):
+              b=boats.get(lane,{'lane':lane,'registration':None,'class':None,'name':'','motor':None,'boat':None})
+              b.update(ex.get(lane,{'exhibitionTime':None,'tilt':None}))
+              final.append(b)
+
+          boat_ok=(len(boats)==6 and len(ex)==6 and len(st)==6 and all(x['motor'] is not None and x['boat'] is not None for x in final))
+          weather_ok=all(x is not None for x in (air,wind,water,wave))
+          if not (boat_ok and weather_ok):
+              print(json.dumps({'status':'WAIT_PRE_RACE_VALUES','race':race,'exhibition':len(ex),'startExhibition':len(st),'weatherReady':weather_ok},ensure_ascii=False))
+              raise SystemExit(0)
+          pack={
+            'schema':'boat-command-toda-pre-race-pack-v1',
+            'venue':'TODA','venueCode':'02','date':date,'race':race,
+            'fetchedAt':now.isoformat(),'deadline':deadline,'timingStatus':'VERIFIED',
+            'boats':final,
+            'startExhibition':[{'course':c,'st':st.get(c)} for c in range(1,7)],
+            'water':{
+              'reference':weather_ref,'airTempC':air,'windSpeedMps':wind,
+              'waterTempC':water,'waveHeightCm':wave,
+              'windDirectionCode':dm.group(1) if dm else None,
+              'weatherCode':wm.group(1) if wm else None,
+              'weatherMappingStatus':'VERIFIED_OFFICIAL_BEFOREINFO'
+            },
+            'boatMappingVerified':boat_ok,'weatherMappingVerified':weather_ok,
+            'readyForResearch':boat_ok and weather_ok,
+            'predictionEnabled':False,'hardLockEnabled':False,
+            'resultEndpointsIncluded':False,'payoutEndpointsIncluded':False
+          }
+          out=pathlib.Path(f'live/toda/{date}/pre/race-{race}-pack.json')
+          out.write_text(json.dumps(pack,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'out':str(out),'race':race,'boatMappingVerified':boat_ok,'weatherMappingVerified':weather_ok,'readyForResearch':pack['readyForResearch']},ensure_ascii=False))
+          PY
+
+          TARGET="live/toda/$DATE/pre/race-$RACE-pack.json"
+          if [ ! -f "$TARGET" ]; then
+            echo 'wrote=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'wrote=true' >> "$GITHUB_OUTPUT"
+
+      - name: Safety audit
+        if: steps.collect.outputs.wrote == 'true'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json
+          files=sorted(glob.glob('live/toda/*/pre/race-*-pack.json'))
+          assert files
+          x=json.load(open(files[-1],encoding='utf-8'))
+          assert x['venue']=='TODA' and x['venueCode']=='02'
+          assert len(x['boats'])==6 and len(x['startExhibition'])==6
+          assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False
+          assert x['resultEndpointsIncluded'] is False and x['payoutEndpointsIncluded'] is False
+          assert x['water']['weatherMappingStatus']=='VERIFIED_OFFICIAL_BEFOREINFO'
+          print('TODA_PRE_RACE_SAFETY_PASS')
+          PY
+
+      - name: Commit PRE-RACE research pack
+        if: steps.collect.outputs.wrote == 'true'
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git config user.name 'boat-command-toda-relay'
+          git config user.email 'boat-command-toda-relay@users.noreply.github.com'
+          git add "live/toda/$DATE/pre/"
+          git diff --cached --quiet && { echo 'NO_TODA_PRE_RACE_CHANGE'; exit 0; }
+          git commit -m "live: toda $DATE pre-race research pack"
+          git pull --rebase origin main
+          git push origin HEAD:main
