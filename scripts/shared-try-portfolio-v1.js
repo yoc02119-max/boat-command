@@ -7,13 +7,15 @@ const CONFIG_PATH=path.join(ROOT,'shared-try-config-v1.json');
 const OUTPUT_PATH=path.join(ROOT,'shared-try-portfolio-v1.json');
 const config=JSON.parse(fs.readFileSync(CONFIG_PATH,'utf8'));
 const JST_OFFSET=9*60*60*1000;
+const NOW_MS=process.env.BOAT_COMMAND_NOW_ISO?Date.parse(process.env.BOAT_COMMAND_NOW_ISO):Date.now();
+if(!Number.isFinite(NOW_MS))throw new Error('INVALID_NOW_OVERRIDE');
 
 const read=p=>{try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}};
 const exists=p=>{try{return fs.existsSync(p)}catch{return false}};
 const sha256=s=>crypto.createHash('sha256').update(s).digest('hex');
 const validPick=v=>/^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;
 const jstDate=d=>new Date((d||Date.now())+JST_OFFSET).toISOString().slice(0,10);
-const requestedDate=process.argv[2]||jstDate();
+const requestedDate=process.argv[2]||jstDate(NOW_MS);
 
 function deadlineEpoch(date,hm){
   const m=String(hm||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return NaN;
@@ -73,6 +75,13 @@ function safeGamagoriGate(adapter,date){
   return out;
 }
 function selectionPath(date){return path.join(ROOT,'live','portfolio',date,'try-selection-v1.json')}
+function withinOperationWindow(date){
+  const start=Date.parse(String(config.operationStartDate||'')+'T00:00:00+09:00');
+  const target=Date.parse(String(date)+'T00:00:00+09:00');
+  if(!Number.isFinite(start)||!Number.isFinite(target))return false;
+  const day=Math.floor((target-start)/86400000);
+  return day>=0&&day<Number(config.operationWindowDays||30);
+}
 function priorPortfolio(){
   return read(OUTPUT_PATH)||{startingBankrollYen:Number(config.startingBankrollYen)||1000000,bankrollYen:Number(config.startingBankrollYen)||1000000};
 }
@@ -83,7 +92,11 @@ function buildSelection(date,available){
     if(prior?.immutableAfterFirstWrite===true)return prior;
     throw new Error('EXISTING_SELECTION_NOT_IMMUTABLE');
   }
-  const now=Date.now(),safety=(Number(config.deadlineSafetyMinutes)||5)*60000,candidates=[];
+  if(!withinOperationWindow(date)){
+    const payload={schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',date,generatedAt:new Date(NOW_MS).toISOString(),selected:[],selectedCount:0,candidateCount:0,totalCommittedStakeYen:0,resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,status:'OUTSIDE_30_DAY_WINDOW'};
+    fs.mkdirSync(path.dirname(outPath),{recursive:true});fs.writeFileSync(outPath,JSON.stringify(payload,null,2)+'\n');return payload;
+  }
+  const now=NOW_MS,safety=(Number(config.deadlineSafetyMinutes)||5)*60000,candidates=[];
   for(const a of config.activeAdapters||[]){
     if(a.type==='GAMAGORI_EXISTING_TRY_GATE'){
       for(const x of safeGamagoriGate(a,date))if(now<x.deadlineEpoch-safety)candidates.push(x);
@@ -112,7 +125,7 @@ function buildSelection(date,available){
   }));
   const payload={
     schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',
-    date,generatedAt:new Date().toISOString(),
+    date,generatedAt:new Date(NOW_MS).toISOString(),
     startingBankrollYen:Number(config.startingBankrollYen)||1000000,bankrollBeforeSelectionYen:available,
     policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,picksPerTry,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
     candidateCount:candidates.length,selectedCount:selected.length,selected,
@@ -167,7 +180,7 @@ function rebuildPortfolio(){
   const settledTries=ledger.filter(x=>x.settled).length;
   const out={
     schema:'boat-command-shared-try-portfolio-v1',version:'SHARED-TRY-PORTFOLIO-V1',
-    generatedAt:new Date().toISOString(),realMoney:false,fundingScope:'ALL_24_VENUES_SHARED',
+    generatedAt:new Date(NOW_MS).toISOString(),realMoney:false,fundingScope:'ALL_24_VENUES_SHARED',
     operationWindowDays:Number(config.operationWindowDays)||30,
     startingBankrollYen:start,bankrollYen:bankroll,status:bankroll>0?'ACTIVE':'BANKRUPT_STOP_NEW_TRY',
     committedStakeYen:committed,settledStakeYen:settledStake,pendingStakeYen:pending,
