@@ -11,6 +11,7 @@ on:
       - 'venue-registry-v1.js'
       - 'venues/toda/config-v1.json'
       - 'venues/edogawa/config-v1.json'
+      - 'venues/karatsu/config-v1.json'
   schedule:
     # Freeze daily TRY selections at 06:00 JST, after early PRE-RACE model generation.
     - cron: '0 21 * * *'
@@ -18,6 +19,7 @@ on:
     workflows:
       - 'Toda POST-RACE result collector v1'
       - 'Edogawa POST-RACE result collector v1'
+      - 'Karatsu POST-RACE result collector v1'
     types: [completed]
 
 permissions:
