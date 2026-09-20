@@ -3,8 +3,8 @@
   "version": "NARUTO-READINESS-V1",
   "venue": "NARUTO",
   "venueCode": "14",
-  "generatedAt": "2026-09-20T01:01:23.888Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-20T01:01:32.489Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -26,16 +26,23 @@
     "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 278,
+    "classHitRate": 0.1474820143884892,
+    "programHitRate": 0.17985611510791366,
+    "classRoi": 0.5805755395683453,
+    "programRoi": 0.5976618705035971,
+    "hitRateDelta": 0.03237410071942445,
+    "roiDelta": 0.017086330935251803,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
