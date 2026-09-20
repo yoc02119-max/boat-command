@@ -25,12 +25,12 @@ const calibrationTargets=rows.filter(x=>x.d<=calEnd),holdoutTargets=rows.filter(
 const calibration=configs.map(cfg=>{const rec=evaluate(cfg,calibrationTargets,'PROGRAM_ONLY'),m4=metrics(rec,4);return{cfg,m4,score:.7*m4.hitRate+.3*Math.min(m4.roi,2)}}).sort((a,b)=>b.score-a.score||b.m4.hitRate-a.m4.hitRate||b.m4.roi-a.m4.roi);
 if(!calibration.length||!calibration[0].m4.races)throw new Error('CALIBRATION_EMPTY');
 const best=calibration[0],programHold=evaluate(best.cfg,holdoutTargets,'PROGRAM_ONLY'),classHold=evaluate(best.cfg,holdoutTargets,'CLASS_BASELINE');
-const p4=metrics(programHold,4),c4=metrics(classHold,4),hitDelta=p4.hitRate-c4.hitRate,roiDelta=p4.roi-c4.roi;
+const p4=metrics(programHold,4),c4=metrics(classHold,4),hitRateDelta=p4.hitRate-c4.hitRate,roiDelta=p4.roi-c4.roi;
 const report={schema:`boat-command-${slug}-baseline-backtest-v1`,version:`${key}-BASELINE-BACKTEST-V1`,venue:key,venueCode:code,source:input,
   strictWalkForward:true,sameDayRowsExcluded:true,resultBlockedUntilPrediction:true,crossVenueWeightsReused:false,primaryRecencyWindowRaces:300,
   baselineArchitecture:`${key}_CLASS_NEIGHBOR_BASELINE`,candidateArchitecture:`${key}_EMPIRICAL_FIRST_SECOND_TRANSITION_PLUS_CLASS_NEIGHBORS`,
   calibration:{lastDate:calEnd,dateCount:cut,selected:best.cfg,candidates:calibration.map(x=>({config:x.cfg,metrics4:x.m4,score:x.score}))},
-  holdout:{firstDate:holdStart,dateCount:dates.length-cut,classBaseline4:c4,programOnly4:p4,hitRateDelta,roiDelta,candidateUplift:hitDelta>=0&&roiDelta>0},
+  holdout:{firstDate:holdStart,dateCount:dates.length-cut,classBaseline4:c4,programOnly4:p4,hitRateDelta,roiDelta,candidateUplift:hitRateDelta>=0&&roiDelta>0},
   productionEnabled:false,tryEnabled:false,promotionEligible:false,
   promotionBlockers:[`${key}_FORWARD_36_RACES_NOT_READY`,`${key}_FORWARD_60_RACES_NOT_READY`,`${key}_FORWARD_MODEL_UPLIFT_NOT_READY`]};
 fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
