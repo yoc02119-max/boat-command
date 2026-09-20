@@ -1,0 +1,75 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:07:gamagori",
+  "venueCode": "07",
+  "venueName": "蒲郡",
+  "slug": "gamagori",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 4071,
+    "historicalRaceDays": 340,
+    "holdoutRaces": 1690,
+    "forwardRaces": 0,
+    "holdoutReady": true,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-fa4176a12ba3",
+    "type": "HIT_RATE_ROI_TRADEOFF",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 2.68672,
+    "evidence": {
+      "scope": "holdout",
+      "races": 1690,
+      "baselineHitRate": 0.227811,
+      "candidateHitRate": 0.268639,
+      "hitRateDelta": 0.040828,
+      "baselineRoi": 0.800754,
+      "candidateRoi": 0.776228,
+      "roiDelta": -0.024527
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "SELECTION_GATE_CALIBRATION",
+      "objective": "KEEP_HIT_RATE_GAIN_AND_REMOVE_ROI_REGRESSION"
+    },
+    "firstObservedAt": "2026-09-20T17:03:19.458Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:07:gamagori",
+    "venueCode": "07",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "ROI_REGRESSION"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0.22781065088757396,
+      "candidateHitRate": 0.2686390532544379,
+      "baselineRoi": 0.8007544378698225,
+      "candidateRoi": 0.7762278106508875
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:03:edogawa",
+  "venueCode": "03",
+  "venueName": "江戸川",
+  "slug": "edogawa",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 767,
+    "historicalRaceDays": 68,
+    "holdoutRaces": 0,
+    "forwardRaces": 24,
+    "holdoutReady": true,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-cb043998bf29",
+    "type": "RACE_NUMBER_LANE1_INTERACTION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 1.299211,
+    "evidence": {
+      "segment": "raceNumber",
+      "value": 6,
+      "races": 65,
+      "venueLane1FirstRate": 0.43807,
+      "segmentLane1FirstRate": 0.276923,
+      "delta": -0.161147
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+    },
+    "firstObservedAt": "2026-09-20T17:03:19.458Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:03:edogawa",
+    "venueCode": "03",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 24,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:18:tokuyama",
+  "venueCode": "18",
+  "venueName": "徳山",
+  "slug": "tokuyama",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 1212,
+    "historicalRaceDays": 101,
+    "holdoutRaces": 372,
+    "forwardRaces": 0,
+    "holdoutReady": true,
+    "holdoutUplift": true,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-5f45f8dba6ac",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 10.375283,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.380376,
+      "estimatedFirstPlaceSamples": 744
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:00:40.372Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:18:tokuyama",
+    "venueCode": "18",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0.19623655913978494,
+      "candidateHitRate": 0.23387096774193547,
+      "baselineRoi": 0.6938844086021505,
+      "candidateRoi": 0.7628360215053763
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

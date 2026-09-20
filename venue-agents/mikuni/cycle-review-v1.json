@@ -1,0 +1,71 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:10:mikuni",
+  "venueCode": "10",
+  "venueName": "三国",
+  "slug": "mikuni",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 1140,
+    "historicalRaceDays": 98,
+    "holdoutRaces": 346,
+    "forwardRaces": 11,
+    "holdoutReady": true,
+    "holdoutUplift": true,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-14c9abf09d0f",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 8.497523,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.352234,
+      "estimatedFirstPlaceSamples": 582
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:00:40.372Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:10:mikuni",
+    "venueCode": "10",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 11,
+      "baselineHitRate": 0.2727272727272727,
+      "candidateHitRate": 0.2727272727272727,
+      "baselineRoi": 0.865909090909091,
+      "candidateRoi": 0.865909090909091
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

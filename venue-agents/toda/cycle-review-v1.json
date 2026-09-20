@@ -1,0 +1,71 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:02:toda",
+  "venueCode": "02",
+  "venueName": "戸田",
+  "slug": "toda",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 1004,
+    "historicalRaceDays": 84,
+    "holdoutRaces": 310,
+    "forwardRaces": 12,
+    "holdoutReady": true,
+    "holdoutUplift": true,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-d2cd02d58bae",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 7.60727,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.383249,
+      "estimatedFirstPlaceSamples": 394
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:00:40.372Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:02:toda",
+    "venueCode": "02",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 12,
+      "baselineHitRate": 0.16666666666666666,
+      "candidateHitRate": 0.16666666666666666,
+      "baselineRoi": 1.7375,
+      "candidateRoi": 1.7375
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

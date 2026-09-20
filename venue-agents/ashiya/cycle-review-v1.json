@@ -1,0 +1,71 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:21:ashiya",
+  "venueCode": "21",
+  "venueName": "芦屋",
+  "slug": "ashiya",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 1187,
+    "historicalRaceDays": 99,
+    "holdoutRaces": 360,
+    "forwardRaces": 0,
+    "holdoutReady": true,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-119dbffec55f",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 8.517695,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.321023,
+      "estimatedFirstPlaceSamples": 704
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:00:40.372Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:21:ashiya",
+    "venueCode": "21",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "ROI_REGRESSION"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0.23055555555555557,
+      "candidateHitRate": 0.23333333333333334,
+      "baselineRoi": 0.8147222222222222,
+      "candidateRoi": 0.7804166666666666
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

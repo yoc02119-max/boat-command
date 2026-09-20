@@ -1,0 +1,71 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:01:kiryu",
+  "venueCode": "01",
+  "venueName": "桐生",
+  "slug": "kiryu",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 1115,
+    "historicalRaceDays": 96,
+    "holdoutRaces": 340,
+    "forwardRaces": 0,
+    "holdoutReady": true,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-bb658700f46d",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 8.186292,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.338462,
+      "estimatedFirstPlaceSamples": 585
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:08:15.823Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:01:kiryu",
+    "venueCode": "01",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "ROI_REGRESSION"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0.2,
+      "candidateHitRate": 0.21470588235294116,
+      "baselineRoi": 0.94125,
+      "candidateRoi": 0.8556617647058824
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "boat-command-venue-agent-cycle-review-v1",
+  "agentId": "venue-agent:14:naruto",
+  "venueCode": "14",
+  "venueName": "鳴門",
+  "slug": "naruto",
+  "generatedAt": "2026-09-20T17:12:41.552Z",
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "state": "IN_CYCLE",
+  "nextAction": "CONTINUE_OBSERVATION",
+  "evidence": {
+    "historicalRaces": 923,
+    "historicalRaceDays": 79,
+    "holdoutRaces": 278,
+    "forwardRaces": 8,
+    "holdoutReady": true,
+    "holdoutUplift": true,
+    "forwardUplift": false
+  },
+  "topHypothesis": {
+    "id": "H-4dd5ecea6c1c",
+    "type": "FIRST_TO_SECOND_TRANSITION",
+    "researchOnly": true,
+    "preRaceRuntimeConsumable": false,
+    "productionMutation": false,
+    "priorityScore": 7.401969,
+    "evidence": {
+      "firstLane": 1,
+      "candidateSecondLane": 2,
+      "conditionalSecondRate": 0.338205,
+      "estimatedFirstPlaceSamples": 479
+    },
+    "experiment": {
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+    },
+    "firstObservedAt": "2026-09-20T17:00:40.372Z",
+    "lastObservedAt": "2026-09-20T17:12:41.416Z",
+    "status": "NEEDS_BACKTEST"
+  },
+  "promotionReview": {
+    "agentId": "venue-agent:14:naruto",
+    "venueCode": "14",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 8,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "boundaries": {
+    "autoPromotion": false,
+    "productionMutation": false,
+    "hardLockMutation": false,
+    "preRaceResultLeakage": false
+  }
+}
