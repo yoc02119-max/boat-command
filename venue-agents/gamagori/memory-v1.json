@@ -5,7 +5,7 @@
   "venueCode": "07",
   "venueName": "蒲郡",
   "slug": "gamagori",
-  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "updatedAt": "2026-09-20T17:03:19.458Z",
   "researchOnly": true,
   "preRaceRuntimeConsumable": false,
   "productionMutation": false,
@@ -16,13 +16,14 @@
     "ageDays": 0,
     "due": false
   },
-  "status": "DATA_BOOTSTRAP",
+  "status": "MODEL_EVALUATION",
   "sourceCoverage": {
     "config": false,
     "readiness": false,
     "historyAnalysis": false,
     "historyAudit": true,
     "shadowEvaluation": true,
+    "backtest": true,
     "model": true
   },
   "sourcePaths": {
@@ -31,19 +32,56 @@
     "historyAnalysis": null,
     "historyAudit": "gamagori-main-history-audit-v0320.json",
     "shadowEvaluation": "gamagori-shadow-evaluation-v0333.json",
+    "backtest": "gamagori-main-backtest-v0320.json",
     "model": "gamagori-main-model-v0320.js"
   },
-  "dataCutoff": null,
+  "dataCutoff": "2026-09-04",
   "evidence": {
-    "historicalRaces": 0,
-    "historicalRaceDays": 0,
-    "forwardRaces": 0,
-    "holdoutReady": false,
+    "historicalRaces": 4071,
+    "historicalRaceDays": 340,
+    "forwardRaces": 1690,
+    "holdoutReady": true,
     "holdoutUplift": false,
     "forwardUplift": false
   },
-  "hypotheses": [],
-  "researchQueue": [],
+  "hypotheses": [
+    {
+      "id": "H-fa4176a12ba3",
+      "type": "HIT_RATE_ROI_TRADEOFF",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 2.68672,
+      "evidence": {
+        "scope": "holdout",
+        "races": 1690,
+        "baselineHitRate": 0.227811,
+        "candidateHitRate": 0.268639,
+        "hitRateDelta": 0.040828,
+        "baselineRoi": 0.800754,
+        "candidateRoi": 0.776228,
+        "roiDelta": -0.024527
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "SELECTION_GATE_CALIBRATION",
+        "objective": "KEEP_HIT_RATE_GAIN_AND_REMOVE_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:03:19.458Z",
+      "lastObservedAt": "2026-09-20T17:03:19.458Z",
+      "status": "NEEDS_BACKTEST"
+    }
+  ],
+  "researchQueue": [
+    {
+      "hypothesisId": "H-fa4176a12ba3",
+      "priorityScore": 2.68672,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "SELECTION_GATE_CALIBRATION",
+      "objective": "KEEP_HIT_RATE_GAIN_AND_REMOVE_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    }
+  ],
   "promotionReview": {
     "agentId": "venue-agent:07:gamagori",
     "venueCode": "07",
@@ -51,16 +89,14 @@
     "autoPromote": false,
     "productionChanged": false,
     "blockers": [
-      "STRICT_HOLDOUT_NOT_PROVEN",
-      "FORWARD_SAMPLE_TOO_SMALL",
-      "HIT_RATE_NOT_IMPROVED"
+      "ROI_REGRESSION"
     ],
     "comparison": {
-      "forwardRaces": 0,
-      "baselineHitRate": 0,
-      "candidateHitRate": 0,
-      "baselineRoi": 0,
-      "candidateRoi": 0
+      "forwardRaces": 1690,
+      "baselineHitRate": 0.22781065088757396,
+      "candidateHitRate": 0.2686390532544379,
+      "baselineRoi": 0.8007544378698225,
+      "candidateRoi": 0.7762278106508875
     }
   },
   "guardrails": {
