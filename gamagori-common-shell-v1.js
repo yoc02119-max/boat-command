@@ -62,7 +62,7 @@ async function loadShared(){
  ]);
  if(a.status==='fulfilled'&&a.value)shared=a.value;
  if(b.status==='fulfilled'&&b.value)selection=b.value;
- renderBank();renderTryStates();
+ renderBank();renderTryStates();renderPresentationStates();
 }
 
 function todayLedger(){
@@ -93,6 +93,29 @@ function renderBank(){
  if(note)note.textContent=`共通100万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
 }
 function selectionReady(){return selection?.immutableAfterFirstWrite===true}
+function liveSessionView(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
+function renderComparisonStates(){
+ const s=liveSessionView();if(!s)return;
+ document.querySelectorAll('#predictionList .race-card[data-race]').forEach(card=>{
+   card.querySelector('.bc-gama-compare')?.remove();
+   const race=Number(card.dataset.race),r=s.races?.find(x=>Number(x.race)===race),picks=r?.firstSuggestion?.shadow?.picks;
+   if(!Array.isArray(picks)||!picks.length)return;
+   const target=card.querySelector('.main-prediction-v0320');
+   if(!target)return;
+   const chips=picks.map(x=>`<i>${esc(x)}</i>`).join('');
+   target.insertAdjacentHTML('afterend',`<div class="bc-gama-compare"><span>比較用SHADOW</span><div class="bc-gama-compare-picks">${chips}</div></div>`);
+ });
+}
+function renderNoProgramDay(){
+ const list=document.getElementById('predictionList'),s=liveSessionView();if(!list||!s)return;
+ list.querySelector('.bc-no-program-banner')?.remove();
+ const races=Array.isArray(s.races)?s.races:[];
+ const noProgram=races.length===12&&races.every(r=>String(r?.programSnapshotReason||'').includes('HTTP_404'));
+ list.classList.toggle('bc-no-program-day',noProgram);
+ if(noProgram)list.insertAdjacentHTML('afterbegin','<div class="bc-no-program-banner"><b>本日の番組データなし</b><span>開催日でないか、公式番組が未公開です。12Rの予想生成は停止しています。</span></div>');
+}
+function renderPresentationStates(){renderComparisonStates();renderNoProgramDay()}
+
 function raceTry(race){
  const d=todayJst();
  return todayLedger().find(x=>String(x.venueCode).padStart(2,'0')===VENUE_CODE&&Number(x.race)===Number(race))||null;
@@ -119,7 +142,7 @@ function renderTryStates(){
 function wrapRender(){
  if(typeof window.renderAll!=='function'||window.renderAll.__commonShellWrapped)return;
  const prior=window.renderAll;
- const wrapped=function(){const out=prior.apply(this,arguments);setTimeout(()=>{renderTryStates();syncTabs(document.querySelector('.nav.active')?.dataset.view||'home')},0);return out};
+ const wrapped=function(){const out=prior.apply(this,arguments);setTimeout(()=>{renderTryStates();renderPresentationStates();syncTabs(document.querySelector('.nav.active')?.dataset.view||'home')},0);return out};
  wrapped.__commonShellWrapped=true;
  window.renderAll=wrapped;
 }
@@ -128,8 +151,8 @@ function start(){
  timer=setInterval(loadShared,60000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadShared()});
  window.addEventListener('boatcommand:shared-portfolio',loadShared);
- setTimeout(renderTryStates,300);
- setTimeout(renderTryStates,1400);
+ setTimeout(()=>{renderTryStates();renderPresentationStates()},300);
+ setTimeout(()=>{renderTryStates();renderPresentationStates()},1400);
 }
 window.BOAT_COMMAND_COMMON_SHELL_V1=Object.freeze({version:VERSION,refresh:loadShared,venueCode:VENUE_CODE,venueName:VENUE_NAME,presentationOnly:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
