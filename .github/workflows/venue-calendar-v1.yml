@@ -1,0 +1,58 @@
+name: 24 venue next-race calendar v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/venue-calendar-v1.yml'
+      - 'scripts/venue-calendar-v1.py'
+  schedule:
+    # Refresh every 3 hours. Entrance cards use this only for display.
+    - cron: '17 */3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-calendar-v1
+  cancel-in-progress: true
+
+jobs:
+  calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Build official next-race calendar
+        run: python3 scripts/venue-calendar-v1.py
+
+      - name: Publish calendar
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-calendar-relay'
+          git config user.email 'boat-command-calendar-relay@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            cp venue-calendar-v1.json /tmp/venue-calendar-v1.json
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/venue-calendar-v1.json venue-calendar-v1.json
+            git add venue-calendar-v1.json
+            if git diff --cached --quiet; then
+              echo 'NO_CALENDAR_CHANGE'
+              exit 0
+            fi
+            git commit -m 'data: refresh 24 venue next-race calendar'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          echo 'CALENDAR_PUSH_RETRY_EXHAUSTED' >&2
+          exit 1
