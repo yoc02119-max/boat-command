@@ -1,4 +1,4 @@
-// BOAT COMMAND fixed browser controls v1
+// BOAT COMMAND fixed browser controls v2
 (()=>{'use strict';
 function mount(){
  if(document.getElementById('bcBrowserControls'))return;
@@ -7,7 +7,7 @@ function mount(){
  document.head.appendChild(st);
  const el=document.createElement('div');el.id='bcBrowserControls';el.setAttribute('aria-label','ページ操作');
  el.innerHTML='<button type="button" data-act="back" aria-label="ページ戻る">‹</button><button type="button" data-act="forward" aria-label="ページ進む">›</button><button type="button" data-act="reload" aria-label="ページ更新">↻</button>';
- el.onclick=e=>{const a=e.target?.dataset?.act;if(a==='back')history.back();else if(a==='forward')history.forward();else if(a==='reload')location.reload()};
+ el.onclick=e=>{const a=e.target?.dataset?.act;if(a==='back')history.back();else if(a==='forward')history.forward();else if(a==='reload'){const u=new URL(location.href);u.searchParams.set('_bc_refresh',Date.now().toString());location.replace(u.toString())}};
  document.body.appendChild(el);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
