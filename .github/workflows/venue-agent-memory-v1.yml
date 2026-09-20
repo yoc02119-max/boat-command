@@ -1,0 +1,84 @@
+name: BOAT COMMAND venue agent memory v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 18 * * *'
+  push:
+    branches:
+      - main
+      - feat/venue-agent-core-v1
+    paths:
+      - 'venue-agent-core-v1.js'
+      - 'venue-agent-research-v1.js'
+      - 'venue-agent-policy-v1.json'
+      - 'venue-registry-v1.js'
+      - 'scripts/venue-agent-memory-refresh-v1.js'
+      - 'scripts/venue-agent-research-smoke-v1.js'
+      - '.github/workflows/venue-agent-memory-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-agent-memory-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax and research guardrails
+        run: |
+          set -euo pipefail
+          node --check venue-agent-research-v1.js
+          node --check scripts/venue-agent-memory-refresh-v1.js
+          node --check scripts/venue-agent-research-smoke-v1.js
+          node scripts/venue-agent-research-smoke-v1.js
+
+      - name: Refresh 24 venue memories
+        run: |
+          set -euo pipefail
+          node scripts/venue-agent-memory-refresh-v1.js --write
+          node - <<'NODE'
+          const x=require('./venue-agent-memory-index-v1.json');
+          if(x.agents!==24)throw new Error('AGENT_COUNT');
+          if(!Array.isArray(x.rows)||x.rows.length!==24)throw new Error('AGENT_ROWS');
+          if(new Set(x.rows.map(r=>r.agentId)).size!==24)throw new Error('AGENT_IDS');
+          console.log('VENUE_AGENT_MEMORY_PASS',{
+            agents:x.agents,
+            statuses:x.statuses,
+            reviewCandidates:x.reviewCandidates
+          });
+          NODE
+
+      - name: Enforce generated-file boundary
+        run: |
+          set -euo pipefail
+          BAD="$(git status --porcelain | awk '{print $2}' | grep -Ev '^(venue-agents/|venue-agent-memory-index-v1\.json$)' || true)"
+          if [ -n "$BAD" ]; then
+            echo "Unexpected modified paths:"
+            echo "$BAD"
+            exit 1
+          fi
+
+      - name: Commit research memory
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-venue-agent-memory'
+          git config user.email 'boat-command-venue-agent-memory@users.noreply.github.com'
+          git add venue-agents venue-agent-memory-index-v1.json
+          git diff --cached --quiet && { echo 'VENUE_AGENT_MEMORY_CURRENT'; exit 0; }
+          git commit -m 'analysis(agent): refresh 24 venue research memories'
+          BRANCH="${GITHUB_REF_NAME}"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
