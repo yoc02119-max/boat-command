@@ -58,6 +58,19 @@
       dataRoot:'./live/mikuni',
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
+    '18':{
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
+      model:{
+        script:'./tokuyama-research-model-v1.js',
+        global:'BOAT_COMMAND_TOKUYAMA_RESEARCH_MODEL_V1',
+        version:'TOKUYAMA-RESEARCH-MODEL-V1'
+      },
+      configPath:'./venues/tokuyama/config-v1.json',
+      readinessPath:'./venues/tokuyama/readiness-v1.json',
+      dataRoot:'./live/tokuyama',
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
+    },
     '21':{
       state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
