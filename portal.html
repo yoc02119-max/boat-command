@@ -26,7 +26,7 @@
 <header class="top"><div class="brand"><div class="mark">◉</div><div><h1>BOAT COMMAND</h1><p>AI × DATA × STRATEGY</p></div></div><div class="tag">競艇を、もっとシンプルに。</div></header>
 <section class="hero"><h2>競艇場を選択</h2><p>24場すべて専用レーン作成済み。蒲郡・戸田・江戸川・三国・鳴門・徳山・芦屋・唐津は30日運用中、残り16場は専用DATA・モデル構築を順次進めます。</p></section>
 <section class="money-strip" aria-label="資金と収支">
-<div class="money-card"><span>24場共通 仮資金</span><strong id="portalBankroll">¥1,000,000</strong><small id="portalBankrollNote">30日固定運用 · 実金なし</small></div>
+<div class="money-card"><span>24場共通 仮資金</span><strong id="portalBankroll">¥1,000,000</strong><small id="portalBankrollNote">30日固定運用 · 実金なし</small><div class="deposit-row"><input id="depositAmount" inputmode="numeric" type="number" min="1" step="1000" placeholder="変更額"><button id="depositBtn" type="button">＋入金</button><button id="withdrawBtn" type="button">－出金</button></div><div class="deposit-note" id="depositNote">変更はこの端末の24場すべてに共通反映</div></div>
 <div class="money-card"><span>累計確定収支</span><strong id="portalProfit" class="flat">¥0</strong><small>入金を除くレース損益</small></div>
 <div class="money-card"><span>今日の確定収支</span><strong id="portalTodayProfit" class="flat">¥0</strong><small id="portalTodayLabel">本日LIVE</small></div>
 <div class="money-card"><span>今日の回収率</span><strong id="portalTodayRoi" class="flat">—</strong><small>本日払戻 ÷ 本日投資</small></div>
@@ -58,7 +58,7 @@ function syncDepositsIntoAppStore(){const target=START_BANKROLL+depositTotal(),c
 function addDeposit(amount){const list=deposits();list.push({amount:Number(amount),at:new Date().toISOString()});localStorage.setItem(DEPOSIT_KEY,JSON.stringify(list));syncDepositsIntoAppStore()}
 function portalStats(){let total=0,today=0,totalInvested=0,totalReturned=0,todayInvested=0,todayReturned=0;const day=todayJst();for(const s of sessions()){if(!s||s.runType!=='LIVE'||s.retestMode)continue;for(const r of Array.isArray(s.races)?s.races:[]){if(!r||!r.settled)continue;const stake=Number(r.stake)||0,ret=Number(r.returnAmount)||0,p=ret-stake;total+=p;totalInvested+=stake;totalReturned+=ret;if(s.date===day){today+=p;todayInvested+=stake;todayReturned+=ret}}}const dep=depositTotal();return{bankroll:START_BANKROLL+dep+total,deposited:dep,total,today,todayKey:day,totalRoi:totalInvested>0?totalReturned/totalInvested*100:null,todayRoi:todayInvested>0?todayReturned/todayInvested*100:null}}
 function renderPortalStats(){const s=portalStats(),b=document.getElementById('portalBankroll'),bn=document.getElementById('portalBankrollNote'),p=document.getElementById('portalProfit'),t=document.getElementById('portalTodayProfit'),l=document.getElementById('portalTodayLabel'),tr=document.getElementById('portalTodayRoi'),rr=document.getElementById('portalTotalRoi');b.textContent=money(s.bankroll);bn.textContent=`仮入金累計 ${money(s.deposited)}・蒲郡本体と共通`;p.textContent=signed(s.total);t.textContent=signed(s.today);l.textContent=`${s.todayKey} LIVE`;tr.textContent=s.todayRoi==null?'—':`${s.todayRoi.toFixed(1)}%`;rr.textContent=s.totalRoi==null?'—':`${s.totalRoi.toFixed(1)}%`;const cls=n=>n>0?'plus':n<0?'minus':'flat',roiCls=n=>n==null?'flat':n>=100?'plus':'minus';p.className=cls(s.total);t.className=cls(s.today);b.className='flat';tr.className=roiCls(s.todayRoi);rr.className=roiCls(s.totalRoi)}
-function setupDeposit(){const input=document.getElementById('depositAmount'),btn=document.getElementById('depositBtn'),note=document.getElementById('depositNote');btn.addEventListener('click',()=>{const amount=Math.floor(Number(input.value));if(!Number.isFinite(amount)||amount<=0){note.textContent='1円以上の入金額を入力してください';return}if(amount>100000000){note.textContent='1回の入金は1億円以下にしてください';return}addDeposit(amount);input.value='';note.textContent=`${money(amount)} を仮資金に入金しました`;renderPortalStats()})}
+function setupDeposit(){const input=document.getElementById('depositAmount'),btn=document.getElementById('depositBtn'),out=document.getElementById('withdrawBtn'),note=document.getElementById('depositNote');if(!input||!btn||!out)return;const apply=sign=>{const amount=Math.floor(Number(input.value));if(!Number.isFinite(amount)||amount<=0){note.textContent='1円以上の変更額を入力してください';return}if(amount>100000000){note.textContent='1回の変更は1億円以下にしてください';return}addDeposit(sign*amount);input.value='';note.textContent=`${money(amount)} を仮資金に${sign>0?'入金':'出金'}しました · 24場共通`;renderSharedPortfolioStats()};btn.onclick=()=>apply(1);out.onclick=()=>apply(-1)}
 function parseMinutes(hm){const m=String(hm||'').match(/(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):null}
 function gamagoriStatus(){const day=todayJst(),now=parseMinutes(nowJstHM()),live=sessions().find(s=>s&&s.runType==='LIVE'&&!s.retestMode&&s.date===day),active=SERIES.find(([a,b])=>a<=day&&day<=b);if(active){const races=Array.isArray(live?.races)?live.races:[],timed=races.map(r=>({race:Number(r.race),deadline:r?.livePreRace?.deadline||r?.deadline||'',settled:!!r?.settled})).filter(x=>x.race>=1&&x.race<=12&&parseMinutes(x.deadline)!==null).sort((a,b)=>a.race-b.race),next=timed.find(x=>parseMinutes(x.deadline)>=now&&!x.settled);if(next)return{top:'開催中',detail:`次 ${next.race}R　締切 ${next.deadline}`,live:true};if(timed.length&&timed.every(x=>x.settled||parseMinutes(x.deadline)<now))return{top:'本日終了',detail:'12R終了後',live:false};return{top:'開催中',detail:'LIVE時刻取得待ち',live:true}}const next=SERIES.find(([a])=>a>day);if(next){const tomorrow=new Date(Date.now()+86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});return{top:next[0]===tomorrow?'明日開催':'次回開催',detail:next[0].slice(5).replace('-','/'),live:false}}return{top:'利用可能',detail:'次回日程確認待ち',live:false}}
 async function renderTodayTryPerformance(){
@@ -85,8 +85,8 @@ async function renderSharedPortfolioStats(){
    const dayStake=settled.reduce((s,z)=>s+(Number(z.stakeYen)||0),0),dayReturn=settled.reduce((s,z)=>s+(Number(z.returnYen)||0),0),dayProfit=dayReturn-dayStake;
    const dayRoi=dayStake?dayReturn/dayStake*100:null,totalRoi=Number.isFinite(Number(x.roi))?Number(x.roi)*100:null;
    const cls=n=>n>0?'plus':n<0?'minus':'flat',roiCls=n=>n==null?'flat':n>=100?'plus':'minus';
-   b.textContent=money(Number(x.bankrollYen??START_BANKROLL));b.className='flat';
-   bn.textContent=`開始 ¥1,000,000 · 未精算TRY ${money(Number(x.pendingStakeYen)||0)}差引済み`;
+   const adjustment=depositTotal();b.textContent=money(Number(x.bankrollYen??START_BANKROLL)+adjustment);b.className='flat';
+   bn.textContent=`基準 ${money(Number(x.bankrollYen??START_BANKROLL))} · 資金調整 ${signed(adjustment)} · 未精算TRY差引済み`;
    p.textContent=signed(Number(x.profitYen)||0);p.className=cls(Number(x.profitYen)||0);
    t.textContent=signed(dayProfit);t.className=cls(dayProfit);
    l.textContent=`${day} · TRY ${rows.length}R`;
@@ -190,6 +190,7 @@ async function refreshVenueCalendarStatus(){
 async function refreshAllResearchBuildStatus(){
  for(const v of venues.filter(x=>x.code!=='07'&&x.readinessPath))await refreshResearchBuildStatus(v.code);
 }
+setupDeposit();
 refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus);
 renderSharedPortfolioStats();
 renderTodayTryPerformance();
