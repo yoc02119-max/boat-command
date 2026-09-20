@@ -141,6 +141,7 @@ const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
 const q=new URLSearchParams(location.search),meta=REG?.resolve(q.get('jcd')||q.get('venue')||''),jcd=meta?.code||'',v=meta?[meta.name,meta.key]:null;
 const runtimePromise=meta&&RUNTIME?.boot?RUNTIME.boot(meta,{loadModel:meta.runtime!=='ENTRY_ONLY'}).catch(()=>null):Promise.resolve(null);
 const yen=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
+const sharedAdjustment=()=>{try{const a=JSON.parse(localStorage.getItem('boatCommand.portalDeposits.v1')||'[]');return Array.isArray(a)?a.reduce((n,x)=>n+(Number(x.amount)||0),0):0}catch{return 0}};
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function syncCommonVenueTabs(view){
  document.querySelectorAll('#commonVenueTabs .common-tab').forEach(t=>t.classList.toggle('active',t.dataset.commonView===view));
