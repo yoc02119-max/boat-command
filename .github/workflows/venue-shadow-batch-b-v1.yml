@@ -1,0 +1,142 @@
+name: Venue SHADOW batch B v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Venue program batch B v1", "Venue baseline batch B v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-shadow-research-v1.js'
+      - '.github/workflows/venue-shadow-batch-b-v1.yml'
+      - 'amagasaki-research-model-v1.js'
+      - 'marugame-research-model-v1.js'
+      - 'kojima-research-model-v1.js'
+      - 'miyajima-research-model-v1.js'
+      - '*-baseline-backtest-v1.json'
+  schedule:
+    - cron: '*/5 0-13,21-23 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-shadow-batch-b-v1
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { code: '13', key: AMAGASAKI, slug: amagasaki }
+          - { code: '15', key: MARUGAME, slug: marugame }
+          - { code: '16', key: KOJIMA, slug: kojima }
+          - { code: '17', key: MIYAJIMA, slug: miyajima }
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Resolve JST date
+        id: date
+        run: echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Freeze result-blind paired SHADOW
+        run: |
+          set -euo pipefail
+          node --check scripts/venue-shadow-research-v1.js
+          node --check "${{ matrix.slug }}-research-model-v1.js"
+          node scripts/venue-shadow-research-v1.js "${{ matrix.slug }}" "${{ matrix.key }}" "${{ matrix.code }}" "${{ steps.date.outputs.date }}"
+      - name: Audit PRE-RACE boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,glob,json,os,re
+          from zoneinfo import ZoneInfo
+          slug=os.environ['SLUG'];key=os.environ['KEY'];code=os.environ['CODE'];date=os.environ['DATE']
+          JST=ZoneInfo('Asia/Tokyo')
+          paths=glob.glob(f'live/{slug}/{date}/shadow/class-baseline/race-*.json')+glob.glob(f'live/{slug}/{date}/shadow/program-only/race-*.json')
+          for p in paths:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-venue-shadow-research-v1'
+              assert x['venue']==key and x['venueCode']==code and x['slug']==slug
+              assert x['mode'] in {'CLASS_BASELINE','PROGRAM_ONLY'}
+              assert x['resultInput'] is False and x['payoutInput'] is False
+              assert x['researchOnly'] is True and x['productionEnabled'] is False and x['tryEnabled'] is False
+              assert x['cashNeutral'] is True and x['immutableAfterFirstWrite'] is True
+              assert len(x['picks'])==4 and len(set(x['picks']))==4
+              assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',v) for v in x['picks'])
+              assert abs(float(x['probabilitySum'])-1)<1e-9
+              d=datetime.date.fromisoformat(x['date']);hh,mm=map(int,str(x['deadline']).split(':'))
+              deadline=datetime.datetime(d.year,d.month,d.day,hh,mm,tzinfo=JST)
+              generated=datetime.datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(JST)
+              assert (deadline-generated).total_seconds()/60>=3
+          print('VENUE_SHADOW_BOUNDARY_PASS',slug,len(paths))
+          PY
+        env:
+          SLUG: ${{ matrix.slug }}
+          KEY: ${{ matrix.key }}
+          CODE: ${{ matrix.code }}
+          DATE: ${{ steps.date.outputs.date }}
+      - name: Stage new SHADOW files
+        run: |
+          set -euo pipefail
+          SRC="live/${{ matrix.slug }}/${{ steps.date.outputs.date }}/shadow"
+          DST="/tmp/venue-shadow-artifact/live/${{ matrix.slug }}/${{ steps.date.outputs.date }}"
+          [ -d "$SRC" ] || { echo "NO_SHADOW_FILES"; exit 0; }
+          mkdir -p "$DST"
+          cp -a "$SRC" "$DST/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-shadow-${{ matrix.slug }}
+          path: /tmp/venue-shadow-artifact/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  publish:
+    needs: snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: venue-shadow-*
+          path: /tmp/venue-shadow-download
+          merge-multiple: true
+      - name: Publish only new immutable SHADOW files
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-venue-shadow'
+          git config user.email 'boat-command-venue-shadow@users.noreply.github.com'
+          rm -rf /tmp/new-shadow
+          mkdir -p /tmp/new-shadow
+          [ -d /tmp/venue-shadow-download ] && cp -a /tmp/venue-shadow-download/. /tmp/new-shadow/ || true
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            while IFS= read -r src; do
+              rel="${src#/tmp/new-shadow/}"
+              dst="$rel"
+              [ -f "$dst" ] && continue
+              mkdir -p "$(dirname "$dst")"
+              cp "$src" "$dst"
+            done < <(find /tmp/new-shadow -type f -name '*.json' | sort)
+            git add live
+            git diff --cached --quiet && { echo 'VENUE_SHADOW_CURRENT'; exit 0; }
+            git commit -m 'shadow: freeze batch B result-blind predictions'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
