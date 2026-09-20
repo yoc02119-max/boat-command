@@ -1,0 +1,42 @@
+name: Tokuyama rapid build contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'tokuyama-research-model-v1.js'
+      - 'scripts/tokuyama-*.js'
+      - 'venues/tokuyama/**'
+      - '.github/workflows/tokuyama-*.yml'
+      - 'venue-registry-v1.js'
+      - 'shared-try-config-v1.json'
+      - 'scripts/shared-try-contract-v1.js'
+      - '.github/workflows/tokuyama-rapid-build-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tokuyama-research-model-v1.js'
+      - 'scripts/tokuyama-*.js'
+      - 'venues/tokuyama/**'
+      - '.github/workflows/tokuyama-*.yml'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check tokuyama-research-model-v1.js
+      - run: node --check scripts/tokuyama-history-analysis-v1.js
+      - run: node --check scripts/tokuyama-baseline-backtest-v1.js
+      - run: node --check scripts/tokuyama-shadow-research-v1.js
+      - run: node --check scripts/tokuyama-shadow-evaluate-v1.js
+      - run: node --check scripts/tokuyama-shadow-evaluation-v1.js
+      - run: node --check scripts/tokuyama-readiness-v1.js
+      - run: node scripts/tokuyama-rapid-build-contract-v1.js
