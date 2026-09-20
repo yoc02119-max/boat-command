@@ -55,7 +55,7 @@ const out={
   schema:'boat-command-venue-shadow-evaluation-v1',version:'VENUE-SHADOW-EVALUATION-V1',
   venue,venueCode:code,slug,generatedAt:new Date().toISOString(),
   evaluationDays:new Set(rows.map(x=>x.date)).size,classBaseline:c,programOnly:p,pairedRaces:paired.length,
-  hitRateDelta,roiDelta,earlyReviewReady:p.evaluated>=36,targetReviewReady:p.evaluated>=60,
+  hitRateDelta:hitDelta,roiDelta,earlyReviewReady:p.evaluated>=36,targetReviewReady:p.evaluated>=60,
   forwardUpliftReady:paired.length>=60&&hitDelta>=0&&roiDelta>0,
   fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}
 };
