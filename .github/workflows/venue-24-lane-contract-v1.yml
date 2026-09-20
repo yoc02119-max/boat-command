@@ -1,0 +1,28 @@
+name: 24 venue lane contract v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'venue-registry-v1.js'
+      - 'venues/**/config-v1.json'
+      - 'venues/**/readiness-v1.json'
+      - 'scripts/venue-24-lane-contract-v1.js'
+      - '.github/workflows/venue-24-lane-contract-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: venue-24-lane-contract-v1
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - run: node --check scripts/venue-24-lane-contract-v1.js
+      - run: node scripts/venue-24-lane-contract-v1.js
