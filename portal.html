@@ -135,13 +135,46 @@ async function refreshResearchBuildStatus(code){
  }catch{}
  card.querySelector('.venue-live').innerHTML='<b>DATA LAYER</b>';
 }
+
+function nextDateLabel(date){
+  if(!date)return '次回日程確認待ち';
+  const today=todayJst();
+  const t=new Date(today+'T00:00:00+09:00'),d=new Date(date+'T00:00:00+09:00');
+  const diff=Math.round((d-t)/86400000);
+  const md=date.slice(5).replace('-','/');
+  if(diff===1)return `明日開催 · ${md}`;
+  return `次回開催 · ${md}`;
+}
+async function refreshVenueCalendarStatus(){
+  try{
+    const r=await fetch(`./venue-calendar-v1.json?t=${Date.now()}`,{cache:'no-store'});
+    if(!r.ok)throw new Error('VENUE_CALENDAR_WAIT');
+    const x=await r.json();
+    if(x?.today!==todayJst()||!x?.venues)return;
+    for(const v of venues){
+      const cal=x.venues?.[v.code],card=document.querySelector(`.venue[data-venue="${v.code}"]`);
+      if(!cal||!card)continue;
+      if(cal.todayActive===true)continue;
+      const label=nextDateLabel(cal.nextRaceDate);
+      const small=card.querySelector('small'),live=card.querySelector('.venue-live');
+      if(v.state==='LIVE'||v.state==='LIVE_SIMULATION'){
+        if(small)small.innerHTML=`<span class="live-dot" style="background:#708aa0;box-shadow:none"></span>非開催`;
+        if(live){live.className='venue-live wait';live.innerHTML=`<b>${label}</b>`}
+      }else{
+        if(small)small.innerHTML='<span class="live-dot" style="background:#708aa0;box-shadow:none"></span>構築中';
+        if(live){live.className='venue-live wait';live.innerHTML=`<b>${label}</b><br>DATA LAYER`}
+      }
+    }
+  }catch{}
+}
+
 async function refreshAllResearchBuildStatus(){
  for(const v of venues.filter(x=>x.code!=='07'&&x.readinessPath))await refreshResearchBuildStatus(v.code);
 }
-refreshAllResearchBuildStatus();
+refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus);
 renderSharedPortfolioStats();
-setInterval(refreshAllResearchBuildStatus,300000);
-setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}renderSharedPortfolioStats()},60000);
+setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
+setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderSharedPortfolioStats()},60000);
 </script>
 </body>
 </html>
