@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import datetime, json, re, time, urllib.request
+import datetime, json, re, urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from zoneinfo import ZoneInfo
 
 JST=ZoneInfo('Asia/Tokyo')
@@ -27,13 +28,22 @@ next_date={c:None for c in CODES}
 today_active=set()
 checked=0
 errors=[]
+days=[TODAY+datetime.timedelta(days=i) for i in range(0,61)]
+pages={}
 
-for offset in range(0,61):
-    day=TODAY+datetime.timedelta(days=offset)
-    try:
-        text=fetch(day)
-    except Exception as e:
-        errors.append({'date':day.isoformat(),'error':str(e)})
+# Fetch the horizon in parallel so this stays fast even when one official page is slow.
+with ThreadPoolExecutor(max_workers=8) as ex:
+    futs={ex.submit(fetch,day):day for day in days}
+    for fut in as_completed(futs):
+        day=futs[fut]
+        try:
+            pages[day]=fut.result()
+        except Exception as e:
+            errors.append({'date':day.isoformat(),'error':str(e)})
+
+for offset,day in enumerate(days):
+    text=pages.get(day)
+    if not text:
         continue
     checked+=1
     # Official race index contains venue-specific links with jcd=XX.
@@ -46,9 +56,6 @@ for offset in range(0,61):
     for code in present:
         if next_date[code] is None:
             next_date[code]=day.isoformat()
-    if all(next_date.values()):
-        break
-    time.sleep(.12)
 
 out={
  'schema':'boat-command-venue-calendar-v1',
