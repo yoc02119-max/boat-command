@@ -11,7 +11,7 @@ assert.equal(new Set(venues.map(v=>v.slug)).size,24,'VENUE_SLUG_DUPLICATE');
 
 const roots=[];
 for(const v of venues){
-  assert.match(v.code,/^\\d{2}$/);
+  assert.ok(/^[0-9]{2}$/.test(v.code),'VENUE_CODE_FORMAT:'+v.code);
   assert.ok(v.name&&v.slug&&v.key,'VENUE_META_MISSING:'+v.code);
   if(v.code==='07'){
     assert.equal(v.state,'LIVE');
@@ -22,14 +22,14 @@ for(const v of venues){
   assert.ok(v.readinessPath,'READINESS_PATH_MISSING:'+v.code);
   assert.ok(v.dataRoot,'DATA_ROOT_MISSING:'+v.code);
   roots.push(v.dataRoot);
-  const cp=v.configPath.replace(/^\.\//,'');
-  const rp=v.readinessPath.replace(/^\\.\\//,'');
+  const cp=String(v.configPath).startsWith('./')?String(v.configPath).slice(2):String(v.configPath);
+  const rp=String(v.readinessPath).startsWith('./')?String(v.readinessPath).slice(2):String(v.readinessPath);
   assert.ok(fs.existsSync(cp),'CONFIG_FILE_MISSING:'+v.code+':'+cp);
   assert.ok(fs.existsSync(rp),'READINESS_FILE_MISSING:'+v.code+':'+rp);
   const c=JSON.parse(fs.readFileSync(cp,'utf8'));
-  const r=JSON.parse(fs.readFileSync(rp,'utf8'));
+  const rr=JSON.parse(fs.readFileSync(rp,'utf8'));
   assert.equal(String(c.venueCode).padStart(2,'0'),v.code,'CONFIG_CODE_MISMATCH:'+v.code);
-  assert.equal(String(r.venueCode).padStart(2,'0'),v.code,'READINESS_CODE_MISMATCH:'+v.code);
+  assert.equal(String(rr.venueCode).padStart(2,'0'),v.code,'READINESS_CODE_MISMATCH:'+v.code);
   assert.equal(c.slug,v.slug,'CONFIG_SLUG_MISMATCH:'+v.code);
   assert.equal(c.realMoneyEnabled,false,'REAL_MONEY_FORBIDDEN:'+v.code);
   assert.equal(c.predictionPolicy?.crossVenueModelFallback,false,'CROSS_MODEL_FORBIDDEN:'+v.code);
