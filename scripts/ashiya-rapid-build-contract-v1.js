@@ -26,11 +26,13 @@ const program=fs.readFileSync('.github/workflows/ashiya-program-snapshot-v1.yml'
 const shadow=fs.readFileSync('.github/workflows/ashiya-shadow-research-v1.yml','utf8');
 const result=fs.readFileSync('.github/workflows/ashiya-result-collector-v1.yml','utf8');
 assert.match(history,/--venue 21/);
-assert.match(program,/jcd=10/);
-assert.match(result,/jcd=10/);
+assert.match(history,/out\/21/);
+assert.match(program,/jcd=21/);
+assert.match(result,/jcd=21/);
 assert.match(shadow,/live\/ashiya/);
 for(const [name,text] of Object.entries({history,program,shadow,result})){
   assert.ok(!text.includes("venueCode':'02"),name+' leaked Toda venueCode');
   assert.ok(!text.includes('jcd=02'),name+' leaked Toda jcd');
+  assert.ok(!text.includes('jcd=10'),name+' leaked Mikuni jcd');
 }
 console.log('ASHIYA_RAPID_BUILD_CONTRACT_PASS');
