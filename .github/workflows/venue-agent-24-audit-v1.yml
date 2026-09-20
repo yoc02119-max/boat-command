@@ -1,0 +1,47 @@
+name: BOAT COMMAND 24 venue agent audit v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/venue-agent-core-v1
+    paths:
+      - 'venue-agent-memory-index-v1.json'
+      - 'venue-agents/**/memory-v1.json'
+      - 'scripts/venue-agent-24-audit-v1.js'
+      - '.github/workflows/venue-agent-24-audit-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-agent-24-audit-v1
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit all 24 venue agents
+        run: |
+          set -euo pipefail
+          node --check scripts/venue-agent-24-audit-v1.js
+          node scripts/venue-agent-24-audit-v1.js --write
+      - name: Commit audit report
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-agent-audit'
+          git config user.email 'boat-command-agent-audit@users.noreply.github.com'
+          git add venue-agent-24-audit-v1.json
+          git diff --cached --quiet && { echo 'AUDIT_CURRENT'; exit 0; }
+          git commit -m 'audit(agent): confirm 24 venue research readiness'
+          BRANCH="${GITHUB_REF_NAME}"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
