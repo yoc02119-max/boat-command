@@ -1,0 +1,85 @@
+{
+  "schema": "boat-command-venue-agent-memory-v1",
+  "version": "VENUE-AGENT-RESEARCH-V1",
+  "agentId": "venue-agent:12:suminoe",
+  "venueCode": "12",
+  "venueName": "住之江",
+  "slug": "suminoe",
+  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "researchOnly": true,
+  "preRaceRuntimeConsumable": false,
+  "productionMutation": false,
+  "autoPromotion": false,
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "status": "ANALYSIS_BOOTSTRAP",
+  "sourceCoverage": {
+    "config": true,
+    "readiness": true,
+    "historyAnalysis": false,
+    "historyAudit": true,
+    "shadowEvaluation": false,
+    "model": true
+  },
+  "sourcePaths": {
+    "config": "venues/suminoe/config-v1.json",
+    "readiness": "venues/suminoe/readiness-v1.json",
+    "historyAnalysis": null,
+    "historyAudit": "suminoe-history-audit-v1.json",
+    "shadowEvaluation": null,
+    "model": "suminoe-research-model-v1.js"
+  },
+  "dataCutoff": "2026-09-19",
+  "evidence": {
+    "historicalRaces": 1139,
+    "historicalRaceDays": 95,
+    "forwardRaces": 0,
+    "holdoutReady": false,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "hypotheses": [],
+  "researchQueue": [],
+  "promotionReview": {
+    "agentId": "venue-agent:12:suminoe",
+    "venueCode": "12",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "STRICT_HOLDOUT_NOT_PROVEN",
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "guardrails": {
+    "agentId": "venue-agent:12:suminoe",
+    "venueCode": "12",
+    "scope": "VENUE_ONLY:suminoe",
+    "mode": "RESEARCH_SHADOW_ONLY",
+    "canReadHistoricalPreRace": true,
+    "canReadHistoricalResultsForEvaluation": true,
+    "canReadCurrentPostRaceForEvaluation": true,
+    "canFeedPostRaceIntoPreRace": false,
+    "canMutateHardLock": false,
+    "canMutateProduction": false,
+    "canAutoPromote": false,
+    "allowedOutputs": [
+      "HYPOTHESIS",
+      "BACKTEST_REPORT",
+      "SHADOW_CANDIDATE",
+      "PROMOTION_REVIEW"
+    ]
+  }
+}

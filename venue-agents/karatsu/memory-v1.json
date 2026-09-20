@@ -1,0 +1,460 @@
+{
+  "schema": "boat-command-venue-agent-memory-v1",
+  "version": "VENUE-AGENT-RESEARCH-V1",
+  "agentId": "venue-agent:23:karatsu",
+  "venueCode": "23",
+  "venueName": "唐津",
+  "slug": "karatsu",
+  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "researchOnly": true,
+  "preRaceRuntimeConsumable": false,
+  "productionMutation": false,
+  "autoPromotion": false,
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "status": "FORWARD_OBSERVATION",
+  "sourceCoverage": {
+    "config": true,
+    "readiness": true,
+    "historyAnalysis": true,
+    "historyAudit": true,
+    "shadowEvaluation": true,
+    "model": true
+  },
+  "sourcePaths": {
+    "config": "venues/karatsu/config-v1.json",
+    "readiness": "venues/karatsu/readiness-v1.json",
+    "historyAnalysis": "karatsu-history-analysis-v1.json",
+    "historyAudit": "karatsu-history-audit-v1.json",
+    "shadowEvaluation": "karatsu-shadow-evaluation-v1.json",
+    "model": "karatsu-research-model-v1.js"
+  },
+  "dataCutoff": "2026-09-19",
+  "evidence": {
+    "historicalRaces": 1138,
+    "historicalRaceDays": 96,
+    "forwardRaces": 12,
+    "holdoutReady": true,
+    "holdoutUplift": true,
+    "forwardUplift": false
+  },
+  "hypotheses": [
+    {
+      "id": "H-c8243728bc43",
+      "type": "FIRST_TO_SECOND_TRANSITION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 9.095616,
+      "evidence": {
+        "firstLane": 1,
+        "candidateSecondLane": 2,
+        "conditionalSecondRate": 0.35814,
+        "estimatedFirstPlaceSamples": 645
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+        "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-bb311d8f259b",
+      "type": "FIRST_TO_SECOND_TRANSITION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 5.813989,
+      "evidence": {
+        "firstLane": 2,
+        "candidateSecondLane": 1,
+        "conditionalSecondRate": 0.45679,
+        "estimatedFirstPlaceSamples": 162
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+        "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-b403abadd55d",
+      "type": "FIRST_TO_SECOND_TRANSITION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 5.412875,
+      "evidence": {
+        "firstLane": 3,
+        "candidateSecondLane": 1,
+        "conditionalSecondRate": 0.480315,
+        "estimatedFirstPlaceSamples": 127
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+        "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-371d9634d405",
+      "type": "FIRST_TO_SECOND_TRANSITION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 4.345152,
+      "evidence": {
+        "firstLane": 4,
+        "candidateSecondLane": 1,
+        "conditionalSecondRate": 0.401709,
+        "estimatedFirstPlaceSamples": 117
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+        "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-1655a987a8fa",
+      "type": "FIRST_TO_SECOND_TRANSITION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 3.545274,
+      "evidence": {
+        "firstLane": 5,
+        "candidateSecondLane": 1,
+        "conditionalSecondRate": 0.465517,
+        "estimatedFirstPlaceSamples": 58
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+        "objective": "IMPROVE_SECOND_PLACE_ORDERING"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-1829887e185b",
+      "type": "RACE_TYPE_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 3.372531,
+      "evidence": {
+        "segment": "raceType",
+        "value": "予選",
+        "races": 288,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.368056,
+        "delta": -0.198728
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-a4dbecd4d059",
+      "type": "RACE_TYPE_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 3.019889,
+      "evidence": {
+        "segment": "raceType",
+        "value": "朝1戦",
+        "races": 96,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.875,
+        "delta": 0.308216
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-eb3e5efc6bfe",
+      "type": "RACE_NUMBER_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 3.019889,
+      "evidence": {
+        "segment": "raceNumber",
+        "value": 1,
+        "races": 96,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.875,
+        "delta": 0.308216
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-4b4ae6ac2aa6",
+      "type": "RACE_NUMBER_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 2.400909,
+      "evidence": {
+        "segment": "raceNumber",
+        "value": 8,
+        "races": 94,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.319149,
+        "delta": -0.247635
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-672c9e297702",
+      "type": "RACE_NUMBER_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 2.241195,
+      "evidence": {
+        "segment": "raceNumber",
+        "value": 7,
+        "races": 95,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.336842,
+        "delta": -0.229942
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-fe9943389038",
+      "type": "RACE_TYPE_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 2.094814,
+      "evidence": {
+        "segment": "raceType",
+        "value": "準優勝戦",
+        "races": 54,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.851852,
+        "delta": 0.285068
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "id": "H-8c93e17fe28e",
+      "type": "RACE_TYPE_LANE1_INTERACTION",
+      "researchOnly": true,
+      "preRaceRuntimeConsumable": false,
+      "productionMutation": false,
+      "priorityScore": 2.005927,
+      "evidence": {
+        "segment": "raceType",
+        "value": "8っぴータイ",
+        "races": 68,
+        "venueLane1FirstRate": 0.566784,
+        "segmentLane1FirstRate": 0.323529,
+        "delta": -0.243254
+      },
+      "experiment": {
+        "mode": "STRICT_WALK_FORWARD_SHADOW",
+        "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+        "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION"
+      },
+      "firstObservedAt": "2026-09-20T17:00:40.372Z",
+      "lastObservedAt": "2026-09-20T17:00:40.372Z",
+      "status": "NEEDS_BACKTEST"
+    }
+  ],
+  "researchQueue": [
+    {
+      "hypothesisId": "H-c8243728bc43",
+      "priorityScore": 9.095616,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-bb311d8f259b",
+      "priorityScore": 5.813989,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-b403abadd55d",
+      "priorityScore": 5.412875,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-371d9634d405",
+      "priorityScore": 4.345152,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-1655a987a8fa",
+      "priorityScore": 3.545274,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "FIRST_PLACE_X_SECOND_PLACE_TRANSITION",
+      "objective": "IMPROVE_SECOND_PLACE_ORDERING",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-1829887e185b",
+      "priorityScore": 3.372531,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-a4dbecd4d059",
+      "priorityScore": 3.019889,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-eb3e5efc6bfe",
+      "priorityScore": 3.019889,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-4b4ae6ac2aa6",
+      "priorityScore": 2.400909,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-672c9e297702",
+      "priorityScore": 2.241195,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_NUMBER_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-fe9943389038",
+      "priorityScore": 2.094814,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    },
+    {
+      "hypothesisId": "H-8c93e17fe28e",
+      "priorityScore": 2.005927,
+      "mode": "STRICT_WALK_FORWARD_SHADOW",
+      "featureFamily": "RACE_TYPE_X_LANE_PRIOR",
+      "objective": "IMPROVE_HIT_RATE_WITHOUT_ROI_REGRESSION",
+      "status": "NEEDS_BACKTEST"
+    }
+  ],
+  "promotionReview": {
+    "agentId": "venue-agent:23:karatsu",
+    "venueCode": "23",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 12,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "guardrails": {
+    "agentId": "venue-agent:23:karatsu",
+    "venueCode": "23",
+    "scope": "VENUE_ONLY:karatsu",
+    "mode": "RESEARCH_SHADOW_ONLY",
+    "canReadHistoricalPreRace": true,
+    "canReadHistoricalResultsForEvaluation": true,
+    "canReadCurrentPostRaceForEvaluation": true,
+    "canFeedPostRaceIntoPreRace": false,
+    "canMutateHardLock": false,
+    "canMutateProduction": false,
+    "canAutoPromote": false,
+    "allowedOutputs": [
+      "HYPOTHESIS",
+      "BACKTEST_REPORT",
+      "SHADOW_CANDIDATE",
+      "PROMOTION_REVIEW"
+    ]
+  }
+}

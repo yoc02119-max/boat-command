@@ -1,0 +1,84 @@
+{
+  "schema": "boat-command-venue-agent-memory-v1",
+  "version": "VENUE-AGENT-RESEARCH-V1",
+  "agentId": "venue-agent:03:edogawa",
+  "venueCode": "03",
+  "venueName": "江戸川",
+  "slug": "edogawa",
+  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "researchOnly": true,
+  "preRaceRuntimeConsumable": false,
+  "productionMutation": false,
+  "autoPromotion": false,
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "status": "DISCOVERY_WAITING",
+  "sourceCoverage": {
+    "config": true,
+    "readiness": true,
+    "historyAnalysis": true,
+    "historyAudit": true,
+    "shadowEvaluation": true,
+    "model": true
+  },
+  "sourcePaths": {
+    "config": "venues/edogawa/config-v1.json",
+    "readiness": "venues/edogawa/readiness-v1.json",
+    "historyAnalysis": "edogawa-history-analysis-v1.json",
+    "historyAudit": "edogawa-history-audit-v1.json",
+    "shadowEvaluation": "edogawa-shadow-evaluation-v1.json",
+    "model": "edogawa-research-model-v2.js"
+  },
+  "dataCutoff": "2026-09-18",
+  "evidence": {
+    "historicalRaces": 767,
+    "historicalRaceDays": 68,
+    "forwardRaces": 24,
+    "holdoutReady": true,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "hypotheses": [],
+  "researchQueue": [],
+  "promotionReview": {
+    "agentId": "venue-agent:03:edogawa",
+    "venueCode": "03",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 24,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "guardrails": {
+    "agentId": "venue-agent:03:edogawa",
+    "venueCode": "03",
+    "scope": "VENUE_ONLY:edogawa",
+    "mode": "RESEARCH_SHADOW_ONLY",
+    "canReadHistoricalPreRace": true,
+    "canReadHistoricalResultsForEvaluation": true,
+    "canReadCurrentPostRaceForEvaluation": true,
+    "canFeedPostRaceIntoPreRace": false,
+    "canMutateHardLock": false,
+    "canMutateProduction": false,
+    "canAutoPromote": false,
+    "allowedOutputs": [
+      "HYPOTHESIS",
+      "BACKTEST_REPORT",
+      "SHADOW_CANDIDATE",
+      "PROMOTION_REVIEW"
+    ]
+  }
+}

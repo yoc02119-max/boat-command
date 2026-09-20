@@ -1,0 +1,85 @@
+{
+  "schema": "boat-command-venue-agent-memory-v1",
+  "version": "VENUE-AGENT-RESEARCH-V1",
+  "agentId": "venue-agent:07:gamagori",
+  "venueCode": "07",
+  "venueName": "蒲郡",
+  "slug": "gamagori",
+  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "researchOnly": true,
+  "preRaceRuntimeConsumable": false,
+  "productionMutation": false,
+  "autoPromotion": false,
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "status": "DATA_BOOTSTRAP",
+  "sourceCoverage": {
+    "config": false,
+    "readiness": false,
+    "historyAnalysis": false,
+    "historyAudit": true,
+    "shadowEvaluation": true,
+    "model": true
+  },
+  "sourcePaths": {
+    "config": null,
+    "readiness": null,
+    "historyAnalysis": null,
+    "historyAudit": "gamagori-main-history-audit-v0320.json",
+    "shadowEvaluation": "gamagori-shadow-evaluation-v0333.json",
+    "model": "gamagori-main-model-v0320.js"
+  },
+  "dataCutoff": null,
+  "evidence": {
+    "historicalRaces": 0,
+    "historicalRaceDays": 0,
+    "forwardRaces": 0,
+    "holdoutReady": false,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "hypotheses": [],
+  "researchQueue": [],
+  "promotionReview": {
+    "agentId": "venue-agent:07:gamagori",
+    "venueCode": "07",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "STRICT_HOLDOUT_NOT_PROVEN",
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "guardrails": {
+    "agentId": "venue-agent:07:gamagori",
+    "venueCode": "07",
+    "scope": "VENUE_ONLY:gamagori",
+    "mode": "RESEARCH_SHADOW_ONLY",
+    "canReadHistoricalPreRace": true,
+    "canReadHistoricalResultsForEvaluation": true,
+    "canReadCurrentPostRaceForEvaluation": true,
+    "canFeedPostRaceIntoPreRace": false,
+    "canMutateHardLock": false,
+    "canMutateProduction": false,
+    "canAutoPromote": false,
+    "allowedOutputs": [
+      "HYPOTHESIS",
+      "BACKTEST_REPORT",
+      "SHADOW_CANDIDATE",
+      "PROMOTION_REVIEW"
+    ]
+  }
+}

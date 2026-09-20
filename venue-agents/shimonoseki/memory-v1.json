@@ -1,0 +1,85 @@
+{
+  "schema": "boat-command-venue-agent-memory-v1",
+  "version": "VENUE-AGENT-RESEARCH-V1",
+  "agentId": "venue-agent:19:shimonoseki",
+  "venueCode": "19",
+  "venueName": "下関",
+  "slug": "shimonoseki",
+  "updatedAt": "2026-09-20T17:00:40.372Z",
+  "researchOnly": true,
+  "preRaceRuntimeConsumable": false,
+  "productionMutation": false,
+  "autoPromotion": false,
+  "cycle": {
+    "days": 30,
+    "startedAt": "2026-09-20T17:00:40.372Z",
+    "ageDays": 0,
+    "due": false
+  },
+  "status": "DATA_BOOTSTRAP",
+  "sourceCoverage": {
+    "config": true,
+    "readiness": true,
+    "historyAnalysis": false,
+    "historyAudit": false,
+    "shadowEvaluation": false,
+    "model": false
+  },
+  "sourcePaths": {
+    "config": "venues/shimonoseki/config-v1.json",
+    "readiness": "venues/shimonoseki/readiness-v1.json",
+    "historyAnalysis": null,
+    "historyAudit": null,
+    "shadowEvaluation": null,
+    "model": null
+  },
+  "dataCutoff": null,
+  "evidence": {
+    "historicalRaces": 0,
+    "historicalRaceDays": 0,
+    "forwardRaces": 0,
+    "holdoutReady": false,
+    "holdoutUplift": false,
+    "forwardUplift": false
+  },
+  "hypotheses": [],
+  "researchQueue": [],
+  "promotionReview": {
+    "agentId": "venue-agent:19:shimonoseki",
+    "venueCode": "19",
+    "eligibleForHumanReview": false,
+    "autoPromote": false,
+    "productionChanged": false,
+    "blockers": [
+      "STRICT_HOLDOUT_NOT_PROVEN",
+      "FORWARD_SAMPLE_TOO_SMALL",
+      "HIT_RATE_NOT_IMPROVED"
+    ],
+    "comparison": {
+      "forwardRaces": 0,
+      "baselineHitRate": 0,
+      "candidateHitRate": 0,
+      "baselineRoi": 0,
+      "candidateRoi": 0
+    }
+  },
+  "guardrails": {
+    "agentId": "venue-agent:19:shimonoseki",
+    "venueCode": "19",
+    "scope": "VENUE_ONLY:shimonoseki",
+    "mode": "RESEARCH_SHADOW_ONLY",
+    "canReadHistoricalPreRace": true,
+    "canReadHistoricalResultsForEvaluation": true,
+    "canReadCurrentPostRaceForEvaluation": true,
+    "canFeedPostRaceIntoPreRace": false,
+    "canMutateHardLock": false,
+    "canMutateProduction": false,
+    "canAutoPromote": false,
+    "allowedOutputs": [
+      "HYPOTHESIS",
+      "BACKTEST_REPORT",
+      "SHADOW_CANDIDATE",
+      "PROMOTION_REVIEW"
+    ]
+  }
+}
