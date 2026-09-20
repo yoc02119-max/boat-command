@@ -1,0 +1,98 @@
+name: Venue program batch D v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-program-collector-v1.py'
+      - '.github/workflows/venue-program-batch-d-v1.yml'
+  schedule:
+    - cron: '*/20 0-13,21-23 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-program-batch-d-v1
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { code: '11', key: BIWAKO, slug: biwako }
+          - { code: '19', key: SHIMONOSEKI, slug: shimonoseki }
+          - { code: '20', key: WAKAMATSU, slug: wakamatsu }
+          - { code: '22', key: FUKUOKA, slug: fukuoka }
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Collect result-free 12R program
+        run: |
+          set -euo pipefail
+          python3 scripts/venue-program-collector-v1.py --code "${{ matrix.code }}" --key "${{ matrix.key }}" --slug "${{ matrix.slug }}"
+      - name: Audit venue boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,os
+          code=os.environ['CODE'];key=os.environ['KEY'];slug=os.environ['SLUG']
+          paths=glob.glob(f'live/{slug}/*/program/race-*.json')
+          for p in paths:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['venueCode']==code and x['venue']==key
+              assert len(x['boats'])==6 and [b['lane'] for b in x['boats']]==[1,2,3,4,5,6]
+              assert x['resultEndpointsIncluded'] is False and x['resultIncluded'] is False and x['exhibitionIncluded'] is False
+          print('PROGRAM_BOUNDARY_PASS',code,slug,len(paths))
+          PY
+        env:
+          CODE: ${{ matrix.code }}
+          KEY: ${{ matrix.key }}
+          SLUG: ${{ matrix.slug }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-program-${{ matrix.slug }}
+          path: live/${{ matrix.slug }}/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  publish:
+    needs: collect
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: venue-program-*
+          path: /tmp/venue-program
+      - name: Publish all venue program packs in one commit
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for d in /tmp/venue-program/venue-program-*; do
+            slug="${d##*/venue-program-}"
+            mkdir -p "live/$slug"
+            cp -a "$d/." "live/$slug/"
+          done
+          git config user.name 'boat-command-program-batch'
+          git config user.email 'boat-command-program-batch@users.noreply.github.com'
+          git add live
+          git diff --cached --quiet && { echo 'NO_BATCH_D_PROGRAM_CHANGE'; exit 0; }
+          cp -a live /tmp/live-program-publish
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp -a /tmp/live-program-publish/. live/
+            git add live
+            git diff --cached --quiet && exit 0
+            git commit -m 'live: publish venue program batch D'
+            git push origin HEAD:main && exit 0
+            sleep $((i*2))
+          done
+          exit 1
