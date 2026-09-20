@@ -8,6 +8,7 @@ const MIN_SEGMENT_RACES=30;
 const MAX_HYPOTHESES=12;
 
 function numberOrNull(v){
+  if(v===null||v===undefined||v==='')return null;
   const n=Number(v);
   return Number.isFinite(n)?n:null;
 }
@@ -39,7 +40,7 @@ function pushHypothesis(out,venueCode,type,key,payload){
   });
 }
 
-function buildHypotheses(history,venueCode){
+function buildHistoryHypotheses(history,venueCode){
   if(!history||typeof history!=='object')return [];
   const out=[];
   const totalRaces=Number(history.races||0);
@@ -48,7 +49,7 @@ function buildHypotheses(history,venueCode){
   if(lane1Base!==null){
     for(const [raceNumber,row] of Object.entries(history.byRaceNumber||{})){
       const sample=Number(row?.races||0);
-      const rate=numberOrNull(row?.lane1FirstRate);
+      const rate=numberOrNull(row?.lane1FirstRate??row?.lane1WinRate);
       if(sample<MIN_SEGMENT_RACES||rate===null)continue;
       const delta=rate-lane1Base;
       if(Math.abs(delta)<0.08)continue;
@@ -72,7 +73,7 @@ function buildHypotheses(history,venueCode){
 
     for(const [raceType,row] of Object.entries(history.byRaceType||{})){
       const sample=Number(row?.races||0);
-      const rate=numberOrNull(row?.lane1FirstRate);
+      const rate=numberOrNull(row?.lane1FirstRate??row?.lane1WinRate);
       if(sample<MIN_SEGMENT_RACES||rate===null)continue;
       const delta=rate-lane1Base;
       if(Math.abs(delta)<0.10)continue;
@@ -122,8 +123,63 @@ function buildHypotheses(history,venueCode){
       }
     });
   }
+  return out;
+}
 
-  return out
+function backtestPair(backtest,scope='holdout'){
+  if(!backtest||typeof backtest!=='object')return null;
+  if(scope==='holdout'){
+    const x=backtest.holdout2026;
+    if(x?.baseline&&x?.candidate)return {baseline:x.baseline,candidate:x.candidate,races:Number(x.records||x.candidate.races||0)};
+  }
+  if(scope==='recent'){
+    const x=backtest.recent360;
+    if(x?.baseline&&x?.candidate)return {baseline:x.baseline,candidate:x.candidate,races:Number(x.candidate.races||x.baseline.races||0)};
+  }
+  if(backtest.baseline&&backtest.candidate){
+    return {baseline:backtest.baseline,candidate:backtest.candidate,races:Number(backtest.records||backtest.candidate.races||0)};
+  }
+  return null;
+}
+
+function buildBacktestHypotheses(backtest,venueCode){
+  const out=[];
+  for(const scope of ['holdout','recent']){
+    const pair=backtestPair(backtest,scope);
+    if(!pair||pair.races<MIN_SEGMENT_RACES)continue;
+    const bh=numberOrNull(pair.baseline.hitRate),ch=numberOrNull(pair.candidate.hitRate);
+    const br=numberOrNull(pair.baseline.roi),cr=numberOrNull(pair.candidate.roi);
+    if(bh===null||ch===null||br===null||cr===null)continue;
+    const hitDelta=ch-bh,roiDelta=cr-br;
+    if(hitDelta>=0.01&&roiDelta<=-0.01){
+      pushHypothesis(out,venueCode,'HIT_RATE_ROI_TRADEOFF',scope,{
+        priorityScore:rounded((hitDelta+Math.abs(roiDelta))*Math.sqrt(pair.races)),
+        evidence:{
+          scope,
+          races:pair.races,
+          baselineHitRate:rounded(bh),
+          candidateHitRate:rounded(ch),
+          hitRateDelta:rounded(hitDelta),
+          baselineRoi:rounded(br),
+          candidateRoi:rounded(cr),
+          roiDelta:rounded(roiDelta)
+        },
+        experiment:{
+          mode:'STRICT_WALK_FORWARD_SHADOW',
+          featureFamily:'SELECTION_GATE_CALIBRATION',
+          objective:'KEEP_HIT_RATE_GAIN_AND_REMOVE_ROI_REGRESSION'
+        }
+      });
+    }
+  }
+  return out;
+}
+
+function buildHypotheses(history,venueCode,backtest=null){
+  return [
+    ...buildHistoryHypotheses(history,venueCode),
+    ...buildBacktestHypotheses(backtest,venueCode)
+  ]
     .sort((a,b)=>(b.priorityScore||0)-(a.priorityScore||0)||a.id.localeCompare(b.id))
     .slice(0,MAX_HYPOTHESES);
 }
@@ -135,27 +191,45 @@ function sourceCoverage(sources={}){
     historyAnalysis:!!sources.historyAnalysis,
     historyAudit:!!sources.historyAudit,
     shadowEvaluation:!!sources.shadowEvaluation,
+    backtest:!!sources.backtest,
     model:!!sources.model
   };
 }
 
-function evaluationSnapshot(readiness={},shadow={}){
+function evaluationSnapshot(readiness={},shadow={},backtest={}){
   const s=shadow&&typeof shadow==='object'?shadow:{};
   const f=readiness?.forward||{};
   const b=readiness?.baseline||{};
+  const bt=backtestPair(backtest,'holdout')||backtestPair(backtest,'recent')||backtestPair(backtest,'all');
 
   const baseline={
-    hitRate:numberOrNull(s?.classBaseline?.hitRate??f.classHitRate),
-    roi:numberOrNull(s?.classBaseline?.roi??f.classRoi)
+    hitRate:numberOrNull(s?.classBaseline?.hitRate??f.classHitRate??bt?.baseline?.hitRate),
+    roi:numberOrNull(s?.classBaseline?.roi??f.classRoi??bt?.baseline?.roi)
   };
   const candidate={
-    hitRate:numberOrNull(s?.programOnly?.hitRate??f.programHitRate),
-    roi:numberOrNull(s?.programOnly?.roi??f.programRoi)
+    hitRate:numberOrNull(s?.programOnly?.hitRate??f.programHitRate??bt?.candidate?.hitRate),
+    roi:numberOrNull(s?.programOnly?.roi??f.programRoi??bt?.candidate?.roi)
   };
-  const forwardRaces=Number(s.pairedRaces??f.pairedRaces??f.programOnlyRaces??0);
-  const holdoutReady=b.ready===true;
-  const holdoutUplift=b.candidateUplift===true;
-  const forwardUplift=(s.forwardUpliftReady??f.forwardUpliftReady)===true;
+  const forwardRaces=Number(
+    s.pairedRaces??
+    f.pairedRaces??
+    f.programOnlyRaces??
+    bt?.races??
+    0
+  );
+  const backtestStrict=
+    backtest?.strictWalkForward===true&&
+    backtest?.sameDayRowsExcluded===true&&
+    backtest?.resultBlockedUntilPrediction===true;
+  const holdoutReady=b.ready===true||backtestStrict;
+  const calculatedUplift=
+    baseline.hitRate!==null&&candidate.hitRate!==null&&
+    baseline.roi!==null&&candidate.roi!==null&&
+    candidate.hitRate>baseline.hitRate&&
+    candidate.roi>=baseline.roi;
+  const holdoutUplift=typeof b.candidateUplift==='boolean'?b.candidateUplift:calculatedUplift;
+  const forwardUplift=(s.forwardUpliftReady??f.forwardUpliftReady)===true||
+    (backtest?.promotionEligible===true&&calculatedUplift);
 
   return {
     forwardRaces,
@@ -167,8 +241,9 @@ function evaluationSnapshot(readiness={},shadow={}){
   };
 }
 
-function statusFor({historyRaces,historyAnalysis,hypotheses,evaluation,review}){
+function statusFor({historyRaces,historyAnalysis,backtest,hypotheses,evaluation,review}){
   if(historyRaces<core.policy.minimumHistoricalRaces)return 'DATA_BOOTSTRAP';
+  if(!historyAnalysis&&backtest)return 'MODEL_EVALUATION';
   if(!historyAnalysis)return 'ANALYSIS_BOOTSTRAP';
   if(hypotheses.length===0)return 'DISCOVERY_WAITING';
   if(evaluation.forwardRaces===0)return 'BACKTEST_QUEUE';
@@ -204,11 +279,19 @@ function buildMemory(input={}){
   const audit=input.historyAudit||null;
   const readiness=input.readiness||{};
   const shadow=input.shadowEvaluation||{};
+  const backtest=input.backtest||null;
   const previous=input.previous||null;
-  const historyRaces=Number(history?.races??audit?.races??readiness?.history?.rows??0);
-  const rawHypotheses=buildHypotheses(history,venueCode);
+  const historyRaces=Number(
+    history?.races??
+    audit?.races??
+    audit?.validRaces??
+    audit?.records??
+    readiness?.history?.rows??
+    0
+  );
+  const rawHypotheses=buildHypotheses(history,venueCode,backtest);
   const hypotheses=preserveHypothesisLifecycle(rawHypotheses,previous,now);
-  const evaluation=evaluationSnapshot(readiness,shadow);
+  const evaluation=evaluationSnapshot(readiness,shadow,backtest);
 
   const promotion=agent.assessPromotion({
     noLeakage:true,
@@ -224,6 +307,7 @@ function buildMemory(input={}){
   const status=statusFor({
     historyRaces,
     historyAnalysis:history,
+    backtest,
     hypotheses,
     evaluation,
     review:promotion
@@ -250,10 +334,16 @@ function buildMemory(input={}){
     status,
     sourceCoverage:sourceCoverage(input.sources),
     sourcePaths:input.sourcePaths||{},
-    dataCutoff:history?.cutoff??audit?.cutoff??null,
+    dataCutoff:history?.cutoff??audit?.cutoff??audit?.lastDate??null,
     evidence:{
       historicalRaces:historyRaces,
-      historicalRaceDays:Number(history?.raceDays??audit?.raceDays??readiness?.history?.raceDays??0),
+      historicalRaceDays:Number(
+        history?.raceDays??
+        audit?.raceDays??
+        audit?.uniqueDates??
+        readiness?.history?.raceDays??
+        0
+      ),
       forwardRaces:evaluation.forwardRaces,
       holdoutReady:evaluation.holdoutReady,
       holdoutUplift:evaluation.holdoutUplift,

@@ -32,7 +32,8 @@ function findRootFile(slug,kind,extra=[]){
   const patterns={
     historyAnalysis:/history-analysis.*\.json$/i,
     historyAudit:/history-audit.*\.json$/i,
-    shadowEvaluation:/shadow-evaluation.*\.json$/i
+    shadowEvaluation:/shadow-evaluation.*\.json$/i,
+    backtest:/(main-backtest|baseline-backtest).*\.json$/i
   };
   const re=patterns[kind];
   return names.filter(name=>re?.test(name)).sort().pop()||null;
@@ -61,6 +62,11 @@ function sourceSet(v){
     'shadowEvaluation',
     v.slug==='gamagori'?['gamagori-shadow-evaluation-v0333.json']:[]
   );
+  const backtestPath=findRootFile(
+    v.slug,
+    'backtest',
+    v.slug==='gamagori'?['gamagori-main-backtest-v0320.json']:[]
+  );
   const modelPath=modelPathFor(v);
   return {
     paths:{
@@ -69,6 +75,7 @@ function sourceSet(v){
       historyAnalysis:historyAnalysisPath,
       historyAudit:historyAuditPath,
       shadowEvaluation:shadowEvaluationPath,
+      backtest:backtestPath,
       model:modelPath
     },
     data:{
@@ -76,7 +83,8 @@ function sourceSet(v){
       readiness:json(readinessPath),
       historyAnalysis:json(historyAnalysisPath),
       historyAudit:json(historyAuditPath),
-      shadowEvaluation:json(shadowEvaluationPath)
+      shadowEvaluation:json(shadowEvaluationPath),
+      backtest:json(backtestPath)
     }
   };
 }
@@ -96,12 +104,14 @@ for(const venue of registry.list()){
     historyAnalysis:src.data.historyAnalysis,
     historyAudit:src.data.historyAudit,
     shadowEvaluation:src.data.shadowEvaluation,
+    backtest:src.data.backtest,
     sources:{
       config:src.data.config,
       readiness:src.data.readiness,
       historyAnalysis:src.data.historyAnalysis,
       historyAudit:src.data.historyAudit,
       shadowEvaluation:src.data.shadowEvaluation,
+      backtest:src.data.backtest,
       model:src.paths.model
     },
     sourcePaths:src.paths
@@ -134,6 +144,7 @@ process.stdout.write(JSON.stringify({
     historyAnalysis:index.rows.filter(x=>x.sourceCoverage.historyAnalysis).length,
     historyAudit:index.rows.filter(x=>x.sourceCoverage.historyAudit).length,
     shadowEvaluation:index.rows.filter(x=>x.sourceCoverage.shadowEvaluation).length,
+    backtest:index.rows.filter(x=>x.sourceCoverage.backtest).length,
     model:index.rows.filter(x=>x.sourceCoverage.model).length
   }
 },null,2)+'\n');

@@ -19,11 +19,11 @@ function history(venueCode,lane1,race1,race6){
       '2':{'1':0.36,'2':0,'3':0.25,'4':0.17,'5':0.12,'6':0.10}
     },
     byRaceNumber:{
-      '1':{races:84,lane1FirstRate:race1},
+      '1':{races:84,lane1WinRate:race1},
       '6':{races:84,lane1FirstRate:race6}
     },
     byRaceType:{
-      'A':{races:100,lane1FirstRate:lane1+0.12},
+      'A':{races:100,lane1WinRate:lane1+0.12},
       'B':{races:100,lane1FirstRate:lane1-0.12}
     }
   };
@@ -75,6 +75,24 @@ const b=research.buildMemory({
   sources:{historyAnalysis:{},historyAudit:{},readiness:{},config:{},model:'x'}
 });
 
+const g=research.buildMemory({
+  venueCode:'07',
+  now:'2026-09-21T00:00:00Z',
+  historyAudit:{validRaces:4071,uniqueDates:340,lastDate:'2026-09-04'},
+  backtest:{
+    strictWalkForward:true,
+    sameDayRowsExcluded:true,
+    resultBlockedUntilPrediction:true,
+    promotionEligible:false,
+    holdout2026:{
+      records:1690,
+      baseline:{hitRate:0.228,roi:0.801},
+      candidate:{hitRate:0.269,roi:0.776}
+    }
+  },
+  sources:{historyAudit:{},backtest:{},model:'x'}
+});
+
 assert.equal(a.researchOnly,true);
 assert.equal(a.preRaceRuntimeConsumable,false);
 assert.equal(a.productionMutation,false);
@@ -94,11 +112,22 @@ assert.notDeepEqual(
   'VENUE_DATA_MUST_PRODUCE_DISTINCT_RESEARCH_MEMORY'
 );
 
-const index=research.buildIndex([a,b],'2026-09-21T00:00:00Z');
-assert.equal(index.agents,2);
+assert.equal(g.evidence.historicalRaces,4071);
+assert.equal(g.evidence.historicalRaceDays,340);
+assert.equal(g.status,'MODEL_EVALUATION');
+assert.ok(g.hypotheses.some(x=>x.type==='HIT_RATE_ROI_TRADEOFF'));
+assert.equal(g.promotionReview.eligibleForHumanReview,false);
+
+const missing=research.evaluationSnapshot({}, {}, {});
+assert.equal(missing.baseline.hitRate,null);
+assert.equal(missing.candidate.hitRate,null);
+
+const index=research.buildIndex([a,b,g],'2026-09-21T00:00:00Z');
+assert.equal(index.agents,3);
 
 console.log('VENUE_AGENT_RESEARCH_SMOKE_PASS',{
   todaHypotheses:a.hypotheses.length,
   ashiyaHypotheses:b.hypotheses.length,
+  gamagoriHypotheses:g.hypotheses.length,
   reviewCandidate:a.promotionReview.eligibleForHumanReview
 });
