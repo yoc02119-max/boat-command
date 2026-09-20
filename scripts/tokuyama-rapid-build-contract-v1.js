@@ -26,11 +26,13 @@ const program=fs.readFileSync('.github/workflows/tokuyama-program-snapshot-v1.ym
 const shadow=fs.readFileSync('.github/workflows/tokuyama-shadow-research-v1.yml','utf8');
 const result=fs.readFileSync('.github/workflows/tokuyama-result-collector-v1.yml','utf8');
 assert.match(history,/--venue 18/);
-assert.match(program,/jcd=10/);
-assert.match(result,/jcd=10/);
+assert.match(history,/out\/18/);
+assert.match(program,/jcd=18/);
+assert.match(result,/jcd=18/);
 assert.match(shadow,/live\/tokuyama/);
 for(const [name,text] of Object.entries({history,program,shadow,result})){
   assert.ok(!text.includes("venueCode':'02"),name+' leaked Toda venueCode');
   assert.ok(!text.includes('jcd=02'),name+' leaked Toda jcd');
+  assert.ok(!text.includes('jcd=10'),name+' leaked Mikuni jcd');
 }
 console.log('TOKUYAMA_RAPID_BUILD_CONTRACT_PASS');
