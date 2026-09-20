@@ -3,8 +3,8 @@
   "version": "TOKUYAMA-READINESS-V1",
   "venue": "TOKUYAMA",
   "venueCode": "18",
-  "generatedAt": "2026-09-20T01:00:24.856Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-20T01:00:52.793Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 372,
+    "classHitRate": 0.19623655913978494,
+    "programHitRate": 0.23387096774193547,
+    "classRoi": 0.6938844086021505,
+    "programRoi": 0.7628360215053763,
+    "hitRateDelta": 0.03763440860215053,
+    "roiDelta": 0.06895161290322582,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.28,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,8 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
