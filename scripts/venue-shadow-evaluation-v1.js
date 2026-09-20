@@ -60,4 +60,4 @@ const out={
   fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}
 };
 fs.writeFileSync(path.join(root,slug+'-shadow-evaluation-v1.json'),JSON.stringify(out,null,2)+'\n');
-console.log(JSON.stringify({slug,pairedRaces:out.pairedRaces,hitRateDelta,roiDelta,forwardUpliftReady:out.forwardUpliftReady}));
+console.log(JSON.stringify({slug,pairedRaces:out.pairedRaces,hitRateDelta:hitDelta,roiDelta,forwardUpliftReady:out.forwardUpliftReady}));
