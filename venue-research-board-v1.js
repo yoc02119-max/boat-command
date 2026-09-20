@@ -10,6 +10,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const money=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
   const signedMoney=v=>Number.isFinite(Number(v))?`${Number(v)>0?'+':''}${money(v)}`:'—';
+  function todayJst(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 
   async function fetchJson(path){
     const sep=path.includes('?')?'&':'?';
@@ -85,8 +86,7 @@
   async function mount(opts){
     const root=typeof opts.root==='string'?document.querySelector(opts.root):opts.root;
     if(!root)throw new Error('OPERATION_BOARD_ROOT_MISSING');
-    const readiness=opts.readiness||{},date=readiness.latestDate||opts.date;
-    if(!date)throw new Error('OPERATION_BOARD_DATE_MISSING');
+    const readiness=opts.readiness||{},date=readiness.latestDate||opts.date||todayJst();
     const dataRoot=String(opts.dataRoot||'').replace(/\/$/,'');
     if(!dataRoot)throw new Error('OPERATION_BOARD_DATA_ROOT_MISSING');
     const venueCode=String(opts.venueCode||readiness.venueCode||'').padStart(2,'0');
@@ -140,7 +140,7 @@
     root.querySelector('.rrb-loading').hidden=true;
     if(!grid.children.length){
       root.querySelector('.rrb-empty').hidden=false;
-      root.querySelector('.rrb-empty').textContent='番組データ待ちです。';
+      root.querySelector('.rrb-empty').textContent='本日は番組データがありません。非開催または公式番組の公開前です。';
     }
 
     const state={root,rows,view:'all'};
