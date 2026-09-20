@@ -1,0 +1,87 @@
+name: Venue baseline batch D v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'biwako-history-bootstrap-v1.json'
+      - 'shimonoseki-history-bootstrap-v1.json'
+      - 'wakamatsu-history-bootstrap-v1.json'
+      - 'fukuoka-history-bootstrap-v1.json'
+      - 'scripts/venue-baseline-backtest-v1.js'
+      - 'biwako-research-model-v1.js'
+      - 'shimonoseki-research-model-v1.js'
+      - 'wakamatsu-research-model-v1.js'
+      - 'fukuoka-research-model-v1.js'
+      - '.github/workflows/venue-baseline-batch-d-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-baseline-batch-d-v1
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { code: '11', key: BIWAKO, slug: biwako }
+          - { code: '19', key: SHIMONOSEKI, slug: shimonoseki }
+          - { code: '20', key: WAKAMATSU, slug: wakamatsu }
+          - { code: '22', key: FUKUOKA, slug: fukuoka }
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run strict venue holdout
+        run: |
+          set -euo pipefail
+          [ -f "${{ matrix.slug }}-history-bootstrap-v1.json" ] || { echo HISTORY_WAIT; exit 0; }
+          node --check "${{ matrix.slug }}-research-model-v1.js"
+          node --check scripts/venue-baseline-backtest-v1.js
+          node scripts/venue-baseline-backtest-v1.js slug=${{ matrix.slug }} code=${{ matrix.code }} key=${{ matrix.key }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: baseline-${{ matrix.slug }}
+          path: ${{ matrix.slug }}-baseline-backtest-v1.json
+          if-no-files-found: ignore
+          retention-days: 3
+
+  publish:
+    needs: backtest
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: baseline-*
+          path: /tmp/baselines
+      - name: Publish holdout reports
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=()
+          for d in /tmp/baselines/baseline-*; do
+            for f in "$d"/*.json; do cp "$f" .; files+=("$(basename "$f")"); done
+          done
+          [ "${#files[@]}" -gt 0 ] || { echo NO_BASELINE_FILES; exit 0; }
+          cp "${files[@]}" /tmp/
+          git config user.name 'boat-command-baseline-batch'
+          git config user.email 'boat-command-baseline-batch@users.noreply.github.com'
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            for f in "${files[@]}"; do cp "/tmp/$f" "$f"; done
+            git add "${files[@]}"
+            git diff --cached --quiet && exit 0
+            git commit -m 'analysis: publish venue baseline batch D'
+            git push origin HEAD:main && exit 0
+            sleep $((i*2))
+          done
+          exit 1
