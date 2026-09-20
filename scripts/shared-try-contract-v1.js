@@ -16,7 +16,7 @@ if(sel.resultInput!==false||sel.payoutInput!==false||sel.realMoney!==false||sel.
 if(!(sel.selectedCount>0))throw new Error('NO_TRY_SELECTED');
 if(sel.selectedCount>cfg.maxTryRacesPerDay)throw new Error('TRY_CAP');
 for(const x of sel.selected){
-  if(!['02','03','07','10','18','21','23'].includes(String(x.venueCode)))throw new Error('VENUE_SCOPE');
+  if(!['02','03','07','10','14','18','21','23'].includes(String(x.venueCode)))throw new Error('VENUE_SCOPE');
   if(!Array.isArray(x.picks)||x.picks.length!==4)throw new Error('PICKS');
   if(x.stakePerPickYen!==500||x.stakeYen!==2000)throw new Error('STAKE');
   if(x.resultInput!==false||x.payoutInput!==false)throw new Error('LEAKAGE');
