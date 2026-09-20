@@ -3,8 +3,8 @@
   "version": "ASHIYA-READINESS-V1",
   "venue": "ASHIYA",
   "venueCode": "21",
-  "generatedAt": "2026-09-20T00:50:55.202Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-20T00:51:04.984Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": true,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
+    "ready": true,
+    "holdoutRaces": 360,
+    "classHitRate": 0.23055555555555557,
+    "programHitRate": 0.23333333333333334,
+    "classRoi": 0.8147222222222222,
+    "programRoi": 0.7804166666666666,
+    "hitRateDelta": 0.002777777777777768,
+    "roiDelta": -0.03430555555555559,
     "candidateUplift": false,
-    "selectedConfig": null
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,8 +61,7 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
-    "STRICT_HOLDOUT_NOT_READY",
+    "HOLDOUT_UPLIFT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
