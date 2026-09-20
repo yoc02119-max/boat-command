@@ -1,0 +1,28 @@
+name: Venue collector boundary contract v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shared-try-config-v1.json'
+      - 'scripts/venue-collector-boundary-contract-v1.js'
+      - '.github/workflows/*-program-snapshot-v1.yml'
+      - '.github/workflows/*-result-collector-v1.yml'
+      - '.github/workflows/*-history-bootstrap-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: venue-collector-boundary-contract-v1
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - run: node --check scripts/venue-collector-boundary-contract-v1.js
+      - run: node scripts/venue-collector-boundary-contract-v1.js
