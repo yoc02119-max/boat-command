@@ -1,0 +1,168 @@
+name: Naruto history bootstrap 180d v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/naruto-history-bootstrap-v1.yml'
+      - 'program-history-builder-v121.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: naruto-history-bootstrap-v1
+  cancel-in-progress: false
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build 30-day Naruto history shard
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          rm -rf naruto-hist-work naruto-hist-out
+          mkdir -p naruto-hist-work naruto-hist-out
+          python3 program-history-builder-v121.py --self-test
+
+          python3 - <<'PY' > naruto-hist-work/dates.txt
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          narutoy=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()
+          start=narutoy-datetime.timedelta(days=180)
+          shard=int(os.environ['SHARD'])
+          a=start+datetime.timedelta(days=shard*30)
+          b=min(a+datetime.timedelta(days=30),narutoy)
+          d=a
+          while d<b:
+              print(d.isoformat());d+=datetime.timedelta(days=1)
+          PY
+
+          : > naruto-hist-work/exceptions.txt
+          mkdir -p naruto-hist-work/days
+
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            rm -rf naruto-hist-work/one
+            mkdir -p naruto-hist-work/one/raw naruto-hist-work/one/b naruto-hist-work/one/k naruto-hist-work/one/out
+
+            bc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o naruto-hist-work/one/raw/$b -w '%{http_code}' https://www1.mbrace.or.jp/od2/B/${ym}/$b || true)"
+            sleep 1
+            kc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o naruto-hist-work/one/raw/$k -w '%{http_code}' https://www1.mbrace.or.jp/od2/K/${ym}/$k || true)"
+            sleep 1
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then echo "$d HTTP B=$bc K=$kc" >> naruto-hist-work/exceptions.txt; continue; fi
+
+            lha xw=naruto-hist-work/one/b naruto-hist-work/one/raw/$b >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> naruto-hist-work/exceptions.txt; continue; }
+            lha xw=naruto-hist-work/one/k naruto-hist-work/one/raw/$k >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> naruto-hist-work/exceptions.txt; continue; }
+
+            python3 program-history-builder-v121.py --b-dir naruto-hist-work/one/b --k-dir naruto-hist-work/one/k --out naruto-hist-work/one/out --venue 14 >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> naruto-hist-work/exceptions.txt; continue; }
+
+            python3 - "$d" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d=sys.argv[1]
+          rows=[]
+          for p in Path('naruto-hist-work/one/out/10').glob('*.json'):
+              x=json.loads(p.read_text(encoding='utf-8'))
+              rows += [r for r in x.get('races',[]) if r.get('d')==d]
+          if not rows:
+              raise SystemExit(0)
+          ids=[r.get('id') for r in rows]
+          if len(ids)!=len(set(ids)): raise SystemExit('DUPLICATE_DAY_IDS')
+          if any(str(r.get('id','')).split('-')[3]!='14' for r in rows): raise SystemExit('WRONG_VENUE')
+          if any(str(r.get('o','')).count('-')!=2 for r in rows): raise SystemExit('INVALID_RESULT')
+          Path(f'naruto-hist-work/days/{d}.json').write_text(json.dumps(rows,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
+          done < naruto-hist-work/dates.txt
+
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          rows=[]
+          for p in sorted(Path('naruto-hist-work/days').glob('*.json')):
+              rows += json.loads(p.read_text(encoding='utf-8'))
+          report={'shard':int(os.environ['SHARD']),'daysWithRaces':len({r['d'] for r in rows}),'races':len(rows),'exceptions':[x for x in Path('naruto-hist-work/exceptions.txt').read_text().splitlines() if x.strip()]}
+          Path('naruto-hist-out/segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('naruto-hist-out/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(report)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naruto-history-shard-${{ matrix.shard }}
+          path: naruto-hist-out/*.json
+          retention-days: 14
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: naruto-history-shard-*
+          path: naruto-history-shards
+      - name: Merge and audit Naruto history
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json
+          from collections import Counter
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          rows=[];reports=[]
+          for p in Path('naruto-history-shards').rglob('segment.json'): rows+=json.loads(p.read_text(encoding='utf-8')).get('races',[])
+          for p in Path('naruto-history-shards').rglob('report.json'): reports.append(json.loads(p.read_text(encoding='utf-8')))
+          rows.sort(key=lambda r:(r['d'],int(r['r'])))
+          ids=[r['id'] for r in rows]
+          assert len(ids)==len(set(ids))
+          assert all(str(r.get('id','')).split('-')[3]=='14' for r in rows)
+          assert all(len(r.get('c',[]))==6 for r in rows)
+          assert all(str(r.get('o','')).count('-')==2 for r in rows)
+          by=Counter(r['d'] for r in rows)
+          cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
+          partial={d:n for d,n in by.items() if n!=12}
+          out={'schema':'boat-command-program-history-v2','builder':'NARUTO-HISTORY-BOOTSTRAP-V1','venueCode':'14','cutoff':cutoff,'resultUse':'HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE','exhibitionIncluded':False,'waterFeaturesIncluded':False,'races':rows}
+          audit={'schema':'boat-command-naruto-history-audit-v1','venueCode':'14','windowDays':180,'cutoff':cutoff,'races':len(rows),'raceDays':len(by),'complete12RaceDays':sum(1 for n in by.values() if n==12),'partialOrCancelledDays':len(partial),'partialRaceCounts':partial,'exceptions':sum((r.get('exceptions',[]) for r in reports),[]),'duplicateIds':len(ids)-len(set(ids)),'readyForResearch':len(rows)>=300,'readyForProductionPrediction':False}
+          Path('naruto-history-bootstrap-v1.json').write_text(json.dumps(out,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          Path('naruto-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          if len(rows)<300: raise SystemExit('NARUTO_HISTORY_MIN_300_NOT_REACHED')
+          PY
+
+      - name: Commit audited Naruto history
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-naruto-history'
+          git config user.email 'boat-command-naruto-history@users.noreply.github.com'
+          git add naruto-history-bootstrap-v1.json naruto-history-audit-v1.json
+          git diff --cached --quiet && { echo 'NARUTO_HISTORY_ALREADY_CURRENT'; exit 0; }
+          git commit -m 'data(naruto): publish audited 180-day history bootstrap'
+          cp naruto-history-bootstrap-v1.json /tmp/naruto-history-bootstrap-v1.json
+          cp naruto-history-audit-v1.json /tmp/naruto-history-audit-v1.json
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/naruto-history-bootstrap-v1.json naruto-history-bootstrap-v1.json
+            cp /tmp/naruto-history-audit-v1.json naruto-history-audit-v1.json
+            git add naruto-history-bootstrap-v1.json naruto-history-audit-v1.json
+            git diff --cached --quiet && exit 0
+            git commit -m 'data(naruto): publish audited 180-day history bootstrap'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
