@@ -1,0 +1,230 @@
+{
+  "schema": "boat-command-heiwajima-baseline-backtest-v1",
+  "version": "HEIWAJIMA-BASELINE-BACKTEST-V1",
+  "venue": "HEIWAJIMA",
+  "venueCode": "04",
+  "source": "heiwajima-history-bootstrap-v1.json",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "crossVenueWeightsReused": false,
+  "primaryRecencyWindowRaces": 300,
+  "baselineArchitecture": "HEIWAJIMA_CLASS_NEIGHBOR_BASELINE",
+  "candidateArchitecture": "HEIWAJIMA_EMPIRICAL_FIRST_SECOND_TRANSITION_PLUS_CLASS_NEIGHBORS",
+  "calibration": {
+    "lastDate": "2026-08-06",
+    "dateCount": 65,
+    "selected": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.45,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    },
+    "candidates": [
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 88,
+          "hitRate": 0.18803418803418803,
+          "stake": 187200,
+          "returns": 173970,
+          "roi": 0.9293269230769231
+        },
+        "score": 0.4104220085470085
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 87,
+          "hitRate": 0.1858974358974359,
+          "stake": 187200,
+          "returns": 169960,
+          "roi": 0.9079059829059829
+        },
+        "score": 0.40249999999999997
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.38,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 80,
+          "hitRate": 0.17094017094017094,
+          "stake": 187200,
+          "returns": 171340,
+          "roi": 0.9152777777777777
+        },
+        "score": 0.39424145299145297
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 82,
+          "hitRate": 0.1752136752136752,
+          "stake": 187200,
+          "returns": 161880,
+          "roi": 0.8647435897435898
+        },
+        "score": 0.3820726495726495
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 76,
+          "hitRate": 0.1623931623931624,
+          "stake": 187200,
+          "returns": 167440,
+          "roi": 0.8944444444444445
+        },
+        "score": 0.382008547008547
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.65,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 76,
+          "hitRate": 0.1623931623931624,
+          "stake": 187200,
+          "returns": 167440,
+          "roi": 0.8944444444444445
+        },
+        "score": 0.382008547008547
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.25,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 80,
+          "hitRate": 0.17094017094017094,
+          "stake": 187200,
+          "returns": 158230,
+          "roi": 0.8452457264957265
+        },
+        "score": 0.37323183760683754
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.28,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 80,
+          "hitRate": 0.17094017094017094,
+          "stake": 187200,
+          "returns": 156170,
+          "roi": 0.834241452991453
+        },
+        "score": 0.36993055555555554
+      },
+      {
+        "config": {
+          "recencyWindow": 300,
+          "classScale": 0.18,
+          "neighborMix": 0.45,
+          "neighborLimit": 240,
+          "decay": 0.55,
+          "laplace": 1
+        },
+        "metrics4": {
+          "races": 468,
+          "hits": 78,
+          "hitRate": 0.16666666666666666,
+          "stake": 187200,
+          "returns": 154440,
+          "roi": 0.825
+        },
+        "score": 0.36416666666666664
+      }
+    ]
+  },
+  "holdout": {
+    "firstDate": "2026-08-07",
+    "dateCount": 29,
+    "classBaseline4": {
+      "races": 348,
+      "hits": 42,
+      "hitRate": 0.1206896551724138,
+      "stake": 139200,
+      "returns": 95740,
+      "roi": 0.6877873563218391
+    },
+    "programOnly4": {
+      "races": 348,
+      "hits": 46,
+      "hitRate": 0.13218390804597702,
+      "stake": 139200,
+      "returns": 76050,
+      "roi": 0.5463362068965517
+    },
+    "hitRateDelta": 0.011494252873563218,
+    "roiDelta": -0.14145114942528736,
+    "candidateUplift": false
+  },
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "promotionEligible": false,
+  "promotionBlockers": [
+    "HEIWAJIMA_FORWARD_36_RACES_NOT_READY",
+    "HEIWAJIMA_FORWARD_60_RACES_NOT_READY",
+    "HEIWAJIMA_FORWARD_MODEL_UPLIFT_NOT_READY"
+  ]
+}
