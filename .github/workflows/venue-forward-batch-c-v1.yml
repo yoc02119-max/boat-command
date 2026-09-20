@@ -1,0 +1,119 @@
+name: Venue forward batch C v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Venue SHADOW batch C v1"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-post-result-v1.py'
+      - 'scripts/venue-shadow-evaluation-v1.js'
+      - 'scripts/venue-readiness-refresh-v1.js'
+      - '.github/workflows/venue-forward-batch-c-v1.yml'
+  schedule:
+    - cron: '0,15,30,45 0-13,21-23 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-forward-batch-c-v1
+  cancel-in-progress: false
+
+jobs:
+  forward:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Install POST parser
+        run: python -m pip install --quiet requests beautifulsoup4
+      - name: Resolve JST date
+        id: date
+        run: echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Collect POST only after paired SHADOW and evaluate
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          while read -r code key slug; do
+            python3 scripts/venue-post-result-v1.py --code "$code" --venue "$key" --slug "$slug" --date "$DATE"
+            node --check scripts/venue-shadow-evaluation-v1.js
+            node scripts/venue-shadow-evaluation-v1.js "$slug" "$key" "$code" "$DATE"
+            node --check scripts/venue-readiness-refresh-v1.js
+            node scripts/venue-readiness-refresh-v1.js "$slug" "$key" "$code"
+          done <<'EOF'
+          24 OMURA omura
+          04 HEIWAJIMA heiwajima
+          08 TOKONAME tokoname
+          09 TSU tsu
+          EOF
+      - name: Audit PRE POST boundary and no promotion
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,re
+          pairs=[('24','OMURA','omura'),('04','HEIWAJIMA','heiwajima'),('08','TOKONAME','tokoname'),('09','TSU','tsu')]
+          for code,key,slug in pairs:
+              for p in glob.glob(f'live/{slug}/*/post/race-*-result.json'):
+                  x=json.load(open(p,encoding='utf-8'))
+                  assert x['schema']=='boat-command-live-result-v1'
+                  assert x['venue']==key and x['venueCode']==code and x.get('slug')==slug
+                  assert x['preRaceDataIncluded'] is False and x['resultEndpointsIncluded'] is True
+                  assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False and x['tryEnabled'] is False
+                  assert x['immutableAfterFirstWrite'] is True and x['preRaceEvidenceRequired'] is True
+                  assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+                  assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
+                  for sp in x['preRaceEvidencePaths']:
+                      s=json.load(open(sp,encoding='utf-8'))
+                      assert s['resultInput'] is False and s['payoutInput'] is False
+                      assert s['productionEnabled'] is False and s['tryEnabled'] is False
+                      assert s['immutableAfterFirstWrite'] is True
+              r=json.load(open(f'venues/{slug}/readiness-v1.json',encoding='utf-8'))
+              assert r['venueCode']==code
+              assert r['operation']['mode']=='SHADOW_ONLY' and r['operation']['active'] is False
+              assert r['modelEnabled'] is False and r['tryEnabled'] is False and r['realMoneyEnabled'] is False
+              e=json.load(open(f'{slug}-shadow-evaluation-v1.json',encoding='utf-8'))
+              assert e['venueCode']==code and e['cashNeutral'] is True and e['realMoney'] is False
+              assert e['boundaries']=={'predictionMutation':False,'bankrollMutation':False,'tryMutation':False}
+          print('VENUE_FORWARD_BOUNDARY_PASS')
+          PY
+      - name: Preserve generated outputs
+        run: |
+          set -euo pipefail
+          DATE="${{ steps.date.outputs.date }}"
+          rm -rf /tmp/venue-forward-publish
+          mkdir -p /tmp/venue-forward-publish
+          for slug in omura heiwajima tokoname tsu; do
+            for p in "$slug-shadow-evaluation-v1.json" "venues/$slug/readiness-v1.json" "live/$slug/$DATE/research-evaluation-v1.json"; do
+              [ -f "$p" ] && cp --parents "$p" /tmp/venue-forward-publish/
+            done
+            if [ -d "live/$slug/$DATE/post" ]; then
+              cp -a --parents "live/$slug/$DATE/post" /tmp/venue-forward-publish/
+            fi
+          done
+      - name: Publish forward evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-venue-forward'
+          git config user.email 'boat-command-venue-forward@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp -a /tmp/venue-forward-publish/. .
+            git add live omura-shadow-evaluation-v1.json heiwajima-shadow-evaluation-v1.json tokoname-shadow-evaluation-v1.json tsu-shadow-evaluation-v1.json venues/omura/readiness-v1.json venues/heiwajima/readiness-v1.json venues/tokoname/readiness-v1.json venues/tsu/readiness-v1.json
+            git diff --cached --quiet && { echo 'VENUE_FORWARD_CURRENT'; exit 0; }
+            git commit -m 'analysis: refresh batch A forward evidence'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
