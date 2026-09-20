@@ -41,6 +41,33 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 @media(max-width:1180px){.rrb-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.research-progress{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.grid{grid-template-columns:1fr}.shell{padding:16px 12px 100px}.hero{padding:18px}.tabs{grid-template-columns:repeat(4,1fr)}.rrb-grid{grid-template-columns:1fr}.rrb-head{align-items:flex-start;flex-direction:column}.rrb-head-stats{justify-content:flex-start}.rrb-safe{display:none}.rrb-boat b{font-size:12px}.rrb-boat small{font-size:10px}.rrb-picks i{font-size:12px}.rrb-subtabs{top:6px}}
+
+/* v3 COMMON OPERATION SHELL — same first-view hierarchy as GAMAGORI */
+.hero{position:relative;padding-right:190px;min-height:136px}
+.hero .status{position:absolute;right:20px;bottom:20px;margin-top:0;border-color:rgba(32,224,199,.28);color:#9be7dc}
+.common-bank{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:9px;margin-top:11px}
+.common-kpi{min-width:0;padding:12px 13px;border:1px solid #1a3a56;border-radius:13px;background:linear-gradient(180deg,#0d2236,#091826)}
+.common-kpi small{display:block;font-size:8px;color:#748fa4;margin-bottom:4px}
+.common-kpi b{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.common-kpi.bank b{font-size:25px;color:#8fe8ff}
+.common-kpi.profit.positive b{color:#79e7bb}.common-kpi.profit.negative b{color:#ff8997}
+.common-bank-note{grid-column:1/-1;padding:0 3px;color:#617e94;font-size:8px;line-height:1.45}
+.common-tabs{position:sticky;top:6px;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px;padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(7,21,34,.94);backdrop-filter:blur(14px)}
+.common-tab{appearance:none;border:1px solid #244762;background:#081725;color:#8199ac;border-radius:10px;padding:10px 8px;font-weight:850;font-size:11px;cursor:pointer}
+.common-tab.active{border-color:#2b98ff;color:white;background:#0a3150}
+.venue-details{margin-top:8px;color:#6c879b;font-size:9px}
+.venue-details>summary{cursor:pointer;list-style:none;width:max-content;padding:5px 2px;font-weight:800}
+.venue-details>summary::-webkit-details-marker{display:none}
+.venue-details>.grid{margin-top:7px}
+.venue-details #venueTabs{display:none!important}
+.venue-details .actions{display:none}
+.research-board{margin-top:10px}
+@media(max-width:720px){
+ .hero{padding-right:18px;min-height:0}.hero .status{position:static;margin-top:13px}
+ .common-bank{grid-template-columns:1fr 1fr;gap:6px}
+ .common-kpi{padding:9px 10px}.common-kpi b{font-size:14px}.common-kpi.bank b{font-size:21px}
+ .common-tabs{top:4px;margin-top:9px}.common-tab{padding:9px 4px}
+}
 </style>
 </head>
 <body>
@@ -49,9 +76,24 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <section class="hero">
 <div class="code" id="venueCode">VENUE --</div>
 <h1 id="venueName">競艇場</h1>
-<p>この競艇場専用の運用画面です。本線ロジックは30日固定し、AUTO TRYと結果を蓄積します。</p>
+<p id="heroCopy">この競艇場専用の運用画面です。</p>
 <div class="status" id="buildStatus"><i></i><span>MODEL準備中</span></div>
 </section>
+<section class="common-bank" id="commonVenueBank">
+ <div class="common-kpi bank"><small>24場共通 仮資金</small><b id="commonBankroll">同期中</b></div>
+ <div class="common-kpi"><small>本日AUTO TRY</small><b id="commonTodayTry">—</b></div>
+ <div class="common-kpi profit" id="commonProfitBox"><small>本日確定損益</small><b id="commonTodayProfit">—</b></div>
+ <div class="common-kpi"><small>本日回収率</small><b id="commonTodayRoi">—</b></div>
+ <div class="common-bank-note" id="commonBankNote">共通100万円 · 実金なし · TRYのみ資金連動</div>
+</section>
+<div class="common-tabs" id="commonVenueTabs" role="tablist">
+ <button class="common-tab active" type="button" data-common-view="today">今日</button>
+ <button class="common-tab" type="button" data-common-view="races">12R</button>
+ <button class="common-tab" type="button" data-common-view="results">結果</button>
+ <button class="common-tab" type="button" data-common-view="history">履歴</button>
+</div>
+<details class="venue-details" id="venueDetails">
+<summary>詳細・検証</summary>
 <section class="grid">
 <div class="panel">
 <h2>この場の進行</h2>
@@ -77,6 +119,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
 </div>
 </section>
+</details>
 <section class="research-board" id="researchBoard" hidden></section>
 </main>
 <script src="venue-registry-v1.js?v=3"></script>
@@ -87,12 +130,58 @@ const REG=window.BOAT_COMMAND_VENUE_REGISTRY;
 const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
 const q=new URLSearchParams(location.search),meta=REG?.resolve(q.get('jcd')||q.get('venue')||''),jcd=meta?.code||'',v=meta?[meta.name,meta.key]:null;
 const runtimePromise=meta&&RUNTIME?.boot?RUNTIME.boot(meta,{loadModel:meta.runtime!=='ENTRY_ONLY'}).catch(()=>null):Promise.resolve(null);
+const yen=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
+const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+function syncCommonVenueTabs(view){
+ document.querySelectorAll('#commonVenueTabs .common-tab').forEach(t=>t.classList.toggle('active',t.dataset.commonView===view));
+}
+function activateCommonVenueView(view){
+ syncCommonVenueTabs(view);
+ if(view==='history'){
+   const d=document.getElementById('venueDetails');if(d)d.open=true;
+   setTimeout(()=>document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'}),20);
+   return;
+ }
+ if(typeof window.__BC_VENUE_ACTIVATE==='function'){window.__BC_VENUE_ACTIVATE(view);return}
+ const old=document.querySelector(`#venueTabs .tab[data-view="${view}"]`);
+ if(old)old.click();
+ if(view==='today')window.scrollTo({top:0,behavior:'smooth'});
+}
+async function refreshCommonVenueBank(){
+ try{
+   const res=await fetch(`./shared-try-portfolio-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(!res.ok)throw new Error('PORTFOLIO_WAIT');
+   const x=await res.json(),day=todayJst(),rows=Array.isArray(x.ledger)?x.ledger.filter(z=>String(z.date)===day):[];
+   const settled=rows.filter(z=>z.settled===true);
+   const committed=rows.reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
+   const settledStake=settled.reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
+   const returned=settled.reduce((a,z)=>a+(Number(z.returnYen)||0),0);
+   const profit=returned-settledStake,roi=settledStake?returned/settledStake:null;
+   document.getElementById('commonBankroll').textContent=yen(Number(x.bankrollYen));
+   document.getElementById('commonTodayTry').textContent=yen(committed);
+   document.getElementById('commonTodayProfit').textContent=settled.length?`${profit>0?'+':''}${yen(profit)}`:'¥0';
+   document.getElementById('commonTodayRoi').textContent=roi==null?'—':`${(roi*100).toFixed(1)}%`;
+   const box=document.getElementById('commonProfitBox');box?.classList.toggle('positive',profit>0);box?.classList.toggle('negative',profit<0);
+   const pending=rows.filter(z=>z.settled!==true).reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
+   document.getElementById('commonBankNote').textContent=`共通100万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
+ }catch{
+   document.getElementById('commonBankroll').textContent='¥1,000,000';
+   document.getElementById('commonTodayTry').textContent='—';
+   document.getElementById('commonTodayProfit').textContent='¥0';
+   document.getElementById('commonTodayRoi').textContent='—';
+ }
+}
+document.querySelectorAll('#commonVenueTabs .common-tab').forEach(t=>t.addEventListener('click',()=>activateCommonVenueView(t.dataset.commonView)));
+refreshCommonVenueBank();
+setInterval(refreshCommonVenueBank,60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCommonVenueBank()});
+
 async function mountOperationalBoard(meta,x){
   if(meta?.state!=='LIVE_SIMULATION'||!x)return null;
   document.getElementById('modelStepTitle').textContent=`${meta.name}専用モデル · 30日固定本線`;
   document.getElementById('tryStatus').textContent='共通100万円 · AUTO TRY';
   const st=document.getElementById('buildStatus');
-  st.querySelector('span').textContent='運用中 · 30日SHADOW';
+  st.querySelector('span').textContent='運用中 · 30日';
   st.querySelector('i').style.background='#20e0c7';
   st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
   st.style.color='#9be7dc';
@@ -108,6 +197,7 @@ async function mountOperationalBoard(meta,x){
   });
   const activate=view=>{
     tabs?.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+    syncCommonVenueTabs(view);
     if(view==='races'){
       boardApi?.setView?.('all');
       document.getElementById('researchBoard')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -120,6 +210,7 @@ async function mountOperationalBoard(meta,x){
       document.querySelector('.hero')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
   };
+  window.__BC_VENUE_ACTIVATE=activate;
   tabs?.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>activate(t.dataset.view)));
   return boardApi;
 }
@@ -130,9 +221,10 @@ else{
  document.getElementById('venueCode').textContent=`VENUE ${jcd} · ${v[1]}`;
  document.getElementById('venueName').textContent=v[0];
  document.getElementById('topVenue').textContent=v[0];
+ if(meta?.state==='LIVE_SIMULATION')document.getElementById('heroCopy').textContent='結果前固定の本線を30日継続運用。資金反映はAUTO TRYのみ。';
  if(jcd==='03'){
    const st=document.getElementById('buildStatus');
-   st.querySelector('span').textContent='運用中 · 30日SHADOW';
+   st.querySelector('span').textContent='運用中 · 30日';
    st.querySelector('i').style.background='#20e0c7';
    st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
    st.style.color='#9be7dc';
@@ -198,13 +290,13 @@ else{
          const v2=x.candidateModel?.v2ForwardEligible===true?' · v2前向き候補PASS':'';
          gates.textContent=`30日固定運用 · 改良SHADOW ${bs.length?bs.length+'項目継続':'比較データ蓄積中'}${v2} · 本線は途中変更なし`;
        }
-       st.querySelector('span').textContent='運用中 · 30日SHADOW';
+       st.querySelector('span').textContent='運用中 · 30日';
        await mountOperationalBoard(meta,x);
      }catch{}
    })();
  } else if(meta?.readinessPath){
    const st=document.getElementById('buildStatus');
-   st.querySelector('span').textContent=meta.state==='LIVE_SIMULATION'?'運用中 · 30日SHADOW':'構築中 · DATA LAYER';
+   st.querySelector('span').textContent=meta.state==='LIVE_SIMULATION'?'運用中 · 30日':'構築中 · DATA LAYER';
    st.querySelector('i').style.background='#20e0c7';
    st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
    st.style.color='#9be7dc';
@@ -258,7 +350,7 @@ else{
            ?`30日固定運用 · FORWARD評価継続${uplift} · 本線は途中変更なし`
            :`昇格ゲート · ${blockers.length?blockers.length+'項目未完了':'人間レビュー待ち'}${uplift} · 自動本番化なし`;
        }
-       st.querySelector('span').textContent=meta.state==='LIVE_SIMULATION'?'運用中 · 30日SHADOW':`構築中 · ${x.phase||'DATA_LAYER'}`;
+       st.querySelector('span').textContent=meta.state==='LIVE_SIMULATION'?'運用中 · 30日':`構築中 · ${x.phase||'DATA_LAYER'}`;
        if(meta.state==='LIVE_SIMULATION')await mountOperationalBoard(meta,x);
      }catch{}
    })();
