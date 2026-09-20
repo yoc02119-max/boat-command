@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+import datetime, json, re, time, urllib.request
+from zoneinfo import ZoneInfo
+
+JST=ZoneInfo('Asia/Tokyo')
+TODAY=datetime.datetime.now(JST).date()
+CODES=[f'{i:02d}' for i in range(1,25)]
+NAMES={
+ '01':'桐生','02':'戸田','03':'江戸川','04':'平和島','05':'多摩川','06':'浜名湖',
+ '07':'蒲郡','08':'常滑','09':'津','10':'三国','11':'びわこ','12':'住之江',
+ '13':'尼崎','14':'鳴門','15':'丸亀','16':'児島','17':'宮島','18':'徳山',
+ '19':'下関','20':'若松','21':'芦屋','22':'福岡','23':'唐津','24':'大村'
+}
+
+def fetch(day):
+    hd=day.strftime('%Y%m%d')
+    url=f'https://www.boatrace.jp/owpc/pc/race/index?hd={hd}'
+    req=urllib.request.Request(url,headers={'User-Agent':'BOAT-COMMAND-VENUE-CALENDAR/1.0'})
+    with urllib.request.urlopen(req,timeout=45) as r:
+        raw=r.read()
+    for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+        try:return raw.decode(enc)
+        except UnicodeDecodeError:pass
+    return raw.decode('utf-8','replace')
+
+next_date={c:None for c in CODES}
+today_active=set()
+checked=0
+errors=[]
+
+for offset in range(0,61):
+    day=TODAY+datetime.timedelta(days=offset)
+    try:
+        text=fetch(day)
+    except Exception as e:
+        errors.append({'date':day.isoformat(),'error':str(e)})
+        continue
+    checked+=1
+    # Official race index contains venue-specific links with jcd=XX.
+    present=set(re.findall(r'(?:[?&]|&amp;)jcd=(\d{2})(?:&|&amp;|"|\')',text))
+    if not present:
+        present=set(re.findall(r'jcd=(\d{2})',text))
+    present={c for c in present if c in next_date}
+    if offset==0:
+        today_active=present
+    for code in present:
+        if next_date[code] is None:
+            next_date[code]=day.isoformat()
+    if all(next_date.values()):
+        break
+    time.sleep(.12)
+
+out={
+ 'schema':'boat-command-venue-calendar-v1',
+ 'version':'VENUE-CALENDAR-V1',
+ 'generatedAt':datetime.datetime.now(JST).isoformat(),
+ 'source':'BOAT RACE official race index',
+ 'sourcePattern':'https://www.boatrace.jp/owpc/pc/race/index?hd=YYYYMMDD',
+ 'today':TODAY.isoformat(),
+ 'horizonDays':60,
+ 'daysChecked':checked,
+ 'venues':{}
+}
+for code in CODES:
+    nxt=next_date[code]
+    out['venues'][code]={
+        'venueCode':code,
+        'venueName':NAMES[code],
+        'todayActive':code in today_active,
+        'nextRaceDate':nxt,
+        'nextRaceDateKnown':nxt is not None
+    }
+if errors:
+    out['fetchErrors']=errors[:10]
+
+with open('venue-calendar-v1.json','w',encoding='utf-8') as f:
+    json.dump(out,f,ensure_ascii=False,indent=2)
+    f.write('\n')
+print(json.dumps({'today':out['today'],'daysChecked':checked,'known':sum(1 for x in next_date.values() if x),'todayActive':len(today_active)},ensure_ascii=False))
