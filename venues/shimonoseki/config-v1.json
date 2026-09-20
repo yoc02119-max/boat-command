@@ -1,0 +1,72 @@
+{
+  "schema": "boat-command-venue-config-v1",
+  "version": "SHIMONOSEKI-CONFIG-V0.1.0",
+  "venue": "SHIMONOSEKI",
+  "venueName": "下関",
+  "venueCode": "19",
+  "slug": "shimonoseki",
+  "state": "BUILDING",
+  "modelEnabled": false,
+  "tryEnabled": false,
+  "realMoneyEnabled": false,
+  "predictionPolicy": {
+    "strictPreRaceOnly": true,
+    "resultLookahead": false,
+    "payoutLookahead": false,
+    "crossVenueModelFallback": false,
+    "crossVenueHistoryMixing": false
+  },
+  "featurePlan": {
+    "program": [
+      "lane",
+      "class",
+      "registration",
+      "fCount",
+      "lCount",
+      "avgST",
+      "nationalWinRate",
+      "national2Rate",
+      "national3Rate",
+      "localWinRate",
+      "local2Rate",
+      "local3Rate",
+      "motor",
+      "boat",
+      "motor2Rate",
+      "boat2Rate",
+      "raceType"
+    ],
+    "status": {
+      "program": "PENDING",
+      "history": "PENDING_180D_BOOTSTRAP",
+      "venueSpecificFeatures": "PENDING_MASTER_CALIBRATION"
+    }
+  },
+  "operationPolicy": {
+    "mode": "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION",
+    "operationStartDate": null,
+    "mainModelVersion": null,
+    "mainLogicFrozen": false,
+    "sharedBankroll": true,
+    "sharedBankrollStartYen": 1000000,
+    "trySelection": "SHARED_CROSS_VENUE_SELECTOR_V1",
+    "stakePerPickYen": 500,
+    "realMoney": false,
+    "improvementsRunAsSeparateShadow": true
+  },
+  "promotionPolicy": {
+    "minimumHistoricalRaces": 300,
+    "primaryRecencyWindowRaces": 300,
+    "earlyReviewRaces": 36,
+    "targetReviewRaces": 60,
+    "requireStrictWalkForwardHoldout": true,
+    "requireHumanReview": true,
+    "autoPromotion": false,
+    "realMoneyEnable": false
+  },
+  "notes": [
+    "下関専用レーン。24場先行構築フェーズのため、他場ロジックを流用せず専用履歴・専用モデルを後続接続する。",
+    "結果・払戻はPRE-RACE予想またはAUTO TRY選抜入力へ逆流させない。",
+    "24場共通100万円の仮資金のみ。実金は扱わない。"
+  ]
+}
