@@ -3,39 +3,46 @@
   "version": "TAMAGAWA-READINESS-V1",
   "venue": "TAMAGAWA",
   "venueCode": "05",
-  "generatedAt": "2026-09-20T01:41:58.074Z",
-  "phase": "DATA_LAYER",
-  "latestDate": null,
+  "generatedAt": "2026-09-20T19:55:31.711Z",
+  "phase": "SHADOW_VALIDATION",
+  "latestDate": "2026-09-19",
   "current": {
-    "programReady": false,
-    "programRaceCount": 0,
+    "programReady": true,
+    "programRaceCount": 12,
     "postResults": 0,
     "shadowClassBaseline": 0,
     "shadowProgramOnly": 0,
     "evaluatedProgramOnly": 0
   },
   "history": {
-    "rows": 0,
-    "raceDays": 0,
+    "rows": 1165,
+    "raceDays": 98,
     "windowDays": 180,
-    "complete12RaceDays": 0,
-    "partialOrCancelledDays": 0,
+    "complete12RaceDays": 97,
+    "partialOrCancelledDays": 1,
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
-    "ready": false,
-    "analysisReady": false
+    "ready": true,
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 360,
+    "classHitRate": 0.20277777777777778,
+    "programHitRate": 0.21388888888888888,
+    "classRoi": 0.7316666666666667,
+    "programRoi": 0.7501388888888889,
+    "hitRateDelta": 0.0111111111111111,
+    "roiDelta": 0.018472222222222223,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,12 +61,9 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "PROGRAM_12R_NOT_READY",
-    "HISTORY_300_RACES_NOT_READY",
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
+    "FORWARD_MODEL_UPLIFT_NOT_READY",
     "HUMAN_REVIEW_NOT_READY"
   ],
   "policy": {
@@ -74,9 +78,9 @@
     "autoTryEnable": false
   },
   "operation": {
-    "mode": "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION",
+    "mode": "SHADOW_ONLY",
     "active": false,
-    "mainLogicFrozen": false,
+    "mainLogicFrozen": true,
     "sharedBankroll": true,
     "sharedBankrollStartYen": 1000000,
     "realMoney": false
