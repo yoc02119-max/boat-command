@@ -1,0 +1,156 @@
+name: Venue history batch A v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/venue-history-batch-a-v1.yml'
+      - 'program-history-builder-v121.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-history-batch-a-v1
+  cancel-in-progress: false
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue:
+          - { code: '01', key: KIRYU, slug: kiryu }
+          - { code: '05', key: TAMAGAWA, slug: tamagawa }
+          - { code: '06', key: HAMANAKO, slug: hamanako }
+          - { code: '12', key: SUMINOE, slug: suminoe }
+        shard: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Build 30-day venue history shard
+        env:
+          CODE: ${{ matrix.venue.code }}
+          KEY: ${{ matrix.venue.key }}
+          SLUG: ${{ matrix.venue.slug }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          WORK="venue-hist-work/$SLUG-$SHARD"
+          OUT="venue-hist-out/$SLUG-$SHARD"
+          rm -rf "$WORK" "$OUT"
+          mkdir -p "$WORK/days" "$OUT"
+          python3 program-history-builder-v121.py --self-test
+          python3 - <<'PY' > "$WORK/dates.txt"
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          today=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()
+          start=today-datetime.timedelta(days=180)
+          shard=int(os.environ['SHARD'])
+          a=start+datetime.timedelta(days=shard*30)
+          b=min(a+datetime.timedelta(days=30),today)
+          while a<b:
+              print(a.isoformat());a+=datetime.timedelta(days=1)
+          PY
+          : > "$WORK/exceptions.txt"
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            ONE="$WORK/one"; rm -rf "$ONE"; mkdir -p "$ONE/raw" "$ONE/b" "$ONE/k" "$ONE/out"
+            bc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o "$ONE/raw/$b" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/B/$ym/$b" || true)"
+            kc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o "$ONE/raw/$k" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/K/$ym/$k" || true)"
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then echo "$d HTTP B=$bc K=$kc" >> "$WORK/exceptions.txt"; continue; fi
+            lha xw="$ONE/b" "$ONE/raw/$b" >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            lha xw="$ONE/k" "$ONE/raw/$k" >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            python3 program-history-builder-v121.py --b-dir "$ONE/b" --k-dir "$ONE/k" --out "$ONE/out" --venue "$CODE" >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            python3 - "$d" "$ONE/out/$CODE" "$WORK/days" "$CODE" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d,outdir,days,code=sys.argv[1:]
+          rows=[]
+          for p in Path(outdir).glob('*.json'):
+              x=json.loads(p.read_text(encoding='utf-8'));rows += [r for r in x.get('races',[]) if r.get('d')==d]
+          if not rows:raise SystemExit(0)
+          ids=[r.get('id') for r in rows]
+          if len(ids)!=len(set(ids)):raise SystemExit('DUPLICATE_DAY_IDS')
+          if any(str(r.get('id','')).split('-')[3]!=code for r in rows):raise SystemExit('WRONG_VENUE')
+          Path(days,f'{d}.json').write_text(json.dumps(rows,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
+          done < "$WORK/dates.txt"
+          python3 - "$WORK" "$OUT" <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          work,out=map(Path,sys.argv[1:])
+          rows=[]
+          for p in sorted((work/'days').glob('*.json')):rows += json.loads(p.read_text(encoding='utf-8'))
+          report={'shard':int(os.environ['SHARD']),'code':os.environ['CODE'],'slug':os.environ['SLUG'],'daysWithRaces':len({r['d'] for r in rows}),'races':len(rows),'exceptions':[x for x in (work/'exceptions.txt').read_text().splitlines() if x.strip()]}
+          (out/'segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(report)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: history-${{ matrix.venue.slug }}-${{ matrix.shard }}
+          path: venue-hist-out/${{ matrix.venue.slug }}-${{ matrix.shard }}/*.json
+          retention-days: 5
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: history-*
+          path: venue-history-shards
+      - name: Merge and audit four venue histories
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json
+          from collections import Counter
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          venues=[('01','KIRYU','kiryu'),('05','TAMAGAWA','tamagawa'),('06','HAMANAKO','hamanako'),('12','SUMINOE','suminoe')]
+          cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
+          for code,key,slug in venues:
+              rows=[];reports=[]
+              for p in Path('venue-history-shards').glob(f'history-{slug}-*/segment.json'):rows+=json.loads(p.read_text(encoding='utf-8')).get('races',[])
+              for p in Path('venue-history-shards').glob(f'history-{slug}-*/report.json'):reports.append(json.loads(p.read_text(encoding='utf-8')))
+              rows.sort(key=lambda r:(r['d'],int(r['r'])))
+              ids=[r['id'] for r in rows]
+              assert len(ids)==len(set(ids))
+              assert all(str(r.get('id','')).split('-')[3]==code for r in rows)
+              assert all(len(r.get('c',[]))==6 for r in rows)
+              by=Counter(r['d'] for r in rows);partial={d:n for d,n in by.items() if n!=12}
+              hist={'schema':'boat-command-program-history-v2','builder':'VENUE-HISTORY-BATCH-A-V1','venue':key,'venueCode':code,'cutoff':cutoff,'resultUse':'HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE','exhibitionIncluded':False,'waterFeaturesIncluded':False,'races':rows}
+              audit={'schema':f'boat-command-{slug}-history-audit-v1','venue':key,'venueCode':code,'windowDays':180,'cutoff':cutoff,'races':len(rows),'raceDays':len(by),'complete12RaceDays':sum(1 for n in by.values() if n==12),'partialOrCancelledDays':len(partial),'partialRaceCounts':partial,'exceptions':sum((r.get('exceptions',[]) for r in reports),[]),'duplicateIds':len(ids)-len(set(ids)),'readyForResearch':len(rows)>=300,'readyForProductionPrediction':False}
+              Path(f'{slug}-history-bootstrap-v1.json').write_text(json.dumps(hist,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+              Path(f'{slug}-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              print(slug, len(rows), len(by), audit['readyForResearch'])
+              if len(rows)<300:raise SystemExit(f'{slug.upper()}_HISTORY_MIN_300_NOT_REACHED')
+          PY
+      - name: Publish batch A histories in one commit
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-history-batch'
+          git config user.email 'boat-command-history-batch@users.noreply.github.com'
+          FILES=(kiryu-history-bootstrap-v1.json kiryu-history-audit-v1.json tamagawa-history-bootstrap-v1.json tamagawa-history-audit-v1.json hamanako-history-bootstrap-v1.json hamanako-history-audit-v1.json suminoe-history-bootstrap-v1.json suminoe-history-audit-v1.json)
+          mkdir -p /tmp/history-batch-a
+          cp "${FILES[@]}" /tmp/history-batch-a/
+          for i in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/history-batch-a/* .
+            git add "${FILES[@]}"
+            git diff --cached --quiet && exit 0
+            git commit -m 'data: publish audited venue history batch A'
+            git push origin HEAD:main && exit 0
+            sleep $((i*2))
+          done
+          exit 1
