@@ -22,7 +22,7 @@ for(const v of venues){
   assert.ok(v.readinessPath,'READINESS_PATH_MISSING:'+v.code);
   assert.ok(v.dataRoot,'DATA_ROOT_MISSING:'+v.code);
   roots.push(v.dataRoot);
-  const cp=v.configPath.replace(/^\\.\\//,'');
+  const cp=v.configPath.replace(/^\.\//,'');
   const rp=v.readinessPath.replace(/^\\.\\//,'');
   assert.ok(fs.existsSync(cp),'CONFIG_FILE_MISSING:'+v.code+':'+cp);
   assert.ok(fs.existsSync(rp),'READINESS_FILE_MISSING:'+v.code+':'+rp);
