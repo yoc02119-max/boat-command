@@ -19,6 +19,8 @@ on:
       - 'gamagori-main-history-audit-v0320.json'
       - 'scripts/venue-agent-memory-refresh-v1.js'
       - 'scripts/venue-agent-research-smoke-v1.js'
+      - 'scripts/venue-agent-cycle-review-v1.js'
+      - 'scripts/venue-agent-cycle-review-smoke-v1.js'
       - '.github/workflows/venue-agent-memory-v1.yml'
 
 permissions:
@@ -65,10 +67,18 @@ jobs:
           });
           NODE
 
+      - name: Refresh 30-day cycle reviews
+        run: |
+          set -euo pipefail
+          node --check scripts/venue-agent-cycle-review-v1.js
+          node --check scripts/venue-agent-cycle-review-smoke-v1.js
+          node scripts/venue-agent-cycle-review-smoke-v1.js
+          node scripts/venue-agent-cycle-review-v1.js --write
+
       - name: Enforce generated-file boundary
         run: |
           set -euo pipefail
-          BAD="$(git status --porcelain | awk '{print $2}' | grep -Ev '^(venue-agents/|venue-agent-memory-index-v1\.json$)' || true)"
+          BAD="$(git status --porcelain | awk '{print $2}' | grep -Ev '^(venue-agents/|venue-agent-memory-index-v1\.json$|venue-agent-cycle-index-v1\.json$)' || true)"
           if [ -n "$BAD" ]; then
             echo "Unexpected modified paths:"
             echo "$BAD"
@@ -80,7 +90,7 @@ jobs:
           set -euo pipefail
           git config user.name 'boat-command-venue-agent-memory'
           git config user.email 'boat-command-venue-agent-memory@users.noreply.github.com'
-          git add venue-agents venue-agent-memory-index-v1.json
+          git add venue-agents venue-agent-memory-index-v1.json venue-agent-cycle-index-v1.json
           git diff --cached --quiet && { echo 'VENUE_AGENT_MEMORY_CURRENT'; exit 0; }
           git commit -m 'analysis(agent): refresh 24 venue research memories'
           BRANCH="${GITHUB_REF_NAME}"
