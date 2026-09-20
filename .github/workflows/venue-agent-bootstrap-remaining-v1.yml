@@ -1,0 +1,299 @@
+name: Venue agent bootstrap remaining v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/venue-agent-core-v1]
+    paths:
+      - 'venue-research-model-factory-v1.js'
+      - '*-research-model-v1.js'
+      - 'scripts/venue-history-analysis-generic-v1.js'
+      - 'scripts/venue-baseline-backtest-v1.js'
+      - 'scripts/venue-agent-memory-refresh-v1.js'
+      - '.github/workflows/venue-agent-bootstrap-remaining-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-agent-bootstrap-remaining-v1
+  cancel-in-progress: false
+
+jobs:
+  history-shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        venue:
+          - { code: '04', key: HEIWAJIMA, slug: heiwajima }
+          - { code: '08', key: TOKONAME, slug: tokoname }
+          - { code: '09', key: TSU, slug: tsu }
+          - { code: '11', key: BIWAKO, slug: biwako }
+          - { code: '13', key: AMAGASAKI, slug: amagasaki }
+          - { code: '15', key: MARUGAME, slug: marugame }
+          - { code: '16', key: KOJIMA, slug: kojima }
+          - { code: '17', key: MIYAJIMA, slug: miyajima }
+          - { code: '19', key: SHIMONOSEKI, slug: shimonoseki }
+          - { code: '20', key: WAKAMATSU, slug: wakamatsu }
+          - { code: '22', key: FUKUOKA, slug: fukuoka }
+          - { code: '24', key: OMURA, slug: omura }
+        shard: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LHA reader
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+
+      - name: Build 180-day history shard
+        env:
+          CODE: ${{ matrix.venue.code }}
+          KEY: ${{ matrix.venue.key }}
+          SLUG: ${{ matrix.venue.slug }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          WORK="venue-hist-work/$SLUG-$SHARD"
+          OUT="venue-hist-out/$SLUG-$SHARD"
+          rm -rf "$WORK" "$OUT"
+          mkdir -p "$WORK/days" "$OUT"
+          python3 program-history-builder-v121.py --self-test
+
+          python3 - <<'PY' > "$WORK/dates.txt"
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          today=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()
+          start=today-datetime.timedelta(days=180)
+          shard=int(os.environ['SHARD'])
+          a=start+datetime.timedelta(days=shard*30)
+          b=min(a+datetime.timedelta(days=30),today)
+          while a<b:
+              print(a.isoformat())
+              a+=datetime.timedelta(days=1)
+          PY
+
+          : > "$WORK/exceptions.txt"
+          while IFS= read -r d; do
+            ymd="${d//-/}"; yyyy="${ymd:0:4}"; mm="${ymd:4:2}"; yy="${ymd:2:2}"; dd="${ymd:6:2}"; ym="${yyyy}${mm}"
+            b="b${yy}${mm}${dd}.lzh"; k="k${yy}${mm}${dd}.lzh"
+            ONE="$WORK/one"; rm -rf "$ONE"; mkdir -p "$ONE/raw" "$ONE/b" "$ONE/k" "$ONE/out"
+            bc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o "$ONE/raw/$b" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/B/$ym/$b" || true)"
+            kc="$(curl -sS -L --retry 2 --retry-delay 1 --connect-timeout 20 --max-time 60 -o "$ONE/raw/$k" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/K/$ym/$k" || true)"
+            if [[ "$bc" != "200" || "$kc" != "200" ]]; then echo "$d HTTP B=$bc K=$kc" >> "$WORK/exceptions.txt"; continue; fi
+            lha xw="$ONE/b" "$ONE/raw/$b" >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            lha xw="$ONE/k" "$ONE/raw/$k" >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            python3 program-history-builder-v121.py --b-dir "$ONE/b" --k-dir "$ONE/k" --out "$ONE/out" --venue "$CODE" >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            python3 - "$d" "$ONE/out/$CODE" "$WORK/days" "$CODE" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d,outdir,days,code=sys.argv[1:]
+          rows=[]
+          for p in Path(outdir).glob('*.json'):
+              x=json.loads(p.read_text(encoding='utf-8'))
+              rows += [r for r in x.get('races',[]) if r.get('d')==d]
+          if not rows: raise SystemExit(0)
+          ids=[r.get('id') for r in rows]
+          if len(ids)!=len(set(ids)): raise SystemExit('DUPLICATE_DAY_IDS')
+          if any(str(r.get('id','')).split('-')[3]!=code for r in rows): raise SystemExit('WRONG_VENUE')
+          Path(days,f'{d}.json').write_text(json.dumps(rows,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
+          done < "$WORK/dates.txt"
+
+          python3 - "$WORK" "$OUT" <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          work,out=map(Path,sys.argv[1:])
+          rows=[]
+          for p in sorted((work/'days').glob('*.json')):
+              rows += json.loads(p.read_text(encoding='utf-8'))
+          report={
+              'shard':int(os.environ['SHARD']),
+              'code':os.environ['CODE'],
+              'slug':os.environ['SLUG'],
+              'daysWithRaces':len({r['d'] for r in rows}),
+              'races':len(rows),
+              'exceptions':[x for x in (work/'exceptions.txt').read_text().splitlines() if x.strip()]
+          }
+          (out/'segment.json').write_text(json.dumps({'races':rows},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(report)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: history-${{ matrix.venue.slug }}-${{ matrix.shard }}
+          path: venue-hist-out/${{ matrix.venue.slug }}-${{ matrix.shard }}/*.json
+          retention-days: 3
+
+  build-agents:
+    needs: history-shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: history-*
+          path: venue-history-shards
+
+      - name: Merge, analyze and backtest 12 venues
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json
+          from collections import Counter
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          venues=[
+              ('04','HEIWAJIMA','heiwajima'),
+              ('08','TOKONAME','tokoname'),
+              ('09','TSU','tsu'),
+              ('11','BIWAKO','biwako'),
+              ('13','AMAGASAKI','amagasaki'),
+              ('15','MARUGAME','marugame'),
+              ('16','KOJIMA','kojima'),
+              ('17','MIYAJIMA','miyajima'),
+              ('19','SHIMONOSEKI','shimonoseki'),
+              ('20','WAKAMATSU','wakamatsu'),
+              ('22','FUKUOKA','fukuoka'),
+              ('24','OMURA','omura'),
+          ]
+          cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
+
+          for code,key,slug in venues:
+              rows=[];reports=[]
+              for p in Path('venue-history-shards').glob(f'history-{slug}-*/segment.json'):
+                  rows += json.loads(p.read_text(encoding='utf-8')).get('races',[])
+              for p in Path('venue-history-shards').glob(f'history-{slug}-*/report.json'):
+                  reports.append(json.loads(p.read_text(encoding='utf-8')))
+              rows.sort(key=lambda r:(r['d'],int(r['r'])))
+              ids=[r['id'] for r in rows]
+              assert len(ids)==len(set(ids)), f'{slug}: duplicate ids'
+              assert all(str(r.get('id','')).split('-')[3]==code for r in rows), f'{slug}: wrong venue'
+              assert all(len(r.get('c',[]))==6 for r in rows), f'{slug}: invalid classes'
+              by=Counter(r['d'] for r in rows)
+              partial={d:n for d,n in by.items() if n!=12}
+              hist={
+                  'schema':'boat-command-program-history-v2',
+                  'builder':'VENUE-AGENT-BOOTSTRAP-REMAINING-V1',
+                  'venue':key,'venueCode':code,'cutoff':cutoff,
+                  'resultUse':'HISTORICAL_ROWS_ONLY_STRICTLY_BEFORE_TARGET_DATE',
+                  'exhibitionIncluded':False,'waterFeaturesIncluded':False,'races':rows
+              }
+              audit={
+                  'schema':f'boat-command-{slug}-history-audit-v1',
+                  'venue':key,'venueCode':code,'windowDays':180,'cutoff':cutoff,
+                  'races':len(rows),'raceDays':len(by),
+                  'complete12RaceDays':sum(1 for n in by.values() if n==12),
+                  'partialOrCancelledDays':len(partial),'partialRaceCounts':partial,
+                  'exceptions':sum((r.get('exceptions',[]) for r in reports),[]),
+                  'duplicateIds':len(ids)-len(set(ids)),
+                  'readyForResearch':len(rows)>=300,
+                  'readyForProductionPrediction':False
+              }
+              if len(rows)<300:
+                  raise SystemExit(f'{slug.upper()}_HISTORY_MIN_300_NOT_REACHED:{len(rows)}')
+              Path(f'{slug}-history-bootstrap-v1.json').write_text(json.dumps(hist,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+              Path(f'{slug}-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              print('HISTORY_READY',slug,len(rows),len(by))
+          PY
+
+          node --check scripts/venue-history-analysis-generic-v1.js
+          node --check scripts/venue-baseline-backtest-v1.js
+          node --check venue-research-model-factory-v1.js
+
+          node scripts/venue-history-analysis-generic-v1.js slug=heiwajima code=04 key=HEIWAJIMA
+          node scripts/venue-baseline-backtest-v1.js slug=heiwajima code=04 key=HEIWAJIMA
+          node scripts/venue-history-analysis-generic-v1.js slug=tokoname code=08 key=TOKONAME
+          node scripts/venue-baseline-backtest-v1.js slug=tokoname code=08 key=TOKONAME
+          node scripts/venue-history-analysis-generic-v1.js slug=tsu code=09 key=TSU
+          node scripts/venue-baseline-backtest-v1.js slug=tsu code=09 key=TSU
+          node scripts/venue-history-analysis-generic-v1.js slug=biwako code=11 key=BIWAKO
+          node scripts/venue-baseline-backtest-v1.js slug=biwako code=11 key=BIWAKO
+          node scripts/venue-history-analysis-generic-v1.js slug=amagasaki code=13 key=AMAGASAKI
+          node scripts/venue-baseline-backtest-v1.js slug=amagasaki code=13 key=AMAGASAKI
+          node scripts/venue-history-analysis-generic-v1.js slug=marugame code=15 key=MARUGAME
+          node scripts/venue-baseline-backtest-v1.js slug=marugame code=15 key=MARUGAME
+          node scripts/venue-history-analysis-generic-v1.js slug=kojima code=16 key=KOJIMA
+          node scripts/venue-baseline-backtest-v1.js slug=kojima code=16 key=KOJIMA
+          node scripts/venue-history-analysis-generic-v1.js slug=miyajima code=17 key=MIYAJIMA
+          node scripts/venue-baseline-backtest-v1.js slug=miyajima code=17 key=MIYAJIMA
+          node scripts/venue-history-analysis-generic-v1.js slug=shimonoseki code=19 key=SHIMONOSEKI
+          node scripts/venue-baseline-backtest-v1.js slug=shimonoseki code=19 key=SHIMONOSEKI
+          node scripts/venue-history-analysis-generic-v1.js slug=wakamatsu code=20 key=WAKAMATSU
+          node scripts/venue-baseline-backtest-v1.js slug=wakamatsu code=20 key=WAKAMATSU
+          node scripts/venue-history-analysis-generic-v1.js slug=fukuoka code=22 key=FUKUOKA
+          node scripts/venue-baseline-backtest-v1.js slug=fukuoka code=22 key=FUKUOKA
+          node scripts/venue-history-analysis-generic-v1.js slug=omura code=24 key=OMURA
+          node scripts/venue-baseline-backtest-v1.js slug=omura code=24 key=OMURA
+
+      - name: Refresh all 24 agent memories with new evidence
+        run: |
+          set -euo pipefail
+          node scripts/venue-agent-memory-refresh-v1.js --write
+          node - <<'NODE'
+          const x=require('./venue-agent-memory-index-v1.json');
+          if(x.agents!==24)throw new Error('AGENT_COUNT');
+          const boot=x.rows.filter(r=>r.status==='DATA_BOOTSTRAP');
+          console.log('AGENT_BOOTSTRAP_RESULT',{
+            agents:x.agents,
+            statuses:x.statuses,
+            dataBootstrapRemaining:boot.map(r=>r.venueCode+':'+r.slug)
+          });
+          NODE
+
+      - name: Commit research-only outputs to feature branch
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-venue-agent-bootstrap'
+          git config user.email 'boat-command-venue-agent-bootstrap@users.noreply.github.com'
+          BRANCH="${GITHUB_REF_NAME}"
+
+          git add \
+            heiwajima-history-bootstrap-v1.json heiwajima-history-audit-v1.json heiwajima-history-analysis-v1.json heiwajima-baseline-backtest-v1.json \
+            tokoname-history-bootstrap-v1.json tokoname-history-audit-v1.json tokoname-history-analysis-v1.json tokoname-baseline-backtest-v1.json \
+            tsu-history-bootstrap-v1.json tsu-history-audit-v1.json tsu-history-analysis-v1.json tsu-baseline-backtest-v1.json \
+            biwako-history-bootstrap-v1.json biwako-history-audit-v1.json biwako-history-analysis-v1.json biwako-baseline-backtest-v1.json \
+            amagasaki-history-bootstrap-v1.json amagasaki-history-audit-v1.json amagasaki-history-analysis-v1.json amagasaki-baseline-backtest-v1.json \
+            marugame-history-bootstrap-v1.json marugame-history-audit-v1.json marugame-history-analysis-v1.json marugame-baseline-backtest-v1.json \
+            kojima-history-bootstrap-v1.json kojima-history-audit-v1.json kojima-history-analysis-v1.json kojima-baseline-backtest-v1.json \
+            miyajima-history-bootstrap-v1.json miyajima-history-audit-v1.json miyajima-history-analysis-v1.json miyajima-baseline-backtest-v1.json \
+            shimonoseki-history-bootstrap-v1.json shimonoseki-history-audit-v1.json shimonoseki-history-analysis-v1.json shimonoseki-baseline-backtest-v1.json \
+            wakamatsu-history-bootstrap-v1.json wakamatsu-history-audit-v1.json wakamatsu-history-analysis-v1.json wakamatsu-baseline-backtest-v1.json \
+            fukuoka-history-bootstrap-v1.json fukuoka-history-audit-v1.json fukuoka-history-analysis-v1.json fukuoka-baseline-backtest-v1.json \
+            omura-history-bootstrap-v1.json omura-history-audit-v1.json omura-history-analysis-v1.json omura-baseline-backtest-v1.json \
+            venue-agents venue-agent-memory-index-v1.json
+
+          git diff --cached --quiet && { echo 'BOOTSTRAP_OUTPUT_CURRENT'; exit 0; }
+
+          mkdir -p /tmp/venue-agent-bootstrap
+          git diff --cached --name-only > /tmp/venue-agent-bootstrap/files.txt
+          while IFS= read -r f; do
+            mkdir -p "/tmp/venue-agent-bootstrap/$(dirname "$f")"
+            cp "$f" "/tmp/venue-agent-bootstrap/$f"
+          done < /tmp/venue-agent-bootstrap/files.txt
+
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+            while IFS= read -r f; do
+              mkdir -p "$(dirname "$f")"
+              cp "/tmp/venue-agent-bootstrap/$f" "$f"
+            done < /tmp/venue-agent-bootstrap/files.txt
+            git add -A
+            git diff --cached --quiet && exit 0
+            git commit -m 'data(agent): bootstrap remaining venue research'
+            git push origin "HEAD:$BRANCH" && exit 0
+            sleep $((i*3))
+          done
+          exit 1
