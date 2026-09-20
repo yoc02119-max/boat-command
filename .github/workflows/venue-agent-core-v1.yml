@@ -1,0 +1,60 @@
+name: BOAT COMMAND venue agent core v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 18 * * *'
+  push:
+    branches:
+      - main
+      - feat/venue-agent-core-v1
+    paths:
+      - 'venue-agent-core-v1.js'
+      - 'venue-agent-policy-v1.json'
+      - 'scripts/venue-agent-core-smoke-v1.js'
+      - 'scripts/venue-agent-audit-v1.js'
+      - 'venue-registry-v1.js'
+      - '.github/workflows/venue-agent-core-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: venue-agent-core-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax
+        run: |
+          node --check venue-agent-core-v1.js
+          node --check scripts/venue-agent-core-smoke-v1.js
+          node --check scripts/venue-agent-audit-v1.js
+      - name: Core guardrails
+        run: node scripts/venue-agent-core-smoke-v1.js
+      - name: Audit all 24 venue agents
+        run: |
+          node scripts/venue-agent-audit-v1.js > /tmp/venue-agent-audit.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('/tmp/venue-agent-audit.json','utf8'));
+          if(a.agents!==24)throw new Error('AGENT_COUNT');
+          if(!Array.isArray(a.rows)||a.rows.length!==24)throw new Error('AGENT_ROWS');
+          console.log('VENUE_AGENT_AUDIT_PASS',{
+            agents:a.agents,
+            ready:a.ready,
+            partial:a.partial,
+            bootstrap:a.bootstrap
+          });
+          NODE
+      - name: Confirm read-only rollout boundary
+        run: |
+          git diff --exit-code
+          echo 'VENUE_AGENT_CORE_READ_ONLY_PASS'

@@ -1,0 +1,39 @@
+{
+  "schema": "boat-command-venue-agent-policy-v1",
+  "version": "VENUE-AGENT-POLICY-V1",
+  "researchCycleDays": 30,
+  "agentScope": "ONE_AGENT_PER_VENUE",
+  "venueCount": 24,
+  "guardrails": {
+    "strictPreRaceOnly": true,
+    "hardLockImmutable": true,
+    "venueIsolation": true,
+    "crossVenueWeightCopy": false,
+    "postRaceAllowedForEvaluationOnly": true,
+    "shadowBeforePromotion": true,
+    "productionMutationFromAgent": false,
+    "autoPromotion": false,
+    "humanReviewRequired": true,
+    "realMoney": false
+  },
+  "promotion": {
+    "minimumHistoricalRaces": 300,
+    "minimumForwardRaces": 60,
+    "requireStrictHoldout": true,
+    "requireForwardValidation": true,
+    "requireHitRateImprovement": true,
+    "roiRegressionAllowed": false
+  },
+  "agentOutputs": [
+    "HYPOTHESIS",
+    "BACKTEST_REPORT",
+    "SHADOW_CANDIDATE",
+    "PROMOTION_REVIEW"
+  ],
+  "notes": [
+    "各場Agentは場固有データから特徴を発見し、場固有の仮説を検証する。",
+    "場ごとの先入観や固定重みを共通Coreから与えない。",
+    "結果・払戻は評価には使えるが、当該レースのPRE-RACE生成経路へ逆流させない。",
+    "改善候補はSHADOWで検証し、人間レビュー前にLIVEへ昇格させない。"
+  ]
+}
