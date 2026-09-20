@@ -88,7 +88,7 @@ jobs:
                   print('TOKUYAMA_WAIT_PROGRAM_EVIDENCE',race)
                   continue
 
-              url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=10&rno={race}'
+              url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd=18&rno={race}'
               try:
                   res=requests.get(url,headers=headers,timeout=20);res.raise_for_status()
               except Exception as e:
