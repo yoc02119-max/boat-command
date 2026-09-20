@@ -3,12 +3,12 @@
   "version": "MIYAJIMA-READINESS-V1",
   "venue": "MIYAJIMA",
   "venueCode": "17",
-  "generatedAt": "2026-09-20T01:41:46.197Z",
+  "generatedAt": "2026-09-20T20:14:21.650Z",
   "phase": "DATA_LAYER",
-  "latestDate": null,
+  "latestDate": "2026-09-20",
   "current": {
-    "programReady": false,
-    "programRaceCount": 0,
+    "programReady": true,
+    "programRaceCount": 12,
     "postResults": 0,
     "shadowClassBaseline": 0,
     "shadowProgramOnly": 0,
@@ -54,12 +54,11 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "PROGRAM_12R_NOT_READY",
     "HISTORY_300_RACES_NOT_READY",
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
     "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
+    "FORWARD_MODEL_UPLIFT_NOT_READY",
     "HUMAN_REVIEW_NOT_READY"
   ],
   "policy": {
@@ -74,9 +73,9 @@
     "autoTryEnable": false
   },
   "operation": {
-    "mode": "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION",
+    "mode": "SHADOW_ONLY",
     "active": false,
-    "mainLogicFrozen": false,
+    "mainLogicFrozen": true,
     "sharedBankroll": true,
     "sharedBankrollStartYen": 1000000,
     "realMoney": false
