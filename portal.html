@@ -197,5 +197,5 @@ document.getElementById("performanceNav")?.addEventListener("click",()=>document
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
 setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderSharedPortfolioStats();renderTodayTryPerformance()},60000);
 </script>
-</body>
+<script src="browser-controls-v1.js?v=1"></script></body>
 </html>
