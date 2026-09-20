@@ -91,7 +91,7 @@ jobs:
         run: |
           set -euo pipefail
           SRC="live/${{ matrix.slug }}/${{ steps.date.outputs.date }}/shadow"
-          DST="/tmp/venue-shadow-artifact/${{ matrix.slug }}/${{ steps.date.outputs.date }}"
+          DST="/tmp/venue-shadow-artifact/live/${{ matrix.slug }}/${{ steps.date.outputs.date }}"
           [ -d "$SRC" ] || { echo "NO_SHADOW_FILES"; exit 0; }
           mkdir -p "$DST"
           cp -a "$SRC" "$DST/"
