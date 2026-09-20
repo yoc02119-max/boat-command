@@ -3,39 +3,46 @@
   "version": "HAMANAKO-READINESS-V1",
   "venue": "HAMANAKO",
   "venueCode": "06",
-  "generatedAt": "2026-09-20T01:41:19.506Z",
-  "phase": "DATA_LAYER",
-  "latestDate": null,
+  "generatedAt": "2026-09-20T19:55:43.406Z",
+  "phase": "SHADOW_VALIDATION",
+  "latestDate": "2026-09-19",
   "current": {
-    "programReady": false,
-    "programRaceCount": 0,
+    "programReady": true,
+    "programRaceCount": 12,
     "postResults": 0,
     "shadowClassBaseline": 0,
     "shadowProgramOnly": 0,
     "evaluatedProgramOnly": 0
   },
   "history": {
-    "rows": 0,
-    "raceDays": 0,
+    "rows": 1192,
+    "raceDays": 100,
     "windowDays": 180,
-    "complete12RaceDays": 0,
-    "partialOrCancelledDays": 0,
+    "complete12RaceDays": 97,
+    "partialOrCancelledDays": 3,
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
-    "ready": false,
-    "analysisReady": false
+    "ready": true,
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
+    "ready": true,
+    "holdoutRaces": 356,
+    "classHitRate": 0.17696629213483145,
+    "programHitRate": 0.18820224719101122,
+    "classRoi": 0.6583567415730337,
+    "programRoi": 0.6572331460674158,
+    "hitRateDelta": 0.011235955056179775,
+    "roiDelta": -0.0011235955056179137,
     "candidateUplift": false,
-    "selectedConfig": null
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.45,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,12 +61,10 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "PROGRAM_12R_NOT_READY",
-    "HISTORY_300_RACES_NOT_READY",
-    "VENUE_FEATURE_ANALYSIS_NOT_READY",
-    "STRICT_HOLDOUT_NOT_READY",
+    "HOLDOUT_UPLIFT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
+    "FORWARD_MODEL_UPLIFT_NOT_READY",
     "HUMAN_REVIEW_NOT_READY"
   ],
   "policy": {
@@ -74,9 +79,9 @@
     "autoTryEnable": false
   },
   "operation": {
-    "mode": "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION",
+    "mode": "SHADOW_ONLY",
     "active": false,
-    "mainLogicFrozen": false,
+    "mainLogicFrozen": true,
     "sharedBankroll": true,
     "sharedBankrollStartYen": 1000000,
     "realMoney": false
