@@ -1,0 +1,63 @@
+name: Naruto history analysis v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Naruto history bootstrap 180d v1"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: naruto-history-analysis-v1
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Refresh main after bootstrap
+        if: github.event_name == 'workflow_run'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            git fetch origin main && git reset --hard origin/main
+            test -f naruto-history-bootstrap-v1.json && exit 0
+            sleep 5
+          done
+          exit 1
+      - name: Analyze Naruto venue structure
+        run: |
+          set -euo pipefail
+          node --check scripts/naruto-history-analysis-v1.js
+          node scripts/naruto-history-analysis-v1.js
+          node - <<'NODE'
+          const x=require('./naruto-history-analysis-v1.json');
+          if(x.schema!=='boat-command-naruto-history-analysis-v1'||x.venueCode!=='14'||x.races<300)throw new Error('NARUTO_ANALYSIS_TARGET');
+          if(x.modelPolicy.crossVenueWeightsReused!==false||x.modelPolicy.productionEnabled!==false)throw new Error('NARUTO_MODEL_BOUNDARY');
+          if(!x.firstToSecond?.['1']||!Number.isFinite(x.trifecta?.entropyBits))throw new Error('NARUTO_TRANSITION_FEATURES');
+          console.log('NARUTO_HISTORY_ANALYSIS_PASS',x.races);
+          NODE
+      - name: Commit Naruto analysis
+        run: |
+          set -euo pipefail
+          cp naruto-history-analysis-v1.json /tmp/naruto-history-analysis-v1.json
+          git config user.name 'boat-command-naruto-analysis'
+          git config user.email 'boat-command-naruto-analysis@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/naruto-history-analysis-v1.json naruto-history-analysis-v1.json
+            git add naruto-history-analysis-v1.json
+            git diff --cached --quiet && { echo 'NARUTO_ANALYSIS_CURRENT'; exit 0; }
+            git commit -m 'analysis(naruto): publish venue-specific historical structure'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
