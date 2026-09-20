@@ -131,6 +131,13 @@ function backtestPair(backtest,scope='holdout'){
   if(scope==='holdout'){
     const x=backtest.holdout2026;
     if(x?.baseline&&x?.candidate)return {baseline:x.baseline,candidate:x.candidate,races:Number(x.records||x.candidate.races||0)};
+    const y=backtest.holdout;
+    if(y?.classBaseline4&&y?.programOnly4)return {
+      baseline:y.classBaseline4,
+      candidate:y.programOnly4,
+      races:Number(y.programOnly4.races||y.classBaseline4.races||0),
+      candidateUplift:y.candidateUplift
+    };
   }
   if(scope==='recent'){
     const x=backtest.recent360;
@@ -214,9 +221,9 @@ function evaluationSnapshot(readiness={},shadow={},backtest={}){
     s.pairedRaces??
     f.pairedRaces??
     f.programOnlyRaces??
-    bt?.races??
     0
   );
+  const holdoutRaces=Number(bt?.races||0);
   const backtestStrict=
     backtest?.strictWalkForward===true&&
     backtest?.sameDayRowsExcluded===true&&
@@ -227,12 +234,14 @@ function evaluationSnapshot(readiness={},shadow={},backtest={}){
     baseline.roi!==null&&candidate.roi!==null&&
     candidate.hitRate>baseline.hitRate&&
     candidate.roi>=baseline.roi;
-  const holdoutUplift=typeof b.candidateUplift==='boolean'?b.candidateUplift:calculatedUplift;
-  const forwardUplift=(s.forwardUpliftReady??f.forwardUpliftReady)===true||
-    (backtest?.promotionEligible===true&&calculatedUplift);
+  const holdoutUplift=
+    typeof bt?.candidateUplift==='boolean'?bt.candidateUplift:
+    (b.ready===true&&typeof b.candidateUplift==='boolean'?b.candidateUplift:calculatedUplift);
+  const forwardUplift=(s.forwardUpliftReady??f.forwardUpliftReady)===true;
 
   return {
     forwardRaces,
+    holdoutRaces,
     holdoutReady,
     holdoutUplift,
     forwardUplift,
@@ -246,6 +255,7 @@ function statusFor({historyRaces,historyAnalysis,backtest,hypotheses,evaluation,
   if(!historyAnalysis&&backtest)return 'MODEL_EVALUATION';
   if(!historyAnalysis)return 'ANALYSIS_BOOTSTRAP';
   if(hypotheses.length===0)return 'DISCOVERY_WAITING';
+  if(evaluation.forwardRaces===0&&evaluation.holdoutReady&&evaluation.holdoutUplift)return 'FORWARD_BOOTSTRAP';
   if(evaluation.forwardRaces===0)return 'BACKTEST_QUEUE';
   if(evaluation.forwardRaces<core.policy.minimumForwardRaces)return 'FORWARD_OBSERVATION';
   if(review.eligibleForHumanReview&&evaluation.holdoutUplift&&evaluation.forwardUplift)return 'PROMOTION_REVIEW_CANDIDATE';
@@ -344,6 +354,7 @@ function buildMemory(input={}){
         readiness?.history?.raceDays??
         0
       ),
+      holdoutRaces:evaluation.holdoutRaces,
       forwardRaces:evaluation.forwardRaces,
       holdoutReady:evaluation.holdoutReady,
       holdoutUplift:evaluation.holdoutUplift,

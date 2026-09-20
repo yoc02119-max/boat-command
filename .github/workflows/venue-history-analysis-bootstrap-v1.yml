@@ -1,30 +1,26 @@
-name: Venue baseline batch A v1
+name: Venue history analysis bootstrap v1
 
 on:
   workflow_dispatch:
   push:
     branches: [main, feat/venue-agent-core-v1]
     paths:
+      - 'scripts/venue-history-analysis-generic-v1.js'
       - 'kiryu-history-bootstrap-v1.json'
       - 'tamagawa-history-bootstrap-v1.json'
       - 'hamanako-history-bootstrap-v1.json'
       - 'suminoe-history-bootstrap-v1.json'
-      - 'scripts/venue-baseline-backtest-v1.js'
-      - 'kiryu-research-model-v1.js'
-      - 'tamagawa-research-model-v1.js'
-      - 'hamanako-research-model-v1.js'
-      - 'suminoe-research-model-v1.js'
-      - '.github/workflows/venue-baseline-batch-a-v1.yml'
+      - '.github/workflows/venue-history-analysis-bootstrap-v1.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: venue-baseline-batch-a-v1
+  group: venue-history-analysis-bootstrap-v1-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  backtest:
+  analyze:
     strategy:
       fail-fast: false
       matrix:
@@ -34,46 +30,52 @@ jobs:
           - { code: '06', key: HAMANAKO, slug: hamanako }
           - { code: '12', key: SUMINOE, slug: suminoe }
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v6
-      - name: Run strict venue holdout
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build venue-specific historical analysis
         run: |
           set -euo pipefail
-          [ -f "${{ matrix.slug }}-history-bootstrap-v1.json" ] || { echo HISTORY_WAIT; exit 0; }
-          node --check "${{ matrix.slug }}-research-model-v1.js"
-          node --check scripts/venue-baseline-backtest-v1.js
-          node scripts/venue-baseline-backtest-v1.js slug=${{ matrix.slug }} code=${{ matrix.code }} key=${{ matrix.key }}
+          node --check scripts/venue-history-analysis-generic-v1.js
+          node scripts/venue-history-analysis-generic-v1.js \
+            slug=${{ matrix.slug }} \
+            code=${{ matrix.code }} \
+            key=${{ matrix.key }}
       - uses: actions/upload-artifact@v4
         with:
-          name: baseline-${{ matrix.slug }}
-          path: ${{ matrix.slug }}-baseline-backtest-v1.json
-          if-no-files-found: ignore
+          name: history-analysis-${{ matrix.slug }}
+          path: ${{ matrix.slug }}-history-analysis-v1.json
           retention-days: 3
 
   publish:
-    needs: backtest
+    needs: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@v5
         with:
-          pattern: baseline-*
-          path: /tmp/baselines
-      - name: Publish holdout reports
+          pattern: history-analysis-*
+          path: /tmp/history-analysis
+      - name: Publish four analysis reports
         run: |
           set -euo pipefail
           shopt -s nullglob
           files=()
-          for d in /tmp/baselines/baseline-*; do
-            for f in "$d"/*.json; do cp "$f" .; files+=("$(basename "$f")"); done
+          for d in /tmp/history-analysis/history-analysis-*; do
+            for f in "$d"/*.json; do
+              cp "$f" /tmp/
+              files+=("$(basename "$f")")
+            done
           done
-          [ "${#files[@]}" -gt 0 ] || { echo NO_BASELINE_FILES; exit 0; }
-          cp "${files[@]}" /tmp/
-          git config user.name 'boat-command-baseline-batch'
-          git config user.email 'boat-command-baseline-batch@users.noreply.github.com'
+          [ "${#files[@]}" -eq 4 ] || { echo "EXPECTED_4_ANALYSES got=${#files[@]}"; exit 1; }
+          git config user.name 'boat-command-history-analysis'
+          git config user.email 'boat-command-history-analysis@users.noreply.github.com'
           BRANCH="${GITHUB_REF_NAME}"
           for i in 1 2 3 4 5; do
             git fetch origin "$BRANCH"
@@ -81,7 +83,7 @@ jobs:
             for f in "${files[@]}"; do cp "/tmp/$f" "$f"; done
             git add "${files[@]}"
             git diff --cached --quiet && exit 0
-            git commit -m 'analysis: publish venue baseline batch A'
+            git commit -m 'analysis: publish venue history analysis bootstrap'
             git push origin "HEAD:$BRANCH" && exit 0
             sleep $((i*2))
           done
