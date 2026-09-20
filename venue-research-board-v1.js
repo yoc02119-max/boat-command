@@ -43,13 +43,14 @@
     if(!row.selectionReady)return '<div class="rrb-try waiting"><span>AUTO TRY</span><b>選抜待ち</b><small>共通100万円 · 実金なし</small></div>';
     if(!t)return '<div class="rrb-try skip"><span>AUTO TRY</span><b>見送り</b><small>予想は成績検証に保存</small></div>';
     const settled=row.result;
-    let tail='共通100万円から仮投入';
+    let tail='共通100万円から仮投入',state='pending';
     if(settled){
-      const hit=(t.picks||[]).includes(settled.trifecta);
+      const hit=(t.picks||[]).includes(settled.trifecta);state=hit?'hit':'miss';
       const ret=hit?Number(settled.payout100||0)*(Number(t.stakePerPickYen||500)/100):0;
-      tail=`${hit?'的中':'不的中'} · ${signedMoney(ret-Number(t.stakeYen||0))}`;
+      tail=`${hit?'✓ 的中':'✕ 不的中'} · ${signedMoney(ret-Number(t.stakeYen||0))}`;
     }
-    return `<div class="rrb-try selected"><span>AUTO TRY · #${Number(t.rank)||'—'}</span><b>${t.picks.length}点 × ${money(t.stakePerPickYen)} = ${money(t.stakeYen)}</b><small>${tail}</small></div>`;
+    row.tryState=state;
+    return `<div class="rrb-try selected ${state}"><span>AUTO TRY · #${Number(t.rank)||'—'}</span><b>${t.picks.length}点 × ${money(t.stakePerPickYen)} = ${money(t.stakeYen)}</b><small>${tail}</small></div>`;
   }
 
   function raceCard(row,opts){
@@ -58,7 +59,11 @@
     const resultHtml=r
       ?`<div class="rrb-result"><span>RESULT</span><b>${esc(r.trifecta||'—')} · ${money(r.payout100)}</b><small>${esc(opts.venueName||'専用')} ${primaryHit||'—'} / 基準 ${baseHit||'—'}</small></div>`
       :'<div class="rrb-result pending"><span>RESULT</span><b>結果待ち</b><small>予想とTRY判定は結果前に固定</small></div>';
-    return `<article class="rrb-card" data-race="${row.race}" data-settled="${r?'1':'0'}" data-try="${row.tryRow?'1':'0'}">
+    const tryHit=row.tryRow&&r?(row.tryRow.picks||[]).includes(r.trifecta):null;
+    const tryState=!row.tryRow?'none':!r?'pending':tryHit?'hit':'miss';
+    const badge=row.tryRow?(tryState==='hit'?'<span class="rrb-try-badge hit">✓ TRY 的中</span>':tryState==='miss'?'<span class="rrb-try-badge miss">✕ TRY 不的中</span>':'<span class="rrb-try-badge pending">TRY 結果待ち</span>'):'';
+    return `<article class="rrb-card try-${tryState}" data-race="${row.race}" data-settled="${r?'1':'0'}" data-try="${row.tryRow?'1':'0'}">
+      ${badge}
       <header><div><strong>${row.race}R</strong><span>${esc(p.raceType||'')}</span></div><time>締切 ${esc(p.deadline||'—')}</time></header>
       <div class="rrb-boats">${boatRows(p)}</div>
       <div class="rrb-models">
