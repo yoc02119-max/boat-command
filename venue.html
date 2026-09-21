@@ -94,7 +94,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
  <div class="common-kpi"><small>本日AUTO TRY</small><b id="commonTodayTry">—</b></div>
  <div class="common-kpi profit" id="commonProfitBox"><small>本日確定損益</small><b id="commonTodayProfit">—</b></div>
  <div class="common-kpi"><small>本日回収率</small><b id="commonTodayRoi">—</b></div>
- <div class="common-bank-note" id="commonBankNote">共通100万円 · 実金なし · TRYのみ資金連動</div>
+ <div class="common-bank-note" id="commonBankNote">共通10万円 · 実金なし · TRYのみ資金連動</div>
 </section>
 <div class="common-tabs" id="commonVenueTabs" role="tablist">
  <button class="common-tab active" type="button" data-common-view="today">今日</button>
@@ -175,7 +175,7 @@ async function refreshCommonVenueBank(){
    document.getElementById('commonTodayRoi').textContent=roi==null?'—':`${(roi*100).toFixed(1)}%`;
    const box=document.getElementById('commonProfitBox');box?.classList.toggle('positive',profit>0);box?.classList.toggle('negative',profit<0);
    const pending=rows.filter(z=>z.settled!==true).reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
-   document.getElementById('commonBankNote').textContent=`共通100万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
+   document.getElementById('commonBankNote').textContent=`共通10万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
  }catch{
    document.getElementById('commonBankroll').textContent='¥1,000,000';
    document.getElementById('commonTodayTry').textContent='—';
@@ -183,6 +183,22 @@ async function refreshCommonVenueBank(){
    document.getElementById('commonTodayRoi').textContent='—';
  }
 }
+function activateVenueFallback(view){
+ const tabs=document.getElementById('venueTabs');
+ tabs?.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+ syncCommonVenueTabs(view);
+ if(view==='today'){document.querySelector('.hero')?.scrollIntoView({behavior:'smooth',block:'start'});return}
+ if(view==='history'){
+   const d=document.getElementById('venueDetails');if(d)d.open=true;
+   document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'});return;
+ }
+ const board=document.getElementById('researchBoard');
+ if(board&&!board.hidden){board.scrollIntoView({behavior:'smooth',block:'start'});return}
+ const d=document.getElementById('venueDetails');if(d)d.open=true;
+ (document.getElementById('venueNote')||document.getElementById('researchProgress'))?.scrollIntoView({behavior:'smooth',block:'center'});
+}
+window.__BC_VENUE_ACTIVATE=activateVenueFallback;
+document.querySelectorAll('#venueTabs .tab').forEach(t=>t.addEventListener('click',()=>window.__BC_VENUE_ACTIVATE?.(t.dataset.view)));
 document.querySelectorAll('#commonVenueTabs .common-tab').forEach(t=>t.addEventListener('click',()=>activateCommonVenueView(t.dataset.commonView)));
 refreshCommonVenueBank();
 setInterval(refreshCommonVenueBank,60000);
@@ -191,7 +207,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCom
 async function mountOperationalBoard(meta,x){
   if(meta?.state!=='LIVE_SIMULATION'||!x)return null;
   document.getElementById('modelStepTitle').textContent=`${meta.name}専用モデル · 30日固定本線`;
-  document.getElementById('tryStatus').textContent='共通100万円 · AUTO TRY';
+  document.getElementById('tryStatus').textContent='共通10万円 · AUTO TRY';
   const st=document.getElementById('buildStatus');
   st.querySelector('span').textContent='運用中 · 30日';
   st.querySelector('i').style.background='#20e0c7';
@@ -223,7 +239,6 @@ async function mountOperationalBoard(meta,x){
     }
   };
   window.__BC_VENUE_ACTIVATE=activate;
-  tabs?.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>activate(t.dataset.view)));
   return boardApi;
 }
 if(jcd==='07'){location.replace('./?venue=gamagori')}
@@ -242,7 +257,7 @@ else{
    st.style.color='#9be7dc';
    document.getElementById('dataStatus').textContent='V2本線 30日運用 · 水面改良は別SHADOW';
    document.getElementById('modelStatus').textContent='EDOGAWA V2 · 本線固定';
-   document.getElementById('venueNote').textContent='江戸川V2を30日固定で仮想運用中。AUTO TRYは共通100万円から選抜し、潮・風・波の改良版は別SHADOWで比較します。';
+   document.getElementById('venueNote').textContent='江戸川V2を30日固定で仮想運用中。AUTO TRYは共通10万円から選抜し、潮・風・波の改良版は別SHADOWで比較します。';
    (async()=>{
      try{
        const ctx=await runtimePromise;
@@ -296,7 +311,7 @@ else{
        if(bs.some(b=>b.startsWith('PROGRAM_ONLY_FORWARD_')))labels.push('A前向き30R');
        if(bs.some(b=>b.startsWith('FULL_PRE_FORWARD_')))labels.push('B前向き30R');
        if(bs.includes('FORWARD_MODEL_UPLIFT_NOT_READY'))labels.push('モデル改善確認');
-       note.textContent=`江戸川V2を30日固定運用中。結果先読みなし・共通100万円AUTO TRY。改良SHADOW残り: ${labels.length?labels.join(' / '):'比較継続'}。`;
+       note.textContent=`江戸川V2を30日固定運用中。結果先読みなし・共通10万円AUTO TRY。改良SHADOW残り: ${labels.length?labels.join(' / '):'比較継続'}。`;
        if(gates){
          gates.classList.add('show');
          const v2=x.candidateModel?.v2ForwardEligible===true?' · v2前向き候補PASS':'';
@@ -314,7 +329,7 @@ else{
    st.style.color='#9be7dc';
    document.getElementById('dataStatus').textContent=meta.state==='LIVE_SIMULATION'?'専用本線 30日運用中':'専用データレーン準備中';
    document.getElementById('modelStatus').textContent=meta.state==='LIVE_SIMULATION'?`${meta.name}専用モデル · 本線固定`:`${meta.name}専用モデルは検証後に接続`;
-   document.getElementById('venueNote').textContent=meta.state==='LIVE_SIMULATION'?`${meta.name}専用モデルを30日固定で仮想運用中。AUTO TRYは共通100万円から自動選抜します。`:`${meta.name}は独立DATA LAYER構築中。他場モデル・他場履歴は流用せず、結果先読みなしで専用モデルを作ります。`;
+   document.getElementById('venueNote').textContent=meta.state==='LIVE_SIMULATION'?`${meta.name}専用モデルを30日固定で仮想運用中。AUTO TRYは共通10万円から自動選抜します。`:`${meta.name}は独立DATA LAYER構築中。他場モデル・他場履歴は流用せず、結果先読みなしで専用モデルを作ります。`;
    (async()=>{
      try{
        const ctx=await runtimePromise;
@@ -335,7 +350,7 @@ else{
            :`HOLDOUT ${hold}R評価済 · SHADOW検証`)
          :`${meta.name}専用モデル 未昇格 · 他場フォールバック禁止`;
        note.textContent=meta.state==='LIVE_SIMULATION'
-         ?`${meta.name}専用本線を30日固定運用中。基準 ${shadowBase}/12・専用 ${shadowVenue}/12を結果前に固定し、AUTO TRYだけ共通100万円を動かします。`
+         ?`${meta.name}専用本線を30日固定運用中。基準 ${shadowBase}/12・専用 ${shadowVenue}/12を結果前に固定し、AUTO TRYだけ共通10万円を動かします。`
          :(x.phase==='SHADOW_VALIDATION'
            ?`${meta.name}専用モデルを前向き検証中。基準 ${shadowBase}/12・専用 ${shadowVenue}/12を結果前に固定済み。`
            :`${meta.name}専用ライン。直近300Rを主軸に履歴を蓄積します。`);
