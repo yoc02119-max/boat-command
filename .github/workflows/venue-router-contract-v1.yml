@@ -14,6 +14,7 @@ on:
       - 'scripts/try-deadline-countdown-contract-v1.js'
       - 'scripts/try-picks-stake-contract-v1.js'
       - 'scripts/try-progress-summary-contract-v1.js'
+      - 'scripts/try-settled-inline-result-contract-v1.js'
       - 'venue.html'
       - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
@@ -30,6 +31,7 @@ on:
       - 'scripts/try-deadline-countdown-contract-v1.js'
       - 'scripts/try-picks-stake-contract-v1.js'
       - 'scripts/try-progress-summary-contract-v1.js'
+      - 'scripts/try-settled-inline-result-contract-v1.js'
       - 'venue.html'
       - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
@@ -59,3 +61,5 @@ jobs:
         run: node scripts/try-picks-stake-contract-v1.js
       - name: Verify daily TRY progress summary
         run: node scripts/try-progress-summary-contract-v1.js
+      - name: Verify settled TRY inline results
+        run: node scripts/try-settled-inline-result-contract-v1.js
