@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/venue-model-cycle-v1.js'
       - 'scripts/test-venue-model-cycle-lifecycle-v1.py'
+      - 'scripts/test-venue-model-cycle-initial-start-v1.py'
       - 'scripts/test-venue-model-cycle-8venue-mixed-v1.py'
       - 'venue-model-cycle-v1.js'
       - 'venue-model-cycle-policy-v1.json'
@@ -18,6 +19,7 @@ on:
     paths:
       - 'scripts/venue-model-cycle-v1.js'
       - 'scripts/test-venue-model-cycle-lifecycle-v1.py'
+      - 'scripts/test-venue-model-cycle-initial-start-v1.py'
       - 'scripts/test-venue-model-cycle-8venue-mixed-v1.py'
       - 'venue-model-cycle-v1.js'
       - 'venue-model-cycle-policy-v1.json'
@@ -111,6 +113,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/test-venue-model-cycle-lifecycle-v1.py
+
+      - name: Run 16-venue initial Cycle 1 start simulation
+        run: |
+          set -euo pipefail
+          python3 scripts/test-venue-model-cycle-initial-start-v1.py
 
       - name: Run mixed 8-venue 30-day simulation
         run: |
