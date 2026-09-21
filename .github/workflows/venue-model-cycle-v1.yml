@@ -98,7 +98,15 @@ jobs:
               assert x['retention']['cycleHistoryPreserved'] is True
               codes.add(x['venueCode']); slugs.add(x['slug'])
           assert len(codes)==24 and len(slugs)==24
-          print('VENUE_MODEL_CYCLE_FLEET_SAFETY_PASS',len(files))
+          ledgers=sorted(p for p in glob.glob('venues/*/model-candidates-v1.json') if '/_template/' not in p)
+          assert len(ledgers)==24, len(ledgers)
+          for p in ledgers:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-venue-model-candidates-v1'
+              assert x['policy']['venueLocalOnly'] is True
+              assert x['policy']['crossVenueCandidateReuse'] is False
+              assert x['policy']['autoPromotion'] is False
+          print('VENUE_MODEL_CYCLE_FLEET_SAFETY_PASS',len(files),len(ledgers))
           PY
 
       - name: Publish cycle states

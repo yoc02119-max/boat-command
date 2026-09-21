@@ -140,6 +140,14 @@ function earliestEvidenceDate(slug){
   const usable=docs.filter(({doc})=>doc.rows.some(r=>validPrediction(r?.programOnly))).map(x=>x.date);
   return usable[0]||null;
 }
+function earliestEvidenceDateForModel(slug,modelVersion){
+  if(!modelVersion)return null;
+  const docs=evaluationDocs(slug,null,null);
+  for(const {date,doc} of docs){
+    if(doc.rows.some(r=>validPrediction(r?.programOnly)&&String(r.programOnly.modelVersion)===String(modelVersion)))return date;
+  }
+  return null;
+}
 function latestProgramOnlyModelVersion(slug){
   const docs=evaluationDocs(slug,null,null).reverse();
   for(const {doc} of docs){
@@ -176,9 +184,13 @@ function baseIsolation(e){return {scope:'VENUE_ONLY',venueCode:e.code,slug:e.slu
 function currentCycleNumber(prev){return Number(prev?.cycleNumber||0)||1}
 function newCycleId(e,n,start){return e.slug+'-cycle-'+String(n).padStart(3,'0')+'-'+start}
 function deriveStart(e,config,prev){
-  if(prev?.startDate&&dateOk(prev.startDate))return prev.startDate;
   const op=config?.operationPolicy||{};
+  const configuredModel=op.mainModelVersion||null;
+  if(prev?.startDate&&dateOk(prev.startDate)&&prev?.mainline?.integrity!=='DRIFT_DETECTED')return prev.startDate;
   if(dateOk(op.operationStartDate))return op.operationStartDate;
+  const modelStart=earliestEvidenceDateForModel(e.slug,configuredModel);
+  if(modelStart)return modelStart;
+  if(prev?.startDate&&dateOk(prev.startDate))return prev.startDate;
   return earliestEvidenceDate(e.slug)||EFFECTIVE_DATE;
 }
 function reviewTemplate(){return {required:true,humanDecision:'PENDING',candidateId:null,decidedAt:null,decidedBy:null,note:null}}
@@ -208,11 +220,17 @@ function standardState(e,config,readiness,prev){
   const selected=selection(candidates);
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
-  const mainEnough=evidence.main.races>=minMain;
-  const versionSet=evidence.mainModelVersions;
   const configVersion=config?.operationPolicy?.mainModelVersion||null;
-  const effectiveVersion=versionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||configVersion;
-  const drift=versionSet.length>1||(configVersion&&versionSet.length&&configVersion!==effectiveVersion);
+  const currentRows=configVersion?evidence.mainRows.filter(x=>x.modelVersion===configVersion):evidence.mainRows;
+  const mainEvaluation=aggregate(currentRows);
+  const mainEnough=mainEvaluation.races>=minMain;
+  const versionSet=[...new Set(currentRows.map(x=>x.modelVersion))];
+  const effectiveVersion=configVersion||versionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
+  const ordered=evidence.mainRows;
+  const firstCurrent=configVersion?ordered.findIndex(x=>x.modelVersion===configVersion):-1;
+  const drift=configVersion
+    ? (firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==configVersion))
+    : evidence.mainModelVersions.length>1;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
   if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
@@ -225,7 +243,7 @@ function standardState(e,config,readiness,prev){
     schema:'boat-command-venue-model-cycle-v1',version:VERSION,venue:e.key,venueName:e.name,venueCode:e.code,slug:e.slug,
     generatedAt:isoNow(),cycleNumber:n,cycleId:newCycleId(e,n,start),cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
     isolation:baseIsolation(e),
-    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:evidence.main,minimumReviewRaces:minMain,evidenceReady:mainEnough},
+    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough},
     candidates,recommendation:rec,review,
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
     source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null},
@@ -309,6 +327,7 @@ function validateState(x){
   if(x.cycleDays!==30||x.isolation?.scope!=='VENUE_ONLY'||x.isolation?.crossVenueTraining!==false||x.isolation?.crossVenueWeightReuse!==false||x.isolation?.crossVenuePromotion!==false)throw new Error('MODEL_CYCLE_ISOLATION');
   if(x.promotion?.autoPromotion!==false||x.promotion?.realMoneyEnable!==false||x.promotion?.humanReviewRequired!==true)throw new Error('MODEL_CYCLE_PROMOTION_SAFETY');
   if(x.retention?.sourceDataPreserved!==true||x.retention?.cycleHistoryPreserved!==true)throw new Error('MODEL_CYCLE_RETENTION');
+  if(x.phase==='ACTIVE'&&x.mainline?.modelVersion&&x.mainline?.integrity==='DRIFT_DETECTED')throw new Error('MODEL_CYCLE_ACTIVE_MAINLINE_DRIFT '+x.slug);
 }
 function main(){
   if(!dateOk(EFFECTIVE_DATE))throw new Error('MODEL_CYCLE_EFFECTIVE_DATE_INVALID');

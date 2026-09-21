@@ -8,7 +8,7 @@ on:
       - 'venue-model-cycle-policy-v1.json'
       - 'venue.html'
       - 'index.html'
-      - 'venues/_template/model-candidates-v1.json'
+      - 'venues/**/model-candidates-v1.json'
       - '.github/workflows/venue-model-cycle-v1.yml'
       - '.github/workflows/venue-model-cycle-contract-v1.yml'
   push:
@@ -75,6 +75,24 @@ jobs:
               assert x['retention']['cycleHistoryPreserved'] is True
               codes.add(x['venueCode']); slugs.add(x['slug'])
           assert len(codes)==24 and len(slugs)==24
+          ledgers=sorted(p for p in glob.glob('venues/*/model-candidates-v1.json') if '/_template/' not in p)
+          assert len(ledgers)==24, len(ledgers)
+          ledger_codes=set()
+          for p in ledgers:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-venue-model-candidates-v1'
+              assert x['policy']['venueLocalOnly'] is True
+              assert x['policy']['crossVenueCandidateReuse'] is False
+              assert x['policy']['historicalValidationRequired'] is True
+              assert x['policy']['forwardValidationRequired'] is True
+              assert x['policy']['humanApprovalRequired'] is True
+              assert x['policy']['autoPromotion'] is False
+              ledger_codes.add(x['venueCode'])
+          assert len(ledger_codes)==24
+          edogawa=json.load(open('/tmp/model-cycle-contract/venues/edogawa/model-cycle-v1.json',encoding='utf-8'))
+          assert edogawa['mainline']['modelVersion']=='EDOGAWA-RESEARCH-MODEL-V2'
+          assert edogawa['mainline']['integrity']=='OK', edogawa['mainline']
+          assert set(edogawa['mainline']['versionsObserved']) <= {'EDOGAWA-RESEARCH-MODEL-V2'}
           fleet=json.load(open('/tmp/model-cycle-contract/venue-model-cycle-fleet-v1.json',encoding='utf-8'))
           assert fleet['venues']==24
           policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
