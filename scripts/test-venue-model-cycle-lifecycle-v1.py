@@ -251,7 +251,20 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-lifecycle-") as td:
     assert s2["review"]["humanDecision"] == "PENDING"
     assert_others_same(repo, before_activate_others)
 
-    # 7) Closed cycle is archived, while source evidence remains untouched.
+    # 7) A normal refresh must not revert the newly activated Cycle 2 mainline
+    #    to the stale config version. The cycle state is the frozen source of truth.
+    before_refresh_others = snapshot_others(repo)
+    run(repo, "--action", "refresh", "--date", "2026-10-22")
+    s2_refresh = state(repo)
+    assert s2_refresh["phase"] == "ACTIVE"
+    assert s2_refresh["cycleNumber"] == 2
+    assert s2_refresh["cycleId"] == s2["cycleId"]
+    assert s2_refresh["cycleDay"] == 1 and s2_refresh["daysRemaining"] == 29
+    assert s2_refresh["mainline"]["modelVersion"] == CANDIDATE_VERSION
+    assert s2_refresh["mainline"]["integrity"] == "OK"
+    assert_others_same(repo, before_refresh_others)
+
+    # 8) Closed cycle is archived, while source evidence remains untouched.
     history_dir = repo / "venues/kiryu/model-cycle-history"
     archives = sorted(history_dir.glob("kiryu-cycle-001-*.json"))
     assert len(archives) == 1, archives
