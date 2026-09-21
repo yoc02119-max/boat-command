@@ -203,6 +203,13 @@ async function refreshVenueCalendarStatus(){
     for(const v of venues){
       const cal=x.venues?.[v.code],card=document.querySelector(`.venue[data-venue="${v.code}"]`);
       if(!cal||!card)continue;
+      if(cal.todayCancelled===true){
+        const small=card.querySelector('small'),live=card.querySelector('.venue-live');
+        const label=nextDateLabel(cal.nextRaceDate);
+        if(small)small.innerHTML='<span class="live-dot" style="background:#ff8997;box-shadow:none"></span>本日中止・順延';
+        if(live){live.className='venue-live wait';live.innerHTML=`<b>${label}</b><br>本日中止`}
+        continue;
+      }
       if(cal.todayActive===true)continue;
       const label=nextDateLabel(cal.nextRaceDate);
       const small=card.querySelector('small'),live=card.querySelector('.venue-live');
