@@ -1,0 +1,177 @@
+{
+  "schema": "boat-command-venue-model-cycle-v1",
+  "version": "VENUE-MODEL-CYCLE-V1",
+  "venue": "EDOGAWA",
+  "venueName": "江戸川",
+  "venueCode": "03",
+  "slug": "edogawa",
+  "generatedAt": "2026-09-21T20:44:25.675Z",
+  "cycleNumber": 1,
+  "cycleId": "edogawa-cycle-001-2026-09-19",
+  "cycleDays": 30,
+  "phase": "ACTIVE",
+  "startDate": "2026-09-19",
+  "endDate": "2026-10-18",
+  "cycleDay": 4,
+  "daysRemaining": 26,
+  "isolation": {
+    "scope": "VENUE_ONLY",
+    "venueCode": "03",
+    "slug": "edogawa",
+    "crossVenueTraining": false,
+    "crossVenueWeightReuse": false,
+    "crossVenuePromotion": false,
+    "independentClock": true
+  },
+  "mainline": {
+    "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
+    "frozen": true,
+    "integrity": "DRIFT_DETECTED",
+    "versionsObserved": [
+      "EDOGAWA-RESEARCH-MODEL-V1",
+      "EDOGAWA-RESEARCH-MODEL-V2"
+    ],
+    "evaluation": {
+      "races": 24,
+      "hits": 6,
+      "hitRate": 0.25,
+      "stakeYenAt100PerPick": 9600,
+      "returnYenAt100PerPick": 8770,
+      "profitYenAt100PerPick": -830,
+      "roi": 0.9135416666666667,
+      "observedDays": 2
+    },
+    "minimumReviewRaces": 60,
+    "evidenceReady": false
+  },
+  "candidates": [
+    {
+      "id": "fullPre:EDOGAWA-RESEARCH-MODEL-V2",
+      "mode": "fullPre",
+      "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
+      "registered": false,
+      "registry": null,
+      "evaluation": {
+        "races": 8,
+        "hits": 2,
+        "hitRate": 0.25,
+        "stakeYenAt100PerPick": 3200,
+        "returnYenAt100PerPick": 2440,
+        "profitYenAt100PerPick": -760,
+        "roi": 0.7625,
+        "observedDays": 1
+      },
+      "pairedMain": {
+        "races": 8,
+        "hits": 2,
+        "hitRate": 0.25,
+        "stakeYenAt100PerPick": 3200,
+        "returnYenAt100PerPick": 3560,
+        "profitYenAt100PerPick": 360,
+        "roi": 1.1125,
+        "observedDays": 1
+      },
+      "pairedRaces": 8,
+      "deltas": {
+        "hitRateDelta": 0,
+        "roiDelta": -0.3500000000000001
+      },
+      "gates": {
+        "minimumPairedRaces": 30,
+        "maxAllowedHitRateRegression": 0.02,
+        "maxAllowedRoiRegression": 0.1,
+        "forwardEligible": false,
+        "historicalRequired": true,
+        "historicalOk": false,
+        "eligible": false,
+        "reasons": [
+          "PAIRED_FORWARD_RACES_30_NOT_READY",
+          "ROI_REGRESSION_GATE",
+          "NO_FORWARD_METRIC_IMPROVEMENT",
+          "HISTORICAL_VALIDATION_NOT_REGISTERED_OR_FAILED",
+          "CANDIDATE_NOT_REGISTERED"
+        ]
+      }
+    },
+    {
+      "id": "fullPre:EDOGAWA-RESEARCH-MODEL-V1",
+      "mode": "fullPre",
+      "modelVersion": "EDOGAWA-RESEARCH-MODEL-V1",
+      "registered": false,
+      "registry": null,
+      "evaluation": {
+        "races": 11,
+        "hits": 2,
+        "hitRate": 0.18181818181818182,
+        "stakeYenAt100PerPick": 4400,
+        "returnYenAt100PerPick": 2270,
+        "profitYenAt100PerPick": -2130,
+        "roi": 0.5159090909090909,
+        "observedDays": 1
+      },
+      "pairedMain": {
+        "races": 11,
+        "hits": 3,
+        "hitRate": 0.2727272727272727,
+        "stakeYenAt100PerPick": 4400,
+        "returnYenAt100PerPick": 3960,
+        "profitYenAt100PerPick": -440,
+        "roi": 0.9,
+        "observedDays": 1
+      },
+      "pairedRaces": 11,
+      "deltas": {
+        "hitRateDelta": -0.09090909090909088,
+        "roiDelta": -0.38409090909090915
+      },
+      "gates": {
+        "minimumPairedRaces": 30,
+        "maxAllowedHitRateRegression": 0.02,
+        "maxAllowedRoiRegression": 0.1,
+        "forwardEligible": false,
+        "historicalRequired": true,
+        "historicalOk": false,
+        "eligible": false,
+        "reasons": [
+          "PAIRED_FORWARD_RACES_30_NOT_READY",
+          "HIT_RATE_REGRESSION_GATE",
+          "ROI_REGRESSION_GATE",
+          "NO_FORWARD_METRIC_IMPROVEMENT",
+          "HISTORICAL_VALIDATION_NOT_REGISTERED_OR_FAILED",
+          "CANDIDATE_NOT_REGISTERED"
+        ]
+      }
+    }
+  ],
+  "recommendation": {
+    "state": "WAIT",
+    "candidateId": null,
+    "reasons": [
+      "CYCLE_IN_PROGRESS"
+    ]
+  },
+  "review": {
+    "required": true,
+    "humanDecision": "PENDING",
+    "candidateId": null,
+    "decidedAt": null,
+    "decidedBy": null,
+    "note": null
+  },
+  "promotion": {
+    "humanReviewRequired": true,
+    "autoPromotion": false,
+    "autoTryEnable": false,
+    "realMoneyEnable": false,
+    "activationRequiresEvidence": true
+  },
+  "source": {
+    "configPath": "venues/edogawa/config-v1.json",
+    "readinessPath": "venues/edogawa/readiness-v1.json",
+    "latestReadinessPhase": "SHADOW_VALIDATION"
+  },
+  "retention": {
+    "sourceDataPreserved": true,
+    "cycleHistoryPreserved": true
+  }
+}

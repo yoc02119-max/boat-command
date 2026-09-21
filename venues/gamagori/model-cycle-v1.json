@@ -1,0 +1,95 @@
+{
+  "schema": "boat-command-venue-model-cycle-v1",
+  "version": "VENUE-MODEL-CYCLE-V1",
+  "venue": "GAMAGORI",
+  "venueName": "蒲郡",
+  "venueCode": "07",
+  "slug": "gamagori",
+  "generatedAt": "2026-09-21T20:44:25.731Z",
+  "cycleNumber": 1,
+  "cycleId": "gamagori-cycle-001-2026-09-18",
+  "cycleDays": 30,
+  "phase": "ACTIVE",
+  "startDate": "2026-09-18",
+  "endDate": "2026-10-17",
+  "cycleDay": 5,
+  "daysRemaining": 25,
+  "isolation": {
+    "scope": "VENUE_ONLY",
+    "venueCode": "07",
+    "slug": "gamagori",
+    "crossVenueTraining": false,
+    "crossVenueWeightReuse": false,
+    "crossVenuePromotion": false,
+    "independentClock": true
+  },
+  "mainline": {
+    "modelVersion": "GAMAGORI-CURRENT-MAIN",
+    "frozen": true,
+    "integrity": "EXTERNAL_FORWARD_POLICY",
+    "evaluation": {
+      "methods": [
+        {
+          "method": "2連単",
+          "label": "予選 × TOP1｜1〜12R",
+          "cycleStartDate": "2026-09-18",
+          "observedDays": 1,
+          "settledMatchedRaces": 0,
+          "hits": 0,
+          "hitRate": null,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "cycleStatus": "COLLECTING"
+        },
+        {
+          "method": "3連単",
+          "label": "A級3人 × 4点｜1〜12R",
+          "cycleStartDate": "2026-09-18",
+          "observedDays": 1,
+          "settledMatchedRaces": 2,
+          "hits": 0,
+          "hitRate": 0,
+          "stakeYen": 4000,
+          "returnYen": 0,
+          "profitYen": -4000,
+          "roi": 0,
+          "cycleStatus": "COLLECTING"
+        }
+      ]
+    }
+  },
+  "candidates": [],
+  "recommendation": {
+    "state": "WAIT",
+    "candidateId": null,
+    "reasons": [
+      "CYCLE_IN_PROGRESS"
+    ]
+  },
+  "review": {
+    "required": true,
+    "humanDecision": "PENDING",
+    "candidateId": null,
+    "decidedAt": null,
+    "decidedBy": null,
+    "note": null
+  },
+  "promotion": {
+    "humanReviewRequired": true,
+    "autoPromotion": false,
+    "autoTryEnable": false,
+    "realMoneyEnable": false,
+    "activationRequiresEvidence": true
+  },
+  "source": {
+    "policyPath": "gamagori-forward-validation-policy-v0346.json",
+    "statusPath": "live/gamagori/forward-status-v0347.json",
+    "cycleType": "FIXED_CALENDAR_WINDOW"
+  },
+  "retention": {
+    "sourceDataPreserved": true,
+    "cycleHistoryPreserved": true
+  }
+}
