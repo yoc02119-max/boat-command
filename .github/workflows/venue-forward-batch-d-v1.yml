@@ -41,7 +41,7 @@ jobs:
       - name: Resolve JST date
         id: date
         run: echo "date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
-      - name: Collect POST only after paired SHADOW and evaluate
+      - name: Collect POST independently and evaluate eligible paired SHADOW
         run: |
           set -euo pipefail
           DATE="${{ steps.date.outputs.date }}"
@@ -70,10 +70,27 @@ jobs:
                   assert x['venue']==key and x['venueCode']==code and x.get('slug')==slug
                   assert x['preRaceDataIncluded'] is False and x['resultEndpointsIncluded'] is True
                   assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False and x['tryEnabled'] is False
-                  assert x['immutableAfterFirstWrite'] is True and x['preRaceEvidenceRequired'] is True
-                  assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+                  assert x['immutableAfterFirstWrite'] is True
                   assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
-                  for sp in x['preRaceEvidencePaths']:
+                  eligible=x.get('evaluationEligible')
+                  if eligible is None:
+                      assert x['preRaceEvidenceRequired'] is True
+                      assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+                      evidence_paths=x['preRaceEvidencePaths']
+                  elif eligible is True:
+                      assert x['preRaceEvidenceRequired'] is False
+                      assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+                      evidence_paths=x['preRaceEvidencePaths']
+                      assert len(evidence_paths)==2
+                  elif eligible is False:
+                      assert x['preRaceEvidenceRequired'] is False
+                      assert x['preRaceEvidenceType']=='NONE_DISPLAY_ONLY'
+                      assert x['preRaceEvidencePaths']==[]
+                      assert x.get('preRaceEvidenceGeneratedAt')=={}
+                      evidence_paths=[]
+                  else:
+                      raise AssertionError('VENUE_RESULT_EVALUATION_ELIGIBILITY_INVALID')
+                  for sp in evidence_paths:
                       s=json.load(open(sp,encoding='utf-8'))
                       assert s['resultInput'] is False and s['payoutInput'] is False
                       assert s['productionEnabled'] is False and s['tryEnabled'] is False

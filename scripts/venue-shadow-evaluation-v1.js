@@ -13,7 +13,10 @@ function preserveGeneratedAt(out,file){
   out.generatedAt=a&&JSON.stringify(a)===JSON.stringify(b)?(old.generatedAt||new Date().toISOString()):new Date().toISOString();
   return out;
 }
-function validShadow(x,race,mode){
+function validShadow(x,race,mode,date){
+  const generated=Date.parse(x?.generatedAt||'');
+  const deadline=/^\d{2}:\d{2}$/.test(x?.deadline||'')?Date.parse(`${date}T${x.deadline}:00+09:00`):NaN;
+  if(x?.date!==date||!Number.isFinite(generated)||!Number.isFinite(deadline)||generated>deadline-180000)return false;
   return !!x&&x.schema==='boat-command-venue-shadow-research-v1'&&x.venue===venue&&x.venueCode===code&&x.slug===slug&&
     Number(x.race)===race&&x.mode===mode&&x.resultInput===false&&x.payoutInput===false&&x.researchOnly===true&&
     x.productionEnabled===false&&x.tryEnabled===false&&x.immutableAfterFirstWrite===true&&Array.isArray(x.picks)&&x.picks.length===4;
@@ -23,10 +26,11 @@ function evaluateDay(date){
   for(let race=1;race<=12;race++){
     const result=read(path.join(dayRoot,'post','race-'+race+'-result.json'));
     if(!result||result.schema!=='boat-command-live-result-v1'||result.venue!==venue||result.venueCode!==code||result.preRaceDataIncluded!==false||result.resultEndpointsIncluded!==true)continue;
+    if(result.evaluationEligible===false||result.date!==date||Number(result.race)!==race)continue;
     const actual=String(result.trifecta||'');if(!/^[1-6]-[1-6]-[1-6]$/.test(actual))continue;
     const c=read(path.join(dayRoot,'shadow','class-baseline','race-'+race+'.json'));
     const p=read(path.join(dayRoot,'shadow','program-only','race-'+race+'.json'));
-    const cz=validShadow(c,race,'CLASS_BASELINE')?c:null,pa=validShadow(p,race,'PROGRAM_ONLY')?p:null;
+    const cz=validShadow(c,race,'CLASS_BASELINE',date)?c:null,pa=validShadow(p,race,'PROGRAM_ONLY',date)?p:null;
     const pack=x=>x?{generatedAt:x.generatedAt,picks:x.picks,hit:x.picks.includes(actual),modelVersion:x.modelVersion,source:x.sources||null}:null;
     if(cz&&pa)rows.push({race,actual,payout100:Number(result.payout100)||0,classBaseline:pack(cz),programOnly:pack(pa)});
   }
@@ -37,7 +41,7 @@ function evaluateDay(date){
     summary:{classBaseline:c,programOnly:p,paired:rows.length,hitRateDelta:rows.length&&c.hitRate!=null&&p.hitRate!=null?p.hitRate-c.hitRate:null,roiDelta:rows.length&&c.roi!=null&&p.roi!=null?p.roi-c.roi:null},
     fundingScope:'NONE_RESEARCH_ONLY',bankrollAffected:false,tryAffected:false,productionAffected:false,realMoney:false
   };
-  if(rows.length){const output=path.join(dayRoot,'research-evaluation-v1.json');fs.mkdirSync(dayRoot,{recursive:true});preserveGeneratedAt(out,output);fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n')}
+  {const output=path.join(dayRoot,'research-evaluation-v1.json');fs.mkdirSync(dayRoot,{recursive:true});preserveGeneratedAt(out,output);fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n')}
   return out;
 }
 
@@ -69,3 +73,4 @@ const aggregateOutput=path.join(root,slug+'-shadow-evaluation-v1.json');
 preserveGeneratedAt(out,aggregateOutput);
 fs.writeFileSync(aggregateOutput,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({slug,pairedRaces:out.pairedRaces,hitRateDelta:hitDelta,roiDelta,forwardUpliftReady:out.forwardUpliftReady}));
+
