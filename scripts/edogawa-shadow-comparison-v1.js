@@ -46,7 +46,7 @@ function stats(key){
 const out={
   schema:'boat-command-edogawa-shadow-comparison-v1',
   venue:'EDOGAWA',venueCode:'03',date,
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   rows,
   summary:{
     classVsProgram:stats('classVsProgram'),
@@ -58,5 +58,9 @@ const out={
   productionAffected:false,
   bankrollAffected:false
 };
-fs.writeFileSync(path.join(root,'shadow-comparison-v1.json'),JSON.stringify(out,null,2)+'\n');
+const output=path.join(root,'shadow-comparison-v1.json');
+const previous=read(output),before=previous?{...previous}:null,after={...out};
+if(before)delete before.generatedAt;delete after.generatedAt;
+out.generatedAt=before&&JSON.stringify(before)===JSON.stringify(after)?(previous.generatedAt||new Date().toISOString()):new Date().toISOString();
+fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify(out.summary));
