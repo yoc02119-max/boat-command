@@ -1,0 +1,47 @@
+name: Pages runtime smoke v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/pages-runtime-smoke-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check published shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://yoc02119-max.github.io/boat-command'
+          for page in portal.html venue.html 'index.html?venue=gamagori'; do
+            curl -fsSL --retry 5 --retry-delay 2 "$base/$page" -o /tmp/page.html
+            grep -q 'github-live-data-v1.js?v=1' /tmp/page.html
+          done
+
+      - name: Check published data router
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://yoc02119-max.github.io/boat-command/github-live-data-v1.js?v=1'
+          curl -fsSL --retry 5 --retry-delay 2 "$url" -o /tmp/router.js
+          grep -q 'https://raw.githubusercontent.com/yoc02119-max/boat-command/main/' /tmp/router.js
+          grep -q 'shared-try-portfolio-v1.json' /tmp/router.js
+
+      - name: Check GitHub main JSON and browser CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://raw.githubusercontent.com/yoc02119-max/boat-command/main/shared-try-portfolio-v1.json'
+          curl -fsSIL --retry 5 --retry-delay 2 "$url" -o /tmp/headers.txt
+          grep -Eiq '^access-control-allow-origin:[[:space:]]*\*' /tmp/headers.txt
+          curl -fsSL --retry 5 --retry-delay 2 "$url" -o /tmp/portfolio.json
+          node -e "const x=require('/tmp/portfolio.json'); if(!Array.isArray(x.ledger)) throw new Error('LEDGER_MISSING'); console.log(JSON.stringify({ledger:x.ledger.length,pending:x.pendingTries,settled:x.settledTries,realMoney:x.realMoney}))"
+
+      - name: Smoke passed
+        run: echo 'PAGES_RUNTIME_SMOKE_PASS'
