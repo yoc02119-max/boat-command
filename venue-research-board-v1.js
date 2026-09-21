@@ -84,12 +84,12 @@
     });
     const empty=root.querySelector('.rrb-empty');
     if(empty){
-      const noVisible=view==='results'&&![...root.querySelectorAll('.rrb-card')].some(x=>!x.hidden);
+      const noVisible=![...root.querySelectorAll('.rrb-card')].some(x=>!x.hidden);
       empty.hidden=!noVisible;
-      if(noVisible)empty.textContent=state.cancelled?state.cancelledMessage:'まだ確定結果はありません。';
+      if(noVisible)empty.textContent=state.cancelled?state.cancelledMessage:(view==='results'?'表示対象日の確定結果データはありません。':'表示対象日の番組データを読み込めませんでした。非開催・未取得・通信エラーの可能性があります。');
     }
     const title=root.querySelector('.rrb-view-title');
-    if(title)title.textContent=view==='results'?'確定結果':'12R 運用';
+    if(title)title.textContent=view==='results'?'確定結果':'全レース';
   }
 
   async function mount(opts){
@@ -122,11 +122,11 @@
     root.hidden=false;
     root.innerHTML=`<div class="rrb-shell">
       <div class="rrb-head">
-        <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R 運用</span></h2><p>${cancelled?(cancelledRefunded?'本日は中止・順延。対象TRYは返還処理済みです。':'本日は中止・順延。事前固定予想は検証記録として保持します。'):'本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。'}</p></div>
+        <div><small>表示対象日 ${esc(date)}${date!==todayJst()?'（過去日）':''} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">全レース</span></h2><p>${cancelled?(cancelledRefunded?'本日は中止・順延。対象TRYは返還処理済みです。':'本日は中止・順延。事前固定予想は検証記録として保持します。'):'本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。'}</p></div>
         <div class="rrb-head-stats">
           <span>24場共通 運用資金 <b>${money(portfolio?.confirmedBankrollYen??portfolio?.startingBankrollYen??100000)}</b></span>
           <span>利用可能 <b>${money(portfolio?.availableBankrollYen??portfolio?.bankrollYen??portfolio?.confirmedBankrollYen??100000)}</b></span>
-          <span>本日TRY <b>${selected.size}R</b></span>
+          <span>対象日TRY <b>${selected.size}R</b></span>
           <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??0)}/${Number(readiness.forward?.targetReviewRaces||readiness.policy?.minimumProgramOnlyForwardRaces||60)}R</b></span>
         </div>
       </div>
@@ -158,7 +158,7 @@
     root.querySelector('.rrb-loading').hidden=true;
     if(!grid.children.length){
       root.querySelector('.rrb-empty').hidden=false;
-      root.querySelector('.rrb-empty').textContent='本日は番組データがありません。非開催または公式番組の公開前です。';
+      root.querySelector('.rrb-empty').textContent='表示対象日の番組データを読み込めませんでした。非開催・未取得・通信エラーの可能性があります。';
     }
 
     const state={root,rows,view:'all',cancelled,cancelledMessage};
