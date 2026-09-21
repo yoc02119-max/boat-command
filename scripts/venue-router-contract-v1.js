@@ -77,7 +77,8 @@ assert.equal(runtime.resolveVenue('gamagori')?.code,'07');
 assert.equal(runtime.capabilities(toda).predictionUi,true);
 assert.equal(runtime.capabilities(toda).try,true);
 
-for(const v of venues.filter(x=>x.runtime!=='ENTRY_ONLY')){
+const active=venues.filter(x=>x.state==='LIVE'||x.state==='LIVE_SIMULATION');
+for(const v of active){
   assert.ok(v.model?.script,`${v.slug}: active runtime requires a model script`);
   assert.ok(v.model?.global,`${v.slug}: active runtime requires a model global`);
   assert.ok(v.dataRoot,`${v.slug}: active runtime requires a venue data root`);
