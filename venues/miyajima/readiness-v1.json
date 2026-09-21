@@ -3,15 +3,15 @@
   "version": "MIYAJIMA-READINESS-V1",
   "venue": "MIYAJIMA",
   "venueCode": "17",
-  "generatedAt": "2026-09-21T03:50:46.495Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:39.467Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-21",
   "current": {
     "programReady": true,
     "programRaceCount": 12,
     "postResults": 0,
-    "shadowClassBaseline": 0,
-    "shadowProgramOnly": 0,
+    "shadowClassBaseline": 7,
+    "shadowProgramOnly": 7,
     "evaluatedProgramOnly": 0
   },
   "history": {
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
+    "ready": true,
+    "holdoutRaces": 360,
+    "classHitRate": 0.2,
+    "programHitRate": 0.19722222222222222,
+    "classRoi": 0.665625,
+    "programRoi": 0.6452083333333334,
+    "hitRateDelta": -0.0027777777777777957,
+    "roiDelta": -0.02041666666666664,
     "candidateUplift": false,
-    "selectedConfig": null
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.45,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,7 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
+    "HOLDOUT_UPLIFT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
