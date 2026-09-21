@@ -58,7 +58,7 @@ function stats(key){
 const out={
   schema:'boat-command-edogawa-shadow-evaluation-v1',
   venue:'EDOGAWA',venueCode:'03',date,
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   rows,
   summary:{classBaseline:stats('classBaseline'),programOnly:stats('programOnly'),richProgram:stats('richProgram'),fullPre:stats('fullPre')},
   fundingScope:'NONE_RESEARCH_ONLY',
@@ -68,5 +68,8 @@ const out={
 };
 const outPath=path.join(root,'research-evaluation-v1.json');
 fs.mkdirSync(root,{recursive:true});
+const _previous=read(outPath),_before=_previous?{..._previous}:null,_after={...out};
+if(_before)delete _before.generatedAt;delete _after.generatedAt;
+out.generatedAt=_before&&JSON.stringify(_before)===JSON.stringify(_after)?(_previous.generatedAt||new Date().toISOString()):new Date().toISOString();
 fs.writeFileSync(outPath,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify(out.summary));

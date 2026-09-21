@@ -47,7 +47,7 @@ const out={
   schema:'boat-command-edogawa-shadow-divergence-v1',
   version:'EDOGAWA-SHADOW-DIVERGENCE-V1',
   venue:'EDOGAWA',venueCode:'03',date,
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   classBaselineVsProgramOnly:cp,
   programOnlyVsFullPre:pf,
   diagnosticOnly:true,
@@ -55,6 +55,9 @@ const out={
   bankrollAffected:false,productionEnabled:false,tryEnabled:false
 };
 const outPath=path.join(root,'live','edogawa',date,'shadow-divergence-v1.json');
+const _previous=read(outPath),_before=_previous?{..._previous}:null,_after={...out};
+if(_before)delete _before.generatedAt;delete _after.generatedAt;
+out.generatedAt=_before&&JSON.stringify(_before)===JSON.stringify(_after)?(_previous.generatedAt||new Date().toISOString()):new Date().toISOString();
 fs.writeFileSync(outPath,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({
   classVsProgram:{paired:cp.pairedRaces,topChangeRate:cp.topChangeRate,setChangeRate:cp.setChangeRate,avgOverlap:cp.averageOverlap},
