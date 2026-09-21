@@ -3,8 +3,8 @@
   "version": "HEIWAJIMA-READINESS-V1",
   "venue": "HEIWAJIMA",
   "venueCode": "04",
-  "generatedAt": "2026-09-21T03:44:28.116Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:37.868Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
+    "ready": true,
+    "holdoutRaces": 348,
+    "classHitRate": 0.1206896551724138,
+    "programHitRate": 0.13218390804597702,
+    "classRoi": 0.6877873563218391,
+    "programRoi": 0.5463362068965517,
+    "hitRateDelta": 0.011494252873563218,
+    "roiDelta": -0.14145114942528736,
     "candidateUplift": false,
-    "selectedConfig": null
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.45,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,7 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
+    "HOLDOUT_UPLIFT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",

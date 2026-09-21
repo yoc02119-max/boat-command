@@ -3,8 +3,8 @@
   "version": "TOKONAME-READINESS-V1",
   "venue": "TOKONAME",
   "venueCode": "08",
-  "generatedAt": "2026-09-21T03:44:28.365Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:38.061Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 396,
+    "classHitRate": 0.20454545454545456,
+    "programHitRate": 0.2676767676767677,
+    "classRoi": 0.6748737373737373,
+    "programRoi": 0.8521464646464646,
+    "hitRateDelta": 0.06313131313131312,
+    "roiDelta": 0.17727272727272725,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",

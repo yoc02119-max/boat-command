@@ -3,8 +3,8 @@
   "version": "OMURA-READINESS-V1",
   "venue": "OMURA",
   "venueCode": "24",
-  "generatedAt": "2026-09-21T03:44:27.876Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:37.677Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 365,
+    "classHitRate": 0.2356164383561644,
+    "programHitRate": 0.2465753424657534,
+    "classRoi": 0.7345205479452055,
+    "programRoi": 0.7606849315068493,
+    "hitRateDelta": 0.010958904109589024,
+    "roiDelta": 0.026164383561643856,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
