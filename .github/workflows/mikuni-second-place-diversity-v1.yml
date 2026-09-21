@@ -1,0 +1,50 @@
+name: Mikuni second-place diversity v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/mikuni-second-place-diversity-v1.js'
+      - 'mikuni-research-model-v1.js'
+      - 'mikuni-history-bootstrap-v1.json'
+      - '.github/workflows/mikuni-second-place-diversity-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mikuni-second-place-diversity-v1
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run strict walk-forward second-place analysis
+        run: |
+          node --check scripts/mikuni-second-place-diversity-v1.js
+          node scripts/mikuni-second-place-diversity-v1.js
+
+      - name: Commit analysis report
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- mikuni-second-place-diversity-v1.json)" ]; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git config user.name 'boat-command-shadow'
+          git config user.email 'boat-command-shadow@users.noreply.github.com'
+          git add mikuni-second-place-diversity-v1.json
+          git commit -m 'analysis(mikuni): evaluate second-place diversity shadow'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort || true
+            sleep 3
+          done
+          exit 1
