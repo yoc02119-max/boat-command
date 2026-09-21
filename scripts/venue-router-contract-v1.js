@@ -78,6 +78,8 @@ assert.equal(runtime.capabilities(toda).predictionUi,true);
 assert.equal(runtime.capabilities(toda).try,true);
 
 const active=venues.filter(x=>x.state==='LIVE'||x.state==='LIVE_SIMULATION');
+assert.equal(active.length,24,'all 24 venues must be active after full-cycle rollout');
+assert.equal(venues.filter(x=>x.state==='BUILDING').length,0,'no venue may remain BUILDING after full-cycle rollout');
 for(const v of active){
   assert.ok(v.model?.script,`${v.slug}: active runtime requires a model script`);
   assert.ok(v.model?.global,`${v.slug}: active runtime requires a model global`);
