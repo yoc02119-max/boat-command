@@ -56,12 +56,23 @@ jobs:
           for code,v in sorted(active.items()):
               assert code in entries, code
               name,slug,key=entries[code]
-              assert code in program_routes, ('PROGRAM_ROUTE_MISSING',code,name)
-              assert code in shadow_routes, ('SHADOW_ROUTE_MISSING',code,name)
-              assert code in forward_routes, ('FORWARD_ROUTE_MISSING',code,name)
-              for routes,label in [(program_routes,'PROGRAM'),(shadow_routes,'SHADOW'),(forward_routes,'FORWARD')]:
-                  batch,rkey,rslug=routes[code]
-                  assert rkey==key and rslug==slug, (label,code,key,slug,rkey,rslug)
+              dedicated={
+                  '02':('toda-program-snapshot-v1.yml','toda-shadow-research-v1.yml','toda-result-collector-v1.yml'),
+                  '03':('edogawa-program-snapshot-v1.yml','edogawa-shadow-research-v1.yml','edogawa-result-collector-v1.yml'),
+                  '10':('mikuni-program-snapshot-v1.yml','mikuni-shadow-research-v1.yml','mikuni-result-collector-v1.yml'),
+                  '18':('tokuyama-program-snapshot-v1.yml','tokuyama-shadow-research-v1.yml','tokuyama-result-collector-v1.yml')
+              }
+              if code in program_routes:
+                  for routes,label in [(program_routes,'PROGRAM'),(shadow_routes,'SHADOW'),(forward_routes,'FORWARD')]:
+                      assert code in routes, (label+'_ROUTE_MISSING',code,name)
+                      batch,rkey,rslug=routes[code]
+                      assert rkey==key and rslug==slug, (label,code,key,slug,rkey,rslug)
+                  route='BATCH_'+program_routes[code][0]
+              else:
+                  assert code in dedicated, ('ROUTE_MISSING',code,name)
+                  for wf in dedicated[code]:
+                      assert (pathlib.Path('.github/workflows')/wf).exists(), ('DEDICATED_WORKFLOW_MISSING',code,wf)
+                  route='DEDICATED'
 
               base=pathlib.Path('live')/slug/date
               programs=sorted((base/'program').glob('race-*.json'))
@@ -120,7 +131,7 @@ jobs:
                       assert rr.get('evaluationEligible') is not False
               report.append({
                   'code':code,'name':name,'slug':slug,
-                  'batch':program_routes[code][0],
+                  'route':route,
                   'program':len(programs),'classShadow':len(classes),'programShadow':len(primary),
                   'post':len(posts),'evaluation':evalp.exists()
               })
