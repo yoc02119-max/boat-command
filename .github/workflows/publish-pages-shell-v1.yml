@@ -1,0 +1,35 @@
+name: Publish stable Pages shell
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'portal.html'
+      - 'venue.html'
+      - '*.js'
+      - '*.css'
+      - '*.json'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - '.github/workflows/publish-pages-shell-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-shell-publish
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update gh-pages only for shell/runtime changes
+        run: git push origin HEAD:refs/heads/gh-pages
