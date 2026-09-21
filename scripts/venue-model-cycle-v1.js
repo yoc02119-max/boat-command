@@ -310,6 +310,29 @@ function archive(state,decision){
   const out={...state,archivedAt:isoNow(),finalDecision:decision};
   if(!DRY_RUN)writeJson(archivePath(state.slug,state.cycleId),out);
 }
+function nextCycleStart(state){
+  const evidenceThrough=dateOk(state?.mainline?.evidenceThroughDate)?state.mainline.evidenceThroughDate:null;
+  const completedThrough=evidenceThrough||(dateOk(state?.endDate)?state.endDate:null);
+  const earliest=completedThrough?shiftDate(completedThrough,1):EFFECTIVE_DATE;
+  return EFFECTIVE_DATE>=earliest?EFFECTIVE_DATE:earliest;
+}
+function freshMainline(state,modelVersion,integrity){
+  return {
+    modelVersion:modelVersion||null,
+    frozen:true,
+    integrity,
+    versionsObserved:modelVersion?[modelVersion]:[],
+    evaluation:aggregate([]),
+    minimumReviewRaces:state?.mainline?.minimumReviewRaces||DEFAULT_MIN_RACES,
+    evidenceReady:false,
+    evidenceThroughDate:null
+  };
+}
+function nextCycleClock(start){
+  const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1);
+  const day=Math.min(CYCLE_DAYS,elapsed);
+  return {day,daysRemaining:Math.max(0,CYCLE_DAYS-day)};
+}
 function applyAction(e,state){
   if(ACTION==='refresh')return state;
   if(!ONLY||e.slug!==ONLY)return state;
@@ -325,16 +348,18 @@ function applyAction(e,state){
     if(state.phase!=='APPROVED_PENDING_DEPLOYMENT')throw new Error('MODEL_CYCLE_NOT_APPROVED_FOR_DEPLOYMENT '+state.phase);
     if(!CANDIDATE)throw new Error('MODEL_CYCLE_CANDIDATE_REQUIRED');
     const c=verifyActivation(e,state,CANDIDATE);archive(state,{action:'ACTIVATE',candidateId:CANDIDATE,modelVersion:c.modelVersion});
-    const nextNumber=state.cycleNumber+1,start=EFFECTIVE_DATE;
-    return {...state,generatedAt:isoNow(),cycleNumber:nextNumber,cycleId:newCycleId(e,nextNumber,start),phase:'ACTIVE',startDate:start,endDate:shiftDate(start,CYCLE_DAYS-1),cycleDay:1,daysRemaining:CYCLE_DAYS-1,
-      mainline:{modelVersion:c.modelVersion,frozen:true,integrity:'ACTIVATION_VERIFIED',versionsObserved:[c.modelVersion],evaluation:aggregate([]),minimumReviewRaces:state.mainline?.minimumReviewRaces||DEFAULT_MIN_RACES,evidenceReady:false},
+    const nextNumber=state.cycleNumber+1,start=nextCycleStart(state),clock=nextCycleClock(start);
+    return {...state,generatedAt:isoNow(),cycleNumber:nextNumber,cycleId:newCycleId(e,nextNumber,start),phase:'ACTIVE',startDate:start,endDate:shiftDate(start,CYCLE_DAYS-1),cycleDay:clock.day,daysRemaining:clock.daysRemaining,
+      mainline:freshMainline(state,c.modelVersion,'ACTIVATION_VERIFIED'),
       candidates:[],recommendation:{state:'WAIT',candidateId:null,reasons:['NEW_CYCLE_STARTED']},review:reviewTemplate()};
   }
   if(!['REVIEW_READY','REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(state.phase))throw new Error('MODEL_CYCLE_DECISION_TOO_EARLY '+state.phase);
-  archive(state,{action:ACTION.toUpperCase(),candidateId:null});
-  const nextNumber=state.cycleNumber+1,start=EFFECTIVE_DATE;
-  return {...state,generatedAt:isoNow(),cycleNumber:nextNumber,cycleId:newCycleId(e,nextNumber,start),phase:state.phase==='WAITING_FOR_MAINLINE'?'WAITING_FOR_MAINLINE':'ACTIVE',
-    startDate:state.phase==='WAITING_FOR_MAINLINE'?null:start,endDate:state.phase==='WAITING_FOR_MAINLINE'?null:shiftDate(start,CYCLE_DAYS-1),cycleDay:state.phase==='WAITING_FOR_MAINLINE'?0:1,daysRemaining:state.phase==='WAITING_FOR_MAINLINE'?CYCLE_DAYS:CYCLE_DAYS-1,
+  const currentModelVersion=state.mainline?.modelVersion||null;
+  archive(state,{action:ACTION.toUpperCase(),candidateId:null,modelVersion:currentModelVersion});
+  const nextNumber=state.cycleNumber+1,start=nextCycleStart(state),clock=nextCycleClock(start);
+  return {...state,generatedAt:isoNow(),cycleNumber:nextNumber,cycleId:newCycleId(e,nextNumber,start),phase:'ACTIVE',
+    startDate:start,endDate:shiftDate(start,CYCLE_DAYS-1),cycleDay:clock.day,daysRemaining:clock.daysRemaining,
+    mainline:freshMainline(state,currentModelVersion,ACTION==='reject'?'CANDIDATE_REJECTED_CURRENT_MODEL_CONTINUED':'CURRENT_MODEL_CONTINUED'),
     candidates:[],recommendation:{state:'WAIT',candidateId:null,reasons:[ACTION==='reject'?'CANDIDATE_REJECTED_NEW_CYCLE':'CURRENT_MODEL_CONTINUED_NEW_CYCLE']},review:reviewTemplate()};
 }
 function validateState(x){
