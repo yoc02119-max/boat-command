@@ -299,7 +299,7 @@
   function routeFor(input){
     const v=resolve(input);
     if(!v)return './portal.html';
-    return v.code==='07'?'./?venue=gamagori':`./venue.html?jcd=${encodeURIComponent(v.code)}`;
+    return v.code==='07'?'./?venue=gamagori':`./venue.html?jcd=${encodeURIComponent(v.code)}&shell=4`;
   }
   function list(){return venues.slice()}
   return Object.freeze({version:'VENUE-REGISTRY-V1',list,resolve,routeFor});
