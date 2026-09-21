@@ -142,6 +142,45 @@ def install_synthetic_forward(repo):
             },
         )
 
+def install_extension_forward(repo):
+    dates = ["2026-09-22", "2026-09-23", "2026-09-24", "2026-09-25", "2026-10-22"]
+    for date in dates:
+        rows = []
+        for race in range(1, 13):
+            actual = "1-2-3"
+            miss = ["1-2-4", "1-3-2", "2-1-3", "2-3-1"]
+            rows.append({
+                "race": race,
+                "actual": actual,
+                "payout100": 2000,
+                "classBaseline": {
+                    "generatedAt": f"{date}T00:00:00Z",
+                    "picks": miss,
+                    "hit": False,
+                    "modelVersion": "KIRYU-CLASS-BASELINE-V1"
+                },
+                "programOnly": {
+                    "generatedAt": f"{date}T00:00:01Z",
+                    "picks": miss,
+                    "hit": False,
+                    "modelVersion": "KIRYU-RESEARCH-MODEL-V1"
+                }
+            })
+        write_json(
+            repo / f"live/kiryu/{date}/research-evaluation-v1.json",
+            {
+                "schema": "boat-command-kiryu-shadow-evaluation-v1",
+                "venue": "KIRYU",
+                "venueCode": "01",
+                "date": date,
+                "rows": rows,
+                "fundingScope": "NONE_RESEARCH_ONLY",
+                "bankrollAffected": False,
+                "tryAffected": False,
+                "productionAffected": False,
+            },
+        )
+
 def state(repo):
     return read_json(repo / "venues/kiryu/model-cycle-v1.json")
 
@@ -275,5 +314,38 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-lifecycle-") as td:
     assert (repo / "live/kiryu/2026-09-22/research-evaluation-v1.json").exists()
     assert s2["retention"]["sourceDataPreserved"] is True
     assert s2["retention"]["cycleHistoryPreserved"] is True
+
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-extension-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(
+        ROOT,
+        repo,
+        ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"),
+    )
+
+    # Evidence extension must actually accumulate post-day-30 races.
+    mutate_kiryu_to_live(repo)
+    install_extension_forward(repo)
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    run(repo, "--action", "refresh", "--date", "2026-10-21")
+    ext = state(repo)
+    assert ext["phase"] == "EVIDENCE_EXTENSION", ext
+    assert ext["cycleDay"] == 30 and ext["daysRemaining"] == 0
+    assert ext["mainline"]["evaluation"]["races"] == 48
+    assert ext["mainline"]["evidenceThroughDate"] == "2026-10-21"
+
+    run(repo, "--action", "refresh", "--date", "2026-10-22")
+    ready = state(repo)
+    assert ready["phase"] == "REVIEW_READY", ready
+    assert ready["mainline"]["evaluation"]["races"] == 60
+    assert ready["mainline"]["evidenceThroughDate"] == "2026-10-22"
+
+    # Once review-ready, freeze the evidence snapshot so later dates do not
+    # move the review target underneath the human decision.
+    run(repo, "--action", "refresh", "--date", "2026-10-23")
+    frozen = state(repo)
+    assert frozen["phase"] == "REVIEW_READY", frozen
+    assert frozen["mainline"]["evaluation"]["races"] == 60
+    assert frozen["mainline"]["evidenceThroughDate"] == "2026-10-22"
 
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
