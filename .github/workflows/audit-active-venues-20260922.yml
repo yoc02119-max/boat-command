@@ -1,0 +1,130 @@
+name: Audit active venues 2026-09-22
+
+on:
+  push:
+    branches:
+      - audit/active-venues-20260922
+    paths:
+      - '.github/workflows/audit-active-venues-20260922.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Audit today's active venue lanes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,glob,json,pathlib,re
+          from zoneinfo import ZoneInfo
+
+          JST=ZoneInfo('Asia/Tokyo')
+          calendar=json.loads(pathlib.Path('venue-calendar-v1.json').read_text(encoding='utf-8'))
+          date=calendar['today']
+          active={code:v for code,v in calendar['venues'].items() if v.get('todayActive') is True}
+          assert date=='2026-09-22'
+          assert len(active)==14, (date,len(active),sorted(active))
+
+          registry=pathlib.Path('venue-registry-v1.js').read_text(encoding='utf-8')
+          entries={}
+          for code,name,slug,key in re.findall(r"\['(\d{2})','([^']+)','([^']+)','([^']+)'\]",registry):
+              entries[code]=(name,slug,key)
+          assert len(entries)==24
+
+          def batch_pairs(kind):
+              pairs={}
+              for letter in 'abcd':
+                  p=pathlib.Path(f'.github/workflows/venue-{kind}-batch-{letter}-v1.yml')
+                  text=p.read_text(encoding='utf-8')
+                  found=re.findall(r"(\d{2})\s+([A-Z0-9_]+)\s+([a-z0-9-]+)",text)
+                  if not found:
+                      found=re.findall(r"code:\s*'(\d{2})'.*?key:\s*([A-Z0-9_]+).*?slug:\s*([a-z0-9-]+)",text)
+                  for code,key,slug in found:
+                      pairs[code]=(letter.upper(),key,slug)
+              return pairs
+
+          program_routes=batch_pairs('program')
+          shadow_routes=batch_pairs('shadow')
+          forward_routes=batch_pairs('forward')
+
+          report=[]
+          for code,v in sorted(active.items()):
+              assert code in entries, code
+              name,slug,key=entries[code]
+              assert code in program_routes, ('PROGRAM_ROUTE_MISSING',code,name)
+              assert code in shadow_routes, ('SHADOW_ROUTE_MISSING',code,name)
+              assert code in forward_routes, ('FORWARD_ROUTE_MISSING',code,name)
+              for routes,label in [(program_routes,'PROGRAM'),(shadow_routes,'SHADOW'),(forward_routes,'FORWARD')]:
+                  batch,rkey,rslug=routes[code]
+                  assert rkey==key and rslug==slug, (label,code,key,slug,rkey,rslug)
+
+              base=pathlib.Path('live')/slug/date
+              programs=sorted((base/'program').glob('race-*.json'))
+              classes=sorted((base/'shadow'/'class-baseline').glob('race-*.json'))
+              primary=sorted((base/'shadow'/'program-only').glob('race-*.json'))
+              posts=sorted((base/'post').glob('race-*-result.json'))
+              assert len(programs)==12, ('PROGRAM_COUNT',code,name,len(programs))
+              assert len(classes)==12, ('CLASS_SHADOW_COUNT',code,name,len(classes))
+              assert len(primary)==12, ('PROGRAM_SHADOW_COUNT',code,name,len(primary))
+
+              for race in range(1,13):
+                  p=json.loads((base/'program'/f'race-{race}.json').read_text(encoding='utf-8'))
+                  assert p['venueCode']==code and p['venue']==key and p['date']==date and int(p['race'])==race
+                  assert len(p['boats'])==6 and [b['lane'] for b in p['boats']]==[1,2,3,4,5,6]
+                  assert p['resultEndpointsIncluded'] is False and p['resultIncluded'] is False and p['exhibitionIncluded'] is False
+                  deadline=datetime.datetime.fromisoformat(date+'T'+p['deadline']+':00').replace(tzinfo=JST)
+                  for mode,folder in [('CLASS_BASELINE','class-baseline'),('PROGRAM_ONLY','program-only')]:
+                      s=json.loads((base/'shadow'/folder/f'race-{race}.json').read_text(encoding='utf-8'))
+                      assert s['venueCode']==code and s['venue']==key and s['slug']==slug
+                      assert s['date']==date and int(s['race'])==race and s['mode']==mode
+                      assert s['resultInput'] is False and s['payoutInput'] is False
+                      assert s['researchOnly'] is True and s['productionEnabled'] is False and s['tryEnabled'] is False
+                      assert s['immutableAfterFirstWrite'] is True
+                      assert len(s['picks'])==4 and len(set(s['picks']))==4
+                      assert all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',x) for x in s['picks'])
+                      g=datetime.datetime.fromisoformat(str(s['generatedAt']).replace('Z','+00:00')).astimezone(JST)
+                      margin=(deadline-g).total_seconds()/60
+                      assert margin>=3, ('LATE_SHADOW',code,name,race,mode,margin)
+
+              for pp in posts:
+                  x=json.loads(pp.read_text(encoding='utf-8'))
+                  assert x['venueCode']==code and x['venue']==key and x['slug']==slug
+                  assert x['preRaceDataIncluded'] is False and x['resultEndpointsIncluded'] is True
+                  assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False and x['tryEnabled'] is False
+                  assert x['immutableAfterFirstWrite'] is True
+                  assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
+                  eligible=x.get('evaluationEligible')
+                  if eligible is False:
+                      assert x['preRaceEvidenceType']=='NONE_DISPLAY_ONLY'
+                      assert x['preRaceEvidencePaths']==[] and x.get('preRaceEvidenceGeneratedAt')=={}
+                  elif eligible is True:
+                      assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+                      assert len(x['preRaceEvidencePaths'])==2
+                  else:
+                      assert x.get('preRaceEvidenceRequired') is True
+                      assert x['preRaceEvidenceType']=='PAIRED_RESULT_BLIND_SHADOW'
+
+              evalp=base/'research-evaluation-v1.json'
+              if evalp.exists():
+                  e=json.loads(evalp.read_text(encoding='utf-8'))
+                  assert e['venueCode']==code and e['venue']==key and e['slug']==slug and e['date']==date
+                  for row in e.get('rows',[]):
+                      rp=base/'post'/f"race-{int(row['race'])}-result.json"
+                      assert rp.exists(), ('EVAL_WITHOUT_RESULT',code,row['race'])
+                      rr=json.loads(rp.read_text(encoding='utf-8'))
+                      assert rr.get('evaluationEligible') is not False
+              report.append({
+                  'code':code,'name':name,'slug':slug,
+                  'batch':program_routes[code][0],
+                  'program':len(programs),'classShadow':len(classes),'programShadow':len(primary),
+                  'post':len(posts),'evaluation':evalp.exists()
+              })
+
+          print(json.dumps({'date':date,'active':len(active),'report':report},ensure_ascii=False,indent=2))
+          print('ACTIVE_VENUE_LANE_AUDIT_PASS')
+          PY
