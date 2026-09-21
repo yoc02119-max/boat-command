@@ -30,8 +30,8 @@ const report={schema:`boat-command-${slug}-baseline-backtest-v1`,version:`${key}
   strictWalkForward:true,sameDayRowsExcluded:true,resultBlockedUntilPrediction:true,crossVenueWeightsReused:false,primaryRecencyWindowRaces:300,
   baselineArchitecture:`${key}_CLASS_NEIGHBOR_BASELINE`,candidateArchitecture:`${key}_EMPIRICAL_FIRST_SECOND_TRANSITION_PLUS_CLASS_NEIGHBORS`,
   calibration:{lastDate:calEnd,dateCount:cut,selected:best.cfg,candidates:calibration.map(x=>({config:x.cfg,metrics4:x.m4,score:x.score}))},
-  holdout:{firstDate:holdStart,dateCount:dates.length-cut,classBaseline4:c4,programOnly4:p4,hitRateDelta,roiDelta,candidateUplift:hitDelta>=0&&roiDelta>0},
+  holdout:{firstDate:holdStart,dateCount:dates.length-cut,classBaseline4:c4,programOnly4:p4,hitRateDelta:hitDelta,roiDelta,candidateUplift:hitDelta>=0&&roiDelta>0},
   productionEnabled:false,tryEnabled:false,promotionEligible:false,
   promotionBlockers:[`${key}_FORWARD_36_RACES_NOT_READY`,`${key}_FORWARD_60_RACES_NOT_READY`,`${key}_FORWARD_MODEL_UPLIFT_NOT_READY`]};
 fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
-console.log(JSON.stringify({venue:key,selected:best.cfg,classBaseline4:c4,programOnly4:p4,hitRateDelta,roiDelta,candidateUplift:report.holdout.candidateUplift},null,2));
+console.log(JSON.stringify({venue:key,selected:best.cfg,classBaseline4:c4,programOnly4:p4,hitRateDelta:hitDelta,roiDelta,candidateUplift:report.holdout.candidateUplift},null,2));
