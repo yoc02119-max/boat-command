@@ -1,0 +1,27 @@
+{
+  "schema": "boat-command-venue-model-candidates-v1",
+  "version": "VENUE-MODEL-CANDIDATES-V1",
+  "venue": "REPLACE_WITH_VENUE",
+  "venueCode": "00",
+  "candidates": [
+    {
+      "id": "modeKey:MODEL-VERSION",
+      "mode": "modeKey",
+      "modelVersion": "MODEL-VERSION",
+      "status": "SHADOW",
+      "artifact": "path/to/candidate/model/or/config",
+      "activationEvidencePath": "path/to/deployed/evidence.json",
+      "historicalValidation": {
+        "passed": false,
+        "races": 0,
+        "hitRate": null,
+        "roi": null,
+        "baselineHitRate": null,
+        "baselineRoi": null,
+        "evaluatedAt": null,
+        "note": "Set passed=true only after venue-specific strict historical validation."
+      }
+    }
+  ],
+  "note": "Candidates are venue-local. Registration does not promote a model; 30-day forward gates and human review are still required."
+}
