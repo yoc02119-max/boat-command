@@ -1,0 +1,37 @@
+{
+  "schema": "boat-command-venue-model-cycle-policy-v1",
+  "version": "VENUE-MODEL-CYCLE-POLICY-V1",
+  "cycleDays": 30,
+  "clock": "JST_CALENDAR_DAYS",
+  "scope": "24_INDEPENDENT_VENUE_CYCLES",
+  "invariants": {
+    "venueSpecificTrainingOnly": true,
+    "crossVenueWeightReuse": false,
+    "crossVenuePromotion": false,
+    "mainlineFrozenDuringCycle": true,
+    "improvementsRunAsShadow": true,
+    "sourceHistoryPreserved": true,
+    "cycleHistoryPreserved": true,
+    "autoPromotion": false,
+    "humanReviewRequired": true,
+    "activationEvidenceRequired": true,
+    "autoTryEnable": false,
+    "realMoneyEnable": false
+  },
+  "defaultGates": {
+    "minimumMainlineEvaluatedRaces": 60,
+    "minimumPairedCandidateRaces": 60,
+    "maximumHitRateRegression": 0,
+    "maximumRoiRegression": 0,
+    "requireAtLeastOneForwardMetricImprovement": true,
+    "requireRegisteredHistoricalValidation": true
+  },
+  "cycleEnd": {
+    "candidatePass": "REVIEW_READY",
+    "noCandidatePass": "KEEP_CURRENT_REVIEW",
+    "insufficientEvidence": "EVIDENCE_EXTENSION",
+    "modelDrift": "REVIEW_BLOCKED",
+    "approval": "APPROVED_PENDING_DEPLOYMENT",
+    "activation": "VERIFY_DEPLOYED_MODEL_VERSION_THEN_START_NEXT_30_DAY_CYCLE"
+  }
+}
