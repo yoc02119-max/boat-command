@@ -28,9 +28,16 @@ jobs:
           import json,pathlib,re
           cfg=json.loads(pathlib.Path('venues/edogawa/config-v1.json').read_text(encoding='utf-8'))
           assert cfg['venue']=='EDOGAWA' and cfg['venueCode']=='03'
-          assert cfg['modelEnabled'] is False
-          assert cfg['tryEnabled'] is False
+          assert cfg['state']=='LIVE_SIMULATION'
+          assert cfg['modelEnabled'] is True
+          assert cfg['tryEnabled'] is True
           assert cfg['realMoneyEnabled'] is False
+          op=cfg['operationPolicy']
+          assert op['mode']=='30_DAY_VIRTUAL_OPERATION'
+          assert op['mainModelVersion']=='EDOGAWA-RESEARCH-MODEL-V2'
+          assert op['mainLogicFrozen'] is True
+          assert op['realMoney'] is False
+          assert op['waterAndTideUpgradeRunsAsSeparateShadow'] is True
           p=cfg['predictionPolicy']
           assert p['strictPreRaceOnly'] is True
           assert p['resultLookahead'] is False
@@ -177,15 +184,22 @@ jobs:
           print('EDOGAWA_V2_FORWARD_GATE_BOUNDARY_PASS')
           PY
 
-      - name: Verify promotion remains blocked
+      - name: Verify automatic promotion remains blocked
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import json,pathlib
           cfg=json.loads(pathlib.Path('venues/edogawa/config-v1.json').read_text(encoding='utf-8'))
-          assert cfg['modelEnabled'] is False
-          assert cfg['tryEnabled'] is False
+          assert cfg['state']=='LIVE_SIMULATION'
+          assert cfg['modelEnabled'] is True and cfg['tryEnabled'] is True
           assert cfg['realMoneyEnabled'] is False
+          promotion=cfg['promotionPolicy']
+          assert promotion['autoPromotion'] is False
+          assert promotion['autoTryEnable'] is False
+          assert promotion['realMoneyEnable'] is False
+          op=cfg['operationPolicy']
+          assert op['mode']=='30_DAY_VIRTUAL_OPERATION'
+          assert op['mainLogicFrozen'] is True and op['realMoney'] is False
           if pathlib.Path('edogawa-baseline-backtest-v1.json').exists():
               x=json.loads(pathlib.Path('edogawa-baseline-backtest-v1.json').read_text(encoding='utf-8'))
               assert x['venueCode']=='03'
