@@ -4,7 +4,7 @@
   "venueCode": "12",
   "slug": "suminoe",
   "date": "2026-09-21",
-  "generatedAt": "2026-09-21T06:28:17.467Z",
+  "generatedAt": "2026-09-21T06:51:49.176Z",
   "rows": [
     {
       "race": 1,
@@ -46,28 +46,69 @@
           "baselinePath": "suminoe-baseline-backtest-v1.json"
         }
       }
+    },
+    {
+      "race": 2,
+      "actual": "1-5-4",
+      "payout100": 7900,
+      "classBaseline": {
+        "generatedAt": "2026-09-20T21:08:35.490Z",
+        "picks": [
+          "1-5-4",
+          "1-2-4",
+          "2-1-3",
+          "1-2-3"
+        ],
+        "hit": true,
+        "modelVersion": "SUMINOE-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/suminoe/2026-09-21/program/race-2.json",
+          "programSha256": "2dda3c7db560735a69f4801a9de3792101f94644039665cc83c6a88ad9706266",
+          "programFetchedAt": "2026-09-21T06:06:04.448161+09:00",
+          "historyPath": "suminoe-history-bootstrap-v1.json",
+          "baselinePath": "suminoe-baseline-backtest-v1.json"
+        }
+      },
+      "programOnly": {
+        "generatedAt": "2026-09-20T21:08:35.490Z",
+        "picks": [
+          "1-2-4",
+          "1-2-3",
+          "1-3-4",
+          "1-3-2"
+        ],
+        "hit": false,
+        "modelVersion": "SUMINOE-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/suminoe/2026-09-21/program/race-2.json",
+          "programSha256": "2dda3c7db560735a69f4801a9de3792101f94644039665cc83c6a88ad9706266",
+          "programFetchedAt": "2026-09-21T06:06:04.448161+09:00",
+          "historyPath": "suminoe-history-bootstrap-v1.json",
+          "baselinePath": "suminoe-baseline-backtest-v1.json"
+        }
+      }
     }
   ],
   "summary": {
     "classBaseline": {
-      "evaluated": 1,
-      "hits": 0,
-      "hitRate": 0,
-      "stake": 400,
-      "returns": 0,
-      "roi": 0
+      "evaluated": 2,
+      "hits": 1,
+      "hitRate": 0.5,
+      "stake": 800,
+      "returns": 7900,
+      "roi": 9.875
     },
     "programOnly": {
-      "evaluated": 1,
+      "evaluated": 2,
       "hits": 1,
-      "hitRate": 1,
-      "stake": 400,
+      "hitRate": 0.5,
+      "stake": 800,
       "returns": 590,
-      "roi": 1.475
+      "roi": 0.7375
     },
-    "paired": 1,
-    "hitRateDelta": 1,
-    "roiDelta": 1.475
+    "paired": 2,
+    "hitRateDelta": 0,
+    "roiDelta": -9.1375
   },
   "fundingScope": "NONE_RESEARCH_ONLY",
   "bankrollAffected": false,
