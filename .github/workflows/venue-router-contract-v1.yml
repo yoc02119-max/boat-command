@@ -13,6 +13,7 @@ on:
       - 'scripts/try-race-deeplink-contract-v1.js'
       - 'scripts/try-deadline-countdown-contract-v1.js'
       - 'scripts/try-picks-stake-contract-v1.js'
+      - 'scripts/try-progress-summary-contract-v1.js'
       - 'venue.html'
       - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
@@ -28,6 +29,7 @@ on:
       - 'scripts/try-race-deeplink-contract-v1.js'
       - 'scripts/try-deadline-countdown-contract-v1.js'
       - 'scripts/try-picks-stake-contract-v1.js'
+      - 'scripts/try-progress-summary-contract-v1.js'
       - 'venue.html'
       - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
@@ -55,3 +57,5 @@ jobs:
         run: node scripts/try-deadline-countdown-contract-v1.js
       - name: Verify TRY picks and stake summary
         run: node scripts/try-picks-stake-contract-v1.js
+      - name: Verify daily TRY progress summary
+        run: node scripts/try-progress-summary-contract-v1.js
