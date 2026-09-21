@@ -24,7 +24,7 @@ function metrics(){
  const pendingCount=Number(t.todayPendingRaces)||0;
  const roi=settledStake?returned/settledStake*100:null;
  const hitRate=settledCount?hits/settledCount*100:null;
- const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||100000)+profit-pending;
+ const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||100000)+profit;
  const start=(Number(store?.startBankroll)||100000)+(typeof bcVirtualDepositTotal==='function'?bcVirtualDepositTotal():0);
  return {s,races,lockedStake:committed,pendingStake:pending,settledStake,returned,profit,hits,settledCount,pendingCount,roi,hitRate,planned:0,bankroll,start,tryCommitted:committed};
 }
@@ -69,7 +69,7 @@ function render(){
  el.innerHTML=`
  <div class="vh-head"><div><div class="vh-kicker">VIRTUAL BANKROLL</div><h2>仮資金ホーム</h2></div><div class="vh-safe">実金連動なし</div></div>
  <div class="vh-main">
-  <div class="vh-balance"><small>現在の仮資金</small><strong>${yen(m.bankroll)}</strong><p>開始 ${yen(m.start)} · TRY未精算 ${yen(m.pendingStake)} は差引済み</p>
+  <div class="vh-balance"><small>現在の仮資金</small><strong>${yen(m.bankroll)}</strong><p>開始 ${yen(m.start)} · 確定損益を継続反映 · TRY未精算 ${yen(m.pendingStake)}予約 · 利用可能 ${yen(Math.max(0,m.bankroll-m.pendingStake))}</p>
    <div class="vh-kpis vh-money-kpis"><div><span>本日投入済</span><b>${yen(m.lockedStake)}</b></div><div><span>予定投入</span><b>${yen(m.planned)}</b></div><div class="profit ${pc}"><span>確定損益</span><b>${m.profit>0?'+':''}${yen(m.profit)}</b></div><div><span>ROI</span><b>${pct(m.roi)}</b></div></div>
   </div>
   <div class="vh-graph"><small>仮資金推移</small>${chartSvg()}</div>
