@@ -342,6 +342,7 @@ else{
        const ctx=await runtimePromise;
        const x=ctx?.readiness;
        if(!x||x.venueCode!==meta.code||ctx?.venue?.code!==meta.code)return;
+       if(meta.state!=='LIVE_SIMULATION')await mountOperationalBoard(meta,x);
        const historyRows=Number(x.history?.rows||0),historyMin=Number(x.history?.minimumRows||300);
        const forwardRaces=Number(x.forward?.programOnlyRaces??x.forward?.races??0),targetRaces=Number(x.forward?.targetReviewRaces||60);
        const shadowBase=Number(x.current?.shadowClassBaseline||0),shadowVenue=Number(x.current?.shadowProgramOnly??x.current?.shadowPredictions??0);
@@ -386,7 +387,15 @@ else{
        }
        st.querySelector('span').textContent=meta.state==='LIVE_SIMULATION'?'運用中 · 30日':`構築中 · ${x.phase||'DATA_LAYER'}`;
        if(meta.state==='LIVE_SIMULATION')await mountOperationalBoard(meta,x);
-     }catch{}
+     }catch(err){
+       if(meta.state!=='LIVE_SIMULATION'){
+         const board=document.getElementById('researchBoard');
+         if(board&&board.hidden){
+           board.hidden=false;
+           board.innerHTML=`<div class="rrb-shell"><div class="rrb-empty" style="display:block">SHADOW表示エラー · ${String(err?.message||err)}</div></div>`;
+         }
+       }
+     }
    })();
  }
 }
