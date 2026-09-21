@@ -128,6 +128,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <div class="actions"><button class="primary" id="portalBtn">24場一覧へ戻る</button></div>
 </div>
 </section>
+<section id="venuePerformance30d" hidden></section>
 </details>
 <section class="research-board" id="researchBoard" hidden></section>
 </main>
@@ -135,6 +136,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <script src="venue-registry-v1.js?v=5"></script>
 <script src="venue-runtime-v1.js?v=2"></script>
 <script src="venue-research-board-v1.js?v=7"></script>
+<script src="venue-performance-30d-v1.js?v=1"></script>
 <script>
 const REG=window.BOAT_COMMAND_VENUE_REGISTRY;
 const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
@@ -143,6 +145,24 @@ const runtimePromise=meta&&RUNTIME?.boot?RUNTIME.boot(meta,{loadModel:meta.runti
 const yen=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
 const sharedAdjustment=()=>{try{const a=JSON.parse(localStorage.getItem('boatCommand.portalDeposits.v1')||'[]');return Array.isArray(a)?a.reduce((n,x)=>n+(Number(x.amount)||0),0):0}catch{return 0}};
 const todayJst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+let venuePerformance30dPromise=null;
+function ensureVenuePerformance30d(){
+ if(!meta?.dataRoot||!window.BOAT_COMMAND_VENUE_PERFORMANCE_30D)return Promise.resolve(null);
+ const root=document.getElementById('venuePerformance30d');
+ if(!root)return Promise.resolve(null);
+ venuePerformance30dPromise=window.BOAT_COMMAND_VENUE_PERFORMANCE_30D.mount({
+   root,
+   venueName:meta.name,
+   venueCode:meta.code,
+   dataRoot:meta.dataRoot,
+   endDate:todayJst()
+ }).catch(err=>{
+   root.hidden=false;
+   root.innerHTML=`<div class="v30-empty">直近30日戦績を読み込めませんでした。<small style="display:block;margin-top:5px">${String(err?.message||err)}</small></div>`;
+   return null;
+ });
+ return venuePerformance30dPromise;
+}
 function syncCommonVenueTabs(view){
  document.querySelectorAll('#commonVenueTabs .common-tab').forEach(t=>t.classList.toggle('active',t.dataset.commonView===view));
 }
@@ -154,7 +174,8 @@ function activateCommonVenueView(view){
  if(details)details.open=view==='history';
  if(view==='history'){
    const d=document.getElementById('venueDetails');if(d)d.open=true;
-   setTimeout(()=>document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'}),20);
+   ensureVenuePerformance30d();
+   setTimeout(()=>document.getElementById('venuePerformance30d')?.scrollIntoView({behavior:'smooth',block:'start'}),20);
    return;
  }
  if(typeof window.__BC_VENUE_ACTIVATE==='function'){window.__BC_VENUE_ACTIVATE(view);return}
@@ -195,7 +216,8 @@ function activateVenueFallback(view){
  if(view==='today'){document.querySelector('.hero')?.scrollIntoView({behavior:'smooth',block:'start'});return}
  if(view==='history'){
    const d=document.getElementById('venueDetails');if(d)d.open=true;
-   document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'});return;
+   ensureVenuePerformance30d();
+   document.getElementById('venuePerformance30d')?.scrollIntoView({behavior:'smooth',block:'start'});return;
  }
  const board=document.getElementById('researchBoard');
  if(board&&!board.hidden){board.scrollIntoView({behavior:'smooth',block:'start'});return}
@@ -243,7 +265,8 @@ async function mountOperationalBoard(meta,x){
       boardApi?.setView?.('results');
       document.getElementById('researchBoard')?.scrollIntoView({behavior:'smooth',block:'start'});
     }else if(view==='history'){
-      document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'});
+      ensureVenuePerformance30d();
+      document.getElementById('venuePerformance30d')?.scrollIntoView({behavior:'smooth',block:'start'});
     }else{
       document.querySelector('.hero')?.scrollIntoView({behavior:'smooth',block:'start'});
     }

@@ -1,0 +1,57 @@
+name: Venue performance 30d contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'venue-performance-30d-v1.js'
+      - 'venue.html'
+      - 'prediction-history-v03519.js'
+      - 'index.html'
+      - 'scripts/test-venue-performance-30d-v1.js'
+      - '.github/workflows/venue-performance-30d-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'venue-performance-30d-v1.js'
+      - 'venue.html'
+      - 'prediction-history-v03519.js'
+      - 'index.html'
+      - 'scripts/test-venue-performance-30d-v1.js'
+      - '.github/workflows/venue-performance-30d-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - name: Syntax and unit contract
+        run: |
+          set -euo pipefail
+          node --check venue-performance-30d-v1.js
+          node --check prediction-history-v03519.js
+          node scripts/test-venue-performance-30d-v1.js
+      - name: Verify UI wiring and retention policy
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          venue=pathlib.Path('venue.html').read_text(encoding='utf-8')
+          index=pathlib.Path('index.html').read_text(encoding='utf-8')
+          history=pathlib.Path('prediction-history-v03519.js').read_text(encoding='utf-8')
+          perf=pathlib.Path('venue-performance-30d-v1.js').read_text(encoding='utf-8')
+          assert 'id="venuePerformance30d"' in venue
+          assert 'venue-performance-30d-v1.js?v=1' in venue
+          assert 'ensureVenuePerformance30d()' in venue
+          assert 'prediction-history-v03519.js?v=3526' in index
+          assert "VISIBLE_WINDOW_DAYS=30" in history
+          assert "dataRetention:'PRESERVE_ALL'" in history
+          assert "WINDOW_DAYS=30" in perf
+          assert "PRESERVE_ALL_SOURCE_DATA" in perf
+          assert "ROLLING_30_CALENDAR_DAYS_JST" in perf
+          assert "PROGRAM_ONLY" in perf
+          print('VENUE_PERFORMANCE_30D_UI_CONTRACT_PASS')
+          PY
