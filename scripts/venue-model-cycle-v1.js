@@ -282,13 +282,14 @@ function applyAction(e,state){
   if(!ONLY||e.slug!==ONLY)return state;
   if(!['approve','reject','continue','activate'].includes(ACTION))throw new Error('MODEL_CYCLE_ACTION_INVALID '+ACTION);
   if(ACTION==='approve'){
-    if(!['REVIEW_READY','REVIEW_BLOCKED','EVIDENCE_EXTENSION'].includes(state.phase))throw new Error('MODEL_CYCLE_NOT_REVIEWABLE '+state.phase);
+    if(state.phase!=='REVIEW_READY')throw new Error('MODEL_CYCLE_NOT_REVIEW_READY '+state.phase);
     if(!CANDIDATE)throw new Error('MODEL_CYCLE_CANDIDATE_REQUIRED');
     const c=(state.candidates||[]).find(x=>x.id===CANDIDATE);
     if(!c||c.gates?.eligible!==true)throw new Error('MODEL_CYCLE_APPROVE_GATE_FAILED '+CANDIDATE);
     return {...state,phase:'APPROVED_PENDING_DEPLOYMENT',review:{required:true,humanDecision:'APPROVE_CANDIDATE',candidateId:CANDIDATE,decidedAt:isoNow(),decidedBy:'HUMAN_WORKFLOW',note:'Candidate approved; production activation still requires deployment evidence.'}};
   }
   if(ACTION==='activate'){
+    if(state.phase!=='APPROVED_PENDING_DEPLOYMENT')throw new Error('MODEL_CYCLE_NOT_APPROVED_FOR_DEPLOYMENT '+state.phase);
     if(!CANDIDATE)throw new Error('MODEL_CYCLE_CANDIDATE_REQUIRED');
     const c=verifyActivation(e,state,CANDIDATE);archive(state,{action:'ACTIVATE',candidateId:CANDIDATE,modelVersion:c.modelVersion});
     const nextNumber=state.cycleNumber+1,start=EFFECTIVE_DATE;
@@ -296,6 +297,7 @@ function applyAction(e,state){
       mainline:{modelVersion:c.modelVersion,frozen:true,integrity:'ACTIVATION_VERIFIED',versionsObserved:[c.modelVersion],evaluation:aggregate([]),minimumReviewRaces:state.mainline?.minimumReviewRaces||DEFAULT_MIN_RACES,evidenceReady:false},
       candidates:[],recommendation:{state:'WAIT',candidateId:null,reasons:['NEW_CYCLE_STARTED']},review:reviewTemplate()};
   }
+  if(!['REVIEW_READY','REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(state.phase))throw new Error('MODEL_CYCLE_DECISION_TOO_EARLY '+state.phase);
   archive(state,{action:ACTION.toUpperCase(),candidateId:null});
   const nextNumber=state.cycleNumber+1,start=EFFECTIVE_DATE;
   return {...state,generatedAt:isoNow(),cycleNumber:nextNumber,cycleId:newCycleId(e,nextNumber,start),phase:state.phase==='WAITING_FOR_MAINLINE'?'WAITING_FOR_MAINLINE':'ACTIVE',
