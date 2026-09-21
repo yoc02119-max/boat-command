@@ -1,0 +1,22 @@
+name: Gamagori sparse second-place SHADOW v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-second-place-candidate-v0343.js'
+      - 'gamagori-main-model-v0320.js'
+      - 'gamagori-main-history-v0320.json'
+      - '.github/workflows/gamagori-second-place-sparse-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run sparse runner-up correction candidate
+        run: node scripts/gamagori-second-place-candidate-v0343.js
