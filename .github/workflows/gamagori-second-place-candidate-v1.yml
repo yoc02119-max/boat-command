@@ -1,0 +1,35 @@
+name: Gamagori second-place SHADOW candidate v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-second-place-candidate-v0342.js'
+      - 'gamagori-main-model-v0320.js'
+      - 'gamagori-main-history-v0320.json'
+      - '.github/workflows/gamagori-second-place-candidate-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run strict walk-forward second-place candidate
+        run: node scripts/gamagori-second-place-candidate-v0342.js
+      - name: Print compact verdict
+        run: |
+          node - <<'NODE'
+          const x=require('./gamagori-second-place-candidate-v0342.json');
+          console.log(JSON.stringify({
+            selectedLambda:x.design.selectedLambda,
+            selectionRule:x.design.selectionRule,
+            designDelta:x.design.delta,
+            holdoutDelta:x.holdout.delta,
+            holdoutPass:x.holdout.pass,
+            promotionEligible:x.promotionEligible
+          },null,2));
+          NODE
