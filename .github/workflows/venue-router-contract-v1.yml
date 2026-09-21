@@ -9,6 +9,10 @@ on:
       - 'portal.html'
       - 'github-live-data-v1.js'
       - 'scripts/portal-24venue-operational-contract-v1.js'
+      - 'try-race-deeplink-v1.js'
+      - 'scripts/try-race-deeplink-contract-v1.js'
+      - 'venue.html'
+      - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
       - '.github/workflows/venue-router-contract-v1.yml'
   pull_request:
@@ -18,6 +22,10 @@ on:
       - 'portal.html'
       - 'github-live-data-v1.js'
       - 'scripts/portal-24venue-operational-contract-v1.js'
+      - 'try-race-deeplink-v1.js'
+      - 'scripts/try-race-deeplink-contract-v1.js'
+      - 'venue.html'
+      - 'index.html'
       - 'scripts/venue-router-contract-v1.js'
       - '.github/workflows/venue-router-contract-v1.yml'
   workflow_dispatch:
@@ -37,3 +45,5 @@ jobs:
         run: node scripts/venue-router-contract-v1.js
       - name: Verify portal 24-venue source of truth
         run: node scripts/portal-24venue-operational-contract-v1.js
+      - name: Verify TRY race deep links
+        run: node scripts/try-race-deeplink-contract-v1.js

@@ -11,5 +11,27 @@ function mount(){
  el.onclick=e=>{const a=e.target?.dataset?.act;if(a==='back')history.back();else if(a==='forward')history.forward();else if(a==='reload'){const u=new URL(location.href);u.searchParams.set('_bc_refresh',Date.now().toString());location.replace(u.toString())}};
  document.body.appendChild(el);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+function focusGamagoriRaceDeepLink(){
+ if(/\/venue\.html$/.test(location.pathname))return;
+ const q=new URLSearchParams(location.search);
+ if(String(q.get('venue')||'').toLowerCase()!=='gamagori')return;
+ const race=Math.max(1,Math.min(12,Number(q.get('race'))||0));if(!race)return;
+ let attempts=0;
+ const tick=()=>{
+  attempts++;
+  document.querySelector('.nav[data-view="predict"]')?.click();
+  const card=document.querySelector(`#predictionList .race-card[data-race="${race}"]`);
+  if(card){
+   card.setAttribute('data-try-focus','1');
+   card.style.borderColor='#20e0c7';
+   card.style.boxShadow='0 0 0 2px rgba(32,224,199,.35),0 12px 34px rgba(0,0,0,.25)';
+   card.scrollIntoView({behavior:'smooth',block:'center'});
+   return;
+  }
+  if(attempts<80)setTimeout(tick,125);
+ };
+ tick();
+}
+function boot(){mount();focusGamagoriRaceDeepLink()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
