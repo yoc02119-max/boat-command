@@ -60,7 +60,7 @@ const out={
   schema:'boat-command-edogawa-forward-model-comparison-v1',
   version:'EDOGAWA-FORWARD-MODEL-COMPARISON-V1',
   venue:'EDOGAWA',venueCode:'03',
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   policy:{
     minimumPairedForwardRaces:minPair,
     maxAllowedHitRateRegression:maxHitRegression,
@@ -78,5 +78,8 @@ const out={
   productionEnabled:false,
   tryEnabled:false
 };
+const _previous=read(path.join(root,'edogawa-forward-model-comparison-v1.json')),_before=_previous?{..._previous}:null,_after={...out};
+if(_before)delete _before.generatedAt;delete _after.generatedAt;
+out.generatedAt=_before&&JSON.stringify(_before)===JSON.stringify(_after)?(_previous.generatedAt||new Date().toISOString()):new Date().toISOString();
 fs.writeFileSync(path.join(root,'edogawa-forward-model-comparison-v1.json'),JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({classVsProgram,classVsRich,programVsRich,richVsFull,programVsFull,ready:out.ready},null,2));

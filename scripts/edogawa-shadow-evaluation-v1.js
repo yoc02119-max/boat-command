@@ -82,7 +82,7 @@ const out={
   schema:'boat-command-edogawa-shadow-evaluation-v1',
   version:'EDOGAWA-SHADOW-EVALUATION-V1',
   venue:'EDOGAWA',venueCode:'03',
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   purpose:'POST_RACE_RESEARCH_ONLY',
   fundingScope:'NONE',
   cashNeutral:true,
@@ -100,5 +100,8 @@ const out={
     tryMutation:false
   }
 };
+const _previous=read(output),_before=_previous?{..._previous}:null,_after={...out};
+if(_before)delete _before.generatedAt;delete _after.generatedAt;
+out.generatedAt=_before&&JSON.stringify(_before)===JSON.stringify(_after)?(_previous.generatedAt||new Date().toISOString()):new Date().toISOString();
 fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({evaluatedRows:out.evaluatedRows,aggregate:out.aggregate,comparison:out.comparison},null,2));
