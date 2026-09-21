@@ -38,7 +38,7 @@ blockers.push('HUMAN_REVIEW_NOT_READY');
 
 const out={
   schema:'boat-command-'+slug+'-readiness-v1',
-  version:venue+'-READINESS-V1',venue,venueCode:code,generatedAt:new Date().toISOString(),phase,
+  version:venue+'-READINESS-V1',venue,venueCode:code,generatedAt:null,phase,
   latestDate:latestDate||audit?.cutoff||old.latestDate||null,
   current:{programReady:programCount===12,programRaceCount:programCount,postResults:postCount,shadowClassBaseline:classShadow,shadowProgramOnly:programShadow,evaluatedProgramOnly:evaluated},
   history:{
@@ -69,5 +69,13 @@ const out={
   operation:{mode:'SHADOW_ONLY',active:false,mainLogicFrozen:true,sharedBankroll:true,sharedBankrollStartYen:1000000,realMoney:false},
   modelEnabled:false,tryEnabled:false,realMoneyEnabled:false
 };
+const _previousReadiness=old;
+const _previousComparable=_previousReadiness?{..._previousReadiness}:null;
+const _nextComparable={...out};
+if(_previousComparable)delete _previousComparable.generatedAt;
+delete _nextComparable.generatedAt;
+out.generatedAt=_previousComparable&&JSON.stringify(_previousComparable)===JSON.stringify(_nextComparable)
+  ? (_previousReadiness.generatedAt||new Date().toISOString())
+  : new Date().toISOString();
 fs.writeFileSync(path.join('venues',slug,'readiness-v1.json'),JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({slug,phase,latestDate:out.latestDate,historyRows,programCount,classShadow,programShadow,postCount,evaluated,holdoutUplift,forwardUplift,blockers}));

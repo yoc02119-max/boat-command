@@ -130,7 +130,7 @@ const out={
   schema:'boat-command-edogawa-readiness-v1',
   version:'EDOGAWA-READINESS-V1',
   venue:'EDOGAWA',venueCode:'03',
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   phase,
   latestDate,
   current:{
@@ -231,5 +231,13 @@ const out={
   realMoneyEnabled:false
 };
 fs.mkdirSync(path.dirname(output),{recursive:true});
+const _previousReadiness=read('venues/edogawa/readiness-v1.json');
+const _previousComparable=_previousReadiness?{..._previousReadiness}:null;
+const _nextComparable={...out};
+if(_previousComparable)delete _previousComparable.generatedAt;
+delete _nextComparable.generatedAt;
+out.generatedAt=_previousComparable&&JSON.stringify(_previousComparable)===JSON.stringify(_nextComparable)
+  ? (_previousReadiness.generatedAt||new Date().toISOString())
+  : new Date().toISOString();
 fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({phase,latestDate,historyRows,baselineReady,forwardProgramRaces,forwardFullRaces,comparisonReady,blockers},null,2));
