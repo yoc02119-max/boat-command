@@ -68,9 +68,9 @@ assert.notEqual(karatsu.model.script,toda.model.script);
 assert.notEqual(karatsu.model.script,edogawa.model.script);
 
 assert.equal(registry.routeFor('07'),'./?venue=gamagori');
-assert.equal(registry.routeFor('03'),'./venue.html?jcd=03');
-assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02');
-assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23');
+assert.equal(registry.routeFor('03'),'./venue.html?jcd=03&shell=5');
+assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02&shell=5');
+assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23&shell=5');
 
 assert.equal(runtime.resolveVenue('03')?.code,'03');
 assert.equal(runtime.resolveVenue('gamagori')?.code,'07');
