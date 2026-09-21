@@ -1,0 +1,109 @@
+name: Venue model cycle contract v1
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/venue-model-cycle-v1.js'
+      - 'venue-model-cycle-v1.js'
+      - 'venue-model-cycle-policy-v1.json'
+      - 'venue.html'
+      - 'index.html'
+      - 'venues/_template/model-candidates-v1.json'
+      - '.github/workflows/venue-model-cycle-v1.yml'
+      - '.github/workflows/venue-model-cycle-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-model-cycle-v1.js'
+      - 'venue-model-cycle-v1.js'
+      - 'venue-model-cycle-policy-v1.json'
+      - 'venue.html'
+      - 'index.html'
+      - 'venues/_template/model-candidates-v1.json'
+      - '.github/workflows/venue-model-cycle-v1.yml'
+      - '.github/workflows/venue-model-cycle-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Syntax
+        run: |
+          set -euo pipefail
+          node --check scripts/venue-model-cycle-v1.js
+          node --check venue-model-cycle-v1.js
+
+      - name: Generate isolated 24-venue fixture from repository evidence
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/model-cycle-contract
+          node scripts/venue-model-cycle-v1.js --date 2026-09-22 --output-root /tmp/model-cycle-contract | tee /tmp/model-cycle.log
+          grep -Fq 'VENUE_MODEL_CYCLE_24_INDEPENDENT_PASS' /tmp/model-cycle.log
+
+      - name: Audit 24 independent states
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,pathlib
+          files=sorted(glob.glob('/tmp/model-cycle-contract/venues/*/model-cycle-v1.json'))
+          assert len(files)==24, len(files)
+          codes=set(); slugs=set()
+          for p in files:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['cycleDays']==30
+              assert x['isolation']=={
+                'scope':'VENUE_ONLY',
+                'venueCode':x['venueCode'],
+                'slug':x['slug'],
+                'crossVenueTraining':False,
+                'crossVenueWeightReuse':False,
+                'crossVenuePromotion':False,
+                'independentClock':True
+              }
+              assert x['promotion']['humanReviewRequired'] is True
+              assert x['promotion']['autoPromotion'] is False
+              assert x['promotion']['autoTryEnable'] is False
+              assert x['promotion']['realMoneyEnable'] is False
+              assert x['promotion']['activationRequiresEvidence'] is True
+              assert x['retention']['sourceDataPreserved'] is True
+              assert x['retention']['cycleHistoryPreserved'] is True
+              codes.add(x['venueCode']); slugs.add(x['slug'])
+          assert len(codes)==24 and len(slugs)==24
+          fleet=json.load(open('/tmp/model-cycle-contract/venue-model-cycle-fleet-v1.json',encoding='utf-8'))
+          assert fleet['venues']==24
+          policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
+          assert policy['cycleDays']==30
+          assert policy['scope']=='24_INDEPENDENT_VENUE_CYCLES'
+          assert policy['invariants']['crossVenueWeightReuse'] is False
+          assert policy['invariants']['autoPromotion'] is False
+          print('VENUE_MODEL_CYCLE_CONTRACT_PASS')
+          PY
+
+      - name: Verify UI and decision safety wiring
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('scripts/venue-model-cycle-v1.js').read_text(encoding='utf-8')
+          v=Path('venue.html').read_text(encoding='utf-8')
+          i=Path('index.html').read_text(encoding='utf-8')
+          ui=Path('venue-model-cycle-v1.js').read_text(encoding='utf-8')
+          assert "MODEL_CYCLE_DECISION_TOO_EARLY" in s
+          assert "MODEL_CYCLE_NOT_REVIEW_READY" in s
+          assert "MODEL_CYCLE_NOT_APPROVED_FOR_DEPLOYMENT" in s
+          assert "MODEL_CYCLE_DEPLOYMENT_EVIDENCE_MISSING" in s
+          assert "APPROVED_PENDING_DEPLOYMENT" in s
+          assert 'id="venueModelCycle"' in v
+          assert 'venue-model-cycle-v1.js?v=1' in v
+          assert 'ensureVenueModelCycle()' in v
+          assert 'data-venue-model-cycle="gamagori"' in i
+          assert 'venue-model-cycle-v1.js?v=3526' in i
+          assert 'ほか23場の重みや成績は使用しません' in ui
+          print('VENUE_MODEL_CYCLE_UI_SAFETY_PASS')
+          PY
