@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import datetime, json, re, urllib.request
+import datetime, html as html_lib, json, re, urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from zoneinfo import ZoneInfo
 
@@ -24,12 +24,41 @@ def fetch(day):
         except UnicodeDecodeError:pass
     return raw.decode('utf-8','replace')
 
+def fetch_venue_today(code):
+    hd=TODAY.strftime('%Y%m%d')
+    url=f'https://www.boatrace.jp/owpc/pc/race/raceindex?hd={hd}&jcd={code}'
+    req=urllib.request.Request(url,headers={'User-Agent':'BOAT-COMMAND-VENUE-CALENDAR/1.0'})
+    with urllib.request.urlopen(req,timeout=45) as r:
+        raw=r.read()
+    for enc in ('utf-8','cp932','shift_jis','euc_jp'):
+        try:return raw.decode(enc)
+        except UnicodeDecodeError:pass
+    return raw.decode('utf-8','replace')
+
+def plain_text(raw):
+    s=re.sub(r'(?is)<script.*?</script>|<style.*?</style>',' ',raw or '')
+    s=re.sub(r'(?s)<[^>]+>',' ',s)
+    s=html_lib.unescape(s)
+    return re.sub(r'\s+',' ',s).strip()
+
+def classify_today_status(code):
+    try:
+        txt=plain_text(fetch_venue_today(code))
+    except Exception as e:
+        return {'status':'UNKNOWN','cancelled':False,'error':str(e)}
+    md=rf'{TODAY.month}\s*月\s*{TODAY.day}\s*日'
+    if re.search(md+r'.{0,24}(?:順延|中止)',txt) or '中止順延' in txt or '中止・順延' in txt:
+        return {'status':'CANCELLED','cancelled':True}
+    return {'status':'ACTIVE','cancelled':False}
+
 next_date={c:None for c in CODES}
 today_active=set()
 checked=0
 errors=[]
 days=[TODAY+datetime.timedelta(days=i) for i in range(0,61)]
 pages={}
+present_by_day={}
+today_status={}
 
 # Fetch the horizon in parallel so this stays fast even when one official page is slow.
 with ThreadPoolExecutor(max_workers=8) as ex:
@@ -51,11 +80,31 @@ for offset,day in enumerate(days):
     if not present:
         present=set(re.findall(r'jcd=(\d{2})',text))
     present={c for c in present if c in next_date}
+    present_by_day[day]=present
     if offset==0:
         today_active=present
     for code in present:
         if next_date[code] is None:
             next_date[code]=day.isoformat()
+
+# A venue can remain linked on the official index even when the day is cancelled/postponed.
+# Resolve today's venue-specific page so "scheduled" and "actually active" are not conflated.
+today_scheduled=set(today_active)
+with ThreadPoolExecutor(max_workers=8) as ex:
+    futs={ex.submit(classify_today_status,code):code for code in sorted(today_scheduled)}
+    for fut in as_completed(futs):
+        code=futs[fut]
+        try:today_status[code]=fut.result()
+        except Exception as e:today_status[code]={'status':'UNKNOWN','cancelled':False,'error':str(e)}
+
+today_cancelled={c for c,s in today_status.items() if s.get('cancelled') is True}
+today_active=today_scheduled-today_cancelled
+for code in today_cancelled:
+    next_date[code]=None
+    for day in days[1:]:
+        if code in present_by_day.get(day,set()):
+            next_date[code]=day.isoformat()
+            break
 
 out={
  'schema':'boat-command-venue-calendar-v1',
@@ -73,7 +122,10 @@ for code in CODES:
     out['venues'][code]={
         'venueCode':code,
         'venueName':NAMES[code],
+        'todayScheduled':code in today_scheduled,
         'todayActive':code in today_active,
+        'todayCancelled':code in today_cancelled,
+        'todayStatus':today_status.get(code,{}).get('status','NOT_SCHEDULED' if code not in today_scheduled else 'UNKNOWN'),
         'nextRaceDate':nxt,
         'nextRaceDateKnown':nxt is not None
     }
