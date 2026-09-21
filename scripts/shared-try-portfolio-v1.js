@@ -83,7 +83,8 @@ function withinOperationWindow(date){
   return day>=0&&day<Number(config.operationWindowDays||30);
 }
 function priorPortfolio(){
-  return read(OUTPUT_PATH)||{startingBankrollYen:Number(config.startingBankrollYen)||1000000,bankrollYen:Number(config.startingBankrollYen)||1000000};
+  const start=Number(config.startingBankrollYen)||100000;
+  return read(OUTPUT_PATH)||{startingBankrollYen:start,confirmedBankrollYen:start,availableBankrollYen:start,bankrollYen:start};
 }
 function buildSelection(date,available){
   const outPath=selectionPath(date);
@@ -176,17 +177,25 @@ function rebuildPortfolio(){
     v.roi=v.settledStakeYen?v.returnYen/v.settledStakeYen:null;
     v.hitRate=v.settled?v.hits/v.settled:null;
   }
-  const bankroll=start-committed+returns;
+  const confirmedProfit=returns-settledStake;
+  const confirmedBankroll=start+confirmedProfit;
+  const availableBankroll=confirmedBankroll-pending;
+  const bankroll=availableBankroll;
   const settledTries=ledger.filter(x=>x.settled).length;
   const out={
     schema:'boat-command-shared-try-portfolio-v1',version:'SHARED-TRY-PORTFOLIO-V1',
     generatedAt:new Date(NOW_MS).toISOString(),realMoney:false,fundingScope:'ALL_24_VENUES_SHARED',
     operationWindowDays:Number(config.operationWindowDays)||30,
-    startingBankrollYen:start,bankrollYen:bankroll,status:bankroll>0?'ACTIVE':'BANKRUPT_STOP_NEW_TRY',
+    startingBankrollYen:start,
+    confirmedBankrollYen:confirmedBankroll,
+    availableBankrollYen:availableBankroll,
+    bankrollYen:bankroll,
+    status:availableBankroll>0?'ACTIVE':'BANKRUPT_STOP_NEW_TRY',
     committedStakeYen:committed,settledStakeYen:settledStake,pendingStakeYen:pending,
-    returnYen:returns,profitYen:returns-settledStake,settledTries,pendingTries:ledger.length-settledTries,
+    returnYen:returns,profitYen:confirmedProfit,settledTries,pendingTries:ledger.length-settledTries,
     hits,hitRate:settledTries?hits/settledTries:null,roi:settledStake?returns/settledStake:null,
     maxDrawdownYen:maxDrawdown,maxConsecutiveLosses:maxLossStreak,byVenue,ledger,
+    capitalPolicy:{fundingScope:'ALL_24_VENUES_SHARED',resetAllowed:false,settledProfitCarriedForward:true,pendingStakeReserved:true},
     boundaries:{resultInputForSelection:false,payoutInputForSelection:false,realMoney:false,bankruptcyStopsNewTry:true}
   };
   fs.writeFileSync(OUTPUT_PATH,JSON.stringify(out,null,2)+'\n');
@@ -195,6 +204,6 @@ function rebuildPortfolio(){
 
 let portfolio=priorPortfolio();
 if(allSelections().length)portfolio=rebuildPortfolio();
-const selection=buildSelection(requestedDate,Number(portfolio.bankrollYen??config.startingBankrollYen));
+const selection=buildSelection(requestedDate,Number(portfolio.availableBankrollYen??portfolio.bankrollYen??config.startingBankrollYen));
 portfolio=rebuildPortfolio();
 console.log(JSON.stringify({date:requestedDate,selectionStatus:selection.status,selectedCount:selection.selectedCount,bankrollYen:portfolio.bankrollYen,pendingTries:portfolio.pendingTries,settledTries:portfolio.settledTries},null,2));
