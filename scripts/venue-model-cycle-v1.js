@@ -350,7 +350,8 @@ function main(){
   if(ONLY&&!entries.some(x=>x.slug===ONLY))throw new Error('MODEL_CYCLE_UNKNOWN_VENUE '+ONLY);
   const results=[];
   for(const e of entries){
-    let state=build(e);
+    const preserveOtherVenue=ACTION!=='refresh'&&ONLY&&e.slug!==ONLY;
+    let state=preserveOtherVenue?(readPrev(e.slug)||build(e)):build(e);
     state=applyAction(e,state);
     validateState(state);
     results.push(state);
