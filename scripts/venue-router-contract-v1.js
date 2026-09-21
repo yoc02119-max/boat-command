@@ -68,9 +68,9 @@ assert.notEqual(karatsu.model.script,toda.model.script);
 assert.notEqual(karatsu.model.script,edogawa.model.script);
 
 assert.equal(registry.routeFor('07'),'./?venue=gamagori');
-assert.equal(registry.routeFor('03'),'./venue.html?jcd=03');
-assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02');
-assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23');
+assert.equal(registry.routeFor('03'),'./venue.html?jcd=03&shell=5');
+assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02&shell=5');
+assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23&shell=5');
 
 assert.equal(runtime.resolveVenue('03')?.code,'03');
 assert.equal(runtime.resolveVenue('gamagori')?.code,'07');
@@ -78,6 +78,8 @@ assert.equal(runtime.capabilities(toda).predictionUi,true);
 assert.equal(runtime.capabilities(toda).try,true);
 
 const active=venues.filter(x=>x.state==='LIVE'||x.state==='LIVE_SIMULATION');
+assert.equal(active.length,24,'all 24 venues must be active after full-cycle rollout');
+assert.equal(venues.filter(x=>x.state==='BUILDING').length,0,'no venue may remain BUILDING after full-cycle rollout');
 for(const v of active){
   assert.ok(v.model?.script,`${v.slug}: active runtime requires a model script`);
   assert.ok(v.model?.global,`${v.slug}: active runtime requires a model global`);
