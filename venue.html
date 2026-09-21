@@ -61,7 +61,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 .common-kpi.bank b{font-size:25px;color:#8fe8ff}
 .common-kpi.profit.positive b{color:#79e7bb}.common-kpi.profit.negative b{color:#ff8997}
 .common-bank-note{grid-column:1/-1;padding:0 3px;color:#617e94;font-size:8px;line-height:1.45}
-.common-tabs{position:sticky;top:6px;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px;padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(7,21,34,.94);backdrop-filter:blur(14px)}
+.common-tabs{position:sticky;top:6px;z-index:20;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px;padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(7,21,34,.94);backdrop-filter:blur(14px)}
 .common-tab{appearance:none;border:1px solid #244762;background:#081725;color:#8199ac;border-radius:10px;padding:10px 8px;font-weight:850;font-size:11px;cursor:pointer}
 .common-tab.active{border-color:#2b98ff;color:white;background:#0a3150}
 .venue-details{margin-top:8px;color:#6c879b;font-size:9px}
@@ -97,10 +97,9 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
  <div class="common-bank-note" id="commonBankNote">共通10万円 · 実金なし · TRYのみ資金連動</div>
 </section>
 <div class="common-tabs" id="commonVenueTabs" role="tablist">
- <button class="common-tab active" type="button" data-common-view="today">今日</button>
- <button class="common-tab" type="button" data-common-view="races">12R</button>
- <button class="common-tab" type="button" data-common-view="results">結果</button>
- <button class="common-tab" type="button" data-common-view="history">履歴</button>
+ <button class="common-tab active" type="button" data-common-view="races">全レース</button>
+ <button class="common-tab" type="button" data-common-view="results">確定結果</button>
+ <button class="common-tab" type="button" data-common-view="history">検証情報</button>
 </div>
 <details class="venue-details" id="venueDetails">
 <summary>詳細・検証</summary>
@@ -135,7 +134,7 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <script src="github-live-data-v1.js?v=1"></script>
 <script src="venue-registry-v1.js?v=5"></script>
 <script src="venue-runtime-v1.js?v=2"></script>
-<script src="venue-research-board-v1.js?v=6"></script>
+<script src="venue-research-board-v1.js?v=7"></script>
 <script>
 const REG=window.BOAT_COMMAND_VENUE_REGISTRY;
 const RUNTIME=window.BOAT_COMMAND_VENUE_RUNTIME;
@@ -149,6 +148,10 @@ function syncCommonVenueTabs(view){
 }
 function activateCommonVenueView(view){
  syncCommonVenueTabs(view);
+ const board=document.getElementById('researchBoard');
+ if(board)board.hidden=view==='history';
+ const details=document.getElementById('venueDetails');
+ if(details)details.open=view==='history';
  if(view==='history'){
    const d=document.getElementById('venueDetails');if(d)d.open=true;
    setTimeout(()=>document.getElementById('researchProgress')?.scrollIntoView({behavior:'smooth',block:'center'}),20);
@@ -177,7 +180,7 @@ async function refreshCommonVenueBank(){
    document.getElementById('commonTodayRoi').textContent=roi==null?'—':`${(roi*100).toFixed(1)}%`;
    const box=document.getElementById('commonProfitBox');box?.classList.toggle('positive',profit>0);box?.classList.toggle('negative',profit<0);
    const pending=rows.filter(z=>z.settled!==true).reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
-   document.getElementById('commonBankNote').textContent=`開始 ${yen(Number(x.startingBankrollYen??100000))} · 未精算予約 ${yen(pending)} · 利用可能 ${yen(available)} · 24場共通 · 実金なし`;
+   document.getElementById('commonBankNote').textContent=`集計日 ${day}（日本時間・24場共通） · 開始 ${yen(Number(x.startingBankrollYen??100000))} · 未精算予約 ${yen(pending)} · 利用可能 ${yen(available)} · 24場共通 · 実金なし`;
  }catch{
    document.getElementById('commonBankroll').textContent='¥100,000';
    document.getElementById('commonTodayTry').textContent='—';
