@@ -20,148 +20,212 @@
 
   const overrides={
     '01':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./kiryu-research-model-v1.js',
+        global:'BOAT_COMMAND_KIRYU_RESEARCH_MODEL_V1',
+        version:'KIRYU-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/kiryu/config-v1.json',
       readinessPath:'./venues/kiryu/readiness-v1.json',
       dataRoot:'./live/kiryu',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '04':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./heiwajima-research-model-v1.js',
+        global:'BOAT_COMMAND_HEIWAJIMA_RESEARCH_MODEL_V1',
+        version:'HEIWAJIMA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/heiwajima/config-v1.json',
       readinessPath:'./venues/heiwajima/readiness-v1.json',
       dataRoot:'./live/heiwajima',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '05':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./tamagawa-research-model-v1.js',
+        global:'BOAT_COMMAND_TAMAGAWA_RESEARCH_MODEL_V1',
+        version:'TAMAGAWA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/tamagawa/config-v1.json',
       readinessPath:'./venues/tamagawa/readiness-v1.json',
       dataRoot:'./live/tamagawa',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '06':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./hamanako-research-model-v1.js',
+        global:'BOAT_COMMAND_HAMANAKO_RESEARCH_MODEL_V1',
+        version:'HAMANAKO-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/hamanako/config-v1.json',
       readinessPath:'./venues/hamanako/readiness-v1.json',
       dataRoot:'./live/hamanako',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '08':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./tokoname-research-model-v1.js',
+        global:'BOAT_COMMAND_TOKONAME_RESEARCH_MODEL_V1',
+        version:'TOKONAME-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/tokoname/config-v1.json',
       readinessPath:'./venues/tokoname/readiness-v1.json',
       dataRoot:'./live/tokoname',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '09':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./tsu-research-model-v1.js',
+        global:'BOAT_COMMAND_TSU_RESEARCH_MODEL_V1',
+        version:'TSU-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/tsu/config-v1.json',
       readinessPath:'./venues/tsu/readiness-v1.json',
       dataRoot:'./live/tsu',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '11':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./biwako-research-model-v1.js',
+        global:'BOAT_COMMAND_BIWAKO_RESEARCH_MODEL_V1',
+        version:'BIWAKO-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/biwako/config-v1.json',
       readinessPath:'./venues/biwako/readiness-v1.json',
       dataRoot:'./live/biwako',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '12':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./suminoe-research-model-v1.js',
+        global:'BOAT_COMMAND_SUMINOE_RESEARCH_MODEL_V1',
+        version:'SUMINOE-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/suminoe/config-v1.json',
       readinessPath:'./venues/suminoe/readiness-v1.json',
       dataRoot:'./live/suminoe',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '13':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./amagasaki-research-model-v1.js',
+        global:'BOAT_COMMAND_AMAGASAKI_RESEARCH_MODEL_V1',
+        version:'AMAGASAKI-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/amagasaki/config-v1.json',
       readinessPath:'./venues/amagasaki/readiness-v1.json',
       dataRoot:'./live/amagasaki',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '15':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./marugame-research-model-v1.js',
+        global:'BOAT_COMMAND_MARUGAME_RESEARCH_MODEL_V1',
+        version:'MARUGAME-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/marugame/config-v1.json',
       readinessPath:'./venues/marugame/readiness-v1.json',
       dataRoot:'./live/marugame',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '16':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./kojima-research-model-v1.js',
+        global:'BOAT_COMMAND_KOJIMA_RESEARCH_MODEL_V1',
+        version:'KOJIMA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/kojima/config-v1.json',
       readinessPath:'./venues/kojima/readiness-v1.json',
       dataRoot:'./live/kojima',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '17':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./miyajima-research-model-v1.js',
+        global:'BOAT_COMMAND_MIYAJIMA_RESEARCH_MODEL_V1',
+        version:'MIYAJIMA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/miyajima/config-v1.json',
       readinessPath:'./venues/miyajima/readiness-v1.json',
       dataRoot:'./live/miyajima',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '19':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./shimonoseki-research-model-v1.js',
+        global:'BOAT_COMMAND_SHIMONOSEKI_RESEARCH_MODEL_V1',
+        version:'SHIMONOSEKI-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/shimonoseki/config-v1.json',
       readinessPath:'./venues/shimonoseki/readiness-v1.json',
       dataRoot:'./live/shimonoseki',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '20':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./wakamatsu-research-model-v1.js',
+        global:'BOAT_COMMAND_WAKAMATSU_RESEARCH_MODEL_V1',
+        version:'WAKAMATSU-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/wakamatsu/config-v1.json',
       readinessPath:'./venues/wakamatsu/readiness-v1.json',
       dataRoot:'./live/wakamatsu',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '22':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./fukuoka-research-model-v1.js',
+        global:'BOAT_COMMAND_FUKUOKA_RESEARCH_MODEL_V1',
+        version:'FUKUOKA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/fukuoka/config-v1.json',
       readinessPath:'./venues/fukuoka/readiness-v1.json',
       dataRoot:'./live/fukuoka',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '24':{
-      state:'BUILDING',
+      state:'LIVE_SIMULATION',
       runtime:'RESEARCH',
-      model:null,
+      model:{
+        script:'./omura-research-model-v1.js',
+        global:'BOAT_COMMAND_OMURA_RESEARCH_MODEL_V1',
+        version:'OMURA-RESEARCH-MODEL-V1'
+      },
       configPath:'./venues/omura/config-v1.json',
       readinessPath:'./venues/omura/readiness-v1.json',
       dataRoot:'./live/omura',
-      capabilities:{predictionUi:false,shadow:false,try:false,bankroll:true,postResultInput:false,realMoney:false}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '02':{
       state:'LIVE_SIMULATION',
