@@ -7,6 +7,12 @@ if(!slug||!venue||!/^\d{2}$/.test(String(code||'')))throw new Error('USAGE: venu
 const root=path.join(__dirname,'..'),liveRoot=path.join(root,'live',slug);
 function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function read(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return null}}
+function preserveGeneratedAt(out,file){
+  const old=read(file),a=old?{...old}:null,b={...out};
+  if(a)delete a.generatedAt;delete b.generatedAt;
+  out.generatedAt=a&&JSON.stringify(a)===JSON.stringify(b)?(old.generatedAt||new Date().toISOString()):new Date().toISOString();
+  return out;
+}
 function validShadow(x,race,mode){
   return !!x&&x.schema==='boat-command-venue-shadow-research-v1'&&x.venue===venue&&x.venueCode===code&&x.slug===slug&&
     Number(x.race)===race&&x.mode===mode&&x.resultInput===false&&x.payoutInput===false&&x.researchOnly===true&&
@@ -27,11 +33,11 @@ function evaluateDay(date){
   function stats(key){const x=rows.filter(r=>r[key]),hits=x.filter(r=>r[key].hit).length,stake=x.length*400,returns=x.filter(r=>r[key].hit).reduce((s,r)=>s+r.payout100,0);return{evaluated:x.length,hits,hitRate:x.length?hits/x.length:null,stake,returns,roi:stake?returns/stake:null}}
   const c=stats('classBaseline'),p=stats('programOnly');
   const out={
-    schema:'boat-command-venue-shadow-day-evaluation-v1',venue,venueCode:code,slug,date,generatedAt:new Date().toISOString(),rows,
+    schema:'boat-command-venue-shadow-day-evaluation-v1',venue,venueCode:code,slug,date,generatedAt:null,rows,
     summary:{classBaseline:c,programOnly:p,paired:rows.length,hitRateDelta:rows.length&&c.hitRate!=null&&p.hitRate!=null?p.hitRate-c.hitRate:null,roiDelta:rows.length&&c.roi!=null&&p.roi!=null?p.roi-c.roi:null},
     fundingScope:'NONE_RESEARCH_ONLY',bankrollAffected:false,tryAffected:false,productionAffected:false,realMoney:false
   };
-  if(rows.length){fs.mkdirSync(dayRoot,{recursive:true});fs.writeFileSync(path.join(dayRoot,'research-evaluation-v1.json'),JSON.stringify(out,null,2)+'\n')}
+  if(rows.length){const output=path.join(dayRoot,'research-evaluation-v1.json');fs.mkdirSync(dayRoot,{recursive:true});preserveGeneratedAt(out,output);fs.writeFileSync(output,JSON.stringify(out,null,2)+'\n')}
   return out;
 }
 
@@ -53,11 +59,13 @@ const hitDelta=paired.length&&c.hitRate!=null&&p.hitRate!=null?p.hitRate-c.hitRa
 const roiDelta=paired.length&&c.roi!=null&&p.roi!=null?p.roi-c.roi:null;
 const out={
   schema:'boat-command-venue-shadow-evaluation-v1',version:'VENUE-SHADOW-EVALUATION-V1',
-  venue,venueCode:code,slug,generatedAt:new Date().toISOString(),
+  venue,venueCode:code,slug,generatedAt:null,
   evaluationDays:new Set(rows.map(x=>x.date)).size,classBaseline:c,programOnly:p,pairedRaces:paired.length,
   hitRateDelta:hitDelta,roiDelta,earlyReviewReady:p.evaluated>=36,targetReviewReady:p.evaluated>=60,
   forwardUpliftReady:paired.length>=60&&hitDelta>=0&&roiDelta>0,
   fundingScope:'NONE',cashNeutral:true,realMoney:false,boundaries:{predictionMutation:false,bankrollMutation:false,tryMutation:false}
 };
-fs.writeFileSync(path.join(root,slug+'-shadow-evaluation-v1.json'),JSON.stringify(out,null,2)+'\n');
+const aggregateOutput=path.join(root,slug+'-shadow-evaluation-v1.json');
+preserveGeneratedAt(out,aggregateOutput);
+fs.writeFileSync(aggregateOutput,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({slug,pairedRaces:out.pairedRaces,hitRateDelta:hitDelta,roiDelta,forwardUpliftReady:out.forwardUpliftReady}));
