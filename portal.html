@@ -33,7 +33,7 @@
 <div class="money-card"><span>トータル回収率</span><strong id="portalTotalRoi" class="flat">—</strong><small>累計払戻 ÷ 累計投資</small></div>
 </section>
 <section id="activeTryPanel" class="notice" style="display:block">
- <div><b>本日のAUTO TRY <span id="activeTryCount">—</span></b><p id="activeTrySummary">24場共通のTRY選抜を読み込み中…</p><div id="activeTryList" class="try-live-list"></div></div>
+ <div><b>現在TRY中 <span id="activeTryCount">—</span></b><p id="activeTrySummary">24場共通口座のTRYを読み込み中…</p><div id="activeTryList" class="try-live-list"></div></div>
 </section>
 <section id="todayTryPerformance" class="notice" style="display:block">
  <div><b>本日の成績</b><p id="todayTrySummary">24場のAUTO TRY結果を読み込み中…</p></div>
@@ -41,6 +41,17 @@
 </section>
 <div id="homeAnchor" class="section-head"><h3>24 BOAT RACE VENUES</h3><span>24場入口 OPEN</span></div><section class="grid" id="venueGrid"></section>
 <section id="otherSection" class="notice"><div><b>30日運用</b><p>全24場の専用レーンを確保済み。8場は30日固定運用、残り16場は場別履歴→専用モデル→SHADOWの順で接続します。AUTO TRYは24場共通10万円を1つの口座として運用。確定損益は累積し、自動リセットしません。</p></div><time>2026.09.20</time></section>
+</div>
+<div id="otherPanel" class="other-panel" hidden aria-hidden="true">
+  <div class="other-sheet" role="dialog" aria-modal="true" aria-labelledby="otherTitle">
+    <button id="otherClose" class="other-close" type="button" aria-label="閉じる">×</button>
+    <h3 id="otherTitle">運用設定</h3>
+    <div class="other-row"><span>資金</span><b>24場共通 · 開始 ¥100,000</b></div>
+    <div class="other-row"><span>収支</span><b>確定損益を継続反映</b></div>
+    <div class="other-row"><span>リセット</span><b>自動リセットなし</b></div>
+    <div class="other-row"><span>未精算</span><b>資金から予約 · 確定後に精算</b></div>
+    <p>各場ごとに別資金を持たず、BOAT COMMAND全体で1つの10万円口座を共有します。既存のTRY履歴・確定結果・SHADOWは保持されます。</p>
+  </div>
 </div>
 <nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><div class="nav" id="performanceNav" style="cursor:pointer"><b style="color:#8097aa">▥</b>成績</div><div class="nav" id="aiChatNav" style="cursor:pointer"><b style="color:#8097aa">✦</b>AIチャット</div><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
 <script src="github-live-data-v1.js?v=1"></script>
@@ -87,9 +98,9 @@ async function renderActiveTryList(){
   const x=await r.json(),day=todayJst(),rows=(Array.isArray(x.ledger)?x.ledger:[]).filter(z=>String(z.date)===day);
   rows.sort((a,b)=>(a.settled===b.settled?0:a.settled?1:-1)||String(a.deadline||'').localeCompare(String(b.deadline||''))||Number(a.race)-Number(b.race));
   const pending=rows.filter(z=>z.settled!==true),names=new Map((window.BOAT_COMMAND_VENUE_REGISTRY?.list?.()||[]).map(v=>[v.code,v.name]));
-  count.textContent=`${rows.length}R`;
-  summary.textContent=`未精算 ${pending.length}R · 24場共通10万円から選抜`;
-  box.innerHTML=rows.length?rows.map(z=>{const code=String(z.venueCode||'').padStart(2,'0'),name=names.get(code)||z.venue||code;return `<span class="try-live-chip ${z.settled?'settled':''}"><b>${name} ${Number(z.race)}R</b> · ${z.settled?(z.hit?'的中確定':'結果確定'):'TRY中'}</span>`}).join(''):'<span class="try-live-chip settled">本日のTRY選抜はまだありません</span>';
+  count.textContent=`${pending.length}R`;
+  summary.textContent=`TRY中 ${pending.length}R · 本日選抜 ${rows.length}R · 24場共通10万円`;
+  box.innerHTML=pending.length?pending.map(z=>{const code=String(z.venueCode||'').padStart(2,'0'),name=names.get(code)||z.venue||code;return `<span class="try-live-chip"><b>${name} ${Number(z.race)}R</b> · TRY中</span>`}).join(''):'<span class="try-live-chip settled">現在TRY中のレースはありません</span>';
  }catch{count.textContent='—';summary.textContent='TRY一覧を取得待ち';box.innerHTML=''}
 }
 async function renderSharedPortfolioStats(){
