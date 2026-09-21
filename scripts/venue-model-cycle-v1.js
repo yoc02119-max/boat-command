@@ -120,7 +120,7 @@ function attachCandidatePolicy(slug,candidates,config){
     const historicalRequired=p.requireStrictWalkForwardHoldout!==false;
     const historicalOk=!historicalRequired||hist?.passed===true;
     const forwardEligible=enough&&hitOk&&roiOk&&improved;
-    const eligible=forwardEligible&&historicalOk&&reg?.status!=='BLOCKED';
+    const eligible=forwardEligible&&historicalOk&&!!reg&&reg?.status!=='BLOCKED';
     const reasons=[];
     if(!enough)reasons.push('PAIRED_FORWARD_RACES_'+minPaired+'_NOT_READY');
     if(c.deltas.hitRateDelta==null||!hitOk)reasons.push('HIT_RATE_REGRESSION_GATE');
