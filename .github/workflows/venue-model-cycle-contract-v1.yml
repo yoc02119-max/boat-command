@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/venue-model-cycle-v1.js'
+      - 'scripts/test-venue-model-cycle-lifecycle-v1.py'
       - 'venue-model-cycle-v1.js'
       - 'venue-model-cycle-policy-v1.json'
       - 'venue.html'
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/venue-model-cycle-v1.js'
+      - 'scripts/test-venue-model-cycle-lifecycle-v1.py'
       - 'venue-model-cycle-v1.js'
       - 'venue-model-cycle-policy-v1.json'
       - 'venue.html'
@@ -29,7 +31,7 @@ permissions:
 jobs:
   contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
 
@@ -102,6 +104,11 @@ jobs:
           assert policy['invariants']['autoPromotion'] is False
           print('VENUE_MODEL_CYCLE_CONTRACT_PASS')
           PY
+
+      - name: Run full venue-local lifecycle simulation
+        run: |
+          set -euo pipefail
+          python3 scripts/test-venue-model-cycle-lifecycle-v1.py
 
       - name: Verify UI and decision safety wiring
         run: |
