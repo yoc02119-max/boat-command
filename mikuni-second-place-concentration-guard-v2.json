@@ -1,0 +1,565 @@
+{
+  "schema": "boat-command-mikuni-second-place-concentration-guard-v2",
+  "version": "MIKUNI-SECOND-PLACE-CONCENTRATION-GUARD-V2",
+  "venue": "MIKUNI",
+  "venueCode": "10",
+  "source": "mikuni-history-bootstrap-v1.json",
+  "analysisOnly": true,
+  "shadowOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "realMoney": false,
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "objective": "Only diversify second-place candidates when baseline top-4 is unusually concentrated under the primary head.",
+  "architecture": {
+    "baseline": "TOP4_RAW_PROBABILITY",
+    "candidate": "CONCENTRATION_GUARD_REPLACE_LOWEST_PRIMARY_HEAD_PICK",
+    "baseModel": "MIKUNI-RESEARCH-MODEL-V1",
+    "fixedPoints": 4
+  },
+  "calibration": {
+    "lastDate": "2026-07-30",
+    "dateCount": 68,
+    "selected": {
+      "minHeadMass": 0.4,
+      "maxDistinctSeconds": 1,
+      "replacements": 2
+    },
+    "candidates": [
+      {
+        "config": {
+          "minHeadMass": 0.4,
+          "maxDistinctSeconds": 1,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 54,
+          "changedHitRate": 0.2222222222222222,
+          "changedReturns": 9270
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 169450,
+          "roi": 0.8610264227642277,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 162,
+          "secondCoverageGivenHead": 0.6893617021276596,
+          "changedRaces": 54,
+          "changedHitRate": 0.2222222222222222,
+          "changedReturns": 11640
+        },
+        "hitRateDelta": 0,
+        "roiDelta": 0.012042682926829307,
+        "secondCoverageDelta": 0.05957446808510636,
+        "score": 0.014925564348728599
+      },
+      {
+        "config": {
+          "minHeadMass": 0.4,
+          "maxDistinctSeconds": 1,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 54,
+          "changedHitRate": 0.2222222222222222,
+          "changedReturns": 9270
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 168410,
+          "roi": 0.8557418699186992,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 159,
+          "secondCoverageGivenHead": 0.676595744680851,
+          "changedRaces": 54,
+          "changedHitRate": 0.2222222222222222,
+          "changedReturns": 10600
+        },
+        "hitRateDelta": 0,
+        "roiDelta": 0.006758130081300773,
+        "secondCoverageDelta": 0.04680851063829783,
+        "score": 0.01105123464798476
+      },
+      {
+        "config": {
+          "minHeadMass": 0.5,
+          "maxDistinctSeconds": 2,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 175,
+          "changedHitRate": 0.2571428571428571,
+          "changedReturns": 45020
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 87,
+          "hitRate": 0.17682926829268292,
+          "stake": 196800,
+          "returns": 166260,
+          "roi": 0.8448170731707317,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 175,
+          "secondCoverageGivenHead": 0.7446808510638298,
+          "changedRaces": 175,
+          "changedHitRate": 0.2,
+          "changedReturns": 44200
+        },
+        "hitRateDelta": -0.02032520325203252,
+        "roiDelta": -0.004166666666666652,
+        "secondCoverageDelta": 0.11489361702127654,
+        "score": 0.01075819494897076
+      },
+      {
+        "config": {
+          "minHeadMass": 0.5,
+          "maxDistinctSeconds": 1,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 30,
+          "changedHitRate": 0.23333333333333334,
+          "changedReturns": 3870
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 168230,
+          "roi": 0.8548272357723578,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 158,
+          "secondCoverageGivenHead": 0.6723404255319149,
+          "changedRaces": 30,
+          "changedHitRate": 0.23333333333333334,
+          "changedReturns": 5020
+        },
+        "hitRateDelta": 0,
+        "roiDelta": 0.005843495934959364,
+        "secondCoverageDelta": 0.04255319148936165,
+        "score": 0.009971512281612171
+      },
+      {
+        "config": {
+          "minHeadMass": 0.6,
+          "maxDistinctSeconds": 2,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 41,
+          "changedHitRate": 0.2682926829268293,
+          "changedReturns": 7570
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 93,
+          "hitRate": 0.18902439024390244,
+          "stake": 196800,
+          "returns": 169020,
+          "roi": 0.8588414634146342,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 158,
+          "secondCoverageGivenHead": 0.6723404255319149,
+          "changedRaces": 41,
+          "changedHitRate": 0.17073170731707318,
+          "changedReturns": 9510
+        },
+        "hitRateDelta": -0.008130081300812997,
+        "roiDelta": 0.0098577235772358,
+        "secondCoverageDelta": 0.04255319148936165,
+        "score": 0.0065035244767341314
+      },
+      {
+        "config": {
+          "minHeadMass": 0.5,
+          "maxDistinctSeconds": 1,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 30,
+          "changedHitRate": 0.23333333333333334,
+          "changedReturns": 3870
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 96,
+          "hitRate": 0.1951219512195122,
+          "stake": 196800,
+          "returns": 166560,
+          "roi": 0.8463414634146341,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 155,
+          "secondCoverageGivenHead": 0.6595744680851063,
+          "changedRaces": 30,
+          "changedHitRate": 0.2,
+          "changedReturns": 3350
+        },
+        "hitRateDelta": -0.0020325203252032353,
+        "roiDelta": -0.002642276422764267,
+        "secondCoverageDelta": 0.029787234042553123,
+        "score": 0.004178991523957778
+      },
+      {
+        "config": {
+          "minHeadMass": 0.5,
+          "maxDistinctSeconds": 2,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 175,
+          "changedHitRate": 0.2571428571428571,
+          "changedReturns": 45020
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 89,
+          "hitRate": 0.18089430894308944,
+          "stake": 196800,
+          "returns": 164210,
+          "roi": 0.834400406504065,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 167,
+          "secondCoverageGivenHead": 0.7106382978723405,
+          "changedRaces": 175,
+          "changedHitRate": 0.21142857142857144,
+          "changedReturns": 42150
+        },
+        "hitRateDelta": -0.016260162601625994,
+        "roiDelta": -0.014583333333333393,
+        "secondCoverageDelta": 0.08085106382978724,
+        "score": 0.0035812900017298047
+      },
+      {
+        "config": {
+          "minHeadMass": 0.6,
+          "maxDistinctSeconds": 2,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 41,
+          "changedHitRate": 0.2682926829268293,
+          "changedReturns": 7570
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 95,
+          "hitRate": 0.19308943089430894,
+          "stake": 196800,
+          "returns": 166210,
+          "roi": 0.8445630081300813,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 156,
+          "secondCoverageGivenHead": 0.6638297872340425,
+          "changedRaces": 41,
+          "changedHitRate": 0.21951219512195122,
+          "changedReturns": 6700
+        },
+        "hitRateDelta": -0.004065040650406498,
+        "roiDelta": -0.004420731707317049,
+        "secondCoverageDelta": 0.0340425531914893,
+        "score": 0.0034675553537450235
+      },
+      {
+        "config": {
+          "minHeadMass": 0.6,
+          "maxDistinctSeconds": 1,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 12,
+          "changedHitRate": 0.25,
+          "changedReturns": 1870
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 151,
+          "secondCoverageGivenHead": 0.6425531914893617,
+          "changedRaces": 12,
+          "changedHitRate": 0.25,
+          "changedReturns": 1870
+        },
+        "hitRateDelta": 0,
+        "roiDelta": 0,
+        "secondCoverageDelta": 0.012765957446808529,
+        "score": 0.002553191489361706
+      },
+      {
+        "config": {
+          "minHeadMass": 0.6,
+          "maxDistinctSeconds": 1,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 12,
+          "changedHitRate": 0.25,
+          "changedReturns": 1870
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 96,
+          "hitRate": 0.1951219512195122,
+          "stake": 196800,
+          "returns": 166330,
+          "roi": 0.8451727642276423,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 151,
+          "secondCoverageGivenHead": 0.6425531914893617,
+          "changedRaces": 12,
+          "changedHitRate": 0.16666666666666666,
+          "changedReturns": 1120
+        },
+        "hitRateDelta": -0.0020325203252032353,
+        "roiDelta": -0.003810975609756073,
+        "secondCoverageDelta": 0.012765957446808529,
+        "score": 0.0004825614080609078
+      },
+      {
+        "config": {
+          "minHeadMass": 0.4,
+          "maxDistinctSeconds": 2,
+          "replacements": 1
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 355,
+          "changedHitRate": 0.2112676056338028,
+          "changedReturns": 115150
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 81,
+          "hitRate": 0.16463414634146342,
+          "stake": 196800,
+          "returns": 143130,
+          "roi": 0.7272865853658537,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 172,
+          "secondCoverageGivenHead": 0.7319148936170212,
+          "changedRaces": 355,
+          "changedHitRate": 0.16619718309859155,
+          "changedReturns": 91200
+        },
+        "hitRateDelta": -0.032520325203252015,
+        "roiDelta": -0.12169715447154472,
+        "secondCoverageDelta": 0.10212765957446801,
+        "score": -0.027884935564781187
+      },
+      {
+        "config": {
+          "minHeadMass": 0.4,
+          "maxDistinctSeconds": 2,
+          "replacements": 2
+        },
+        "baseline": {
+          "races": 492,
+          "hits": 97,
+          "hitRate": 0.19715447154471544,
+          "stake": 196800,
+          "returns": 167080,
+          "roi": 0.8489837398373984,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 148,
+          "secondCoverageGivenHead": 0.6297872340425532,
+          "changedRaces": 355,
+          "changedHitRate": 0.2112676056338028,
+          "changedReturns": 115150
+        },
+        "candidate": {
+          "races": 492,
+          "hits": 71,
+          "hitRate": 0.1443089430894309,
+          "stake": 196800,
+          "returns": 118860,
+          "roi": 0.6039634146341464,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 184,
+          "secondCoverageGivenHead": 0.7829787234042553,
+          "changedRaces": 355,
+          "changedHitRate": 0.13802816901408452,
+          "changedReturns": 66930
+        },
+        "hitRateDelta": -0.052845528455284535,
+        "roiDelta": -0.245020325203252,
+        "secondCoverageDelta": 0.15319148936170213,
+        "score": -0.059681824078879064
+      }
+    ]
+  },
+  "holdout": {
+    "firstDate": "2026-07-31",
+    "dateCount": 30,
+    "baseline": {
+      "races": 346,
+      "hits": 86,
+      "hitRate": 0.24855491329479767,
+      "stake": 138400,
+      "returns": 139960,
+      "roi": 1.011271676300578,
+      "headCorrect": 193,
+      "headRate": 0.5578034682080925,
+      "secondCoveredGivenHead": 135,
+      "secondCoverageGivenHead": 0.6994818652849741,
+      "changedRaces": 17,
+      "changedHitRate": 0.23529411764705882,
+      "changedReturns": 11620
+    },
+    "candidate": {
+      "races": 346,
+      "hits": 86,
+      "hitRate": 0.24855491329479767,
+      "stake": 138400,
+      "returns": 150800,
+      "roi": 1.0895953757225434,
+      "headCorrect": 193,
+      "headRate": 0.5578034682080925,
+      "secondCoveredGivenHead": 138,
+      "secondCoverageGivenHead": 0.7150259067357513,
+      "changedRaces": 17,
+      "changedHitRate": 0.23529411764705882,
+      "changedReturns": 22460
+    },
+    "hitRateDelta": 0,
+    "roiDelta": 0.07832369942196538,
+    "secondCoverageDelta": 0.015544041450777146
+  },
+  "decision": "SHADOW_ONLY",
+  "promotionEligible": false,
+  "note": "This analysis never mutates LIVE/TRY/frozen predictions. Any adoption requires separate forward SHADOW validation."
+}
