@@ -1,7 +1,7 @@
 {
   "schema": "boat-command-shared-try-config-v1",
   "version": "SHARED-TRY-CONFIG-V1",
-  "startingBankrollYen": 1000000,
+  "startingBankrollYen": 100000,
   "realMoney": false,
   "operationWindowDays": 30,
   "stakePerPickYen": 500,
@@ -71,12 +71,16 @@
   "futureScope": "24_VENUES_SINGLE_SHARED_BANKROLL",
   "bankruptcyPolicy": "STOP_NEW_TRY_KEEP_PREDICTIONS_RUNNING",
   "notes": [
-    "24場で共有する仮資金の初期値は100万円。実金は扱わない。",
+    "24場で共有する仮資金の初期値は10万円。実金は扱わない。",
     "戸田・江戸川・三国・鳴門・徳山・芦屋・唐津の標準SHADOW予想と、蒲郡の既存TRYゲートを同じ共通口座へ接続する。",
     "戸田・江戸川・三国・鳴門・徳山・芦屋・唐津は各場内の相対的な4点カバー確率で正規化し、場ごとの確率スケール差をそのまま比較しない。",
     "蒲郡は30日固定中の既存FORWARD_SHADOW_TRY判定を候補として共通選抜へ渡す。",
     "予想・TRY候補は結果前固定のみを使用し、結果・払戻を選抜入力に使わない。",
-    "30日運用中は本線ロジックを固定し、改良版は別SHADOWで比較する。"
+    "30日運用中は本線ロジックを固定し、改良版は別SHADOWで比較する。",
+    "共通資金は10万円を開始基準とし、確定損益を累積反映する。自動リセットは禁止し、既存TRY履歴・確定結果を保持する。"
   ],
-  "operationStartDate": "2026-09-20"
+  "operationStartDate": "2026-09-20",
+  "fundingScope": "ALL_24_VENUES_SHARED",
+  "resetPolicy": "NEVER_AUTOMATICALLY_RESET",
+  "preserveSettledHistory": true
 }
