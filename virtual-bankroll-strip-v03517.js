@@ -33,9 +33,10 @@ function render(){
  const invested=Number(t.todayCommittedStakeYen)||0;
  const profit=Number(t.todayProfitYen)||0;
  const pending=Number(t.todayPendingStakeYen)||0;
- const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||1000000)+profit-pending;
+ const bankroll=typeof bcVirtualBankrollNow==='function'?bcVirtualBankrollNow():(Number(store?.startBankroll)||100000)+profit;
+ const available=Math.max(0,bankroll-pending);
  const cls=profit>0?'positive':profit<0?'negative':'';
- el.innerHTML=`<div class="bankroll"><small>24場共通 仮資金</small><b>${yen(bankroll)}</b></div><div><small>本日AUTO TRY</small><b>${yen(invested)}</b></div><div class="profit ${cls}"><small>本日確定損益</small><b>${profit>0?'+':''}${yen(profit)}</b></div><div class="sub">30日仮想運用 · 未精算TRY ${yen(pending)} は共通100万円から差引済み · 実金なし</div>`;
+ el.innerHTML=`<div class="bankroll"><small>24場共通 仮資金</small><b>${yen(bankroll)}</b></div><div><small>本日AUTO TRY</small><b>${yen(invested)}</b></div><div class="profit ${cls}"><small>本日確定損益</small><b>${profit>0?'+':''}${yen(profit)}</b></div><div class="sub">24場共通10万円 · 確定損益を継続反映 · 未精算TRY ${yen(pending)}予約 · 利用可能 ${yen(available)} · 自動リセットなし · 実金なし</div>`;
 }
 const prior=typeof renderAll==='function'?renderAll:null;
 if(prior)renderAll=function(){const out=prior.apply(this,arguments);render();return out};
