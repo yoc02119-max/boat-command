@@ -50,6 +50,22 @@ def assert_others_same(repo, before):
     changed = [slug for slug in before if before[slug] != after[slug]]
     assert not changed, f"cross-venue mutation: {changed}"
 
+def reset_kiryu_to_building(repo):
+    p = repo / "venues/kiryu/config-v1.json"
+    cfg = read_json(p)
+    cfg["state"] = "BUILDING"
+    cfg["modelEnabled"] = False
+    cfg["tryEnabled"] = False
+    cfg["realMoneyEnabled"] = False
+    op = cfg.setdefault("operationPolicy", {})
+    op["mode"] = "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION"
+    op["operationStartDate"] = None
+    op["mainModelVersion"] = None
+    op["mainLogicFrozen"] = False
+    op["realMoney"] = False
+    op["improvementsRunAsSeparateShadow"] = True
+    write_json(p, cfg)
+
 def mutate_kiryu_to_live(repo):
     p = repo / "venues/kiryu/config-v1.json"
     cfg = read_json(p)
@@ -230,7 +246,9 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-lifecycle-") as td:
         ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"),
     )
 
-    # 1) Baseline: KIRYU is not a formal 30-day mainline yet.
+    # 1) Baseline fixture: force KIRYU back to BUILDING so this test remains
+    #    valid even after production has entered the 24-venue operation.
+    reset_kiryu_to_building(repo)
     run(repo, "--action", "refresh", "--date", "2026-09-22")
     s0 = state(repo)
     assert s0["phase"] == "WAITING_FOR_MAINLINE", s0
@@ -599,7 +617,9 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-drift-") as td:
     )
 
     # Normalize all venue states first, then introduce a KIRYU-only deployment
-    # mismatch. One bad venue must fail closed without stopping the other 23.
+    # mismatch. Force KIRYU to the BUILDING fixture first so production's
+    # scheduled 2026-09-23 start cannot alter this historical drift contract.
+    reset_kiryu_to_building(repo)
     run(repo, "--action", "refresh", "--date", "2026-09-22")
     before_others = snapshot_others(repo)
 
