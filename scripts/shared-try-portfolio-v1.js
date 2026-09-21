@@ -16,6 +16,9 @@ const sha256=s=>crypto.createHash('sha256').update(s).digest('hex');
 const validPick=v=>/^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;
 const jstDate=d=>new Date((d||Date.now())+JST_OFFSET).toISOString().slice(0,10);
 const requestedDate=process.argv[2]||jstDate(NOW_MS);
+if(Number(config.startingBankrollYen)!==100000)throw new Error('SHARED_BANKROLL_MUST_BE_100000');
+if(config.fundingScope!=='ALL_24_VENUES_SHARED')throw new Error('SHARED_BANKROLL_SCOPE_INVALID');
+if(config.resetPolicy!=='NEVER_AUTOMATICALLY_RESET'||config.preserveSettledHistory!==true)throw new Error('SHARED_BANKROLL_RESET_POLICY_INVALID');
 
 function deadlineEpoch(date,hm){
   const m=String(hm||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return NaN;
@@ -127,7 +130,7 @@ function buildSelection(date,available){
   const payload={
     schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',
     date,generatedAt:new Date(NOW_MS).toISOString(),
-    startingBankrollYen:Number(config.startingBankrollYen)||1000000,bankrollBeforeSelectionYen:available,
+    startingBankrollYen:Number(config.startingBankrollYen)||100000,bankrollBeforeSelectionYen:available,
     policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,picksPerTry,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
     candidateCount:candidates.length,selectedCount:selected.length,selected,
     totalCommittedStakeYen:selected.reduce((s,x)=>s+x.stakeYen,0),
@@ -155,7 +158,7 @@ function resultFor(x){
   return r;
 }
 function rebuildPortfolio(){
-  const start=Number(config.startingBankrollYen)||1000000;
+  const start=Number(config.startingBankrollYen)||100000;
   const rows=allSelections().sort((a,b)=>a.date.localeCompare(b.date)||String(a.deadline).localeCompare(String(b.deadline))||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
   let committed=0,settledStake=0,returns=0,hits=0,pending=0,lossStreak=0,maxLossStreak=0;
   let curveBalance=start,peak=start,maxDrawdown=0;
