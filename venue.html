@@ -207,11 +207,16 @@ setInterval(refreshCommonVenueBank,60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCommonVenueBank()});
 
 async function mountOperationalBoard(meta,x){
-  if(meta?.state!=='LIVE_SIMULATION'||!x)return null;
-  document.getElementById('modelStepTitle').textContent=`${meta.name}専用モデル · 30日固定本線`;
-  document.getElementById('tryStatus').textContent='共通10万円 · AUTO TRY';
+  if(!x)return null;
+  const live=meta?.state==='LIVE_SIMULATION';
+  const researchShadow=!live&&x.phase==='SHADOW_VALIDATION';
+  if(!live&&!researchShadow)return null;
+  document.getElementById('modelStepTitle').textContent=live
+    ?`${meta.name}専用モデル · 30日固定本線`
+    :`${meta.name}専用モデル · SHADOW検証`;
+  document.getElementById('tryStatus').textContent=live?'共通10万円 · AUTO TRY':'SHADOW ONLY · TRY未解禁';
   const st=document.getElementById('buildStatus');
-  st.querySelector('span').textContent='運用中 · 30日';
+  st.querySelector('span').textContent=live?'運用中 · 30日':'検証中 · SHADOW_VALIDATION';
   st.querySelector('i').style.background='#20e0c7';
   st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
   st.style.color='#9be7dc';
