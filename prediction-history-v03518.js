@@ -1,7 +1,7 @@
 // BOAT COMMAND GAMAGORI prediction/result history v0.35.18
 // Past-date read-only view. Never fetches today's POST-RACE data.
 (()=>{'use strict';
-const VERSION='GAMAGORI-PREDICTION-HISTORY-V0.35.18';
+const VERSION='GAMAGORI-PREDICTION-HISTORY-V0.35.19';
 const VISIBLE_WINDOW_DAYS=30;
 const cache=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -74,9 +74,13 @@ function installStyle(){
 .history-try{font-size:9px;color:#91aabb}.history-try b{display:block;font-size:10px;color:#d6e8f2;margin-top:2px}.history-try .up{color:#79e7bb}.history-try .down{color:#ff8997}
 .history-empty{padding:22px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:12px;color:#728da1;font-size:11px}
 #historyLoading{font-size:10px;color:#7893a7}
+.history-30d{margin-bottom:14px;border:1px solid rgba(32,224,199,.22);border-radius:14px;padding:14px;background:rgba(32,224,199,.035)}
+.history-30d-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.history-30d-head h3{margin:0;font-size:16px}.history-30d-head p{margin:4px 0 0;color:#718da2;font-size:9px;line-height:1.5}.history-30d-range{font-size:9px;color:#7893a7;text-align:right}
+.history-30d-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:11px}.history-30d-kpi{padding:9px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025)}.history-30d-kpi small{display:block;font-size:7px;color:#6f899d;margin-bottom:3px}.history-30d-kpi b{font-size:13px}.history-30d-kpi.up b{color:#79e7bb}.history-30d-kpi.down b{color:#ff8997}
 @media(max-width:760px){
  .sidebar nav{grid-template-columns:repeat(5,1fr)}
  .history-day-head{align-items:flex-start;flex-direction:column}
+ .history-30d-head{flex-direction:column}.history-30d-range{text-align:left}.history-30d-kpis{grid-template-columns:1fr 1fr}.history-30d-kpi:last-child{grid-column:1/-1}
  .history-row{grid-template-columns:42px 1fr auto;gap:8px;padding:11px 10px}
  .history-main{grid-column:2/4}.history-result{grid-column:2}.history-eval{grid-column:3;grid-row:2}.history-try{grid-column:2/4;border-top:1px solid rgba(255,255,255,.045);padding-top:7px}
 }
@@ -123,6 +127,37 @@ async function renderDay(date,tmap){
   </div><div class="history-list">${body}</div>
  </section>`;
 }
+async function rollingSummary(dates){
+ let races=0,hits=0,stake=0,returns=0;
+ for(const date of dates){
+   const s=sessionMap()[date]||null,items=Array.isArray(s?.races)?s.races:[];
+   for(let race=1;race<=12;race++){
+     const row=items.find(x=>Number(x.race)===race)||null,picks=mainPicks(row);
+     if(!picks.length)continue;
+     const res=await result(date,race);
+     if(!res?.trifecta)continue;
+     const hit=picks.includes(String(res.trifecta));
+     races++;stake+=picks.length*100;
+     if(hit){hits++;returns+=Number(res.payout100)||0}
+   }
+ }
+ return {races,hits,stake,returns,profit:returns-stake,hitRate:races?hits/races:null,roi:stake?returns/stake:null};
+}
+function rollingSummaryHtml(summary,dates){
+ const start=dates.at(-1)||'',end=dates[0]||'',profitClass=summary.profit>0?'up':summary.profit<0?'down':'';
+ const rate=summary.hitRate==null?'—':(summary.hitRate*100).toFixed(1)+'%';
+ const roi=summary.roi==null?'—':(summary.roi*100).toFixed(1)+'%';
+ return `<section class="history-30d">
+  <div class="history-30d-head"><div><h3>直近30日戦績 · 蒲郡</h3><p>結果前に固定したメイン予想だけを100円/点換算で集計。古いデータは削除せず表示対象からだけ外します。</p></div><div class="history-30d-range">${esc(start)} 〜 ${esc(end)}<br>前日まで・日本時間</div></div>
+  <div class="history-30d-kpis">
+   <div class="history-30d-kpi"><small>評価レース</small><b>${summary.races}R</b></div>
+   <div class="history-30d-kpi"><small>的中</small><b>${summary.hits}R</b></div>
+   <div class="history-30d-kpi"><small>的中率</small><b>${rate}</b></div>
+   <div class="history-30d-kpi"><small>回収率</small><b>${roi}</b></div>
+   <div class="history-30d-kpi ${profitClass}"><small>100円/点換算 損益</small><b>${summary.profit>0?'+':''}${yen(summary.profit)}</b></div>
+  </div>
+ </section>`;
+}
 async function render(){
  installStyle();
  const root=document.getElementById('predictionHistory');if(!root)return;
@@ -132,7 +167,8 @@ async function render(){
  const tmap=tryRows();
  const html=[];
  for(const d of dates)html.push(await renderDay(d,tmap));
- root.innerHTML=`<div class="history-wrap">${html.join('')}</div>`;
+ const summary=await rollingSummary(dates);
+ root.innerHTML=`${rollingSummaryHtml(summary,dates)}<div class="history-wrap">${html.join('')}</div>`;
 }
 function start(){
  installStyle();
