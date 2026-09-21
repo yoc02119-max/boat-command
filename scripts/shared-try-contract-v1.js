@@ -34,6 +34,9 @@ if(p.capitalPolicy?.resetAllowed!==false||p.capitalPolicy?.settledProfitCarriedF
 const ledger=Array.isArray(p.ledger)?p.ledger:[];
 const dayLedger=ledger.filter(x=>x.date==='2026-09-20');
 if(dayLedger.length!==sel.selectedCount)throw new Error('TRY_COUNT_DATE');
-if(Number(p.pendingTries||0)+Number(p.settledTries||0)!==ledger.length)throw new Error('TRY_COUNT');
+if(Number(p.pendingTries||0)+Number(p.settledTries||0)+Number(p.voidedTries||0)!==ledger.length)throw new Error('TRY_COUNT');
+for(const row of ledger.filter(x=>x.voided===true)){
+  if(row.settled!==true||row.settlementStatus!=='VOID_CANCELLED'||Number(row.returnYen)!==Number(row.stakeYen)||row.result!==null||row.hit!==null)throw new Error('VOID_CANCELLED_CONTRACT');
+}
 if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('PORTFOLIO_LEAKAGE');
 console.log('SHARED_TRY_CONTRACT_PASS',JSON.stringify({selected:sel.selectedCount,bankroll:p.bankrollYen,venues:[...new Set(sel.selected.map(x=>x.venueCode))]}));
