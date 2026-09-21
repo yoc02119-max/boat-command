@@ -239,17 +239,18 @@ function standardState(e,config,readiness,prev){
   const currentRows=lockedVersion?evidence.mainRows.filter(x=>x.modelVersion===lockedVersion):evidence.mainRows;
   const mainEvaluation=aggregate(currentRows);
   const mainEnough=mainEvaluation.races>=minMain;
-  const versionSet=[...new Set(currentRows.map(x=>x.modelVersion))];
-  const effectiveVersion=lockedVersion||versionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
+  const observedVersionSet=[...new Set(evidence.mainRows.map(x=>x.modelVersion))];
+  const effectiveVersion=lockedVersion||observedVersionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
   const ordered=evidence.mainRows;
   const firstCurrent=lockedVersion?ordered.findIndex(x=>x.modelVersion===lockedVersion):-1;
+  const expectedVersionMissing=!!lockedVersion&&ordered.length>0&&firstCurrent<0;
   const drift=lockedVersion
-    ? (firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==lockedVersion))
-    : evidence.mainModelVersions.length>1;
+    ? expectedVersionMissing||(firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==lockedVersion))
+    : observedVersionSet.length>1;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
-  if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
-  else if(elapsed>=CYCLE_DAYS&&drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:['MAINLINE_MODEL_DRIFT_DETECTED']}}
+  if(drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:[expectedVersionMissing?'MAINLINE_EXPECTED_VERSION_NOT_OBSERVED':'MAINLINE_MODEL_DRIFT_DETECTED']}}
+  else if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
   else if(elapsed>=CYCLE_DAYS&&selected){rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS){rec={state:'KEEP_CURRENT',candidateId:null,reasons:['NO_REGISTERED_CANDIDATE_PASSED_ALL_GATES']}}
   const review=prev?.cycleId===cycleId?(prev.review||reviewTemplate()):reviewTemplate();
@@ -258,7 +259,7 @@ function standardState(e,config,readiness,prev){
     schema:'boat-command-venue-model-cycle-v1',version:VERSION,venue:e.key,venueName:e.name,venueCode:e.code,slug:e.slug,
     generatedAt:isoNow(),cycleNumber:n,cycleId,cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
     isolation:baseIsolation(e),
-    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
+    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:observedVersionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
     candidates,recommendation:rec,review,
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
     source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null},
