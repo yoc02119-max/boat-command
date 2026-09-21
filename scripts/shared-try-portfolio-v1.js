@@ -157,23 +157,35 @@ function resultFor(x){
   if(r.preRaceDataIncluded!==false||r.resultEndpointsIncluded!==true||!validPick(r.trifecta))return null;
   return r;
 }
+function cancellationFor(x){
+  const p=path.join(ROOT,'live',x.slug,x.date,'post','day-status.json');
+  const s=read(p);if(!s)return null;
+  if(s.schema!=='boat-command-day-status-v1'||String(s.venueCode)!==x.venueCode||String(s.date)!==x.date)return null;
+  if(s.status!=='CANCELLED'||s.immutableAfterFirstWrite!==true||s.selectionMutation!==false)return null;
+  return s;
+}
 function rebuildPortfolio(){
   const start=Number(config.startingBankrollYen)||100000;
   const rows=allSelections().sort((a,b)=>a.date.localeCompare(b.date)||String(a.deadline).localeCompare(String(b.deadline))||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
-  let committed=0,settledStake=0,returns=0,hits=0,pending=0,lossStreak=0,maxLossStreak=0;
+  let committed=0,settledStake=0,returns=0,hits=0,pending=0,voided=0,voidedStake=0,lossStreak=0,maxLossStreak=0;
   let curveBalance=start,peak=start,maxDrawdown=0;
   const byVenue={},ledger=[];
   for(const x of rows){
     const stake=Number(x.stakeYen)||0;committed+=stake;curveBalance-=stake;
     peak=Math.max(peak,curveBalance);maxDrawdown=Math.max(maxDrawdown,peak-curveBalance);
-    const r=resultFor(x),hit=!!(r&&x.picks.includes(r.trifecta)),ret=hit?Number(r.payout100||0)*(Number(x.stakePerPickYen||500)/100):0;
-    if(r){
+    const cancel=cancellationFor(x);
+    const r=cancel?null:resultFor(x),hit=!!(r&&x.picks.includes(r.trifecta)),ret=hit?Number(r.payout100||0)*(Number(x.stakePerPickYen||500)/100):0;
+    if(cancel){
+      voided++;voidedStake+=stake;curveBalance+=stake;peak=Math.max(peak,curveBalance);maxDrawdown=Math.max(maxDrawdown,peak-curveBalance);
+    }else if(r){
       settledStake+=stake;returns+=ret;if(hit){hits++;lossStreak=0}else{lossStreak++;maxLossStreak=Math.max(maxLossStreak,lossStreak)}
       curveBalance+=ret;peak=Math.max(peak,curveBalance);maxDrawdown=Math.max(maxDrawdown,peak-curveBalance);
     }else pending+=stake;
-    const v=byVenue[x.venueCode]||(byVenue[x.venueCode]={venue:x.venue,tries:0,settled:0,hits:0,stakeYen:0,settledStakeYen:0,returnYen:0});
-    v.tries++;v.stakeYen+=stake;if(r){v.settled++;v.settledStakeYen+=stake;v.returnYen+=ret;if(hit)v.hits++}
-    ledger.push({date:x.date,venueCode:x.venueCode,venue:x.venue,race:x.race,deadline:x.deadline,picks:x.picks,stakeYen:stake,settled:!!r,result:r?.trifecta||null,payout100:r?.payout100??null,hit:r?hit:null,returnYen:r?ret:null});
+    const v=byVenue[x.venueCode]||(byVenue[x.venueCode]={venue:x.venue,tries:0,settled:0,voided:0,hits:0,stakeYen:0,settledStakeYen:0,voidedStakeYen:0,returnYen:0});
+    v.tries++;v.stakeYen+=stake;
+    if(cancel){v.voided++;v.voidedStakeYen+=stake}
+    else if(r){v.settled++;v.settledStakeYen+=stake;v.returnYen+=ret;if(hit)v.hits++}
+    ledger.push({date:x.date,venueCode:x.venueCode,venue:x.venue,race:x.race,deadline:x.deadline,picks:x.picks,stakeYen:stake,settled:!!(r||cancel),voided:!!cancel,settlementStatus:cancel?'VOID_CANCELLED':r?'RESULT':'PENDING',result:r?.trifecta||null,payout100:r?.payout100??null,hit:r?hit:null,returnYen:cancel?stake:r?ret:null});
   }
   for(const v of Object.values(byVenue)){
     v.profitYen=v.returnYen-v.settledStakeYen;
@@ -184,7 +196,8 @@ function rebuildPortfolio(){
   const confirmedBankroll=start+confirmedProfit;
   const availableBankroll=confirmedBankroll-pending;
   const bankroll=availableBankroll;
-  const settledTries=ledger.filter(x=>x.settled).length;
+  const settledTries=ledger.filter(x=>x.settled&&!x.voided).length;
+  const pendingTries=ledger.filter(x=>!x.settled).length;
   const out={
     schema:'boat-command-shared-try-portfolio-v1',version:'SHARED-TRY-PORTFOLIO-V1',
     generatedAt:new Date(NOW_MS).toISOString(),realMoney:false,fundingScope:'ALL_24_VENUES_SHARED',
@@ -195,10 +208,10 @@ function rebuildPortfolio(){
     bankrollYen:bankroll,
     status:availableBankroll>0?'ACTIVE':'BANKRUPT_STOP_NEW_TRY',
     committedStakeYen:committed,settledStakeYen:settledStake,pendingStakeYen:pending,
-    returnYen:returns,profitYen:confirmedProfit,settledTries,pendingTries:ledger.length-settledTries,
+    returnYen:returns,profitYen:confirmedProfit,settledTries,pendingTries,voidedTries:voided,voidedStakeYen:voidedStake,
     hits,hitRate:settledTries?hits/settledTries:null,roi:settledStake?returns/settledStake:null,
     maxDrawdownYen:maxDrawdown,maxConsecutiveLosses:maxLossStreak,byVenue,ledger,
-    capitalPolicy:{fundingScope:'ALL_24_VENUES_SHARED',resetAllowed:false,settledProfitCarriedForward:true,pendingStakeReserved:true},
+    capitalPolicy:{fundingScope:'ALL_24_VENUES_SHARED',resetAllowed:false,settledProfitCarriedForward:true,pendingStakeReserved:true,cancelledRaceReservationReleased:true},
     boundaries:{resultInputForSelection:false,payoutInputForSelection:false,realMoney:false,bankruptcyStopsNewTry:true}
   };
   fs.writeFileSync(OUTPUT_PATH,JSON.stringify(out,null,2)+'\n');
