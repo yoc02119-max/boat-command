@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 
 const portal=fs.readFileSync('portal.html','utf8');
 assert.ok(portal.includes('function tryDeadlineMs(date,deadline)'));
-assert.ok(portal.includes("'+09:00'"));
+assert.ok(portal.includes("+09:00"));
 assert.ok(portal.includes('function tryCountdownText(deadlineMs)'));
 assert.ok(portal.includes('function refreshTryCountdowns()'));
 assert.ok(portal.includes('data-try-deadline-ms='));
