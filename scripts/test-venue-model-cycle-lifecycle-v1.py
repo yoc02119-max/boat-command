@@ -617,7 +617,9 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-drift-") as td:
     )
 
     # Normalize all venue states first, then introduce a KIRYU-only deployment
-    # mismatch. One bad venue must fail closed without stopping the other 23.
+    # mismatch. Force KIRYU to the BUILDING fixture first so production's
+    # scheduled 2026-09-23 start cannot alter this historical drift contract.
+    reset_kiryu_to_building(repo)
     run(repo, "--action", "refresh", "--date", "2026-09-22")
     before_others = snapshot_others(repo)
 
