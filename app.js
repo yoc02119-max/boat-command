@@ -1,7 +1,7 @@
 const APP_KEY="boatCommand.v05";
 const MIRROR_KEY="boatCommand.v05.mirror";
 const SESSION_MIRROR_KEY="boatCommand.v05.sessionMirror";
-const START_BANKROLL=1000000;
+const START_BANKROLL=100000;
 const PICK_PRICE=500;
 const MAX_PICKS=6;
 const STARTUP_FORCE_TODAY_LIVE=true;
@@ -23,6 +23,11 @@ function loadStore(){const c=[];for(const [kind,key] of [['l',APP_KEY],['l',MIRR
 function saveStore(){store._meta=store._meta||{};store._meta.revision=(Number(store._meta.revision)||0)+1;store._meta.updatedAt=new Date().toISOString();const raw=JSON.stringify(store);let ok=0;for(const [kind,key] of [['l',APP_KEY],['l',MIRROR_KEY],['s',SESSION_MIRROR_KEY]])try{(kind==='s'?sessionStorage:localStorage).setItem(key,raw);ok++}catch{}return ok>0}
 function ensureSessionShape(s){if(!s||typeof s!=='object')return s;if(!Array.isArray(s.races))s.races=[];for(let n=1;n<=12;n++){let r=s.races.find(x=>Number(x.race)===n);if(!r){r=baseRace(n);s.races.push(r)}for(const [k,v] of Object.entries(baseRace(n)))if(r[k]===undefined)r[k]=Array.isArray(v)?[...v]:v}if(!s.runType)s.runType='LIVE';s.venue='蒲郡';if(!s.strategyVersion)s.strategyVersion='GAMAGORI-V1.0';s.races.sort((a,b)=>a.race-b.race);return s}
 let store=loadStore();if(!Array.isArray(store.retestArchive))store.retestArchive=[];if(!store.liveMonitor)store.liveMonitor={last:null,history:[]};
+if(Number(store.startBankroll)!==START_BANKROLL){
+  store.startBankroll=START_BANKROLL;
+  store._meta={...(store._meta||{}),revision:(Number(store?._meta?.revision)||0)+1,updatedAt:new Date().toISOString(),bankrollPolicy:'SHARED_24_VENUES_100K_PERSISTENT'};
+  saveStore();
+}
 let currentDate=todayISO();
 function session(date=currentDate){if(STARTUP_FORCE_TODAY_LIVE)date=todayISO();currentDate=date;if(!store.sessions[date])store.sessions[date]=baseSession(date);const s=ensureSessionShape(store.sessions[date]);s.runType='LIVE';s.venue='蒲郡';return s}
 function save(){return saveStore()}
