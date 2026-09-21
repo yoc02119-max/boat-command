@@ -28,7 +28,7 @@ function install(){
    <div class="bc-shell-kpi"><small>本日AUTO TRY</small><b id="bcCommonTodayTry">—</b></div>
    <div class="bc-shell-kpi profit" id="bcCommonProfitBox"><small>本日確定損益</small><b id="bcCommonTodayProfit">—</b></div>
    <div class="bc-shell-kpi"><small>本日回収率</small><b id="bcCommonTodayRoi">—</b></div>
-   <div class="bc-shell-bank-note" id="bcCommonBankNote">共通100万円 · 実金なし · TRYのみ資金連動</div>
+   <div class="bc-shell-bank-note" id="bcCommonBankNote">共通10万円 · 実金なし · TRYのみ資金連動</div>
   </div>
   <div class="bc-shell-tabs" role="tablist">
    <button class="bc-shell-tab active" type="button" data-common-view="home">今日</button>
@@ -76,7 +76,8 @@ function renderBank(){
  const settledStake=settled.reduce((s,x)=>s+(Number(x.stakeYen)||0),0);
  const returned=settled.reduce((s,x)=>s+(Number(x.returnYen)||0),0);
  const profit=returned-settledStake;
- const bankroll=Number(shared?.bankrollYen);
+ const confirmed=Number(shared?.confirmedBankrollYen??(Number(shared?.startingBankrollYen||100000)+Number(shared?.profitYen||0)));
+ const available=Number(shared?.availableBankrollYen??shared?.bankrollYen??confirmed);
  const roi=settledStake?returned/settledStake:null;
  const bank=document.getElementById('bcCommonBankroll');
  const tr=document.getElementById('bcCommonTodayTry');
@@ -84,13 +85,13 @@ function renderBank(){
  const rr=document.getElementById('bcCommonTodayRoi');
  const box=document.getElementById('bcCommonProfitBox');
  const note=document.getElementById('bcCommonBankNote');
- if(bank)bank.textContent=Number.isFinite(bankroll)?yen(bankroll):'同期中';
- if(tr)tr.textContent=yen(committed);
+ if(bank)bank.textContent=Number.isFinite(confirmed)?yen(confirmed):'同期中';
+ if(tr)tr.textContent=`${rows.length}R`;
  if(pf)pf.textContent=settled.length?(profit>0?'+':'')+yen(profit):'¥0';
  if(rr)rr.textContent=roi==null?'—':pct(roi);
  if(box){box.classList.toggle('positive',profit>0);box.classList.toggle('negative',profit<0)}
  const pending=rows.filter(x=>x.settled!==true).reduce((s,x)=>s+(Number(x.stakeYen)||0),0);
- if(note)note.textContent=`共通100万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
+ if(note)note.textContent=`開始10万円 · 未精算TRY ${yen(pending)}予約 · 利用可能 ${yen(available)} · 24場共通 · 実金なし`;
 }
 function selectionReady(){return selection?.immutableAfterFirstWrite===true}
 function liveSessionView(){try{return typeof window.session==='function'?window.session():null}catch{return null}}
@@ -121,7 +122,7 @@ function raceTry(race){
  return todayLedger().find(x=>String(x.venueCode).padStart(2,'0')===VENUE_CODE&&Number(x.race)===Number(race))||null;
 }
 function tryMarkup(row){
- if(!selectionReady()&&!row)return '<div class="bc-common-try wait"><span>AUTO TRY</span><b>選抜待ち</b><small>共通100万円 · 実金なし</small></div>';
+ if(!selectionReady()&&!row)return '<div class="bc-common-try wait"><span>AUTO TRY</span><b>選抜待ち</b><small>共通10万円 · 実金なし</small></div>';
  if(!row)return '<div class="bc-common-try skip"><span>AUTO TRY</span><b>見送り</b><small>メイン予想は成績評価に保存</small></div>';
  const picks=Array.isArray(row.picks)?row.picks.length:0;
  const stake=Number(row.stakeYen)||0;
@@ -129,7 +130,7 @@ function tryMarkup(row){
    const ret=Number(row.returnYen)||0,profit=ret-stake;
    return `<div class="bc-common-try selected"><span>AUTO TRY</span><b>${picks}点 · ${yen(stake)}</b><small>${row.hit?'的中':'不的中'} · ${profit>0?'+':''}${yen(profit)}</small></div>`;
  }
- return `<div class="bc-common-try selected"><span>AUTO TRY</span><b>${picks}点 · ${yen(stake)}</b><small>共通100万円から仮投入 · 結果待ち</small></div>`;
+ return `<div class="bc-common-try selected"><span>AUTO TRY</span><b>${picks}点 · ${yen(stake)}</b><small>共通10万円から仮投入 · 結果待ち</small></div>`;
 }
 function renderTryStates(){
  document.querySelectorAll('#predictionList .race-card[data-race]').forEach(card=>{
