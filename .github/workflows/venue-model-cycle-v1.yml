@@ -1,0 +1,117 @@
+name: Venue independent 30d model cycles v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: refresh / approve / reject / continue / activate
+        required: true
+        default: refresh
+        type: choice
+        options: [refresh, approve, reject, continue, activate]
+      venue:
+        description: venue slug for a decision action
+        required: false
+        type: string
+      candidate:
+        description: exact candidate id for approve/activate
+        required: false
+        type: string
+      effective_date:
+        description: optional JST YYYY-MM-DD override
+        required: false
+        type: string
+  schedule:
+    - cron: '40 15 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-model-cycle-v1.js'
+      - 'venue-model-cycle-v1.js'
+      - 'venue-model-cycle-fleet-v1.json'
+      - 'venues/**/model-candidates-v1.json'
+      - '.github/workflows/venue-model-cycle-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-independent-model-cycles-v1
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Run 24 independent cycles
+        env:
+          ACTION: ${{ github.event.inputs.action || 'refresh' }}
+          VENUE: ${{ github.event.inputs.venue || '' }}
+          CANDIDATE: ${{ github.event.inputs.candidate || '' }}
+          EFFECTIVE_DATE: ${{ github.event.inputs.effective_date || '' }}
+        run: |
+          set -euo pipefail
+          node --check scripts/venue-model-cycle-v1.js
+          args=(--action "$ACTION")
+          [ -n "$VENUE" ] && args+=(--venue "$VENUE")
+          [ -n "$CANDIDATE" ] && args+=(--candidate "$CANDIDATE")
+          [ -n "$EFFECTIVE_DATE" ] && args+=(--date "$EFFECTIVE_DATE")
+          node scripts/venue-model-cycle-v1.js "${args[@]}"
+
+      - name: Audit fleet isolation and safety
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json
+          fleet=json.load(open('venue-model-cycle-fleet-v1.json',encoding='utf-8'))
+          files=sorted(glob.glob('venues/*/model-cycle-v1.json'))
+          assert fleet['venues']==24, fleet
+          assert len(files)==24, len(files)
+          codes=set(); slugs=set()
+          for p in files:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-venue-model-cycle-v1'
+              assert x['version']=='VENUE-MODEL-CYCLE-V1'
+              assert x['cycleDays']==30
+              iso=x['isolation']
+              assert iso['scope']=='VENUE_ONLY'
+              assert iso['crossVenueTraining'] is False
+              assert iso['crossVenueWeightReuse'] is False
+              assert iso['crossVenuePromotion'] is False
+              assert iso['independentClock'] is True
+              assert x['promotion']['humanReviewRequired'] is True
+              assert x['promotion']['autoPromotion'] is False
+              assert x['promotion']['autoTryEnable'] is False
+              assert x['promotion']['realMoneyEnable'] is False
+              assert x['retention']['sourceDataPreserved'] is True
+              assert x['retention']['cycleHistoryPreserved'] is True
+              codes.add(x['venueCode']); slugs.add(x['slug'])
+          assert len(codes)==24 and len(slugs)==24
+          print('VENUE_MODEL_CYCLE_FLEET_SAFETY_PASS',len(files))
+          PY
+
+      - name: Publish cycle states
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-model-cycle'
+          git config user.email 'boat-command-model-cycle@users.noreply.github.com'
+          git add venue-model-cycle-fleet-v1.json venues
+          git diff --cached --quiet && { echo 'MODEL_CYCLE_STATES_CURRENT'; exit 0; }
+          for attempt in 1 2 3 4 5 6; do
+            git commit -m "status: refresh 24 independent model cycles" || true
+            git pull --rebase origin main
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
