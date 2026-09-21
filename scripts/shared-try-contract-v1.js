@@ -10,7 +10,7 @@ const cfg=JSON.parse(fs.readFileSync('shared-try-config-v1.json','utf8'));
 const sel=JSON.parse(fs.readFileSync('live/portfolio/2026-09-20/try-selection-v1.json','utf8'));
 const p=JSON.parse(fs.readFileSync('shared-try-portfolio-v1.json','utf8'));
 
-if(cfg.startingBankrollYen!==1000000)throw new Error('CONFIG_1M');
+if(!Number.isFinite(Number(cfg.startingBankrollYen))||Number(cfg.startingBankrollYen)<=0)throw new Error('CONFIG_BANKROLL');
 if(cfg.operationStartDate!=='2026-09-20'||cfg.operationWindowDays!==30)throw new Error('WINDOW');
 if(sel.resultInput!==false||sel.payoutInput!==false||sel.realMoney!==false||sel.immutableAfterFirstWrite!==true)throw new Error('SELECTION_BOUNDARY');
 if(!(sel.selectedCount>0))throw new Error('NO_TRY_SELECTED');
@@ -21,8 +21,13 @@ for(const x of sel.selected){
   if(x.stakePerPickYen!==500||x.stakeYen!==2000)throw new Error('STAKE');
   if(x.resultInput!==false||x.payoutInput!==false)throw new Error('LEAKAGE');
 }
-if(p.startingBankrollYen!==1000000||p.realMoney!==false)throw new Error('PORTFOLIO_BOUNDARY');
-if(p.bankrollYen!==1000000-Number(p.committedStakeYen||0)+Number(p.returnYen||0))throw new Error('BANKROLL_IDENTITY');
+if(p.startingBankrollYen!==Number(cfg.startingBankrollYen)||p.realMoney!==false)throw new Error('PORTFOLIO_BOUNDARY');
+const expectedConfirmed=Number(cfg.startingBankrollYen)+Number(p.profitYen||0);
+const expectedAvailable=expectedConfirmed-Number(p.pendingStakeYen||0);
+if(Number(p.confirmedBankrollYen)!==expectedConfirmed)throw new Error('CONFIRMED_BANKROLL_IDENTITY');
+if(Number(p.availableBankrollYen)!==expectedAvailable)throw new Error('AVAILABLE_BANKROLL_IDENTITY');
+if(Number(p.bankrollYen)!==expectedAvailable)throw new Error('BANKROLL_ALIAS_IDENTITY');
+if(p.capitalPolicy?.resetAllowed!==false||p.capitalPolicy?.settledProfitCarriedForward!==true)throw new Error('CAPITAL_RESET_POLICY');
 const ledger=Array.isArray(p.ledger)?p.ledger:[];
 const dayLedger=ledger.filter(x=>x.date==='2026-09-20');
 if(dayLedger.length!==sel.selectedCount)throw new Error('TRY_COUNT_DATE');
