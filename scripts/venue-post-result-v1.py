@@ -28,6 +28,14 @@ def validate_shadow(x,venue,code,slug,date,race,mode):
     picks=x.get('picks')
     return isinstance(picks,list) and len(picks)==4 and len(set(picks))==4 and all(re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(v)) for v in picks)
 
+def timely_shadow(x,date,deadline):
+    if not x:return False
+    try:
+        generated=datetime.datetime.fromisoformat(x.get('generatedAt','').replace('Z','+00:00'))
+        cutoff=datetime.datetime.fromisoformat(date).replace(tzinfo=JST)+datetime.timedelta(minutes=deadline-3)
+        return generated.tzinfo is not None and generated<=cutoff
+    except (ValueError,TypeError):return False
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--slug',required=True)
@@ -46,8 +54,8 @@ def main():
     base=pathlib.Path('live')/args.slug/date
     program_dir=base/'program'
     shadow_dir=base/'shadow'
-    if not program_dir.exists() or not shadow_dir.exists():
-        print('VENUE_RESULT_WAIT_EVIDENCE',args.slug,date);return 0
+    if not program_dir.exists():
+        print('VENUE_RESULT_WAIT_PROGRAM',args.slug,date);return 0
     outdir=base/'post';outdir.mkdir(parents=True,exist_ok=True)
     made=[]
     headers={'User-Agent':f'Mozilla/5.0 BOAT-COMMAND-{args.venue}-SHADOW/1.0'}
@@ -56,21 +64,22 @@ def main():
         pp=program_dir/f'race-{race}.json'
         cp=shadow_dir/'class-baseline'/f'race-{race}.json'
         apath=shadow_dir/'program-only'/f'race-{race}.json'
-        if not (pp.exists() and cp.exists() and apath.exists()):
+        if not pp.exists():
             continue
         program=read(pp);c=read(cp);a=read(apath)
         if not program or program.get('schema')!='boat-command-program-pack-v1':continue
         if program.get('venue')!=args.venue or program.get('venueCode')!=args.code or program.get('date')!=date or int(program.get('race',0))!=race:continue
         if program.get('resultEndpointsIncluded') is not False or program.get('resultIncluded') is not False or program.get('exhibitionIncluded') is not False:
             raise RuntimeError('VENUE_RESULT_PROGRAM_BOUNDARY')
-        if not validate_shadow(c,args.venue,args.code,args.slug,date,race,'CLASS_BASELINE'):
+        if cp.exists() and not validate_shadow(c,args.venue,args.code,args.slug,date,race,'CLASS_BASELINE'):
             raise RuntimeError('VENUE_RESULT_CLASS_SHADOW_INVALID')
-        if not validate_shadow(a,args.venue,args.code,args.slug,date,race,'PROGRAM_ONLY'):
+        if apath.exists() and not validate_shadow(a,args.venue,args.code,args.slug,date,race,'PROGRAM_ONLY'):
             raise RuntimeError('VENUE_RESULT_PROGRAM_SHADOW_INVALID')
         deadline=minutes(program.get('deadline'))
         if deadline is None or now.hour*60+now.minute < deadline:
             continue
 
+        evidence_ready=timely_shadow(c,date,deadline) and timely_shadow(a,date,deadline)
         path=outdir/f'race-{race}-result.json'
         if path.exists():
             x=read(path)
@@ -122,14 +131,15 @@ def main():
             'winningMethod':method if method in VALID_METHODS else None,
             'preRaceDataIncluded':False,'resultEndpointsIncluded':True,
             'predictionEnabled':False,'hardLockEnabled':False,'tryEnabled':False,
-            'immutableAfterFirstWrite':True,'preRaceEvidenceRequired':True,
-            'preRaceEvidenceType':'PAIRED_RESULT_BLIND_SHADOW',
+            'immutableAfterFirstWrite':True,'preRaceEvidenceRequired':False,
+            'evaluationEligible':evidence_ready,
+            'preRaceEvidenceType':'PAIRED_RESULT_BLIND_SHADOW' if evidence_ready else 'NONE_DISPLAY_ONLY',
             'preRaceEvidencePaths':[
                 str(cp).replace('\\','/'),str(apath).replace('\\','/')
-            ],
+            ] if evidence_ready else [],
             'preRaceEvidenceGeneratedAt':{
                 'classBaseline':c.get('generatedAt'),'programOnly':a.get('generatedAt')
-            }
+            } if evidence_ready else {}
         }
         path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         made.append(race)
