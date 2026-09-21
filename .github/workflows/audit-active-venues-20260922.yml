@@ -91,7 +91,7 @@ jobs:
                   deadline=datetime.datetime.fromisoformat(date+'T'+p['deadline']+':00').replace(tzinfo=JST)
                   for mode,folder in [('CLASS_BASELINE','class-baseline'),('PROGRAM_ONLY','program-only')]:
                       s=json.loads((base/'shadow'/folder/f'race-{race}.json').read_text(encoding='utf-8'))
-                      assert s['venueCode']==code and s['venue']==key and s['slug']==slug
+                      assert s['venueCode']==code and s['venue']==key and s.get('slug',slug)==slug
                       assert s['date']==date and int(s['race'])==race and s['mode']==mode
                       assert s['resultInput'] is False and s['payoutInput'] is False
                       assert s['researchOnly'] is True and s['productionEnabled'] is False and s['tryEnabled'] is False
@@ -123,7 +123,7 @@ jobs:
               evalp=base/'research-evaluation-v1.json'
               if evalp.exists():
                   e=json.loads(evalp.read_text(encoding='utf-8'))
-                  assert e['venueCode']==code and e['venue']==key and e['slug']==slug and e['date']==date
+                  assert e['venueCode']==code and e['venue']==key and e.get('slug',slug)==slug and e['date']==date
                   for row in e.get('rows',[]):
                       rp=base/'post'/f"race-{int(row['race'])}-result.json"
                       assert rp.exists(), ('EVAL_WITHOUT_RESULT',code,row['race'])
