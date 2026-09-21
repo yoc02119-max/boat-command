@@ -169,15 +169,17 @@ async function refreshCommonVenueBank(){
    const settledStake=settled.reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
    const returned=settled.reduce((a,z)=>a+(Number(z.returnYen)||0),0);
    const profit=returned-settledStake,roi=settledStake?returned/settledStake:null;
-   document.getElementById('commonBankroll').textContent=yen(Number(x.bankrollYen));
+   const confirmed=Number(x.confirmedBankrollYen??(Number(x.startingBankrollYen??100000)+Number(x.profitYen??0)));
+   const available=Number(x.availableBankrollYen??x.bankrollYen??confirmed);
+   document.getElementById('commonBankroll').textContent=yen(confirmed);
    document.getElementById('commonTodayTry').textContent=yen(committed);
    document.getElementById('commonTodayProfit').textContent=settled.length?`${profit>0?'+':''}${yen(profit)}`:'¥0';
    document.getElementById('commonTodayRoi').textContent=roi==null?'—':`${(roi*100).toFixed(1)}%`;
    const box=document.getElementById('commonProfitBox');box?.classList.toggle('positive',profit>0);box?.classList.toggle('negative',profit<0);
    const pending=rows.filter(z=>z.settled!==true).reduce((a,z)=>a+(Number(z.stakeYen)||0),0);
-   document.getElementById('commonBankNote').textContent=`共通10万円 · 未精算TRY ${yen(pending)} は差引済み · 実金なし`;
+   document.getElementById('commonBankNote').textContent=`開始 ${yen(Number(x.startingBankrollYen??100000))} · 未精算予約 ${yen(pending)} · 利用可能 ${yen(available)} · 24場共通 · 実金なし`;
  }catch{
-   document.getElementById('commonBankroll').textContent='¥1,000,000';
+   document.getElementById('commonBankroll').textContent='¥100,000';
    document.getElementById('commonTodayTry').textContent='—';
    document.getElementById('commonTodayProfit').textContent='¥0';
    document.getElementById('commonTodayRoi').textContent='—';
