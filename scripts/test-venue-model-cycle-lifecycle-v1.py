@@ -67,6 +67,14 @@ def reset_kiryu_to_building(repo):
     write_json(p, cfg)
 
 def mutate_kiryu_to_live(repo):
+    # Each scenario starts from a clean KIRYU cycle fixture so production
+    # start dates / archived cycles cannot shift historical contract dates.
+    cycle_path = repo / "venues/kiryu/model-cycle-v1.json"
+    cycle_path.unlink(missing_ok=True)
+    history_dir = repo / "venues/kiryu/model-cycle-history"
+    if history_dir.exists():
+        shutil.rmtree(history_dir)
+
     p = repo / "venues/kiryu/config-v1.json"
     cfg = read_json(p)
     cfg["state"] = "LIVE_SIMULATION"
