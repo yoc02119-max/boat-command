@@ -83,7 +83,11 @@
       card.hidden=view==='results'&&card.dataset.settled!=='1';
     });
     const empty=root.querySelector('.rrb-empty');
-    if(empty)empty.hidden=!(view==='results'&&![...root.querySelectorAll('.rrb-card')].some(x=>!x.hidden));
+    if(empty){
+      const noVisible=view==='results'&&![...root.querySelectorAll('.rrb-card')].some(x=>!x.hidden);
+      empty.hidden=!noVisible;
+      if(noVisible)empty.textContent=state.cancelled?'本日は中止・順延です。確定結果はありません。事前固定予想は検証記録として保持します。':'まだ確定結果はありません。';
+    }
     const title=root.querySelector('.rrb-view-title');
     if(title)title.textContent=view==='results'?'確定結果':'12R 運用';
   }
@@ -100,17 +104,20 @@
     const modePath=(dir,r)=>dir?`${dataRoot}/${date}/shadow/${dir}/race-${r}.json`:null;
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
 
-    const [portfolio,selection]=await Promise.all([
+    const [portfolio,selection,calendar]=await Promise.all([
       maybe('./shared-try-portfolio-v1.json'),
-      maybe(`./live/portfolio/${date}/try-selection-v1.json`)
+      maybe(`./live/portfolio/${date}/try-selection-v1.json`),
+      maybe('./venue-calendar-v1.json')
     ]);
     const selected=new Map((selection?.selected||[]).filter(x=>String(x.venueCode).padStart(2,'0')===venueCode).map(x=>[Number(x.race),x]));
     const selectionReady=selection?.immutableAfterFirstWrite===true;
+    const venueCalendar=calendar?.today===date?calendar?.venues?.[venueCode]:null;
+    const cancelled=venueCalendar?.todayCancelled===true;
 
     root.hidden=false;
     root.innerHTML=`<div class="rrb-shell">
       <div class="rrb-head">
-        <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R 運用</span></h2><p>本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。</p></div>
+        <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R 運用</span></h2><p>${cancelled?'本日は中止・順延。事前固定予想は検証記録として保持します。':'本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。'}</p></div>
         <div class="rrb-head-stats">
           <span>24場共通 運用資金 <b>${money(portfolio?.confirmedBankrollYen??portfolio?.startingBankrollYen??100000)}</b></span>
           <span>利用可能 <b>${money(portfolio?.availableBankrollYen??portfolio?.bankrollYen??portfolio?.confirmedBankrollYen??100000)}</b></span>
@@ -149,7 +156,7 @@
       root.querySelector('.rrb-empty').textContent='本日は番組データがありません。非開催または公式番組の公開前です。';
     }
 
-    const state={root,rows,view:'all'};
+    const state={root,rows,view:'all',cancelled};
     root.querySelectorAll('.rrb-subtab').forEach(btn=>btn.addEventListener('click',()=>setView(state,btn.dataset.view)));
     return Object.freeze({version:VERSION,date,rows,portfolio,selection,setView:view=>setView(state,view)});
   }
