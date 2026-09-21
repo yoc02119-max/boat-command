@@ -22,12 +22,12 @@
     // Only reroute repository-owned mutable JSON/data paths.
     if(raw.startsWith('./')) {
       const rel=raw.slice(2);
-      if(rel.startsWith('live/')||rel.startsWith('venues/')||rel.startsWith('shared-try-portfolio-v1.json'))return rel;
+      if(rel.startsWith('live/')||rel.startsWith('venues/')||rel==='shared-try-portfolio-v1.json'||rel.startsWith('shared-try-portfolio-v1.json?')||rel==='venue-calendar-v1.json'||rel.startsWith('venue-calendar-v1.json?'))return rel;
       return null;
     }
 
     // Some callers may omit "./".
-    if(raw.startsWith('live/')||raw.startsWith('venues/')||raw.startsWith('shared-try-portfolio-v1.json'))return raw;
+    if(raw.startsWith('live/')||raw.startsWith('venues/')||raw.startsWith('shared-try-portfolio-v1.json')||raw.startsWith('venue-calendar-v1.json'))return raw;
 
     // If a same-origin absolute URL points at one of the mutable paths, normalize it too.
     try{
@@ -38,7 +38,7 @@
       const at=p.indexOf(repoPrefix);
       if(at>=0)p=p.slice(at+repoPrefix.length);
       else p=p.replace(/^\//,'');
-      if(!(p.startsWith('live/')||p.startsWith('venues/')||p==='shared-try-portfolio-v1.json'))return null;
+      if(!(p.startsWith('live/')||p.startsWith('venues/')||p==='shared-try-portfolio-v1.json'||p==='venue-calendar-v1.json'))return null;
       return p+u.search;
     }catch{return null}
   }
@@ -65,7 +65,7 @@
 
   window.fetch=routedFetch;
   window.BOAT_COMMAND_GITHUB_DATA_V1=Object.freeze({
-    version:'GITHUB-MAIN-DATA-ROUTER-V1',
+    version:'GITHUB-MAIN-DATA-ROUTER-V1.1',
     rawBase:RAW_BASE,
     rawUrl
   });
