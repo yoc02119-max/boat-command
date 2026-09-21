@@ -54,8 +54,8 @@
   </div>
 </div>
 <nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><div class="nav" id="performanceNav" style="cursor:pointer"><b style="color:#8097aa">▥</b>成績</div><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
-<script src="github-live-data-v1.js?v=2"></script>
-<script src="venue-registry-v1.js?v=5"></script>
+<script src="github-live-data-v1.js?v=3"></script>
+<script src="venue-registry-v1.js?v=6"></script>
 <script>
 const APP_KEY='boatCommand.v05',MIRROR_KEY='boatCommand.v05.mirror',SESSION_MIRROR_KEY='boatCommand.v05.sessionMirror',DEPOSIT_KEY='boatCommand.portalDeposits.v1',START_BANKROLL=100000;
 const money=n=>`¥${Math.round(Number(n)||0).toLocaleString('ja-JP')}`,signed=n=>`${Number(n)>0?'+':''}${money(n)}`;
@@ -127,6 +127,35 @@ async function renderSharedPortfolioStats(){
    p.textContent='¥0';t.textContent='¥0';l.textContent=`${todayJst()} · 運用準備`;tr.textContent='—';rr.textContent='—';
  }
 }
+let cycleFleetByCode=new Map();
+function cyclePhaseIsOperational(phase){
+ return ['ACTIVE','REVIEW_READY','EVIDENCE_EXTENSION','REVIEW_BLOCKED','APPROVED_PENDING_DEPLOYMENT'].includes(String(phase||''));
+}
+function venueOperational(meta,code){
+ const fleet=cycleFleetByCode.get(String(code).padStart(2,'0'));
+ return cyclePhaseIsOperational(fleet?.phase)||meta?.state==='LIVE'||meta?.state==='LIVE_SIMULATION';
+}
+async function refreshCycleFleetSourceOfTruth(){
+ try{
+  const r=await fetch(`./venue-model-cycle-fleet-v1.json?t=${Date.now()}`,{cache:'no-store'});
+  if(!r.ok)throw new Error('FLEET_WAIT');
+  const x=await r.json();
+  if(Number(x?.venues)!==24||!Array.isArray(x?.venueStates))throw new Error('FLEET_INVALID');
+  cycleFleetByCode=new Map(x.venueStates.map(v=>[String(v.code).padStart(2,'0'),v]));
+  for(const meta of venues){
+   const card=document.querySelector(`.venue[data-venue="${meta.code}"]`);
+   if(!card)continue;
+   const state=cycleFleetByCode.get(meta.code);
+   if(!cyclePhaseIsOperational(state?.phase))continue;
+   card.classList.remove('prep','building');
+   card.classList.add('active');
+   const small=card.querySelector('small');
+   if(small)small.innerHTML='<span class="live-dot"></span>運用中 · 30日';
+   const live=card.querySelector('.venue-live');
+   if(live){live.className='venue-live';live.innerHTML='<b>予想・AUTO TRY 接続済み</b>'}
+  }
+ }catch{}
+}
 const venues=(window.BOAT_COMMAND_VENUE_REGISTRY?.list?.()||[]),grid=document.getElementById('venueGrid'),gs=gamagoriStatus();
 venues.forEach(v=>{
  const btn=document.createElement('button'),active=v.state==='LIVE'||v.state==='LIVE_SIMULATION',building=!active&&v.state!=='ENTRY_OPEN';
@@ -146,7 +175,7 @@ async function refreshResearchBuildStatus(code){
  const meta=window.BOAT_COMMAND_VENUE_REGISTRY?.resolve?.(code);
  const card=document.querySelector(`.venue[data-venue="${code}"]`);
  if(!meta?.readinessPath||!card)return;
- card.querySelector('small').innerHTML=meta.state==='LIVE_SIMULATION'?'<span class="live-dot"></span>運用中 · 30日':'<span class="live-dot"></span>構築中';
+ card.querySelector('small').innerHTML=venueOperational(meta,code)?'<span class="live-dot"></span>運用中 · 30日':'<span class="live-dot"></span>構築中';
  card.querySelector('.venue-live').className='venue-live';
  try{
    const r=await fetch(`${meta.readinessPath}?t=${Date.now()}`,{cache:'no-store'});
@@ -213,7 +242,7 @@ async function refreshVenueCalendarStatus(){
       if(cal.todayActive===true)continue;
       const label=nextDateLabel(cal.nextRaceDate);
       const small=card.querySelector('small'),live=card.querySelector('.venue-live');
-      if(v.state==='LIVE'||v.state==='LIVE_SIMULATION'){
+      if(venueOperational(v,v.code)){
         if(small)small.innerHTML=`<span class="live-dot" style="background:#708aa0;box-shadow:none"></span>非開催`;
         if(live){live.className='venue-live wait';live.innerHTML=`<b>${label}</b>`}
       }else{
@@ -227,7 +256,7 @@ async function refreshVenueCalendarStatus(){
 async function refreshAllResearchBuildStatus(){
  for(const v of venues.filter(x=>x.code!=='07'&&x.readinessPath))await refreshResearchBuildStatus(v.code);
 }
-refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus);
+refreshCycleFleetSourceOfTruth().then(refreshAllResearchBuildStatus).then(refreshVenueCalendarStatus);
 renderSharedPortfolioStats();
 renderActiveTryList();
 renderTodayTryPerformance();
