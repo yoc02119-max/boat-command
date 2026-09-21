@@ -216,7 +216,17 @@ function standardState(e,config,readiness,prev){
   }
   const n=currentCycleNumber(prev),start=deriveStart(e,config,prev),end=shiftDate(start,CYCLE_DAYS-1);
   const cycleId=newCycleId(e,n,start);
-  const evidence=discoverEvidence(e.slug,start,EFFECTIVE_DATE<end?EFFECTIVE_DATE:end);
+  const previousPhase=prev?.cycleId===cycleId?prev?.phase:null;
+  const previousEvidenceThrough=prev?.cycleId===cycleId&&dateOk(prev?.mainline?.evidenceThroughDate)
+    ? prev.mainline.evidenceThroughDate
+    : null;
+  const reviewSnapshotFrozen=previousEvidenceThrough&&['REVIEW_READY','APPROVED_PENDING_DEPLOYMENT','REVIEW_BLOCKED'].includes(previousPhase);
+  const evidenceThrough=reviewSnapshotFrozen
+    ? previousEvidenceThrough
+    : previousPhase==='EVIDENCE_EXTENSION'
+      ? EFFECTIVE_DATE
+      : (EFFECTIVE_DATE<end?EFFECTIVE_DATE:end);
+  const evidence=discoverEvidence(e.slug,start,evidenceThrough);
   const candidates=attachCandidatePolicy(e.slug,evidence.candidates,config);
   const selected=selection(candidates);
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
@@ -248,7 +258,7 @@ function standardState(e,config,readiness,prev){
     schema:'boat-command-venue-model-cycle-v1',version:VERSION,venue:e.key,venueName:e.name,venueCode:e.code,slug:e.slug,
     generatedAt:isoNow(),cycleNumber:n,cycleId,cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
     isolation:baseIsolation(e),
-    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough},
+    mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
     candidates,recommendation:rec,review,
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
     source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null},
