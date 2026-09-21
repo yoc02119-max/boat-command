@@ -40,10 +40,10 @@
 
   function tryHtml(row){
     const t=row.tryRow;
-    if(!row.selectionReady)return '<div class="rrb-try waiting"><span>AUTO TRY</span><b>選抜待ち</b><small>共通100万円 · 実金なし</small></div>';
+    if(!row.selectionReady)return '<div class="rrb-try waiting"><span>AUTO TRY</span><b>選抜待ち</b><small>24場共通10万円 · 実金なし</small></div>';
     if(!t)return '<div class="rrb-try skip"><span>AUTO TRY</span><b>見送り</b><small>予想は成績検証に保存</small></div>';
     const settled=row.result;
-    let tail='共通100万円から仮投入',state='pending';
+    let tail='24場共通10万円口座から仮投入',state='pending';
     if(settled){
       const hit=(t.picks||[]).includes(settled.trifecta);state=hit?'hit':'miss';
       const ret=hit?Number(settled.payout100||0)*(Number(t.stakePerPickYen||500)/100):0;
@@ -112,7 +112,8 @@
       <div class="rrb-head">
         <div><small>${esc(date)} · ${esc(opts.venueName||'VENUE')}</small><h2><span class="rrb-view-title">12R 運用</span></h2><p>本線ロジックを30日固定。AUTO TRYだけが共通仮資金を動かします。</p></div>
         <div class="rrb-head-stats">
-          <span>共通仮資金 <b>${money(portfolio?.bankrollYen??1000000)}</b></span>
+          <span>24場共通 運用資金 <b>${money(portfolio?.confirmedBankrollYen??portfolio?.startingBankrollYen??100000)}</b></span>
+          <span>利用可能 <b>${money(portfolio?.availableBankrollYen??portfolio?.bankrollYen??portfolio?.confirmedBankrollYen??100000)}</b></span>
           <span>本日TRY <b>${selected.size}R</b></span>
           <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??0)}/${Number(readiness.forward?.targetReviewRaces||readiness.policy?.minimumProgramOnlyForwardRaces||60)}R</b></span>
         </div>
