@@ -590,4 +590,40 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-unregistered-") as t
     assert unregistered["recommendation"]["state"] == "KEEP_CURRENT"
     assert unregistered["recommendation"]["candidateId"] is None
 
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-drift-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(
+        ROOT,
+        repo,
+        ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"),
+    )
+
+    # Normalize all venue states first, then introduce a KIRYU-only deployment
+    # mismatch. One bad venue must fail closed without stopping the other 23.
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    before_others = snapshot_others(repo)
+
+    mutate_kiryu_to_live(repo)
+    cfg_path = repo / "venues/kiryu/config-v1.json"
+    cfg = read_json(cfg_path)
+    cfg["operationPolicy"]["mainModelVersion"] = "KIRYU-EXPECTED-MODEL-V2"
+    write_json(cfg_path, cfg)
+
+    # Existing synthetic evidence remains V1 only: the expected locked V2 is
+    # never observed. This must be treated as drift immediately, not as a
+    # harmless evidence shortage that waits until day 30.
+    install_synthetic_forward(repo)
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    drifted = state(repo)
+
+    assert drifted["cycleDay"] == 1
+    assert drifted["phase"] == "REVIEW_BLOCKED", drifted
+    assert drifted["mainline"]["modelVersion"] == "KIRYU-EXPECTED-MODEL-V2"
+    assert drifted["mainline"]["integrity"] == "DRIFT_DETECTED"
+    assert drifted["mainline"]["evaluation"]["races"] == 0
+    assert "KIRYU-RESEARCH-MODEL-V1" in drifted["mainline"]["versionsObserved"]
+    assert drifted["recommendation"]["state"] == "BLOCKED"
+    assert drifted["recommendation"]["reasons"] == ["MAINLINE_EXPECTED_VERSION_NOT_OBSERVED"]
+    assert_others_same(repo, before_others)
+
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
