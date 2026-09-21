@@ -61,8 +61,12 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync('shared-try-portfolio-v1.json','utf8'));
+          const cfg=JSON.parse(fs.readFileSync('shared-try-config-v1.json','utf8'));
           if(p.realMoney!==false)throw new Error('REAL_MONEY_MUST_BE_FALSE');
-          if(p.startingBankrollYen!==1000000)throw new Error('START_BANKROLL_MUST_BE_1M');
+          if(p.startingBankrollYen!==Number(cfg.startingBankrollYen))throw new Error('START_BANKROLL_CONFIG_MISMATCH');
+          if(Number(p.confirmedBankrollYen)!==Number(cfg.startingBankrollYen)+Number(p.profitYen||0))throw new Error('CONFIRMED_BANKROLL_IDENTITY');
+          if(Number(p.availableBankrollYen)!==Number(p.confirmedBankrollYen)-Number(p.pendingStakeYen||0))throw new Error('AVAILABLE_BANKROLL_IDENTITY');
+          if(p.capitalPolicy?.resetAllowed!==false)throw new Error('CAPITAL_MUST_NOT_AUTO_RESET');
           if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('SELECTION_LEAKAGE');
           for(const row of p.ledger||[]){
             if(!Array.isArray(row.picks)||row.picks.length!==4)throw new Error('TRY_PICKS');
@@ -95,7 +99,7 @@ jobs:
             fi
             git add shared-try-portfolio-v1.json live/portfolio
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'sim: update shared 1M virtual TRY portfolio'
+            git commit -m 'sim: update shared virtual TRY portfolio'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((i*2))
           done
