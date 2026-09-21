@@ -1,0 +1,201 @@
+{
+  "schema": "boat-command-mikuni-second-place-diversity-v1",
+  "version": "MIKUNI-SECOND-PLACE-DIVERSITY-V1",
+  "venue": "MIKUNI",
+  "venueCode": "10",
+  "source": "mikuni-history-bootstrap-v1.json",
+  "analysisOnly": true,
+  "shadowOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "realMoney": false,
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "objective": "Improve second-place coverage without changing the underlying PROGRAM_ONLY probability model.",
+  "architecture": {
+    "baseline": "TOP4_RAW_PROBABILITY",
+    "candidate": "PRIMARY_HEAD_SECOND_DIVERSITY_THEN_FILL",
+    "baseModel": "MIKUNI-RESEARCH-MODEL-V1",
+    "fixedPoints": 4
+  },
+  "calibration": {
+    "lastDate": "2026-07-30",
+    "dateCount": 68,
+    "baseline": {
+      "races": 492,
+      "hits": 97,
+      "hitRate": 0.19715447154471544,
+      "stake": 196800,
+      "returns": 167080,
+      "roi": 0.8489837398373984,
+      "headCorrect": 235,
+      "headRate": 0.47764227642276424,
+      "secondCoveredGivenHead": 148,
+      "secondCoverageGivenHead": 0.6297872340425532,
+      "avgDistinctSecondCandidates": 1.9979674796747968
+    },
+    "selected": {
+      "minHeadMass": 0.45,
+      "secondSlots": 3
+    },
+    "candidates": [
+      {
+        "config": {
+          "minHeadMass": 0.45,
+          "secondSlots": 3
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 90,
+          "hitRate": 0.18292682926829268,
+          "stake": 196800,
+          "returns": 170340,
+          "roi": 0.8655487804878049,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 186,
+          "secondCoverageGivenHead": 0.7914893617021277,
+          "avgDistinctSecondCandidates": 2.613821138211382
+        },
+        "score": 0.4752948235599378
+      },
+      {
+        "config": {
+          "minHeadMass": 0.55,
+          "secondSlots": 3
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 93,
+          "hitRate": 0.18902439024390244,
+          "stake": 196800,
+          "returns": 171160,
+          "roi": 0.8697154471544716,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 175,
+          "secondCoverageGivenHead": 0.7446808510638298,
+          "avgDistinctSecondCandidates": 2.2642276422764227
+        },
+        "score": 0.4703284466355302
+      },
+      {
+        "config": {
+          "minHeadMass": 0.45,
+          "secondSlots": 2
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 95,
+          "hitRate": 0.19308943089430894,
+          "stake": 196800,
+          "returns": 166050,
+          "roi": 0.84375,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 156,
+          "secondCoverageGivenHead": 0.6638297872340425,
+          "avgDistinctSecondCandidates": 2.0792682926829267
+        },
+        "score": 0.44990264443867845
+      },
+      {
+        "config": {
+          "minHeadMass": 0.35,
+          "secondSlots": 2
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 94,
+          "hitRate": 0.1910569105691057,
+          "stake": 196800,
+          "returns": 163640,
+          "roi": 0.8315040650406504,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 159,
+          "secondCoverageGivenHead": 0.676595744680851,
+          "avgDistinctSecondCandidates": 2.1463414634146343
+        },
+        "score": 0.448276466009341
+      },
+      {
+        "config": {
+          "minHeadMass": 0.55,
+          "secondSlots": 2
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 95,
+          "hitRate": 0.19308943089430894,
+          "stake": 196800,
+          "returns": 165010,
+          "roi": 0.8384654471544716,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 155,
+          "secondCoverageGivenHead": 0.6595744680851063,
+          "avgDistinctSecondCandidates": 2.048780487804878
+        },
+        "score": 0.44773044239750903
+      },
+      {
+        "config": {
+          "minHeadMass": 0.35,
+          "secondSlots": 3
+        },
+        "metrics": {
+          "races": 492,
+          "hits": 83,
+          "hitRate": 0.16869918699186992,
+          "stake": 196800,
+          "returns": 139950,
+          "roi": 0.7111280487804879,
+          "headCorrect": 235,
+          "headRate": 0.47764227642276424,
+          "secondCoveredGivenHead": 195,
+          "secondCoverageGivenHead": 0.8297872340425532,
+          "avgDistinctSecondCandidates": 2.9471544715447155
+        },
+        "score": 0.43652401184916106
+      }
+    ]
+  },
+  "holdout": {
+    "firstDate": "2026-07-31",
+    "dateCount": 30,
+    "baseline": {
+      "races": 346,
+      "hits": 86,
+      "hitRate": 0.24855491329479767,
+      "stake": 138400,
+      "returns": 139960,
+      "roi": 1.011271676300578,
+      "headCorrect": 193,
+      "headRate": 0.5578034682080925,
+      "secondCoveredGivenHead": 135,
+      "secondCoverageGivenHead": 0.6994818652849741,
+      "avgDistinctSecondCandidates": 2.1734104046242773
+    },
+    "candidate": {
+      "races": 346,
+      "hits": 80,
+      "hitRate": 0.23121387283236994,
+      "stake": 138400,
+      "returns": 147900,
+      "roi": 1.06864161849711,
+      "headCorrect": 193,
+      "headRate": 0.5578034682080925,
+      "secondCoveredGivenHead": 154,
+      "secondCoverageGivenHead": 0.7979274611398963,
+      "avgDistinctSecondCandidates": 2.786127167630058
+    },
+    "hitRateDelta": -0.017341040462427737,
+    "roiDelta": 0.05736994219653191,
+    "secondCoverageDelta": 0.09844559585492219
+  },
+  "decision": "SHADOW_ONLY",
+  "promotionEligible": false,
+  "note": "No LIVE picks, frozen predictions, stakes, TRY selection, or result collection are modified by this report."
+}
