@@ -75,7 +75,7 @@ jobs:
               assert x['retention']['cycleHistoryPreserved'] is True
               codes.add(x['venueCode']); slugs.add(x['slug'])
           assert len(codes)==24 and len(slugs)==24
-          ledgers=sorted(glob.glob('venues/*/model-candidates-v1.json'))
+          ledgers=sorted(p for p in glob.glob('venues/*/model-candidates-v1.json') if '/_template/' not in p)
           assert len(ledgers)==24, len(ledgers)
           ledger_codes=set()
           for p in ledgers:
