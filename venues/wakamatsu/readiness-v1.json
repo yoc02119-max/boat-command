@@ -3,8 +3,8 @@
   "version": "WAKAMATSU-READINESS-V1",
   "venue": "WAKAMATSU",
   "venueCode": "20",
-  "generatedAt": "2026-09-21T03:49:04.754Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:38.481Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-06",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
+    "ready": true,
+    "holdoutRaces": 322,
+    "classHitRate": 0.2670807453416149,
+    "programHitRate": 0.27639751552795033,
+    "classRoi": 0.8413819875776397,
+    "programRoi": 0.7909937888198758,
+    "hitRateDelta": 0.009316770186335421,
+    "roiDelta": -0.0503881987577639,
     "candidateUplift": false,
-    "selectedConfig": null
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,7 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
+    "HOLDOUT_UPLIFT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",

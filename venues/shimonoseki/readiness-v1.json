@@ -3,8 +3,8 @@
   "version": "SHIMONOSEKI-READINESS-V1",
   "venue": "SHIMONOSEKI",
   "venueCode": "19",
-  "generatedAt": "2026-09-21T03:49:04.501Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:38.229Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 312,
+    "classHitRate": 0.2403846153846154,
+    "programHitRate": 0.266025641025641,
+    "classRoi": 0.6729166666666667,
+    "programRoi": 0.8092147435897435,
+    "hitRateDelta": 0.025641025641025633,
+    "roiDelta": 0.13629807692307683,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.28,
+      "neighborMix": 0.45,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",

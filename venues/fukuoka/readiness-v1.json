@@ -3,8 +3,8 @@
   "version": "FUKUOKA-READINESS-V1",
   "venue": "FUKUOKA",
   "venueCode": "22",
-  "generatedAt": "2026-09-21T03:49:04.989Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:38.738Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 360,
+    "classHitRate": 0.2861111111111111,
+    "programHitRate": 0.2972222222222222,
+    "classRoi": 1.0509722222222222,
+    "programRoi": 1.0779166666666666,
+    "hitRateDelta": 0.011111111111111127,
+    "roiDelta": 0.026944444444444438,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.28,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",

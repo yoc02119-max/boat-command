@@ -3,8 +3,8 @@
   "version": "BIWAKO-READINESS-V1",
   "venue": "BIWAKO",
   "venueCode": "11",
-  "generatedAt": "2026-09-21T03:49:04.249Z",
-  "phase": "HISTORY_READY",
+  "generatedAt": "2026-09-21T03:52:37.983Z",
+  "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-20",
   "current": {
     "programReady": false,
@@ -23,19 +23,26 @@
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
-    "analysisReady": false
+    "analysisReady": true
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 335,
+    "classHitRate": 0.1880597014925373,
+    "programHitRate": 0.2417910447761194,
+    "classRoi": 0.7046268656716418,
+    "programRoi": 0.8046268656716418,
+    "hitRateDelta": 0.05373134328358209,
+    "roiDelta": 0.09999999999999998,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.38,
+      "neighborMix": 0.25,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -54,7 +61,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "STRICT_HOLDOUT_NOT_READY",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
