@@ -550,4 +550,44 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-multicycle-") as td:
     assert (repo / "live/kiryu/2026-10-22/research-evaluation-v1.json").exists()
     assert (repo / "live/kiryu/2026-11-21/research-evaluation-v1.json").exists()
 
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-unregistered-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(
+        ROOT,
+        repo,
+        ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"),
+    )
+
+    # Even if historical validation is explicitly not required, an unregistered
+    # candidate must never become promotion-eligible. The venue-local registry
+    # itself is a mandatory safety boundary.
+    mutate_kiryu_to_live(repo)
+    install_synthetic_forward(repo)
+
+    cfg_path = repo / "venues/kiryu/config-v1.json"
+    cfg = read_json(cfg_path)
+    cfg["promotionPolicy"]["requireStrictWalkForwardHoldout"] = False
+    write_json(cfg_path, cfg)
+
+    ledger_path = repo / "venues/kiryu/model-candidates-v1.json"
+    ledger = read_json(ledger_path)
+    ledger["candidates"] = []
+    write_json(ledger_path, ledger)
+
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    run(repo, "--action", "refresh", "--date", "2026-10-21")
+    unregistered = state(repo)
+    candidate = next(x for x in unregistered["candidates"] if x["id"] == CANDIDATE_ID)
+
+    assert unregistered["phase"] == "REVIEW_READY", unregistered
+    assert candidate["pairedRaces"] == 60
+    assert candidate["gates"]["forwardEligible"] is True
+    assert candidate["gates"]["historicalRequired"] is False
+    assert candidate["gates"]["historicalOk"] is True
+    assert candidate["registered"] is False
+    assert candidate["gates"]["eligible"] is False
+    assert "CANDIDATE_NOT_REGISTERED" in candidate["gates"]["reasons"]
+    assert unregistered["recommendation"]["state"] == "KEEP_CURRENT"
+    assert unregistered["recommendation"]["candidateId"] is None
+
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
