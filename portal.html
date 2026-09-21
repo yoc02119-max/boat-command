@@ -228,8 +228,11 @@ function activateBottomNav(id,target){
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id===id));
  const el=document.getElementById(target);if(el){el.classList.remove('nav-flash');void el.offsetWidth;el.classList.add('nav-flash');el.scrollIntoView({behavior:'smooth',block:'start'})}
 }
-document.getElementById("performanceNav")?.addEventListener("click",()=>activateBottomNav('performanceNav','activeTryPanel'));
-document.getElementById("homeNav")?.addEventListener("click",()=>activateBottomNav('homeNav','homeAnchor'));
+document.getElementById("performanceNav")?.addEventListener("click",()=>activateBottomNav('performanceNav','todayTryPerformance'));
+document.getElementById("homeNav")?.addEventListener("click",()=>{
+ document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id==='homeNav'));
+ window.scrollTo({top:0,behavior:'smooth'});
+});
 document.getElementById("aiChatNav")?.addEventListener("click",()=>{
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id==='aiChatNav'));
  const q=encodeURIComponent("BOAT COMMANDの24場予想について分析したい");
