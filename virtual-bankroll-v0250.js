@@ -94,8 +94,9 @@
   }
 
   function virtualBankrollNow(){
+    if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.confirmedBankrollYen)))return Number(sharedPortfolio.confirmedBankrollYen);
     if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.bankrollYen)))return Number(sharedPortfolio.bankrollYen);
-    const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
+    const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
     const t=virtualTryLedger();
     return base+t.settledProfitYen-t.pendingStakeYen;
   }
@@ -103,7 +104,8 @@
   // Only SHADOW TRY moves the simulated bankroll.
   // MAIN predictions/results stay available for accuracy evaluation but are cash-neutral.
   window.bankrollSeries=function(){
-    const base=typeof START_BANKROLL==='number'?START_BANKROLL:1000000;
+    const base=typeof START_BANKROLL==='number'?START_BANKROLL:100000;
+    if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.confirmedBankrollYen)))return [{label:'SHARED START',value:base},{label:'24場共通 確定後',value:Number(sharedPortfolio.confirmedBankrollYen)}];
     if(sharedPortfolio&&Number.isFinite(Number(sharedPortfolio.bankrollYen)))return [{label:'SHARED START',value:base},{label:'24場共通 現在',value:Number(sharedPortfolio.bankrollYen)}];
     let bal=base;
     const out=[{label:'SHARED START',value:bal}];
@@ -119,7 +121,7 @@
   window.bcVirtualBankrollNow=virtualBankrollNow;
   window.bcVirtualDepositTotal=virtualDepositTotal;
   window.BOAT_COMMAND_VIRTUAL_BANKROLL_V0250=Object.freeze({
-    version:'0.35.17',fundingScope:'SHARED_24_VENUES_VIRTUAL',mainPredictionCashNeutral:true,fixedStartBankrollYen:1000000,manualDepositsExcluded:true,realMoney:false
+    version:'0.35.17',fundingScope:'SHARED_24_VENUES_VIRTUAL',mainPredictionCashNeutral:true,fixedStartBankrollYen:100000,manualDepositsExcluded:true,realMoney:false
   });
   window.addEventListener('storage',e=>{
     if(e.key===DEPOSIT_KEY&&typeof renderAll==='function')renderAll();
