@@ -215,21 +215,26 @@ function standardState(e,config,readiness,prev){
     };
   }
   const n=currentCycleNumber(prev),start=deriveStart(e,config,prev),end=shiftDate(start,CYCLE_DAYS-1);
+  const cycleId=newCycleId(e,n,start);
   const evidence=discoverEvidence(e.slug,start,EFFECTIVE_DATE<end?EFFECTIVE_DATE:end);
   const candidates=attachCandidatePolicy(e.slug,evidence.candidates,config);
   const selected=selection(candidates);
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
-  const configVersion=config?.operationPolicy?.mainModelVersion||null;
-  const currentRows=configVersion?evidence.mainRows.filter(x=>x.modelVersion===configVersion):evidence.mainRows;
+  const configuredVersion=config?.operationPolicy?.mainModelVersion||null;
+  const previousLockedVersion=prev?.cycleId===cycleId&&prev?.startDate===start&&prev?.mainline?.frozen===true
+    ? (prev.mainline.modelVersion||null)
+    : null;
+  const lockedVersion=previousLockedVersion||configuredVersion||evidence.mainModelVersions.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
+  const currentRows=lockedVersion?evidence.mainRows.filter(x=>x.modelVersion===lockedVersion):evidence.mainRows;
   const mainEvaluation=aggregate(currentRows);
   const mainEnough=mainEvaluation.races>=minMain;
   const versionSet=[...new Set(currentRows.map(x=>x.modelVersion))];
-  const effectiveVersion=configVersion||versionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
+  const effectiveVersion=lockedVersion||versionSet.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
   const ordered=evidence.mainRows;
-  const firstCurrent=configVersion?ordered.findIndex(x=>x.modelVersion===configVersion):-1;
-  const drift=configVersion
-    ? (firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==configVersion))
+  const firstCurrent=lockedVersion?ordered.findIndex(x=>x.modelVersion===lockedVersion):-1;
+  const drift=lockedVersion
+    ? (firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==lockedVersion))
     : evidence.mainModelVersions.length>1;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
@@ -237,11 +242,11 @@ function standardState(e,config,readiness,prev){
   else if(elapsed>=CYCLE_DAYS&&drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:['MAINLINE_MODEL_DRIFT_DETECTED']}}
   else if(elapsed>=CYCLE_DAYS&&selected){rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS){rec={state:'KEEP_CURRENT',candidateId:null,reasons:['NO_REGISTERED_CANDIDATE_PASSED_ALL_GATES']}}
-  const review=prev?.cycleId===newCycleId(e,n,start)?(prev.review||reviewTemplate()):reviewTemplate();
+  const review=prev?.cycleId===cycleId?(prev.review||reviewTemplate()):reviewTemplate();
   if(review.humanDecision==='APPROVE_CANDIDATE')phase='APPROVED_PENDING_DEPLOYMENT';
   return {
     schema:'boat-command-venue-model-cycle-v1',version:VERSION,venue:e.key,venueName:e.name,venueCode:e.code,slug:e.slug,
-    generatedAt:isoNow(),cycleNumber:n,cycleId:newCycleId(e,n,start),cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
+    generatedAt:isoNow(),cycleNumber:n,cycleId,cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
     isolation:baseIsolation(e),
     mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:versionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough},
     candidates,recommendation:rec,review,
