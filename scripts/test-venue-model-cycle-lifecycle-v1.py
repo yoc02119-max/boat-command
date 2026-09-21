@@ -181,6 +181,44 @@ def install_extension_forward(repo):
             },
         )
 
+def install_mainline_days(repo, dates, model_version="KIRYU-RESEARCH-MODEL-V1"):
+    for date in dates:
+        rows = []
+        for race in range(1, 13):
+            actual = "1-2-3"
+            miss = ["1-2-4", "1-3-2", "2-1-3", "2-3-1"]
+            rows.append({
+                "race": race,
+                "actual": actual,
+                "payout100": 2000,
+                "classBaseline": {
+                    "generatedAt": f"{date}T00:00:00Z",
+                    "picks": miss,
+                    "hit": False,
+                    "modelVersion": "KIRYU-CLASS-BASELINE-V1"
+                },
+                "programOnly": {
+                    "generatedAt": f"{date}T00:00:01Z",
+                    "picks": miss,
+                    "hit": False,
+                    "modelVersion": model_version
+                }
+            })
+        write_json(
+            repo / f"live/kiryu/{date}/research-evaluation-v1.json",
+            {
+                "schema": "boat-command-kiryu-shadow-evaluation-v1",
+                "venue": "KIRYU",
+                "venueCode": "01",
+                "date": date,
+                "rows": rows,
+                "fundingScope": "NONE_RESEARCH_ONLY",
+                "bankrollAffected": False,
+                "tryAffected": False,
+                "productionAffected": False,
+            },
+        )
+
 def state(repo):
     return read_json(repo / "venues/kiryu/model-cycle-v1.json")
 
@@ -443,5 +481,73 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-reject-") as td:
     assert archived["finalDecision"]["action"] == "REJECT"
     assert archived["finalDecision"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
     assert archived["mainline"]["evaluation"]["races"] == 60
+
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-multicycle-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(
+        ROOT,
+        repo,
+        ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"),
+    )
+
+    # Prove the same venue can rotate through multiple 30-day cycles without
+    # carrying evaluation totals forward or overwriting archived history.
+    mutate_kiryu_to_live(repo)
+    install_synthetic_forward(repo)
+    install_mainline_days(repo, ["2026-10-22", "2026-10-23", "2026-10-24", "2026-10-25", "2026-10-26"])
+    install_mainline_days(repo, ["2026-11-21", "2026-11-22", "2026-11-23", "2026-11-24", "2026-11-25"])
+
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    run(repo, "--action", "refresh", "--date", "2026-10-21")
+    c1 = state(repo)
+    assert c1["cycleNumber"] == 1
+    assert c1["phase"] == "REVIEW_READY"
+    assert c1["mainline"]["evaluation"]["races"] == 60
+
+    before_c1_continue_others = snapshot_others(repo)
+    run(repo, "--action", "continue", "--venue", KIRYU, "--date", "2026-10-21")
+    c2_day0 = state(repo)
+    assert c2_day0["cycleNumber"] == 2
+    assert c2_day0["startDate"] == "2026-10-22"
+    assert c2_day0["cycleDay"] == 0
+    assert c2_day0["mainline"]["evaluation"]["races"] == 0
+    assert_others_same(repo, before_c1_continue_others)
+
+    run(repo, "--action", "refresh", "--date", "2026-11-20")
+    c2 = state(repo)
+    assert c2["cycleNumber"] == 2
+    assert c2["phase"] == "REVIEW_READY"
+    assert c2["cycleDay"] == 30 and c2["daysRemaining"] == 0
+    assert c2["mainline"]["evaluation"]["races"] == 60
+    assert c2["mainline"]["evidenceThroughDate"] == "2026-11-20"
+
+    before_c2_continue_others = snapshot_others(repo)
+    run(repo, "--action", "continue", "--venue", KIRYU, "--date", "2026-11-20")
+    c3_day0 = state(repo)
+    assert c3_day0["cycleNumber"] == 3
+    assert c3_day0["startDate"] == "2026-11-21"
+    assert c3_day0["cycleDay"] == 0
+    assert c3_day0["mainline"]["evaluation"]["races"] == 0
+    assert_others_same(repo, before_c2_continue_others)
+
+    run(repo, "--action", "refresh", "--date", "2026-12-20")
+    c3 = state(repo)
+    assert c3["cycleNumber"] == 3
+    assert c3["phase"] == "REVIEW_READY"
+    assert c3["cycleDay"] == 30 and c3["daysRemaining"] == 0
+    assert c3["mainline"]["evaluation"]["races"] == 60
+    assert c3["mainline"]["evidenceThroughDate"] == "2026-12-20"
+
+    archives = sorted((repo / "venues/kiryu/model-cycle-history").glob("kiryu-cycle-*.json"))
+    assert len(archives) == 2, archives
+    a1 = read_json(archives[0])
+    a2 = read_json(archives[1])
+    assert a1["cycleNumber"] == 1 and a1["finalDecision"]["action"] == "CONTINUE"
+    assert a2["cycleNumber"] == 2 and a2["finalDecision"]["action"] == "CONTINUE"
+    assert a1["mainline"]["evaluation"]["races"] == 60
+    assert a2["mainline"]["evaluation"]["races"] == 60
+    assert (repo / "live/kiryu/2026-09-22/research-evaluation-v1.json").exists()
+    assert (repo / "live/kiryu/2026-10-22/research-evaluation-v1.json").exists()
+    assert (repo / "live/kiryu/2026-11-21/research-evaluation-v1.json").exists()
 
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
