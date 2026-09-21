@@ -148,6 +148,13 @@ function earliestEvidenceDateForModel(slug,modelVersion){
   }
   return null;
 }
+function artifactModelVersion(slug){
+  const p=path.join(ROOT,slug+'-research-model-v1.js');
+  if(!fs.existsSync(p))return null;
+  const text=fs.readFileSync(p,'utf8');
+  const m=text.match(/const VERSION=['"]([^'"]+)['"]/);
+  return m?m[1]:null;
+}
 function latestProgramOnlyModelVersion(slug){
   const docs=evaluationDocs(slug,null,null).reverse();
   for(const {doc} of docs){
@@ -337,7 +344,29 @@ function nextCycleClock(start){
 function applyAction(e,state){
   if(ACTION==='refresh')return state;
   if(!ONLY||e.slug!==ONLY)return state;
-  if(!['approve','reject','continue','activate'].includes(ACTION))throw new Error('MODEL_CYCLE_ACTION_INVALID '+ACTION);
+  if(!['start','approve','reject','continue','activate'].includes(ACTION))throw new Error('MODEL_CYCLE_ACTION_INVALID '+ACTION);
+  if(ACTION==='start'){
+    if(state.phase!=='WAITING_FOR_MAINLINE')throw new Error('MODEL_CYCLE_START_NOT_WAITING '+state.phase);
+    const config=readJson(path.join(ROOT,'venues',e.slug,'config-v1.json'));
+    const readiness=readJson(path.join(ROOT,'venues',e.slug,'readiness-v1.json'));
+    if(readiness?.history?.ready!==true)throw new Error('MODEL_CYCLE_START_HISTORY_NOT_READY '+e.slug);
+    if(readiness?.baseline?.ready!==true)throw new Error('MODEL_CYCLE_START_BASELINE_NOT_READY '+e.slug);
+    if(config?.predictionPolicy?.strictPreRaceOnly!==true||config?.predictionPolicy?.resultLookahead!==false||config?.predictionPolicy?.payoutLookahead!==false)throw new Error('MODEL_CYCLE_START_PRE_RACE_BOUNDARY_INVALID '+e.slug);
+    if(config?.predictionPolicy?.crossVenueModelFallback!==false||config?.predictionPolicy?.crossVenueHistoryMixing!==false)throw new Error('MODEL_CYCLE_START_VENUE_ISOLATION_INVALID '+e.slug);
+    if(config?.realMoneyEnabled===true||config?.operationPolicy?.realMoney===true)throw new Error('MODEL_CYCLE_START_REAL_MONEY_FORBIDDEN '+e.slug);
+    const modelVersion=config?.operationPolicy?.mainModelVersion||latestProgramOnlyModelVersion(e.slug)||artifactModelVersion(e.slug);
+    if(!modelVersion)throw new Error('MODEL_CYCLE_START_MODEL_VERSION_MISSING '+e.slug);
+    const start=shiftDate(EFFECTIVE_DATE,1);
+    const nextConfig=JSON.parse(JSON.stringify(config||{}));
+    nextConfig.state='LIVE_SIMULATION';
+    nextConfig.modelEnabled=true;
+    nextConfig.tryEnabled=true;
+    nextConfig.realMoneyEnabled=false;
+    nextConfig.operationPolicy={...(nextConfig.operationPolicy||{}),mode:'30_DAY_VIRTUAL_OPERATION',operationStartDate:start,mainModelVersion:modelVersion,mainLogicFrozen:true,realMoney:false,improvementsRunAsSeparateShadow:true};
+    if(!DRY_RUN)writeJson(path.join(ROOT,'venues',e.slug,'config-v1.json'),nextConfig);
+    const started=standardState(e,nextConfig,readiness,null);
+    return {...started,mainline:{...started.mainline,integrity:'INITIAL_START_VERIFIED'},recommendation:{state:'WAIT',candidateId:null,reasons:['INITIAL_CYCLE_SCHEDULED']},review:reviewTemplate()};
+  }
   if(ACTION==='approve'){
     if(state.phase!=='REVIEW_READY')throw new Error('MODEL_CYCLE_NOT_REVIEW_READY '+state.phase);
     if(!CANDIDATE)throw new Error('MODEL_CYCLE_CANDIDATE_REQUIRED');

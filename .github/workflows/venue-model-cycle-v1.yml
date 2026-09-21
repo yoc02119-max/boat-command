@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: refresh / approve / reject / continue / activate
+        description: refresh / start / approve / reject / continue / activate
         required: true
         default: refresh
         type: choice
-        options: [refresh, approve, reject, continue, activate]
+        options: [refresh, start, approve, reject, continue, activate]
       venue:
         description: venue slug for a decision action
         required: false
