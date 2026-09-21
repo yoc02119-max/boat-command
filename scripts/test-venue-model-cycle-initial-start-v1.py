@@ -59,11 +59,29 @@ def artifact_version(repo, slug):
     assert m, slug
     return m.group(1)
 
+def reset_waiting_configs(repo, slugs):
+    for slug in slugs:
+        p = repo / f"venues/{slug}/config-v1.json"
+        cfg = read_json(p)
+        cfg["state"] = "BUILDING"
+        cfg["modelEnabled"] = False
+        cfg["tryEnabled"] = False
+        cfg["realMoneyEnabled"] = False
+        op = cfg.setdefault("operationPolicy", {})
+        op["mode"] = "BUILD_FIRST_THEN_30_DAY_VIRTUAL_OPERATION"
+        op["operationStartDate"] = None
+        op["mainModelVersion"] = None
+        op["mainLogicFrozen"] = False
+        op["realMoney"] = False
+        op["improvementsRunAsSeparateShadow"] = True
+        write_json(p, cfg)
+
 # Negative gate: an unready venue must fail closed and leave config/state unchanged.
 with tempfile.TemporaryDirectory(prefix="boat-command-initial-start-negative-") as td:
     repo = pathlib.Path(td) / "repo"
     shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
 
+    reset_waiting_configs(repo, ["kiryu"])
     run(repo, "--action", "refresh", "--date", EFFECTIVE_DATE)
     cfg_path = repo / "venues/kiryu/config-v1.json"
     ready_path = repo / "venues/kiryu/readiness-v1.json"
@@ -93,6 +111,7 @@ with tempfile.TemporaryDirectory(prefix="boat-command-initial-start-fleet-") as 
     repo = pathlib.Path(td) / "repo"
     shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
 
+    reset_waiting_configs(repo, WAITING)
     run(repo, "--action", "refresh", "--date", EFFECTIVE_DATE)
     fleet0 = read_json(repo / "venue-model-cycle-fleet-v1.json")
     waiting0 = [x["slug"] for x in fleet0["venueStates"] if x["phase"] == "WAITING_FOR_MAINLINE"]
