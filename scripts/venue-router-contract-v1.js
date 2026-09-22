@@ -2,6 +2,7 @@
 'use strict';
 
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
 const registry=require('../venue-registry-v1.js');
 const runtime=require('../venue-runtime-v1.js');
 
@@ -80,6 +81,12 @@ assert.equal(runtime.resolveVenue('03')?.code,'03');
 assert.equal(runtime.resolveVenue('gamagori')?.code,'07');
 assert.equal(runtime.capabilities(toda).predictionUi,true);
 assert.equal(runtime.capabilities(toda).try,true);
+
+const venueHtml=fs.readFileSync('venue.html','utf8');
+const boardUi=fs.readFileSync('venue-research-board-v1.js','utf8');
+assert.ok(!venueHtml.includes("if(jcd==='07'){location.replace('./?venue=gamagori')}"),'Gamagori must not redirect to the legacy dedicated screen');
+assert.ok(venueHtml.includes("GAMAGORI_ALL_RACE_GATE_V0349"),'Gamagori common screen must use the frozen-picks adapter');
+assert.ok(boardUi.includes("primaryAdapter!=='GAMAGORI_ALL_RACE_GATE_V0349'"),'common board must expose Gamagori adapter');
 
 const active=venues.filter(x=>x.state==='LIVE'||x.state==='LIVE_SIMULATION');
 assert.equal(venues.filter(x=>x.runtime==='PRODUCTION').length,0,'all venue screens must use the common runtime shell');
