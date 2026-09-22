@@ -2,6 +2,8 @@ name: Edogawa history bootstrap recovery v2
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '20 18 * * 1,4'
   workflow_run:
     workflows: ["Edogawa history bootstrap 180d v1"]
     types: [completed]
@@ -64,7 +66,19 @@ jobs:
             lha xw=edogawa-hist-work/one/b edogawa-hist-work/one/raw/$b >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
             lha xw=edogawa-hist-work/one/k edogawa-hist-work/one/raw/$k >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
 
-            python3 program-history-builder-v121.py               --b-dir edogawa-hist-work/one/b               --k-dir edogawa-hist-work/one/k               --out edogawa-hist-work/one/out               --venue 03 >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> edogawa-hist-work/exceptions.txt; continue; }
+            set +e
+            python3 program-history-builder-v121.py               --b-dir edogawa-hist-work/one/b               --k-dir edogawa-hist-work/one/k               --out edogawa-hist-work/one/out               --venue 03 >edogawa-hist-work/one/builder.log 2>&1
+            brc=$?
+            set -e
+            if [[ "$brc" -eq 2 ]]; then
+              # Builder v1.2.1 returns 2 when the target venue produced no yearly output.
+              # For a daily archive this normally means "Edogawa not held that day", not a parser failure.
+              continue
+            elif [[ "$brc" -ne 0 ]]; then
+              msg="$(tail -n 3 edogawa-hist-work/one/builder.log | tr '\n' ' ' | cut -c1-300)"
+              echo "$d BUILDER_FAIL rc=$brc $msg" >> edogawa-hist-work/exceptions.txt
+              continue
+            fi
 
             python3 - "$d" <<'PY'
           import json,sys
