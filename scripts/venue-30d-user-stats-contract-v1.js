@@ -10,8 +10,8 @@ for(const stat of ['hit','roi','tries','profit']){
   assert.ok(portal.includes(`data-stat="${stat}"`), stat);
 }
 assert.ok(portal.includes('function renderVenue30dStats(portfolio)'));
-assert.ok(portal.includes('Number(v?.hitRate)*100'));
-assert.ok(portal.includes('Number(v?.roi)*100'));
+assert.ok(portal.includes('Number(v.hitRate)*100'));
+assert.ok(portal.includes('Number(v.roi)*100'));
 assert.ok(portal.includes('Number(v?.tries)||0'));
 assert.ok(portal.includes('Number(v?.profitYen)||0'));
 assert.ok(portal.includes('renderVenue30dStats(x)'));
