@@ -16,6 +16,13 @@ assert.ok(portal.includes("if(cal.todayActive===true){"));
 assert.ok(portal.includes("card.classList.add('operational','active')"));
 assert.ok(portal.includes("card.classList.remove('active');\n      card.classList.add('offday');"));
 assert.ok(portal.includes('venue-model-cycle-fleet-v1.json'));
+// PROMOTION_APPROVAL_UI_BOUNDARY: owner only chooses yes/no after system gate says ready.
+assert.ok(!portal.includes('async const promotionVariantLabel='));
+assert.ok(portal.includes("const promotionVariantLabel={RANK6:'順位6点'"));
+assert.ok(portal.includes("v.decision==='AWAITING_HUMAN_REVIEW'&&v.humanReviewPending===true"));
+assert.ok(portal.includes('data-promotion-action="approve"'));
+assert.ok(portal.includes('data-promotion-action="reject"'));
+assert.ok(portal.includes("action:'venue_expansion_decision'"));
 assert.ok(portal.includes('github-live-data-v1.js?v=3'));
 assert.ok(portal.includes('venue-registry-v1.js?v=6'));
 assert.ok(router.includes("venue-model-cycle-fleet-v1.json"));
