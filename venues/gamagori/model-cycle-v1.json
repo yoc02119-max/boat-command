@@ -5,7 +5,7 @@
   "venueName": "蒲郡",
   "venueCode": "07",
   "slug": "gamagori",
-  "generatedAt": "2026-09-22T02:40:49.123Z",
+  "generatedAt": "2026-09-22T02:59:03.562Z",
   "cycleNumber": 1,
   "cycleId": "gamagori-cycle-001-2026-09-18",
   "cycleDays": 30,
@@ -24,41 +24,25 @@
     "independentClock": true
   },
   "mainline": {
-    "modelVersion": "GAMAGORI-CURRENT-MAIN",
+    "modelVersion": "GAMAGORI-MAIN-MODEL-V0.32.0",
     "frozen": true,
-    "integrity": "EXTERNAL_FORWARD_POLICY",
+    "integrity": "OK",
+    "versionsObserved": [
+      "GAMAGORI-MAIN-MODEL-V0.32.0"
+    ],
     "evaluation": {
-      "methods": [
-        {
-          "method": "2連単",
-          "label": "予選 × TOP1｜1〜12R",
-          "cycleStartDate": "2026-09-18",
-          "observedDays": 1,
-          "settledMatchedRaces": 0,
-          "hits": 0,
-          "hitRate": null,
-          "stakeYen": 0,
-          "returnYen": 0,
-          "profitYen": 0,
-          "roi": null,
-          "cycleStatus": "COLLECTING"
-        },
-        {
-          "method": "3連単",
-          "label": "A級3人 × 4点｜1〜12R",
-          "cycleStartDate": "2026-09-18",
-          "observedDays": 1,
-          "settledMatchedRaces": 2,
-          "hits": 0,
-          "hitRate": 0,
-          "stakeYen": 4000,
-          "returnYen": 0,
-          "profitYen": -4000,
-          "roi": 0,
-          "cycleStatus": "COLLECTING"
-        }
-      ]
-    }
+      "races": 12,
+      "hits": 2,
+      "hitRate": 0.16666666666666666,
+      "stakeYenAt100PerPick": 4800,
+      "returnYenAt100PerPick": 2240,
+      "profitYenAt100PerPick": -2560,
+      "roi": 0.4666666666666667,
+      "observedDays": 1
+    },
+    "minimumReviewRaces": 60,
+    "evidenceReady": false,
+    "evidenceThroughDate": "2026-09-22"
   },
   "candidates": [],
   "recommendation": {
@@ -84,9 +68,10 @@
     "activationRequiresEvidence": true
   },
   "source": {
-    "policyPath": "gamagori-forward-validation-policy-v0346.json",
-    "statusPath": "live/gamagori/forward-status-v0347.json",
-    "cycleType": "FIXED_CALENDAR_WINDOW"
+    "configPath": "venues/gamagori/config-v1.json",
+    "readinessPath": "venues/gamagori/readiness-v1.json",
+    "latestReadinessPhase": null,
+    "evaluationAdapter": "GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349"
   },
   "retention": {
     "sourceDataPreserved": true,
