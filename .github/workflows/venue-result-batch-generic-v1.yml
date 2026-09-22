@@ -1,0 +1,178 @@
+name: Venue POST-RACE batch generic v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/venue-post-result-v1.py'
+      - 'scripts/test-venue-result-coverage.py'
+      - '.github/workflows/venue-result-batch-generic-v1.yml'
+  schedule:
+    # 09:05-23:05 JST, hourly. Covers daytime and night venues without per-venue poll duplication.
+    - cron: '5 0-14 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-result-batch-generic-v1
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install parser
+        run: python -m pip install --quiet requests beautifulsoup4
+      - name: Verify collector offline contract
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/venue-post-result-v1.py scripts/test-venue-result-coverage.py
+          python scripts/test-venue-result-coverage.py
+
+  collect:
+    needs: contract
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: A
+            items: '01:KIRYU:kiryu 05:TAMAGAWA:tamagawa 06:HAMANAKO:hamanako 07:GAMAGORI:gamagori 12:SUMINOE:suminoe'
+          - group: B
+            items: '13:AMAGASAKI:amagasaki 15:MARUGAME:marugame 16:KOJIMA:kojima 17:MIYAJIMA:miyajima'
+          - group: C
+            items: '04:HEIWAJIMA:heiwajima 08:TOKONAME:tokoname 09:TSU:tsu 24:OMURA:omura'
+          - group: D
+            items: '11:BIWAKO:biwako 19:SHIMONOSEKI:shimonoseki 20:WAKAMATSU:wakamatsu 22:FUKUOKA:fukuoka'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install parser
+        run: python -m pip install --quiet requests beautifulsoup4
+      - name: Collect immutable official results
+        env:
+          ITEMS: ${{ matrix.items }}
+        run: |
+          set -euo pipefail
+          DATE="$(TZ=Asia/Tokyo date +%F)"
+          for item in $ITEMS; do
+            IFS=: read -r code venue slug <<< "$item"
+            python3 scripts/venue-post-result-v1.py --slug "$slug" --venue "$venue" --code "$code" --date "$DATE"
+          done
+      - name: Audit generated POST boundary
+        env:
+          ITEMS: ${{ matrix.items }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,json,os,pathlib,re
+          from zoneinfo import ZoneInfo
+          date=datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date().isoformat()
+          allowed={}
+          for item in os.environ['ITEMS'].split():
+              code,venue,slug=item.split(':')
+              allowed[slug]=(code,venue)
+          checked=0
+          for slug,(code,venue) in allowed.items():
+              for p in (pathlib.Path('live')/slug/date/'post').glob('race-*-result.json'):
+                  x=json.loads(p.read_text(encoding='utf-8'))
+                  assert x.get('schema')=='boat-command-live-result-v1'
+                  assert x.get('venue')==venue and x.get('venueCode')==code and x.get('slug')==slug
+                  assert x.get('date')==date and 1<=int(x.get('race',0))<=12
+                  assert x.get('preRaceDataIncluded') is False and x.get('resultEndpointsIncluded') is True
+                  assert x.get('predictionEnabled') is False and x.get('hardLockEnabled') is False
+                  assert x.get('tryEnabled') is False and x.get('immutableAfterFirstWrite') is True
+                  assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',str(x.get('trifecta','')))
+                  assert isinstance(x.get('payout100'),int) and x.get('payout100')>=0
+                  checked+=1
+          print('GENERIC_POST_BOUNDARY_PASS',os.environ.get('ITEMS'),checked)
+          PY
+      - name: Stage group result artifact
+        env:
+          ITEMS: ${{ matrix.items }}
+        run: |
+          set -euo pipefail
+          DATE="$(TZ=Asia/Tokyo date +%F)"
+          ROOT="/tmp/venue-result-artifact"
+          rm -rf "$ROOT"
+          for item in $ITEMS; do
+            IFS=: read -r code venue slug <<< "$item"
+            SRC="live/$slug/$DATE/post"
+            [ -d "$SRC" ] || continue
+            DST="$ROOT/live/$slug/$DATE/post"
+            mkdir -p "$DST"
+            find "$SRC" -maxdepth 1 -type f -name 'race-*-result.json' -exec cp {} "$DST/" \;
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-result-generic-${{ matrix.group }}
+          path: /tmp/venue-result-artifact/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  publish:
+    needs: collect
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: venue-result-generic-*
+          path: /tmp/venue-result-download
+          merge-multiple: true
+      - name: Publish only new immutable POST files
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-venue-result'
+          git config user.email 'boat-command-venue-result@users.noreply.github.com'
+          rm -rf /tmp/new-results
+          mkdir -p /tmp/new-results
+          [ -d /tmp/venue-result-download ] && cp -a /tmp/venue-result-download/. /tmp/new-results/ || true
+
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            while IFS= read -r src; do
+              rel="${src#/tmp/new-results/}"
+              dst="$rel"
+              if [ -f "$dst" ]; then
+                cmp -s "$src" "$dst" || { echo "RESULT_IMMUTABILITY_CONFLICT $dst" >&2; exit 1; }
+                continue
+              fi
+              mkdir -p "$(dirname "$dst")"
+              cp "$src" "$dst"
+            done < <(find /tmp/new-results -type f -name 'race-*-result.json' | sort)
+
+            git add live
+            git diff --cached --quiet && { echo 'GENERIC_POST_CURRENT'; exit 0; }
+            python3 - <<'PY'
+          import re,subprocess
+          allowed={'kiryu','tamagawa','hamanako','gamagori','suminoe','amagasaki','marugame','kojima','miyajima','heiwajima','tokoname','tsu','omura','biwako','shimonoseki','wakamatsu','fukuoka'}
+          paths=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          bad=[]
+          for p in paths:
+              m=re.fullmatch(r'live/([^/]+)/(\d{4}-\d{2}-\d{2})/post/race-(?:[1-9]|1[0-2])-result\.json',p)
+              if not m or m.group(1) not in allowed: bad.append(p)
+          if bad: raise SystemExit('GENERIC_POST_FORBIDDEN_CHANGE:'+repr(bad))
+          print('GENERIC_POST_WRITE_BOUNDARY_PASS',len(paths))
+          PY
+            git commit -m 'live: collect generic venue POST-RACE results'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
