@@ -1,13 +1,7 @@
-name: Gamagori 12R program snapshot v0.27.0
+name: Gamagori 12R program snapshot v0.27.0 (manual only)
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/gamagori-program-snapshot-v0270.yml'
-  schedule:
-    # Hourly. The job itself only writes when all 12 official race cards are available.
-    - cron: '17 * * * *'
 
 permissions:
   contents: write
