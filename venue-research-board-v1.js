@@ -99,16 +99,17 @@
     const dataRoot=String(opts.dataRoot||'').replace(/\/$/,'');
     if(!dataRoot)throw new Error('OPERATION_BOARD_DATA_ROOT_MISSING');
     const venueCode=String(opts.venueCode||readiness.venueCode||'').padStart(2,'0');
-    const modes=opts.modes||{};
+    const modes=opts.modes||{},gamagoriGate=modes.gamagoriGate===true;
     const programOnlyPath=r=>`${dataRoot}/${date}/program/race-${r}.json`;
     const modePath=(dir,r)=>dir?`${dataRoot}/${date}/shadow/${dir}/race-${r}.json`:null;
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
 
-    const [portfolio,selection,calendar,dayStatus]=await Promise.all([
+    const [portfolio,selection,calendar,dayStatus,gamagoriGateDoc]=await Promise.all([
       maybe('./shared-try-portfolio-v1.json'),
       maybe(`./live/portfolio/${date}/try-selection-v1.json`),
       maybe('./venue-calendar-v1.json'),
-      maybe(`${dataRoot}/${date}/post/day-status.json`)
+      maybe(`${dataRoot}/${date}/post/day-status.json`),
+      gamagoriGate?maybe(`${dataRoot}/${date}/shadow/all-race-try-gates-v0349.json`):Promise.resolve(null)
     ]);
     const selected=new Map((selection?.selected||[]).filter(x=>String(x.venueCode).padStart(2,'0')===venueCode).map(x=>[Number(x.race),x]));
     const selectionReady=selection?.immutableAfterFirstWrite===true;
@@ -141,15 +142,22 @@
     </div>`;
 
     const rows=[];
-    const shouldLoadResults=Number(readiness.current?.postResults||0)>0;
+    const shouldLoadResults=gamagoriGate||Number(readiness.current?.postResults||0)>0;
+    const gamagoriPrimary=race=>{
+      if(!gamagoriGateDoc||gamagoriGateDoc.targetResultsRead!==false||gamagoriGateDoc.targetPayoutsRead!==false)return null;
+      const row=(gamagoriGateDoc.races||[]).find(x=>Number(x?.race)===Number(race));
+      const picks=Array.isArray(row?.trifecta?.allModelPicks)?row.trifecta.allModelPicks.map(String):[];
+      if(!picks.length)return null;
+      return {picks,modelVersion:gamagoriGateDoc.modelVersion||'GAMAGORI-MAIN',immutableAfterFirstWrite:true,resultInput:false,payoutInput:false};
+    };
     await Promise.all(Array.from({length:12},(_,i)=>i+1).map(async race=>{
-      const [program,primary,baseline,result]=await Promise.all([
+      const [program,primaryRaw,baseline,result]=await Promise.all([
         maybe(programOnlyPath(race)),
-        maybe(modePath(modes.primaryDir||'program-only',race)),
-        maybe(modePath(modes.baselineDir||'class-baseline',race)),
+        gamagoriGate?Promise.resolve(gamagoriPrimary(race)):maybe(modePath(modes.primaryDir||'program-only',race)),
+        gamagoriGate?Promise.resolve(null):maybe(modePath(modes.baselineDir||'class-baseline',race)),
         shouldLoadResults?maybe(resultPath(race)):Promise.resolve(null)
       ]);
-      rows.push({race,program,primary,baseline,result,tryRow:selected.get(race)||null,selectionReady});
+      rows.push({race,program,primary:primaryRaw,baseline,result,tryRow:selected.get(race)||null,selectionReady});
     }));
     rows.sort((a,b)=>a.race-b.race);
 
