@@ -1,14 +1,7 @@
-name: Gamagori LIVE production scheduler v0.21.0
+name: Gamagori legacy production scheduler v0.21.0 (manual only)
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/gamagori-live-production-scheduler-v0210.yml'
-  schedule:
-    # 14:00-22:59 JST. Each scheduled job checks twice, 5 minutes apart.
-    # This gives a 5-minute PRE-RACE readiness cadence with half as many workflow starts.
-    - cron: '*/10 5-13 * * *'
 
 permissions:
   actions: write
