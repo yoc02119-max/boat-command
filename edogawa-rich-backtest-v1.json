@@ -1,0 +1,864 @@
+{
+  "schema": "boat-command-edogawa-rich-backtest-v1",
+  "venue": "EDOGAWA",
+  "venueCode": "03",
+  "source": "edogawa-rich-history-v1.json",
+  "strictWalkForward": true,
+  "sameDayRowsExcluded": true,
+  "resultBlockedUntilPrediction": true,
+  "featureScope": [
+    "laneClass",
+    "nationalWinRate",
+    "national2Rate",
+    "localWinRate",
+    "local2Rate",
+    "localVsNationalDelta",
+    "motor2Rate",
+    "boat2Rate",
+    "raceNumber",
+    "raceType"
+  ],
+  "calibration": {
+    "lastDate": "2026-07-25",
+    "dateCount": 47,
+    "selected": {
+      "name": "CLASS_HEAVY",
+      "classW": 1.45,
+      "abilityW": 0.3,
+      "localW": 0.5,
+      "motorW": 0.3,
+      "boatW": 0.12,
+      "neighbors": 120,
+      "decay": 0.3,
+      "racePenalty": 0.5,
+      "typePenalty": 0.65,
+      "globalMass": 18
+    },
+    "selected4": {
+      "races": 394,
+      "hits": 61,
+      "hitRate": 0.1548223350253807,
+      "stake": 157600,
+      "returns": 123300,
+      "roi": 0.7823604060913706
+    },
+    "selected6": {
+      "races": 394,
+      "hits": 75,
+      "hitRate": 0.19035532994923857,
+      "stake": 236400,
+      "returns": 146960,
+      "roi": 0.62165820642978
+    },
+    "topCandidates": [
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 120,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 61,
+          "hitRate": 0.1548223350253807,
+          "stake": 157600,
+          "returns": 123300,
+          "roi": 0.7823604060913706
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 146960,
+          "roi": 0.62165820642978
+        },
+        "score": 0.3163261421319797
+      },
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 60,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 59,
+          "hitRate": 0.14974619289340102,
+          "stake": 157600,
+          "returns": 118670,
+          "roi": 0.7529822335025381
+        },
+        "m6": {
+          "races": 394,
+          "hits": 80,
+          "hitRate": 0.20304568527918782,
+          "stake": 236400,
+          "returns": 158120,
+          "roi": 0.6688663282571912
+        },
+        "score": 0.30748413705583755
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 60,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 58,
+          "hitRate": 0.14720812182741116,
+          "stake": 157600,
+          "returns": 113010,
+          "roi": 0.7170685279187817
+        },
+        "m6": {
+          "races": 394,
+          "hits": 77,
+          "hitRate": 0.19543147208121828,
+          "stake": 236400,
+          "returns": 155130,
+          "roi": 0.6562182741116751
+        },
+        "score": 0.29594225888324877
+      },
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 240,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 55,
+          "hitRate": 0.13959390862944163,
+          "stake": 157600,
+          "returns": 113970,
+          "roi": 0.7231598984771573
+        },
+        "m6": {
+          "races": 394,
+          "hits": 76,
+          "hitRate": 0.19289340101522842,
+          "stake": 236400,
+          "returns": 149150,
+          "roi": 0.630922165820643
+        },
+        "score": 0.29241434010152284
+      },
+      {
+        "config": {
+          "name": "BALANCED",
+          "classW": 1,
+          "abilityW": 0.5,
+          "localW": 0.75,
+          "motorW": 0.45,
+          "boatW": 0.2,
+          "neighbors": 60,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 57,
+          "hitRate": 0.1446700507614213,
+          "stake": 157600,
+          "returns": 110530,
+          "roi": 0.7013324873096447
+        },
+        "m6": {
+          "races": 394,
+          "hits": 77,
+          "hitRate": 0.19543147208121828,
+          "stake": 236400,
+          "returns": 156590,
+          "roi": 0.6623942470389171
+        },
+        "score": 0.29043464467005076
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 240,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 57,
+          "hitRate": 0.1446700507614213,
+          "stake": 157600,
+          "returns": 108950,
+          "roi": 0.6913071065989848
+        },
+        "m6": {
+          "races": 394,
+          "hits": 78,
+          "hitRate": 0.19796954314720813,
+          "stake": 236400,
+          "returns": 149120,
+          "roi": 0.6307952622673435
+        },
+        "score": 0.28825824873096445
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 120,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 56,
+          "hitRate": 0.14213197969543148,
+          "stake": 157600,
+          "returns": 108050,
+          "roi": 0.6855964467005076
+        },
+        "m6": {
+          "races": 394,
+          "hits": 76,
+          "hitRate": 0.19289340101522842,
+          "stake": 236400,
+          "returns": 145250,
+          "roi": 0.614424703891709
+        },
+        "score": 0.2845970812182741
+      },
+      {
+        "config": {
+          "name": "BALANCED",
+          "classW": 1,
+          "abilityW": 0.5,
+          "localW": 0.75,
+          "motorW": 0.45,
+          "boatW": 0.2,
+          "neighbors": 120,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 56,
+          "hitRate": 0.14213197969543148,
+          "stake": 157600,
+          "returns": 108050,
+          "roi": 0.6855964467005076
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 148190,
+          "roi": 0.6268612521150593
+        },
+        "score": 0.28426713197969544
+      },
+      {
+        "config": {
+          "name": "BALANCED",
+          "classW": 1,
+          "abilityW": 0.5,
+          "localW": 0.75,
+          "motorW": 0.45,
+          "boatW": 0.2,
+          "neighbors": 240,
+          "decay": 0.3,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 55,
+          "hitRate": 0.13959390862944163,
+          "stake": 157600,
+          "returns": 106720,
+          "roi": 0.6771573604060914
+        },
+        "m6": {
+          "races": 394,
+          "hits": 77,
+          "hitRate": 0.19543147208121828,
+          "stake": 236400,
+          "returns": 155430,
+          "roi": 0.6574873096446701
+        },
+        "score": 0.28124365482233504
+      },
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 60,
+          "decay": 0.5,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 108020,
+          "roi": 0.6854060913705584
+        },
+        "m6": {
+          "races": 394,
+          "hits": 74,
+          "hitRate": 0.18781725888324874,
+          "stake": 236400,
+          "returns": 149630,
+          "roi": 0.6329526226734349
+        },
+        "score": 0.280742385786802
+      },
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 120,
+          "decay": 0.5,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 108020,
+          "roi": 0.6854060913705584
+        },
+        "m6": {
+          "races": 394,
+          "hits": 74,
+          "hitRate": 0.18781725888324874,
+          "stake": 236400,
+          "returns": 149630,
+          "roi": 0.6329526226734349
+        },
+        "score": 0.280742385786802
+      },
+      {
+        "config": {
+          "name": "CLASS_HEAVY",
+          "classW": 1.45,
+          "abilityW": 0.3,
+          "localW": 0.5,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 240,
+          "decay": 0.5,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 108020,
+          "roi": 0.6854060913705584
+        },
+        "m6": {
+          "races": 394,
+          "hits": 74,
+          "hitRate": 0.18781725888324874,
+          "stake": 236400,
+          "returns": 149630,
+          "roi": 0.6329526226734349
+        },
+        "score": 0.280742385786802
+      },
+      {
+        "config": {
+          "name": "BALANCED",
+          "classW": 1,
+          "abilityW": 0.5,
+          "localW": 0.75,
+          "motorW": 0.45,
+          "boatW": 0.2,
+          "neighbors": 60,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 76,
+          "hitRate": 0.19289340101522842,
+          "stake": 236400,
+          "returns": 150930,
+          "roi": 0.6384517766497462
+        },
+        "score": 0.2805615482233502
+      },
+      {
+        "config": {
+          "name": "MOTOR_HEAVY",
+          "classW": 0.85,
+          "abilityW": 0.4,
+          "localW": 0.75,
+          "motorW": 0.9,
+          "boatW": 0.3,
+          "neighbors": 60,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147760,
+          "roi": 0.6250423011844332
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "MOTOR_HEAVY",
+          "classW": 0.85,
+          "abilityW": 0.4,
+          "localW": 0.75,
+          "motorW": 0.9,
+          "boatW": 0.3,
+          "neighbors": 120,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147760,
+          "roi": 0.6250423011844332
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "MOTOR_HEAVY",
+          "classW": 0.85,
+          "abilityW": 0.4,
+          "localW": 0.75,
+          "motorW": 0.9,
+          "boatW": 0.3,
+          "neighbors": 240,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147760,
+          "roi": 0.6250423011844332
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 60,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147390,
+          "roi": 0.6234771573604061
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 120,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147760,
+          "roi": 0.6250423011844332
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "ABILITY_HEAVY",
+          "classW": 0.8,
+          "abilityW": 0.95,
+          "localW": 0.55,
+          "motorW": 0.3,
+          "boatW": 0.12,
+          "neighbors": 240,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 75,
+          "hitRate": 0.19035532994923857,
+          "stake": 236400,
+          "returns": 147760,
+          "roi": 0.6250423011844332
+        },
+        "score": 0.28023159898477157
+      },
+      {
+        "config": {
+          "name": "BALANCED",
+          "classW": 1,
+          "abilityW": 0.5,
+          "localW": 0.75,
+          "motorW": 0.45,
+          "boatW": 0.2,
+          "neighbors": 120,
+          "decay": 0.75,
+          "racePenalty": 0.5,
+          "typePenalty": 0.65,
+          "globalMass": 18
+        },
+        "m4": {
+          "races": 394,
+          "hits": 54,
+          "hitRate": 0.13705583756345177,
+          "stake": 157600,
+          "returns": 107490,
+          "roi": 0.6820431472081219
+        },
+        "m6": {
+          "races": 394,
+          "hits": 74,
+          "hitRate": 0.18781725888324874,
+          "stake": 236400,
+          "returns": 144220,
+          "roi": 0.6100676818950931
+        },
+        "score": 0.27990164974619286
+      }
+    ]
+  },
+  "holdout": {
+    "firstDate": "2026-07-26",
+    "dateCount": 21,
+    "pointCounts": {
+      "1": {
+        "races": 239,
+        "hits": 12,
+        "hitRate": 0.0502092050209205,
+        "stake": 23900,
+        "returns": 22880,
+        "roi": 0.9573221757322176
+      },
+      "2": {
+        "races": 239,
+        "hits": 24,
+        "hitRate": 0.100418410041841,
+        "stake": 47800,
+        "returns": 38590,
+        "roi": 0.8073221757322175
+      },
+      "3": {
+        "races": 239,
+        "hits": 30,
+        "hitRate": 0.12552301255230125,
+        "stake": 71700,
+        "returns": 51710,
+        "roi": 0.7211994421199442
+      },
+      "4": {
+        "races": 239,
+        "hits": 39,
+        "hitRate": 0.16317991631799164,
+        "stake": 95600,
+        "returns": 68900,
+        "roi": 0.7207112970711297
+      },
+      "5": {
+        "races": 239,
+        "hits": 40,
+        "hitRate": 0.16736401673640167,
+        "stake": 119500,
+        "returns": 70300,
+        "roi": 0.5882845188284519
+      },
+      "6": {
+        "races": 239,
+        "hits": 45,
+        "hitRate": 0.18828451882845187,
+        "stake": 143400,
+        "returns": 80530,
+        "roi": 0.5615760111576011
+      },
+      "7": {
+        "races": 239,
+        "hits": 48,
+        "hitRate": 0.200836820083682,
+        "stake": 167300,
+        "returns": 84320,
+        "roi": 0.5040047818290496
+      },
+      "8": {
+        "races": 239,
+        "hits": 57,
+        "hitRate": 0.2384937238493724,
+        "stake": 191200,
+        "returns": 106780,
+        "roi": 0.5584728033472803
+      }
+    }
+  },
+  "allWalkForward": {
+    "pointCounts": {
+      "1": {
+        "races": 633,
+        "hits": 30,
+        "hitRate": 0.04739336492890995,
+        "stake": 63300,
+        "returns": 61870,
+        "roi": 0.9774091627172196
+      },
+      "2": {
+        "races": 633,
+        "hits": 53,
+        "hitRate": 0.08372827804107424,
+        "stake": 126600,
+        "returns": 89820,
+        "roi": 0.709478672985782
+      },
+      "3": {
+        "races": 633,
+        "hits": 74,
+        "hitRate": 0.11690363349131122,
+        "stake": 189900,
+        "returns": 138940,
+        "roi": 0.7316482359136388
+      },
+      "4": {
+        "races": 633,
+        "hits": 100,
+        "hitRate": 0.1579778830963665,
+        "stake": 253200,
+        "returns": 192200,
+        "roi": 0.759083728278041
+      },
+      "5": {
+        "races": 633,
+        "hits": 108,
+        "hitRate": 0.17061611374407584,
+        "stake": 316500,
+        "returns": 205170,
+        "roi": 0.6482464454976303
+      },
+      "6": {
+        "races": 633,
+        "hits": 120,
+        "hitRate": 0.1895734597156398,
+        "stake": 379800,
+        "returns": 227490,
+        "roi": 0.5989731437598736
+      },
+      "7": {
+        "races": 633,
+        "hits": 134,
+        "hitRate": 0.21169036334913113,
+        "stake": 443100,
+        "returns": 255240,
+        "roi": 0.5760324983073798
+      },
+      "8": {
+        "races": 633,
+        "hits": 152,
+        "hitRate": 0.2401263823064771,
+        "stake": 506400,
+        "returns": 309480,
+        "roi": 0.6111374407582938
+      }
+    }
+  },
+  "comparisonToClassBaseline": {
+    "baseline4": {
+      "races": 239,
+      "hits": 36,
+      "hitRate": 0.1506276150627615,
+      "stake": 95600,
+      "returns": 64190,
+      "roi": 0.6714435146443515
+    },
+    "rich4": {
+      "races": 239,
+      "hits": 39,
+      "hitRate": 0.16317991631799164,
+      "stake": 95600,
+      "returns": 68900,
+      "roi": 0.7207112970711297
+    },
+    "hitRateDelta": 0.01255230125523013,
+    "roiDelta": 0.049267782426778206,
+    "beatsBaselineOnHitRate": true,
+    "beatsBaselineOnRoi": true
+  },
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "promotionEligible": false,
+  "promotionBlockers": [
+    "EXHIBITION_HISTORY_NOT_AVAILABLE",
+    "WATER_FORWARD_VALIDATION_REQUIRED",
+    "TIDE_FORWARD_VALIDATION_REQUIRED"
+  ]
+}
