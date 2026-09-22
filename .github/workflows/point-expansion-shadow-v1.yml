@@ -7,6 +7,8 @@ on:
       - 'scripts/point-expansion-*.js'
       - 'scripts/*shadow-research-v1.js'
       - '.github/workflows/point-expansion-shadow-v1.yml'
+      - '.github/workflows/venue-shadow-batch-*-v1.yml'
+      - '.github/workflows/gamagori-point-expansion-shadow-v1.yml'
   schedule:
     - cron: '17,47 * * * *'
 permissions:
@@ -23,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Audit 24-venue point-expansion wiring
+        run: node scripts/point-expansion-readiness-audit-v1.js /tmp/point-expansion-readiness-v1.json
       - name: Verify baseline and PRE-RACE contracts
         run: node scripts/point-expansion-shadow-test-v1.js
       - name: Compare frozen variants per venue and model configuration
@@ -30,5 +34,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: point-expansion-shadow-report
-          path: /tmp/point-expansion-report-v1.json
+          path: |
+            /tmp/point-expansion-readiness-v1.json
+            /tmp/point-expansion-report-v1.json
           retention-days: 30
