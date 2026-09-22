@@ -1,8 +1,8 @@
 // BOAT COMMAND TRY race deep-link v1
 (()=>{'use strict';
   const q=new URLSearchParams(location.search);
-  const race=Math.max(1,Math.min(12,Number(q.get('race'))||0));
-  if(!race)return;
+  const race=Number(q.get('race'));
+  if(!Number.isInteger(race)||race<1||race>12)return;
 
   let attempts=0;
   let timer=null;
@@ -63,7 +63,11 @@
       const rows=(Array.isArray(x.ledger)?x.ledger:[]).filter(z=>String(z.date)===day).sort((a,b)=>String(a.deadline||'').localeCompare(String(b.deadline||''))||Number(a.race)-Number(b.race));
       const here=rows.findIndex(z=>String(z.venueCode||'').padStart(2,'0')===code&&Number(z.race)===race);
       if(here<0){btn.style.display='none';return}
-      const next=rows.slice(here+1).find(z=>z.settled!==true);
+      const next=rows.slice(here+1).find(z=>{
+    const deadline=String(z.deadline||'');
+    const ms=/^\d{2}:\d{2}(?::\d{2})?$/.test(deadline)?Date.parse(`${day}T${deadline.length===5?deadline+':00':deadline}+09:00`):NaN;
+    return z.settled!==true&&z.voided!==true&&Number.isInteger(Number(z.race))&&Number(z.race)>=1&&Number(z.race)<=12&&ms>Date.now();
+  });
       if(!next){btn.style.display='none';return}
       const nextCode=String(next.venueCode||'').padStart(2,'0'),meta=window.BOAT_COMMAND_VENUE_REGISTRY?.resolve?.(nextCode);
       const name=meta?.name||next.venue||nextCode,nextRace=Number(next.race);
