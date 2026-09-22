@@ -1,0 +1,46 @@
+name: Gamagori point expansion SHADOW v1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-point-expansion-adapter-v1.js'
+      - 'scripts/gamagori-point-expansion-adapter-test-v1.js'
+      - 'scripts/point-expansion-shadow-v1.js'
+      - '.github/workflows/gamagori-point-expansion-shadow-v1.yml'
+  schedule:
+    - cron: '27,57 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: gamagori-point-expansion-shadow-v1
+  cancel-in-progress: false
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify production freeze and adapter contracts
+        run: |
+          set -euo pipefail
+          node scripts/gamagori-live-freeze-contract-v0333.js
+          node scripts/point-expansion-shadow-test-v1.js
+          node scripts/gamagori-point-expansion-adapter-test-v1.js
+      - name: Capture future-only immutable Gamagori sidecars
+        run: node scripts/gamagori-point-expansion-adapter-v1.js
+      - name: Commit new sidecars only
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-shadow'
+          git config user.email 'boat-command-shadow@users.noreply.github.com'
+          git add live/gamagori/*/shadow/program-only/ 2>/dev/null || true
+          git diff --cached --quiet && { echo 'NO_GAMAGORI_POINT_EXPANSION_CAPTURE'; exit 0; }
+          git commit -m 'shadow: capture Gamagori point expansion forward snapshot'
+          git pull --rebase origin main
+          git push origin HEAD:main
