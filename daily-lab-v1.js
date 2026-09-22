@@ -3,12 +3,14 @@
 'use strict';
 const LABELS={BASE4:'現行4点',RANK6:'順位6点',RANK8:'順位8点',HEAD6:'1着筋拡張',SECOND6:'2着筋拡張',THIRD6:'3着筋拡張'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:'—';
+const pct=v=>v!=null&&v!==''&&Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:'—';
 const signed=n=>`${Number(n)>0?'+':''}${Number(n)||0}`;
 const q=s=>document.querySelector(s);
 
-async function load(){
- const r=await fetch(`./daily-lab-v1.json?t=${Date.now()}`,{cache:'no-store'});
+let current=null,archive=null,requestId=0;
+async function load(date){
+ const file=date?`daily-lab/${date}.json`:'daily-lab-v1.json';
+ const r=await fetch(`./${file}?t=${Date.now()}`,{cache:'no-store'});
  if(!r.ok)throw new Error('DAILY_LAB_REPORT_WAIT');
  const x=await r.json();
  if(x?.schema!=='boat-command-daily-lab-v1'||x?.totals?.venues!==24||!Array.isArray(x?.venues)||x.venues.length!==24)throw new Error('DAILY_LAB_REPORT_INVALID');
@@ -20,7 +22,7 @@ function venueCard(v){
  const base=v.summary?.BASE4||{},r6=v.summary?.RANK6||{},r8=v.summary?.RANK8||{};
  const d6=(Number(r6.hits)||0)-(Number(base.hits)||0),d8=(Number(r8.hits)||0)-(Number(base.hits)||0);
  const obs=(v.observations||[])[0];
- const obsText=v.evaluated?`${LABELS[obs?.key]||obs?.key||'—'} ${signed(obs?.deltaHits||0)}的中`:'結果待ち';
+ const obsText=v.evaluated&&obs?.deltaHits>0?`${LABELS[obs?.key]||obs?.key||'—'} ${signed(obs?.deltaHits||0)}的中`:v.evaluated?'追加的中なし':'結果待ち';
  return `<button class="lab-venue ${v.captured?'has-data':''}" data-code="${esc(v.code)}">
    <div class="lab-venue-top"><span>${esc(v.code)}</span><b>${esc(v.name)}</b><em>${v.captured?`${v.captured}/12固定`:'未固定'}</em></div>
    <div class="lab-venue-kpis">
@@ -29,7 +31,7 @@ function venueCard(v){
     <div><small>RANK6</small><strong class="${d6>0?'up':''}">${signed(d6)}</strong></div>
     <div><small>RANK8</small><strong class="${d8>0?'up':''}">${signed(d8)}</strong></div>
    </div>
-   <div class="lab-observe"><span>今日の観察</span><b>${esc(obsText)}</b></div>
+   <div class="lab-observe"><span>この日の観察</span><b>${esc(obsText)}</b></div>
   </button>`;
 }
 function variantRow(v,key){
@@ -39,7 +41,7 @@ function variantRow(v,key){
   <strong>${Number(s.hits)||0}/${Number(s.races)||0}</strong>
   <span>${pct(s.hitRate)}</span>
   <em class="${delta>0?'up':''}">${key==='BASE4'?'基準':`${signed(delta)}的中`}</em>
-  <i>${key==='BASE4'?'—':`${Number(s.addedHits)||0}R救済`}</i>
+  <i>${key==='BASE4'?'—':`${Number(s.addedHits)||0}R追加的中`}</i>
  </div>`;
 }
 function pickChips(xs,cls=''){return (xs||[]).map(x=>`<i class="${cls}">${esc(x)}</i>`).join('')}
@@ -60,7 +62,7 @@ function raceCard(r){
  }).join('');
  const baseHit=settled?v.BASE4?.hit:null;
  return `<article class="lab-race ${settled?(baseHit?'base-hit':'base-miss'):'pending'}">
-   <header><div><strong>${Number(r.race)}R</strong><span>${settled?`結果 ${esc(r.actual)}`:'結果待ち'}</span></div><em>${settled&&r.actualRank?`実着順ランク #${r.actualRank}`:'PRE-RACE固定'}</em></header>
+   <header><div><strong>${Number(r.race)}R</strong><span>${settled?`結果 ${esc(r.actual)}`:r.status==='RESULT_EXCLUDED'?'結果データ確認待ち':'結果待ち'}</span></div><em>${settled&&r.actualRank?`実着順ランク #${r.actualRank}`:'PRE-RACE固定'}</em></header>
    <div class="lab-base"><span>BASE4</span><div>${pickChips(base)}</div><b>${!settled?'固定済み':baseHit?'HIT':`MISS · ${esc(r.baselineMiss||'')}`}</b></div>
    <div class="lab-race-variants">${rows}</div>
   </article>`;
@@ -73,27 +75,65 @@ function renderDetail(data,code){
  q('#labDetailTitle').textContent=`${v.name} DAILY LAB`;
  q('#labDetailMeta').textContent=`${data.date} · ${v.captured}/12固定 · ${v.evaluated}R評価 · 自動昇格なし`;
  q('#labVariantTable').innerHTML=['BASE4','RANK6','RANK8','HEAD6','SECOND6','THIRD6'].map(k=>variantRow(v,k)).join('');
- q('#labRaceGrid').innerHTML=v.races.length?v.races.map(raceCard).join(''):'<div class="lab-empty">今日はまだPoint Expansionの固定データがありません。</div>';
+ q('#labRaceGrid').innerHTML=v.races.length?v.races.map(raceCard).join(''):'<div class="lab-empty">この日の締切前に固定された試験データはありません。</div>';
  document.querySelectorAll('.lab-venue').forEach(x=>x.classList.toggle('selected',x.dataset.code===v.code));
- history.replaceState(null,'',`daily-lab.html?venue=${encodeURIComponent(v.code)}`);
+ history.replaceState(null,'',`daily-lab.html?venue=${encodeURIComponent(v.code)}&date=${encodeURIComponent(data.date)}`);
+ renderHistory(v.code);
  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function render(data){
+ current=data;
+ q('#labDetail').hidden=true;
+ q('#labHistory').hidden=true;
  q('#labDate').textContent=data.date;
- metric('#labVenues',`${data.totals.venuesCaptured}/24場`,'本日固定あり');
+ metric('#labVenues',`${data.totals.venuesCaptured}/24場`,'選択日の固定あり');
  metric('#labCaptured',`${data.totals.capturedRaces}R`,'結果前固定');
  metric('#labEvaluated',`${data.totals.evaluatedRaces}R`,'結果照合済み');
  metric('#labBaseHits',`${data.totals.baseHits}的中`,'現行BASE4');
  metric('#labRank6',signed(data.totals.rank6Hits-data.totals.baseHits),'RANK6追加差');
  metric('#labRank8',signed(data.totals.rank8Hits-data.totals.baseHits),'RANK8追加差');
  q('#labVenueGrid').innerHTML=data.venues.map(venueCard).join('');
- q('#labVenueGrid').addEventListener('click',e=>{const b=e.target.closest('.lab-venue');if(b)renderDetail(data,b.dataset.code)});
+ q('#labVenueGrid').onclick=e=>{const b=e.target.closest('.lab-venue');if(b)renderDetail(current,b.dataset.code)};
  const initial=new URLSearchParams(location.search).get('venue');
  if(initial&&data.venues.some(v=>v.code===initial))renderDetail(data,initial);
 }
+function renderHistory(code){
+ const box=q('#labHistory');
+ if(!archive){box.hidden=true;return}
+ const v=archive.venues.find(x=>x.code===code);if(!v){box.hidden=true;return}
+ box.hidden=false;
+ q('#labHistoryTitle').textContent=`${v.name} · 直近30日`;
+ q('#labHistoryMeta').textContent=`${archive.from}〜${archive.to} · 評価日数 ${v.days}日。保存済み試験のみ／期間内のモデル変更を含む参考集計。`;
+ q('#labHistoryTable').innerHTML='<thead><tr><th>試験</th><th>的中/R</th><th>的中率</th><th>追加的中</th><th>払戻÷購入額*</th></tr></thead><tbody>'+Object.keys(LABELS).map(k=>{
+  const s=v.summary[k];return `<tr><th>${esc(LABELS[k])}</th><td>${s.hits}/${s.races}</td><td>${pct(s.hitRate)}</td><td>${k==='BASE4'?'—':s.addedHits}</td><td>${pct(s.payoutOnlyRoi)}</td></tr>`;
+ }).join('')+'</tbody>';
+}
+async function selectDate(date){
+ const token=++requestId;
+ q('#labLoading').hidden=false;q('#labLoading').textContent='読み込み中…';
+ q('#labVenueGrid').innerHTML='';q('#labDetail').hidden=true;q('#labHistory').hidden=true;
+ document.querySelectorAll('.summary strong').forEach(x=>x.textContent='—');
+ try{
+  const data=await load(date);if(token!==requestId)return;
+  render(data);q('#labLoading').hidden=true;
+  const params=new URLSearchParams(location.search);params.set('date',data.date);
+  history.replaceState(null,'',`daily-lab.html?${params}`);
+ }catch(e){if(token!==requestId)return;q('#labLoading').textContent='この日の集計を取得できません。日付を選び直すか再読み込みしてください。'}
+}
 async function boot(){
- try{const data=await load();render(data);q('#labLoading').hidden=true}
- catch(e){q('#labLoading').innerHTML='<b>DAILY LAB 集計待ち</b><span>初回サマリー生成後に24場の検証結果が表示されます。既存の本番予想には影響しません。</span>'}
+ try{
+  const data=await load();
+  try{
+   const r=await fetch(`./daily-lab/index.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const x=await r.json();if(x.schema==='boat-command-daily-lab-history-v1'&&Array.isArray(x.dates)&&Array.isArray(x.venues))archive=x}
+  }catch{}
+  const dates=[...new Set([data.date,...(archive?.dates||[]).map(x=>x.date)])].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort().reverse();
+  const selector=q('#labDateSelect');selector.innerHTML=dates.map(d=>`<option value="${d}">${d}</option>`).join('');selector.disabled=false;
+  selector.onchange=()=>selectDate(selector.value);
+  const requested=new URLSearchParams(location.search).get('date');
+  if(requested&&dates.includes(requested)&&requested!==data.date){selector.value=requested;await selectDate(requested)}
+  else{selector.value=data.date;render(data);q('#labLoading').hidden=true}
+ }catch(e){q('#labLoading').innerHTML='<b>DAILY LAB 集計を取得できません</b><span>初回集計待ち、または通信エラーです。時間をおいて再読み込みしてください。</span>'}
 }
 boot();
 })();

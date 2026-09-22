@@ -6,11 +6,14 @@ on:
     branches: [main]
     paths:
       - 'scripts/daily-lab-report-v1.js'
+      - 'scripts/daily-lab-history-v1.js'
+      - 'scripts/daily-lab-test-v1.js'
+      - 'scripts/point-expansion-shadow-v1.js'
       - 'live/*/*/shadow/program-only/race-*.json'
       - 'live/*/*/post/race-*-result.json'
       - '.github/workflows/daily-lab-v1.yml'
   schedule:
-    - cron: '7,22,37,52 0-14,21-23 * * *'
+    - cron: '7,22,37,52 * * * *'
 
 permissions:
   contents: write
@@ -39,15 +42,17 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/daily-lab-report-v1.js
-          node scripts/daily-lab-report-v1.js
+          node scripts/daily-lab-test-v1.js
+          node --check scripts/daily-lab-history-v1.js
+          node scripts/daily-lab-history-v1.js
       - name: Audit write boundary
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json,subprocess
+          import json,re,subprocess
           raw=subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=all'],text=True)
           paths=[line[3:] for line in raw.splitlines() if line]
-          bad=[p for p in paths if p!='daily-lab-v1.json']
+          bad=[p for p in paths if p!='daily-lab-v1.json' and not re.fullmatch(r'daily-lab/(?:index|\d{4}-\d{2}-\d{2})\.json',p)]
           if bad:
               raise SystemExit('DAILY_LAB_FORBIDDEN_CHANGE:'+json.dumps(bad,ensure_ascii=False))
           if paths:
@@ -65,10 +70,10 @@ jobs:
       - name: Publish scoreboard only when changed
         run: |
           set -euo pipefail
-          git diff --quiet -- daily-lab-v1.json && { echo 'DAILY_LAB_CURRENT'; exit 0; }
+          git add -- daily-lab-v1.json daily-lab/
+          git diff --cached --quiet && { echo 'DAILY_LAB_CURRENT'; exit 0; }
           git config user.name 'boat-command-daily-lab'
           git config user.email 'boat-command-daily-lab@users.noreply.github.com'
-          git add daily-lab-v1.json
           git commit -m 'analysis: refresh daily lab scoreboard'
           for attempt in 1 2 3 4 5 6; do
             git pull --rebase origin main
@@ -76,3 +81,4 @@ jobs:
             sleep $((attempt*2))
           done
           exit 1
+

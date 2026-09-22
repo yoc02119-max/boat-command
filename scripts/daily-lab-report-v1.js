@@ -2,7 +2,8 @@
 'use strict';
 const fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'..');
-const outPath=path.join(root,'daily-lab-v1.json');
+const {build,evaluate}=require('./point-expansion-shadow-v1.js');
+const crypto=require('crypto');
 const VARIANTS=['BASE4','RANK6','RANK8','HEAD6','SECOND6','THIRD6'];
 const VENUES=[
   ['01','kiryu','桐生'],['02','toda','戸田'],['03','edogawa','江戸川'],['04','heiwajima','平和島'],
@@ -21,17 +22,29 @@ function pct(hit,n){return n?hit/n:null}
 function roi(ret,stake){return stake?ret/stake:null}
 function summarizeVariant(m){return {...m,hitRate:pct(m.hits,m.races),payoutOnlyRoi:roi(m.payoutOnlyReturn100,m.stake100)}}
 
-const date=process.argv[2]||todayJst();
+function buildReport(date= todayJst()){
 if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('DAILY_LAB_DATE_INVALID');
 const venues=[];
 for(const [code,slug,name] of VENUES){
   const stats=Object.fromEntries(VARIANTS.map(k=>[k,metric()]));
   const races=[];
-  let captured=0,evaluated=0,pending=0,invalid=0;
+  let captured=0,evaluated=0,pending=0,invalid=0,legacyExcluded=0;
   for(let race=1;race<=12;race++){
     const shadowPath=path.join(root,'live',slug,date,'shadow','program-only',`race-${race}.json`);
     const s=read(shadowPath);
-    if(!s?.pointExpansion||s.pointExpansion.status!=='FROZEN_WITH_BASELINE')continue;
+    if(!s)continue;
+    if(!s.pointExpansion){legacyExcluded++;continue}
+    try{
+      const deadline=Date.parse(`${s.date}T${s.deadline}:00+09:00`),generated=Date.parse(s.generatedAt);
+      const e=s.pointExpansion,rebuilt=build({rows:e.ranked},s.picks);
+      const hash=crypto.createHash('sha256').update(JSON.stringify(s.picks)).digest('hex');
+      if(s.date!==date||s.venueCode!==code||s.venue!==slug.toUpperCase()||Number(s.race)!==race||
+         !Number.isFinite(deadline)||!Number.isFinite(generated)||generated>deadline-180000||
+         s.mode!=='PROGRAM_ONLY'||s.resultInput!==false||s.payoutInput!==false||
+         s.researchOnly!==true||s.productionEnabled!==false||s.tryEnabled!==false||s.immutableAfterFirstWrite!==true||
+         e.status!=='FROZEN_WITH_BASELINE'||e.version!==rebuilt.version||e.baselineHash!==hash||
+         JSON.stringify(e.variants)!==JSON.stringify(rebuilt.variants))throw Error('INVALID_CAPTURE');
+    }catch{invalid++;continue} 
     const variants={};
     let variantOk=true;
     for(const key of VARIANTS){
@@ -42,10 +55,14 @@ for(const [code,slug,name] of VENUES){
     }
     if(!variantOk){invalid++;continue}
     captured++;
-    const result=read(path.join(root,'live',slug,date,'post',`race-${race}-result.json`));
+    let result=read(path.join(root,'live',slug,date,'post',`race-${race}-result.json`));
+    if(slug==='gamagori'&&result?.venue==='GAMAGORI'&&result.venueCode==null)result={...result,venueCode:'07'};
+    let verified=null;
+    try{if(result)verified=evaluate(s,result)}catch{}
+    if(result&&!verified){invalid++;pending++;races.push({race,status:'RESULT_EXCLUDED',base:variants.BASE4,variants});continue}
     const actual=validPick(result?.trifecta)?String(result.trifecta):null;
     const payout=Number(result?.payout100);
-    const hasResult=!!actual&&Number.isFinite(payout)&&payout>=0;
+    const hasResult=!!verified;
     if(!hasResult){pending++;races.push({race,status:'PENDING',base:variants.BASE4,variants});continue}
     evaluated++;
     const row={race,status:'SETTLED',actual,payout100:payout,base:variants.BASE4,variants:{},baselineMiss:null,actualRank:null};
@@ -68,7 +85,7 @@ for(const [code,slug,name] of VENUES){
   }));
   observations.sort((a,b)=>b.deltaHits-a.deltaHits||b.addedHits-a.addedHits||VARIANTS.indexOf(a.key)-VARIANTS.indexOf(b.key));
   venues.push({
-    code,slug,name,date,captured,evaluated,pending,invalid,
+    code,slug,name,date,captured,evaluated,pending,invalid,legacyExcluded,
     status:captured?'COLLECTING':'NO_CAPTURE',
     observationOnly:true,automaticPromotion:false,productionChanged:false,
     summary,observations,races
@@ -96,7 +113,14 @@ const output={
 };
 if(output.venues.length!==24)throw new Error('DAILY_LAB_24_VENUES_REQUIRED');
 if(output.venues.some(v=>v.code.length!==2||v.automaticPromotion!==false||v.productionChanged!==false))throw new Error('DAILY_LAB_BOUNDARY_INVALID');
+return output;
+}
+function writeReport(output,outPath){
 const next=JSON.stringify(output,null,2)+'\n';
 const prev=fs.existsSync(outPath)?fs.readFileSync(outPath,'utf8'):null;
 if(prev!==next)fs.writeFileSync(outPath,next);
-console.log(JSON.stringify({status:'PASS',date,...totals,changed:prev!==next}));
+return prev!==next;
+}
+if(require.main===module){const output=buildReport(process.argv[2]);const changed=writeReport(output,path.join(root,'daily-lab-v1.json'));console.log(JSON.stringify({status:'PASS',date:output.date,...output.totals,changed}));}
+module.exports={buildReport,writeReport,VARIANTS,VENUES};
+
