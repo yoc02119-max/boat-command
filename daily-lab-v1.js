@@ -62,7 +62,7 @@ function variantRow(v,key){
 }
 function pickChips(xs,cls=''){return (xs||[]).map(x=>`<i class="${cls}">${esc(x)}</i>`).join('')}
 function raceCard(r){
- const settled=r.status==='SETTLED';
+ const settled=r.status==='SETTLED'||r.status==='SETTLED_REPLAY';
  const v=r.variants||{};
  const base=settled?(v.BASE4?.picks||r.base||[]):r.base||[];
  const variants=['RANK6','RANK8','HEAD6','SECOND6','THIRD6'];
