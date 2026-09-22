@@ -9,6 +9,12 @@ const router=fs.readFileSync('github-live-data-v1.js','utf8');
 assert.ok(portal.includes('24場すべて30日独立運用中'));
 assert.ok(!portal.includes('8場は30日固定運用、残り16場'));
 assert.ok(portal.includes('refreshCycleFleetSourceOfTruth'));
+// OFFDAY_VISUAL_BOUNDARY: green .active is owned by today's calendar, not model operational state.
+assert.ok(portal.includes(".venue.offday{border-color:#183753;box-shadow:none"));
+assert.ok(portal.includes("btn.className='venue '+(active?'operational':building?'prep building':'prep')"));
+assert.ok(portal.includes("if(cal.todayActive===true){"));
+assert.ok(portal.includes("card.classList.add('operational','active')"));
+assert.ok(portal.includes("card.classList.remove('active');\n      card.classList.add('offday');"));
 assert.ok(portal.includes('venue-model-cycle-fleet-v1.json'));
 assert.ok(portal.includes('github-live-data-v1.js?v=3'));
 assert.ok(portal.includes('venue-registry-v1.js?v=6'));
