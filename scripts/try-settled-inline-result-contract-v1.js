@@ -10,7 +10,7 @@ assert.ok(portal.includes("const label=voided?'返還':z.hit===true?'的中':'�
 assert.ok(portal.includes("const profitText=voided?'±¥0':signed(profit)"));
 assert.ok(portal.includes('class="try-result"'));
 assert.ok(portal.includes('class="try-result-detail"'));
-assert.ok(portal.includes("pendingHtml+finishedHtml"));
+assert.ok(portal.includes("pendingHtml+resultWaitingHtml+finishedHtml"));
 assert.ok(portal.includes('.try-live-chip.settled.hit'));
 assert.ok(portal.includes('.try-live-chip.settled.miss'));
 assert.ok(portal.includes('.try-live-chip.settled.void'));
