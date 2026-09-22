@@ -66,7 +66,18 @@ jobs:
             if [[ "$bc" != "200" || "$kc" != "200" ]]; then echo "$d HTTP B=$bc K=$kc" >> "$WORK/exceptions.txt"; continue; fi
             lha xw="$ONE/b" "$ONE/raw/$b" >/dev/null 2>&1 || { echo "$d B_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
             lha xw="$ONE/k" "$ONE/raw/$k" >/dev/null 2>&1 || { echo "$d K_EXTRACT_FAIL" >> "$WORK/exceptions.txt"; continue; }
-            python3 program-history-builder-v121.py --b-dir "$ONE/b" --k-dir "$ONE/k" --out "$ONE/out" --venue "$CODE" >/dev/null 2>&1 || { echo "$d BUILDER_FAIL" >> "$WORK/exceptions.txt"; continue; }
+            set +e
+            python3 program-history-builder-v121.py --b-dir "$ONE/b" --k-dir "$ONE/k" --out "$ONE/out" --venue "$CODE" >"$ONE/builder.log" 2>&1
+            brc=$?
+            set -e
+            if [[ "$brc" -eq 2 ]]; then
+              # No target-venue output for the day means non-event day, not a builder failure.
+              continue
+            elif [[ "$brc" -ne 0 ]]; then
+              msg="$(tail -n 3 "$ONE/builder.log" | tr '\n' ' ' | cut -c1-300)"
+              echo "$d BUILDER_FAIL rc=$brc $msg" >> "$WORK/exceptions.txt"
+              continue
+            fi
             python3 - "$d" "$ONE/out/$CODE" "$WORK/days" "$CODE" <<'PY'
           import json,sys
           from pathlib import Path
