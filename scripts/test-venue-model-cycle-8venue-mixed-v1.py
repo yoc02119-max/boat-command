@@ -11,6 +11,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 EFFECTIVE_DATE = "2026-10-25"
 
 STANDARD = {
+    "gamagori": {
+        "venue": "GAMAGORI",
+        "start": "2026-09-18",
+        "model": "GAMAGORI-MAIN-MODEL-V0.32.0",
+        "scenario": "KEEP_NO_CANDIDATE",
+    },
     "toda": {
         "venue": "TODA",
         "start": "2026-09-20",
@@ -55,7 +61,7 @@ STANDARD = {
     },
 }
 GAMAGORI = "gamagori"
-ACTIVE = set(STANDARD) | {GAMAGORI}
+ACTIVE = set(STANDARD)
 
 def read_json(path):
     return json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
@@ -246,27 +252,6 @@ def write_standard_evidence(repo, slug, meta):
         )
     return candidate
 
-def configure_gamagori(repo):
-    p = repo / "live/gamagori/forward-status-v0347.json"
-    x = read_json(p)
-    x["date"] = "2026-10-17"
-    for key, method in x["methods"].items():
-        method["cycleStartDate"] = "2026-09-18"
-        method["cycleDays"] = 30
-        method["cycleDay"] = 30
-        method["daysRemaining"] = 0
-        method["cycleStatus"] = "REVIEW_READY"
-        method["observedDays"] = 30
-        method["matchedRaces"] = 10 if key == "trifecta" else 4
-        method["settledMatchedRaces"] = 10 if key == "trifecta" else 4
-        method["hits"] = 2 if key == "trifecta" else 1
-        method["hitRate"] = method["hits"] / method["settledMatchedRaces"]
-        method["stakeYen"] = method["settledMatchedRaces"] * 2000
-        method["returnYen"] = method["stakeYen"]
-        method["profitYen"] = 0
-        method["roi"] = 1
-    write_json(p, x)
-
 with tempfile.TemporaryDirectory(prefix="boat-command-8venue-mixed-") as td:
     repo = pathlib.Path(td) / "repo"
     shutil.copytree(
@@ -279,7 +264,7 @@ with tempfile.TemporaryDirectory(prefix="boat-command-8venue-mixed-") as td:
     assert ACTIVE == {"toda", "edogawa", "gamagori", "mikuni", "naruto", "tokuyama", "ashiya", "karatsu"}
 
     # Build a deterministic mixed fleet in the temporary copy only:
-    # seven standard venue-local cycles + GAMAGORI's existing external forward policy.
+    # all eight active venues use the same standard venue-local lifecycle.
     for slug in reg:
         cycle = repo / f"venues/{slug}/model-cycle-v1.json"
         if cycle.exists():
@@ -290,13 +275,12 @@ with tempfile.TemporaryDirectory(prefix="boat-command-8venue-mixed-") as td:
 
         if slug in STANDARD:
             configure_active(repo, slug, STANDARD[slug])
-        elif slug != GAMAGORI:
+        else:
             configure_waiting(repo, slug)
 
     candidates = {}
     for slug, meta in STANDARD.items():
         candidates[slug] = write_standard_evidence(repo, slug, meta)
-    configure_gamagori(repo)
 
     # Baseline proves all eight clocks coexist while the other sixteen remain waiting.
     run(repo, "--action", "refresh", "--date", "2026-09-18")
@@ -388,8 +372,10 @@ with tempfile.TemporaryDirectory(prefix="boat-command-8venue-mixed-") as td:
 
     gamagori = states["gamagori"]
     assert gamagori["phase"] == "REVIEW_READY"
-    assert gamagori["mainline"]["integrity"] == "EXTERNAL_FORWARD_POLICY"
-    assert gamagori["recommendation"]["state"] == "HUMAN_REVIEW"
+    assert gamagori["mainline"]["evaluation"]["races"] == 60
+    assert gamagori["mainline"]["modelVersion"] == "GAMAGORI-MAIN-MODEL-V0.32.0"
+    assert gamagori["mainline"]["integrity"] == "OK"
+    assert gamagori["recommendation"]["state"] == "KEEP_CURRENT"
 
     assert fleet["venues"] == 24
     assert fleet["active"] == 0
