@@ -4,7 +4,7 @@
   "venueCode": "16",
   "slug": "kojima",
   "date": "2026-09-22",
-  "generatedAt": "2026-09-22T04:33:19.611Z",
+  "generatedAt": "2026-09-22T05:10:42.655Z",
   "rows": [
     {
       "race": 1,
@@ -251,28 +251,69 @@
           "baselinePath": "kojima-baseline-backtest-v1.json"
         }
       }
+    },
+    {
+      "race": 7,
+      "actual": "1-2-4",
+      "payout100": 730,
+      "classBaseline": {
+        "generatedAt": "2026-09-21T19:16:02.343Z",
+        "picks": [
+          "1-3-2",
+          "1-3-5",
+          "1-6-2",
+          "1-5-3"
+        ],
+        "hit": false,
+        "modelVersion": "KOJIMA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/kojima/2026-09-22/program/race-7.json",
+          "programSha256": "3d59d5bb4ece893cf3920f8bf83fbed74ef9ee823c76935b756f516f9ce90cdc",
+          "programFetchedAt": "2026-09-22T04:14:39.604315+09:00",
+          "historyPath": "kojima-history-bootstrap-v1.json",
+          "baselinePath": "kojima-baseline-backtest-v1.json"
+        }
+      },
+      "programOnly": {
+        "generatedAt": "2026-09-21T19:16:02.343Z",
+        "picks": [
+          "1-3-2",
+          "1-2-4",
+          "1-2-3",
+          "1-3-5"
+        ],
+        "hit": true,
+        "modelVersion": "KOJIMA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/kojima/2026-09-22/program/race-7.json",
+          "programSha256": "3d59d5bb4ece893cf3920f8bf83fbed74ef9ee823c76935b756f516f9ce90cdc",
+          "programFetchedAt": "2026-09-22T04:14:39.604315+09:00",
+          "historyPath": "kojima-history-bootstrap-v1.json",
+          "baselinePath": "kojima-baseline-backtest-v1.json"
+        }
+      }
     }
   ],
   "summary": {
     "classBaseline": {
-      "evaluated": 6,
+      "evaluated": 7,
       "hits": 0,
       "hitRate": 0,
-      "stake": 2400,
+      "stake": 2800,
       "returns": 0,
       "roi": 0
     },
     "programOnly": {
-      "evaluated": 6,
-      "hits": 0,
-      "hitRate": 0,
-      "stake": 2400,
-      "returns": 0,
-      "roi": 0
+      "evaluated": 7,
+      "hits": 1,
+      "hitRate": 0.14285714285714285,
+      "stake": 2800,
+      "returns": 730,
+      "roi": 0.26071428571428573
     },
-    "paired": 6,
-    "hitRateDelta": 0,
-    "roiDelta": 0
+    "paired": 7,
+    "hitRateDelta": 0.14285714285714285,
+    "roiDelta": 0.26071428571428573
   },
   "fundingScope": "NONE_RESEARCH_ONLY",
   "bankrollAffected": false,
