@@ -22,6 +22,7 @@
 
 .venue-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-2px 2px 14px;color:#a8bdd0;font-size:13px}.venue-filter label{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #244764;border-radius:10px;background:#0b2033;cursor:pointer}.venue-filter input{width:17px;height:17px;margin:0;accent-color:#20e0c7}.venue-filter label:has(input:checked){border-color:#20e0c7;color:#eafffb}.venue-filter label:focus-within{outline:2px solid #56b5ff;outline-offset:2px}#venueGrid .venue[hidden]{display:none!important}#venueFilterEmpty{color:#a8bdd0;font-size:14px;padding:14px 2px}
 .venue-try-count{display:block;width:fit-content;max-width:100%;margin:0 0 10px;padding:5px 8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#91a9bc;background:rgba(255,255,255,.025);font-size:12px;font-weight:800;line-height:1.4}.venue-try-count.has-try{border-color:rgba(32,224,199,.4);background:rgba(32,224,199,.1);color:#b9fff0}
+.try-live-chip .try-reason{display:block;margin-top:5px;color:#c4e7fa;font-size:11px;line-height:1.4;max-width:280px;white-space:normal}
 </style>
 </head>
 <body>
@@ -121,6 +122,26 @@ function refreshTryCountdowns(){
   el.classList.toggle('soon',diff>5&&diff<=15);
  });
 }
+function tryPickSummary(picks){
+ const orders=[...new Set((Array.isArray(picks)?picks:[]).map(v=>String(v).trim()))]
+  .filter(v=>/^[1-6]-[1-6]-[1-6]$/.test(v)&&new Set(v.split('-')).size===3)
+  .map(v=>v.split('-'));
+ if(!orders.length)return '';
+ const leaders=position=>{
+  const counts=new Map();
+  orders.forEach(order=>counts.set(order[position],(counts.get(order[position])||0)+1));
+  const max=Math.max(...counts.values());
+  return [...counts.keys()].filter(lane=>counts.get(lane)===max).sort();
+ };
+ const first=leaders(0),second=leaders(1);
+ const firstText=first.length>2?'1着候補を分散':first.length===1?`${first[0]}号艇1着中心`:`${first.join('・')}号艇の1着を想定`;
+ const secondText=second.length>2?'2着は幅広く':`2着は${second.join('・')}号艇中心`;
+ return `${firstText}・${secondText}`;
+}
+function tryReasonHtml(picks){
+ const summary=tryPickSummary(picks);
+ return summary?`<span class="try-reason" title="結果を使わず、固定買い目に含まれる着順の数を要約しています。">狙い：${summary}</span>`:'';
+}
 let todayTryVenueCodes=null;
 function applyTodayTryVenueFilter(){
  const toggle=document.getElementById('todayTryFilter'),status=document.getElementById('venueFilterStatus'),empty=document.getElementById('venueFilterEmpty');
@@ -182,7 +203,7 @@ async function renderActiveTryList(){
    const perPick=picks.length&&stake>0?Math.round(stake/picks.length):0;
    const picksText=picks.length?`買い目 ${picks.join(' / ')}`:'買い目確認中';
    const stakeText=picks.length&&perPick>0?`${picks.length}点 × ${money(perPick)} = ${money(stake)}`:(stake>0?money(stake):'金額確認中');
-   return `<button type="button" class="try-live-chip" data-try-code="${code}" data-try-race="${race}" aria-label="${name} ${race}Rを開く"><b>${name} ${race}R</b> · TRY中<span class="try-deadline" data-try-deadline-ms="${deadlineMs??''}" data-try-deadline-label="${deadlineLabel}">${deadlineLabel}${deadlineMs!=null?' · '+tryCountdownText(deadlineMs):''}</span><span class="try-picks">${picksText}</span><span class="try-stake">${stakeText}</span></button>`;
+   return `<button type="button" class="try-live-chip" data-try-code="${code}" data-try-race="${race}" aria-label="${name} ${race}Rを開く"><b>${name} ${race}R</b> · TRY中<span class="try-deadline" data-try-deadline-ms="${deadlineMs??''}" data-try-deadline-label="${deadlineLabel}">${deadlineLabel}${deadlineMs!=null?' · '+tryCountdownText(deadlineMs):''}</span><span class="try-picks">${picksText}</span>${tryReasonHtml(picks)}<span class="try-stake">${stakeText}</span></button>`;
   }).join('');
   const resultWaitingHtml=resultWaiting.map(z=>{
    const code=String(z.venueCode||'').padStart(2,'0'),name=names.get(code)||z.venue||code,race=Number(z.race),deadline=String(z.deadline||'—');
@@ -190,7 +211,7 @@ async function renderActiveTryList(){
    const perPick=picks.length&&stake>0?Math.round(stake/picks.length):0;
    const picksText=picks.length?`買い目 ${picks.join(' / ')}`:'買い目確認中';
    const stakeText=picks.length&&perPick>0?`${picks.length}点 × ${money(perPick)} = ${money(stake)}`:(stake>0?money(stake):'金額確認中');
-   return `<button type="button" class="try-live-chip result-waiting" data-try-code="${code}" data-try-race="${race}" aria-label="${name} ${race}Rの結果待ちを開く"><b>${name} ${race}R</b> · 結果待ち<span class="try-result">締切 ${deadline} · 結果待ち</span><span class="try-picks">${picksText}</span><span class="try-stake">${stakeText}</span></button>`;
+   return `<button type="button" class="try-live-chip result-waiting" data-try-code="${code}" data-try-race="${race}" aria-label="${name} ${race}Rの結果待ちを開く"><b>${name} ${race}R</b> · 結果待ち<span class="try-result">締切 ${deadline} · 結果待ち</span><span class="try-picks">${picksText}</span>${tryReasonHtml(picks)}<span class="try-stake">${stakeText}</span></button>`;
   }).join('');
   const finishedHtml=finished.map(z=>{
    const code=String(z.venueCode||'').padStart(2,'0'),name=names.get(code)||z.venue||code,race=Number(z.race);
