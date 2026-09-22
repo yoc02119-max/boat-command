@@ -287,15 +287,51 @@ async function mountOperationalBoard(meta,x){
   window.__BC_VENUE_ACTIVATE=activate;
   return boardApi;
 }
-if(jcd==='07'){location.replace('./?venue=gamagori')}
-else if(!v){location.replace('./portal.html')}
+if(!v){location.replace('./portal.html')}
 else{
  document.title=`BOAT COMMAND | ${v[0]}`;
  document.getElementById('venueCode').textContent=`VENUE ${jcd} · ${v[1]}`;
  document.getElementById('venueName').textContent=v[0];
  document.getElementById('topVenue').textContent=v[0];
  if(meta?.state==='LIVE_SIMULATION')document.getElementById('heroCopy').textContent='結果前固定の本線を30日継続運用。資金反映はAUTO TRYのみ。';
- if(jcd==='03'){
+ if(jcd==='07'){
+   const st=document.getElementById('buildStatus');
+   st.querySelector('span').textContent='運用中 · 30日';
+   st.querySelector('i').style.background='#20e0c7';
+   st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
+   st.style.color='#9be7dc';
+   document.getElementById('dataStatus').textContent='蒲郡専用本線 · 共通30日サイクル';
+   document.getElementById('modelStatus').textContent='GAMAGORI MAIN · 本線固定';
+   document.getElementById('venueNote').textContent='蒲郡も他23場と同じ共通画面・共通30日サイクルで運用。予想ロジックは蒲郡専用のままです。';
+   (async()=>{
+     try{
+       const cycleRes=await fetch('./venues/gamagori/model-cycle-v1.json?t='+Date.now(),{cache:'no-store'});
+       const cycle=cycleRes.ok?await cycleRes.json():null;
+       const readiness={
+         venueCode:'07',
+         latestDate:todayJst(),
+         phase:'LIVE_SIMULATION',
+         forward:{programOnlyRaces:Number(cycle?.mainline?.evaluation?.races||0),targetReviewRaces:Number(cycle?.mainline?.minimumReviewRaces||60)},
+         current:{postResults:12}
+       };
+       await window.BOAT_COMMAND_RESEARCH_BOARD_V1?.mount?.({
+         root:'#researchBoard',
+         venueName:'蒲郡',
+         venueCode:'07',
+         readiness,
+         dataRoot:'./live/gamagori',
+         modes:{gamagoriGate:true}
+       });
+       const board=document.getElementById('researchBoard');if(board)board.hidden=false;
+       window.__BC_VENUE_ACTIVATE=view=>{
+         document.querySelectorAll('#venueTabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+         syncCommonVenueTabs(view);
+         if(view==='history'){const d=document.getElementById('venueDetails');if(d)d.open=true;ensureVenueModelCycle();ensureVenuePerformance30d();document.getElementById('venuePerformance30d')?.scrollIntoView({behavior:'smooth',block:'start'});return}
+         const b=document.getElementById('researchBoard');if(b){b.hidden=false;b.scrollIntoView({behavior:'smooth',block:'start'})}
+       };
+     }catch{}
+   })();
+ } else if(jcd==='03'){
    const st=document.getElementById('buildStatus');
    st.querySelector('span').textContent='運用中 · 30日';
    st.querySelector('i').style.background='#20e0c7';
