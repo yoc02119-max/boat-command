@@ -102,7 +102,7 @@ const totals={
   rank8Hits:venues.reduce((s,v)=>s+v.summary.RANK8.hits,0)
 };
 const output={
-  schema:'boat-command-daily-lab-v1',version:'DAILY-LAB-V1',date,
+  schema:'boat-command-daily-lab-v1',version:'DAILY-LAB-V1',date,sourceMode:'LIVE_PRE_RACE_CAPTURE',
   researchOnly:true,resultBlindSelection:true,automaticPromotion:false,
   productionChanged:false,tryChanged:false,bankrollChanged:false,
   accounting:'PAYOUT_ONLY_REFUNDS_NOT_ACCOUNTED_NOT_SETTLED_ROI',

@@ -10,6 +10,8 @@ on:
       - 'scripts/daily-lab-report-v1.js'
       - 'scripts/daily-lab-history-v1.js'
       - 'scripts/daily-lab-historical-replay-v1.js'
+      - 'scripts/daily-lab-forward-gate-v1.js'
+      - 'daily-lab/forward-candidates-v1.json'
       - 'scripts/daily-lab-test-v1.js'
       - 'scripts/point-expansion-shadow-v1.js'
       - 'live/*/*/shadow/program-only/race-*.json'
@@ -62,6 +64,8 @@ jobs:
           node --check scripts/daily-lab-historical-replay-v1.js
           node --check scripts/daily-lab-history-v1.js
           node scripts/daily-lab-history-v1.js
+          node --check scripts/daily-lab-forward-gate-v1.js
+          node scripts/daily-lab-forward-gate-v1.js
       - name: Audit write boundary
         run: |
           set -euo pipefail
@@ -69,7 +73,7 @@ jobs:
           import json,re,subprocess
           raw=subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=all'],text=True)
           paths=[line[3:] for line in raw.splitlines() if line]
-          bad=[p for p in paths if p!='daily-lab-v1.json' and not re.fullmatch(r'daily-lab/(?:index|\d{4}-\d{2}-\d{2})\.json',p)]
+          bad=[p for p in paths if p!='daily-lab-v1.json' and not re.fullmatch(r'daily-lab/(?:index|forward-gate-v1|\d{4}-\d{2}-\d{2})\.json',p)]
           if bad:
               raise SystemExit('DAILY_LAB_FORBIDDEN_CHANGE:'+json.dumps(bad,ensure_ascii=False))
           if paths:
