@@ -1,15 +1,6 @@
-name: Gamagori point expansion SHADOW v1
+name: Gamagori legacy point expansion SHADOW v1 (manual only)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/gamagori-point-expansion-adapter-v1.js'
-      - 'scripts/gamagori-point-expansion-adapter-test-v1.js'
-      - 'scripts/point-expansion-shadow-v1.js'
-      - '.github/workflows/gamagori-point-expansion-shadow-v1.yml'
-  schedule:
-    - cron: '27,57 * * * *'
 permissions:
   contents: write
 concurrency:
