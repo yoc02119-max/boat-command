@@ -89,7 +89,7 @@ function renderDetail(data,code){
  const box=q('#labDetail');
  box.hidden=false;
  q('#labDetailTitle').textContent=`${v.name} DAILY LAB`;
- q('#labDetailMeta').textContent=`${data.date} · ${v.captured}/12固定 · ${v.evaluated}R評価 · 自動昇格なし`;
+ q('#labDetailMeta').textContent=`${data.date} · ${data.sourceMode==='STRICT_HISTORICAL_REPLAY_V1'?'厳密過去再生':'結果前固定'} · ${v.captured}R · ${v.evaluated}R評価 · 自動昇格なし`;
  q('#labVariantTable').innerHTML=['BASE4','RANK6','RANK8','HEAD6','SECOND6','THIRD6'].map(k=>variantRow(v,k)).join('');
  q('#labRaceGrid').innerHTML=v.races.length?v.races.map(raceCard).join(''):'<div class="lab-empty">この日の締切前に固定された試験データはありません。</div>';
  document.querySelectorAll('.lab-venue').forEach(x=>x.classList.toggle('selected',x.dataset.code===v.code));
@@ -101,9 +101,10 @@ function render(data){
  current=data;
  q('#labDetail').hidden=true;
  q('#labHistory').hidden=true;
- q('#labDate').textContent=data.date;
- metric('#labVenues',`${data.totals.venuesCaptured}/24場`,'選択日の固定あり');
- metric('#labCaptured',`${data.totals.capturedRaces}R`,'結果前固定');
+ const strictReplay=data.sourceMode==='STRICT_HISTORICAL_REPLAY_V1';
+ q('#labDate').textContent=`${data.date} · ${strictReplay?'STRICT REPLAY':'LIVE CAPTURE'}`;
+ metric('#labVenues',`${data.totals.venuesCaptured}/24場`,strictReplay?'過去再生できた場':'選択日の固定あり');
+ metric('#labCaptured',`${data.totals.capturedRaces}R`,strictReplay?'対象日より前だけで再生成':'結果前固定');
  metric('#labEvaluated',`${data.totals.evaluatedRaces}R`,'結果照合済み');
  metric('#labBaseHits',`${data.totals.baseHits}的中`,'現行BASE4');
  metric('#labRank6',signed(data.totals.rank6Hits-data.totals.baseHits),'RANK6追加差');
