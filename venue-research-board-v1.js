@@ -103,6 +103,7 @@
     const programOnlyPath=r=>`${dataRoot}/${date}/program/race-${r}.json`;
     const modePath=(dir,r)=>dir?`${dataRoot}/${date}/shadow/${dir}/race-${r}.json`:null;
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
+    const gamagoriGate=modes.gamagoriGate===true?await maybe(`${dataRoot}/${date}/shadow/all-race-try-gates-v0349.json`):null;
 
     const [portfolio,selection,calendar,dayStatus]=await Promise.all([
       maybe('./shared-try-portfolio-v1.json'),
@@ -141,14 +142,19 @@
     </div>`;
 
     const rows=[];
-    const shouldLoadResults=Number(readiness.current?.postResults||0)>0;
+    const shouldLoadResults=modes.gamagoriGate===true||Number(readiness.current?.postResults||0)>0;
     await Promise.all(Array.from({length:12},(_,i)=>i+1).map(async race=>{
-      const [program,primary,baseline,result]=await Promise.all([
+      let [program,primary,baseline,result]=await Promise.all([
         maybe(programOnlyPath(race)),
-        maybe(modePath(modes.primaryDir||'program-only',race)),
-        maybe(modePath(modes.baselineDir||'class-baseline',race)),
+        modes.gamagoriGate===true?Promise.resolve(null):maybe(modePath(modes.primaryDir||'program-only',race)),
+        modes.gamagoriGate===true?Promise.resolve(null):maybe(modePath(modes.baselineDir||'class-baseline',race)),
         shouldLoadResults?maybe(resultPath(race)):Promise.resolve(null)
       ]);
+      if(modes.gamagoriGate===true){
+        const g=(gamagoriGate?.races||[]).find(x=>Number(x?.race)===race);
+        const picks=Array.isArray(g?.trifecta?.allModelPicks)?g.trifecta.allModelPicks:[];
+        primary=picks.length?{picks,immutableAfterFirstWrite:true,resultInput:false,modelVersion:gamagoriGate?.modelVersion||'GAMAGORI-MAIN'}:null;
+      }
       rows.push({race,program,primary,baseline,result,tryRow:selected.get(race)||null,selectionReady});
     }));
     rows.sort((a,b)=>a.race-b.race);
