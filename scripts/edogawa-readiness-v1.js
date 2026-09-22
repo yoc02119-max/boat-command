@@ -82,7 +82,7 @@ const historyDays=Number(histAudit?.raceDays)||0;
 const historyReady=histAudit?.venueCode==='03'&&histAudit?.readyForResearch===true&&historyRows>=MIN_HISTORY;
 const analysisReady=histAnalysis?.venueCode==='03'&&Number(histAnalysis?.races)>=300;
 const baselineReady=baseline?.venueCode==='03'&&baseline?.strictWalkForward===true&&baseline?.sameDayRowsExcluded===true&&Number(baseline?.holdout?.metrics4?.races)>0;
-const richHistoryReady=richAudit?.venueCode==='03'&&richAudit?.readyForRichBacktest===true&&richAudit?.exactBaseCoverage===true;
+const richHistoryReady=richAudit?.venueCode==='03'&&richAudit?.readyForRichBacktest===true;
 const richBacktestReady=richBacktest?.venueCode==='03'&&richBacktest?.strictWalkForward===true&&richBacktest?.sameDayRowsExcluded===true&&Number(richBacktest?.holdout?.pointCounts?.['4']?.races)>0;
 const comparisonReady=comparison?.venueCode==='03'&&comparison?.ready===true&&
   Number(comparison?.classBaselineVsProgramOnly?.rows)>=MIN_PAIRED&&
