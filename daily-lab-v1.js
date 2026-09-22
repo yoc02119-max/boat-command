@@ -9,7 +9,7 @@ const q=s=>document.querySelector(s);
 
 // Pages shell and research reports publish independently; read current main data.
 const DATA_ROOT=['localhost','127.0.0.1','[::1]'].includes(location.hostname)?'./':'https://raw.githubusercontent.com/yoc02119-max/boat-command/main/';
-let current=null,archive=null,requestId=0,selectedVenueCode=null;
+let current=null,archive=null,forwardGate=null,requestId=0,selectedVenueCode=null;
 async function load(date){
  const file=date?`daily-lab/${date}.json`:'daily-lab-v1.json';
  const r=await fetch(`${DATA_ROOT}${file}?t=${Date.now()}`,{cache:'no-store'});
@@ -19,6 +19,11 @@ async function load(date){
  return x;
 }
 function metric(id,value,sub){const el=q(id);if(el)el.innerHTML=`<strong>${esc(value)}</strong><small>${esc(sub)}</small>`}
+
+function forwardObservation(code){
+ if(!forwardGate?.venues)return null;
+ return forwardGate.venues.find(x=>x.code===code)||null;
+}
 
 function archiveObservation(code){
  if(!archive?.venues)return null;
@@ -39,6 +44,8 @@ function venueCard(v){
  const obsText=v.evaluated&&obs?.deltaHits>0?`${LABELS[obs?.key]||obs?.key||'—'} ${signed(obs?.deltaHits||0)}的中`:v.evaluated?'追加的中なし':'結果待ち';
  const hist=archiveObservation(v.code);
  const histText=hist?`30日観察 · ${hist.label}`:'30日観察 · 集計待ち';
+ const fwd=forwardObservation(v.code);
+ const fwdText=fwd?.mode==='BASE4_CONTROL'?'FORWARD · BASE4維持':fwd?`FORWARD · ${Number(fwd.forwardRaces)||0}/${Number(fwd.targetRaces)||60}R`:'FORWARD · 集計待ち';
  return `<button class="lab-venue ${v.captured?'has-data':''}" data-code="${esc(v.code)}">
    <div class="lab-venue-top"><span>${esc(v.code)}</span><b>${esc(v.name)}</b><em>${v.captured?`${v.captured}/12固定`:'未固定'}</em></div>
    <div class="lab-venue-kpis">
@@ -47,7 +54,7 @@ function venueCard(v){
     <div><small>RANK6</small><strong class="${d6>0?'up':''}">${signed(d6)}</strong></div>
     <div><small>RANK8</small><strong class="${d8>0?'up':''}">${signed(d8)}</strong></div>
    </div>
-   <div class="lab-observe"><span>この日の観察</span><b>${esc(obsText)}</b><em class="lab-30d-observe ${hist?.candidate?'candidate':'base'}">${esc(histText)}</em></div>
+   <div class="lab-observe"><span>この日の観察</span><b>${esc(obsText)}</b><em class="lab-30d-observe ${hist?.candidate?'candidate':'base'}">${esc(histText)}</em><em class="lab-forward-observe ${fwd?.reviewEligible?'ready':fwd?.mode==='BASE4_CONTROL'?'base':'collecting'}">${esc(fwdText)}</em></div>
   </button>`;
 }
 function variantRow(v,key){
@@ -122,8 +129,10 @@ function renderHistory(code){
  box.hidden=false;
  q('#labHistoryTitle').textContent=`${v.name} · 直近30日`;
  const hist=archiveObservation(code);
+ const fwd=forwardObservation(code);
  const histDetail=hist?.candidate?`観察候補 ${hist.label.replace('候補','')} · 的中率 ${pct(hist.base.hitRate)}→${pct(hist.chosen.hitRate)} · ROI ${pct(hist.base.payoutOnlyRoi)}→${pct(hist.chosen.payoutOnlyRoi)}。`:'観察上はBASE4維持。';
- q('#labHistoryMeta').textContent=`${archive.from}〜${archive.to} · 評価日数 ${v.days}日。 ${histDetail} 保存済み試験のみ／自動昇格なし。`;
+ const fwdDetail=fwd?.mode==='BASE4_CONTROL'?'FORWARDはBASE4対照。':fwd?.reviewEligible?`FORWARD ${fwd.forwardRaces}/${fwd.targetRaces}R · 人間確認待ち。`:fwd?`FORWARD ${fwd.forwardRaces}/${fwd.targetRaces}R収集中。`:'FORWARD集計待ち。';
+ q('#labHistoryMeta').textContent=`${archive.from}〜${archive.to} · 評価日数 ${v.days}日。 ${histDetail} ${fwdDetail} 自動昇格なし。`;
  q('#labHistoryTable').innerHTML='<thead><tr><th>試験</th><th>的中/R</th><th>的中率</th><th>追加的中</th><th>払戻÷購入額*</th></tr></thead><tbody>'+Object.keys(LABELS).map(k=>{
   const s=v.summary[k];return `<tr><th>${esc(LABELS[k])}</th><td>${s.hits}/${s.races}</td><td>${pct(s.hitRate)}</td><td>${k==='BASE4'?'—':s.addedHits}</td><td>${pct(s.payoutOnlyRoi)}</td></tr>`;
  }).join('')+'</tbody>';
@@ -147,6 +156,10 @@ async function boot(){
   try{
    const r=await fetch(`${DATA_ROOT}daily-lab/index.json?t=${Date.now()}`,{cache:'no-store'});
    if(r.ok){const x=await r.json();if(x.schema==='boat-command-daily-lab-history-v1'&&Array.isArray(x.dates)&&Array.isArray(x.venues))archive=x}
+  }catch{}
+  try{
+   const r=await fetch(`${DATA_ROOT}daily-lab/forward-gate-v1.json?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const x=await r.json();if(x.schema==='boat-command-daily-lab-forward-gate-v1'&&Array.isArray(x.venues)&&x.venues.length===24)forwardGate=x}
   }catch{}
   const dates=[...new Set([data.date,...(archive?.dates||[]).map(x=>x.date)])].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort().reverse();
   const selector=q('#labDateSelect');selector.innerHTML=dates.map(d=>`<option value="${d}">${d}</option>`).join('');selector.disabled=false;
