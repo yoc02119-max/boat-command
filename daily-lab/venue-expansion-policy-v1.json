@@ -1,16 +1,16 @@
 {
   "schema": "boat-command-venue-expansion-policy-v1",
-  "version": "VENUE-EXPANSION-POLICY-V1",
+  "version": "VENUE-EXPANSION-POLICY-V1.1",
   "generatedFrom": "daily-lab/forward-gate-v1.json",
   "candidateVersion": "DAILY-LAB-FORWARD-CANDIDATES-V1",
   "forwardStartDate": "2026-09-23",
   "evaluatedThrough": null,
-  "policyPurpose": "REVIEW_GATE_ONLY",
-  "researchOnly": true,
+  "policyPurpose": "OWNER_DECISION_GATE",
+  "researchOnly": false,
   "automaticPromotion": false,
   "requiresExplicitHumanApproval": true,
-  "productionChanged": false,
-  "predictionLogicChanged": false,
+  "activationStartsNextJstDay": true,
+  "automaticRollbackOnGateFailure": true,
   "bankrollChanged": false,
   "summary": {
     "venues": 24,
@@ -18,8 +18,10 @@
     "collecting": 18,
     "forwardNotConfirmed": 0,
     "awaitingHumanReview": 0,
-    "integrationReady": 0,
-    "productionEnabled": 0
+    "approvedNextDay": 0,
+    "active": 0,
+    "suspended": 0,
+    "rejected": 0
   },
   "venues": [
     {
@@ -31,19 +33,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "02",
@@ -54,19 +85,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "03",
@@ -77,19 +137,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "04",
@@ -100,19 +189,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "05",
@@ -123,19 +241,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "06",
@@ -146,19 +293,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "07",
@@ -169,19 +345,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "08",
@@ -192,19 +397,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "09",
@@ -215,19 +449,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "10",
@@ -238,19 +501,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "11",
@@ -261,19 +553,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "12",
@@ -284,19 +605,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "13",
@@ -307,19 +657,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "14",
@@ -330,19 +709,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "15",
@@ -353,19 +761,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "16",
@@ -376,19 +813,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "17",
@@ -399,19 +865,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "18",
@@ -422,19 +917,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "19",
@@ -445,19 +969,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "20",
@@ -468,19 +1021,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "21",
@@ -491,19 +1073,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "22",
@@ -514,19 +1125,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "23",
@@ -537,19 +1177,48 @@
       "decision": "COLLECT_FORWARD",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     },
     {
       "code": "24",
@@ -560,19 +1229,48 @@
       "decision": "KEEP_BASE4",
       "forward": {
         "races": 0,
-        "target": 60,
+        "target": 120,
         "progress": 0,
         "hitRateDelta": null,
         "roiDelta": null,
-        "candidateUplift": null,
+        "addedHits": 0,
+        "recent": {
+          "targetRaces": 60,
+          "base": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "candidate": {
+            "races": 0,
+            "hits": 0,
+            "stake100": 0,
+            "payoutOnlyReturn100": 0,
+            "hitRate": null,
+            "payoutOnlyRoi": null
+          },
+          "hitRateDelta": null,
+          "roiDelta": null,
+          "addedHits": 0
+        },
+        "robustness": {
+          "addedReturnTotal100": 0,
+          "maxAddedReturn100": 0,
+          "singleAddedReturnShare": null
+        },
         "reviewEligible": false
       },
+      "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
-      "productionEnabled": false
+      "productionEnabled": false,
+      "automaticRollbackToBase4": false
     }
   ]
 }
