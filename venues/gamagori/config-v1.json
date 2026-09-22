@@ -1,6 +1,6 @@
 {
   "schema": "boat-command-venue-config-v1",
-  "version": "GAMAGORI-CONFIG-V1.0.0",
+  "version": "GAMAGORI-CONFIG-V1.1.0",
   "venue": "GAMAGORI",
   "venueName": "蒲郡",
   "venueCode": "07",
@@ -34,22 +34,23 @@
     "realMoneyEnable": false
   },
   "notes": [
-    "蒲郡の予想ロジックは変更せず、30日モデル更新ライフサイクルだけ24場共通エンジンへ統一する。",
-    "既存のPRE-RACE固定allModelPicksとPOST結果を共通評価形式へ正規化し、結果を予想入力へ逆流させない。",
-    "Cycle 1の開始日は2026-09-18を維持する。",
-    "候補は蒲郡専用SHADOW・履歴検証・前向き比較を通過し、人間承認後にのみ反映する。",
+    "蒲郡は旧GAMAGORI-MAIN-MODEL-V0.32.0直結を解除し、他23場と同じRESEARCH / LIVE_SIMULATION運用レーンへ統一する。",
+    "予想入力はPRE-RACEのみ。POST結果・払戻は評価専用とし、予想入力へ逆流させない。",
+    "蒲郡履歴は蒲郡ローカルのみを使用し、他場履歴・他場重みの流用は禁止する。",
+    "モデル変更はSHADOW・履歴検証・前向き比較・人間確認を通過した場合のみ反映する。",
     "実金は扱わない。"
   ],
   "operationPolicy": {
     "mode": "30_DAY_VIRTUAL_OPERATION",
     "operationStartDate": "2026-09-18",
-    "mainModelVersion": "GAMAGORI-MAIN-MODEL-V0.32.0",
+    "mainModelVersion": "GAMAGORI-RESEARCH-MODEL-V1",
     "mainLogicFrozen": true,
     "sharedBankroll": true,
     "trySelection": "SHARED_CROSS_VENUE_SELECTOR_V1",
     "stakePerPickYen": 500,
     "realMoney": false,
     "improvementsRunAsSeparateShadow": true,
-    "evaluationAdapter": "GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349"
+    "evaluationAdapter": "VENUE_PROGRAM_ONLY_SHADOW_V1",
+    "legacyProductionModelRetired": "GAMAGORI-MAIN-MODEL-V0.32.0"
   }
 }
