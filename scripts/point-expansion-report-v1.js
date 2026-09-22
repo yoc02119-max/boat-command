@@ -22,7 +22,11 @@ for(const slug of slugs){
         captured++;
         const resultPath=path.join(dir,date,'post',`race-${race}-result.json`);
         if(!fs.existsSync(resultPath)){pending++;continue;}
-        const row=evaluate(s,read(resultPath));
+        let result=read(resultPath);
+        // Gamagori's frozen result writer predates venueCode. Normalize only inside this research report;
+        // the immutable source result file and production pipeline remain untouched.
+        if(slug==='gamagori'&&result?.venue==='GAMAGORI'&&result.venueCode==null)result={...result,venueCode:'07'};
+        const row=evaluate(s,result);
         if(!row){invalid++;continue;}
         const key=`${row.modelVersion}:${row.configHash}`;
         if(!groups.has(key))groups.set(key,{modelVersion:row.modelVersion,configHash:row.configHash,rows:[]});
