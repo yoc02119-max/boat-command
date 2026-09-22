@@ -56,13 +56,14 @@ jobs:
           05 TAMAGAWA tamagawa
           06 HAMANAKO hamanako
           12 SUMINOE suminoe
+          07 GAMAGORI gamagori
           EOF
       - name: Audit PRE POST boundary and no promotion
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import glob,json,re
-          pairs=[('01','KIRYU','kiryu'),('05','TAMAGAWA','tamagawa'),('06','HAMANAKO','hamanako'),('12','SUMINOE','suminoe')]
+          pairs=[('01','KIRYU','kiryu'),('05','TAMAGAWA','tamagawa'),('06','HAMANAKO','hamanako'),('12','SUMINOE','suminoe'),('07','GAMAGORI','gamagori')]
           for code,key,slug in pairs:
               for p in glob.glob(f'live/{slug}/*/post/race-*-result.json'):
                   x=json.load(open(p,encoding='utf-8'))
@@ -110,7 +111,7 @@ jobs:
           DATE="${{ steps.date.outputs.date }}"
           rm -rf /tmp/venue-forward-publish
           mkdir -p /tmp/venue-forward-publish
-          for slug in kiryu tamagawa hamanako suminoe; do
+          for slug in kiryu tamagawa hamanako suminoe gamagori; do
             for p in "$slug-shadow-evaluation-v1.json" "venues/$slug/readiness-v1.json" "live/$slug/$DATE/research-evaluation-v1.json"; do
               [ -f "$p" ] && cp --parents "$p" /tmp/venue-forward-publish/
             done
@@ -127,7 +128,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp -a /tmp/venue-forward-publish/. .
-            git add live kiryu-shadow-evaluation-v1.json tamagawa-shadow-evaluation-v1.json hamanako-shadow-evaluation-v1.json suminoe-shadow-evaluation-v1.json venues/kiryu/readiness-v1.json venues/tamagawa/readiness-v1.json venues/hamanako/readiness-v1.json venues/suminoe/readiness-v1.json
+            git add live kiryu-shadow-evaluation-v1.json tamagawa-shadow-evaluation-v1.json hamanako-shadow-evaluation-v1.json suminoe-shadow-evaluation-v1.json gamagori-shadow-evaluation-v1.json venues/kiryu/readiness-v1.json venues/tamagawa/readiness-v1.json venues/hamanako/readiness-v1.json venues/suminoe/readiness-v1.json venues/gamagori/readiness-v1.json
             git diff --cached --quiet && { echo 'VENUE_FORWARD_CURRENT'; exit 0; }
             git commit -m 'analysis: refresh batch A forward evidence'
             git push origin HEAD:main && exit 0

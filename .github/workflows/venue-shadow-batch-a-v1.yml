@@ -14,6 +14,7 @@ on:
       - 'tamagawa-research-model-v1.js'
       - 'hamanako-research-model-v1.js'
       - 'suminoe-research-model-v1.js'
+      - 'gamagori-research-model-v1.js'
       - '*-baseline-backtest-v1.json'
   schedule:
     - cron: '*/5 0-13,21-23 * * *'
@@ -36,6 +37,7 @@ jobs:
           - { code: '05', key: TAMAGAWA, slug: tamagawa }
           - { code: '06', key: HAMANAKO, slug: hamanako }
           - { code: '12', key: SUMINOE, slug: suminoe }
+          - { code: '07', key: GAMAGORI, slug: gamagori }
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
