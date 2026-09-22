@@ -38,7 +38,7 @@ function decisionPayload(x,action,candidate){
 }
 function reviewHtml(x,candidate){
  const phase=String(x?.phase||''),rec=String(x?.recommendation?.state||'');
- if(phase==='EVIDENCE_EXTENSION')return '<div class="mc-review"><h3>人間承認</h3><p>証拠が不足しているため自動で延長収集中です。承認操作はまだ出しません。</p></div>';
+ if(phase==='ACTIVE')return '<div class="mc-review"><h3>人間承認 · 待機中</h3><p>30日評価完了後にここへ承認操作を表示します。検証中は本線変更できません。</p></div>';\n if(phase==='EVIDENCE_EXTENSION')return '<div class="mc-review"><h3>人間承認</h3><p>証拠が不足しているため自動で延長収集中です。承認操作はまだ出しません。</p></div>';
  if(phase==='REVIEW_BLOCKED')return '<div class="mc-review"><h3>人間承認</h3><p>評価ブロック中です。原因を解消するまで承認・次Cycle開始はできません。</p></div>';
  if(phase==='APPROVED_PENDING_DEPLOYMENT')return '<div class="mc-review"><h3>人間承認 · 承認済み</h3><p>候補の本線配置証拠を確認してからCycleを切り替えます。承認だけでは本線は変わりません。</p><div class="mc-review-actions"><button class="mc-review-btn activate" type="button" data-cycle-action="activate">反映確認 → 次Cycle開始</button></div><div class="mc-review-status" data-cycle-review-status>候補配置前に押しても安全側で失敗します。</div></div>';
  if(phase!=='REVIEW_READY')return '';
