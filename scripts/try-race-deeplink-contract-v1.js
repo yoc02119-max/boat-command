@@ -14,7 +14,7 @@ assert.ok(portal.includes("activeTryList')?.addEventListener('click'"));
 assert.ok(portal.includes("routeFor?.(meta)"));
 assert.ok(portal.includes("base.includes('?')"));
 
-assert.ok(venue.includes('try-race-deeplink-v1.js?v=1'));
+assert.ok(venue.includes('try-race-deeplink-v1.js?v=2'));
 assert.ok(browser.includes('focusGamagoriRaceDeepLink'));
 assert.ok(browser.includes('#predictionList .race-card[data-race='));
 
