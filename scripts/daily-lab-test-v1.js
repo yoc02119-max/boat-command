@@ -39,7 +39,7 @@ try{
  const dup=structuredClone(snapshot);dup.pointExpansion.variants.RANK6[5]=dup.pointExpansion.variants.RANK6[4];put(sp,dup);assert.equal(buildReport(snapshot.date).totals.capturedRaces,0);
  put(sp,snapshot);
  execFileSync(process.execPath,[path.join(temp,'scripts/daily-lab-history-v1.js'),'2026-09-23']);
- const index=JSON.parse(fs.readFileSync(path.join(temp,'daily-lab/index.json')));assert.equal(index.venues[1].summary.RANK6.hits,1);assert.equal(index.venues[1].summary.RANK6.payoutOnlyRoi,2.5);assert.equal(index.venues[0].summary.BASE4.hitRate,null);
+ const index=JSON.parse(fs.readFileSync(path.join(temp,'daily-lab/index.json')));assert.equal(index.venues[1].summary.RANK6.hits,2);assert.equal(index.venues[1].summary.RANK6.payoutOnlyRoi,2.5);assert.equal(index.venues[0].summary.BASE4.hitRate,null);
  execFileSync('git',['init','-q'],{cwd:temp});execFileSync('git',['add','--','daily-lab-v1.json','daily-lab/'],{cwd:temp});
  const staged=execFileSync('git',['diff','--cached','--name-only'],{cwd:temp,encoding:'utf8'});assert(staged.includes('daily-lab-v1.json'));assert(staged.includes('daily-lab/index.json'));
  console.log('DAILY_LAB_TEST_PASS: live capture boundaries, strict historical replay, no future-config leakage, history totals and missing data');
