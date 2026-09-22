@@ -7,6 +7,7 @@ on:
     paths:
       - 'scripts/daily-lab-report-v1.js'
       - 'scripts/daily-lab-history-v1.js'
+      - 'scripts/daily-lab-historical-replay-v1.js'
       - 'scripts/daily-lab-test-v1.js'
       - 'scripts/point-expansion-shadow-v1.js'
       - 'live/*/*/shadow/program-only/race-*.json'
@@ -55,6 +56,7 @@ jobs:
           set -euo pipefail
           node --check scripts/daily-lab-report-v1.js
           node scripts/daily-lab-test-v1.js
+          node --check scripts/daily-lab-historical-replay-v1.js
           node --check scripts/daily-lab-history-v1.js
           node scripts/daily-lab-history-v1.js
       - name: Audit write boundary
