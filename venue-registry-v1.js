@@ -319,15 +319,17 @@
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '07':{
-      state:'LIVE',
-      runtime:'PRODUCTION',
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
       model:{
         script:'./gamagori-main-model-v0320.js',
         global:'BOAT_COMMAND_MAIN_MODEL_V0320',
         version:'GAMAGORI-MAIN-MODEL-V0.32.0'
       },
+      configPath:'./venues/gamagori/config-v1.json',
+      readinessPath:'./venues/gamagori/model-cycle-v1.json',
       dataRoot:'./live/gamagori',
-      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true}
+      capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     }
   };
 
@@ -363,7 +365,7 @@
   function routeFor(input){
     const v=resolve(input);
     if(!v)return './portal.html';
-    return v.code==='07'?'./?venue=gamagori':`./venue.html?jcd=${encodeURIComponent(v.code)}&shell=5`;
+    return `./venue.html?jcd=${encodeURIComponent(v.code)}&shell=5`;
   }
   function list(){return venues.slice()}
   return Object.freeze({version:'VENUE-REGISTRY-V1',list,resolve,routeFor});
