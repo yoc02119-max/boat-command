@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse,json,re
+import argparse,json,re,importlib.util,sys,math
 from pathlib import Path
+# Reuse the existing real-archive venue extractor, including named venue sections.
+_spec=importlib.util.spec_from_file_location('bc_program_history_v131',Path(__file__).resolve().parents[1]/'program-history-builder-v131.py')
+_base=importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name]=_base
+_spec.loader.exec_module(_base)
 
 FW=str.maketrans("０１２３４５６７８９ＲｒＨｈ：ｍ", "0123456789RrHh:m")
 VALID={"A1","A2","B1","B2"}
 ENTRY=re.compile(
- r"^\s*([1-6])\s+(\d{4}).*?(A1|A2|B1|B2)\s+"
+ r"^\s*([1-6])\s*(\d{4}).*?(A1|A2|B1|B2)\s+"
  r"([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s+"
  r"([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s+"
  r"(\d+)\s+([0-9]+(?:\.[0-9]+)?)\s+(\d+)\s+([0-9]+(?:\.[0-9]+)?)(.*)$"
 )
-RACE_HEAD=re.compile(r"^\s*(\d{1,2})R\s+(.*?)\s+H\s*\d+",re.I)
+RACE_HEAD=re.compile(r"^\s*(\d{1,2})\s*R\s+(.*?)\s+H\s*\d+",re.I)
 TRIFECTA=re.compile(r"(?:３|3)連単\s+([1-6])-([1-6])-([1-6])\s+([0-9,]+)円?",re.I)
-RESULT_HEAD=re.compile(r"^\s*(\d{1,2})R\s+",re.I)
+RESULT_HEAD=re.compile(r"^\s*(\d{1,2})\s*R\s+",re.I)
 
 def read(path:Path)->str:
  raw=path.read_bytes()
@@ -26,11 +31,7 @@ def norm(s:str)->str:
  return s.translate(FW).replace("　"," ")
 
 def block(text:str,code:str,kind:str)->str:
- t=norm(text)
- a=re.search(rf"(?m)^\s*{re.escape(code)}{kind}BGN\s*$",t)
- if not a:return ""
- b=re.search(rf"(?m)^\s*{re.escape(code)}{kind}END\s*$",t[a.end():])
- return t[a.end():a.end()+b.start()] if b else t[a.end():]
+ return _base.venue_blocks(text,kind).get(code,"")
 
 def parse_program(text:str):
  out={};cur=None;typ="";boats={}
@@ -58,7 +59,8 @@ def parse_program(text:str):
    "motor2Rate":round(float(m.group(9))/100,4),
    "boat":int(m.group(10)),
    "boat2Rate":round(float(m.group(11))/100,4),
-   "seriesRaw":m.group(12).strip()
+   "avgST":None,
+   "avgSTAvailable":False
   }
  flush()
  return out
@@ -69,6 +71,11 @@ def parse_results(text:str):
   line=norm(raw)
   h=RESULT_HEAD.search(line)
   if h:cur=int(h.group(1))
+  summary=re.match(r"^\s*(\d{1,2})\s*R\s+([1-6]-[1-6]-[1-6])\s+([0-9,]+)(?:\s|$)",line)
+  if summary:
+   race=int(summary.group(1));order=summary.group(2);payout=int(summary.group(3).replace(',',''))
+   if 1<=race<=12 and len(set(order.split('-')))==3 and payout>0:out.setdefault(race,(order,payout))
+   continue
   m=TRIFECTA.search(line)
   if m and cur and 1<=cur<=12:
    order=f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
@@ -86,6 +93,7 @@ def date_from(path:Path)->str:
 
 def build(b:Path,k:Path,code="03"):
  d=date_from(b)
+ if date_from(k)!=d:raise ValueError("B_K_DATE_MISMATCH")
  pb=block(read(b),code,"B");kb=block(read(k),code,"K")
  if not pb or not kb:return []
  programs=parse_program(pb);results=parse_results(kb);rows=[]
@@ -114,6 +122,15 @@ def main():
   assert kr[1]==("1-2-3",8820)
   kn=norm(k)
   assert TRIFECTA.search(kn)
+  # Named multi-venue archives, compact lane+registration, spaced race numbers.
+  boats='\n'.join(line.replace('1 3812',str(i)+'3812',1) for i in range(1,7))
+  b='戸 田［番組］\n 1R 予選 H1800m\n'+boats+'\n江 戸 川［番組］\n １ Ｒ 予選 H1800m\n'+boats+'\n平和島［番組］\n'
+  section=block(b,'03','B');assert '戸 田' not in section and '平和島' not in section
+  programs=parse_program(section);assert len(programs[1]['boats'])==6
+  assert programs[1]['boats'][0]['motor2Rate']==.4643
+  assert programs[1]['boats'][0]['avgST'] is None
+  assert parse_results(' 1R 1-2-3 8,820 1-2-3 500')[1]==('1-2-3',8820)
+  assert block('戸田［番組］\n','03','B')==''
   print("EDOGAWA_RICH_PARSER_SELF_TEST_PASS");return
  rows=build(args.b,args.k)
  payload={
@@ -125,3 +142,4 @@ def main():
  args.out.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
  print(json.dumps({"date":payload["date"],"races":len(rows)},ensure_ascii=False))
 if __name__=="__main__":main()
+

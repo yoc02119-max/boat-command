@@ -7,6 +7,7 @@ on:
       - '.github/workflows/edogawa-rich-history-bootstrap-v1.yml'
       - 'scripts/edogawa-rich-history-builder-v1.py'
       - 'edogawa-history-bootstrap-v1.json'
+      - 'program-history-builder-v131.py'
 
 permissions:
   contents: write
@@ -173,6 +174,9 @@ jobs:
             'mismatchIds':mismatch[:100],
             'blockExceptions':sum((x.get('exceptions',[]) for x in reports),[]),
             'exactBaseCoverage':not missing and not extra and not mismatch,
+            'avgSTAvailable':False,
+            'readyForCurrentProgramOnlyReplay':False,
+            'remainingFeatureGap':['avgST'],
             'readyForRichBacktest':not missing and not extra and not mismatch and len(rich)>=500
           }
           if not audit['readyForRichBacktest']:
@@ -184,6 +188,8 @@ jobs:
             'venue':'EDOGAWA','venueCode':'03',
             'cutoff':base.get('cutoff'),
             'resultUse':'HISTORICAL_LABEL_ONLY_STRICTLY_BEFORE_TARGET_DATE',
+            'avgSTAvailable':False,
+            'currentProgramOnlyReplayReady':False,
             'features':['class','nationalWinRate','national2Rate','localWinRate','local2Rate','motor2Rate','boat2Rate','raceType','raceNumber'],
             'races':sorted(rich.values(),key=lambda x:(x['d'],x['r']))
           }
@@ -202,3 +208,4 @@ jobs:
           git commit -m 'data(edogawa): publish audited rich historical features'
           git pull --rebase origin main
           git push origin HEAD:main
+
