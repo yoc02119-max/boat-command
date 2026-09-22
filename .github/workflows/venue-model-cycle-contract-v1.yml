@@ -145,10 +145,16 @@ jobs:
           assert "MODEL_CYCLE_DEPLOYMENT_EVIDENCE_MISSING" in s
           assert "APPROVED_PENDING_DEPLOYMENT" in s
           assert 'id="venueModelCycle"' in v
-          assert 'venue-model-cycle-v1.js?v=1' in v
+          assert 'venue-model-cycle-v1.js?v=2' in v
           assert 'ensureVenueModelCycle()' in v
           assert 'data-venue-model-cycle="gamagori"' in i
           assert 'venue-model-cycle-v1.js?v=3527' in i
           assert 'ほか23場の重みや成績は使用しません' in ui
+          assert 'data-cycle-action="approve"' in ui
+          assert 'data-cycle-action="reject"' in ui
+          assert 'data-cycle-action="continue"' in ui
+          assert 'data-cycle-action="activate"' in ui
+          assert '自動昇格はしません。承認後も配置確認が必要です。' in ui
+          assert 'BOAT COMMANDにはGitHub秘密鍵を保存しない' in ui
           print('VENUE_MODEL_CYCLE_UI_SAFETY_PASS')
           PY
