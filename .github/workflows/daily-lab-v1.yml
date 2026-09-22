@@ -1,0 +1,78 @@
+name: Daily LAB v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/daily-lab-report-v1.js'
+      - 'live/*/*/shadow/program-only/race-*.json'
+      - 'live/*/*/post/race-*-result.json'
+      - '.github/workflows/daily-lab-v1.yml'
+  schedule:
+    - cron: '7,22,37,52 0-14,21-23 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-lab-v1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Build daily research scoreboard
+        run: |
+          set -euo pipefail
+          node --check scripts/daily-lab-report-v1.js
+          node scripts/daily-lab-report-v1.js
+      - name: Audit write boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,subprocess
+          raw=subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=all'],text=True)
+          paths=[line[3:] for line in raw.splitlines() if line]
+          bad=[p for p in paths if p!='daily-lab-v1.json']
+          if bad:
+              raise SystemExit('DAILY_LAB_FORBIDDEN_CHANGE:'+json.dumps(bad,ensure_ascii=False))
+          if paths:
+              x=json.load(open('daily-lab-v1.json',encoding='utf-8'))
+              assert x['schema']=='boat-command-daily-lab-v1'
+              assert x['researchOnly'] is True
+              assert x['resultBlindSelection'] is True
+              assert x['automaticPromotion'] is False
+              assert x['productionChanged'] is False
+              assert x['tryChanged'] is False
+              assert x['bankrollChanged'] is False
+              assert x['totals']['venues']==24 and len(x['venues'])==24
+          print('DAILY_LAB_BOUNDARY_PASS',paths)
+          PY
+      - name: Publish scoreboard only when changed
+        run: |
+          set -euo pipefail
+          git diff --quiet -- daily-lab-v1.json && { echo 'DAILY_LAB_CURRENT'; exit 0; }
+          git config user.name 'boat-command-daily-lab'
+          git config user.email 'boat-command-daily-lab@users.noreply.github.com'
+          git add daily-lab-v1.json
+          git commit -m 'analysis: refresh daily lab scoreboard'
+          for attempt in 1 2 3 4 5 6; do
+            git pull --rebase origin main
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
