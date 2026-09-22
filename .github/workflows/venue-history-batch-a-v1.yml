@@ -25,6 +25,7 @@ jobs:
           - { code: '05', key: TAMAGAWA, slug: tamagawa }
           - { code: '06', key: HAMANAKO, slug: hamanako }
           - { code: '12', key: SUMINOE, slug: suminoe }
+          - { code: '07', key: GAMAGORI, slug: gamagori }
         shard: [0, 1, 2, 3, 4, 5]
     runs-on: ubuntu-latest
     timeout-minutes: 22
@@ -108,7 +109,7 @@ jobs:
         with:
           pattern: history-*
           path: venue-history-shards
-      - name: Merge and audit four venue histories
+      - name: Merge and audit five venue histories
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -116,7 +117,7 @@ jobs:
           from collections import Counter
           from pathlib import Path
           from zoneinfo import ZoneInfo
-          venues=[('01','KIRYU','kiryu'),('05','TAMAGAWA','tamagawa'),('06','HAMANAKO','hamanako'),('12','SUMINOE','suminoe')]
+          venues=[('01','KIRYU','kiryu'),('05','TAMAGAWA','tamagawa'),('06','HAMANAKO','hamanako'),('12','SUMINOE','suminoe'),('07','GAMAGORI','gamagori')]
           cutoff=(datetime.datetime.now(ZoneInfo('Asia/Tokyo')).date()-datetime.timedelta(days=1)).isoformat()
           for code,key,slug in venues:
               rows=[];reports=[]
@@ -140,7 +141,7 @@ jobs:
           set -euo pipefail
           git config user.name 'boat-command-history-batch'
           git config user.email 'boat-command-history-batch@users.noreply.github.com'
-          FILES=(kiryu-history-bootstrap-v1.json kiryu-history-audit-v1.json tamagawa-history-bootstrap-v1.json tamagawa-history-audit-v1.json hamanako-history-bootstrap-v1.json hamanako-history-audit-v1.json suminoe-history-bootstrap-v1.json suminoe-history-audit-v1.json)
+          FILES=(kiryu-history-bootstrap-v1.json kiryu-history-audit-v1.json tamagawa-history-bootstrap-v1.json tamagawa-history-audit-v1.json hamanako-history-bootstrap-v1.json hamanako-history-audit-v1.json suminoe-history-bootstrap-v1.json suminoe-history-audit-v1.json gamagori-history-bootstrap-v1.json gamagori-history-audit-v1.json)
           mkdir -p /tmp/history-batch-a
           cp "${FILES[@]}" /tmp/history-batch-a/
           for i in 1 2 3 4 5 6; do
