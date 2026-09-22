@@ -26,14 +26,81 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify production freeze and adapter contracts
+      - name: Verify point-expansion and Gamagori adapter contracts
         run: |
           set -euo pipefail
-          node scripts/gamagori-live-freeze-contract-v0333.js
           node scripts/point-expansion-shadow-test-v1.js
           node scripts/gamagori-point-expansion-adapter-test-v1.js
       - name: Capture future-only immutable Gamagori sidecars
         run: node scripts/gamagori-point-expansion-adapter-v1.js
+      - name: Enforce research-only write boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime, json, pathlib, re, subprocess
+          from zoneinfo import ZoneInfo
+
+          raw=subprocess.check_output(
+              ['git','status','--porcelain=v1','--untracked-files=all'],
+              text=True
+          )
+          paths=[]
+          for line in raw.splitlines():
+              if not line:
+                  continue
+              path=line[3:]
+              if ' -> ' in path:
+                  path=path.split(' -> ',1)[1]
+              paths.append(path)
+
+          allowed=re.compile(
+              r'^live/gamagori/\d{4}-\d{2}-\d{2}/shadow/program-only/'
+              r'race-(?:[1-9]|1[0-2])\.json$'
+          )
+          bad=[p for p in paths if not allowed.fullmatch(p)]
+          if bad:
+              raise SystemExit('FORBIDDEN_WORKTREE_CHANGE: '+json.dumps(bad,ensure_ascii=False))
+
+          checked=0
+          for p in paths:
+              x=json.loads(pathlib.Path(p).read_text(encoding='utf-8'))
+              assert x.get('venue')=='GAMAGORI' and x.get('venueCode')=='07'
+              assert x.get('mode')=='PROGRAM_ONLY'
+              assert x.get('resultInput') is False and x.get('payoutInput') is False
+              assert x.get('researchOnly') is True
+              assert x.get('productionEnabled') is False and x.get('tryEnabled') is False
+              assert x.get('cashNeutral') is True
+              assert x.get('immutableAfterFirstWrite') is True
+              assert x.get('productionBaselineUnchanged') is True
+              assert x.get('selectionUsesResults') is False
+              e=x.get('pointExpansion') or {}
+              assert e.get('status')=='FROZEN_WITH_BASELINE'
+              assert e.get('productionEnabled') is False
+              assert e.get('tryEnabled') is False
+              assert e.get('realMoney') is False
+              assert e.get('automaticPromotion') is False
+              assert e.get('selectionUsesResults') is False
+              ranked=e.get('ranked') or []
+              assert len(ranked)==120 and len({r.get('order') for r in ranked})==120
+              base=e.get('variants',{}).get('BASE4')
+              assert base==x.get('picks') and len(base)==4
+              for key in ('RANK6','RANK8','HEAD6','SECOND6','THIRD6'):
+                  picks=e.get('variants',{}).get(key)
+                  assert isinstance(picks,list)
+                  assert picks[:4]==base
+              date=x['date']; deadline=x['deadline']
+              d=datetime.datetime.fromisoformat(f'{date}T{deadline}:00+09:00')
+              g=datetime.datetime.fromisoformat(x['generatedAt'].replace('Z','+00:00'))
+              assert g <= d.astimezone(datetime.timezone.utc)-datetime.timedelta(minutes=3)
+              checked+=1
+
+          print(json.dumps({
+              'status':'PASS',
+              'researchOnlyChanges':paths,
+              'sidecarsChecked':checked,
+              'productionFilesChanged':False
+          },ensure_ascii=False))
+          PY
       - name: Commit new sidecars only
         run: |
           set -euo pipefail
