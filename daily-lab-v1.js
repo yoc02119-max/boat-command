@@ -20,11 +20,25 @@ async function load(date){
 }
 function metric(id,value,sub){const el=q(id);if(el)el.innerHTML=`<strong>${esc(value)}</strong><small>${esc(sub)}</small>`}
 
+function archiveObservation(code){
+ if(!archive?.venues)return null;
+ const v=archive.venues.find(x=>x.code===code),base=v?.summary?.BASE4;
+ if(!v||!base||!Number(base.races))return null;
+ const keys=['RANK6','RANK8','HEAD6','SECOND6','THIRD6'];
+ const candidates=keys.map(key=>({key,s:v.summary?.[key]})).filter(x=>x.s&&Number(x.s.hitRate)>Number(base.hitRate)&&Number(x.s.payoutOnlyRoi)>Number(base.payoutOnlyRoi))
+   .sort((a,b)=>Number(b.s.payoutOnlyRoi)-Number(a.s.payoutOnlyRoi)||Number(b.s.hitRate)-Number(a.s.hitRate));
+ if(!candidates.length)return {key:'BASE4',label:'BASE4維持',candidate:false,base,chosen:base};
+ const best=candidates[0];
+ return {key:best.key,label:`${LABELS[best.key]||best.key}候補`,candidate:true,base,chosen:best.s};
+}
+
 function venueCard(v){
  const base=v.summary?.BASE4||{},r6=v.summary?.RANK6||{},r8=v.summary?.RANK8||{};
  const d6=(Number(r6.hits)||0)-(Number(base.hits)||0),d8=(Number(r8.hits)||0)-(Number(base.hits)||0);
  const obs=(v.observations||[])[0];
  const obsText=v.evaluated&&obs?.deltaHits>0?`${LABELS[obs?.key]||obs?.key||'—'} ${signed(obs?.deltaHits||0)}的中`:v.evaluated?'追加的中なし':'結果待ち';
+ const hist=archiveObservation(v.code);
+ const histText=hist?`30日観察 · ${hist.label}`:'30日観察 · 集計待ち';
  return `<button class="lab-venue ${v.captured?'has-data':''}" data-code="${esc(v.code)}">
    <div class="lab-venue-top"><span>${esc(v.code)}</span><b>${esc(v.name)}</b><em>${v.captured?`${v.captured}/12固定`:'未固定'}</em></div>
    <div class="lab-venue-kpis">
@@ -33,7 +47,7 @@ function venueCard(v){
     <div><small>RANK6</small><strong class="${d6>0?'up':''}">${signed(d6)}</strong></div>
     <div><small>RANK8</small><strong class="${d8>0?'up':''}">${signed(d8)}</strong></div>
    </div>
-   <div class="lab-observe"><span>この日の観察</span><b>${esc(obsText)}</b></div>
+   <div class="lab-observe"><span>この日の観察</span><b>${esc(obsText)}</b><em class="lab-30d-observe ${hist?.candidate?'candidate':'base'}">${esc(histText)}</em></div>
   </button>`;
 }
 function variantRow(v,key){
@@ -105,7 +119,9 @@ function renderHistory(code){
  const v=archive.venues.find(x=>x.code===code);if(!v){box.hidden=true;return}
  box.hidden=false;
  q('#labHistoryTitle').textContent=`${v.name} · 直近30日`;
- q('#labHistoryMeta').textContent=`${archive.from}〜${archive.to} · 評価日数 ${v.days}日。保存済み試験のみ／期間内のモデル変更を含む参考集計。`;
+ const hist=archiveObservation(code);
+ const histDetail=hist?.candidate?`観察候補 ${hist.label.replace('候補','')} · 的中率 ${pct(hist.base.hitRate)}→${pct(hist.chosen.hitRate)} · ROI ${pct(hist.base.payoutOnlyRoi)}→${pct(hist.chosen.payoutOnlyRoi)}。`:'観察上はBASE4維持。';
+ q('#labHistoryMeta').textContent=`${archive.from}〜${archive.to} · 評価日数 ${v.days}日。 ${histDetail} 保存済み試験のみ／自動昇格なし。`;
  q('#labHistoryTable').innerHTML='<thead><tr><th>試験</th><th>的中/R</th><th>的中率</th><th>追加的中</th><th>払戻÷購入額*</th></tr></thead><tbody>'+Object.keys(LABELS).map(k=>{
   const s=v.summary[k];return `<tr><th>${esc(LABELS[k])}</th><td>${s.hits}/${s.races}</td><td>${pct(s.hitRate)}</td><td>${k==='BASE4'?'—':s.addedHits}</td><td>${pct(s.payoutOnlyRoi)}</td></tr>`;
  }).join('')+'</tbody>';
