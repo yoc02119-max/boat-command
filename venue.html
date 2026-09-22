@@ -243,7 +243,7 @@ refreshCommonVenueBank();
 setInterval(refreshCommonVenueBank,60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCommonVenueBank()});
 
-async function mountOperationalBoard(meta,x){
+async function mountOperationalBoard(meta,x,modes={primaryDir:'program-only',baselineDir:'class-baseline'}){
   if(!x)return null;
   const live=meta?.state==='LIVE_SIMULATION';
   const researchShadow=!live&&x.phase==='SHADOW_VALIDATION';
@@ -265,7 +265,7 @@ async function mountOperationalBoard(meta,x){
     venueCode:meta.code,
     readiness:x,
     dataRoot:meta.dataRoot,
-    modes:{primaryDir:'program-only',baselineDir:'class-baseline'}
+    modes
   });
   const activate=view=>{
     tabs?.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
@@ -287,15 +287,62 @@ async function mountOperationalBoard(meta,x){
   window.__BC_VENUE_ACTIVATE=activate;
   return boardApi;
 }
-if(jcd==='07'){location.replace('./?venue=gamagori')}
-else if(!v){location.replace('./portal.html')}
+if(!v){location.replace('./portal.html')}
 else{
  document.title=`BOAT COMMAND | ${v[0]}`;
  document.getElementById('venueCode').textContent=`VENUE ${jcd} · ${v[1]}`;
  document.getElementById('venueName').textContent=v[0];
  document.getElementById('topVenue').textContent=v[0];
  if(meta?.state==='LIVE_SIMULATION')document.getElementById('heroCopy').textContent='結果前固定の本線を30日継続運用。資金反映はAUTO TRYのみ。';
- if(jcd==='03'){
+ if(jcd==='07'){
+   const st=document.getElementById('buildStatus');
+   st.querySelector('span').textContent='運用中 · 30日';
+   st.querySelector('i').style.background='#20e0c7';
+   st.querySelector('i').style.boxShadow='0 0 14px #20e0c7';
+   st.style.color='#9be7dc';
+   document.getElementById('dataStatus').textContent='蒲郡専用本線 · 30日運用中';
+   document.getElementById('modelStatus').textContent='GAMAGORI MAIN · 本線固定';
+   document.getElementById('venueNote').textContent='蒲郡専用本線を30日固定で仮想運用中。AUTO TRYは24場共通資金から自動選抜します。';
+   (async()=>{
+     try{
+       const [cycle,status]=await Promise.all([
+         fetch('./venues/gamagori/model-cycle-v1.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null),
+         fetch('./live/gamagori/forward-status-v0347.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null)
+       ]);
+       const latestDate=status?.date||todayJst();
+       const readiness={
+         venueCode:'07',
+         latestDate,
+         current:{postResults:12},
+         forward:{
+           races:Number(cycle?.mainline?.evaluation?.races||0),
+           programOnlyRaces:Number(cycle?.mainline?.evaluation?.races||0),
+           targetReviewRaces:Number(cycle?.mainline?.minimumReviewRaces||60)
+         }
+       };
+       const progress=document.getElementById('researchProgress'),gates=document.getElementById('researchGates');
+       if(progress){
+         progress.classList.add('show');
+         document.querySelector('#rpHistory').previousElementSibling.textContent='CYCLE';
+         document.getElementById('rpHistory').textContent=`${Number(cycle?.cycleDay||0)}/30日`;
+         document.querySelector('#rpHoldout').previousElementSibling.textContent='本線MODEL';
+         document.getElementById('rpHoldout').textContent=cycle?.mainline?.modelVersion||'GAMAGORI MAIN';
+         document.querySelector('#rpProgram').previousElementSibling.textContent='FORWARD';
+         document.getElementById('rpProgram').textContent=`${Number(cycle?.mainline?.evaluation?.races||0)}/${Number(cycle?.mainline?.minimumReviewRaces||60)}R`;
+         document.querySelector('#rpFull').previousElementSibling.textContent='残り';
+         document.getElementById('rpFull').textContent=`${Number(cycle?.daysRemaining||0)}日`;
+       }
+       if(gates){
+         gates.classList.add('show');
+         gates.textContent='30日固定運用 · 他23場と同じ共通サイクル · 自動昇格なし · 人間承認必須';
+       }
+       await mountOperationalBoard(meta,readiness,{gamagoriGate:true});
+     }catch(err){
+       const board=document.getElementById('researchBoard');
+       if(board){board.hidden=false;board.innerHTML=`<div class="rrb-shell"><div class="rrb-empty" style="display:block">蒲郡表示エラー · ${String(err?.message||err)}</div></div>`;}
+     }
+   })();
+ } else if(jcd==='03'){
    const st=document.getElementById('buildStatus');
    st.querySelector('span').textContent='運用中 · 30日';
    st.querySelector('i').style.background='#20e0c7';
