@@ -1,0 +1,74 @@
+name: Venue expansion owner decision v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: approve / reject
+        required: true
+        type: choice
+        options: [approve, reject]
+      venue:
+        description: venue code or slug
+        required: true
+        type: string
+      variant:
+        description: exact candidate variant
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-expansion-owner-decision-v1
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply guarded owner decision
+        env:
+          ACTION: ${{ inputs.action }}
+          VENUE: ${{ inputs.venue }}
+          VARIANT: ${{ inputs.variant }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+          node --check scripts/daily-lab-forward-gate-v1.js
+          node --check scripts/venue-expansion-decision-v1.js
+          node --check scripts/venue-expansion-policy-v1.js
+          node scripts/daily-lab-forward-gate-v1.js
+          node scripts/venue-expansion-decision-v1.js --action "$ACTION" --venue "$VENUE" --variant "$VARIANT"
+          node scripts/venue-expansion-policy-v1.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('daily-lab/venue-expansion-policy-v1.json','utf8'));
+          const d=JSON.parse(fs.readFileSync('daily-lab/venue-expansion-decisions-v1.json','utf8'));
+          if(p.automaticPromotion!==false||p.requiresExplicitHumanApproval!==true)throw Error('OWNER_DECISION_BOUNDARY');
+          if(!Array.isArray(d.decisions))throw Error('OWNER_DECISION_LEDGER');
+          console.log('VENUE_EXPANSION_OWNER_DECISION_PASS',p.summary);
+          NODE
+      - name: Publish decision
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-owner-decision'
+          git config user.email 'boat-command-owner-decision@users.noreply.github.com'
+          git add daily-lab/forward-gate-v1.json daily-lab/venue-expansion-decisions-v1.json daily-lab/venue-expansion-policy-v1.json
+          git diff --cached --quiet && { echo 'OWNER_DECISION_CURRENT'; exit 0; }
+          git commit -m "decision: venue expansion ${{ inputs.action }} ${{ inputs.venue }}"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main
+            git push origin HEAD:main && exit 0
+            sleep $((i*2))
+          done
+          exit 1
