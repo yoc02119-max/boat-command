@@ -103,6 +103,16 @@
     const programOnlyPath=r=>`${dataRoot}/${date}/program/race-${r}.json`;
     const modePath=(dir,r)=>dir?`${dataRoot}/${date}/shadow/${dir}/race-${r}.json`:null;
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
+    let gamagoriGatePromise=null;
+    async function primaryForRace(race){
+      if(modes.primaryAdapter!=='GAMAGORI_ALL_RACE_GATE_V0349')return maybe(modePath(modes.primaryDir||'program-only',race));
+      gamagoriGatePromise=gamagoriGatePromise||maybe(`${dataRoot}/${date}/shadow/all-race-try-gates-v0349.json`);
+      const gate=await gamagoriGatePromise;
+      const row=Array.isArray(gate?.races)?gate.races.find(x=>Number(x.race)===Number(race)):null;
+      const picks=Array.isArray(row?.trifecta?.allModelPicks)?row.trifecta.allModelPicks.map(String):[];
+      if(!row||!picks.length)return null;
+      return {schema:'boat-command-gamagori-common-ui-primary-v1',race:Number(race),picks,modelVersion:String(gate?.modelVersion||'GAMAGORI-MAIN-MODEL-V0.32.0'),immutableAfterFirstWrite:true,resultInput:false,payoutInput:false,sourceFetchedAt:row.sourceFetchedAt||null};
+    }
 
     const [portfolio,selection,calendar,dayStatus]=await Promise.all([
       maybe('./shared-try-portfolio-v1.json'),
@@ -127,7 +137,7 @@
           <span>24場共通 運用資金 <b>${money(portfolio?.confirmedBankrollYen??portfolio?.startingBankrollYen??100000)}</b></span>
           <span>利用可能 <b>${money(portfolio?.availableBankrollYen??portfolio?.bankrollYen??portfolio?.confirmedBankrollYen??100000)}</b></span>
           <span>対象日TRY <b>${selected.size}R</b></span>
-          <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??0)}/${Number(readiness.forward?.targetReviewRaces||readiness.policy?.minimumProgramOnlyForwardRaces||60)}R</b></span>
+          <span>FORWARD <b>${Number(readiness.forward?.programOnlyRaces??readiness.forward?.races??readiness.mainline?.evaluation?.races??0)}/${Number(readiness.forward?.targetReviewRaces||readiness.mainline?.minimumReviewRaces||readiness.policy?.minimumProgramOnlyForwardRaces||60)}R</b></span>
         </div>
       </div>
       <div class="rrb-subtabs">
@@ -141,11 +151,11 @@
     </div>`;
 
     const rows=[];
-    const shouldLoadResults=Number(readiness.current?.postResults||0)>0;
+    const shouldLoadResults=modes.loadResultsIfPresent===true||Number(readiness.current?.postResults||0)>0;
     await Promise.all(Array.from({length:12},(_,i)=>i+1).map(async race=>{
       const [program,primary,baseline,result]=await Promise.all([
         maybe(programOnlyPath(race)),
-        maybe(modePath(modes.primaryDir||'program-only',race)),
+        primaryForRace(race),
         maybe(modePath(modes.baselineDir||'class-baseline',race)),
         shouldLoadResults?maybe(resultPath(race)):Promise.resolve(null)
       ]);

@@ -134,9 +134,9 @@ body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071521,#04101b
 <section class="research-board" id="researchBoard" hidden></section>
 </main>
 <script src="github-live-data-v1.js?v=2"></script>
-<script src="venue-registry-v1.js?v=5"></script>
+<script src="venue-registry-v1.js?v=7"></script>
 <script src="venue-runtime-v1.js?v=2"></script>
-<script src="venue-research-board-v1.js?v=7"></script>
+<script src="venue-research-board-v1.js?v=8"></script>
 <script src="venue-performance-30d-v1.js?v=1"></script>
 <script src="venue-model-cycle-v1.js?v=2"></script>
 <script src="try-race-deeplink-v1.js?v=2"></script>
@@ -265,7 +265,7 @@ async function mountOperationalBoard(meta,x){
     venueCode:meta.code,
     readiness:x,
     dataRoot:meta.dataRoot,
-    modes:{primaryDir:'program-only',baselineDir:'class-baseline'}
+    modes:meta?.code==='07'?{primaryAdapter:'GAMAGORI_ALL_RACE_GATE_V0349',baselineDir:null,loadResultsIfPresent:true}:{primaryDir:'program-only',baselineDir:'class-baseline'}
   });
   const activate=view=>{
     tabs?.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
@@ -287,8 +287,7 @@ async function mountOperationalBoard(meta,x){
   window.__BC_VENUE_ACTIVATE=activate;
   return boardApi;
 }
-if(jcd==='07'){location.replace('./?venue=gamagori')}
-else if(!v){location.replace('./portal.html')}
+if(!v){location.replace('./portal.html')}
 else{
  document.title=`BOAT COMMAND | ${v[0]}`;
  document.getElementById('venueCode').textContent=`VENUE ${jcd} · ${v[1]}`;
@@ -381,6 +380,27 @@ else{
        const ctx=await runtimePromise;
        const x=ctx?.readiness;
        if(!x||x.venueCode!==meta.code||ctx?.venue?.code!==meta.code)return;
+       if(meta.code==='07'){
+         const ev=x.mainline?.evaluation||{},races=Number(ev.races||0),hits=Number(ev.hits||0),roi=ev.roi;
+         document.getElementById('dataStatus').textContent=`Cycle ${Number(x.cycleDay||0)}/30日 · 共通サイクル`;
+         document.getElementById('modelStatus').textContent=`${meta.name}専用本線 · ${x.mainline?.modelVersion||meta.model?.version||'MODEL'}`;
+         document.getElementById('venueNote').textContent=`${meta.name}も他23場と同じ30日共通サイクルで運用中。予想ロジックは蒲郡専用のまま、本線は途中変更しません。`;
+         const progress=document.getElementById('researchProgress'),gates=document.getElementById('researchGates');
+         if(progress){
+           progress.classList.add('show');
+           document.querySelector('#rpHistory').previousElementSibling.textContent='CYCLE';
+           document.getElementById('rpHistory').textContent=`${Number(x.cycleDay||0)}/30日`;
+           document.querySelector('#rpHoldout').previousElementSibling.textContent='評価';
+           document.getElementById('rpHoldout').textContent=races?`${hits}/${races}的中 · ROI ${Number.isFinite(Number(roi))?(Number(roi)*100).toFixed(1)+'%':'—'}`:'収集中';
+           document.querySelector('#rpProgram').previousElementSibling.textContent='本線';
+           document.getElementById('rpProgram').textContent=x.mainline?.integrity==='OK'?'固定・整合OK':'確認中';
+           document.querySelector('#rpFull').previousElementSibling.textContent='次判定';
+           document.getElementById('rpFull').textContent=x.endDate||'—';
+         }
+         if(gates){gates.classList.add('show');gates.textContent='24場共通サイクル · 自動昇格なし · 人間承認必須 · 実金なし'}
+         await mountOperationalBoard(meta,x);
+         return;
+       }
        if(meta.state!=='LIVE_SIMULATION')await mountOperationalBoard(meta,x);
        const historyRows=Number(x.history?.rows||0),historyMin=Number(x.history?.minimumRows||300);
        const forwardRaces=Number(x.forward?.programOnlyRaces??x.forward?.races??0),targetRaces=Number(x.forward?.targetReviewRaces||60);
