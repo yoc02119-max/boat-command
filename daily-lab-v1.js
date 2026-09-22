@@ -7,10 +7,12 @@ const pct=v=>v!=null&&v!==''&&Number.isFinite(Number(v))?`${(Number(v)*100).toFi
 const signed=n=>`${Number(n)>0?'+':''}${Number(n)||0}`;
 const q=s=>document.querySelector(s);
 
+// Pages shell and research reports publish independently; read current main data.
+const DATA_ROOT=['localhost','127.0.0.1','[::1]'].includes(location.hostname)?'./':'https://raw.githubusercontent.com/yoc02119-max/boat-command/main/';
 let current=null,archive=null,requestId=0;
 async function load(date){
  const file=date?`daily-lab/${date}.json`:'daily-lab-v1.json';
- const r=await fetch(`./${file}?t=${Date.now()}`,{cache:'no-store'});
+ const r=await fetch(`${DATA_ROOT}${file}?t=${Date.now()}`,{cache:'no-store'});
  if(!r.ok)throw new Error('DAILY_LAB_REPORT_WAIT');
  const x=await r.json();
  if(x?.schema!=='boat-command-daily-lab-v1'||x?.totals?.venues!==24||!Array.isArray(x?.venues)||x.venues.length!==24)throw new Error('DAILY_LAB_REPORT_INVALID');
@@ -124,7 +126,7 @@ async function boot(){
  try{
   const data=await load();
   try{
-   const r=await fetch(`./daily-lab/index.json?t=${Date.now()}`,{cache:'no-store'});
+   const r=await fetch(`${DATA_ROOT}daily-lab/index.json?t=${Date.now()}`,{cache:'no-store'});
    if(r.ok){const x=await r.json();if(x.schema==='boat-command-daily-lab-history-v1'&&Array.isArray(x.dates)&&Array.isArray(x.venues))archive=x}
   }catch{}
   const dates=[...new Set([data.date,...(archive?.dates||[]).map(x=>x.date)])].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort().reverse();
