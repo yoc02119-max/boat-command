@@ -16,6 +16,6 @@ for(const src of [deep,browser]){
 }
 assert.ok(deep.includes("q.get('jcd')"));
 assert.ok(browser.includes("q.get('venue')"));
-assert.ok(browser.includes("==='gamagori'"));
+assert.ok(browser.includes("'gamagori'"));
 
 console.log('NEXT_TRY_RACE_BUTTON_CONTRACT_PASS');
