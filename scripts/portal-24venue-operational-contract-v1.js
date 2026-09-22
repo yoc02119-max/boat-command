@@ -5,6 +5,8 @@ const assert=require('node:assert/strict');
 
 const portal=fs.readFileSync('portal.html','utf8');
 const router=fs.readFileSync('github-live-data-v1.js','utf8');
+const inlineScripts=[...portal.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());
+for(const src of inlineScripts)new Function(src);
 
 assert.ok(portal.includes('24場すべて30日独立運用中'));
 assert.ok(!portal.includes('8場は30日固定運用、残り16場'));
@@ -23,6 +25,7 @@ assert.ok(portal.includes("v.decision==='AWAITING_HUMAN_REVIEW'&&v.humanReviewPe
 assert.ok(portal.includes('data-promotion-action="approve"'));
 assert.ok(portal.includes('data-promotion-action="reject"'));
 assert.ok(portal.includes("action:'venue_expansion_decision'"));
+assert.ok(portal.includes('async function renderTodayTryPerformance(){'));
 assert.ok(portal.includes('github-live-data-v1.js?v=3'));
 assert.ok(portal.includes('venue-registry-v1.js?v=6'));
 assert.ok(router.includes("venue-model-cycle-fleet-v1.json"));
