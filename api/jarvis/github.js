@@ -1,9 +1,25 @@
+import crypto from 'node:crypto';
 // BOAT COMMAND JARVIS -> GitHub executor bridge.
 // Token stays server-side in Vercel. Reads are allowed; development dispatch is constrained to a dedicated branch/issue.
 const REPO='yoc02119-max/boat-command';
 const API='https://api.github.com';
 const DEV_BRANCH='jarvis-completion-v0336';
 const DEV_ISSUE=2;
+const DEV_COOKIE='boat_command_dev';
+function devSecret(){return String(process.env.BOAT_COMMAND_DEVELOPER_PASSWORD||'');}
+function devCookie(req){
+ const raw=String(req.headers?.cookie||'');
+ for(const part of raw.split(';')){const i=part.indexOf('=');if(i<0)continue;if(part.slice(0,i).trim()===DEV_COOKIE)return decodeURIComponent(part.slice(i+1).trim());}
+ return '';
+}
+function safeEq(a,b){const aa=Buffer.from(String(a)),bb=Buffer.from(String(b));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb);}
+function devSessionValid(req){
+ const key=devSecret(),token=devCookie(req);if(!key||!token)return false;
+ const p=String(token).split('.');if(p.length!==2)return false;
+ const sig=crypto.createHmac('sha256',key).update(p[0]).digest('base64url');
+ if(!safeEq(p[1],sig))return false;
+ try{const x=JSON.parse(Buffer.from(p[0],'base64url').toString('utf8'));return x?.v===1&&Number(x.exp)>Date.now();}catch{return false;}
+}
 function headers(token){return {'accept':'application/vnd.github+json','authorization':`Bearer ${token}`,'x-github-api-version':'2022-11-28','user-agent':'boat-command-jarvis'};}
 async function gh(token,path,options={}){const r=await fetch(`${API}${path}`,{...options,headers:{...headers(token),...(options.headers||{})}});let data=null;try{data=await r.json()}catch{}return {r,data};}
 function resultFromComments(comments,jobId){const rows=(Array.isArray(comments)?comments:[]).slice().reverse();for(const c of rows){const body=String(c?.body||'');if(!body.includes(jobId))continue;const status=(body.match(/status\s*[:=]\s*(COMPLETED|FAILED|RUNNING)/i)||[])[1]?.toUpperCase();if(!status)continue;const sha=(body.match(/(?:commit\s*sha|commit|sha)\s*[:=]\s*([0-9a-f]{7,40})/i)||[])[1]||null;const tests=(body.match(/tests?\s*[:=]\s*([^\n]+)/i)||[])[1]?.trim()||null;const summary=(body.match(/summary\s*[:=]\s*([^\n]+)/i)||[])[1]?.trim()||'';return {status,commitSha:sha,tests,summary,commentId:c.id||null,commentUrl:c.html_url||null,updatedAt:c.updated_at||c.created_at||null};}return null;}
@@ -11,6 +27,8 @@ export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
  const token=process.env.JARVIS_GITHUB_EXECUTOR_TOKEN;if(!token)return res.status(503).json({error:'JARVIS_GITHUB_EXECUTOR_NOT_CONFIGURED'});
  const action=String(req.body?.action||'status');
+ const protectedActions=new Set(['dispatch_development','venue_expansion_decision','development_result']);
+ if(protectedActions.has(action)&&!devSessionValid(req))return res.status(401).json({error:'DEVELOPER_AUTH_REQUIRED'});
  try{
   if(action==='status'){
    const [repoX,branchX]=await Promise.all([gh(token,`/repos/${REPO}`),gh(token,`/repos/${REPO}/branches/main`)]);if(!repoX.r.ok||!branchX.r.ok)return res.status(502).json({error:'GITHUB_UPSTREAM_ERROR',repoStatus:repoX.r.status,branchStatus:branchX.r.status});
