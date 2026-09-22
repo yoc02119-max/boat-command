@@ -5,6 +5,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'daily-lab-v1.js'
+      - 'daily-lab.html'
       - 'scripts/daily-lab-report-v1.js'
       - 'scripts/daily-lab-history-v1.js'
       - 'scripts/daily-lab-historical-replay-v1.js'
@@ -54,6 +56,7 @@ jobs:
       - name: Build daily research scoreboard
         run: |
           set -euo pipefail
+          node --check daily-lab-v1.js
           node --check scripts/daily-lab-report-v1.js
           node scripts/daily-lab-test-v1.js
           node --check scripts/daily-lab-historical-replay-v1.js
