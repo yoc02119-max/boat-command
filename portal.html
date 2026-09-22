@@ -125,7 +125,7 @@ async function renderPromotionQueue(){
   if(ownerDevice)rows.forEach(v=>{const card=list.querySelector('[data-promotion-code="'+v.code+'"]');if(!card)return;card.querySelectorAll('[data-promotion-action]').forEach(btn=>btn.addEventListener('click',()=>sendPromotionDecision(v,btn.dataset.promotionAction,card)))});
  }catch{panel.hidden=true;list.innerHTML=''}
 }
-function renderTodayTryPerformance(){
+async function renderTodayTryPerformance(){
  const box=document.getElementById('todayTryResults'),summary=document.getElementById('todayTrySummary');if(!box||!summary)return;
  try{
   const r=await fetch(`./shared-try-portfolio-v1.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error('WAIT');
