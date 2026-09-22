@@ -1,0 +1,55 @@
+{
+  "schema": "boat-command-venue-config-v1",
+  "version": "GAMAGORI-CONFIG-V1.0.0",
+  "venue": "GAMAGORI",
+  "venueName": "蒲郡",
+  "venueCode": "07",
+  "slug": "gamagori",
+  "state": "LIVE_SIMULATION",
+  "modelEnabled": true,
+  "tryEnabled": true,
+  "realMoneyEnabled": false,
+  "predictionPolicy": {
+    "strictPreRaceOnly": true,
+    "resultLookahead": false,
+    "payoutLookahead": false,
+    "crossVenueModelFallback": false,
+    "crossVenueHistoryMixing": false,
+    "promotionRequiresVenueSpecificValidation": true
+  },
+  "promotionPolicy": {
+    "minimumHistoricalRaces": 300,
+    "primaryRecencyWindowRaces": 300,
+    "earlyReviewRaces": 36,
+    "standardObservationDays": 5,
+    "targetReviewRaces": 60,
+    "minimumPairedForwardRaces": 60,
+    "maxAllowedHitRateRegression": 0,
+    "maxAllowedResearchRoiRegression": 0,
+    "requireStrictWalkForwardHoldout": true,
+    "requireVenueSpecificForwardValidation": true,
+    "requireHumanReview": true,
+    "autoPromotion": false,
+    "autoTryEnable": false,
+    "realMoneyEnable": false
+  },
+  "notes": [
+    "蒲郡の予想ロジックは変更せず、30日モデル更新ライフサイクルだけ24場共通エンジンへ統一する。",
+    "既存のPRE-RACE固定allModelPicksとPOST結果を共通評価形式へ正規化し、結果を予想入力へ逆流させない。",
+    "Cycle 1の開始日は2026-09-18を維持する。",
+    "候補は蒲郡専用SHADOW・履歴検証・前向き比較を通過し、人間承認後にのみ反映する。",
+    "実金は扱わない。"
+  ],
+  "operationPolicy": {
+    "mode": "30_DAY_VIRTUAL_OPERATION",
+    "operationStartDate": "2026-09-18",
+    "mainModelVersion": "GAMAGORI-MAIN-MODEL-V0.32.0",
+    "mainLogicFrozen": true,
+    "sharedBankroll": true,
+    "trySelection": "SHARED_CROSS_VENUE_SELECTOR_V1",
+    "stakePerPickYen": 500,
+    "realMoney": false,
+    "improvementsRunAsSeparateShadow": true,
+    "evaluationAdapter": "GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349"
+  }
+}

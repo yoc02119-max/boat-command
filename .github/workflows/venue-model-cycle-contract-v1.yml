@@ -105,6 +105,13 @@ jobs:
           assert edogawa['mainline']['modelVersion']=='EDOGAWA-RESEARCH-MODEL-V2'
           assert edogawa['mainline']['integrity']=='OK', edogawa['mainline']
           assert set(edogawa['mainline']['versionsObserved']) <= {'EDOGAWA-RESEARCH-MODEL-V2'}
+          gamagori=json.load(open('/tmp/model-cycle-contract/venues/gamagori/model-cycle-v1.json',encoding='utf-8'))
+          assert gamagori['phase']=='ACTIVE', gamagori
+          assert gamagori['startDate']=='2026-09-18' and gamagori['endDate']=='2026-10-17'
+          assert gamagori['mainline']['modelVersion']=='GAMAGORI-MAIN-MODEL-V0.32.0'
+          assert gamagori['mainline']['integrity']=='OK', gamagori['mainline']
+          assert gamagori['mainline']['evaluation']['races']==12, gamagori['mainline']['evaluation']
+          assert gamagori['source']['evaluationAdapter']=='GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349'
           fleet=json.load(open('/tmp/model-cycle-contract/venue-model-cycle-fleet-v1.json',encoding='utf-8'))
           assert fleet['venues']==24
           policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
@@ -144,6 +151,9 @@ jobs:
           assert "MODEL_CYCLE_NOT_APPROVED_FOR_DEPLOYMENT" in s
           assert "MODEL_CYCLE_DEPLOYMENT_EVIDENCE_MISSING" in s
           assert "APPROVED_PENDING_DEPLOYMENT" in s
+          assert 'function gamagoriState' not in s
+          assert "return standardState(e,config,readiness,prev);" in s
+          assert 'GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349' in s
           assert 'id="venueModelCycle"' in v
           assert 'venue-model-cycle-v1.js?v=2' in v
           assert 'ensureVenueModelCycle()' in v

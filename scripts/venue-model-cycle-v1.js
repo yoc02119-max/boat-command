@@ -65,11 +65,46 @@ function metricDelta(candidate,main){
     roiDelta:Number.isFinite(candidate.roi)&&Number.isFinite(main.roi)?candidate.roi-main.roi:null
   };
 }
+function gamagoriNormalizedEvaluationDoc(date){
+  const base=path.join(ROOT,'live','gamagori',date);
+  const gate=readJson(path.join(base,'shadow','all-race-try-gates-v0349.json'));
+  if(!gate||gate.targetResultsRead!==false||gate.targetPayoutsRead!==false||!Array.isArray(gate.races)||!gate.modelVersion)return null;
+  const rows=[];
+  for(const g of gate.races){
+    const race=Number(g?.race);
+    const post=readJson(path.join(base,'post','race-'+race+'-result.json'));
+    const picks=Array.isArray(g?.trifecta?.allModelPicks)?g.trifecta.allModelPicks.map(String):[];
+    const actual=String(post?.trifecta||'');
+    const payout100=Number(post?.payout100);
+    if(!Number.isInteger(race)||race<1||race>12||picks.length===0||!picks.every(x=>/^[1-6]-[1-6]-[1-6]$/.test(x)))continue;
+    if(!/^[1-6]-[1-6]-[1-6]$/.test(actual)||!Number.isFinite(payout100)||payout100<0)continue;
+    rows.push({
+      race,actual,payout100,
+      programOnly:{
+        generatedAt:g.sourceFetchedAt||gate.generatedAt||null,
+        picks,
+        hit:picks.includes(actual),
+        modelVersion:String(gate.modelVersion),
+        normalizedFrom:'GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349'
+      }
+    });
+  }
+  if(!rows.length)return null;
+  return {
+    schema:'boat-command-normalized-research-evaluation-v1',
+    venue:'GAMAGORI',venueCode:'07',date,rows,
+    normalization:{source:'all-race-try-gates-v0349',preRaceFrozen:true,resultLeakage:false}
+  };
+}
 function evaluationDocs(slug,start,end){
   const base=path.join(ROOT,'live',slug);
   if(!fs.existsSync(base))return [];
   const dates=fs.readdirSync(base).filter(dateOk).sort().filter(d=>(!start||d>=start)&&(!end||d<=end));
-  return dates.map(date=>({date,doc:readJson(path.join(base,date,'research-evaluation-v1.json'))})).filter(x=>x.doc&&Array.isArray(x.doc.rows));
+  return dates.map(date=>{
+    const standard=readJson(path.join(base,date,'research-evaluation-v1.json'));
+    const doc=standard&&Array.isArray(standard.rows)?standard:(slug==='gamagori'?gamagoriNormalizedEvaluationDoc(date):null);
+    return {date,doc};
+  }).filter(x=>x.doc&&Array.isArray(x.doc.rows));
 }
 function discoverEvidence(slug,start,end){
   const docs=evaluationDocs(slug,start,end);
@@ -171,15 +206,6 @@ function latestProgramOnlyModelVersion(slug){
   }
   return null;
 }
-function gamagoriInfo(){
-  const policy=readJson(path.join(ROOT,'gamagori-forward-validation-policy-v0346.json'));
-  const status=readJson(path.join(ROOT,'live','gamagori','forward-status-v0347.json'));
-  const starts=[];
-  for(const m of Object.values(status?.methods||{}))if(dateOk(m?.cycleStartDate))starts.push(m.cycleStartDate);
-  const start=starts.sort()[0]||policy?.effectiveDate||null;
-  const methods=Object.values(status?.methods||{}).map(m=>({method:m.method,label:m.label,cycleStartDate:m.cycleStartDate,observedDays:Number(m.observedDays||0),settledMatchedRaces:Number(m.settledMatchedRaces||0),hits:Number(m.hits||0),hitRate:m.hitRate??null,stakeYen:Number(m.stakeYen||0),returnYen:Number(m.returnYen||0),profitYen:Number(m.profitYen||0),roi:m.roi??null,cycleStatus:m.cycleStatus||null}));
-  return {policy,status,start,methods};
-}
 function isActiveConfig(config){
   const mode=String(config?.operationPolicy?.mode||'');
   return config?.state==='LIVE_SIMULATION'||mode==='30_DAY_VIRTUAL_OPERATION'||mode.includes('30_DAY_VIRTUAL_OPERATION')&&config?.modelEnabled===true;
@@ -239,7 +265,7 @@ function standardState(e,config,readiness,prev){
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
   const configuredVersion=config?.operationPolicy?.mainModelVersion||null;
-  const previousLockedVersion=prev?.cycleId===cycleId&&prev?.startDate===start&&prev?.mainline?.frozen===true
+  const previousLockedVersion=prev?.cycleId===cycleId&&prev?.startDate===start&&prev?.mainline?.frozen===true&&prev?.mainline?.integrity!=='EXTERNAL_FORWARD_POLICY'
     ? (prev.mainline.modelVersion||null)
     : null;
   const lockedVersion=previousLockedVersion||configuredVersion||evidence.mainModelVersions.at(-1)||latestProgramOnlyModelVersion(e.slug)||null;
@@ -269,28 +295,7 @@ function standardState(e,config,readiness,prev){
     mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:observedVersionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
     candidates,recommendation:rec,review,
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
-    source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null},
-    retention:{sourceDataPreserved:true,cycleHistoryPreserved:true}
-  };
-}
-function gamagoriState(e,prev){
-  const g=gamagoriInfo(),start=prev?.startDate||g.start||EFFECTIVE_DATE,n=currentCycleNumber(prev),end=shiftDate(start,CYCLE_DAYS-1);
-  const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
-  const methods=g.methods,settled=methods.reduce((s,m)=>s+m.settledMatchedRaces,0);
-  const review=prev?.cycleId===newCycleId(e,n,start)?(prev.review||reviewTemplate()):reviewTemplate();
-  let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
-  let rec=elapsed<CYCLE_DAYS?{state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']}:
-    settled===0?{state:'EXTEND_EVIDENCE',candidateId:null,reasons:['NO_SETTLED_FORWARD_MATCHES']}:
-    {state:'HUMAN_REVIEW',candidateId:null,reasons:['EXISTING_GAMAGORI_FORWARD_POLICY_REQUIRES_REVIEW']};
-  if(review.humanDecision==='APPROVE_CANDIDATE')phase='APPROVED_PENDING_DEPLOYMENT';
-  return {
-    schema:'boat-command-venue-model-cycle-v1',version:VERSION,venue:e.key,venueName:e.name,venueCode:e.code,slug:e.slug,
-    generatedAt:isoNow(),cycleNumber:n,cycleId:newCycleId(e,n,start),cycleDays:CYCLE_DAYS,phase,startDate:start,endDate:end,cycleDay:day,daysRemaining,
-    isolation:baseIsolation(e),
-    mainline:{modelVersion:'GAMAGORI-CURRENT-MAIN',frozen:true,integrity:'EXTERNAL_FORWARD_POLICY',evaluation:{methods}},
-    candidates:[],recommendation:rec,review,
-    promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
-    source:{policyPath:'gamagori-forward-validation-policy-v0346.json',statusPath:'live/gamagori/forward-status-v0347.json',cycleType:g.policy?.evaluation?.cycleType||'FIXED_CALENDAR_WINDOW'},
+    source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null,evaluationAdapter:config?.operationPolicy?.evaluationAdapter||'RESEARCH_EVALUATION_V1'},
     retention:{sourceDataPreserved:true,cycleHistoryPreserved:true}
   };
 }
@@ -298,7 +303,7 @@ function build(e){
   const config=readJson(path.join(ROOT,'venues',e.slug,'config-v1.json'));
   const readiness=readJson(path.join(ROOT,'venues',e.slug,'readiness-v1.json'));
   const prev=readPrev(e.slug);
-  return e.slug==='gamagori'?gamagoriState(e,prev):standardState(e,config,readiness,prev);
+  return standardState(e,config,readiness,prev);
 }
 function verifyActivation(e,state,candidateId){
   if(state.review?.humanDecision!=='APPROVE_CANDIDATE'||state.review?.candidateId!==candidateId)throw new Error('MODEL_CYCLE_ACTIVATION_NOT_APPROVED '+e.slug);
