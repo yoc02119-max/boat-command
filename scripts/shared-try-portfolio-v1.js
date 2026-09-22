@@ -5,6 +5,7 @@ const fs=require('fs'),path=require('path'),crypto=require('crypto');
 const ROOT=path.join(__dirname,'..');
 const CONFIG_PATH=path.join(ROOT,'shared-try-config-v1.json');
 const OUTPUT_PATH=path.join(ROOT,'shared-try-portfolio-v1.json');
+const EXPANSION_POLICY_PATH=path.join(ROOT,'daily-lab','venue-expansion-policy-v1.json');
 const config=JSON.parse(fs.readFileSync(CONFIG_PATH,'utf8'));
 const JST_OFFSET=9*60*60*1000;
 const NOW_MS=process.env.BOAT_COMMAND_NOW_ISO?Date.parse(process.env.BOAT_COMMAND_NOW_ISO):Date.now();
@@ -15,6 +16,14 @@ const exists=p=>{try{return fs.existsSync(p)}catch{return false}};
 const sha256=s=>crypto.createHash('sha256').update(s).digest('hex');
 const validPick=v=>/^[1-6]-[1-6]-[1-6]$/.test(String(v||''))&&new Set(String(v).split('-')).size===3;
 const jstDate=d=>new Date((d||Date.now())+JST_OFFSET).toISOString().slice(0,10);
+const expansionPolicy=read(EXPANSION_POLICY_PATH);
+function activeExpansion(venueCode,date){
+  const row=(expansionPolicy?.venues||[]).find(v=>String(v.code).padStart(2,'0')===String(venueCode).padStart(2,'0'));
+  if(!row||row.productionEnabled!==true||row.applyToPrediction!==true||!row.candidateVariant)return null;
+  const effective=String(row.approval?.effectiveDate||'');
+  if(effective&&String(date)<effective)return null;
+  return row;
+}
 const requestedDate=process.argv[2]||jstDate(NOW_MS);
 if(Number(config.startingBankrollYen)!==100000)throw new Error('SHARED_BANKROLL_MUST_BE_100000');
 if(config.fundingScope!=='ALL_24_VENUES_SHARED')throw new Error('SHARED_BANKROLL_SCOPE_INVALID');
@@ -37,10 +46,18 @@ function safeProgramShadow(adapter,date,race){
   if(String(x.venueCode)!==adapter.venueCode||String(x.venue)!==adapter.venue)return null;
   if(String(x.date)!==date||Number(x.race)!==race)return null;
   if(x.resultInput!==false||x.payoutInput!==false||x.immutableAfterFirstWrite!==true)return null;
-  const picks=Array.isArray(x.picks)?x.picks.filter(validPick):[];
-  if(picks.length!==Number(config.picksPerTry||4))return null;
-  const probs=Array.isArray(x.probabilities)?x.probabilities:[];
-  const map=new Map(probs.map(z=>[String(z.order),Number(z.probability)]));
+  const basePicks=Array.isArray(x.picks)?x.picks.filter(validPick):[];
+  if(basePicks.length!==Number(config.picksPerTry||4))return null;
+  let picks=basePicks,expansionVariant=null;
+  const policy=activeExpansion(adapter.venueCode,date);
+  if(policy){
+    const expanded=x.pointExpansion?.variants?.[policy.candidateVariant];
+    if(!Array.isArray(expanded)||![6,8].includes(expanded.length)||expanded.some(v=>!validPick(v)))return null;
+    if(JSON.stringify(expanded.slice(0,basePicks.length))!==JSON.stringify(basePicks))return null;
+    picks=[...expanded];expansionVariant=policy.candidateVariant;
+  }
+  const ranked=Array.isArray(x.pointExpansion?.ranked)?x.pointExpansion.ranked:(Array.isArray(x.probabilities)?x.probabilities:[]);
+  const map=new Map(ranked.map(z=>[String(z.order),Number(z.probability)]));
   const pickProbs=picks.map(k=>map.get(k));
   if(pickProbs.some(v=>!Number.isFinite(v)||v<0))return null;
   const generated=Date.parse(x.generatedAt||''),ddl=deadlineEpoch(date,x.deadline);
@@ -49,9 +66,9 @@ function safeProgramShadow(adapter,date,race){
     venueCode:adapter.venueCode,venue:adapter.venue,slug:adapter.slug,date,race,
     deadline:x.deadline,deadlineEpoch:ddl,generatedAt:x.generatedAt,
     predictionPath:path.relative(ROOT,p).replace(/\\/g,'/'),predictionSha256:sha256(raw),
-    modelVersion:x.modelVersion||null,picks,
+    modelVersion:x.modelVersion||null,picks,expansionVariant,
     pickCoverage:pickProbs.reduce((s,v)=>s+v,0),topProbability:Math.max(...pickProbs),
-    sourcePolicy:'PROGRAM_ONLY_SHADOW',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true
+    sourcePolicy:expansionVariant?'PROGRAM_ONLY_SHADOW_APPROVED_EXPANSION':'PROGRAM_ONLY_SHADOW',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true
   };
 }
 function safeGamagoriGate(adapter,date){
@@ -118,20 +135,26 @@ function buildSelection(date,available){
   candidates.sort((a,b)=>b.relativeConfidence-a.relativeConfidence||(Number(b.pickCoverage)||0)-(Number(a.pickCoverage)||0)||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
   const fraction=Math.max(0,Math.min(1,Number(config.selectionFraction)||0.25));
   const desired=Math.min(Number(config.maxTryRacesPerDay)||8,Math.max(candidates.length?1:0,Math.ceil(candidates.length*fraction)));
-  const stakePerPick=Number(config.stakePerPickYen)||500,picksPerTry=Number(config.picksPerTry)||4,stakePerRace=stakePerPick*picksPerTry;
-  const affordable=Math.max(0,Math.floor(Math.max(0,available)/stakePerRace));
-  const selected=candidates.slice(0,Math.min(desired,affordable)).map((x,i)=>({
-    rank:i+1,venueCode:x.venueCode,venue:x.venue,slug:x.slug,date:x.date,race:x.race,
-    deadline:x.deadline,generatedAt:x.generatedAt,modelVersion:x.modelVersion,sourcePolicy:x.sourcePolicy,
-    predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,picks:x.picks,
-    pickCoverage:x.pickCoverage,venueMedianCoverage:x.venueMedianCoverage,relativeConfidence:x.relativeConfidence,
-    stakePerPickYen:stakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
-  }));
+  const stakePerPick=Number(config.stakePerPickYen)||500,picksPerTry=Number(config.picksPerTry)||4;
+  const selected=[];let remaining=Math.max(0,Number(available)||0);
+  for(const x of candidates){
+    if(selected.length>=desired)break;
+    const stakePerRace=stakePerPick*x.picks.length;
+    if(stakePerRace>remaining)continue;
+    selected.push({
+      rank:selected.length+1,venueCode:x.venueCode,venue:x.venue,slug:x.slug,date:x.date,race:x.race,
+      deadline:x.deadline,generatedAt:x.generatedAt,modelVersion:x.modelVersion,sourcePolicy:x.sourcePolicy,
+      predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,picks:x.picks,expansionVariant:x.expansionVariant||null,
+      pickCoverage:x.pickCoverage,venueMedianCoverage:x.venueMedianCoverage,relativeConfidence:x.relativeConfidence,
+      stakePerPickYen:stakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
+    });
+    remaining-=stakePerRace;
+  }
   const payload={
     schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',
     date,generatedAt:new Date(NOW_MS).toISOString(),
     startingBankrollYen:Number(config.startingBankrollYen)||100000,bankrollBeforeSelectionYen:available,
-    policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,picksPerTry,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
+    policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,basePicksPerTry:picksPerTry,variablePicksByVenuePolicy:true,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
     candidateCount:candidates.length,selectedCount:selected.length,selected,
     totalCommittedStakeYen:selected.reduce((s,x)=>s+x.stakeYen,0),
     resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,
@@ -185,7 +208,7 @@ function rebuildPortfolio(){
     v.tries++;v.stakeYen+=stake;
     if(cancel){v.voided++;v.voidedStakeYen+=stake}
     else if(r){v.settled++;v.settledStakeYen+=stake;v.returnYen+=ret;if(hit)v.hits++}
-    ledger.push({date:x.date,venueCode:x.venueCode,venue:x.venue,race:x.race,deadline:x.deadline,picks:x.picks,stakeYen:stake,settled:!!(r||cancel),voided:!!cancel,settlementStatus:cancel?'VOID_CANCELLED':r?'RESULT':'PENDING',result:r?.trifecta||null,payout100:r?.payout100??null,hit:r?hit:null,returnYen:cancel?stake:r?ret:null});
+    ledger.push({date:x.date,venueCode:x.venueCode,venue:x.venue,race:x.race,deadline:x.deadline,picks:x.picks,expansionVariant:x.expansionVariant||null,stakeYen:stake,settled:!!(r||cancel),voided:!!cancel,settlementStatus:cancel?'VOID_CANCELLED':r?'RESULT':'PENDING',result:r?.trifecta||null,payout100:r?.payout100??null,hit:r?hit:null,returnYen:cancel?stake:r?ret:null});
   }
   for(const v of Object.values(byVenue)){
     v.profitYen=v.returnYen-v.settledStakeYen;
@@ -212,7 +235,7 @@ function rebuildPortfolio(){
     hits,hitRate:settledTries?hits/settledTries:null,roi:settledStake?returns/settledStake:null,
     maxDrawdownYen:maxDrawdown,maxConsecutiveLosses:maxLossStreak,byVenue,ledger,
     capitalPolicy:{fundingScope:'ALL_24_VENUES_SHARED',resetAllowed:false,settledProfitCarriedForward:true,pendingStakeReserved:true,cancelledRaceReservationReleased:true},
-    boundaries:{resultInputForSelection:false,payoutInputForSelection:false,realMoney:false,bankruptcyStopsNewTry:true}
+    boundaries:{resultInputForSelection:false,payoutInputForSelection:false,realMoney:false,bankruptcyStopsNewTry:true,approvedExpansionPolicyOnly:true}
   };
   fs.writeFileSync(OUTPUT_PATH,JSON.stringify(out,null,2)+'\n');
   return out;

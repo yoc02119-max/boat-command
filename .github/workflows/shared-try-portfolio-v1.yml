@@ -7,6 +7,7 @@ on:
     paths:
       - 'shared-try-config-v1.json'
       - 'scripts/shared-try-portfolio-v1.js'
+      - 'daily-lab/venue-expansion-policy-v1.json'
       - '.github/workflows/shared-try-portfolio-v1.yml'
       - 'venue-registry-v1.js'
       - 'live/*/*/post/day-status.json'
@@ -73,8 +74,8 @@ jobs:
           if(p.capitalPolicy?.resetAllowed!==false)throw new Error('CAPITAL_MUST_NOT_AUTO_RESET');
           if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('SELECTION_LEAKAGE');
           for(const row of p.ledger||[]){
-            if(!Array.isArray(row.picks)||row.picks.length!==4)throw new Error('TRY_PICKS');
-            if(Number(row.stakeYen)!==2000)throw new Error('FIXED_STAKE');
+            if(!Array.isArray(row.picks)||![4,6,8].includes(row.picks.length))throw new Error('TRY_PICKS');
+            if(Number(row.stakeYen)!==row.picks.length*Number(cfg.stakePerPickYen||500))throw new Error('VARIABLE_STAKE_IDENTITY');
           }
           console.log('SHARED_TRY_PORTFOLIO_BOUNDARY_PASS');
           NODE

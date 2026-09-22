@@ -10,6 +10,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const money=v=>Number.isFinite(Number(v))?`¥${Math.round(Number(v)).toLocaleString('ja-JP')}`:'—';
   const signedMoney=v=>Number.isFinite(Number(v))?`${Number(v)>0?'+':''}${money(v)}`:'—';
+  const EXPANSION_LABELS={RANK6:'順位6点',RANK8:'順位8点',HEAD6:'1着筋拡張',SECOND6:'2着筋拡張',THIRD6:'3着筋拡張'};
   function todayJst(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 
   async function fetchJson(path){
@@ -31,6 +32,15 @@
     if(!shadow)return `<div class="rrb-model ${primary?'primary':''}"><span>${esc(label)}</span><b>未固定</b></div>`;
     const picks=(shadow.picks||[]).map(x=>`<i>${esc(x)}</i>`).join('');
     return `<div class="rrb-model ${primary?'primary':''}"><span>${esc(label)}</span><div class="rrb-picks">${picks||'<b>—</b>'}</div><small>${shadow.immutableAfterFirstWrite===true&&shadow.resultInput===false?'結果前固定済み':'境界確認中'}</small></div>`;
+  }
+
+  function approvedPrimary(shadow,policy){
+    if(!shadow||!policy||policy.productionEnabled!==true||policy.applyToPrediction!==true||!policy.candidateVariant)return shadow;
+    const base=Array.isArray(shadow.picks)?shadow.picks:[],expanded=shadow.pointExpansion?.variants?.[policy.candidateVariant];
+    const valid=x=>/^[1-6]-[1-6]-[1-6]$/.test(String(x||''))&&new Set(String(x).split('-')).size===3;
+    if(base.length!==4||!Array.isArray(expanded)||![6,8].includes(expanded.length)||expanded.some(x=>!valid(x)))return shadow;
+    if(JSON.stringify(expanded.slice(0,4))!==JSON.stringify(base))return shadow;
+    return {...shadow,basePicks:[...base],picks:[...expanded],expansionVariant:policy.candidateVariant,approvedExpansion:true};
   }
 
   function hitText(shadow,result){
@@ -67,7 +77,7 @@
       <header><div><strong>${row.race}R</strong><span>${esc(p.raceType||'')}</span></div><time>締切 ${esc(p.deadline||'—')}</time></header>
       <div class="rrb-boats">${boatRows(p)}</div>
       <div class="rrb-models">
-        ${picksHtml(row.primary,`${opts.venueName||'場'}専用 · 30日固定本線`,true)}
+        ${picksHtml(row.primary,row.primary?.expansionVariant?`${opts.venueName||'場'}本予想 · ${EXPANSION_LABELS[row.primary.expansionVariant]||row.primary.expansionVariant}`:`${opts.venueName||'場'}専用 · 30日固定本線`,true)}
         ${picksHtml(row.baseline,'比較用ベースライン')}
       </div>
       ${tryHtml(row)}
@@ -105,12 +115,14 @@
     const resultPath=r=>`${dataRoot}/${date}/post/race-${r}-result.json`;
     const gamagoriGate=modes.gamagoriGate===true?await maybe(`${dataRoot}/${date}/shadow/all-race-try-gates-v0349.json`):null;
 
-    const [portfolio,selection,calendar,dayStatus]=await Promise.all([
+    const [portfolio,selection,calendar,dayStatus,expansionPolicy]=await Promise.all([
       maybe('./shared-try-portfolio-v1.json'),
       maybe(`./live/portfolio/${date}/try-selection-v1.json`),
       maybe('./venue-calendar-v1.json'),
-      maybe(`${dataRoot}/${date}/post/day-status.json`)
+      maybe(`${dataRoot}/${date}/post/day-status.json`),
+      maybe('./daily-lab/venue-expansion-policy-v1.json')
     ]);
+    const expansionRow=(expansionPolicy?.venues||[]).find(v=>String(v.code).padStart(2,'0')===venueCode&&v.productionEnabled===true&&v.applyToPrediction===true&&(!v.approval?.effectiveDate||String(v.approval.effectiveDate)<=date))||null;
     const selected=new Map((selection?.selected||[]).filter(x=>String(x.venueCode).padStart(2,'0')===venueCode).map(x=>[Number(x.race),x]));
     const selectionReady=selection?.immutableAfterFirstWrite===true;
     const venueCalendar=calendar?.today===date?calendar?.venues?.[venueCode]:null;
@@ -155,6 +167,7 @@
         const picks=Array.isArray(g?.trifecta?.allModelPicks)?g.trifecta.allModelPicks:[];
         primary=picks.length?{picks,immutableAfterFirstWrite:true,resultInput:false,modelVersion:gamagoriGate?.modelVersion||'GAMAGORI-MAIN'}:null;
       }
+      primary=approvedPrimary(primary,expansionRow);
       rows.push({race,program,primary,baseline,result,tryRow:selected.get(race)||null,selectionReady});
     }));
     rows.sort((a,b)=>a.race-b.race);
