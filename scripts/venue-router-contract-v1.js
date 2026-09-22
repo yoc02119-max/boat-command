@@ -23,10 +23,14 @@ const edogawa=registry.resolve('03');
 const toda=registry.resolve('02');
 const karatsu=registry.resolve('23');
 
-assert.equal(gamagori.runtime,'PRODUCTION');
+assert.equal(gamagori.runtime,'RESEARCH');
 assert.equal(gamagori.model.global,'BOAT_COMMAND_MAIN_MODEL_V0320');
 assert.equal(gamagori.capabilities.predictionUi,true);
 assert.equal(gamagori.capabilities.try,true);
+assert.equal(gamagori.state,'LIVE_SIMULATION');
+assert.equal(gamagori.configPath,'./venues/gamagori/config-v1.json');
+assert.equal(gamagori.readinessPath,'./venues/gamagori/model-cycle-v1.json');
+assert.equal(gamagori.capabilities.realMoney,false);
 
 assert.equal(edogawa.runtime,'RESEARCH');
 assert.equal(edogawa.model.global,'BOAT_COMMAND_EDOGAWA_RESEARCH_MODEL_V2');
@@ -67,7 +71,7 @@ assert.notEqual(karatsu.model.script,gamagori.model.script);
 assert.notEqual(karatsu.model.script,toda.model.script);
 assert.notEqual(karatsu.model.script,edogawa.model.script);
 
-assert.equal(registry.routeFor('07'),'./?venue=gamagori');
+assert.equal(registry.routeFor('07'),'./venue.html?jcd=07&shell=5');
 assert.equal(registry.routeFor('03'),'./venue.html?jcd=03&shell=5');
 assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02&shell=5');
 assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23&shell=5');
@@ -78,6 +82,7 @@ assert.equal(runtime.capabilities(toda).predictionUi,true);
 assert.equal(runtime.capabilities(toda).try,true);
 
 const active=venues.filter(x=>x.state==='LIVE'||x.state==='LIVE_SIMULATION');
+assert.equal(venues.filter(x=>x.runtime==='PRODUCTION').length,0,'all venue screens must use the common runtime shell');
 assert.equal(active.length,24,'all 24 venues must be active after full-cycle rollout');
 assert.equal(venues.filter(x=>x.state==='BUILDING').length,0,'no venue may remain BUILDING after full-cycle rollout');
 for(const v of active){
