@@ -9,7 +9,7 @@ const q=s=>document.querySelector(s);
 
 // Pages shell and research reports publish independently; read current main data.
 const DATA_ROOT=['localhost','127.0.0.1','[::1]'].includes(location.hostname)?'./':'https://raw.githubusercontent.com/yoc02119-max/boat-command/main/';
-let current=null,archive=null,requestId=0;
+let current=null,archive=null,requestId=0,selectedVenueCode=null;
 async function load(date){
  const file=date?`daily-lab/${date}.json`:'daily-lab-v1.json';
  const r=await fetch(`${DATA_ROOT}${file}?t=${Date.now()}`,{cache:'no-store'});
@@ -86,6 +86,7 @@ function raceCard(r){
 function renderDetail(data,code){
  const v=data.venues.find(x=>x.code===code)||data.venues.find(x=>x.captured>0)||data.venues[0];
  if(!v)return;
+ selectedVenueCode=v.code;
  const box=q('#labDetail');
  box.hidden=false;
  q('#labDetailTitle').textContent=`${v.name} DAILY LAB`;
@@ -94,7 +95,7 @@ function renderDetail(data,code){
  q('#labRaceGrid').innerHTML=v.races.length?v.races.map(raceCard).join(''):'<div class="lab-empty">この日の締切前に固定された試験データはありません。</div>';
  document.querySelectorAll('.lab-venue').forEach(x=>x.classList.toggle('selected',x.dataset.code===v.code));
  history.replaceState(null,'',`daily-lab.html?venue=${encodeURIComponent(v.code)}&date=${encodeURIComponent(data.date)}`);
- renderHistory(v.code);
+ renderHistory(selectedVenueCode);
  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function render(data){
@@ -111,7 +112,7 @@ function render(data){
  metric('#labRank8',signed(data.totals.rank8Hits-data.totals.baseHits),'RANK8追加差');
  q('#labVenueGrid').innerHTML=data.venues.map(venueCard).join('');
  q('#labVenueGrid').onclick=e=>{const b=e.target.closest('.lab-venue');if(b)renderDetail(current,b.dataset.code)};
- const initial=new URLSearchParams(location.search).get('venue');
+ const initial=selectedVenueCode||new URLSearchParams(location.search).get('venue');
  if(initial&&data.venues.some(v=>v.code===initial))renderDetail(data,initial);
 }
 function renderHistory(code){
@@ -136,6 +137,7 @@ async function selectDate(date){
   const data=await load(date);if(token!==requestId)return;
   render(data);q('#labLoading').hidden=true;
   const params=new URLSearchParams(location.search);params.set('date',data.date);
+  if(selectedVenueCode)params.set('venue',selectedVenueCode);else params.delete('venue');
   history.replaceState(null,'',`daily-lab.html?${params}`);
  }catch(e){if(token!==requestId)return;q('#labLoading').textContent='この日の集計を取得できません。日付を選び直すか再読み込みしてください。'}
 }
