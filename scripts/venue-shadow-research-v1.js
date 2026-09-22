@@ -57,7 +57,7 @@ function snapshot(program,programPath,mode,now){
     },
     picks:picks.map(x=>x.order),
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
-    probabilitySum:d.sum,
+    pointExpansion:require('./point-expansion-shadow-v1.js').capture(d,picks,mode),probabilitySum:d.sum,
     resultInput:false,payoutInput:false,researchOnly:true,
     productionEnabled:false,tryEnabled:false,cashNeutral:true,
     immutableAfterFirstWrite:true

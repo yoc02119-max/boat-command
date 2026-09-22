@@ -81,7 +81,7 @@ function snapshot(program,fx,mode,generatedAt,sources){
     },
     picks:picks.map(x=>x.order),
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
-    probabilitySum:d.sum,
+    pointExpansion:require('./point-expansion-shadow-v1.js').capture(d,picks,mode),probabilitySum:d.sum,
     nearestDistance:d.nearestDistance,
     lanePriorSource:d.lanePriorSource||null,
     preRaceComplete:!!fx?.preRaceComplete,
