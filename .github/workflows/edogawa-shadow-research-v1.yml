@@ -57,7 +57,10 @@ jobs:
           import datetime,glob,json,re
           from zoneinfo import ZoneInfo
           JST=ZoneInfo('Asia/Tokyo')
-          for p in glob.glob('live/edogawa/*/shadow/*/race-*.json'):
+          owned=[]
+          for mode_dir in ('class-baseline','program-only','full-pre'):
+              owned.extend(glob.glob(f'live/edogawa/*/shadow/{mode_dir}/race-*.json'))
+          for p in owned:
               x=json.load(open(p,encoding='utf-8'))
               assert x['schema']=='boat-command-edogawa-shadow-research-v1'
               assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
@@ -76,7 +79,7 @@ jobs:
               generated=datetime.datetime.fromisoformat(str(x['generatedAt']).replace('Z','+00:00')).astimezone(JST)
               margin=(deadline-generated).total_seconds()/60
               assert margin>=3, f'POST_CUTOFF_SHADOW {p} margin={margin}'
-          print('EDOGAWA_SHADOW_BOUNDARY_PASS')
+          print('EDOGAWA_SHADOW_BOUNDARY_PASS',len(owned))
           PY
 
       - name: Publish only new immutable shadow files
