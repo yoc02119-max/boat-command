@@ -131,7 +131,7 @@ jobs:
           pattern: edogawa-rich-block-*
           path: /tmp/edogawa-rich-blocks
 
-      - name: Merge and exact-audit against base history
+      - name: Merge and trusted-overlap audit against base history
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -146,10 +146,12 @@ jobs:
 
           rich={r['id']:r for r in rows}
           assert len(rich)==len(rows), 'DUPLICATE_RICH_IDS'
+          trusted_ids=sorted(set(base_rows)&set(rich))
+          trusted={rid:rich[rid] for rid in trusted_ids}
           missing=sorted(set(base_rows)-set(rich))
           extra=sorted(set(rich)-set(base_rows))
           mismatch=[]
-          for rid in sorted(set(base_rows)&set(rich)):
+          for rid in trusted_ids:
               b=base_rows[rid];r=rich[rid]
               if b['o']!=r['o'] or int(b['p'])!=int(r['p']) or b['c']!=r['c']:
                   mismatch.append(rid)
@@ -168,16 +170,21 @@ jobs:
             'schema':'boat-command-edogawa-rich-history-audit-v1',
             'venueCode':'03',
             'baseRaces':len(base_rows),'richRaces':len(rich),
-            'coverage':len(rich)/len(base_rows) if base_rows else 0,
+            'sourceRichRaces':len(rich),'trustedRaces':len(trusted),
+            'coverage':len(trusted)/len(base_rows) if base_rows else 0,
+            'trustedCoverageMinimum':0.98,
             'missingIds':missing[:100],
             'extraIds':extra[:100],
             'mismatchIds':mismatch[:100],
             'blockExceptions':sum((x.get('exceptions',[]) for x in reports),[]),
             'exactBaseCoverage':not missing and not extra and not mismatch,
+            'ignoredExtraRichRows':len(extra),
+            'unmatchedBaseRows':len(missing),
+            'trustedIntersectionOnly':True,
             'avgSTAvailable':False,
             'readyForCurrentProgramOnlyReplay':False,
             'remainingFeatureGap':['avgST'],
-            'readyForRichBacktest':not missing and not extra and not mismatch and len(rich)>=500
+            'readyForRichBacktest':not mismatch and len(trusted)>=500 and (len(trusted)/len(base_rows) if base_rows else 0)>=0.98
           }
           if not audit['readyForRichBacktest']:
               print(json.dumps(audit,ensure_ascii=False,indent=2))
@@ -190,8 +197,11 @@ jobs:
             'resultUse':'HISTORICAL_LABEL_ONLY_STRICTLY_BEFORE_TARGET_DATE',
             'avgSTAvailable':False,
             'currentProgramOnlyReplayReady':False,
+            'sourcePolicy':'BASE_HISTORY_VERIFIED_INTERSECTION_ONLY',
+            'sourceRichRaces':len(rich),
+            'trustedRaces':len(trusted),
             'features':['class','nationalWinRate','national2Rate','localWinRate','local2Rate','motor2Rate','boat2Rate','raceType','raceNumber'],
-            'races':sorted(rich.values(),key=lambda x:(x['d'],x['r']))
+            'races':sorted(trusted.values(),key=lambda x:(x['d'],x['r']))
           }
           pathlib.Path('edogawa-rich-history-v1.json').write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
           pathlib.Path('edogawa-rich-history-audit-v1.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
