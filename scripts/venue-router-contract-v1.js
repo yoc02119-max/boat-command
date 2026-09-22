@@ -24,6 +24,10 @@ const toda=registry.resolve('02');
 const karatsu=registry.resolve('23');
 
 assert.equal(gamagori.runtime,'PRODUCTION');
+assert.equal(gamagori.state,'LIVE_SIMULATION');
+assert.equal(gamagori.configPath,'./venues/gamagori/config-v1.json');
+assert.equal(gamagori.dataRoot,'./live/gamagori');
+assert.equal(gamagori.capabilities.realMoney,false);
 assert.equal(gamagori.model.global,'BOAT_COMMAND_MAIN_MODEL_V0320');
 assert.equal(gamagori.capabilities.predictionUi,true);
 assert.equal(gamagori.capabilities.try,true);
@@ -67,7 +71,7 @@ assert.notEqual(karatsu.model.script,gamagori.model.script);
 assert.notEqual(karatsu.model.script,toda.model.script);
 assert.notEqual(karatsu.model.script,edogawa.model.script);
 
-assert.equal(registry.routeFor('07'),'./?venue=gamagori');
+assert.equal(registry.routeFor('07'),'./venue.html?jcd=07&shell=5');
 assert.equal(registry.routeFor('03'),'./venue.html?jcd=03&shell=5');
 assert.equal(registry.routeFor('toda'),'./venue.html?jcd=02&shell=5');
 assert.equal(registry.routeFor('karatsu'),'./venue.html?jcd=23&shell=5');
