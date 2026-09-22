@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06101c">
+<link rel="manifest" href="manifest.webmanifest?v=3520">
+<link rel="icon" href="icon.svg?v=3520" type="image/svg+xml">
+<title>BOAT COMMAND · DAILY LAB</title>
+<style>
+:root{--bg:#06101c;--panel:#0b1b2d;--line:#1c3d5f;--text:#f4f8fc;--muted:#829bb0;--cyan:#20e0c7;--blue:#178cff;--good:#5ce0a2;--warn:#ffd36a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 85% 0,rgba(23,140,255,.12),transparent 28%),linear-gradient(180deg,#071521,#04101b);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.shell{max-width:1240px;margin:auto;padding:22px 18px 90px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px}.back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#dcebf7;border:1px solid #294b68;background:#0a1a2a;border-radius:12px;padding:10px 13px;font-weight:850}.brand{text-align:right}.brand small{display:block;color:#69869d;font-size:10px;letter-spacing:.14em}.brand b{font-size:16px}.hero{margin-top:18px;border:1px solid #214663;border-radius:22px;padding:24px;background:radial-gradient(circle at 88% 20%,rgba(32,224,199,.1),transparent 28%),linear-gradient(135deg,#0b1c2d,#0b2439)}.hero-row{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.eyebrow{font-size:10px;color:#6f8ca3;letter-spacing:.13em;font-weight:900}.hero h1{font-size:clamp(32px,6vw,58px);margin:5px 0 8px;letter-spacing:-.035em}.hero p{margin:0;color:#9db4c6;line-height:1.6;max-width:720px}.safe{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.safe span{border:1px solid rgba(32,224,199,.25);border-radius:999px;padding:6px 9px;color:#9be8dc;background:rgba(32,224,199,.045);font-size:9px;font-weight:900;letter-spacing:.07em}.date{margin-top:16px;color:#7590a5;font-size:11px}.date b{color:#dcebf7;margin-left:5px}.summary{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0 24px}.summary>div{border:1px solid #193a57;background:linear-gradient(180deg,#0c2033,#081725);border-radius:14px;padding:13px 14px}.summary strong{display:block;font-size:22px}.summary small{display:block;margin-top:3px;color:#6f8ca2;font-size:9px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:24px 2px 12px}.section-head h2{margin:0;font-size:22px}.section-head p{margin:0;color:#718da3;font-size:11px}.lab-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.lab-venue{appearance:none;text-align:left;color:var(--text);border:1px solid #173853;border-radius:15px;background:linear-gradient(180deg,#0d2236,#091827);padding:14px;cursor:pointer;transition:.14s}.lab-venue:hover{transform:translateY(-1px);border-color:#2b648e}.lab-venue.has-data{border-color:#245170}.lab-venue.selected{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(32,224,199,.28),0 12px 28px rgba(0,0,0,.2)}.lab-venue-top{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center}.lab-venue-top span{display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#122f48;color:#92b2c9;font-size:10px;font-weight:900}.lab-venue-top b{font-size:18px}.lab-venue-top em{font-style:normal;font-size:8px;color:#6e8ba1}.lab-venue-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.lab-venue-kpis div{min-width:0;padding:7px 6px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055)}.lab-venue-kpis small{display:block;color:#668397;font-size:7px}.lab-venue-kpis strong{display:block;margin-top:2px;font-size:11px}.up{color:var(--good)!important}.lab-observe{margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}.lab-observe span{display:block;color:#627f94;font-size:7px}.lab-observe b{display:block;margin-top:2px;color:#c4d6e4;font-size:10px}.loading{border:1px dashed #214460;border-radius:14px;padding:22px;text-align:center;color:#7895ab}.loading b{display:block;color:#eaf5fc;font-size:15px}.loading span{display:block;margin-top:4px;font-size:11px}.detail{margin-top:28px;scroll-margin-top:14px}.detail[hidden]{display:none}.detail-shell{border:1px solid #214865;border-radius:20px;padding:18px;background:linear-gradient(180deg,#0b1e31,#071522)}.detail-head{display:flex;justify-content:space-between;align-items:flex-end;gap:15px}.detail-head h2{margin:0;font-size:28px}.detail-head p{margin:4px 0 0;color:#7994a8;font-size:11px}.lock-badge{border:1px solid rgba(255,211,106,.26);color:#ffd36a;background:rgba(255,211,106,.055);border-radius:999px;padding:7px 10px;font-size:9px;font-weight:900}.variant-table{margin-top:14px;border:1px solid rgba(255,255,255,.07);border-radius:13px;overflow:hidden}.lab-variant-row{display:grid;grid-template-columns:1.3fr .55fr .55fr .65fr .65fr;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid rgba(255,255,255,.055)}.lab-variant-row:first-child{border-top:0}.lab-variant-row div b{display:block;font-size:11px}.lab-variant-row div small{display:block;color:#678397;font-size:8px;margin-top:2px}.lab-variant-row>strong,.lab-variant-row>span,.lab-variant-row>em,.lab-variant-row>i{font-style:normal;font-size:10px;text-align:right}.lab-variant-row>span,.lab-variant-row>i{color:#7793a7}.race-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.lab-race{border:1px solid #183a56;border-radius:14px;background:#091a2a;overflow:hidden}.lab-race.base-hit{border-color:rgba(92,224,162,.36)}.lab-race>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 11px;border-bottom:1px solid rgba(255,255,255,.06)}.lab-race>header strong{font-size:18px}.lab-race>header span{margin-left:6px;color:#9fb4c3;font-size:9px}.lab-race>header em{font-style:normal;color:#6c879b;font-size:8px}.lab-base{padding:9px 10px;background:rgba(0,0,0,.13)}.lab-base>span{display:block;color:#6f8da3;font-size:8px;font-weight:900}.lab-base>div,.lab-added{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.lab-base i,.lab-added i{font-style:normal;border-radius:6px;background:#102d45;padding:4px 6px;font-size:9px;font-weight:900}.lab-added i.hit{background:rgba(92,224,162,.15);color:#aaffd3;border:1px solid rgba(92,224,162,.26)}.lab-base>b{display:block;margin-top:5px;font-size:8px;color:#809caf}.lab-race-variants{padding:8px 10px;display:grid;gap:5px}.lab-race-variant{display:grid;grid-template-columns:78px 1fr auto;gap:6px;align-items:center;min-height:27px;border-radius:7px;padding:4px 5px}.lab-race-variant.rescued{background:rgba(92,224,162,.06);box-shadow:inset 0 0 0 1px rgba(92,224,162,.14)}.lab-race-variant>span{font-size:8px;color:#7d99ad}.lab-race-variant>.lab-added{margin:0}.lab-race-variant>b{font-size:8px;color:#819aab}.lab-race-variant.rescued>b{color:#9ff4c7}.lab-empty{grid-column:1/-1;border:1px dashed #20435e;border-radius:12px;padding:22px;text-align:center;color:#7894a9}.foot-note{margin-top:14px;border:1px dashed rgba(255,255,255,.08);border-radius:12px;padding:12px;color:#6e899e;font-size:9px;line-height:1.6}.bottom-home{position:fixed;right:16px;bottom:18px;text-decoration:none;display:grid;place-items:center;width:50px;height:50px;border:1px solid #2a5676;border-radius:16px;background:rgba(7,24,38,.95);color:white;font-size:20px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+@media(max-width:1050px){.lab-grid{grid-template-columns:repeat(3,1fr)}.race-grid{grid-template-columns:repeat(2,1fr)}.summary{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.shell{padding:14px 11px 80px}.hero{padding:18px}.hero-row{display:block}.safe{justify-content:flex-start;margin-top:13px}.summary{grid-template-columns:repeat(2,1fr)}.lab-grid{grid-template-columns:repeat(2,1fr);gap:7px}.lab-venue{padding:10px}.lab-venue-top b{font-size:15px}.lab-venue-kpis{grid-template-columns:1fr 1fr}.detail-head{align-items:flex-start;flex-direction:column}.lab-variant-row{grid-template-columns:1.2fr .6fr .6fr}.lab-variant-row>em,.lab-variant-row>i{display:none}.race-grid{grid-template-columns:1fr}.brand{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+ <div class="top"><a class="back" href="./portal.html">← ホーム</a><div class="brand"><small>BOAT COMMAND</small><b>RESEARCH ENVIRONMENT</b></div></div>
+ <section class="hero">
+  <div class="hero-row">
+   <div><div class="eyebrow">DAILY LOGIC VERIFICATION</div><h1>DAILY LAB</h1><p>24場の本番ロジックを壊さず、同じ実レースで追加買い目ロジックを毎日比較する試験会場。結果を見る前に候補を固定し、結果後は検証だけを行います。</p></div>
+   <div class="safe"><span>RESULT-BLIND</span><span>RESEARCH ONLY</span><span>NO AUTO PROMOTION</span></div>
+  </div>
+  <div class="date">検証日 <b id="labDate">読み込み中…</b></div>
+ </section>
+ <section class="summary" aria-label="今日の検証集計">
+  <div id="labVenues"><strong>—</strong><small>本日固定あり</small></div>
+  <div id="labCaptured"><strong>—</strong><small>結果前固定</small></div>
+  <div id="labEvaluated"><strong>—</strong><small>結果照合済み</small></div>
+  <div id="labBaseHits"><strong>—</strong><small>現行BASE4</small></div>
+  <div id="labRank6"><strong>—</strong><small>RANK6追加差</small></div>
+  <div id="labRank8"><strong>—</strong><small>RANK8追加差</small></div>
+ </section>
+ <div class="section-head"><div><h2>24場 試験会場</h2><p>場ごとに独立評価。カードを押すと12R詳細へ。</p></div></div>
+ <div id="labLoading" class="loading"><b>DAILY LABを読み込み中</b><span>24場の固定済みSHADOWを集計しています。</span></div>
+ <section id="labVenueGrid" class="lab-grid"></section>
+ <section id="labDetail" class="detail" hidden>
+  <div class="detail-shell">
+   <div class="detail-head"><div><h2 id="labDetailTitle">DAILY LAB</h2><p id="labDetailMeta"></p></div><span class="lock-badge">観察専用 · 自動昇格なし</span></div>
+   <div id="labVariantTable" class="variant-table"></div>
+   <div id="labRaceGrid" class="race-grid"></div>
+   <div class="foot-note">回収値は払戻のみを使った参考値で、返還を完全精算した正式ROIではありません。日次成績だけで本番ロジックを変更せず、30日・HOLDOUT・FORWARD検証を経て別工程で判断します。</div>
+  </div>
+ </section>
+</div>
+<a class="bottom-home" href="./portal.html" aria-label="ホームへ">⌂</a>
+<script src="daily-lab-v1.js?v=1"></script>
+<script src="browser-controls-v1.js?v=3"></script>
+</body>
+</html>
