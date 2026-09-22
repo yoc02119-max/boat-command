@@ -319,14 +319,15 @@
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     },
     '07':{
-      state:'LIVE',
-      runtime:'PRODUCTION',
+      state:'LIVE_SIMULATION',
+      runtime:'RESEARCH',
       model:{
-        script:'./gamagori-main-model-v0320.js',
-        global:'BOAT_COMMAND_MAIN_MODEL_V0320',
-        version:'GAMAGORI-MAIN-MODEL-V0.32.0'
+        script:'./gamagori-research-model-v1.js',
+        global:'BOAT_COMMAND_GAMAGORI_RESEARCH_MODEL_V1',
+        version:'GAMAGORI-RESEARCH-MODEL-V1'
       },
       configPath:'./venues/gamagori/config-v1.json',
+      readinessPath:'./venues/gamagori/readiness-v1.json',
       dataRoot:'./live/gamagori',
       capabilities:{predictionUi:true,shadow:true,try:true,bankroll:true,postResultInput:true,realMoney:false}
     }
