@@ -2,6 +2,9 @@ name: Venue baseline batch D v1
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Venue history batch D v1"]
+    types: [completed]
   push:
     branches: [main]
     paths:
@@ -25,6 +28,7 @@ concurrency:
 
 jobs:
   backtest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     strategy:
       fail-fast: false
       matrix:
