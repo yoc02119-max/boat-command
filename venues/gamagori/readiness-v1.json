@@ -1,9 +1,9 @@
 {
   "schema": "boat-command-gamagori-readiness-v1",
-  "version": "GAMAGORI-READINESS-V1",
+  "version": "GAMAGORI-READINESS-V1.1",
   "venue": "GAMAGORI",
   "venueCode": "07",
-  "generatedAt": "2026-09-23T03:20:00+09:00",
+  "generatedAt": "2026-09-23T03:45:00+09:00",
   "phase": "SHADOW_VALIDATION",
   "latestDate": "2026-09-23",
   "current": {
@@ -15,28 +15,35 @@
     "evaluatedProgramOnly": 0
   },
   "history": {
-    "rows": 4071,
-    "raceDays": 340,
-    "windowDays": null,
-    "complete12RaceDays": null,
-    "partialOrCancelledDays": null,
+    "rows": 1127,
+    "raceDays": 95,
+    "windowDays": 180,
+    "complete12RaceDays": 91,
+    "partialOrCancelledDays": 4,
     "minimumRows": 300,
     "primaryRecencyWindowRaces": 300,
     "ready": true,
     "analysisReady": true,
-    "source": "gamagori-main-history-v0320.json"
+    "source": "gamagori-history-bootstrap-v1.json"
   },
   "baseline": {
-    "ready": false,
-    "holdoutRaces": 0,
-    "classHitRate": null,
-    "programHitRate": null,
-    "classRoi": null,
-    "programRoi": null,
-    "hitRateDelta": null,
-    "roiDelta": null,
-    "candidateUplift": false,
-    "selectedConfig": null
+    "ready": true,
+    "holdoutRaces": 348,
+    "classHitRate": 0.20977011494252873,
+    "programHitRate": 0.22988505747126436,
+    "classRoi": 0.8171695402298851,
+    "programRoi": 0.8548850574712644,
+    "hitRateDelta": 0.020114942528735635,
+    "roiDelta": 0.03771551724137934,
+    "candidateUplift": true,
+    "selectedConfig": {
+      "recencyWindow": 300,
+      "classScale": 0.18,
+      "neighborMix": 0.65,
+      "neighborLimit": 240,
+      "decay": 0.55,
+      "laplace": 1
+    }
   },
   "forward": {
     "evaluationDays": 0,
@@ -55,7 +62,6 @@
     "forwardUpliftReady": false
   },
   "blockers": [
-    "COMMON_RESEARCH_BASELINE_NOT_REBUILT",
     "FORWARD_36_RACES_NOT_READY",
     "FORWARD_60_RACES_NOT_READY",
     "FORWARD_MODEL_UPLIFT_NOT_READY",
@@ -77,7 +83,7 @@
     "active": true,
     "mainLogicFrozen": true,
     "sharedBankroll": true,
-    "sharedBankrollStartYen": 1000000,
+    "sharedBankrollStartYen": 100000,
     "realMoney": false,
     "runtime": "RESEARCH",
     "modelVersion": "GAMAGORI-RESEARCH-MODEL-V1",

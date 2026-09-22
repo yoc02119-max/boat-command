@@ -8,6 +8,7 @@ const generic=[
   ['tamagawa','TAMAGAWA','05','venue-shadow-batch-a-v1.yml'],
   ['hamanako','HAMANAKO','06','venue-shadow-batch-a-v1.yml'],
   ['suminoe','SUMINOE','12','venue-shadow-batch-a-v1.yml'],
+  ['gamagori','GAMAGORI','07','venue-shadow-batch-a-v1.yml'],
   ['amagasaki','AMAGASAKI','13','venue-shadow-batch-b-v1.yml'],
   ['marugame','MARUGAME','15','venue-shadow-batch-b-v1.yml'],
   ['kojima','KOJIMA','16','venue-shadow-batch-b-v1.yml'],
@@ -25,7 +26,7 @@ const specialized=[
   ['toda','TODA','02'],['edogawa','EDOGAWA','03'],['mikuni','MIKUNI','10'],
   ['naruto','NARUTO','14'],['tokuyama','TOKUYAMA','18'],['ashiya','ASHIYA','21'],['karatsu','KARATSU','23']
 ];
-const expected=new Map([...generic.map(x=>[x[0],x[2]]),...specialized.map(x=>[x[0],x[2]]),['gamagori','07']]);
+const expected=new Map([...generic.map(x=>[x[0],x[2]]),...specialized.map(x=>[x[0],x[2]])]);
 function fail(message){throw new Error(message)}
 function file(rel){const p=path.join(root,rel);if(!fs.existsSync(p))fail(`MISSING_FILE:${rel}`);return fs.readFileSync(p,'utf8')}
 function must(text,needle,label){if(!text.includes(needle))fail(`MISSING_CONTRACT:${label}:${needle}`)}
@@ -50,7 +51,7 @@ for(const [slug,key,code,wfName] of generic){
   must(wf,`key: ${key}`,'generic-workflow-key');
   must(wf,`slug: ${slug}`,'generic-workflow-slug');
   must(wf,'node scripts/venue-shadow-research-v1.js','generic-workflow-writer');
-  rows.push({slug,venue:key,venueCode:code,mode:'GENERIC_16',wired:true});
+  rows.push({slug,venue:key,venueCode:code,mode:'GENERIC_17',wired:true});
 }
 for(const [slug,key,code] of specialized){
   inputs(slug);
@@ -60,15 +61,6 @@ for(const [slug,key,code] of specialized){
   must(writer,'tryEnabled:false','specialized-writer-try-boundary');
   rows.push({slug,venue:key,venueCode:code,mode:'SPECIALIZED_7',wired:true});
 }
-const ga=file('scripts/gamagori-point-expansion-adapter-v1.js');
-const gat=file('scripts/gamagori-point-expansion-adapter-test-v1.js');
-const gaw=file('.github/workflows/gamagori-point-expansion-shadow-v1.yml');
-for(const needle of ["capture(dist,base,'PROGRAM_ONLY')",'productionEnabled:false','tryEnabled:false','cashNeutral:true','productionBaselineUnchanged:true','selectionUsesResults:false']) must(ga,needle,'gamagori-adapter');
-must(gat,'GAMAGORI_POINT_EXPANSION_ADAPTER_PASS','gamagori-adapter-test');
-must(gaw,'Enforce research-only write boundary','gamagori-workflow-boundary');
-must(gaw,'git add live/gamagori/*/shadow/program-only/','gamagori-workflow-write-scope');
-rows.push({slug:'gamagori',venue:'GAMAGORI',venueCode:'07',mode:'GAMAGORI_ADAPTER_1',wired:true});
-
 if(rows.length!==24||new Set(rows.map(x=>x.slug)).size!==24)fail(`VENUE_COUNT_INVALID:${rows.length}`);
 for(const row of rows) if(expected.get(row.slug)!==row.venueCode)fail(`VENUE_CODE_MISMATCH:${row.slug}`);
 const result={
@@ -79,7 +71,8 @@ const result={
   venues:24,
   generic:generic.length,
   specialized:specialized.length,
-  gamagoriAdapter:1,
+  gamagoriAdapter:0,
+  gamagoriUsesGenericShadow:true,
   productionChanged:false,
   uiChanged:false,
   tryChanged:false,
