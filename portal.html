@@ -21,7 +21,7 @@
 @media(max-width:1100px){.money-strip{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}@media(max-width:640px){.wrap{padding:18px 14px 100px}.grid{grid-template-columns:repeat(3,1fr);gap:9px}.venue{min-height:126px;padding:13px}.venue strong{font-size:20px;margin-bottom:9px}.venue-live{font-size:11px}.tag{display:none}.bottom{gap:34px}.hero{padding:19px}.section-head h3{font-size:21px}.money-strip{grid-template-columns:1fr 1fr}.money-card:first-child{grid-column:1/-1}.money-card{padding:14px}.money-card strong{font-size:26px}}
 
 .venue-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-2px 2px 14px;color:#a8bdd0;font-size:13px}.venue-filter label{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #244764;border-radius:10px;background:#0b2033;cursor:pointer}.venue-filter input{width:17px;height:17px;margin:0;accent-color:#20e0c7}.venue-filter label:has(input:checked){border-color:#20e0c7;color:#eafffb}.venue-filter label:focus-within{outline:2px solid #56b5ff;outline-offset:2px}#venueGrid .venue[hidden]{display:none!important}#venueFilterEmpty{color:#a8bdd0;font-size:14px;padding:14px 2px}
-.venue-try-count{display:block;width:fit-content;max-width:100%;margin:0 0 10px;padding:5px 8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#91a9bc;background:rgba(255,255,255,.025);font-size:12px;font-weight:800;line-height:1.4}.venue-try-count.has-try{border-color:rgba(32,224,199,.4);background:rgba(32,224,199,.1);color:#b9fff0}
+.venue-try-count{display:block;width:fit-content;max-width:100%;margin:0 0 10px;padding:5px 8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#91a9bc;background:rgba(255,255,255,.025);font-size:12px;font-weight:800;line-height:1.4}.venue-try-count.has-try{border-color:rgba(32,224,199,.4);background:rgba(32,224,199,.1);color:#b9fff0}.venue-30d-title{margin-top:10px;color:#6f8ba1;font-size:10px;font-weight:800;letter-spacing:.04em}.venue-30d-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}.venue-30d-stat{padding:5px 6px;border:1px solid rgba(255,255,255,.07);border-radius:7px;background:rgba(255,255,255,.02);min-width:0}.venue-30d-stat span{display:block;color:#6f8ba1;font-size:9px;line-height:1.2}.venue-30d-stat b{display:block;margin-top:2px;color:#eef8ff;font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.venue-30d-stat b.plus{color:#9ee7dc}.venue-30d-stat b.minus{color:#ff9baa}
 </style>
 </head>
 <body>
@@ -225,6 +225,22 @@ async function renderActiveTryList(){
   if(selectedEl)selectedEl.textContent='—';if(beforeDeadlineEl)beforeDeadlineEl.textContent='—';if(resultWaitingEl)resultWaitingEl.textContent='—';if(finishedEl)finishedEl.textContent='—';
  }
 }
+function renderVenue30dStats(portfolio){
+ const byVenue=portfolio?.byVenue&&typeof portfolio.byVenue==='object'?portfolio.byVenue:{};
+ for(const meta of venues){
+  const card=document.querySelector(`.venue[data-venue="${meta.code}"]`);if(!card)continue;
+  const v=byVenue[String(meta.code).padStart(2,'0')]||null;
+  const tries=Number(v?.tries)||0,settled=Number(v?.settled)||0;
+  const hit=settled&&Number.isFinite(Number(v?.hitRate))?Number(v.hitRate)*100:null;
+  const roi=Number(v?.settledStakeYen)>0&&Number.isFinite(Number(v?.roi))?Number(v.roi)*100:null;
+  const profit=Number(v?.profitYen)||0;
+  const hitEl=card.querySelector('[data-stat="hit"]'),roiEl=card.querySelector('[data-stat="roi"]'),triesEl=card.querySelector('[data-stat="tries"]'),profitEl=card.querySelector('[data-stat="profit"]');
+  if(hitEl)hitEl.textContent=hit==null?'—':`${hit.toFixed(1)}%`;
+  if(roiEl){roiEl.textContent=roi==null?'—':`${roi.toFixed(1)}%`;roiEl.className=roi==null?'':roi>=100?'plus':'minus'}
+  if(triesEl)triesEl.textContent=`${tries}R`;
+  if(profitEl){profitEl.textContent=signed(profit);profitEl.className=profit>0?'plus':profit<0?'minus':''}
+ }
+}
 async function renderSharedPortfolioStats(){
  const b=document.getElementById('portalBankroll'),bn=document.getElementById('portalBankrollNote'),p=document.getElementById('portalProfit'),t=document.getElementById('portalTodayProfit'),l=document.getElementById('portalTodayLabel'),tr=document.getElementById('portalTodayRoi'),rr=document.getElementById('portalTotalRoi');
  try{
@@ -244,9 +260,11 @@ async function renderSharedPortfolioStats(){
    l.textContent=`${day} · TRY ${rows.length}R`;
    tr.textContent=dayRoi==null?'—':`${dayRoi.toFixed(1)}%`;tr.className=roiCls(dayRoi);
    rr.textContent=totalRoi==null?'—':`${totalRoi.toFixed(1)}%`;rr.className=roiCls(totalRoi);
+   renderVenue30dStats(x);
  }catch{
    b.textContent=money(START_BANKROLL);bn.textContent='24場共通10万円 · 確定損益を継続反映 · 自動リセットなし';
    p.textContent='¥0';t.textContent='¥0';l.textContent=`${todayJst()} · 運用準備`;tr.textContent='—';rr.textContent='—';
+   renderVenue30dStats({byVenue:{}});
  }
 }
 let cycleFleetByCode=new Map();
@@ -292,6 +310,9 @@ venues.forEach(v=>{
    :`<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
  const tryBadge=document.createElement('span');tryBadge.className='venue-try-count';tryBadge.textContent='今日のTRY 確認中';
  btn.querySelector('small').before(tryBadge);
+ const statsTitle=document.createElement('div');statsTitle.className='venue-30d-title';statsTitle.textContent='30日TRY成績';
+ const stats=document.createElement('div');stats.className='venue-30d-stats';stats.innerHTML='<div class="venue-30d-stat"><span>的中率</span><b data-stat="hit">—</b></div><div class="venue-30d-stat"><span>ROI</span><b data-stat="roi">—</b></div><div class="venue-30d-stat"><span>TRY数</span><b data-stat="tries">0R</b></div><div class="venue-30d-stat"><span>収支</span><b data-stat="profit">¥0</b></div>';
+ btn.querySelector('.venue-live')?.after(statsTitle,stats);
  btn.onclick=()=>{location.href=window.BOAT_COMMAND_VENUE_REGISTRY?.routeFor?.(v)||`./venue.html?jcd=${v.code}`};
  grid.appendChild(btn)
 });
