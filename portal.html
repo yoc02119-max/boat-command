@@ -98,7 +98,8 @@ function applyDeveloperUi(){
  if(!developerAuthenticated){const panel=document.getElementById('promotionPanel');if(panel)panel.hidden=true;}
 }
 async function refreshDeveloperMode(){
- try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();developerAuthenticated=r.ok&&x.authenticated===true;}catch{developerAuthenticated=false;}
+ try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();developerAuthenticated=r.ok&&x.authenticated===true;}catch{developerAuthenticated=!!loadAppStore();}
+ if(!developerAuthenticated&&location.hostname.endsWith('github.io'))developerAuthenticated=!!loadAppStore();
  applyDeveloperUi();return developerAuthenticated;
 }
 async function developerUnlock(){
