@@ -88,6 +88,32 @@ const money=n=>`¥${Math.round(Number(n)||0).toLocaleString('ja-JP')}`,signed=n=
 const todayJst=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const nowJstHM=()=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
 const SERIES=[['2026-09-13','2026-09-18'],['2026-09-29','2026-10-04'],['2026-10-07','2026-10-10'],['2026-10-27','2026-11-01'],['2026-11-09','2026-11-14'],['2026-11-21','2026-11-24'],['2026-11-27','2026-12-02'],['2026-12-06','2026-12-11'],['2026-12-25','2026-12-29']];
+let developerAuthenticated=false;
+function applyDeveloperUi(){
+ const badge=document.getElementById('developerBadge'),status=document.getElementById('developerStatus'),toggle=document.getElementById('developerToggle'),lab=document.getElementById('dailyLabNav');
+ if(badge)badge.hidden=!developerAuthenticated;
+ if(status)status.textContent=developerAuthenticated?'UNLOCKED':'LOCKED';
+ if(lab)lab.hidden=!developerAuthenticated;
+ if(toggle){toggle.textContent=developerAuthenticated?'開発者モードをロック':'開発者モードを解除';toggle.classList.toggle('lock',developerAuthenticated);toggle.classList.toggle('unlock',!developerAuthenticated);}
+ if(!developerAuthenticated){const panel=document.getElementById('promotionPanel');if(panel)panel.hidden=true;}
+}
+async function refreshDeveloperMode(){
+ try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();developerAuthenticated=r.ok&&x.authenticated===true;}catch{developerAuthenticated=false;}
+ applyDeveloperUi();return developerAuthenticated;
+}
+async function developerUnlock(){
+ const code=window.prompt('開発者コードを入力してください');if(code===null)return;
+ try{
+  const r=await fetch('/api/developer-auth',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'login',code})});
+  const x=await r.json().catch(()=>({}));
+  if(!r.ok){window.alert(x.error==='DEVELOPER_PASSWORD_NOT_CONFIGURED'?'開発者コードがまだ設定されていません。':'開発者コードが違います。');return;}
+  developerAuthenticated=x.authenticated===true;applyDeveloperUi();renderPromotionQueue();
+ }catch{window.alert('開発者モードを解除できませんでした。');}
+}
+async function developerLock(){
+ try{await fetch('/api/developer-auth',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'logout'})});}catch{}
+ developerAuthenticated=false;applyDeveloperUi();renderPromotionQueue();
+}
 function parseStore(raw){try{const x=JSON.parse(raw||'null');return x&&x.schema===5&&x.sessions?x:null}catch{return null}}
 function storeRank(x){return (Number(x?._meta?.revision)||0)*10000000000000+(Date.parse(x?._meta?.updatedAt||'')||0)}
 function loadAppStore(){const xs=[];try{const x=parseStore(localStorage.getItem(APP_KEY));if(x)xs.push(x)}catch{}try{const x=parseStore(localStorage.getItem(MIRROR_KEY));if(x)xs.push(x)}catch{}try{const x=parseStore(sessionStorage.getItem(SESSION_MIRROR_KEY));if(x)xs.push(x)}catch{}if(!xs.length)return null;xs.sort((a,b)=>storeRank(b)-storeRank(a));return xs[0]}
@@ -119,13 +145,13 @@ async function sendPromotionDecision(row,decision,card){
 }
 async function renderPromotionQueue(){
  const panel=document.getElementById('promotionPanel'),list=document.getElementById('promotionList');if(!panel||!list)return;
+ if(!developerAuthenticated){panel.hidden=true;list.innerHTML='';return;}
  try{
   const r=await fetch('./daily-lab/venue-expansion-policy-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('WAIT');
   const x=await r.json(),rows=(x.venues||[]).filter(v=>v.decision==='AWAITING_HUMAN_REVIEW'&&v.humanReviewPending===true);
   panel.hidden=!rows.length;
-  const ownerDevice=!!loadAppStore();
-  list.innerHTML=rows.map(v=>`<div class="promotion-card" data-promotion-code="${v.code}"><strong>${v.name} · ${promotionVariantLabel[v.candidateVariant]||v.candidateVariant}</strong><small>FORWARD ${v.forward?.races||0}/${v.forward?.target||120}R通過 · 的中率差 ${Number.isFinite(Number(v.forward?.hitRateDelta))?(Number(v.forward.hitRateDelta)*100).toFixed(1)+'pt':'—'} · ROI差 ${Number.isFinite(Number(v.forward?.roiDelta))?(Number(v.forward.roiDelta)*100).toFixed(1)+'pt':'—'}</small>${ownerDevice?'<div class="promotion-actions"><button class="yes" type="button" data-promotion-action="approve">はい</button><button class="no" type="button" data-promotion-action="reject">いいえ</button></div><div class="promotion-status">昇格するかだけ選んでください。</div>':'<div class="promotion-status">昇格判断待ち · オーナー端末で決定します。</div>'}</div>`).join('');
-  if(ownerDevice)rows.forEach(v=>{const card=list.querySelector('[data-promotion-code="'+v.code+'"]');if(!card)return;card.querySelectorAll('[data-promotion-action]').forEach(btn=>btn.addEventListener('click',()=>sendPromotionDecision(v,btn.dataset.promotionAction,card)))});
+  list.innerHTML=rows.map(v=>`<div class="promotion-card" data-promotion-code="${v.code}"><strong>${v.name} · ${promotionVariantLabel[v.candidateVariant]||v.candidateVariant}</strong><small>FORWARD ${v.forward?.races||0}/${v.forward?.target||120}R通過 · 的中率差 ${Number.isFinite(Number(v.forward?.hitRateDelta))?(Number(v.forward.hitRateDelta)*100).toFixed(1)+'pt':'—'} · ROI差 ${Number.isFinite(Number(v.forward?.roiDelta))?(Number(v.forward.roiDelta)*100).toFixed(1)+'pt':'—'}</small><div class="promotion-actions"><button class="yes" type="button" data-promotion-action="approve">はい</button><button class="no" type="button" data-promotion-action="reject">いいえ</button></div><div class="promotion-status">昇格するかだけ選んでください。</div></div>`).join('');
+  rows.forEach(v=>{const card=list.querySelector('[data-promotion-code="'+v.code+'"]');if(!card)return;card.querySelectorAll('[data-promotion-action]').forEach(btn=>btn.addEventListener('click',()=>sendPromotionDecision(v,btn.dataset.promotionAction,card)))});
  }catch{panel.hidden=true;list.innerHTML=''}
 }
 async function renderTodayTryPerformance(){
@@ -502,7 +528,7 @@ async function refreshAllResearchBuildStatus(){
 }
 refreshCycleFleetSourceOfTruth().then(refreshAllResearchBuildStatus).then(refreshVenueCalendarStatus);
 document.getElementById('todayTryFilter')?.addEventListener('change',applyTodayTryVenueFilter);
-renderPromotionQueue();
+refreshDeveloperMode().then(renderPromotionQueue);
 setInterval(renderPromotionQueue,60000);
 renderTodayOverview();
 renderSharedPortfolioStats();
@@ -536,6 +562,7 @@ function setOtherPanel(open){
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',open&&x.id==='otherNav'));
 }
 document.getElementById("otherNav")?.addEventListener("click",()=>setOtherPanel(true));
+document.getElementById('developerToggle')?.addEventListener('click',()=>developerAuthenticated?developerLock():developerUnlock());
 document.getElementById("otherClose")?.addEventListener("click",()=>setOtherPanel(false));
 document.getElementById("otherPanel")?.addEventListener("click",e=>{if(e.target?.id==='otherPanel')setOtherPanel(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setOtherPanel(false)});
