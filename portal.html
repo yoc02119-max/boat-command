@@ -56,18 +56,35 @@ body:before{content:"010110 001011 101100 011001 010101 001101 111000 010010";po
 @media(max-width:1180px){:root{--side:145px}.wrap{padding-left:18px;padding-right:18px}.hero{padding-right:350px}.hero-art{width:340px}.try-live-list{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:820px){:root{--side:0px}.matrix-side{display:none}.wrap{margin-left:0;padding:12px 10px 92px}.bottom{left:0}.top.matrix-top{grid-template-columns:1fr auto}.matrix-top-slogan{display:none}.hero{padding:18px 13px;min-height:142px}.hero-art{right:-55px;width:330px;opacity:.22}.hero-copy-right{display:none}.hero h2{font-size:30px}.hero p{max-width:76%;font-size:10px}.money-strip{grid-template-columns:1fr 1fr}.money-card:first-child{grid-column:1/-1}.try-live-list{grid-template-columns:1fr 1fr}.grid{grid-auto-columns:minmax(150px,175px)}}
 @media(max-width:560px){.today-overview-grid{grid-template-columns:1fr 1fr}.money-card{min-height:92px;padding:11px}.money-card strong{font-size:21px}.try-live-list{grid-template-columns:1fr}.hero p{max-width:100%}.hero-art{opacity:.12}.bottom{gap:13px;justify-content:space-around}}
+
+.matrix-rain{position:fixed;z-index:0;pointer-events:none;inset:0 0 0 var(--side);overflow:hidden;opacity:.22;mix-blend-mode:screen}
+.matrix-rain:before,.matrix-rain:after{content:"010101 001011 101100 011010 110001 010010 111000 001101 101011 010101";position:absolute;left:0;right:0;top:-40%;height:180%;color:#2dffcb;font:700 10px/20px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:9px;word-spacing:24px;white-space:normal;transform:skewX(-2deg);animation:matrixFall 19s linear infinite;text-shadow:0 0 8px rgba(45,255,203,.15)}
+.matrix-rain:after{left:18%;opacity:.55;animation-duration:27s;animation-delay:-9s;letter-spacing:14px;word-spacing:32px}
+@keyframes matrixFall{from{transform:translateY(-10%) skewX(-2deg)}to{transform:translateY(28%) skewX(-2deg)}}
+.hero-photo{position:absolute;right:0;top:0;width:58%;height:100%;object-fit:cover;object-position:center;opacity:.98;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent 0,#000 28%,#000 100%);filter:saturate(1.14) contrast(1.08) brightness(.92) drop-shadow(0 0 18px rgba(45,255,203,.16))}
+.hero .hero-art{display:none}
+.matrix-icon{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid rgba(45,255,203,.22);border-radius:7px;background:linear-gradient(180deg,rgba(45,255,203,.09),rgba(45,255,203,.025));color:#63ffe4;font:900 13px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:inset 0 0 12px rgba(45,255,203,.04),0 0 10px rgba(45,255,203,.035)}
+.today-overview-item{padding-left:46px;min-height:54px}.today-overview-item .matrix-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%)}
+.money-card{padding-left:54px}.money-card .matrix-icon{position:absolute;left:14px;top:18px}
+.virtual-mode-banner{position:relative;padding-left:56px}.virtual-mode-banner>.matrix-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:31px;height:31px}
+#activeTryPanel>div>b:before,#todayTryPerformance>div>b:before{display:inline-grid;place-items:center;width:20px;height:20px;margin-right:7px;border:1px solid rgba(45,255,203,.25);border-radius:5px;color:#5affdf;font-size:11px;vertical-align:-5px;background:rgba(45,255,203,.05)}
+#activeTryPanel>div>b:before{content:"⚑"}#todayTryPerformance>div>b:before{content:"◆"}
+.venue{padding-top:88px}.venue-photo{position:absolute;left:0;right:0;top:0;width:100%;height:76px;border-radius:7px 7px 0 0;overflow:hidden;background:#03121a;border-bottom:1px solid rgba(45,255,203,.14)}.venue-photo use{pointer-events:none}.venue-photo-shade{position:absolute;left:0;right:0;top:0;height:77px;background:linear-gradient(180deg,transparent 38%,rgba(2,14,21,.84) 100%);pointer-events:none}.venue.operational .venue-photo{filter:saturate(1.1) brightness(1.03)}.venue.offday .venue-photo{filter:saturate(.5) brightness(.65)}
+.venue strong{position:relative;z-index:2}.venue-try-count,.venue small,.venue-live,.venue-30d-title,.venue-30d-stats,.arrow{position:relative;z-index:2}
+.matrix-side .side-ico{width:18px;height:18px;display:grid;place-items:center;border:1px solid rgba(45,255,203,.18);border-radius:5px;color:#6affdf;font-size:10px;background:rgba(45,255,203,.035)}
+@media(max-width:820px){.matrix-rain{left:0}.hero-photo{width:78%;opacity:.34}.today-overview-item{padding-left:42px}.money-card{padding-left:47px}.venue{padding-top:82px}.venue-photo,.venue-photo-shade{height:70px}}
 </style>
 </head>
-<body>
+<body><div class="matrix-rain" aria-hidden="true"></div>
 <aside class="matrix-side" aria-label="BOAT COMMAND navigation">
  <div class="matrix-logo"><span class="matrix-logo-mark">◉</span><b>BOAT COMMAND</b><small>AI × DATA × STRATEGY</small></div>
  <nav class="matrix-nav">
-  <a class="active" href="./portal.html"><b>⌂</b>ホーム</a>
-  <a href="#homeAnchor"><b>⌗</b>競艇場選択</a>
-  <a href="./performance.html?v=202609231000"><b>▥</b>成績</a>
-  <a href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer"><b>✦</b>AIチャット</a>
-  <a id="dailyLabNavSide" hidden href="./daily-lab.html"><b>⌬</b>LAB</a>
-  <button id="sideOtherNav" type="button"><b>⚙</b>設定</button>
+  <a class="active" href="./portal.html"><span class="side-ico">⌂</span>ホーム</a>
+  <a href="#homeAnchor"><span class="side-ico">⌗</span>競艇場選択</a>
+  <a href="./performance.html?v=202609231015"><span class="side-ico">▥</span>成績</a>
+  <a href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer"><span class="side-ico">✦</span>AIチャット</a>
+  <a id="dailyLabNavSide" hidden href="./daily-lab.html"><span class="side-ico">⌬</span>LAB</a>
+  <button id="sideOtherNav" type="button"><span class="side-ico">⚙</span>設定</button>
  </nav>
  <div class="matrix-side-bottom"><div class="system-card"><strong><i class="system-dot"></i>システム稼働中</strong><small>24 VENUES · AUTO TRY<br>LIVE DATA CONNECTED</small></div><div class="matrix-side-foot">BOAT COMMAND<br>MAKE YOUR OWN MATRIX.</div></div>
 </aside>
@@ -81,7 +98,7 @@ body:before{content:"010110 001011 101100 011001 010101 001101 111000 010010";po
  <h2>競艇場を選択</h2>
  <p>24場すべて30日独立運用中。各場専用モデルを固定し、場ごとに独立して評価・更新します。</p>
  <div class="hero-label">//// DATA DRIVEN BOAT RACING ////</div>
- <svg class="hero-art" viewBox="0 0 430 150" aria-hidden="true"><path class="wake" d="M7 120 C87 94 177 108 274 91 S376 75 426 84" fill="none" stroke-width="2"/><path class="wake" d="M24 133 C113 116 181 122 286 103 S381 95 430 100" fill="none"/><path class="boat" d="M170 98 L338 83 L382 103 L335 118 L194 116 L151 107 Z" stroke-width="2"/><path class="boat" d="M208 92 L302 81 L337 89 L313 99 L217 104 Z"/><path class="rider" d="M248 47 C258 31 278 30 289 45 C299 58 292 74 277 78 L307 91 L260 95 L239 71 Z" stroke-width="2"/><circle class="rider" cx="273" cy="36" r="12" stroke-width="2"/><path class="wake" d="M154 105 L79 95 M158 112 L54 116 M180 120 L88 136" fill="none"/></svg>
+ <img class="hero-photo" src="./hero-racer-v1.svg?v=2" alt="" aria-hidden="true">
  <div class="hero-copy-right">FASTER<br>SMARTER<br>HIGHER WINRATE</div>
 </section>
 <section id="promotionPanel" class="promotion-panel" hidden aria-live="polite">
@@ -91,22 +108,22 @@ body:before{content:"010110 001011 101100 011001 010101 001101 111000 010010";po
 <section class="today-overview" id="todayOverview" aria-label="今日のまとめ">
  <div class="today-overview-head"><b>今日のまとめ</b><span id="todayOverviewDate">読み込み中…</span></div>
  <div class="today-overview-grid">
-  <div class="today-overview-item"><span>開催</span><b id="todayActiveVenues">—</b></div>
-  <div class="today-overview-item"><span>予想候補</span><b id="todayCandidateRaces">—</b></div>
-  <div class="today-overview-item"><span>TRY選抜</span><b id="todaySelectedRaces">—</b></div>
-  <div class="today-overview-item"><span>未確定</span><b id="todayPendingRaces">—</b></div>
-  <div class="today-overview-item"><span>終了</span><b id="todaySettledRaces">—</b></div>
-  <div class="today-overview-item"><span>本日損益</span><b id="todayOverviewProfit">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">◫</i><span>開催</span><b id="todayActiveVenues">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">▤</i><span>予想候補</span><b id="todayCandidateRaces">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">▶</i><span>TRY選抜</span><b id="todaySelectedRaces">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">⌛</i><span>未確定</span><b id="todayPendingRaces">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">✓</i><span>終了</span><b id="todaySettledRaces">—</b></div>
+  <div class="today-overview-item"><i class="matrix-icon">¥</i><span>本日損益</span><b id="todayOverviewProfit">—</b></div>
  </div>
 </section>
 <section class="money-strip" aria-label="資金と収支">
-<div class="money-card"><span>24場共通 運用資金</span><strong id="portalBankroll">¥100,000</strong><small id="portalBankrollNote">開始10万円 · 確定損益を継続反映 · 自動リセットなし</small></div>
-<div class="money-card"><span>累計確定収支</span><strong id="portalProfit" class="flat">¥0</strong><small>入金を除くレース損益</small></div>
-<div class="money-card"><span>今日の確定収支</span><strong id="portalTodayProfit" class="flat">¥0</strong><small id="portalTodayLabel">本日LIVE</small></div>
-<div class="money-card"><span>今日の回収率</span><strong id="portalTodayRoi" class="flat">—</strong><small>本日払戻 ÷ 本日投資</small></div>
-<div class="money-card"><span>トータル回収率</span><strong id="portalTotalRoi" class="flat">—</strong><small>累計払戻 ÷ 累計投資</small></div>
+<div class="money-card"><i class="matrix-icon">◎</i><span>24場共通 運用資金</span><strong id="portalBankroll">¥100,000</strong><small id="portalBankrollNote">開始10万円 · 確定損益を継続反映 · 自動リセットなし</small></div>
+<div class="money-card"><i class="matrix-icon">↗</i><span>累計確定収支</span><strong id="portalProfit" class="flat">¥0</strong><small>入金を除くレース損益</small></div>
+<div class="money-card"><i class="matrix-icon">◫</i><span>今日の確定収支</span><strong id="portalTodayProfit" class="flat">¥0</strong><small id="portalTodayLabel">本日LIVE</small></div>
+<div class="money-card"><i class="matrix-icon">▥</i><span>今日の回収率</span><strong id="portalTodayRoi" class="flat">—</strong><small>本日払戻 ÷ 本日投資</small></div>
+<div class="money-card"><i class="matrix-icon">◉</i><span>トータル回収率</span><strong id="portalTotalRoi" class="flat">—</strong><small>累計払戻 ÷ 累計投資</small></div>
 </section>
-<div class="virtual-mode-banner" role="status" aria-label="仮想運用モード">
+<div class="virtual-mode-banner" role="status" aria-label="仮想運用モード"><i class="matrix-icon">◇</i>
  <div><strong>VIRTUAL TRY</strong><br><span>仮想資金のみで集計中。実金投票は行いません。</span></div>
  <div class="virtual-mode-pill">実金なし</div>
 </div>
@@ -133,7 +150,7 @@ body:before{content:"010110 001011 101100 011001 010101 001101 111000 010010";po
     <p>各場ごとに別資金を持たず、BOAT COMMAND全体で1つの10万円口座を共有します。既存のTRY履歴・確定結果・SHADOWは保持されます。</p>
   </div>
 </div>
-<nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><a class="nav" id="performanceNav" href="./performance.html?v=202609231000" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">▥</b>成績</a><a class="nav" id="dailyLabNav" hidden href="./daily-lab.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">◈</b>LAB</a><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
+<nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><a class="nav" id="performanceNav" href="./performance.html?v=202609231015" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">▥</b>成績</a><a class="nav" id="dailyLabNav" hidden href="./daily-lab.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">◈</b>LAB</a><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
 <script src="github-live-data-v1.js?v=3"></script>
 <script src="venue-registry-v1.js?v=6"></script>
 <script>
@@ -498,11 +515,12 @@ venues.forEach(v=>{
  btn.dataset.venue=v.code;
  const opTop=v.code==='07'?gs.top:'運用中 · 30日';
  const opDetail=v.code==='07'?gs.detail:'予想・AUTO TRY 接続済み';
+ const venueVisual=`<svg class="venue-photo" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="./venue-thumbnails-v1.svg?v=2#v${v.code}"></use></svg><span class="venue-photo-shade"></span>`;
  btn.innerHTML=active
-  ?`<strong>${v.name}</strong><small><span class="live-dot"></span>${opTop}</small><div class="venue-live ${v.code==='07'&&!gs.live?'wait':''}"><b>${opDetail}</b></div><span class="arrow">→</span>`
+  ?`${venueVisual}<strong>${v.name}</strong><small><span class="live-dot"></span>${opTop}</small><div class="venue-live ${v.code==='07'&&!gs.live?'wait':''}"><b>${opDetail}</b></div><span class="arrow">→</span>`
   :building
-   ?`<strong>${v.name}</strong><small><span class="live-dot"></span>構築中</small><div class="venue-live"><b>DATA LAYER</b></div><span class="arrow">→</span>`
-   :`<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
+   ?`${venueVisual}<strong>${v.name}</strong><small><span class="live-dot"></span>構築中</small><div class="venue-live"><b>DATA LAYER</b></div><span class="arrow">→</span>`
+   :`${venueVisual}<strong>${v.name}</strong><small>入口OPEN</small><div class="venue-live wait"><b>MODEL準備中</b></div><span class="arrow">→</span>`;
  const tryBadge=document.createElement('span');tryBadge.className='venue-try-count';tryBadge.textContent='今日のTRY 確認中';
  btn.querySelector('small').before(tryBadge);
  const statsTitle=document.createElement('div');statsTitle.className='venue-30d-title';statsTitle.textContent='30日TRY成績';
