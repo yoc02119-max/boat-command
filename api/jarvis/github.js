@@ -6,7 +6,10 @@ const API='https://api.github.com';
 const DEV_BRANCH='jarvis-completion-v0336';
 const DEV_ISSUE=2;
 const DEV_COOKIE='boat_command_dev';
-function devSecret(){return String(process.env.BOAT_COMMAND_DEVELOPER_PASSWORD||'');}
+function devSecret(){
+ const raw=String(process.env.BOAT_COMMAND_DEVELOPER_SESSION_SECRET||process.env.JARVIS_GITHUB_EXECUTOR_TOKEN||process.env.OPENAI_API_KEY||'');
+ return raw?crypto.createHash('sha256').update('boat-command-developer-session-v1:'+raw).digest('hex'):'';
+}
 function devCookie(req){
  const raw=String(req.headers?.cookie||'');
  for(const part of raw.split(';')){const i=part.indexOf('=');if(i<0)continue;if(part.slice(0,i).trim()===DEV_COOKIE)return decodeURIComponent(part.slice(i+1).trim());}
