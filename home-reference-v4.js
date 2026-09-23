@@ -31,7 +31,7 @@
   document.querySelectorAll('#venueGrid .venue[data-venue]').forEach(card=>{
    const src=sources[card.dataset.venue];if(!src||card.querySelector('.home-venue-photo'))return;
    const img=document.createElement('img');img.className='home-venue-photo';img.alt='';img.setAttribute('aria-hidden','true');img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
-   img.onload=()=>img.classList.add('loaded');img.onerror=()=>img.remove();img.src=src;card.prepend(img);
+   img.onload=()=>{img.classList.add('loaded');card.classList.add('venue-photo-loaded')};img.onerror=()=>img.remove();img.src=src;card.prepend(img);
   });
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',decorate,{once:true});else decorate();
