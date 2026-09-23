@@ -8,7 +8,7 @@ on:
       - 'scripts/venue-rich-history-builder-v1.py'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   archive:
@@ -97,3 +97,27 @@ jobs:
           name: venue-rich-history-audited
           path: /tmp/venue-rich-output/
           retention-days: 30
+      - name: Save audited research data to the source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          a=json.load(open('/tmp/venue-rich-output/venue-rich-history-audit-v1.json'))
+          assert len(a['venues'])==24
+          assert a['richRaces']>=27000, 'LOW_COVERAGE_RESEARCH_DATA_NOT_SAVED'
+          assert not a.get('archiveExceptions'), 'ARCHIVE_EXCEPTIONS_RESEARCH_DATA_NOT_SAVED'
+          PY
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p rich-history-24
+          cp /tmp/venue-rich-output/*-rich-history-v1.json rich-history-24/
+          cp /tmp/venue-rich-output/venue-rich-history-audit-v1.json rich-history-24/
+          git config user.name 'boat-command-rich-history-research'
+          git config user.email 'boat-command-rich-history-research@users.noreply.github.com'
+          git add rich-history-24
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'data(research): store audited 24-venue history [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
