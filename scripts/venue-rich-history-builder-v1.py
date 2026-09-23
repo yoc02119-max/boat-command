@@ -58,8 +58,27 @@ def exact_block(text, code, kind):
     label = "［番組］" if kind == "B" else "［成績］"
     title = PARSER._base.VENUE_NAMES[code]
     named = any(title in PARSER._base._compact(line) and label in line
-                for line in section.splitlines()[:4])
-    return section if re.search(marker, section) or named else ""
+                for line in section.splitlines()[:2])
+    # Official single-venue archives can use "ボートレース 津" without [番組].
+    # Require it in the title, not somewhere in a racer's name or prefecture.
+    titled = any(PARSER._base._compact(line).startswith("ボートレース" + title)
+                 for line in section.splitlines()[:2])
+    if re.search(marker, section) or named or titled:
+        return section
+    # Some official days omit a venue marker or use another leading marker.
+    # Slice at the *venue heading* instead of accepting the whole archive.
+    lines = text.splitlines()
+    headings = [(i, PARSER._base._compact(line)[len("ボートレース"):])
+                for i, line in enumerate(lines)
+                if PARSER._base._compact(line).startswith("ボートレース")]
+    for start, heading in headings:
+        if not heading.startswith(title):
+            continue
+        end = next((i for i, _ in headings if i > start), len(lines))
+        end = min(end, next((i for i in range(start + 1, end)
+                             if re.match(r"^\s*\d{2}[BK](?:BGN|END)\s*$", lines[i])), end))
+        return "\n".join(lines[start:end])
+    return ""
 
 
 def extract_day(b: Path, k: Path):
@@ -154,6 +173,9 @@ def self_test():
     assert parsed[1]["boats"][0]["motor2Rate"] == .4491
     assert parsed[1]["boats"][0]["boat"] == 164
     assert not exact_block("24BBGN\n1 1234選手23福岡52B1", "22", "B")
+    assert exact_block("ボートレース 津\n 1R 予選 H1800m", "09", "B")
+    multi = "24BBGN\nボートレース大村\n1R 予選 H1800m\nボートレース福 岡\n1R 予選 H1800m"
+    assert exact_block(multi, "22", "B").startswith("ボートレース福 岡")
     base = {"id": "2026-01-01-03-01", "c": ["B1"]*6, "o": "1-2-3", "p": 900}
     rich = {**base, "boats": [{"lane": i, "class": "B1", "registration": 4000+i,
                               **{f: .3 for f in FEATURES}} for i in range(1, 7)]}
