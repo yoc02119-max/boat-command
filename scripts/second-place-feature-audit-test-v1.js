@@ -1,5 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {build}=require('./point-expansion-shadow-v1.js');
 const {pairCandidates,auditRace,buildReport}=require('./second-place-feature-audit-v1.js');
 const orders=[];
@@ -33,4 +34,23 @@ assert.equal(pairCandidates({...snapshot,sources:{programFetchedAt:'2026-09-24T0
 assert.equal(pairCandidates({...snapshot,generatedAt:'2026-09-24T10:45:00+09:00'}),null);
 assert.equal(pairCandidates({...snapshot,preRaceFeatures:null}),null);
 assert.equal(buildReport('2026-09-24','/nonexistent-research-input').totals.verifiedResults,0);
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'second-place-audit-'));
+try{
+  const dir=path.join(temp,'live','toda',program.date);
+  for(const [relative,value] of [
+    ['shadow/program-only/race-1.json',snapshot],
+    ['post/race-1-result.json',result]
+  ]){
+    const target=path.join(dir,relative);
+    fs.mkdirSync(path.dirname(target),{recursive:true});
+    fs.writeFileSync(target,JSON.stringify(value));
+  }
+  const report=buildReport(program.date,temp);
+  assert.equal(report.totals.snapshotsWithFeatures,1);
+  assert.equal(report.totals.verifiedResults,1);
+  assert.equal(report.totals.firstOneRaces,1);
+  assert.deepEqual(report.totals.methods.CLASS,{eligible:1,secondHits:1});
+  assert.deepEqual(report.totals.methods.MOTOR_2_RATE,{eligible:1,secondHits:1});
+  assert.equal(report.venues.find(v=>v.slug==='toda').firstOneRaces,1);
+}finally{fs.rmSync(temp,{recursive:true,force:true})}
 console.log('SECOND_PLACE_FEATURE_AUDIT_PASS');
