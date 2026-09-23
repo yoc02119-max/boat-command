@@ -133,13 +133,13 @@
 .lab-reference .lab-venue-top em{color:#70aebb}
 .lab-reference .lab-venue-kpis{grid-template-columns:repeat(2,1fr);gap:4px;margin-top:9px}
 .lab-reference .lab-venue-kpis div{padding:5px;border-radius:5px;background:#001923;border-color:#005d68}
-.lab-reference .lab-venue-kpis small{color:#6099a7}
-.lab-reference .lab-venue-kpis strong{font-size:10px}
+.lab-reference .lab-venue-kpis small{color:#78adba;font-size:8px;line-height:1.25}
+.lab-reference .lab-venue-kpis strong{font-size:11px;line-height:1.25}
 .lab-reference .up{color:var(--lab-good)!important}
 .lab-reference .lab-observe{border-top-color:#005b6555}
-.lab-reference .lab-observe span{color:#5f95a3}
-.lab-reference .lab-observe b{color:#cbeaf0}
-.lab-reference .lab-30d-observe,.lab-reference .lab-forward-observe{border-top-color:#005b6555;color:#6da5b1}
+.lab-reference .lab-observe span{color:#72a7b3;font-size:8px;line-height:1.35}
+.lab-reference .lab-observe b{color:#d7f3f6;font-size:10px;line-height:1.35}
+.lab-reference .lab-30d-observe,.lab-reference .lab-forward-observe{border-top-color:#005b6555;color:#7bb2bd;font-size:8px;line-height:1.35}
 .lab-reference .lab-30d-observe.candidate{color:#83f0d3}
 .lab-reference .lab-forward-observe.ready{color:#ffd36a}
 .lab-reference .lab-forward-observe.collecting{color:#78d7e6}
@@ -216,3 +216,17 @@
  .lab-reference .brand{display:none}
 }
 @media(prefers-reduced-motion:reduce){.lab-reference *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Keep global browser controls off the LAB experiment matrix on desktop. */
+@media(min-width:821px){
+ .lab-reference #bcBrowserControls{
+  left:14px!important;right:auto!important;bottom:132px!important;transform:none!important;
+  grid-template-columns:repeat(3,42px)!important;gap:5px!important;padding:5px!important;
+  border-color:#007683!important;border-radius:8px!important;background:#001923ee!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.28)!important;
+ }
+ .lab-reference #bcBrowserControls button{
+  width:42px!important;height:34px!important;border-radius:6px!important;border-color:#006d78!important;
+  background:#002630!important;color:#bdfcff!important;font-size:16px!important;
+ }
+}
