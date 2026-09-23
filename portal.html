@@ -741,6 +741,7 @@ function activateBottomNav(id,target){
 }
 document.getElementById("homeNav")?.addEventListener("click",()=>{
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id==='homeNav'));
+ if(location.hash){history.replaceState(history.state,'',location.pathname+location.search);}
  window.scrollTo({top:0,behavior:'smooth'});
 });
 document.getElementById("aiChatNav")?.addEventListener("click",()=>{
