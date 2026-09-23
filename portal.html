@@ -88,7 +88,8 @@ const money=n=>`¥${Math.round(Number(n)||0).toLocaleString('ja-JP')}`,signed=n=
 const todayJst=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const nowJstHM=()=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
 const SERIES=[['2026-09-13','2026-09-18'],['2026-09-29','2026-10-04'],['2026-10-07','2026-10-10'],['2026-10-27','2026-11-01'],['2026-11-09','2026-11-14'],['2026-11-21','2026-11-24'],['2026-11-27','2026-12-02'],['2026-12-06','2026-12-11'],['2026-12-25','2026-12-29']];
-let developerAuthenticated=false;
+let developerAuthenticated=false,developerLockConfig=null;
+const DEV_SESSION_KEY='boatCommand.developerSession.v1';
 function applyDeveloperUi(){
  const badge=document.getElementById('developerBadge'),status=document.getElementById('developerStatus'),toggle=document.getElementById('developerToggle'),lab=document.getElementById('dailyLabNav');
  if(badge)badge.hidden=!developerAuthenticated;
@@ -97,21 +98,51 @@ function applyDeveloperUi(){
  if(toggle){toggle.textContent=developerAuthenticated?'開発者モードをロック':'開発者モードを解除';toggle.classList.toggle('lock',developerAuthenticated);toggle.classList.toggle('unlock',!developerAuthenticated);}
  if(!developerAuthenticated){const panel=document.getElementById('promotionPanel');if(panel)panel.hidden=true;}
 }
+async function loadDeveloperLockConfig(){
+ if(developerLockConfig)return developerLockConfig;
+ try{const r=await fetch('./developer-lock-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;const x=await r.json();if(x?.schema!=='boat-command-developer-lock-v1')return null;developerLockConfig=x;return x;}catch{return null;}
+}
+function localDeveloperSessionValid(){
+ try{const x=JSON.parse(localStorage.getItem(DEV_SESSION_KEY)||'null');return !!(x&&x.version==='DEVELOPER-LOCK-V1'&&Number(x.expiresAt)>Date.now());}catch{return false;}
+}
+function saveLocalDeveloperSession(hours){
+ try{localStorage.setItem(DEV_SESSION_KEY,JSON.stringify({version:'DEVELOPER-LOCK-V1',expiresAt:Date.now()+Math.max(1,Number(hours)||12)*3600000}));}catch{}
+}
+function hexBytes(hex){const m=String(hex||'').match(/../g)||[];return new Uint8Array(m.map(x=>parseInt(x,16)))}
+async function developerCodeHash(code,cfg){
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(code)),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:hexBytes(cfg.saltHex),iterations:Number(cfg.iterations)||210000},key,256);
+ return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function localDeveloperCodeValid(code,cfg){
+ if(!cfg?.configured||!cfg.hashHex||!cfg.saltHex)return false;
+ try{return (await developerCodeHash(code,cfg))===String(cfg.hashHex).toLowerCase();}catch{return false;}
+}
 async function refreshDeveloperMode(){
- try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();developerAuthenticated=r.ok&&x.authenticated===true;}catch{developerAuthenticated=!!loadAppStore();}
- if(!developerAuthenticated&&location.hostname.endsWith('github.io'))developerAuthenticated=!!loadAppStore();
+ let apiAuth=false;
+ try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();apiAuth=r.ok&&x.authenticated===true;}catch{}
+ const cfg=await loadDeveloperLockConfig();
+ developerAuthenticated=apiAuth||localDeveloperSessionValid()||(!cfg?.configured&&!!loadAppStore());
  applyDeveloperUi();return developerAuthenticated;
 }
 async function developerUnlock(){
  const code=window.prompt('開発者コードを入力してください');if(code===null)return;
+ let unlocked=false;
  try{
   const r=await fetch('/api/developer-auth',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'login',code})});
-  const x=await r.json().catch(()=>({}));
-  if(!r.ok){window.alert(x.error==='DEVELOPER_PASSWORD_NOT_CONFIGURED'?'開発者コードがまだ設定されていません。':'開発者コードが違います。');return;}
-  developerAuthenticated=x.authenticated===true;applyDeveloperUi();renderPromotionQueue();
- }catch{window.alert('開発者モードを解除できませんでした。');}
+  const x=await r.json().catch(()=>({}));unlocked=r.ok&&x.authenticated===true;
+ }catch{}
+ if(!unlocked){
+  const cfg=await loadDeveloperLockConfig();
+  if(!cfg?.configured){window.alert('開発者コードの初期設定待ちです。');return;}
+  unlocked=await localDeveloperCodeValid(code,cfg);
+  if(unlocked)saveLocalDeveloperSession(cfg.sessionHours);
+ }
+ if(!unlocked){window.alert('開発者コードが違います。');return;}
+ developerAuthenticated=true;applyDeveloperUi();renderPromotionQueue();
 }
 async function developerLock(){
+ try{localStorage.removeItem(DEV_SESSION_KEY);}catch{}
  try{await fetch('/api/developer-auth',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'logout'})});}catch{}
  developerAuthenticated=false;applyDeveloperUi();renderPromotionQueue();
 }
