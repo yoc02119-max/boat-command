@@ -365,7 +365,7 @@
   function routeFor(input){
     const v=resolve(input);
     if(!v)return './portal.html';
-    return `./venue.html?jcd=${encodeURIComponent(v.code)}&shell=5`;
+    return `./venue.html?jcd=${encodeURIComponent(v.code)}&shell=6`;
   }
   function list(){return venues.slice()}
   return Object.freeze({version:'VENUE-REGISTRY-V1',list,resolve,routeFor});
