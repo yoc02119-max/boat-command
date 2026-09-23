@@ -1,0 +1,123 @@
+name: Venue rich history rebuild v1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/venue-rich-history-rebuild-v1.yml'
+      - 'scripts/venue-rich-history-builder-v1.py'
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install archive extractor
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lhasa
+      - name: Extract all venues from each daily archive once
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          python3 program-history-builder-v131.py --self-test
+          python3 scripts/edogawa-rich-history-builder-v1.py --self-test
+          python3 scripts/venue-rich-history-builder-v1.py --self-test
+          mkdir -p /tmp/venue-rich/days /tmp/venue-rich/raw /tmp/venue-rich/b /tmp/venue-rich/k
+          python3 - <<'PY' > /tmp/venue-rich/dates.txt
+          import glob,json,os
+          dates=sorted({r['d'] for p in glob.glob('*-history-bootstrap-v1.json')
+                        for r in json.load(open(p,encoding='utf-8'))['races']})
+          for i,d in enumerate(dates):
+              if i%6==int(os.environ['SHARD']):print(d)
+          PY
+          : > /tmp/venue-rich/exceptions.txt
+          while IFS= read -r d; do
+            ymd="${d//-/}"; ym="${ymd:0:6}"; yy="${ymd:2:6}"
+            b="b${yy}.lzh"; k="k${yy}.lzh"
+            rm -rf /tmp/venue-rich/raw/* /tmp/venue-rich/b/* /tmp/venue-rich/k/*
+            bc=$(curl -sS -L --retry 2 --connect-timeout 20 --max-time 60 -o "/tmp/venue-rich/raw/$b" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/B/$ym/$b" || true)
+            kc=$(curl -sS -L --retry 2 --connect-timeout 20 --max-time 60 -o "/tmp/venue-rich/raw/$k" -w '%{http_code}' "https://www1.mbrace.or.jp/od2/K/$ym/$k" || true)
+            if [[ "$bc" != 200 || "$kc" != 200 ]]; then
+              echo "$d HTTP_B=$bc HTTP_K=$kc" >> /tmp/venue-rich/exceptions.txt
+              continue
+            fi
+            lha xw=/tmp/venue-rich/b "/tmp/venue-rich/raw/$b" >/dev/null 2>&1 || { echo "$d B_EXTRACT" >> /tmp/venue-rich/exceptions.txt; continue; }
+            lha xw=/tmp/venue-rich/k "/tmp/venue-rich/raw/$k" >/dev/null 2>&1 || { echo "$d K_EXTRACT" >> /tmp/venue-rich/exceptions.txt; continue; }
+            BFILE=$(find /tmp/venue-rich/b -type f -print -quit)
+            KFILE=$(find /tmp/venue-rich/k -type f -print -quit)
+            if [[ -z "$BFILE" || -z "$KFILE" ]]; then
+              echo "$d EMPTY_ARCHIVE" >> /tmp/venue-rich/exceptions.txt
+              continue
+            fi
+            if ! python3 scripts/venue-rich-history-builder-v1.py --b "$BFILE" --k "$KFILE" --day-out "/tmp/venue-rich/days/$d.json"; then
+              echo "$d PARSE_FAIL" >> /tmp/venue-rich/exceptions.txt
+            fi
+          done < /tmp/venue-rich/dates.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-rich-days-${{ matrix.shard }}
+          path: |
+            /tmp/venue-rich/days/
+            /tmp/venue-rich/exceptions.txt
+          retention-days: 7
+
+  audit:
+    needs: archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: venue-rich-days-*
+          path: /tmp/venue-rich-blocks
+      - name: Merge only verified rows and report coverage
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/venue-rich-all
+          find /tmp/venue-rich-blocks -name '*.json' -exec cp -n '{}' /tmp/venue-rich-all/ \;
+          python3 scripts/venue-rich-history-builder-v1.py --base-dir . --day-dir /tmp/venue-rich-all --out-dir /tmp/venue-rich-output
+          python3 - <<'PY'
+          import glob,json
+          p='/tmp/venue-rich-output/venue-rich-history-audit-v1.json'
+          a=json.load(open(p,encoding='utf-8'))
+          a['archiveExceptions']=[line for f in glob.glob('/tmp/venue-rich-blocks/*/exceptions.txt') for line in open(f,encoding='utf-8') if line.strip()]
+          with open(p,'w',encoding='utf-8') as f:json.dump(a,f,ensure_ascii=False,indent=2)
+          print('RICH',a['richRaces'],'/',a['baseRaces'],'REJECTED',a['rejected'],'ARCHIVE_EXCEPTIONS',len(a['archiveExceptions']))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-rich-history-audited
+          path: /tmp/venue-rich-output/
+          retention-days: 30
+      - name: Save audited research data to the source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          a=json.load(open('/tmp/venue-rich-output/venue-rich-history-audit-v1.json'))
+          assert len(a['venues'])==24
+          assert a['richRaces']>=27000, 'LOW_COVERAGE_RESEARCH_DATA_NOT_SAVED'
+          assert not a.get('archiveExceptions'), 'ARCHIVE_EXCEPTIONS_RESEARCH_DATA_NOT_SAVED'
+          PY
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p rich-history-24
+          cp /tmp/venue-rich-output/*-rich-history-v1.json rich-history-24/
+          cp /tmp/venue-rich-output/venue-rich-history-audit-v1.json rich-history-24/
+          git config user.name 'boat-command-rich-history-research'
+          git config user.email 'boat-command-rich-history-research@users.noreply.github.com'
+          git add rich-history-24
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'data(research): store audited 24-venue history [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
