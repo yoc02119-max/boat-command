@@ -130,6 +130,33 @@ body{background-color:#02080d}
 #otherSection b{font-size:12px}#otherSection p{font-size:8px;line-height:1.55;color:#668b97}#otherSection time{position:absolute;right:16px;top:15px;font-size:8px;color:#4c8690}
 .bottom{box-shadow:0 -8px 30px rgba(0,0,0,.18)}.bottom .nav{position:relative}.bottom .nav.active:before{content:"";position:absolute;left:18%;right:18%;top:-8px;height:2px;background:#2dffcb;box-shadow:0 0 10px #2dffcb}
 @media(max-width:820px){.hero{padding-right:13px}.hero-photo{width:82%;opacity:.27;mask-image:linear-gradient(90deg,transparent 0,#000 30%,#000 100%)}.hero-copy-right{display:none}.section-head:after{display:none}.money-card strong:after{width:52px}.venue{min-height:205px}}
+
+/* MATRIX HOME v3 — final polish; presentation only */
+.hero{min-height:180px;padding:25px 48% 22px 28px}
+.hero-photo{width:64%;right:-8px;filter:saturate(1.22) contrast(1.15) brightness(.98) drop-shadow(0 0 22px rgba(45,255,203,.24))}
+.hero-speedlines{position:absolute;z-index:3;right:84px;top:24px;width:360px;height:128px;pointer-events:none}
+.hero-speedlines span{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,255,203,.72));box-shadow:0 0 8px rgba(45,255,203,.26)}
+.hero-speedlines span:nth-child(1){top:8px;width:92px}.hero-speedlines span:nth-child(2){top:25px;width:136px}.hero-speedlines span:nth-child(3){top:44px;width:82px}.hero-speedlines span:nth-child(4){top:65px;width:154px}.hero-speedlines span:nth-child(5){top:89px;width:114px}
+.hero-hud-corner{position:absolute;z-index:3;right:13px;bottom:10px;color:#4ba99f;font:700 6px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.13em}
+.hero-hud-corner:before{content:"";display:inline-block;width:44px;height:1px;margin-right:7px;vertical-align:middle;background:linear-gradient(90deg,transparent,#2dffcb)}
+.venue-badge{position:absolute;z-index:4;left:8px;top:8px;padding:3px 6px;border:1px solid rgba(45,255,203,.27);border-radius:4px;background:rgba(1,12,18,.76);color:#73ffe7;font:800 6px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.11em;box-shadow:0 0 10px rgba(45,255,203,.04)}
+.venue.active .venue-badge,.venue.operational .venue-badge{border-color:rgba(45,255,203,.48);background:rgba(2,23,27,.82)}
+.venue.offday .venue-badge{color:#76919a;border-color:rgba(118,145,154,.22)}
+.venue:after{content:"";position:absolute;left:8px;right:8px;top:80px;height:1px;background:linear-gradient(90deg,rgba(45,255,203,.48),rgba(45,255,203,.04));opacity:.55}
+.venue strong{letter-spacing:.015em}
+.venue-30d-stat{transition:.15s;border-color:rgba(45,255,203,.09);background:linear-gradient(180deg,rgba(5,28,36,.74),rgba(2,17,24,.62))}
+.venue:hover .venue-30d-stat{border-color:rgba(45,255,203,.16)}
+.venue-30d-stat b.plus{color:#74ffe5;text-shadow:0 0 8px rgba(45,255,203,.16)}.venue-30d-stat b.minus{color:#ff758b;text-shadow:0 0 8px rgba(255,102,125,.10)}
+.try-progress-chip{position:relative;overflow:hidden}.try-progress-chip:after{content:"";position:absolute;left:8px;right:8px;bottom:4px;height:1px;background:linear-gradient(90deg,#2dffcb,transparent);opacity:.18}
+.try-live-chip{box-shadow:inset 0 0 20px rgba(45,255,203,.015),0 5px 14px rgba(0,0,0,.12)}.try-live-chip:hover{transform:translateY(-1px)}
+.today-overview-item b,.money-card strong{font-variant-numeric:tabular-nums}
+.money-card{overflow:hidden}.money-card:before{height:36px}.money-card:after{width:25px;height:25px}
+.money-card small{max-width:92%;line-height:1.42}
+.section-head h3{letter-spacing:.015em}
+#otherSection{min-height:58px}
+@media(max-width:820px){
+ .hero-speedlines,.hero-hud-corner{display:none}.hero{min-height:154px}.venue-badge{font-size:5px}
+}
 </style>
 </head>
 <body><div class="matrix-rain" aria-hidden="true"></div>
@@ -155,8 +182,10 @@ body{background-color:#02080d}
  <h2>競艇場を選択</h2>
  <p>24場すべて30日独立運用中。各場専用モデルを固定し、場ごとに独立して評価・更新します。</p>
  <div class="hero-label">//// DATA DRIVEN BOAT RACING ////</div>
- <img class="hero-photo" src="./hero-racer-v1.svg?v=3" alt="" aria-hidden="true">
+ <img class="hero-photo" src="./hero-racer-v1.svg?v=4" alt="" aria-hidden="true">
  <div class="hero-copy-right">FASTER<br>SMARTER<br>HIGHER WINRATE</div>
+ <div class="hero-speedlines" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+ <div class="hero-hud-corner" aria-hidden="true">LIVE MATRIX / AUTO TRY</div>
 </section>
 <section id="promotionPanel" class="promotion-panel" hidden aria-live="polite">
  <div class="promotion-head"><b>昇格候補があります</b><span>OWNER DECISION</span></div>
@@ -572,7 +601,7 @@ venues.forEach(v=>{
  btn.dataset.venue=v.code;
  const opTop=v.code==='07'?gs.top:'運用中 · 30日';
  const opDetail=v.code==='07'?gs.detail:'予想・AUTO TRY 接続済み';
- const venueVisual=`<svg class="venue-photo" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="./venue-thumbnails-v1.svg?v=2#v${v.code}"></use></svg><span class="venue-photo-shade"></span>`;
+ const venueVisual=`<svg class="venue-photo" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="./venue-thumbnails-v1.svg?v=2#v${v.code}"></use></svg><span class="venue-photo-shade"></span><span class="venue-badge">LIVE VIEW</span>`;
  btn.innerHTML=active
   ?`${venueVisual}<strong>${v.name}</strong><small><span class="live-dot"></span>${opTop}</small><div class="venue-live ${v.code==='07'&&!gs.live?'wait':''}"><b>${opDetail}</b></div><span class="arrow">→</span>`
   :building
