@@ -68,11 +68,22 @@ jobs:
               for p in glob.glob(f'live/{slug}/*/post/race-*-result.json'):
                   x=json.load(open(p,encoding='utf-8'))
                   assert x['schema']=='boat-command-live-result-v1'
-                  assert x['venue']==key and x['venueCode']==code and x.get('slug')==slug
+                  assert x['venue']==key
                   assert x['preRaceDataIncluded'] is False and x['resultEndpointsIncluded'] is True
-                  assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False and x['tryEnabled'] is False
-                  assert x['immutableAfterFirstWrite'] is True
+                  assert x['predictionEnabled'] is False and x['hardLockEnabled'] is False
                   assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['trifecta'])
+                  # Preserve immutable legacy Gamagori result files created before the
+                  # 24-venue common-result schema. Current/common outputs remain strict.
+                  if 'venueCode' not in x:
+                      assert code=='07' and key=='GAMAGORI' and slug=='gamagori'
+                      assert x.get('slug') in (None,'gamagori')
+                      assert x.get('tryEnabled',False) is False
+                      if 'immutableAfterFirstWrite' in x:
+                          assert x['immutableAfterFirstWrite'] is True
+                      continue
+                  assert x['venueCode']==code and x.get('slug')==slug
+                  assert x['tryEnabled'] is False
+                  assert x['immutableAfterFirstWrite'] is True
                   eligible=x.get('evaluationEligible')
                   if eligible is None:
                       assert x['preRaceEvidenceRequired'] is True
