@@ -18,6 +18,8 @@ on:
       - 'daily-lab/forward-candidates-v1.json'
       - 'scripts/daily-lab-test-v1.js'
       - 'scripts/point-expansion-shadow-v1.js'
+      - 'scripts/pre-race-feature-freeze-v1.js'
+      - 'scripts/pre-race-feature-freeze-test-v1.js'
       - 'live/*/*/shadow/program-only/race-*.json'
       - 'live/*/*/post/race-*-result.json'
       - '.github/workflows/daily-lab-v1.yml'
@@ -65,6 +67,7 @@ jobs:
           node --check daily-lab-v1.js
           node --check scripts/daily-lab-report-v1.js
           node scripts/daily-lab-test-v1.js
+          node scripts/pre-race-feature-freeze-test-v1.js
           node --check scripts/daily-lab-historical-replay-v1.js
           node --check scripts/daily-lab-history-v1.js
           node scripts/daily-lab-history-v1.js
@@ -108,4 +111,3 @@ jobs:
             sleep $((attempt*2))
           done
           exit 1
-
