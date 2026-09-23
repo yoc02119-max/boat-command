@@ -79,7 +79,7 @@
     <p>各場ごとに別資金を持たず、BOAT COMMAND全体で1つの10万円口座を共有します。既存のTRY履歴・確定結果・SHADOWは保持されます。</p>
   </div>
 </div>
-<nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><div class="nav" id="performanceNav" style="cursor:pointer"><b style="color:#8097aa">▥</b>成績</div><a class="nav" id="dailyLabNav" hidden href="./daily-lab.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">◈</b>LAB</a><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
+<nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><a class="nav" id="performanceNav" href="./performance.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">▥</b>成績</a><a class="nav" id="dailyLabNav" hidden href="./daily-lab.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">◈</b>LAB</a><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
 <script src="github-live-data-v1.js?v=3"></script>
 <script src="venue-registry-v1.js?v=6"></script>
 <script>
@@ -579,7 +579,6 @@ function activateBottomNav(id,target){
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id===id));
  const el=document.getElementById(target);if(el){el.classList.remove('nav-flash');void el.offsetWidth;el.classList.add('nav-flash');el.scrollIntoView({behavior:'smooth',block:'start'})}
 }
-document.getElementById("performanceNav")?.addEventListener("click",()=>activateBottomNav('performanceNav','todayTryPerformance'));
 document.getElementById("homeNav")?.addEventListener("click",()=>{
  document.querySelectorAll('.bottom .nav').forEach(x=>x.classList.toggle('active',x.id==='homeNav'));
  window.scrollTo({top:0,behavior:'smooth'});
