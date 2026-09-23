@@ -49,7 +49,7 @@ export default async function handler(req,res){
   }
   if(action!=='login')return res.status(400).json({error:'INVALID_ACTION'});
   if(!key)return res.status(503).json({error:'DEVELOPER_PASSWORD_NOT_CONFIGURED'});
-  const supplied=String(req.body?.password||'');
+  const supplied=String(req.body?.code||req.body?.password||'');
   if(!same(supplied,key)){
     await new Promise(r=>setTimeout(r,650));
     return res.status(401).json({error:'INVALID_DEVELOPER_PASSWORD'});
