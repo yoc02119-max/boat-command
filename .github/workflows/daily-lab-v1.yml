@@ -20,6 +20,8 @@ on:
       - 'scripts/point-expansion-shadow-v1.js'
       - 'scripts/pre-race-feature-freeze-v1.js'
       - 'scripts/pre-race-feature-freeze-test-v1.js'
+      - 'scripts/second-place-feature-audit-v1.js'
+      - 'scripts/second-place-feature-audit-test-v1.js'
       - 'live/*/*/shadow/program-only/race-*.json'
       - 'live/*/*/post/race-*-result.json'
       - '.github/workflows/daily-lab-v1.yml'
@@ -68,6 +70,8 @@ jobs:
           node --check scripts/daily-lab-report-v1.js
           node scripts/daily-lab-test-v1.js
           node scripts/pre-race-feature-freeze-test-v1.js
+          node scripts/second-place-feature-audit-test-v1.js
+          node scripts/second-place-feature-audit-v1.js
           node --check scripts/daily-lab-historical-replay-v1.js
           node --check scripts/daily-lab-history-v1.js
           node scripts/daily-lab-history-v1.js
@@ -82,7 +86,7 @@ jobs:
           import json,re,subprocess
           raw=subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=all'],text=True)
           paths=[line[3:] for line in raw.splitlines() if line]
-          bad=[p for p in paths if p!='daily-lab-v1.json' and not re.fullmatch(r'daily-lab/(?:index|forward-gate-v1|venue-expansion-policy-v1|\d{4}-\d{2}-\d{2})\.json',p)]
+          bad=[p for p in paths if p!='daily-lab-v1.json' and not re.fullmatch(r'daily-lab/(?:index|forward-gate-v1|venue-expansion-policy-v1|second-place-feature-audit-v1|\d{4}-\d{2}-\d{2})\.json',p)]
           if bad:
               raise SystemExit('DAILY_LAB_FORBIDDEN_CHANGE:'+json.dumps(bad,ensure_ascii=False))
           if paths:
@@ -95,6 +99,11 @@ jobs:
               assert x['tryChanged'] is False
               assert x['bankrollChanged'] is False
               assert x['totals']['venues']==24 and len(x['venues'])==24
+          second=json.load(open('daily-lab/second-place-feature-audit-v1.json',encoding='utf-8'))
+          assert second['schema']=='boat-command-second-place-feature-audit-v1'
+          assert second['researchOnly'] is True and second['productionChanged'] is False
+          assert second['bankrollChanged'] is False and second['selectionUsesResults'] is False
+          assert second['secondPlaceOnlyNotTicketRoi'] is True and len(second['venues'])==24
           print('DAILY_LAB_BOUNDARY_PASS',paths)
           PY
       - name: Publish scoreboard only when changed
