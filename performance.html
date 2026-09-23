@@ -20,7 +20,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
 .hero{margin-top:18px;border:1px solid #164a32;border-radius:22px;padding:22px;background:linear-gradient(135deg,rgba(6,25,17,.97),rgba(3,13,9,.98));box-shadow:0 18px 50px rgba(0,0,0,.3),inset 0 0 44px rgba(57,255,136,.025);position:relative;overflow:hidden}.hero:after{content:"00101100 01000010 01000011";position:absolute;right:18px;top:16px;color:rgba(57,255,136,.12);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}.eyebrow{font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#4f9670;letter-spacing:.18em}.hero h1{margin:6px 0 4px;font-size:clamp(31px,6vw,54px);letter-spacing:-.04em}.hero p{margin:0;color:#79a68b;font-size:13px}.live-status{display:inline-flex;align-items:center;gap:7px;margin-top:14px;border:1px solid rgba(57,255,136,.26);border-radius:999px;padding:6px 9px;color:#9bffbd;font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace}.live-status i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0 24px}.kpi{border:1px solid #123927;background:linear-gradient(180deg,#071610,#04100b);border-radius:14px;padding:14px}.kpi span{display:block;color:#5f8f74;font-size:9px;letter-spacing:.04em}.kpi strong{display:block;margin-top:5px;font-size:clamp(19px,3vw,28px);font-variant-numeric:tabular-nums}.kpi small{display:block;margin-top:4px;color:#426851;font-size:9px}.plus{color:var(--green2)!important}.minus{color:#ff8ea1!important}.flat{color:#eafff3!important}
 .section{margin-top:24px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 2px 10px}.section-head h2{margin:0;font-size:21px}.section-head span{color:#527b63;font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}.panel{border:1px solid #123927;background:linear-gradient(180deg,rgba(6,19,13,.96),rgba(3,13,9,.96));border-radius:17px;padding:16px}
-.chart-wrap{position:relative;height:300px;overflow:hidden}.chart-wrap svg{width:100%;height:100%;display:block}.chart-note{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#537b64;font-size:10px}.chart-note b{color:#a9f7c0}
+.range-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.range-tabs button{appearance:none;border:1px solid #17482f;background:#06130d;color:#5e9273;border-radius:999px;padding:7px 12px;font:800 10px ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer;letter-spacing:.04em}.range-tabs button.active{border-color:rgba(57,255,136,.55);background:rgba(57,255,136,.1);color:#baffcf;box-shadow:0 0 18px rgba(57,255,136,.08)}.range-tabs button:hover{border-color:#2a6a49;color:#9eeab7}.chart-wrap{position:relative;height:300px;overflow:hidden}.chart-wrap svg{width:100%;height:100%;display:block}.chart-note{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#537b64;font-size:10px}.chart-note b{color:#a9f7c0}
 .venue-table{width:100%;border-collapse:collapse;font-size:12px}.venue-table th,.venue-table td{padding:11px 9px;border-bottom:1px solid rgba(57,255,136,.075);text-align:right;white-space:nowrap}.venue-table th{color:#4d7d62;font-size:9px;letter-spacing:.04em}.venue-table th:first-child,.venue-table td:first-child{text-align:left}.venue-table tr:last-child td{border-bottom:0}.venue-name{display:flex;align-items:center;gap:8px;font-weight:850}.venue-code{display:grid;place-items:center;width:28px;height:24px;border:1px solid #184831;border-radius:7px;color:#70c88f;background:#06130d;font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace}.no-data{color:#365a46}
 .history{display:grid;gap:7px}.history-row{display:grid;grid-template-columns:95px minmax(90px,1fr) 52px minmax(82px,1fr) 62px minmax(82px,1fr);gap:8px;align-items:center;border:1px solid rgba(57,255,136,.09);background:rgba(57,255,136,.018);border-radius:11px;padding:10px 11px;font-size:11px}.history-row.hit{border-color:rgba(57,255,136,.28);background:rgba(57,255,136,.045)}.history-row .date{color:#58856b;font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace}.history-row strong{font-size:12px}.history-row .result{color:#94bea3}.history-row .status{font-weight:900}.history-row.hit .status{color:var(--green2)}.history-row.miss .status{color:#b37e86}.history-row .profit{text-align:right;font-weight:900}
 .empty{padding:28px;text-align:center;color:#527a62}.footer-note{margin-top:14px;color:#3e6750;font-size:9px;line-height:1.6}
@@ -49,6 +49,12 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
  <section class="section">
   <div class="section-head"><h2>資金推移</h2><span>EQUITY CURVE</span></div>
   <div class="panel">
+   <div class="range-tabs" id="equityRangeTabs" aria-label="資金推移の表示期間">
+    <button type="button" data-range="day">日足</button>
+    <button type="button" data-range="month" class="active">月足</button>
+    <button type="button" data-range="half">半年</button>
+    <button type="button" data-range="year">1年</button>
+   </div>
    <div class="chart-wrap"><svg id="equityChart" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-label="資金推移グラフ"></svg></div>
    <div class="chart-note"><span id="rangeLabel">—</span><span>開始資金 <b id="startBankroll">—</b></span></div>
   </div>
@@ -83,9 +89,27 @@ const pct=n=>Number.isFinite(Number(n))?`${(Number(n)*100).toFixed(1)}%`:'—';
 const cls=n=>Number(n)>0?'plus':Number(n)<0?'minus':'flat';
 function setMetric(id,value,className){const el=document.getElementById(id);if(!el)return;el.textContent=value;if(className)el.className=className}
 function venueNames(){return new Map((window.BOAT_COMMAND_VENUE_REGISTRY?.list?.()||[]).map(v=>[String(v.code).padStart(2,'0'),v.name]))}
-function renderEquity(x){
- const svg=document.getElementById('equityChart'),start=Number(x.startingBankrollYen)||100000;
- const rows=(x.ledger||[]).filter(z=>z.settled===true&&z.voided!==true&&z.result).slice().sort((a,b)=>String(a.date+a.deadline).localeCompare(String(b.date+b.deadline)));
+let performanceData=null,equityRange='month';
+const EQUITY_RANGES={
+ day:{days:1,label:'日足'},
+ month:{days:30,label:'月足'},
+ half:{days:183,label:'半年'},
+ year:{days:365,label:'1年'}
+};
+function jstDateString(d){
+ return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+}
+function rangeCutoff(anchorDate,days){
+ const d=new Date(anchorDate+'T12:00:00+09:00');d.setDate(d.getDate()-(Math.max(1,days)-1));return jstDateString(d);
+}
+function renderEquity(x,rangeKey=equityRange){
+ const svg=document.getElementById('equityChart'),baseStart=Number(x.startingBankrollYen)||100000,cfg=EQUITY_RANGES[rangeKey]||EQUITY_RANGES.month;
+ const allRows=(x.ledger||[]).filter(z=>z.settled===true&&z.voided!==true&&z.result).slice().sort((a,b)=>String(a.date+a.deadline).localeCompare(String(b.date+b.deadline)));
+ const latestDate=allRows.length?allRows[allRows.length-1].date:jstDateString(new Date(x.generatedAt||Date.now()));
+ const cutoff=rangeCutoff(latestDate,cfg.days);
+ let start=baseStart;
+ for(const z of allRows){if(String(z.date)<cutoff)start+=(Number(z.returnYen)||0)-(Number(z.stakeYen)||0)}
+ const rows=allRows.filter(z=>String(z.date)>=cutoff&&String(z.date)<=latestDate);
  let balance=start,points=[{label:'START',value:start}];
  rows.forEach(z=>{balance+=(Number(z.returnYen)||0)-(Number(z.stakeYen)||0);points.push({label:`${z.date} ${z.deadline||''}`,value:balance})});
  if(points.length<2)points.push({label:'NOW',value:start});
@@ -97,8 +121,15 @@ function renderEquity(x){
  const baseY=py(start);
  let grid='';for(let i=0;i<5;i++){const y=top+i*(plotH/4);const val=hi-(hi-lo)*(i/4);grid+=`<line x1="${left}" y1="${y}" x2="${W-right}" y2="${y}" stroke="rgba(57,255,136,.075)" stroke-width="1"/><text x="4" y="${y+4}" fill="#456f57" font-size="10" font-family="monospace">${Math.round(val/1000)}k</text>`}
  svg.innerHTML=`<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#39ff88" stop-opacity=".16"/><stop offset="100%" stop-color="#39ff88" stop-opacity=".01"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${grid}<line x1="${left}" y1="${baseY}" x2="${W-right}" y2="${baseY}" stroke="rgba(255,211,106,.23)" stroke-dasharray="8 8"/><polygon points="${area}" fill="url(#area)"/><polyline points="${line}" fill="none" stroke="#39ff88" stroke-width="3" vector-effect="non-scaling-stroke" filter="url(#glow)"/><circle cx="${coords[coords.length-1][0]}" cy="${coords[coords.length-1][1]}" r="5" fill="#b6ffce" stroke="#39ff88" stroke-width="2" vector-effect="non-scaling-stroke"/><text x="${Math.max(left,coords[coords.length-1][0]-86)}" y="${Math.max(15,coords[coords.length-1][1]-12)}" fill="#b6ffce" font-size="12" font-family="monospace">${money(points[points.length-1].value)}</text>`;
- const dates=rows.map(r=>r.date);document.getElementById('rangeLabel').textContent=dates.length?`${dates[0]} → ${dates[dates.length-1]} · ${rows.length} settled TRY`:'確定TRY待ち';
+ document.getElementById('rangeLabel').textContent=rows.length?`${cfg.label} · ${cutoff} → ${latestDate} · ${rows.length} settled TRY`:`${cfg.label} · ${cutoff} → ${latestDate} · 確定TRYなし`;
  document.getElementById('startBankroll').textContent=money(start);
+}
+function setupEquityRanges(){
+ document.querySelectorAll('#equityRangeTabs button[data-range]').forEach(btn=>btn.addEventListener('click',()=>{
+  equityRange=btn.dataset.range||'month';
+  document.querySelectorAll('#equityRangeTabs button').forEach(x=>x.classList.toggle('active',x===btn));
+  if(performanceData)renderEquity(performanceData,equityRange);
+ }));
 }
 function renderVenues(x){
  const names=venueNames(),by=x.byVenue||{},tbody=document.getElementById('venueRows');
@@ -113,18 +144,18 @@ function renderHistory(x){
 }
 async function render(){
  try{
-  const r=await fetch('./shared-try-portfolio-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('WAIT');const x=await r.json();
+  const r=await fetch('./shared-try-portfolio-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('WAIT');const x=await r.json();performanceData=x;
   const profit=Number(x.profitYen)||0,roi=Number(x.roi),hit=Number(x.hitRate);
   setMetric('bankroll',money(x.confirmedBankrollYen),'flat');setMetric('profit',signed(profit),cls(profit));setMetric('roi',Number.isFinite(roi)?pct(roi):'—',roi>=1?'plus':roi>0?'minus':'flat');setMetric('hitRate',Number.isFinite(hit)?pct(hit):'—','flat');setMetric('tries',String(Number(x.settledTries)||0),'flat');setMetric('drawdown',money(x.maxDrawdownYen),'minus');
   const at=new Date(x.generatedAt||Date.now());document.getElementById('generatedAt').textContent='SYNC '+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(at);
-  renderEquity(x);renderVenues(x);renderHistory(x);
+  renderEquity(x,equityRange);renderVenues(x);renderHistory(x);
  }catch{document.getElementById('generatedAt').textContent='DATA WAIT';document.getElementById('history').innerHTML='<div class="empty">戦績データを取得待ちです。</div>'}
 }
 async function developerNav(){
  try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'}),x=await r.json();if(r.ok&&x.authenticated===true){document.getElementById('labNav').hidden=false;return}}catch{}
  try{const s=JSON.parse(localStorage.getItem('boatCommand.developerSession.v1')||'null');if(s&&s.version==='DEVELOPER-LOCK-V1'&&Number(s.expiresAt)>Date.now())document.getElementById('labNav').hidden=false}catch{}
 }
-render();developerNav();setInterval(render,60000);
+setupEquityRanges();render();developerNav();setInterval(render,60000);
 </script>
 </body>
 </html>
