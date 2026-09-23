@@ -90,10 +90,8 @@ def extract_day(b: Path, k: Path):
     for number in range(1, 25):
         code = f"{number:02d}"
         pb, kb = exact_block(b_text, code, "B"), exact_block(k_text, code, "K")
-        if not pb or not kb:
-            continue
-        programs = program_section(pb)
-        results = PARSER.parse_results(kb)
+        programs = program_section(pb) if pb and kb else {}
+        results = PARSER.parse_results(kb) if pb and kb else {}
         for race in sorted(programs.keys() & results.keys()):
             p = programs[race]
             o, payout = results[race]
@@ -101,6 +99,13 @@ def extract_day(b: Path, k: Path):
             rows.append({"id": f"{date}-{code}-{race:02d}", "d": date,
                          "r": race, "t": p["t"], "c": [x["class"] for x in boats],
                          "boats": boats, "o": o, "p": payout})
+        # Older official days use irregular venue markers. The established
+        # Edogawa extractor can still recover them. This is a *candidate*
+        # only: merge() checks all six grades, exact order and exact payout
+        # against the existing independent baseline before accepting it.
+        if not pb or not kb or len(programs.keys() & results.keys()) < len(results):
+            existing = {r["id"] for r in rows if r["id"].split("-")[3] == code}
+            rows.extend(r for r in PARSER.build(b, k, code) if r["id"] not in existing)
     return rows
 
 
