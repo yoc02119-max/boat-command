@@ -731,7 +731,7 @@ document.getElementById('activeTryList')?.addEventListener('click',e=>{
  const chip=e.target.closest?.('[data-try-code][data-try-race]');if(!chip)return;
  const code=String(chip.dataset.tryCode||'').padStart(2,'0'),race=Math.max(1,Math.min(12,Number(chip.dataset.tryRace)||0));
  const meta=window.BOAT_COMMAND_VENUE_REGISTRY?.resolve?.(code);if(!meta||!race)return;
- const base=window.BOAT_COMMAND_VENUE_REGISTRY?.routeFor?.(meta)||`./venue.html?jcd=${encodeURIComponent(code)}&shell=5`;
+ const base=window.BOAT_COMMAND_VENUE_REGISTRY?.routeFor?.(meta)||`./venue.html?jcd=${encodeURIComponent(code)}&shell=6`;
  const sep=base.includes('?')?'&':'?';
  location.href=`${base}${sep}race=${race}`;
 });
