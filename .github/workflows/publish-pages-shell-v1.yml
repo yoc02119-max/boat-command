@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'portal.html'
       - 'performance.html'
+      - 'performance-v2.html'
       - 'daily-lab.html'
       - 'developer-lock-v1.json'
       - 'venue.html'
@@ -38,4 +39,6 @@ jobs:
           fetch-depth: 0
 
       - name: Update gh-pages only for shell/runtime changes
-        run: git push origin HEAD:refs/heads/gh-pages
+        run: |
+          git fetch origin gh-pages
+          git push --force-with-lease=refs/heads/gh-pages:refs/remotes/origin/gh-pages origin HEAD:refs/heads/gh-pages
