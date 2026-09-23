@@ -58,6 +58,7 @@ function snapshot(program,programPath,mode,now){
     picks:picks.map(x=>x.order),
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
     pointExpansion:require('./point-expansion-shadow-v1.js').capture(d,picks,mode),probabilitySum:d.sum,
+    preRaceFeatures:mode==='PROGRAM_ONLY'?require('./pre-race-feature-freeze-v1.js').freeze(program,now.iso):null,
     resultInput:false,payoutInput:false,researchOnly:true,
     productionEnabled:false,tryEnabled:false,cashNeutral:true,
     immutableAfterFirstWrite:true
