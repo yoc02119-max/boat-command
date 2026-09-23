@@ -16,7 +16,7 @@ linear-gradient(90deg,rgba(6,35,22,.18) 1px,transparent 1px),
 radial-gradient(circle at 70% 0,rgba(57,255,136,.08),transparent 28%),
 linear-gradient(180deg,#020806,#030b08);background-size:28px 28px,28px 28px,auto,auto;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(57,255,136,.018),transparent 34%,rgba(57,255,136,.012));mix-blend-mode:screen}
-.shell{max-width:1180px;margin:auto;padding:22px 18px 104px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px}.back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#dffbed;border:1px solid #1d4c36;background:#06120d;border-radius:12px;padding:10px 13px;font-weight:850}.brand{text-align:right}.brand small{display:block;color:#4d7c63;font-size:9px;letter-spacing:.18em}.brand b{font-size:14px;color:#bfffd3}
+.shell{max-width:1180px;margin:auto;padding:22px 18px 104px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px}.top-left{display:flex;align-items:center;gap:8px}.back,.refresh-btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#dffbed;border:1px solid #1d4c36;background:#06120d;border-radius:12px;padding:10px 13px;font-weight:850}.refresh-btn{cursor:pointer;font:850 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.refresh-btn:hover{border-color:#2f7450;color:#baffcf}.refresh-btn.loading{opacity:.7;pointer-events:none}.refresh-btn.loading .refresh-icon{display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.brand{text-align:right}.brand small{display:block;color:#4d7c63;font-size:9px;letter-spacing:.18em}.brand b{font-size:14px;color:#bfffd3}
 .hero{margin-top:18px;border:1px solid #164a32;border-radius:22px;padding:22px;background:linear-gradient(135deg,rgba(6,25,17,.97),rgba(3,13,9,.98));box-shadow:0 18px 50px rgba(0,0,0,.3),inset 0 0 44px rgba(57,255,136,.025);position:relative;overflow:hidden}.hero:after{content:"00101100 01000010 01000011";position:absolute;right:18px;top:16px;color:rgba(57,255,136,.12);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}.eyebrow{font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#4f9670;letter-spacing:.18em}.hero h1{margin:6px 0 4px;font-size:clamp(31px,6vw,54px);letter-spacing:-.04em}.hero p{margin:0;color:#79a68b;font-size:13px}.live-status{display:inline-flex;align-items:center;gap:7px;margin-top:14px;border:1px solid rgba(57,255,136,.26);border-radius:999px;padding:6px 9px;color:#9bffbd;font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace}.live-status i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0 24px}.kpi{border:1px solid #123927;background:linear-gradient(180deg,#071610,#04100b);border-radius:14px;padding:14px}.kpi span{display:block;color:#5f8f74;font-size:9px;letter-spacing:.04em}.kpi strong{display:block;margin-top:5px;font-size:clamp(19px,3vw,28px);font-variant-numeric:tabular-nums}.kpi small{display:block;margin-top:4px;color:#426851;font-size:9px}.plus{color:var(--green2)!important}.minus{color:#ff8ea1!important}.flat{color:#eafff3!important}
 .section{margin-top:24px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 2px 10px}.section-head h2{margin:0;font-size:21px}.section-head span{color:#527b63;font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}.panel{border:1px solid #123927;background:linear-gradient(180deg,rgba(6,19,13,.96),rgba(3,13,9,.96));border-radius:17px;padding:16px}
@@ -30,7 +30,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
 </head>
 <body>
 <div class="shell">
- <header class="top"><a class="back" href="./portal.html">← ホーム</a><div class="brand"><small>BOAT COMMAND</small><b>PERFORMANCE MATRIX</b></div></header>
+ <header class="top"><div class="top-left"><a class="back" href="./portal.html">← ホーム</a><button class="refresh-btn" id="refreshPerformance" type="button"><span class="refresh-icon">↻</span> 更新</button></div><div class="brand"><small>BOAT COMMAND</small><b>PERFORMANCE MATRIX</b></div></header>
  <section class="hero">
   <div class="eyebrow">VIRTUAL TRY / PERFORMANCE LOG</div>
   <h1>戦績</h1>
@@ -151,11 +151,18 @@ async function render(){
   renderEquity(x,equityRange);renderVenues(x);renderHistory(x);
  }catch{document.getElementById('generatedAt').textContent='DATA WAIT';document.getElementById('history').innerHTML='<div class="empty">戦績データを取得待ちです。</div>'}
 }
+async function manualRefresh(){
+ const btn=document.getElementById('refreshPerformance');if(!btn)return;
+ btn.classList.add('loading');btn.innerHTML='<span class="refresh-icon">↻</span> 更新中';
+ try{await render();btn.innerHTML='<span class="refresh-icon">✓</span> 更新済み';setTimeout(()=>{btn.innerHTML='<span class="refresh-icon">↻</span> 更新'},1200)}
+ catch{btn.innerHTML='<span class="refresh-icon">!</span> 再試行';}
+ finally{setTimeout(()=>btn.classList.remove('loading'),350)}
+}
 async function developerNav(){
  try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'}),x=await r.json();if(r.ok&&x.authenticated===true){document.getElementById('labNav').hidden=false;return}}catch{}
  try{const s=JSON.parse(localStorage.getItem('boatCommand.developerSession.v1')||'null');if(s&&s.version==='DEVELOPER-LOCK-V1'&&Number(s.expiresAt)>Date.now())document.getElementById('labNav').hidden=false}catch{}
 }
-setupEquityRanges();render();developerNav();setInterval(render,60000);
+setupEquityRanges();document.getElementById('refreshPerformance')?.addEventListener('click',manualRefresh);render();developerNav();setInterval(render,60000);
 </script>
 </body>
 </html>
