@@ -122,7 +122,7 @@ async function refreshDeveloperMode(){
  let apiAuth=false;
  try{const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'});const x=await r.json();apiAuth=r.ok&&x.authenticated===true;}catch{}
  const cfg=await loadDeveloperLockConfig();
- developerAuthenticated=apiAuth||localDeveloperSessionValid()||(!cfg?.configured&&!!loadAppStore());
+ developerAuthenticated=apiAuth||localDeveloperSessionValid();
  applyDeveloperUi();return developerAuthenticated;
 }
 async function developerUnlock(){
