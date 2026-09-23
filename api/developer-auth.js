@@ -1,9 +1,24 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const COOKIE='boat_command_dev';
 const TTL_SECONDS=12*60*60;
 
-function secret(){return String(process.env.BOAT_COMMAND_DEVELOPER_PASSWORD||'');}
+function lockConfig(){
+  try{return JSON.parse(fs.readFileSync(path.join(process.cwd(),'developer-lock-v1.json'),'utf8'));}catch{return null;}
+}
+function sessionSecret(){
+  const raw=String(process.env.BOAT_COMMAND_DEVELOPER_SESSION_SECRET||process.env.JARVIS_GITHUB_EXECUTOR_TOKEN||process.env.OPENAI_API_KEY||'');
+  return raw?crypto.createHash('sha256').update('boat-command-developer-session-v1:'+raw).digest('hex'):'';
+}
+function verifyCode(code,cfg){
+  if(!cfg?.configured||cfg.algorithm!=='PBKDF2-SHA256'||!cfg.saltHex||!cfg.hashHex)return false;
+  try{
+    const out=crypto.pbkdf2Sync(String(code),Buffer.from(String(cfg.saltHex),'hex'),Number(cfg.iterations)||210000,32,'sha256').toString('hex');
+    return same(out,String(cfg.hashHex).toLowerCase());
+  }catch{return false;}
+}
 function cookieValue(req){
   const raw=String(req.headers?.cookie||'');
   for(const part of raw.split(';')){
@@ -37,9 +52,9 @@ function setCookie(res,value,maxAge){
 
 export default async function handler(req,res){
   res.setHeader('Cache-Control','no-store, max-age=0');
-  const key=secret();
+  const cfg=lockConfig(),key=sessionSecret();
   if(req.method==='GET'){
-    return res.status(200).json({authenticated:valid(cookieValue(req),key),configured:Boolean(key),expiresHours:12});
+    return res.status(200).json({authenticated:valid(cookieValue(req),key),configured:Boolean(cfg?.configured),expiresHours:12});
   }
   if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
   const action=String(req.body?.action||'login').toLowerCase();
@@ -48,9 +63,10 @@ export default async function handler(req,res){
     return res.status(200).json({ok:true,authenticated:false});
   }
   if(action!=='login')return res.status(400).json({error:'INVALID_ACTION'});
-  if(!key)return res.status(503).json({error:'DEVELOPER_PASSWORD_NOT_CONFIGURED'});
+  if(!cfg?.configured)return res.status(503).json({error:'DEVELOPER_PASSWORD_NOT_CONFIGURED'});
+  if(!key)return res.status(503).json({error:'DEVELOPER_SESSION_SECRET_NOT_CONFIGURED'});
   const supplied=String(req.body?.code||req.body?.password||'');
-  if(!same(supplied,key)){
+  if(!verifyCode(supplied,cfg)){
     await new Promise(r=>setTimeout(r,650));
     return res.status(401).json({error:'INVALID_DEVELOPER_PASSWORD'});
   }
