@@ -53,10 +53,12 @@ const fs=require('fs'),path=require('path'),os=require('os'),cp=require('child_p
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'point-expansion-contract-'));
 try {
   fs.mkdirSync(path.join(tmp,'scripts'));
-  for(const f of ['scripts/toda-shadow-research-v1.js','scripts/point-expansion-shadow-v1.js','toda-research-model-v1.js'])
+  for(const f of ['scripts/toda-shadow-research-v1.js','scripts/point-expansion-shadow-v1.js',
+    'scripts/pre-race-feature-freeze-v1.js','toda-research-model-v1.js'])
     fs.copyFileSync(path.join(__dirname,'..',f),path.join(tmp,f));
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  const program={venue:'TODA',venueCode:'02',race:1,raceType:'予選',deadline:'23:59',
+  const program={venue:'TODA',venueCode:'02',date,race:1,raceType:'予選',deadline:'23:59',
+    fetchedAt:`${date}T00:00:00+09:00`,
     resultEndpointsIncluded:false,resultIncluded:false,exhibitionIncluded:false,
     boats:['A1','B1','A2','B1','B1','B2'].map((grade,i)=>({lane:i+1,class:grade}))};
   const history=Array.from({length:300},(_,i)=>({d:'2000-01-01',r:i%12+1,c:program.boats.map(x=>x.class),o:orders[i%120],t:'予選'}));
@@ -74,6 +76,7 @@ try {
   if(fs.existsSync(newPath)){
     const fresh=JSON.parse(fs.readFileSync(newPath));
     assert.equal(fresh.pointExpansion.status,'FROZEN_WITH_BASELINE');
+    assert.equal(fresh.preRaceFeatures?.schema,'boat-command-pre-race-feature-freeze-v1');
     assert.deepEqual(fresh.picks,fresh.pointExpansion.variants.BASE4);
     const bytes=fs.readFileSync(newPath);
     cp.execFileSync(process.execPath,[path.join(tmp,'scripts/toda-shadow-research-v1.js'),date]);
