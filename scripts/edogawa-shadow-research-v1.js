@@ -82,6 +82,7 @@ function snapshot(program,fx,mode,generatedAt,sources){
     picks:picks.map(x=>x.order),
     probabilities:picks.map(x=>({order:x.order,probability:x.probability})),
     pointExpansion:require('./point-expansion-shadow-v1.js').capture(d,picks,mode),probabilitySum:d.sum,
+    preRaceFeatures:mode==='PROGRAM_ONLY'?require('./pre-race-feature-freeze-v1.js').freeze(program,generatedAt):null,
     nearestDistance:d.nearestDistance,
     lanePriorSource:d.lanePriorSource||null,
     preRaceComplete:!!fx?.preRaceComplete,
