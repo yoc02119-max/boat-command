@@ -4,7 +4,7 @@
   "venueCode": "17",
   "slug": "miyajima",
   "date": "2026-09-23",
-  "generatedAt": "2026-09-23T02:23:41.801Z",
+  "generatedAt": "2026-09-23T02:52:24.263Z",
   "rows": [
     {
       "race": 1,
@@ -87,28 +87,69 @@
           "baselinePath": "miyajima-baseline-backtest-v1.json"
         }
       }
+    },
+    {
+      "race": 3,
+      "actual": "1-2-5",
+      "payout100": 730,
+      "classBaseline": {
+        "generatedAt": "2026-09-22T19:09:38.328Z",
+        "picks": [
+          "1-3-4",
+          "1-2-3",
+          "1-4-5",
+          "1-2-5"
+        ],
+        "hit": true,
+        "modelVersion": "MIYAJIMA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/miyajima/2026-09-23/program/race-3.json",
+          "programSha256": "343ce05d7faad941637fb5bd6f58962cfee76208df771560ae2e3008b63d6321",
+          "programFetchedAt": "2026-09-23T04:07:41.071617+09:00",
+          "historyPath": "miyajima-history-bootstrap-v1.json",
+          "baselinePath": "miyajima-baseline-backtest-v1.json"
+        }
+      },
+      "programOnly": {
+        "generatedAt": "2026-09-22T19:09:38.328Z",
+        "picks": [
+          "1-3-4",
+          "1-2-3",
+          "1-3-5",
+          "1-4-5"
+        ],
+        "hit": false,
+        "modelVersion": "MIYAJIMA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/miyajima/2026-09-23/program/race-3.json",
+          "programSha256": "343ce05d7faad941637fb5bd6f58962cfee76208df771560ae2e3008b63d6321",
+          "programFetchedAt": "2026-09-23T04:07:41.071617+09:00",
+          "historyPath": "miyajima-history-bootstrap-v1.json",
+          "baselinePath": "miyajima-baseline-backtest-v1.json"
+        }
+      }
     }
   ],
   "summary": {
     "classBaseline": {
-      "evaluated": 2,
-      "hits": 1,
-      "hitRate": 0.5,
-      "stake": 800,
-      "returns": 440,
-      "roi": 0.55
+      "evaluated": 3,
+      "hits": 2,
+      "hitRate": 0.6666666666666666,
+      "stake": 1200,
+      "returns": 1170,
+      "roi": 0.975
     },
     "programOnly": {
-      "evaluated": 2,
+      "evaluated": 3,
       "hits": 1,
-      "hitRate": 0.5,
-      "stake": 800,
+      "hitRate": 0.3333333333333333,
+      "stake": 1200,
       "returns": 440,
-      "roi": 0.55
+      "roi": 0.36666666666666664
     },
-    "paired": 2,
-    "hitRateDelta": 0,
-    "roiDelta": 0
+    "paired": 3,
+    "hitRateDelta": -0.3333333333333333,
+    "roiDelta": -0.6083333333333334
   },
   "fundingScope": "NONE_RESEARCH_ONLY",
   "bankrollAffected": false,
