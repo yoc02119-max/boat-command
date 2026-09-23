@@ -54,13 +54,6 @@ select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radi
 <a class="bottom-home" href="./portal.html" aria-label="ホームへ">⌂</a>
 <script>
 (async()=>{
- const hasOwnerStore=()=>{
-  try{
-   const keys=['boatCommand.v05','boatCommand.v05.mirror'];
-   for(const k of keys){const x=JSON.parse(localStorage.getItem(k)||'null');if(x&&x.schema===5&&x.sessions)return true;}
-   const y=JSON.parse(sessionStorage.getItem('boatCommand.v05.sessionMirror')||'null');return !!(y&&y.schema===5&&y.sessions);
-  }catch{return false;}
- };
  const localSession=()=>{
   try{const x=JSON.parse(localStorage.getItem('boatCommand.developerSession.v1')||'null');return !!(x&&x.version==='DEVELOPER-LOCK-V1'&&Number(x.expiresAt)>Date.now());}catch{return false;}
  };
@@ -71,7 +64,6 @@ select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radi
  }catch{}
  try{const r=await fetch('./developer-lock-v1.json?t='+Date.now(),{cache:'no-store'});if(r.ok)cfg=await r.json();}catch{}
  if(!allowed)allowed=localSession();
- if(!allowed&&cfg?.configured!==true)allowed=hasOwnerStore();
  if(!allowed){location.replace('./portal.html?developer=locked');return;}
  document.body.style.visibility='visible';
  for(const src of ['daily-lab-v1.js?v=8','browser-controls-v1.js?v=3']){
