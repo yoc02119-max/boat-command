@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -27,13 +28,61 @@ def load_parser():
 PARSER = load_parser()
 FEATURES = ("nationalWinRate", "national2Rate", "localWinRate", "local2Rate",
             "motor2Rate", "boat2Rate")
+# Some official B lines join a two-decimal motor rate to the boat number:
+# "60 44.91164 34.70" means motor 60, 44.91%, boat 164, 34.70%.
+JOINED = re.compile(
+    r"^(\s*[1-6]\s*\d{4}.*?(?:A1|A2|B1|B2)\s+"
+    r"(?:\d+(?:\.\d+)?\s+){4}\d+\s+)"
+    r"(\d{1,3}\.\d{2})(\d{1,3})\s+(\d{1,3}\.\d{2})(.*)$"
+)
+
+
+def program_section(section):
+    fixed = []
+    for line in section.splitlines():
+        line = PARSER.norm(line)
+        if not PARSER.ENTRY.search(line):
+            joined = JOINED.search(line)
+            if joined:
+                line = (joined.group(1) + joined.group(2) + " "
+                        + joined.group(3) + " " + joined.group(4) + joined.group(5))
+        fixed.append(line)
+    return PARSER.parse_program("\n".join(fixed))
+
+
+def exact_block(text, code, kind):
+    section = PARSER.block(text, code, kind)
+    marker = rf"(?m)^\s*{code}{kind}BGN\s*$"
+    # The shared parser's last-resort fallback searches the first 40 lines.
+    # That can mistake a racer's prefecture (e.g. 福岡) for the venue name.
+    label = "［番組］" if kind == "B" else "［成績］"
+    title = PARSER._base.VENUE_NAMES[code]
+    named = any(title in PARSER._base._compact(line) and label in line
+                for line in section.splitlines()[:4])
+    return section if re.search(marker, section) or named else ""
 
 
 def extract_day(b: Path, k: Path):
     if PARSER.date_from(b) != PARSER.date_from(k):
         raise ValueError("B_K_DATE_MISMATCH")
-    return [race for code in range(1, 25)
-            for race in PARSER.build(b, k, f"{code:02d}")]
+    date = PARSER.date_from(b)
+    b_text, k_text = PARSER.read(b), PARSER.read(k)
+    rows = []
+    for number in range(1, 25):
+        code = f"{number:02d}"
+        pb, kb = exact_block(b_text, code, "B"), exact_block(k_text, code, "K")
+        if not pb or not kb:
+            continue
+        programs = program_section(pb)
+        results = PARSER.parse_results(kb)
+        for race in sorted(programs.keys() & results.keys()):
+            p = programs[race]
+            o, payout = results[race]
+            boats = p["boats"]
+            rows.append({"id": f"{date}-{code}-{race:02d}", "d": date,
+                         "r": race, "t": p["t"], "c": [x["class"] for x in boats],
+                         "boats": boats, "o": o, "p": payout})
+    return rows
 
 
 def match(base, candidate):
@@ -98,6 +147,13 @@ def merge(base_dir: Path, day_dir: Path, out_dir: Path):
 
 
 def self_test():
+    joined = "1 5330安河内鈴22福岡51A2 6.02 40.59 5.38 32.59 60 44.91164 34.70 11"
+    section = "21BBGN\n 1R 予選 H1800m\n" + "\n".join(
+        joined.replace("1 5330", f"{i} 5330", 1) for i in range(1, 7))
+    parsed = program_section(section)
+    assert parsed[1]["boats"][0]["motor2Rate"] == .4491
+    assert parsed[1]["boats"][0]["boat"] == 164
+    assert not exact_block("24BBGN\n1 1234選手23福岡52B1", "22", "B")
     base = {"id": "2026-01-01-03-01", "c": ["B1"]*6, "o": "1-2-3", "p": 900}
     rich = {**base, "boats": [{"lane": i, "class": "B1", "registration": 4000+i,
                               **{f: .3 for f in FEATURES}} for i in range(1, 7)]}
