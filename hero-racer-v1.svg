@@ -1,40 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 360">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360">
 <defs>
- <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#03151c"/><stop offset=".55" stop-color="#06363c"/><stop offset="1" stop-color="#021018"/></linearGradient>
- <linearGradient id="boat" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#093c46"/><stop offset=".5" stop-color="#17d6c1"/><stop offset="1" stop-color="#06323b"/></linearGradient>
- <linearGradient id="suit" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0f423e"/><stop offset=".5" stop-color="#1d8e75"/><stop offset="1" stop-color="#041c22"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
- <pattern id="rain" width="52" height="82" patternUnits="userSpaceOnUse"><text x="4" y="16" fill="#2dffcb" opacity=".18" font-size="12" font-family="monospace">01</text><text x="25" y="45" fill="#2dffcb" opacity=".10" font-size="9" font-family="monospace">10</text><text x="9" y="72" fill="#2dffcb" opacity=".12" font-size="8" font-family="monospace">001</text></pattern>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#020b12"/><stop offset=".46" stop-color="#06303b"/><stop offset="1" stop-color="#01080d"/>
+  </linearGradient>
+  <linearGradient id="hull" x1="0" y1=".2" x2="1" y2=".8">
+    <stop stop-color="#03131a"/><stop offset=".42" stop-color="#0a5b62"/><stop offset=".72" stop-color="#13d8c1"/><stop offset="1" stop-color="#03141a"/>
+  </linearGradient>
+  <linearGradient id="suit" x1=".2" y1="0" x2=".8" y2="1">
+    <stop stop-color="#0a1a1e"/><stop offset=".5" stop-color="#0e6c61"/><stop offset=".85" stop-color="#071b20"/>
+  </linearGradient>
+  <radialGradient id="halo">
+    <stop stop-color="#5affdf" stop-opacity=".36"/><stop offset=".55" stop-color="#2dffcb" stop-opacity=".09"/><stop offset="1" stop-color="#2dffcb" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="blur8"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+  <pattern id="rain" width="48" height="70" patternUnits="userSpaceOnUse">
+    <text x="4" y="14" fill="#2dffcb" opacity=".12" font-size="10" font-family="monospace">01</text>
+    <text x="22" y="38" fill="#2dffcb" opacity=".06" font-size="8" font-family="monospace">10</text>
+    <text x="7" y="62" fill="#2dffcb" opacity=".08" font-size="7" font-family="monospace">001</text>
+  </pattern>
 </defs>
-<rect width="1000" height="360" fill="url(#bg)"/>
-<rect width="1000" height="360" fill="url(#rain)" opacity=".65"/>
-<path d="M0 296 C150 245 255 285 402 250 S683 225 1000 274" fill="none" stroke="#2dffcb" opacity=".18" stroke-width="4"/>
-<path d="M0 319 C180 277 308 318 485 277 S776 267 1000 304" fill="none" stroke="#2dffcb" opacity=".11" stroke-width="2"/>
-<g opacity=".55" filter="url(#soft)" fill="#35ffd2">
- <ellipse cx="690" cy="243" rx="260" ry="56"/><ellipse cx="781" cy="194" rx="165" ry="35"/>
+<rect width="1200" height="360" fill="url(#bg)"/>
+<rect width="1200" height="360" fill="url(#rain)" opacity=".55"/>
+<ellipse cx="820" cy="178" rx="330" ry="145" fill="url(#halo)" filter="url(#blur8)"/>
+<g fill="none" stroke="#49ffe1">
+  <path d="M0 273 C150 230 300 291 440 250 S766 202 1200 279" opacity=".18" stroke-width="5"/>
+  <path d="M0 302 C180 260 312 317 492 282 S790 240 1200 310" opacity=".10" stroke-width="2"/>
+  <path d="M690 62 H1135 V110" opacity=".33" stroke-width="2"/>
+  <path d="M735 74 H1100" opacity=".2"/>
 </g>
-<g transform="translate(365 34)">
- <g filter="url(#glow)">
-  <path d="M55 212 L408 175 L564 210 L500 258 L134 263 L31 236 Z" fill="url(#boat)" stroke="#77ffe7" stroke-width="5"/>
-  <path d="M130 202 L347 170 L438 188 L395 213 L168 229 Z" fill="#05252c" stroke="#31ebd4" stroke-width="3"/>
-  <path d="M480 211 L602 208 L569 229 L503 246 Z" fill="#0e6d6b" stroke="#7affeb" stroke-width="3"/>
-  <path d="M221 116 C240 72 285 51 323 74 C357 95 352 140 321 158 L381 191 L266 201 L210 154 Z" fill="url(#suit)" stroke="#61ffe1" stroke-width="4"/>
-  <path d="M274 78 C286 47 329 41 349 66 C365 87 349 115 321 119 C297 123 266 107 274 78 Z" fill="#06191e" stroke="#9affec" stroke-width="4"/>
-  <path d="M288 74 L342 82 L326 103 L281 96 Z" fill="#0fb5b0" opacity=".48"/>
-  <path d="M237 142 L172 183 M322 149 L405 177" stroke="#9affec" stroke-width="9" stroke-linecap="round"/>
- </g>
- <g fill="none" stroke="#48ffe0" opacity=".55">
-  <path d="M28 232 C-40 224 -102 207 -157 183" stroke-width="5"/>
-  <path d="M37 247 C-54 251 -127 268 -196 286" stroke-width="3"/>
-  <path d="M58 263 C-23 286 -85 312 -138 341" stroke-width="2"/>
- </g>
- <g fill="#baffef" opacity=".55">
-  <circle cx="31" cy="219" r="4"/><circle cx="-8" cy="203" r="3"/><circle cx="-39" cy="190" r="5"/><circle cx="3" cy="270" r="4"/><circle cx="-58" cy="284" r="3"/><circle cx="-102" cy="296" r="4"/>
- </g>
+<g filter="url(#blur3)" fill="#69ffe6" opacity=".22">
+  <ellipse cx="745" cy="257" rx="310" ry="48"/>
+  <ellipse cx="930" cy="206" rx="210" ry="32"/>
 </g>
-<g opacity=".55" stroke="#2dffcb" fill="none">
- <path d="M705 38 H947 V84" stroke-width="2"/><path d="M735 48 H922" stroke-width="1"/>
- <path d="M63 74 H265" stroke-width="1"/><path d="M63 83 H203" stroke-width="1"/>
+<!-- high-speed spray -->
+<g fill="none" stroke-linecap="round">
+  <path d="M630 230 C520 210 418 180 328 126" stroke="#e9ffff" stroke-width="7" opacity=".24"/>
+  <path d="M635 245 C515 241 403 254 290 288" stroke="#52ffe0" stroke-width="5" opacity=".28"/>
+  <path d="M650 260 C530 278 430 307 342 348" stroke="#2dffcb" stroke-width="3" opacity=".2"/>
+  <path d="M770 198 C850 158 965 146 1104 168" stroke="#6dffe7" stroke-width="3" opacity=".15"/>
+</g>
+<g fill="#e9ffff">
+  <circle cx="470" cy="204" r="5" opacity=".55"/><circle cx="430" cy="190" r="3" opacity=".45"/><circle cx="390" cy="169" r="4" opacity=".5"/>
+  <circle cx="521" cy="251" r="4" opacity=".4"/><circle cx="454" cy="272" r="3" opacity=".35"/><circle cx="365" cy="296" r="5" opacity=".3"/>
+  <circle cx="864" cy="129" r="3" opacity=".4"/><circle cx="911" cy="119" r="4" opacity=".35"/><circle cx="962" cy="130" r="3" opacity=".3"/>
+</g>
+<!-- boat -->
+<g transform="translate(425 22)" filter="url(#glow)">
+  <path d="M72 216 L502 170 L674 206 L590 271 L168 277 L31 244 Z" fill="url(#hull)" stroke="#79ffe9" stroke-width="5"/>
+  <path d="M132 214 L411 174 L528 190 L475 221 L181 239 Z" fill="#03161d" stroke="#2fe7d1" stroke-width="3"/>
+  <path d="M522 210 L722 203 L676 231 L595 253 Z" fill="#0b4c53" stroke="#74ffe7" stroke-width="3"/>
+  <path d="M182 245 C286 251 405 251 556 236" stroke="#b8fff4" stroke-width="2" opacity=".42" fill="none"/>
+  <path d="M212 228 L248 203 L286 201 L300 222 Z" fill="#0fcab5" opacity=".72"/>
+  <text x="238" y="224" fill="#d9fff8" font-size="34" font-family="Arial" font-weight="800" transform="skewX(-10)">1</text>
+  <!-- racer -->
+  <path d="M314 118 C335 69 382 46 427 70 C468 93 463 143 426 164 L503 199 L359 211 L300 160 Z" fill="url(#suit)" stroke="#6affe4" stroke-width="4"/>
+  <path d="M373 73 C387 36 436 29 459 59 C478 82 459 115 426 120 C396 125 364 108 373 73 Z" fill="#020a0e" stroke="#adfff1" stroke-width="4"/>
+  <path d="M389 68 L452 79 L431 102 L379 95 Z" fill="#17b9b0" opacity=".48"/>
+  <path d="M328 147 L245 195 M431 151 L526 187" stroke="#9bffed" stroke-width="12" stroke-linecap="round"/>
+  <path d="M352 127 C373 142 396 149 423 153" stroke="#2dffcb" stroke-width="3" opacity=".55" fill="none"/>
+</g>
+<!-- foreground data rail -->
+<g font-family="monospace" fill="#6affe4">
+  <text x="928" y="70" font-size="14" font-weight="700" letter-spacing="3">FASTER</text>
+  <text x="928" y="94" font-size="14" font-weight="700" letter-spacing="3">SMARTER</text>
+  <text x="928" y="118" font-size="14" font-weight="700" letter-spacing="3">HIGHER WINRATE</text>
+  <text x="900" y="324" font-size="11" opacity=".52" letter-spacing="2">LIVE MATRIX / 24 VENUES / AUTO TRY</text>
+</g>
+<g stroke="#2dffcb" fill="none" opacity=".35">
+  <path d="M58 58 H286"/><path d="M58 70 H212"/><path d="M1060 286 H1160 V326" stroke-width="2"/>
 </g>
 </svg>
