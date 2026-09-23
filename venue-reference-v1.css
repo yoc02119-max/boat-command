@@ -1,0 +1,211 @@
+/* BOAT COMMAND shared venue presentation layer.
+   Visual only: prediction, HARD LOCK, TRY, result, cycle and model scripts remain untouched. */
+.venue-reference{
+ --vr-side:184px;--vr-cyan:#00e6eb;--vr-line:#008f9d;--vr-panel:#00131d;
+ --vr-panel2:#00232d;--vr-text:#f4fbff;--vr-muted:#7eaebb;
+ margin:0;background:#010b12;color:var(--vr-text);
+}
+.venue-reference *,.venue-reference *:before,.venue-reference *:after{box-sizing:border-box}
+.venue-reference:before{
+ content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+ background:
+ linear-gradient(rgba(0,230,235,.017) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(0,230,235,.013) 1px,transparent 1px),
+ radial-gradient(ellipse at 74% 0,rgba(0,230,235,.075),transparent 43%),
+ linear-gradient(180deg,#020d15,#01090f 78%);
+ background-size:32px 32px,32px 32px,auto,auto;
+}
+.venue-reference .matrix-rain{position:fixed;z-index:0;pointer-events:none;inset:0 0 0 var(--vr-side);overflow:hidden;opacity:.15}
+.venue-reference .matrix-rain:before,.venue-reference .matrix-rain:after{
+ content:"010101 001011 101100 011010 110001 010010 111000 001101 101011";
+ position:absolute;left:0;right:0;top:-42%;height:188%;color:#00e6eb;
+ font:700 9px/20px ui-monospace,SFMono-Regular,Menlo,monospace;
+ letter-spacing:12px;word-spacing:31px;animation:venueMatrixFall 27s linear infinite;
+ text-shadow:0 0 8px rgba(0,230,235,.11);
+}
+.venue-reference .matrix-rain:after{left:19%;opacity:.42;animation-duration:36s;animation-delay:-12s}
+@keyframes venueMatrixFall{from{transform:translateY(-8%)}to{transform:translateY(27%)}}
+
+/* Shared side command rail */
+.venue-reference .matrix-side{
+ position:fixed;z-index:40;inset:0 auto 0 0;width:var(--vr-side);display:flex;flex-direction:column;
+ padding:14px 13px 24px;border-right:1px solid #08778166;
+ background:linear-gradient(140deg,#00253488,transparent 35%),#010c13;
+ box-shadow:12px 0 40px rgba(0,0,0,.16);
+}
+.venue-reference .matrix-logo{padding:0 11px 28px}
+.venue-reference .matrix-logo-mark{
+ display:grid;place-items:center;width:39px;height:39px;margin-bottom:10px;border:1px solid #00edee;border-radius:8px;
+ background:linear-gradient(135deg,#08636e,#01212d);color:#9cffff;font-size:27px;box-shadow:0 0 20px #00e6eb33;
+}
+.venue-reference .matrix-logo b{display:block;font-size:23px;line-height:1;font-weight:800;letter-spacing:-.5px}
+.venue-reference .matrix-logo small{display:block;margin-top:10px;font:8px ui-monospace,monospace;letter-spacing:1.7px;color:#40dee7}
+.venue-reference .matrix-nav{display:grid;gap:5px}
+.venue-reference .matrix-nav a{
+ display:flex;align-items:center;gap:16px;min-height:49px;padding:12px;border:1px solid transparent;border-radius:8px;
+ color:#bfe8f2;text-decoration:none;font-size:14px;font-weight:500;
+}
+.venue-reference .matrix-nav a:hover{background:#01374377}
+.venue-reference .matrix-nav a.active{
+ border-color:#00b9c4;background:linear-gradient(90deg,#00546055,#00313a33);
+ box-shadow:inset 3px 0 #00eff0,0 0 20px #00e6eb10;color:#fff;font-weight:700;
+}
+.venue-reference .side-ico{display:grid;place-items:center;flex:0 0 22px;width:22px;height:24px;color:#8de8f0}
+.venue-reference .matrix-nav .active .side-ico{color:#00eff0}
+.venue-reference .matrix-side-bottom{margin-top:auto;padding:88px 9px 0}
+.venue-reference .system-card{border:1px solid #0392a3;border-radius:8px;background:#002a3444;padding:11px}
+.venue-reference .system-card strong{display:flex;align-items:center;gap:8px;color:#00f0ed;font-size:11px}
+.venue-reference .system-dot{width:9px;height:9px;border-radius:50%;background:#00eeee;box-shadow:0 0 14px #00e6eb55}
+.venue-reference .system-card small{display:block;margin-top:6px;color:#4fabbb;font:9px/1.5 ui-monospace,monospace;letter-spacing:.7px}
+.venue-reference .matrix-side-foot{margin-top:12px;color:#76bbcd;font:9px/1.5 ui-monospace,monospace;letter-spacing:1px}
+
+/* Main venue canvas */
+.venue-reference .shell{position:relative;z-index:1;max-width:none;margin-left:var(--vr-side);padding:10px 25px 92px}
+.venue-reference .top{min-height:46px;margin:0;padding:0 4px 7px;border-bottom:1px solid #00757f66}
+.venue-reference .back{
+ border:1px solid #006e7a;background:#01202b;color:#bcf8ff;border-radius:7px;padding:8px 12px;
+ box-shadow:0 0 14px #00e6eb0d;
+}
+.venue-reference .back:hover{border-color:#00d6df;color:#fff}
+.venue-reference .brand{color:#4b94a3;font-size:8px;letter-spacing:.16em}
+.venue-reference .brand b{color:#73edf1;font-size:13px;letter-spacing:.08em}
+
+/* Venue hero */
+.venue-reference .hero{
+ position:relative;isolation:isolate;min-height:188px;margin:10px 0 10px;padding:31px 47% 20px 34px;
+ overflow:hidden;border:1px solid #00cbd6;border-radius:10px;background:#01121b;box-shadow:0 0 14px #00e6eb20;
+}
+.venue-reference .hero:before{
+ content:"";position:absolute;z-index:3;inset:7px auto 9px 10px;width:15px;
+ border:1px solid #00d6e2;border-right:0;border-radius:6px;
+}
+.venue-reference .hero:after{
+ content:"";position:absolute;z-index:1;right:0;bottom:0;width:72%;height:100%;
+ background:linear-gradient(90deg,#01121b 0%,transparent 47%),url('./assets/home-racer-v4.webp') right 43%/cover no-repeat;
+ opacity:.82;pointer-events:none;
+}
+.venue-reference .hero .code,.venue-reference .hero h1,.venue-reference .hero p,.venue-reference .hero .status{position:relative;z-index:4}
+.venue-reference .hero .code{color:#00edec;font:800 9px ui-monospace,monospace;letter-spacing:.2em}
+.venue-reference .hero h1{margin:7px 0 6px;font-size:42px;line-height:1.08;letter-spacing:.025em}
+.venue-reference .hero p{max-width:610px;color:#acd7e4;font-size:12px;line-height:1.55}
+.venue-reference .hero .status{
+ right:auto;left:34px;bottom:18px;margin:0;border:1px solid #007b87;border-radius:5px;
+ padding:5px 8px;background:#002631bb;color:#83edf2;font-size:8px;
+}
+.venue-reference .hero .status i{background:#00e6eb;box-shadow:0 0 10px #00e6eb}
+
+/* Shared bankroll strip */
+.venue-reference .common-bank{grid-template-columns:1.35fr 1fr 1fr 1fr;gap:8px;margin-top:8px}
+.venue-reference .common-kpi{
+ position:relative;min-height:83px;padding:12px 14px;border:1px solid #00aab8;border-radius:7px;
+ background:radial-gradient(circle at 90% 80%,#00516120,transparent 50%),linear-gradient(135deg,#01212c,#00101a);
+ box-shadow:inset 0 0 22px #00e6eb08;
+}
+.venue-reference .common-kpi:before{content:"";position:absolute;left:0;top:0;width:4px;height:34px;background:#00eded;box-shadow:0 0 13px #00e6eb}
+.venue-reference .common-kpi small{color:#76aab7;font-size:9px}
+.venue-reference .common-kpi b{font-size:19px;color:#effdff}
+.venue-reference .common-kpi.bank b{font-size:25px;color:#d8ffff}
+.venue-reference .common-kpi.profit.positive b{color:#63ebce}.venue-reference .common-kpi.profit.negative b{color:#ff628a}
+.venue-reference .common-bank-note{grid-column:1/-1;color:#5a92a0;font-size:8px;padding:0 4px}
+
+/* Main tab rail */
+.venue-reference .common-tabs{
+ top:7px;z-index:24;margin:10px 0 0;padding:6px;gap:6px;border:1px solid #006d78;border-radius:8px;
+ background:#00131def;box-shadow:0 9px 22px rgba(0,0,0,.18);backdrop-filter:blur(14px);
+}
+.venue-reference .common-tab{
+ border:1px solid #005c67;border-radius:6px;background:#001b25;color:#79afbb;padding:10px 8px;font-size:11px;
+}
+.venue-reference .common-tab:hover{border-color:#00a6b0;color:#d4ffff}
+.venue-reference .common-tab.active{
+ border-color:#00d9df;background:linear-gradient(90deg,#00404b,#002b34);color:#eaffff;
+ box-shadow:inset 3px 0 #00e6eb,0 0 15px rgba(0,230,235,.08);
+}
+
+/* Prediction / race board */
+.venue-reference .research-board{margin-top:10px}
+.venue-reference .rrb-shell{
+ border:1px solid #008e9b;border-radius:8px;padding:13px;background:linear-gradient(160deg,#00202a,#000f18);
+ box-shadow:inset 0 0 28px #00e6eb07;
+}
+.venue-reference .rrb-head{padding:2px 2px 10px;border-bottom:1px solid #005f6955}
+.venue-reference .rrb-head small{color:#5ba0ad}.venue-reference .rrb-head h2{font-size:22px}
+.venue-reference .rrb-head p{color:#78aeb9}
+.venue-reference .rrb-head-stats span{border-color:#00616c;background:#001923;color:#6da5b1;border-radius:6px}
+.venue-reference .rrb-head-stats b{color:#e7fdff}
+.venue-reference .rrb-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.venue-reference .rrb-card{
+ border:1px solid #007580;border-radius:7px;background:linear-gradient(180deg,#00212b,#00131b);overflow:hidden;
+ box-shadow:inset 0 0 18px rgba(0,230,235,.035);
+}
+.venue-reference .rrb-card:hover{border-color:#00aebb}
+.venue-reference .rrb-card>header{padding:10px 11px;border-bottom-color:#005b6555;background:#001b24}
+.venue-reference .rrb-card>header strong{font-size:19px;color:#f2feff}
+.venue-reference .rrb-card>header span{color:#6ea5b1}.venue-reference .rrb-card>header time{color:#8dc4cf;font-size:10px}
+.venue-reference .rrb-boats{padding:9px 10px;gap:5px}
+.venue-reference .rrb-boat b{font-size:10px}.venue-reference .rrb-boat small{font-size:8px;color:#6b9aa5}
+.venue-reference .rrb-lane{border-radius:5px}
+.venue-reference .rrb-models{padding:7px 9px;background:#000d14aa}
+.venue-reference .rrb-model{border-color:#005a6455;border-radius:6px;padding:7px}
+.venue-reference .rrb-model.primary{border-color:#0097a4;background:#00e6eb08}
+.venue-reference .rrb-model>span{color:#68a1ae;font-size:8px}
+.venue-reference .rrb-model>small{color:#527f8a}
+.venue-reference .rrb-picks i{background:#002b35;border-radius:4px;padding:5px 6px;color:#e8fcff;font-size:10px}
+.venue-reference .rrb-model.primary .rrb-picks i{background:#00404a;color:#bffcff}
+.venue-reference .rrb-result,.venue-reference .rrb-try{border-color:#005b6555;border-radius:6px;background:#001620}
+.venue-reference .rrb-result span,.venue-reference .rrb-try span{color:#6397a3}
+.venue-reference .rrb-result small,.venue-reference .rrb-try small{color:#6f9aa4}
+.venue-reference .rrb-try.selected{border-color:#00a994;background:#12c8a50c}
+.venue-reference .rrb-card.try-hit{border-color:#42d8bc;background:linear-gradient(180deg,#07352f,#00131b)}
+.venue-reference .rrb-card.try-miss{border-color:#d95773;background:linear-gradient(180deg,#351a24,#00131b)}
+.venue-reference .rrb-card.try-pending{border-color:#d4ac56}
+.venue-reference .rrb-try-badge{border-radius:5px}
+
+/* History / development detail */
+.venue-reference .venue-details{margin-top:8px;color:#6ea5b1;font-size:9px}
+.venue-reference .venue-details>summary{
+ padding:7px 10px;border:1px solid #005e69;border-radius:6px;background:#001923;color:#78c5ce;
+}
+.venue-reference .panel{
+ border:1px solid #00717c;border-radius:7px;padding:14px;background:linear-gradient(160deg,#00202a,#00111a);
+}
+.venue-reference .panel h2{font-size:16px}.venue-reference .panel p{color:#7daab4}
+.venue-reference .step{border:1px solid #00545e55;border-radius:6px;background:#001923}
+.venue-reference .step span{border-radius:5px;background:#00323c;color:#9bfbff}
+.venue-reference .step small{color:#6998a2}
+.venue-reference .note,.venue-reference .research-gates{border-color:#00616c!important;background:#00131b;color:#6f9faa}
+.venue-reference .research-kpi{border-color:#00616c;border-radius:6px;background:#001923}
+.venue-reference .research-kpi small{color:#6396a2}.venue-reference .research-kpi b{color:#ddfaff}
+.venue-reference #venueModelCycle,.venue-reference #venuePerformance30d{margin-top:10px}
+.venue-reference #venueModelCycle [class^="mc-"],.venue-reference #venuePerformance30d [class^="v30-"]{border-color:#006b76}
+.venue-reference .mc-card,.venue-reference .v30-shell{background:linear-gradient(160deg,#00202a,#00111a)!important}
+
+/* Desktop density tuned to show many races without losing readability. */
+@media(max-width:1450px){.venue-reference .rrb-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1160px){
+ .venue-reference{--vr-side:160px}
+ .venue-reference .shell{padding-left:16px;padding-right:16px}
+ .venue-reference .matrix-nav a{font-size:12px;gap:12px}
+ .venue-reference .matrix-logo b{font-size:21px}
+ .venue-reference .hero{padding-right:43%}
+ .venue-reference .rrb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:820px){
+ .venue-reference{--vr-side:0px}
+ .venue-reference .matrix-side{display:none}
+ .venue-reference .matrix-rain{left:0}
+ .venue-reference .shell{margin-left:0;padding:10px 10px 90px}
+ .venue-reference .hero{min-height:162px;padding:22px 28% 18px 20px}
+ .venue-reference .hero:after{width:100%;opacity:.4;background:linear-gradient(90deg,#01121b 0%,#01121baa 42%,transparent 77%),url('./assets/home-racer-v4.webp') right 43%/cover no-repeat}
+ .venue-reference .hero h1{font-size:34px}
+ .venue-reference .hero .status{left:20px;bottom:14px}
+ .venue-reference .common-bank{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+ .venue-reference .hero{padding-right:18px}
+ .venue-reference .hero p{max-width:72%}
+ .venue-reference .common-kpi{min-height:74px;padding:10px}
+ .venue-reference .common-kpi b{font-size:15px}.venue-reference .common-kpi.bank b{font-size:20px}
+ .venue-reference .rrb-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.venue-reference *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
