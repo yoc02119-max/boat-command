@@ -16,7 +16,7 @@
 select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radius:8px;padding:8px} .history-table{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th:first-child{text-align:left} #labHistoryMeta{color:var(--muted);font-size:11px;line-height:1.7}
 </style>
 </head>
-<body>
+<body style="visibility:hidden">
 <div class="shell">
  <div class="top"><a class="back" href="./portal.html">← ホーム</a><div class="brand"><small>BOAT COMMAND</small><b>RESEARCH ENVIRONMENT</b></div></div>
  <section class="hero">
@@ -52,7 +52,17 @@ select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radi
  </section>
 </div>
 <a class="bottom-home" href="./portal.html" aria-label="ホームへ">⌂</a>
-<script src="daily-lab-v1.js?v=8"></script>
-<script src="browser-controls-v1.js?v=3"></script>
+<script>
+(async()=>{
+ try{
+  const r=await fetch('/api/developer-auth',{credentials:'same-origin',cache:'no-store'}),x=await r.json();
+  if(!r.ok||x.authenticated!==true){location.replace('./portal.html?developer=locked');return;}
+  document.body.style.visibility='visible';
+  for(const src of ['daily-lab-v1.js?v=8','browser-controls-v1.js?v=3']){
+   await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=reject;document.body.appendChild(el)});
+  }
+ }catch{location.replace('./portal.html?developer=locked');}
+})();
+</script>
 </body>
 </html>
