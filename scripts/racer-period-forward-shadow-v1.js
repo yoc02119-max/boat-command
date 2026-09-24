@@ -19,7 +19,14 @@ const PARAM_REPORT=path.join(ROOT,'research','racer-period-second-place-shadow-v
 const HIST_REPORT=JSON.parse(fs.readFileSync(PARAM_REPORT,'utf8'));
 const PARAMS=new Map((HIST_REPORT.venues||[])
   .filter(v=>v.status==='EVALUATED'&&v.selected?.preset&&Number.isFinite(Number(v.selected?.lambda)))
-  .map(v=>[String(v.code),{preset:v.selected.preset,lambda:Number(v.selected.lambda)}]));
+  .map(v=>[String(v.code),{
+    preset:v.selected.preset,
+    lambda:Number(v.selected.lambda),
+    modelVersion:String(v.modelVersion||''),
+    holdoutSecondDeltaVsMarginal:Number(v.holdout?.periodSecondDeltaVsMarginal||0),
+    holdoutSecondDeltaVsTop:Number(v.holdout?.periodSecondDeltaVsTop||0),
+    holdoutExactDeltaVsTop:Number(v.holdout?.periodExactDeltaVsTop||0)
+  }]));
 
 const PRESETS={
   ST_GLOBAL:{three:0,st:-1.00,ability:0,f:-0.05,l:-0.05,c2:0,cst:0,crank:0},
@@ -147,6 +154,10 @@ for(const v of registry.list()){
   if(!fs.existsSync(modelPath)||!fs.existsSync(historyPath)||!fs.existsSync(baselinePath))continue;
   const model=require(modelPath),historyDb=read(historyPath),baseline=read(baselinePath);
   if(!historyDb?.races?.length)continue;
+  if(param.modelVersion && String(model.version||'')!==param.modelVersion){
+    console.log('FORWARD_SHADOW_MODEL_VERSION_DRIFT',v.code,v.slug,param.modelVersion,model.version||null);
+    continue;
+  }
 
   for(let race=1;race<=12;race++){
     const pp=path.join(ROOT,'live',v.slug,date,'program','race-'+race+'.json');
@@ -187,6 +198,9 @@ for(const v of registry.list()){
         strongModelDistributionHoldoutReport:'research/racer-period-second-place-shadow-v1.json',
         mixedSimplifiedRankingReport:'research/racer-period-second-place-audit-v1.json',
         ticketExpansionReport:'research/period-second-expansion-v1.json',
+        holdoutSecondDeltaVsMarginal:param.holdoutSecondDeltaVsMarginal,
+        holdoutSecondDeltaVsTop:param.holdoutSecondDeltaVsTop,
+        holdoutExactDeltaVsTop:param.holdoutExactDeltaVsTop,
         forwardValidationRequired:true
       },
       sources:{
