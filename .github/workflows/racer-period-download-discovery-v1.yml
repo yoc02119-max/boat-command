@@ -1,0 +1,162 @@
+name: Racer period download discovery v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-download-discovery-v1.yml'
+      - 'scripts/racer-period-download-discovery-v1.py'
+      - 'scripts/racer-period-enrichment-v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Discover official half-year racer data links
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-download-discovery-v1.py
+          python3 scripts/racer-period-download-discovery-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-download-discovery-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-download-discovery-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['candidateLinks']
+          print('RACER_PERIOD_DISCOVERY_PASS',len(x['candidateLinks']))
+          PY
+      - name: Probe one current archive structure
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+          URL=$(python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-download-discovery-v1.json',encoding='utf-8'))
+          rows=[r['url'] for r in x['candidateLinks'] if r['url'].endswith('/fan2510.lzh')]
+          assert len(rows)==1, rows
+          print(rows[0])
+          PY
+          )
+          curl -fsSL --connect-timeout 20 --max-time 60 "$URL" -o /tmp/fan2510.lzh
+          rm -rf /tmp/fan2510 && mkdir -p /tmp/fan2510
+          lha xw=/tmp/fan2510 /tmp/fan2510.lzh >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          fs=[p for p in Path('/tmp/fan2510').rglob('*') if p.is_file()]
+          assert fs
+          p=fs[0]; raw=p.read_bytes(); lines=raw.splitlines()
+          print('ARCHIVE_FILE',p.name,'BYTES',len(raw),'LINES',len(lines))
+          for i,b in enumerate(lines[:2],1):
+              print('LINE',i,'BYTE_LEN',len(b),'TEXT',b.decode('cp932','replace')[:260])
+          PY
+
+      - name: Build historical racer-period enrichment audit
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-enrichment-v1.py
+          python3 scripts/racer-period-enrichment-v1.py --self-test
+          rm -rf /tmp/racer-period && mkdir -p /tmp/racer-period
+          python3 scripts/racer-period-enrichment-v1.py --needed-files > /tmp/racer-period/needed.txt
+          echo 'NEEDED_PERIOD_ARCHIVES'
+          cat /tmp/racer-period/needed.txt
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            stem="${file%.lzh}"
+            mkdir -p "/tmp/racer-period/$stem"
+            curl -fsSL --connect-timeout 20 --max-time 60               "https://www.boatrace.jp/static_extra/pc_static/download/data/kibetsu/$file"               -o "/tmp/racer-period/$file"
+            lha "xw=/tmp/racer-period/$stem" "/tmp/racer-period/$file" >/dev/null
+          done < /tmp/racer-period/needed.txt
+          python3 scripts/racer-period-enrichment-v1.py             --archive-root /tmp/racer-period             --out-root racer-period-24
+          python3 - <<'PY'
+          import json
+          x=json.load(open('racer-period-24/audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-enrichment-audit-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['totals']['venues']==24
+          assert x['totals']['boatRows']>150000
+          assert x['totals']['matchCoverage']>=0.99
+          assert x['totals']['safeJoinCoverage']>=0.98
+          assert x['totals']['periodAvgSTCoverage']>=0.99
+          assert len(x['packFiles'])==2
+          print('RACER_PERIOD_ENRICHMENT_AUDIT_PASS',x['totals'])
+          PY
+
+      - name: Save audited racer-period research packs to source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('racer-period-24/audit-v1.json',encoding='utf-8'))
+          assert x['totals']['venues']==24
+          assert x['totals']['matchCoverage']>=0.99
+          assert x['totals']['safeJoinCoverage']>=0.98
+          assert x['recommendedJoinPolicy']=='RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED'
+          assert len(x['packFiles'])==2
+          print('RACER_PERIOD_SAVE_GATE_PASS',x['totals'])
+          PY
+          rm -rf /tmp/racer-period-save
+          mkdir -p /tmp/racer-period-save
+          cp -a racer-period-24/. /tmp/racer-period-save/
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          rm -rf racer-period-24
+          mkdir -p racer-period-24
+          cp -a /tmp/racer-period-save/. racer-period-24/
+          git config user.name 'boat-command-racer-period-research'
+          git config user.email 'boat-command-racer-period-research@users.noreply.github.com'
+          git add racer-period-24
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(research): store audited racer-period features [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-period-enrichment-v1
+          path: |
+            research/racer-period-download-discovery-v1.json
+            racer-period-24/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save audited enrichment data to the source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('racer-period-24/audit-v1.json',encoding='utf-8'))
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['totals']['venues']==24
+          assert x['totals']['matchCoverage'] >= 0.99
+          assert x['totals']['periodAvgSTCoverage'] >= 0.99
+          assert x['totals']['period3RateDerivedCoverage'] >= 0.97
+          PY
+          rm -rf /tmp/racer-period-24
+          cp -a racer-period-24 /tmp/racer-period-24
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          rm -rf racer-period-24
+          cp -a /tmp/racer-period-24 racer-period-24
+          git config user.name 'boat-command-racer-period-research'
+          git config user.email 'boat-command-racer-period-research@users.noreply.github.com'
+          git add racer-period-24
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(research): store audited racer-period enrichment [skip ci]'
+          git push origin "HEAD:$HEAD_REF"

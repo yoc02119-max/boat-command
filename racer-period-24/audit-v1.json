@@ -1,0 +1,653 @@
+{
+  "schema": "boat-command-racer-period-enrichment-audit-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "source": "BOAT RACE official racer half-year archives",
+  "officialRecordBytes": 416,
+  "leakageRule": "term1 Jan-Jun uses prior-Oct-ending stats; term2 Jul-Dec uses Apr-ending stats",
+  "recommendedJoinPolicy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+  "periods": [
+    {
+      "year": 2026,
+      "term": 1,
+      "archive": "fan2510",
+      "racers": 1625,
+      "badLines": 1,
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-06-30",
+      "maxCalcTo": "2025-10-31"
+    },
+    {
+      "year": 2026,
+      "term": 2,
+      "archive": "fan2604",
+      "racers": 1643,
+      "badLines": 1,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2026-12-31",
+      "maxCalcTo": "2026-04-30"
+    }
+  ],
+  "totals": {
+    "venues": 24,
+    "boatRows": 162564,
+    "matchedBoatRows": 161891,
+    "matchCoverage": 0.99586,
+    "classMatchRows": 161299,
+    "classMismatchRows": 592,
+    "classMatchCoverageOfMatched": 0.996343,
+    "safeJoinCoverage": 0.992218,
+    "periodAvgSTCoverage": 0.99586,
+    "period3RateDerivedCoverage": 0.982628,
+    "periodFCountDerivedCoverage": 0.99586,
+    "periodLCountDerivedCoverage": 0.99586,
+    "courseFeatureCoverage": 0.99586
+  },
+  "packFiles": [
+    "racer-period-24/2026-1.json",
+    "racer-period-24/2026-2.json"
+  ],
+  "venuesData": [
+    {
+      "slug": "amagasaki",
+      "races": 1282,
+      "boatRows": 7692,
+      "matchedBoatRows": 7668,
+      "matchCoverage": 0.99688,
+      "classMatchRows": 7668,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.99688,
+      "fieldCoverage": {
+        "name": 0.99688,
+        "periodAvgST": 0.99688,
+        "period3RateDerived": 0.975949,
+        "periodFCountDerived": 0.99688,
+        "periodLCountDerived": 0.99688,
+        "currentAbility": 0.99688,
+        "previousAbility": 0.99688,
+        "courses": 0.99688
+      },
+      "periodRaceCounts": {
+        "2026-1": 622,
+        "2026-2": 660
+      }
+    },
+    {
+      "slug": "ashiya",
+      "races": 1179,
+      "boatRows": 7074,
+      "matchedBoatRows": 7052,
+      "matchCoverage": 0.99689,
+      "classMatchRows": 7052,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.99689,
+      "fieldCoverage": {
+        "name": 0.99689,
+        "periodAvgST": 0.99689,
+        "period3RateDerived": 0.985722,
+        "periodFCountDerived": 0.99689,
+        "periodLCountDerived": 0.99689,
+        "currentAbility": 0.99689,
+        "previousAbility": 0.99689,
+        "courses": 0.99689
+      },
+      "periodRaceCounts": {
+        "2026-1": 663,
+        "2026-2": 516
+      }
+    },
+    {
+      "slug": "biwako",
+      "races": 1013,
+      "boatRows": 6078,
+      "matchedBoatRows": 6060,
+      "matchCoverage": 0.997038,
+      "classMatchRows": 6029,
+      "classMismatchRows": 31,
+      "classMatchCoverageOfMatched": 0.994884,
+      "safeJoinCoverage": 0.991938,
+      "fieldCoverage": {
+        "name": 0.997038,
+        "periodAvgST": 0.997038,
+        "period3RateDerived": 0.980421,
+        "periodFCountDerived": 0.997038,
+        "periodLCountDerived": 0.997038,
+        "currentAbility": 0.997038,
+        "previousAbility": 0.997038,
+        "courses": 0.997038
+      },
+      "periodRaceCounts": {
+        "2026-1": 471,
+        "2026-2": 542
+      }
+    },
+    {
+      "slug": "edogawa",
+      "races": 794,
+      "boatRows": 4764,
+      "matchedBoatRows": 4764,
+      "matchCoverage": 1.0,
+      "classMatchRows": 4764,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 1.0,
+      "fieldCoverage": {
+        "name": 1.0,
+        "periodAvgST": 1.0,
+        "period3RateDerived": 0.989505,
+        "periodFCountDerived": 1.0,
+        "periodLCountDerived": 1.0,
+        "currentAbility": 1.0,
+        "previousAbility": 1.0,
+        "courses": 1.0
+      },
+      "periodRaceCounts": {
+        "2026-1": 426,
+        "2026-2": 368
+      }
+    },
+    {
+      "slug": "fukuoka",
+      "races": 1150,
+      "boatRows": 6900,
+      "matchedBoatRows": 6863,
+      "matchCoverage": 0.994638,
+      "classMatchRows": 6863,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.994638,
+      "fieldCoverage": {
+        "name": 0.994638,
+        "periodAvgST": 0.994638,
+        "period3RateDerived": 0.977536,
+        "periodFCountDerived": 0.994638,
+        "periodLCountDerived": 0.994638,
+        "currentAbility": 0.994638,
+        "previousAbility": 0.994638,
+        "courses": 0.994638
+      },
+      "periodRaceCounts": {
+        "2026-1": 514,
+        "2026-2": 636
+      }
+    },
+    {
+      "slug": "gamagori",
+      "races": 1116,
+      "boatRows": 6696,
+      "matchedBoatRows": 6674,
+      "matchCoverage": 0.996714,
+      "classMatchRows": 6674,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.996714,
+      "fieldCoverage": {
+        "name": 0.996714,
+        "periodAvgST": 0.996714,
+        "period3RateDerived": 0.986858,
+        "periodFCountDerived": 0.996714,
+        "periodLCountDerived": 0.996714,
+        "currentAbility": 0.996714,
+        "previousAbility": 0.996714,
+        "courses": 0.996714
+      },
+      "periodRaceCounts": {
+        "2026-1": 648,
+        "2026-2": 468
+      }
+    },
+    {
+      "slug": "hamanako",
+      "races": 1204,
+      "boatRows": 7224,
+      "matchedBoatRows": 7195,
+      "matchCoverage": 0.995986,
+      "classMatchRows": 7187,
+      "classMismatchRows": 8,
+      "classMatchCoverageOfMatched": 0.998888,
+      "safeJoinCoverage": 0.994878,
+      "fieldCoverage": {
+        "name": 0.995986,
+        "periodAvgST": 0.995986,
+        "period3RateDerived": 0.984635,
+        "periodFCountDerived": 0.995986,
+        "periodLCountDerived": 0.995986,
+        "currentAbility": 0.995986,
+        "previousAbility": 0.995986,
+        "courses": 0.995986
+      },
+      "periodRaceCounts": {
+        "2026-1": 632,
+        "2026-2": 572
+      }
+    },
+    {
+      "slug": "heiwajima",
+      "races": 1092,
+      "boatRows": 6552,
+      "matchedBoatRows": 6552,
+      "matchCoverage": 1.0,
+      "classMatchRows": 6552,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 1.0,
+      "fieldCoverage": {
+        "name": 1.0,
+        "periodAvgST": 1.0,
+        "period3RateDerived": 0.986264,
+        "periodFCountDerived": 1.0,
+        "periodLCountDerived": 1.0,
+        "currentAbility": 1.0,
+        "previousAbility": 1.0,
+        "courses": 1.0
+      },
+      "periodRaceCounts": {
+        "2026-1": 456,
+        "2026-2": 636
+      }
+    },
+    {
+      "slug": "karatsu",
+      "races": 1138,
+      "boatRows": 6828,
+      "matchedBoatRows": 6772,
+      "matchCoverage": 0.991798,
+      "classMatchRows": 6677,
+      "classMismatchRows": 95,
+      "classMatchCoverageOfMatched": 0.985972,
+      "safeJoinCoverage": 0.977885,
+      "fieldCoverage": {
+        "name": 0.991798,
+        "periodAvgST": 0.991798,
+        "period3RateDerived": 0.978764,
+        "periodFCountDerived": 0.991798,
+        "periodLCountDerived": 0.991798,
+        "currentAbility": 0.991798,
+        "previousAbility": 0.991798,
+        "courses": 0.991798
+      },
+      "periodRaceCounts": {
+        "2026-1": 651,
+        "2026-2": 487
+      }
+    },
+    {
+      "slug": "kiryu",
+      "races": 1151,
+      "boatRows": 6906,
+      "matchedBoatRows": 6883,
+      "matchCoverage": 0.99667,
+      "classMatchRows": 6883,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.99667,
+      "fieldCoverage": {
+        "name": 0.99667,
+        "periodAvgST": 0.99667,
+        "period3RateDerived": 0.989719,
+        "periodFCountDerived": 0.99667,
+        "periodLCountDerived": 0.99667,
+        "currentAbility": 0.99667,
+        "previousAbility": 0.99667,
+        "courses": 0.99667
+      },
+      "periodRaceCounts": {
+        "2026-1": 633,
+        "2026-2": 518
+      }
+    },
+    {
+      "slug": "kojima",
+      "races": 1259,
+      "boatRows": 7554,
+      "matchedBoatRows": 7513,
+      "matchCoverage": 0.994572,
+      "classMatchRows": 7426,
+      "classMismatchRows": 87,
+      "classMatchCoverageOfMatched": 0.98842,
+      "safeJoinCoverage": 0.983055,
+      "fieldCoverage": {
+        "name": 0.994572,
+        "periodAvgST": 0.994572,
+        "period3RateDerived": 0.979084,
+        "periodFCountDerived": 0.994572,
+        "periodLCountDerived": 0.994572,
+        "currentAbility": 0.994572,
+        "previousAbility": 0.994572,
+        "courses": 0.994572
+      },
+      "periodRaceCounts": {
+        "2026-1": 636,
+        "2026-2": 623
+      }
+    },
+    {
+      "slug": "marugame",
+      "races": 1103,
+      "boatRows": 6618,
+      "matchedBoatRows": 6608,
+      "matchCoverage": 0.998489,
+      "classMatchRows": 6608,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.998489,
+      "fieldCoverage": {
+        "name": 0.998489,
+        "periodAvgST": 0.998489,
+        "period3RateDerived": 0.989423,
+        "periodFCountDerived": 0.998489,
+        "periodLCountDerived": 0.998489,
+        "currentAbility": 0.998489,
+        "previousAbility": 0.998489,
+        "courses": 0.998489
+      },
+      "periodRaceCounts": {
+        "2026-1": 660,
+        "2026-2": 443
+      }
+    },
+    {
+      "slug": "mikuni",
+      "races": 1124,
+      "boatRows": 6744,
+      "matchedBoatRows": 6697,
+      "matchCoverage": 0.993031,
+      "classMatchRows": 6684,
+      "classMismatchRows": 13,
+      "classMatchCoverageOfMatched": 0.998059,
+      "safeJoinCoverage": 0.991103,
+      "fieldCoverage": {
+        "name": 0.993031,
+        "periodAvgST": 0.993031,
+        "period3RateDerived": 0.982651,
+        "periodFCountDerived": 0.993031,
+        "periodLCountDerived": 0.993031,
+        "currentAbility": 0.993031,
+        "previousAbility": 0.993031,
+        "courses": 0.993031
+      },
+      "periodRaceCounts": {
+        "2026-1": 586,
+        "2026-2": 538
+      }
+    },
+    {
+      "slug": "miyajima",
+      "races": 1194,
+      "boatRows": 7164,
+      "matchedBoatRows": 7132,
+      "matchCoverage": 0.995533,
+      "classMatchRows": 7102,
+      "classMismatchRows": 30,
+      "classMatchCoverageOfMatched": 0.995794,
+      "safeJoinCoverage": 0.991346,
+      "fieldCoverage": {
+        "name": 0.995533,
+        "periodAvgST": 0.995533,
+        "period3RateDerived": 0.983389,
+        "periodFCountDerived": 0.995533,
+        "periodLCountDerived": 0.995533,
+        "currentAbility": 0.995533,
+        "previousAbility": 0.995533,
+        "courses": 0.995533
+      },
+      "periodRaceCounts": {
+        "2026-1": 668,
+        "2026-2": 526
+      }
+    },
+    {
+      "slug": "naruto",
+      "races": 923,
+      "boatRows": 5538,
+      "matchedBoatRows": 5517,
+      "matchCoverage": 0.996208,
+      "classMatchRows": 5517,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.996208,
+      "fieldCoverage": {
+        "name": 0.996208,
+        "periodAvgST": 0.996208,
+        "period3RateDerived": 0.985374,
+        "periodFCountDerived": 0.996208,
+        "periodLCountDerived": 0.996208,
+        "currentAbility": 0.996208,
+        "previousAbility": 0.996208,
+        "courses": 0.996208
+      },
+      "periodRaceCounts": {
+        "2026-1": 489,
+        "2026-2": 434
+      }
+    },
+    {
+      "slug": "omura",
+      "races": 1170,
+      "boatRows": 7020,
+      "matchedBoatRows": 7005,
+      "matchCoverage": 0.997863,
+      "classMatchRows": 6994,
+      "classMismatchRows": 11,
+      "classMatchCoverageOfMatched": 0.99843,
+      "safeJoinCoverage": 0.996296,
+      "fieldCoverage": {
+        "name": 0.997863,
+        "periodAvgST": 0.997863,
+        "period3RateDerived": 0.984188,
+        "periodFCountDerived": 0.997863,
+        "periodLCountDerived": 0.997863,
+        "currentAbility": 0.997863,
+        "previousAbility": 0.997863,
+        "courses": 0.997863
+      },
+      "periodRaceCounts": {
+        "2026-1": 613,
+        "2026-2": 557
+      }
+    },
+    {
+      "slug": "shimonoseki",
+      "races": 999,
+      "boatRows": 5994,
+      "matchedBoatRows": 5961,
+      "matchCoverage": 0.994494,
+      "classMatchRows": 5852,
+      "classMismatchRows": 109,
+      "classMatchCoverageOfMatched": 0.981714,
+      "safeJoinCoverage": 0.97631,
+      "fieldCoverage": {
+        "name": 0.994494,
+        "periodAvgST": 0.994494,
+        "period3RateDerived": 0.97998,
+        "periodFCountDerived": 0.994494,
+        "periodLCountDerived": 0.994494,
+        "currentAbility": 0.994494,
+        "previousAbility": 0.994494,
+        "courses": 0.994494
+      },
+      "periodRaceCounts": {
+        "2026-1": 431,
+        "2026-2": 568
+      }
+    },
+    {
+      "slug": "suminoe",
+      "races": 1139,
+      "boatRows": 6834,
+      "matchedBoatRows": 6805,
+      "matchCoverage": 0.995757,
+      "classMatchRows": 6805,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.995757,
+      "fieldCoverage": {
+        "name": 0.995757,
+        "periodAvgST": 0.995757,
+        "period3RateDerived": 0.979807,
+        "periodFCountDerived": 0.995757,
+        "periodLCountDerived": 0.995757,
+        "currentAbility": 0.995757,
+        "previousAbility": 0.995757,
+        "courses": 0.995757
+      },
+      "periodRaceCounts": {
+        "2026-1": 587,
+        "2026-2": 552
+      }
+    },
+    {
+      "slug": "tamagawa",
+      "races": 1165,
+      "boatRows": 6990,
+      "matchedBoatRows": 6974,
+      "matchCoverage": 0.997711,
+      "classMatchRows": 6928,
+      "classMismatchRows": 46,
+      "classMatchCoverageOfMatched": 0.993404,
+      "safeJoinCoverage": 0.99113,
+      "fieldCoverage": {
+        "name": 0.997711,
+        "periodAvgST": 0.997711,
+        "period3RateDerived": 0.977396,
+        "periodFCountDerived": 0.997711,
+        "periodLCountDerived": 0.997711,
+        "currentAbility": 0.997711,
+        "previousAbility": 0.997711,
+        "courses": 0.997711
+      },
+      "periodRaceCounts": {
+        "2026-1": 565,
+        "2026-2": 600
+      }
+    },
+    {
+      "slug": "toda",
+      "races": 989,
+      "boatRows": 5934,
+      "matchedBoatRows": 5901,
+      "matchCoverage": 0.994439,
+      "classMatchRows": 5881,
+      "classMismatchRows": 20,
+      "classMatchCoverageOfMatched": 0.996611,
+      "safeJoinCoverage": 0.991068,
+      "fieldCoverage": {
+        "name": 0.994439,
+        "periodAvgST": 0.994439,
+        "period3RateDerived": 0.984159,
+        "periodFCountDerived": 0.994439,
+        "periodLCountDerived": 0.994439,
+        "currentAbility": 0.994439,
+        "previousAbility": 0.994439,
+        "courses": 0.994439
+      },
+      "periodRaceCounts": {
+        "2026-1": 539,
+        "2026-2": 450
+      }
+    },
+    {
+      "slug": "tokoname",
+      "races": 1302,
+      "boatRows": 7812,
+      "matchedBoatRows": 7756,
+      "matchCoverage": 0.992832,
+      "classMatchRows": 7688,
+      "classMismatchRows": 68,
+      "classMatchCoverageOfMatched": 0.991233,
+      "safeJoinCoverage": 0.984127,
+      "fieldCoverage": {
+        "name": 0.992832,
+        "periodAvgST": 0.992832,
+        "period3RateDerived": 0.982463,
+        "periodFCountDerived": 0.992832,
+        "periodLCountDerived": 0.992832,
+        "currentAbility": 0.992832,
+        "previousAbility": 0.992832,
+        "courses": 0.992832
+      },
+      "periodRaceCounts": {
+        "2026-1": 713,
+        "2026-2": 589
+      }
+    },
+    {
+      "slug": "tokuyama",
+      "races": 1208,
+      "boatRows": 7248,
+      "matchedBoatRows": 7195,
+      "matchCoverage": 0.992688,
+      "classMatchRows": 7195,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.992688,
+      "fieldCoverage": {
+        "name": 0.992688,
+        "periodAvgST": 0.992688,
+        "period3RateDerived": 0.980132,
+        "periodFCountDerived": 0.992688,
+        "periodLCountDerived": 0.992688,
+        "currentAbility": 0.992688,
+        "previousAbility": 0.992688,
+        "courses": 0.992688
+      },
+      "periodRaceCounts": {
+        "2026-1": 668,
+        "2026-2": 540
+      }
+    },
+    {
+      "slug": "tsu",
+      "races": 1318,
+      "boatRows": 7908,
+      "matchedBoatRows": 7880,
+      "matchCoverage": 0.996459,
+      "classMatchRows": 7880,
+      "classMismatchRows": 0,
+      "classMatchCoverageOfMatched": 1.0,
+      "safeJoinCoverage": 0.996459,
+      "fieldCoverage": {
+        "name": 0.996459,
+        "periodAvgST": 0.996459,
+        "period3RateDerived": 0.979767,
+        "periodFCountDerived": 0.996459,
+        "periodLCountDerived": 0.996459,
+        "currentAbility": 0.996459,
+        "previousAbility": 0.996459,
+        "courses": 0.996459
+      },
+      "periodRaceCounts": {
+        "2026-1": 707,
+        "2026-2": 611
+      }
+    },
+    {
+      "slug": "wakamatsu",
+      "races": 1082,
+      "boatRows": 6492,
+      "matchedBoatRows": 6464,
+      "matchCoverage": 0.995687,
+      "classMatchRows": 6390,
+      "classMismatchRows": 74,
+      "classMatchCoverageOfMatched": 0.988552,
+      "safeJoinCoverage": 0.984288,
+      "fieldCoverage": {
+        "name": 0.995687,
+        "periodAvgST": 0.995687,
+        "period3RateDerived": 0.984288,
+        "periodFCountDerived": 0.995687,
+        "periodLCountDerived": 0.995687,
+        "currentAbility": 0.995687,
+        "previousAbility": 0.995687,
+        "courses": 0.995687
+      },
+      "periodRaceCounts": {
+        "2026-1": 496,
+        "2026-2": 586
+      }
+    }
+  ]
+}
