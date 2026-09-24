@@ -50,20 +50,27 @@ def program_section(section):
     return PARSER.parse_program("\n".join(fixed))
 
 
-def exact_block(text, code, kind):
-    section = PARSER.block(text, code, kind)
-    marker = rf"(?m)^\s*{code}{kind}BGN\s*$"
-    # The shared parser's last-resort fallback searches the first 40 lines.
-    # That can mistake a racer's prefecture (e.g. 福岡) for the venue name.
+def trusted_section(section, code, kind):
+    """Accept only a section whose own header identifies the requested venue."""
+    lines = [line for line in section.splitlines() if line.strip()]
+    if not lines:
+        return False
+    marker = rf"\s*{code}{kind}BGN\s*"
+    marker_head = bool(re.fullmatch(marker, lines[0]))
     label = "［番組］" if kind == "B" else "［成績］"
     title = PARSER._base.VENUE_NAMES[code]
     named = any(title in PARSER._base._compact(line) and label in line
-                for line in section.splitlines()[:2])
-    # Official single-venue archives can use "ボートレース 津" without [番組].
-    # Require it in the title, not somewhere in a racer's name or prefecture.
+                for line in lines[:2])
     titled = any(PARSER._base._compact(line).startswith("ボートレース" + title)
-                 for line in section.splitlines()[:2])
-    if re.search(marker, section) or named or titled:
+                 for line in lines[:2])
+    return marker_head or named or titled
+
+
+def exact_block(text, code, kind):
+    section = PARSER.block(text, code, kind)
+    # A broad fallback can contain another venue plus a later marker for code.
+    # Do not trust a marker found in the middle of that broad block.
+    if trusted_section(section, code, kind):
         return section
     # Some official days omit a venue marker or use another leading marker.
     # Slice at the *venue heading* instead of accepting the whole archive.
@@ -177,6 +184,12 @@ def self_test():
     parsed = program_section(section)
     assert parsed[1]["boats"][0]["motor2Rate"] == .4491
     assert parsed[1]["boats"][0]["boat"] == 164
+    assert not trusted_section("24BBGN\n1 1234選手23福岡52B1", "22", "B")
+    assert trusted_section("22BBGN\n1R 予選 H1800m", "22", "B")
+    assert trusted_section("福 岡［番組］\n1R 予選 H1800m", "22", "B")
+    assert trusted_section("ボートレース 津\n1R 予選 H1800m", "09", "B")
+    false_broad = "ボートレース桐生\n1R 予選 H1800m\n22BBGN\n1R 予選 H1800m"
+    assert not trusted_section(false_broad, "22", "B")
     assert not exact_block("24BBGN\n1 1234選手23福岡52B1", "22", "B")
     assert exact_block("ボートレース 津\n 1R 予選 H1800m", "09", "B")
     multi = "24BBGN\nボートレース大村\n1R 予選 H1800m\nボートレース福 岡\n1R 予選 H1800m"
