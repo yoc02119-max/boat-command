@@ -1,0 +1,115 @@
+name: Historical beforeinfo backfill v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/historical-beforeinfo-backfill-v1.yml'
+      - 'scripts/historical-beforeinfo-backfill-v1.py'
+      - 'scripts/venue-pre-race-rich-collector-v1.py'
+      - 'scripts/venue-program-collector-v1.py'
+      - 'rich-history-24/**'
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-beforeinfo-backfill-v1
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest branch
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Contract and incremental backfill
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/historical-beforeinfo-backfill-v1.py
+          python3 scripts/historical-beforeinfo-backfill-v1.py --self-test
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python3 scripts/historical-beforeinfo-backfill-v1.py               --one-per-venue --max-groups 24 --verify-candidates 24 --workers 6
+          else
+            python3 scripts/historical-beforeinfo-backfill-v1.py               --max-groups 24 --verify-candidates 36 --workers 6
+          fi
+
+      - name: Safety and completeness audit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob,json,os
+          status=json.load(open('research/historical-beforeinfo-backfill-status-v1.json',encoding='utf-8'))
+          assert status['schema']=='boat-command-historical-beforeinfo-backfill-status-v1'
+          assert status['researchOnly'] is True
+          assert status['productionChanged'] is False
+          assert status['predictionInputChanged'] is False
+          assert status['resultEndpointsIncluded'] is False
+          assert status['payoutEndpointsIncluded'] is False
+          run=status['lastRun']
+          files=[]
+          for g in run['selectedGroups']:
+              p=f"historical-beforeinfo-24/{g['slug']}/{g['date']}.json"
+              if os.path.exists(p): files.append(p)
+          assert files, 'NO_BACKFILL_FILES'
+          for p in files:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-historical-beforeinfo-day-v1'
+              assert x['researchOnly'] is True
+              assert x['productionEnabled'] is False
+              assert x['predictionInputEnabled'] is False
+              assert x['resultEndpointsIncluded'] is False
+              assert x['payoutEndpointsIncluded'] is False
+              assert x['identityVerification']['verified'] is True
+              raw=json.dumps(x,ensure_ascii=False)
+              assert '"o":' not in raw and '"p":' not in raw
+              for r in x['races']:
+                  assert 'actual' not in r and 'payout' not in r and 'trifecta' not in r
+                  assert r['startExhibitionInterpretation']=='DISPLAY_TOKENS_ONLY_NOT_ASSERTED_AS_ACTUAL_ENTRY_COURSES'
+          print('HISTORICAL_BEFOREINFO_SAFETY_PASS',len(files),status['totals'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-beforeinfo-backfill-v1
+          path: |
+            historical-beforeinfo-24/
+            research/historical-beforeinfo-backfill-status-v1.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Publish audited research backfill
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/historical-beforeinfo-24 /tmp/historical-beforeinfo-status.json
+          cp -a historical-beforeinfo-24 /tmp/historical-beforeinfo-24
+          cp research/historical-beforeinfo-backfill-status-v1.json /tmp/historical-beforeinfo-status.json
+
+          git config user.name 'boat-command-historical-beforeinfo'
+          git config user.email 'boat-command-historical-beforeinfo@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp -a /tmp/historical-beforeinfo-24/. historical-beforeinfo-24/
+            mkdir -p research
+            cp /tmp/historical-beforeinfo-status.json research/historical-beforeinfo-backfill-status-v1.json
+            git add historical-beforeinfo-24 research/historical-beforeinfo-backfill-status-v1.json
+            git diff --cached --quiet && exit 0
+            git commit -m 'data(research): backfill historical PRE-RACE beforeinfo'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
