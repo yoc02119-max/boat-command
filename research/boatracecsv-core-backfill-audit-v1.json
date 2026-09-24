@@ -1,0 +1,6771 @@
+{
+  "schema": "boat-command-boatracecsv-core-backfill-audit-v1",
+  "generatedAt": "2026-09-24T21:24:54.309492+00:00",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "tryChanged": false,
+  "hardLockChanged": false,
+  "source": {
+    "repository": "BoatraceCSV/boatracecsv.github.io",
+    "licenseClaimFromReadme": "MIT License",
+    "baseUrl": "https://boatracecsv.github.io/data",
+    "upstreamAsDocumentedBySource": "race.boatcast.jp / BOAT RACE related feeds",
+    "thirdPartyDataset": true
+  },
+  "safety": {
+    "resultsFetched": false,
+    "payoutsFetched": false,
+    "previewAcceptedOnlyAfterSixRegistrationIdentityMatch": true,
+    "existingRichHistoryMutated": false
+  },
+  "totals": {
+    "targetRaces": 27094,
+    "raceCardIdentityMatched": 26569,
+    "raceCardIdentityRejected": 0,
+    "raceCardIdentityCoverage": 0.980623,
+    "raceCardBoatRows": 159414,
+    "raceCardFieldCoverage": {
+      "name": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "period": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "branch": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "birthplace": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "age": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "class": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "prizeExclusion": {
+        "present": 2365,
+        "total": 159414,
+        "coverage": 0.014836
+      },
+      "fCount": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "lCount": {
+        "present": 159414,
+        "total": 159414,
+        "coverage": 1.0
+      },
+      "avgST": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "nationalWinRate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "national2Rate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "national3Rate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "localWinRate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "local2Rate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "local3Rate": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "motor": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "motor2Rate": {
+        "present": 153728,
+        "total": 159414,
+        "coverage": 0.964332
+      },
+      "motor3Rate": {
+        "present": 153728,
+        "total": 159414,
+        "coverage": 0.964332
+      },
+      "boat": {
+        "present": 159353,
+        "total": 159414,
+        "coverage": 0.999617
+      },
+      "boat2Rate": {
+        "present": 153944,
+        "total": 159414,
+        "coverage": 0.965687
+      },
+      "boat3Rate": {
+        "present": 153944,
+        "total": 159414,
+        "coverage": 0.965687
+      },
+      "quickRace": {
+        "present": 120227,
+        "total": 159414,
+        "coverage": 0.754181
+      }
+    },
+    "tkzAcceptedRaces": 25249,
+    "tkzRaceCoverage": 0.931904,
+    "sttAcceptedRaces": 25245,
+    "sttRaceCoverage": 0.931756,
+    "suiAcceptedRaces": 25249,
+    "suiRaceCoverage": 0.931904,
+    "originalExhibitionAcceptedRaces": 24276,
+    "originalExhibitionRaceCoverage": 0.895992,
+    "tkzBoatFieldCoverage": {
+      "weightKg": {
+        "present": 151310,
+        "total": 151494,
+        "coverage": 0.998785
+      },
+      "adjustWeightKg": {
+        "present": 151310,
+        "total": 151494,
+        "coverage": 0.998785
+      },
+      "exhibitionTime": {
+        "present": 146852,
+        "total": 151494,
+        "coverage": 0.969359
+      },
+      "tilt": {
+        "present": 151283,
+        "total": 151494,
+        "coverage": 0.998607
+      }
+    },
+    "sttBoatFieldCoverage": {
+      "exhibitionCourse": {
+        "present": 151270,
+        "total": 151470,
+        "coverage": 0.99868
+      },
+      "exhibitionST": {
+        "present": 151257,
+        "total": 151470,
+        "coverage": 0.998594
+      }
+    },
+    "suiFieldRaceCoverage": {
+      "weatherObservationTime": {
+        "presentRaces": 21040,
+        "totalRaces": 25249,
+        "coverage": 0.8333
+      },
+      "windSpeedMps": {
+        "presentRaces": 25246,
+        "totalRaces": 25249,
+        "coverage": 0.999881
+      },
+      "windDirection": {
+        "presentRaces": 23736,
+        "totalRaces": 25249,
+        "coverage": 0.940077
+      },
+      "waveHeightCm": {
+        "presentRaces": 25246,
+        "totalRaces": 25249,
+        "coverage": 0.999881
+      },
+      "weather": {
+        "presentRaces": 25249,
+        "totalRaces": 25249,
+        "coverage": 1.0
+      },
+      "airTempC": {
+        "presentRaces": 25246,
+        "totalRaces": 25249,
+        "coverage": 0.999881
+      },
+      "waterTempC": {
+        "presentRaces": 25246,
+        "totalRaces": 25249,
+        "coverage": 0.999881
+      }
+    }
+  },
+  "fetch": {
+    "filesRequested": 915,
+    "filesOK": 914,
+    "errors": {
+      "race_cards:HTTP_404": 1
+    }
+  },
+  "identityRejectExamples": [],
+  "venues": [
+    {
+      "code": "01",
+      "slug": "kiryu",
+      "targetRaces": 1151,
+      "dateMin": "2026-04-01",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1139,
+        "identityMatched": 1139,
+        "identityRejected": 0,
+        "identityCoverage": 0.989574,
+        "classMismatchRaces": 0,
+        "boatRows": 6834,
+        "fieldCoverage": {
+          "name": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "period": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "branch": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "birthplace": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "age": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "class": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "prizeExclusion": {
+            "present": 79,
+            "total": 6834,
+            "coverage": 0.01156,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "lCount": {
+            "present": 6834,
+            "total": 6834,
+            "coverage": 1.0,
+            "full6Races": 1139
+          },
+          "avgST": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "nationalWinRate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "national2Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "national3Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "localWinRate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "local2Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "local3Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "motor": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "motor2Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "motor3Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "boat": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "boat2Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "boat3Rate": {
+            "present": 6833,
+            "total": 6834,
+            "coverage": 0.999854,
+            "full6Races": 1138
+          },
+          "quickRace": {
+            "present": 4970,
+            "total": 6834,
+            "coverage": 0.727246,
+            "full6Races": 281
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 991,
+          "raceCoverage": 0.870061,
+          "slots": 27360,
+          "entryValues": 27356,
+          "stValues": 27356,
+          "finishValues": 27360
+        }
+      },
+      "tkz": {
+        "rows": 1093,
+        "accepted": 1081,
+        "raceCoverage": 0.939183,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6485,
+            "total": 6486,
+            "coverage": 0.999846,
+            "full6Races": 1080
+          },
+          "adjustWeightKg": {
+            "present": 6485,
+            "total": 6486,
+            "coverage": 0.999846,
+            "full6Races": 1080
+          },
+          "exhibitionTime": {
+            "present": 6113,
+            "total": 6486,
+            "coverage": 0.942492,
+            "full6Races": 1018
+          },
+          "tilt": {
+            "present": 6478,
+            "total": 6486,
+            "coverage": 0.998767,
+            "full6Races": 1078
+          }
+        }
+      },
+      "stt": {
+        "rows": 1093,
+        "accepted": 1081,
+        "raceCoverage": 0.939183,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6484,
+            "total": 6486,
+            "coverage": 0.999692,
+            "full6Races": 1079
+          },
+          "exhibitionST": {
+            "present": 6484,
+            "total": 6486,
+            "coverage": 0.999692,
+            "full6Races": 1079
+          }
+        }
+      },
+      "sui": {
+        "rows": 1093,
+        "accepted": 1081,
+        "raceCoverage": 0.939183,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 918,
+            "totalRaces": 1081,
+            "coverage": 0.849214
+          },
+          "windSpeedMps": {
+            "presentRaces": 1081,
+            "totalRaces": 1081,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1031,
+            "totalRaces": 1081,
+            "coverage": 0.953747
+          },
+          "waveHeightCm": {
+            "presentRaces": 1081,
+            "totalRaces": 1081,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1081,
+            "totalRaces": 1081,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1081,
+            "totalRaces": 1081,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1081,
+            "totalRaces": 1081,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1093,
+        "accepted": 1081,
+        "raceCoverage": 0.939183,
+        "measureCountDistribution": {
+          "3": 1081
+        },
+        "full6RacesByValueIndex": {
+          "1": 1079,
+          "2": 1054,
+          "3": 1054
+        },
+        "labelCounts": {
+          "半周ラップ": 1081,
+          "まわり足": 1081,
+          "直線": 1081
+        }
+      }
+    },
+    {
+      "code": "02",
+      "slug": "toda",
+      "targetRaces": 989,
+      "dateMin": "2026-03-24",
+      "dateMax": "2026-09-19",
+      "raceCards": {
+        "rows": 989,
+        "identityMatched": 989,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 5934,
+        "fieldCoverage": {
+          "name": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "period": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "branch": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "birthplace": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "age": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "class": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "prizeExclusion": {
+            "present": 106,
+            "total": 5934,
+            "coverage": 0.017863,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "lCount": {
+            "present": 5934,
+            "total": 5934,
+            "coverage": 1.0,
+            "full6Races": 989
+          },
+          "avgST": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "nationalWinRate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "national2Rate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "national3Rate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "localWinRate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "local2Rate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "local3Rate": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "motor": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "motor2Rate": {
+            "present": 5649,
+            "total": 5934,
+            "coverage": 0.951972,
+            "full6Races": 939
+          },
+          "motor3Rate": {
+            "present": 5649,
+            "total": 5934,
+            "coverage": 0.951972,
+            "full6Races": 939
+          },
+          "boat": {
+            "present": 5931,
+            "total": 5934,
+            "coverage": 0.999494,
+            "full6Races": 986
+          },
+          "boat2Rate": {
+            "present": 5649,
+            "total": 5934,
+            "coverage": 0.951972,
+            "full6Races": 939
+          },
+          "boat3Rate": {
+            "present": 5649,
+            "total": 5934,
+            "coverage": 0.951972,
+            "full6Races": 939
+          },
+          "quickRace": {
+            "present": 4439,
+            "total": 5934,
+            "coverage": 0.748062,
+            "full6Races": 214
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 836,
+          "raceCoverage": 0.845298,
+          "slots": 22972,
+          "entryValues": 22967,
+          "stValues": 22967,
+          "finishValues": 22972
+        }
+      },
+      "tkz": {
+        "rows": 915,
+        "accepted": 915,
+        "raceCoverage": 0.925177,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5485,
+            "total": 5490,
+            "coverage": 0.999089,
+            "full6Races": 910
+          },
+          "adjustWeightKg": {
+            "present": 5485,
+            "total": 5490,
+            "coverage": 0.999089,
+            "full6Races": 910
+          },
+          "exhibitionTime": {
+            "present": 5484,
+            "total": 5490,
+            "coverage": 0.998907,
+            "full6Races": 909
+          },
+          "tilt": {
+            "present": 5485,
+            "total": 5490,
+            "coverage": 0.999089,
+            "full6Races": 910
+          }
+        }
+      },
+      "stt": {
+        "rows": 915,
+        "accepted": 915,
+        "raceCoverage": 0.925177,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5485,
+            "total": 5490,
+            "coverage": 0.999089,
+            "full6Races": 910
+          },
+          "exhibitionST": {
+            "present": 5484,
+            "total": 5490,
+            "coverage": 0.998907,
+            "full6Races": 909
+          }
+        }
+      },
+      "sui": {
+        "rows": 915,
+        "accepted": 915,
+        "raceCoverage": 0.925177,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 711,
+            "totalRaces": 915,
+            "coverage": 0.777049
+          },
+          "windSpeedMps": {
+            "presentRaces": 915,
+            "totalRaces": 915,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 783,
+            "totalRaces": 915,
+            "coverage": 0.855738
+          },
+          "waveHeightCm": {
+            "presentRaces": 915,
+            "totalRaces": 915,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 915,
+            "totalRaces": 915,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 915,
+            "totalRaces": 915,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 915,
+            "totalRaces": 915,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 913,
+        "accepted": 913,
+        "raceCoverage": 0.923155,
+        "measureCountDistribution": {
+          "3": 913
+        },
+        "full6RacesByValueIndex": {
+          "1": 906,
+          "2": 907,
+          "3": 907
+        },
+        "labelCounts": {
+          "一周": 913,
+          "まわり足": 913,
+          "直線": 913
+        }
+      }
+    },
+    {
+      "code": "03",
+      "slug": "edogawa",
+      "targetRaces": 794,
+      "dateMin": "2026-04-13",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 794,
+        "identityMatched": 794,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 4764,
+        "fieldCoverage": {
+          "name": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "period": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "branch": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "birthplace": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "age": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "class": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "prizeExclusion": {
+            "present": 131,
+            "total": 4764,
+            "coverage": 0.027498,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "lCount": {
+            "present": 4764,
+            "total": 4764,
+            "coverage": 1.0,
+            "full6Races": 794
+          },
+          "avgST": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "nationalWinRate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "national2Rate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "national3Rate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "localWinRate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "local2Rate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "local3Rate": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "motor": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "motor2Rate": {
+            "present": 4402,
+            "total": 4764,
+            "coverage": 0.924013,
+            "full6Races": 732
+          },
+          "motor3Rate": {
+            "present": 4402,
+            "total": 4764,
+            "coverage": 0.924013,
+            "full6Races": 732
+          },
+          "boat": {
+            "present": 4762,
+            "total": 4764,
+            "coverage": 0.99958,
+            "full6Races": 792
+          },
+          "boat2Rate": {
+            "present": 4402,
+            "total": 4764,
+            "coverage": 0.924013,
+            "full6Races": 732
+          },
+          "boat3Rate": {
+            "present": 4402,
+            "total": 4764,
+            "coverage": 0.924013,
+            "full6Races": 732
+          },
+          "quickRace": {
+            "present": 3375,
+            "total": 4764,
+            "coverage": 0.708438,
+            "full6Races": 127
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 688,
+          "raceCoverage": 0.866499,
+          "slots": 18294,
+          "entryValues": 18290,
+          "stValues": 18290,
+          "finishValues": 18292
+        }
+      },
+      "tkz": {
+        "rows": 757,
+        "accepted": 757,
+        "raceCoverage": 0.953401,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 4534,
+            "total": 4542,
+            "coverage": 0.998239,
+            "full6Races": 749
+          },
+          "adjustWeightKg": {
+            "present": 4534,
+            "total": 4542,
+            "coverage": 0.998239,
+            "full6Races": 749
+          },
+          "exhibitionTime": {
+            "present": 4323,
+            "total": 4542,
+            "coverage": 0.951783,
+            "full6Races": 713
+          },
+          "tilt": {
+            "present": 4532,
+            "total": 4542,
+            "coverage": 0.997798,
+            "full6Races": 747
+          }
+        }
+      },
+      "stt": {
+        "rows": 757,
+        "accepted": 757,
+        "raceCoverage": 0.953401,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 4532,
+            "total": 4542,
+            "coverage": 0.997798,
+            "full6Races": 747
+          },
+          "exhibitionST": {
+            "present": 4530,
+            "total": 4542,
+            "coverage": 0.997358,
+            "full6Races": 745
+          }
+        }
+      },
+      "sui": {
+        "rows": 757,
+        "accepted": 757,
+        "raceCoverage": 0.953401,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 656,
+            "totalRaces": 757,
+            "coverage": 0.866579
+          },
+          "windSpeedMps": {
+            "presentRaces": 757,
+            "totalRaces": 757,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 756,
+            "totalRaces": 757,
+            "coverage": 0.998679
+          },
+          "waveHeightCm": {
+            "presentRaces": 757,
+            "totalRaces": 757,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 757,
+            "totalRaces": 757,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 757,
+            "totalRaces": 757,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 757,
+            "totalRaces": 757,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 0,
+        "accepted": 0,
+        "raceCoverage": 0.0,
+        "measureCountDistribution": {},
+        "full6RacesByValueIndex": {},
+        "labelCounts": {}
+      }
+    },
+    {
+      "code": "04",
+      "slug": "heiwajima",
+      "targetRaces": 1092,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-19",
+      "raceCards": {
+        "rows": 1092,
+        "identityMatched": 1092,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6552,
+        "fieldCoverage": {
+          "name": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "period": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "branch": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "birthplace": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "age": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "class": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "prizeExclusion": {
+            "present": 111,
+            "total": 6552,
+            "coverage": 0.016941,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "lCount": {
+            "present": 6552,
+            "total": 6552,
+            "coverage": 1.0,
+            "full6Races": 1092
+          },
+          "avgST": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "nationalWinRate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "national2Rate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "national3Rate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "localWinRate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "local2Rate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "local3Rate": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "motor": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "motor2Rate": {
+            "present": 6261,
+            "total": 6552,
+            "coverage": 0.955586,
+            "full6Races": 1041
+          },
+          "motor3Rate": {
+            "present": 6261,
+            "total": 6552,
+            "coverage": 0.955586,
+            "full6Races": 1041
+          },
+          "boat": {
+            "present": 6549,
+            "total": 6552,
+            "coverage": 0.999542,
+            "full6Races": 1089
+          },
+          "boat2Rate": {
+            "present": 6261,
+            "total": 6552,
+            "coverage": 0.955586,
+            "full6Races": 1041
+          },
+          "boat3Rate": {
+            "present": 6261,
+            "total": 6552,
+            "coverage": 0.955586,
+            "full6Races": 1041
+          },
+          "quickRace": {
+            "present": 4993,
+            "total": 6552,
+            "coverage": 0.762057,
+            "full6Races": 241
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 948,
+          "raceCoverage": 0.868132,
+          "slots": 26362,
+          "entryValues": 26356,
+          "stValues": 26356,
+          "finishValues": 26362
+        }
+      },
+      "tkz": {
+        "rows": 1019,
+        "accepted": 1019,
+        "raceCoverage": 0.93315,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6102,
+            "total": 6114,
+            "coverage": 0.998037,
+            "full6Races": 1007
+          },
+          "adjustWeightKg": {
+            "present": 6102,
+            "total": 6114,
+            "coverage": 0.998037,
+            "full6Races": 1007
+          },
+          "exhibitionTime": {
+            "present": 6089,
+            "total": 6114,
+            "coverage": 0.995911,
+            "full6Races": 1004
+          },
+          "tilt": {
+            "present": 6101,
+            "total": 6114,
+            "coverage": 0.997874,
+            "full6Races": 1006
+          }
+        }
+      },
+      "stt": {
+        "rows": 1019,
+        "accepted": 1019,
+        "raceCoverage": 0.93315,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6101,
+            "total": 6114,
+            "coverage": 0.997874,
+            "full6Races": 1006
+          },
+          "exhibitionST": {
+            "present": 6100,
+            "total": 6114,
+            "coverage": 0.99771,
+            "full6Races": 1005
+          }
+        }
+      },
+      "sui": {
+        "rows": 1019,
+        "accepted": 1019,
+        "raceCoverage": 0.93315,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 827,
+            "totalRaces": 1019,
+            "coverage": 0.81158
+          },
+          "windSpeedMps": {
+            "presentRaces": 1019,
+            "totalRaces": 1019,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 963,
+            "totalRaces": 1019,
+            "coverage": 0.945044
+          },
+          "waveHeightCm": {
+            "presentRaces": 1019,
+            "totalRaces": 1019,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1019,
+            "totalRaces": 1019,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1019,
+            "totalRaces": 1019,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1019,
+            "totalRaces": 1019,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1019,
+        "accepted": 1019,
+        "raceCoverage": 0.93315,
+        "measureCountDistribution": {
+          "3": 1019
+        },
+        "full6RacesByValueIndex": {
+          "1": 1005,
+          "2": 1005,
+          "3": 1005
+        },
+        "labelCounts": {
+          "一周": 1019,
+          "まわり足": 1019,
+          "直線": 1019
+        }
+      }
+    },
+    {
+      "code": "05",
+      "slug": "tamagawa",
+      "targetRaces": 1165,
+      "dateMin": "2026-03-28",
+      "dateMax": "2026-09-21",
+      "raceCards": {
+        "rows": 1153,
+        "identityMatched": 1153,
+        "identityRejected": 0,
+        "identityCoverage": 0.9897,
+        "classMismatchRaces": 0,
+        "boatRows": 6918,
+        "fieldCoverage": {
+          "name": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "period": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "branch": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "birthplace": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "age": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "class": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "prizeExclusion": {
+            "present": 48,
+            "total": 6918,
+            "coverage": 0.006938,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "lCount": {
+            "present": 6918,
+            "total": 6918,
+            "coverage": 1.0,
+            "full6Races": 1153
+          },
+          "avgST": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "nationalWinRate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "national2Rate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "national3Rate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "localWinRate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "local2Rate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "local3Rate": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "motor": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "motor2Rate": {
+            "present": 6484,
+            "total": 6918,
+            "coverage": 0.937265,
+            "full6Races": 1079
+          },
+          "motor3Rate": {
+            "present": 6484,
+            "total": 6918,
+            "coverage": 0.937265,
+            "full6Races": 1079
+          },
+          "boat": {
+            "present": 6916,
+            "total": 6918,
+            "coverage": 0.999711,
+            "full6Races": 1151
+          },
+          "boat2Rate": {
+            "present": 6484,
+            "total": 6918,
+            "coverage": 0.937265,
+            "full6Races": 1079
+          },
+          "boat3Rate": {
+            "present": 6484,
+            "total": 6918,
+            "coverage": 0.937265,
+            "full6Races": 1079
+          },
+          "quickRace": {
+            "present": 5274,
+            "total": 6918,
+            "coverage": 0.762359,
+            "full6Races": 260
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1008,
+          "raceCoverage": 0.874241,
+          "slots": 26888,
+          "entryValues": 26880,
+          "stValues": 26877,
+          "finishValues": 26888
+        }
+      },
+      "tkz": {
+        "rows": 1124,
+        "accepted": 1112,
+        "raceCoverage": 0.954506,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6659,
+            "total": 6672,
+            "coverage": 0.998052,
+            "full6Races": 1099
+          },
+          "adjustWeightKg": {
+            "present": 6659,
+            "total": 6672,
+            "coverage": 0.998052,
+            "full6Races": 1099
+          },
+          "exhibitionTime": {
+            "present": 6629,
+            "total": 6672,
+            "coverage": 0.993555,
+            "full6Races": 1094
+          },
+          "tilt": {
+            "present": 6659,
+            "total": 6672,
+            "coverage": 0.998052,
+            "full6Races": 1099
+          }
+        }
+      },
+      "stt": {
+        "rows": 1124,
+        "accepted": 1112,
+        "raceCoverage": 0.954506,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6660,
+            "total": 6672,
+            "coverage": 0.998201,
+            "full6Races": 1100
+          },
+          "exhibitionST": {
+            "present": 6660,
+            "total": 6672,
+            "coverage": 0.998201,
+            "full6Races": 1100
+          }
+        }
+      },
+      "sui": {
+        "rows": 1124,
+        "accepted": 1112,
+        "raceCoverage": 0.954506,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 956,
+            "totalRaces": 1112,
+            "coverage": 0.859712
+          },
+          "windSpeedMps": {
+            "presentRaces": 1112,
+            "totalRaces": 1112,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 961,
+            "totalRaces": 1112,
+            "coverage": 0.864209
+          },
+          "waveHeightCm": {
+            "presentRaces": 1112,
+            "totalRaces": 1112,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1112,
+            "totalRaces": 1112,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1112,
+            "totalRaces": 1112,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1112,
+            "totalRaces": 1112,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1123,
+        "accepted": 1111,
+        "raceCoverage": 0.953648,
+        "measureCountDistribution": {
+          "3": 1111
+        },
+        "full6RacesByValueIndex": {
+          "1": 1097,
+          "2": 1097,
+          "3": 1097
+        },
+        "labelCounts": {
+          "一周": 1111,
+          "まわり足": 1111,
+          "直線": 1111
+        }
+      }
+    },
+    {
+      "code": "06",
+      "slug": "hamanako",
+      "targetRaces": 1204,
+      "dateMin": "2026-03-29",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1204,
+        "identityMatched": 1204,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 7224,
+        "fieldCoverage": {
+          "name": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "period": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "branch": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "birthplace": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "age": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "class": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "prizeExclusion": {
+            "present": 108,
+            "total": 7224,
+            "coverage": 0.01495,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "lCount": {
+            "present": 7224,
+            "total": 7224,
+            "coverage": 1.0,
+            "full6Races": 1204
+          },
+          "avgST": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "nationalWinRate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "national2Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "national3Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "localWinRate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "local2Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "local3Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "motor": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "motor2Rate": {
+            "present": 6789,
+            "total": 7224,
+            "coverage": 0.939784,
+            "full6Races": 1129
+          },
+          "motor3Rate": {
+            "present": 6789,
+            "total": 7224,
+            "coverage": 0.939784,
+            "full6Races": 1129
+          },
+          "boat": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "boat2Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "boat3Rate": {
+            "present": 7221,
+            "total": 7224,
+            "coverage": 0.999585,
+            "full6Races": 1201
+          },
+          "quickRace": {
+            "present": 5394,
+            "total": 7224,
+            "coverage": 0.746678,
+            "full6Races": 253
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1036,
+          "raceCoverage": 0.860465,
+          "slots": 28141,
+          "entryValues": 28134,
+          "stValues": 28134,
+          "finishValues": 28139
+        }
+      },
+      "tkz": {
+        "rows": 1132,
+        "accepted": 1132,
+        "raceCoverage": 0.940199,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6787,
+            "total": 6792,
+            "coverage": 0.999264,
+            "full6Races": 1127
+          },
+          "adjustWeightKg": {
+            "present": 6787,
+            "total": 6792,
+            "coverage": 0.999264,
+            "full6Races": 1127
+          },
+          "exhibitionTime": {
+            "present": 6649,
+            "total": 6792,
+            "coverage": 0.978946,
+            "full6Races": 1104
+          },
+          "tilt": {
+            "present": 6786,
+            "total": 6792,
+            "coverage": 0.999117,
+            "full6Races": 1126
+          }
+        }
+      },
+      "stt": {
+        "rows": 1132,
+        "accepted": 1132,
+        "raceCoverage": 0.940199,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6786,
+            "total": 6792,
+            "coverage": 0.999117,
+            "full6Races": 1126
+          },
+          "exhibitionST": {
+            "present": 6784,
+            "total": 6792,
+            "coverage": 0.998822,
+            "full6Races": 1124
+          }
+        }
+      },
+      "sui": {
+        "rows": 1132,
+        "accepted": 1132,
+        "raceCoverage": 0.940199,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 932,
+            "totalRaces": 1132,
+            "coverage": 0.823322
+          },
+          "windSpeedMps": {
+            "presentRaces": 1131,
+            "totalRaces": 1132,
+            "coverage": 0.999117
+          },
+          "windDirection": {
+            "presentRaces": 1081,
+            "totalRaces": 1132,
+            "coverage": 0.954947
+          },
+          "waveHeightCm": {
+            "presentRaces": 1131,
+            "totalRaces": 1132,
+            "coverage": 0.999117
+          },
+          "weather": {
+            "presentRaces": 1132,
+            "totalRaces": 1132,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1131,
+            "totalRaces": 1132,
+            "coverage": 0.999117
+          },
+          "waterTempC": {
+            "presentRaces": 1131,
+            "totalRaces": 1132,
+            "coverage": 0.999117
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1132,
+        "accepted": 1132,
+        "raceCoverage": 0.940199,
+        "measureCountDistribution": {
+          "3": 1132
+        },
+        "full6RacesByValueIndex": {
+          "1": 1122,
+          "2": 1125,
+          "3": 1125
+        },
+        "labelCounts": {
+          "一周": 1132,
+          "まわり足": 1132,
+          "直線": 1132
+        }
+      }
+    },
+    {
+      "code": "07",
+      "slug": "gamagori",
+      "targetRaces": 1116,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-18",
+      "raceCards": {
+        "rows": 1106,
+        "identityMatched": 1106,
+        "identityRejected": 0,
+        "identityCoverage": 0.991039,
+        "classMismatchRaces": 0,
+        "boatRows": 6636,
+        "fieldCoverage": {
+          "name": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "period": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "branch": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "birthplace": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "age": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "class": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "prizeExclusion": {
+            "present": 131,
+            "total": 6636,
+            "coverage": 0.019741,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "lCount": {
+            "present": 6636,
+            "total": 6636,
+            "coverage": 1.0,
+            "full6Races": 1106
+          },
+          "avgST": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "nationalWinRate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "national2Rate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "national3Rate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "localWinRate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "local2Rate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "local3Rate": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "motor": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "motor2Rate": {
+            "present": 6200,
+            "total": 6636,
+            "coverage": 0.934298,
+            "full6Races": 1030
+          },
+          "motor3Rate": {
+            "present": 6200,
+            "total": 6636,
+            "coverage": 0.934298,
+            "full6Races": 1030
+          },
+          "boat": {
+            "present": 6632,
+            "total": 6636,
+            "coverage": 0.999397,
+            "full6Races": 1102
+          },
+          "boat2Rate": {
+            "present": 6200,
+            "total": 6636,
+            "coverage": 0.934298,
+            "full6Races": 1030
+          },
+          "boat3Rate": {
+            "present": 6200,
+            "total": 6636,
+            "coverage": 0.934298,
+            "full6Races": 1030
+          },
+          "quickRace": {
+            "present": 4966,
+            "total": 6636,
+            "coverage": 0.748342,
+            "full6Races": 300
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 974,
+          "raceCoverage": 0.880651,
+          "slots": 28036,
+          "entryValues": 28028,
+          "stValues": 28028,
+          "finishValues": 28036
+        }
+      },
+      "tkz": {
+        "rows": 1049,
+        "accepted": 1039,
+        "raceCoverage": 0.931004,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6223,
+            "total": 6234,
+            "coverage": 0.998235,
+            "full6Races": 1028
+          },
+          "adjustWeightKg": {
+            "present": 6223,
+            "total": 6234,
+            "coverage": 0.998235,
+            "full6Races": 1028
+          },
+          "exhibitionTime": {
+            "present": 5940,
+            "total": 6234,
+            "coverage": 0.952839,
+            "full6Races": 980
+          },
+          "tilt": {
+            "present": 6223,
+            "total": 6234,
+            "coverage": 0.998235,
+            "full6Races": 1028
+          }
+        }
+      },
+      "stt": {
+        "rows": 1048,
+        "accepted": 1038,
+        "raceCoverage": 0.930108,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6217,
+            "total": 6228,
+            "coverage": 0.998234,
+            "full6Races": 1027
+          },
+          "exhibitionST": {
+            "present": 6217,
+            "total": 6228,
+            "coverage": 0.998234,
+            "full6Races": 1027
+          }
+        }
+      },
+      "sui": {
+        "rows": 1049,
+        "accepted": 1039,
+        "raceCoverage": 0.931004,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 850,
+            "totalRaces": 1039,
+            "coverage": 0.818094
+          },
+          "windSpeedMps": {
+            "presentRaces": 1039,
+            "totalRaces": 1039,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 963,
+            "totalRaces": 1039,
+            "coverage": 0.926853
+          },
+          "waveHeightCm": {
+            "presentRaces": 1039,
+            "totalRaces": 1039,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1039,
+            "totalRaces": 1039,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1039,
+            "totalRaces": 1039,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1039,
+            "totalRaces": 1039,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1049,
+        "accepted": 1039,
+        "raceCoverage": 0.931004,
+        "measureCountDistribution": {
+          "3": 1039
+        },
+        "full6RacesByValueIndex": {
+          "1": 1027,
+          "2": 1027,
+          "3": 1027
+        },
+        "labelCounts": {
+          "一周": 1039,
+          "まわり足": 1039,
+          "直線": 1039
+        }
+      }
+    },
+    {
+      "code": "08",
+      "slug": "tokoname",
+      "targetRaces": 1302,
+      "dateMin": "2026-03-28",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1290,
+        "identityMatched": 1290,
+        "identityRejected": 0,
+        "identityCoverage": 0.990783,
+        "classMismatchRaces": 0,
+        "boatRows": 7740,
+        "fieldCoverage": {
+          "name": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "period": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "branch": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "birthplace": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "age": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "class": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "prizeExclusion": {
+            "present": 93,
+            "total": 7740,
+            "coverage": 0.012016,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "lCount": {
+            "present": 7740,
+            "total": 7740,
+            "coverage": 1.0,
+            "full6Races": 1290
+          },
+          "avgST": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "nationalWinRate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "national2Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "national3Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "localWinRate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "local2Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "local3Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "motor": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "motor2Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "motor3Rate": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "boat": {
+            "present": 7739,
+            "total": 7740,
+            "coverage": 0.999871,
+            "full6Races": 1289
+          },
+          "boat2Rate": {
+            "present": 7307,
+            "total": 7740,
+            "coverage": 0.944057,
+            "full6Races": 1217
+          },
+          "boat3Rate": {
+            "present": 7307,
+            "total": 7740,
+            "coverage": 0.944057,
+            "full6Races": 1217
+          },
+          "quickRace": {
+            "present": 6093,
+            "total": 7740,
+            "coverage": 0.787209,
+            "full6Races": 345
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1100,
+          "raceCoverage": 0.852713,
+          "slots": 32414,
+          "entryValues": 32412,
+          "stValues": 32412,
+          "finishValues": 32414
+        }
+      },
+      "tkz": {
+        "rows": 1239,
+        "accepted": 1227,
+        "raceCoverage": 0.942396,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 7355,
+            "total": 7362,
+            "coverage": 0.999049,
+            "full6Races": 1220
+          },
+          "adjustWeightKg": {
+            "present": 7355,
+            "total": 7362,
+            "coverage": 0.999049,
+            "full6Races": 1220
+          },
+          "exhibitionTime": {
+            "present": 7199,
+            "total": 7362,
+            "coverage": 0.977859,
+            "full6Races": 1194
+          },
+          "tilt": {
+            "present": 7355,
+            "total": 7362,
+            "coverage": 0.999049,
+            "full6Races": 1220
+          }
+        }
+      },
+      "stt": {
+        "rows": 1239,
+        "accepted": 1227,
+        "raceCoverage": 0.942396,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 7355,
+            "total": 7362,
+            "coverage": 0.999049,
+            "full6Races": 1220
+          },
+          "exhibitionST": {
+            "present": 7355,
+            "total": 7362,
+            "coverage": 0.999049,
+            "full6Races": 1220
+          }
+        }
+      },
+      "sui": {
+        "rows": 1239,
+        "accepted": 1227,
+        "raceCoverage": 0.942396,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 1006,
+            "totalRaces": 1227,
+            "coverage": 0.819886
+          },
+          "windSpeedMps": {
+            "presentRaces": 1227,
+            "totalRaces": 1227,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1174,
+            "totalRaces": 1227,
+            "coverage": 0.956805
+          },
+          "waveHeightCm": {
+            "presentRaces": 1227,
+            "totalRaces": 1227,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1227,
+            "totalRaces": 1227,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1227,
+            "totalRaces": 1227,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1227,
+            "totalRaces": 1227,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1035,
+        "accepted": 1023,
+        "raceCoverage": 0.785714,
+        "measureCountDistribution": {
+          "3": 1023
+        },
+        "full6RacesByValueIndex": {
+          "1": 1015,
+          "2": 1014,
+          "3": 1015
+        },
+        "labelCounts": {
+          "一周": 1023,
+          "まわり足": 1023,
+          "直線": 1023
+        }
+      }
+    },
+    {
+      "code": "09",
+      "slug": "tsu",
+      "targetRaces": 1318,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-17",
+      "raceCards": {
+        "rows": 1182,
+        "identityMatched": 1182,
+        "identityRejected": 0,
+        "identityCoverage": 0.896813,
+        "classMismatchRaces": 0,
+        "boatRows": 7092,
+        "fieldCoverage": {
+          "name": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "period": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "branch": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "birthplace": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "age": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "class": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "prizeExclusion": {
+            "present": 137,
+            "total": 7092,
+            "coverage": 0.019318,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "lCount": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "avgST": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "nationalWinRate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "national2Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "national3Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "localWinRate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "local2Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "local3Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "motor": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "motor2Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "motor3Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "boat": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "boat2Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "boat3Rate": {
+            "present": 7091,
+            "total": 7092,
+            "coverage": 0.999859,
+            "full6Races": 1181
+          },
+          "quickRace": {
+            "present": 5162,
+            "total": 7092,
+            "coverage": 0.727862,
+            "full6Races": 228
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1015,
+          "raceCoverage": 0.858714,
+          "slots": 29497,
+          "entryValues": 29491,
+          "stValues": 29491,
+          "finishValues": 29497
+        }
+      },
+      "tkz": {
+        "rows": 1146,
+        "accepted": 1134,
+        "raceCoverage": 0.860395,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6797,
+            "total": 6804,
+            "coverage": 0.998971,
+            "full6Races": 1127
+          },
+          "adjustWeightKg": {
+            "present": 6797,
+            "total": 6804,
+            "coverage": 0.998971,
+            "full6Races": 1127
+          },
+          "exhibitionTime": {
+            "present": 6766,
+            "total": 6804,
+            "coverage": 0.994415,
+            "full6Races": 1121
+          },
+          "tilt": {
+            "present": 6796,
+            "total": 6804,
+            "coverage": 0.998824,
+            "full6Races": 1126
+          }
+        }
+      },
+      "stt": {
+        "rows": 1146,
+        "accepted": 1134,
+        "raceCoverage": 0.860395,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6796,
+            "total": 6804,
+            "coverage": 0.998824,
+            "full6Races": 1126
+          },
+          "exhibitionST": {
+            "present": 6796,
+            "total": 6804,
+            "coverage": 0.998824,
+            "full6Races": 1126
+          }
+        }
+      },
+      "sui": {
+        "rows": 1146,
+        "accepted": 1134,
+        "raceCoverage": 0.860395,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 963,
+            "totalRaces": 1134,
+            "coverage": 0.849206
+          },
+          "windSpeedMps": {
+            "presentRaces": 1134,
+            "totalRaces": 1134,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1039,
+            "totalRaces": 1134,
+            "coverage": 0.916226
+          },
+          "waveHeightCm": {
+            "presentRaces": 1134,
+            "totalRaces": 1134,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1134,
+            "totalRaces": 1134,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1134,
+            "totalRaces": 1134,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1134,
+            "totalRaces": 1134,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1145,
+        "accepted": 1133,
+        "raceCoverage": 0.859636,
+        "measureCountDistribution": {
+          "3": 1133
+        },
+        "full6RacesByValueIndex": {
+          "1": 1125,
+          "2": 1125,
+          "3": 1125
+        },
+        "labelCounts": {
+          "一周": 1133,
+          "まわり足": 1133,
+          "直線": 1133
+        }
+      }
+    },
+    {
+      "code": "10",
+      "slug": "mikuni",
+      "targetRaces": 1124,
+      "dateMin": "2026-03-24",
+      "dateMax": "2026-09-15",
+      "raceCards": {
+        "rows": 1124,
+        "identityMatched": 1124,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6744,
+        "fieldCoverage": {
+          "name": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "period": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "branch": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "birthplace": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "age": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "class": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "prizeExclusion": {
+            "present": 65,
+            "total": 6744,
+            "coverage": 0.009638,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "lCount": {
+            "present": 6744,
+            "total": 6744,
+            "coverage": 1.0,
+            "full6Races": 1124
+          },
+          "avgST": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "nationalWinRate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "national2Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "national3Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "localWinRate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "local2Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "local3Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "motor": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "motor2Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "motor3Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "boat": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "boat2Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "boat3Rate": {
+            "present": 6742,
+            "total": 6744,
+            "coverage": 0.999703,
+            "full6Races": 1122
+          },
+          "quickRace": {
+            "present": 5231,
+            "total": 6744,
+            "coverage": 0.775652,
+            "full6Races": 289
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 968,
+          "raceCoverage": 0.86121,
+          "slots": 27867,
+          "entryValues": 27854,
+          "stValues": 27854,
+          "finishValues": 27867
+        }
+      },
+      "tkz": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.960854,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6474,
+            "total": 6480,
+            "coverage": 0.999074,
+            "full6Races": 1074
+          },
+          "adjustWeightKg": {
+            "present": 6474,
+            "total": 6480,
+            "coverage": 0.999074,
+            "full6Races": 1074
+          },
+          "exhibitionTime": {
+            "present": 6407,
+            "total": 6480,
+            "coverage": 0.988735,
+            "full6Races": 1062
+          },
+          "tilt": {
+            "present": 6473,
+            "total": 6480,
+            "coverage": 0.99892,
+            "full6Races": 1073
+          }
+        }
+      },
+      "stt": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.960854,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6475,
+            "total": 6480,
+            "coverage": 0.999228,
+            "full6Races": 1075
+          },
+          "exhibitionST": {
+            "present": 6475,
+            "total": 6480,
+            "coverage": 0.999228,
+            "full6Races": 1075
+          }
+        }
+      },
+      "sui": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.960854,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 922,
+            "totalRaces": 1080,
+            "coverage": 0.853704
+          },
+          "windSpeedMps": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1046,
+            "totalRaces": 1080,
+            "coverage": 0.968519
+          },
+          "waveHeightCm": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.960854,
+        "measureCountDistribution": {
+          "3": 1080
+        },
+        "full6RacesByValueIndex": {
+          "1": 1073,
+          "2": 1073,
+          "3": 1073
+        },
+        "labelCounts": {
+          "一周": 1080,
+          "まわり足": 1080,
+          "直線": 1080
+        }
+      }
+    },
+    {
+      "code": "11",
+      "slug": "biwako",
+      "targetRaces": 1013,
+      "dateMin": "2026-04-08",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1013,
+        "identityMatched": 1013,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6078,
+        "fieldCoverage": {
+          "name": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "period": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "branch": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "birthplace": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "age": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "class": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "prizeExclusion": {
+            "present": 82,
+            "total": 6078,
+            "coverage": 0.013491,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "lCount": {
+            "present": 6078,
+            "total": 6078,
+            "coverage": 1.0,
+            "full6Races": 1013
+          },
+          "avgST": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "nationalWinRate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "national2Rate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "national3Rate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "localWinRate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "local2Rate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "local3Rate": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "motor": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "motor2Rate": {
+            "present": 5715,
+            "total": 6078,
+            "coverage": 0.940276,
+            "full6Races": 950
+          },
+          "motor3Rate": {
+            "present": 5715,
+            "total": 6078,
+            "coverage": 0.940276,
+            "full6Races": 950
+          },
+          "boat": {
+            "present": 6075,
+            "total": 6078,
+            "coverage": 0.999506,
+            "full6Races": 1010
+          },
+          "boat2Rate": {
+            "present": 5715,
+            "total": 6078,
+            "coverage": 0.940276,
+            "full6Races": 950
+          },
+          "boat3Rate": {
+            "present": 5715,
+            "total": 6078,
+            "coverage": 0.940276,
+            "full6Races": 950
+          },
+          "quickRace": {
+            "present": 4614,
+            "total": 6078,
+            "coverage": 0.759131,
+            "full6Races": 262
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 853,
+          "raceCoverage": 0.842053,
+          "slots": 24678,
+          "entryValues": 24672,
+          "stValues": 24672,
+          "finishValues": 24678
+        }
+      },
+      "tkz": {
+        "rows": 981,
+        "accepted": 981,
+        "raceCoverage": 0.968411,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5879,
+            "total": 5886,
+            "coverage": 0.998811,
+            "full6Races": 974
+          },
+          "adjustWeightKg": {
+            "present": 5879,
+            "total": 5886,
+            "coverage": 0.998811,
+            "full6Races": 974
+          },
+          "exhibitionTime": {
+            "present": 5816,
+            "total": 5886,
+            "coverage": 0.988107,
+            "full6Races": 961
+          },
+          "tilt": {
+            "present": 5876,
+            "total": 5886,
+            "coverage": 0.998301,
+            "full6Races": 971
+          }
+        }
+      },
+      "stt": {
+        "rows": 981,
+        "accepted": 981,
+        "raceCoverage": 0.968411,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5876,
+            "total": 5886,
+            "coverage": 0.998301,
+            "full6Races": 971
+          },
+          "exhibitionST": {
+            "present": 5875,
+            "total": 5886,
+            "coverage": 0.998131,
+            "full6Races": 970
+          }
+        }
+      },
+      "sui": {
+        "rows": 981,
+        "accepted": 981,
+        "raceCoverage": 0.968411,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 883,
+            "totalRaces": 981,
+            "coverage": 0.900102
+          },
+          "windSpeedMps": {
+            "presentRaces": 981,
+            "totalRaces": 981,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 914,
+            "totalRaces": 981,
+            "coverage": 0.931702
+          },
+          "waveHeightCm": {
+            "presentRaces": 981,
+            "totalRaces": 981,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 981,
+            "totalRaces": 981,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 981,
+            "totalRaces": 981,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 981,
+            "totalRaces": 981,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 981,
+        "accepted": 981,
+        "raceCoverage": 0.968411,
+        "measureCountDistribution": {
+          "3": 981
+        },
+        "full6RacesByValueIndex": {
+          "1": 971,
+          "2": 971,
+          "3": 971
+        },
+        "labelCounts": {
+          "一周": 981,
+          "まわり足": 981,
+          "直線": 981
+        }
+      }
+    },
+    {
+      "code": "12",
+      "slug": "suminoe",
+      "targetRaces": 1139,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1127,
+        "identityMatched": 1127,
+        "identityRejected": 0,
+        "identityCoverage": 0.989464,
+        "classMismatchRaces": 0,
+        "boatRows": 6762,
+        "fieldCoverage": {
+          "name": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "period": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "branch": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "birthplace": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "age": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "class": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "prizeExclusion": {
+            "present": 134,
+            "total": 6762,
+            "coverage": 0.019817,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "lCount": {
+            "present": 6762,
+            "total": 6762,
+            "coverage": 1.0,
+            "full6Races": 1127
+          },
+          "avgST": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "nationalWinRate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "national2Rate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "national3Rate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "localWinRate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "local2Rate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "local3Rate": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "motor": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "motor2Rate": {
+            "present": 6687,
+            "total": 6762,
+            "coverage": 0.988909,
+            "full6Races": 1112
+          },
+          "motor3Rate": {
+            "present": 6687,
+            "total": 6762,
+            "coverage": 0.988909,
+            "full6Races": 1112
+          },
+          "boat": {
+            "present": 6759,
+            "total": 6762,
+            "coverage": 0.999556,
+            "full6Races": 1124
+          },
+          "boat2Rate": {
+            "present": 6687,
+            "total": 6762,
+            "coverage": 0.988909,
+            "full6Races": 1112
+          },
+          "boat3Rate": {
+            "present": 6687,
+            "total": 6762,
+            "coverage": 0.988909,
+            "full6Races": 1112
+          },
+          "quickRace": {
+            "present": 4799,
+            "total": 6762,
+            "coverage": 0.709701,
+            "full6Races": 233
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 971,
+          "raceCoverage": 0.861579,
+          "slots": 26713,
+          "entryValues": 26709,
+          "stValues": 26709,
+          "finishValues": 26708
+        }
+      },
+      "tkz": {
+        "rows": 1071,
+        "accepted": 1059,
+        "raceCoverage": 0.929763,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6342,
+            "total": 6354,
+            "coverage": 0.998111,
+            "full6Races": 1047
+          },
+          "adjustWeightKg": {
+            "present": 6342,
+            "total": 6354,
+            "coverage": 0.998111,
+            "full6Races": 1047
+          },
+          "exhibitionTime": {
+            "present": 5515,
+            "total": 6354,
+            "coverage": 0.867957,
+            "full6Races": 910
+          },
+          "tilt": {
+            "present": 6342,
+            "total": 6354,
+            "coverage": 0.998111,
+            "full6Races": 1047
+          }
+        }
+      },
+      "stt": {
+        "rows": 1070,
+        "accepted": 1058,
+        "raceCoverage": 0.928885,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6336,
+            "total": 6348,
+            "coverage": 0.99811,
+            "full6Races": 1046
+          },
+          "exhibitionST": {
+            "present": 6335,
+            "total": 6348,
+            "coverage": 0.997952,
+            "full6Races": 1045
+          }
+        }
+      },
+      "sui": {
+        "rows": 1071,
+        "accepted": 1059,
+        "raceCoverage": 0.929763,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 879,
+            "totalRaces": 1059,
+            "coverage": 0.830028
+          },
+          "windSpeedMps": {
+            "presentRaces": 1059,
+            "totalRaces": 1059,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 740,
+            "totalRaces": 1059,
+            "coverage": 0.698772
+          },
+          "waveHeightCm": {
+            "presentRaces": 1059,
+            "totalRaces": 1059,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1059,
+            "totalRaces": 1059,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1059,
+            "totalRaces": 1059,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1059,
+            "totalRaces": 1059,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1071,
+        "accepted": 1059,
+        "raceCoverage": 0.929763,
+        "measureCountDistribution": {
+          "2": 1059
+        },
+        "full6RacesByValueIndex": {
+          "1": 1046,
+          "2": 1047
+        },
+        "labelCounts": {
+          "一周": 1059,
+          "まわり足": 1059
+        }
+      }
+    },
+    {
+      "code": "13",
+      "slug": "amagasaki",
+      "targetRaces": 1282,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-21",
+      "raceCards": {
+        "rows": 1270,
+        "identityMatched": 1270,
+        "identityRejected": 0,
+        "identityCoverage": 0.99064,
+        "classMismatchRaces": 0,
+        "boatRows": 7620,
+        "fieldCoverage": {
+          "name": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "period": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "branch": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "birthplace": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "age": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "class": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "prizeExclusion": {
+            "present": 95,
+            "total": 7620,
+            "coverage": 0.012467,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "lCount": {
+            "present": 7620,
+            "total": 7620,
+            "coverage": 1.0,
+            "full6Races": 1270
+          },
+          "avgST": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "nationalWinRate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "national2Rate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "national3Rate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "localWinRate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "local2Rate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "local3Rate": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "motor": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "motor2Rate": {
+            "present": 7186,
+            "total": 7620,
+            "coverage": 0.943045,
+            "full6Races": 1196
+          },
+          "motor3Rate": {
+            "present": 7186,
+            "total": 7620,
+            "coverage": 0.943045,
+            "full6Races": 1196
+          },
+          "boat": {
+            "present": 7617,
+            "total": 7620,
+            "coverage": 0.999606,
+            "full6Races": 1267
+          },
+          "boat2Rate": {
+            "present": 7186,
+            "total": 7620,
+            "coverage": 0.943045,
+            "full6Races": 1196
+          },
+          "boat3Rate": {
+            "present": 7186,
+            "total": 7620,
+            "coverage": 0.943045,
+            "full6Races": 1196
+          },
+          "quickRace": {
+            "present": 5630,
+            "total": 7620,
+            "coverage": 0.738845,
+            "full6Races": 303
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1102,
+          "raceCoverage": 0.867717,
+          "slots": 30555,
+          "entryValues": 30540,
+          "stValues": 30538,
+          "finishValues": 30555
+        }
+      },
+      "tkz": {
+        "rows": 1237,
+        "accepted": 1225,
+        "raceCoverage": 0.955538,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 7339,
+            "total": 7350,
+            "coverage": 0.998503,
+            "full6Races": 1214
+          },
+          "adjustWeightKg": {
+            "present": 7339,
+            "total": 7350,
+            "coverage": 0.998503,
+            "full6Races": 1214
+          },
+          "exhibitionTime": {
+            "present": 7025,
+            "total": 7350,
+            "coverage": 0.955782,
+            "full6Races": 1160
+          },
+          "tilt": {
+            "present": 7336,
+            "total": 7350,
+            "coverage": 0.998095,
+            "full6Races": 1211
+          }
+        }
+      },
+      "stt": {
+        "rows": 1236,
+        "accepted": 1224,
+        "raceCoverage": 0.954758,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 7331,
+            "total": 7344,
+            "coverage": 0.99823,
+            "full6Races": 1211
+          },
+          "exhibitionST": {
+            "present": 7331,
+            "total": 7344,
+            "coverage": 0.99823,
+            "full6Races": 1211
+          }
+        }
+      },
+      "sui": {
+        "rows": 1237,
+        "accepted": 1225,
+        "raceCoverage": 0.955538,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 1057,
+            "totalRaces": 1225,
+            "coverage": 0.862857
+          },
+          "windSpeedMps": {
+            "presentRaces": 1225,
+            "totalRaces": 1225,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1138,
+            "totalRaces": 1225,
+            "coverage": 0.92898
+          },
+          "waveHeightCm": {
+            "presentRaces": 1225,
+            "totalRaces": 1225,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1225,
+            "totalRaces": 1225,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1225,
+            "totalRaces": 1225,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1225,
+            "totalRaces": 1225,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1236,
+        "accepted": 1224,
+        "raceCoverage": 0.954758,
+        "measureCountDistribution": {
+          "2": 1224
+        },
+        "full6RacesByValueIndex": {
+          "1": 1209,
+          "2": 1209
+        },
+        "labelCounts": {
+          "一周": 1224,
+          "まわり足": 1224
+        }
+      }
+    },
+    {
+      "code": "14",
+      "slug": "naruto",
+      "targetRaces": 923,
+      "dateMin": "2026-04-11",
+      "dateMax": "2026-09-19",
+      "raceCards": {
+        "rows": 923,
+        "identityMatched": 923,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 5538,
+        "fieldCoverage": {
+          "name": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "period": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "branch": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "birthplace": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "age": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "class": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "prizeExclusion": {
+            "present": 87,
+            "total": 5538,
+            "coverage": 0.01571,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "lCount": {
+            "present": 5538,
+            "total": 5538,
+            "coverage": 1.0,
+            "full6Races": 923
+          },
+          "avgST": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "nationalWinRate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "national2Rate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "national3Rate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "localWinRate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "local2Rate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "local3Rate": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "motor": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "motor2Rate": {
+            "present": 5160,
+            "total": 5538,
+            "coverage": 0.931744,
+            "full6Races": 860
+          },
+          "motor3Rate": {
+            "present": 5160,
+            "total": 5538,
+            "coverage": 0.931744,
+            "full6Races": 860
+          },
+          "boat": {
+            "present": 5536,
+            "total": 5538,
+            "coverage": 0.999639,
+            "full6Races": 921
+          },
+          "boat2Rate": {
+            "present": 5160,
+            "total": 5538,
+            "coverage": 0.931744,
+            "full6Races": 860
+          },
+          "boat3Rate": {
+            "present": 5160,
+            "total": 5538,
+            "coverage": 0.931744,
+            "full6Races": 860
+          },
+          "quickRace": {
+            "present": 4272,
+            "total": 5538,
+            "coverage": 0.771398,
+            "full6Races": 265
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 779,
+          "raceCoverage": 0.843987,
+          "slots": 21460,
+          "entryValues": 21456,
+          "stValues": 21456,
+          "finishValues": 21460
+        }
+      },
+      "tkz": {
+        "rows": 886,
+        "accepted": 886,
+        "raceCoverage": 0.959913,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5313,
+            "total": 5316,
+            "coverage": 0.999436,
+            "full6Races": 883
+          },
+          "adjustWeightKg": {
+            "present": 5313,
+            "total": 5316,
+            "coverage": 0.999436,
+            "full6Races": 883
+          },
+          "exhibitionTime": {
+            "present": 5270,
+            "total": 5316,
+            "coverage": 0.991347,
+            "full6Races": 875
+          },
+          "tilt": {
+            "present": 5312,
+            "total": 5316,
+            "coverage": 0.999248,
+            "full6Races": 882
+          }
+        }
+      },
+      "stt": {
+        "rows": 886,
+        "accepted": 886,
+        "raceCoverage": 0.959913,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5312,
+            "total": 5316,
+            "coverage": 0.999248,
+            "full6Races": 882
+          },
+          "exhibitionST": {
+            "present": 5312,
+            "total": 5316,
+            "coverage": 0.999248,
+            "full6Races": 882
+          }
+        }
+      },
+      "sui": {
+        "rows": 886,
+        "accepted": 886,
+        "raceCoverage": 0.959913,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 757,
+            "totalRaces": 886,
+            "coverage": 0.854402
+          },
+          "windSpeedMps": {
+            "presentRaces": 886,
+            "totalRaces": 886,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 840,
+            "totalRaces": 886,
+            "coverage": 0.948081
+          },
+          "waveHeightCm": {
+            "presentRaces": 886,
+            "totalRaces": 886,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 886,
+            "totalRaces": 886,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 886,
+            "totalRaces": 886,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 886,
+            "totalRaces": 886,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 886,
+        "accepted": 886,
+        "raceCoverage": 0.959913,
+        "measureCountDistribution": {
+          "3": 886
+        },
+        "full6RacesByValueIndex": {
+          "1": 882,
+          "2": 882,
+          "3": 882
+        },
+        "labelCounts": {
+          "一周": 886,
+          "まわり足": 886,
+          "直線": 886
+        }
+      }
+    },
+    {
+      "code": "15",
+      "slug": "marugame",
+      "targetRaces": 1103,
+      "dateMin": "2026-03-30",
+      "dateMax": "2026-09-21",
+      "raceCards": {
+        "rows": 1103,
+        "identityMatched": 1103,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6618,
+        "fieldCoverage": {
+          "name": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "period": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "branch": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "birthplace": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "age": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "class": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "prizeExclusion": {
+            "present": 91,
+            "total": 6618,
+            "coverage": 0.01375,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "lCount": {
+            "present": 6618,
+            "total": 6618,
+            "coverage": 1.0,
+            "full6Races": 1103
+          },
+          "avgST": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "nationalWinRate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "national2Rate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "national3Rate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "localWinRate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "local2Rate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "local3Rate": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "motor": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "motor2Rate": {
+            "present": 6256,
+            "total": 6618,
+            "coverage": 0.945301,
+            "full6Races": 1041
+          },
+          "motor3Rate": {
+            "present": 6256,
+            "total": 6618,
+            "coverage": 0.945301,
+            "full6Races": 1041
+          },
+          "boat": {
+            "present": 6616,
+            "total": 6618,
+            "coverage": 0.999698,
+            "full6Races": 1101
+          },
+          "boat2Rate": {
+            "present": 6184,
+            "total": 6618,
+            "coverage": 0.934421,
+            "full6Races": 1029
+          },
+          "boat3Rate": {
+            "present": 6184,
+            "total": 6618,
+            "coverage": 0.934421,
+            "full6Races": 1029
+          },
+          "quickRace": {
+            "present": 5056,
+            "total": 6618,
+            "coverage": 0.763977,
+            "full6Races": 288
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 982,
+          "raceCoverage": 0.890299,
+          "slots": 28644,
+          "entryValues": 28640,
+          "stValues": 28640,
+          "finishValues": 28644
+        }
+      },
+      "tkz": {
+        "rows": 1055,
+        "accepted": 1055,
+        "raceCoverage": 0.956482,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6325,
+            "total": 6330,
+            "coverage": 0.99921,
+            "full6Races": 1050
+          },
+          "adjustWeightKg": {
+            "present": 6325,
+            "total": 6330,
+            "coverage": 0.99921,
+            "full6Races": 1050
+          },
+          "exhibitionTime": {
+            "present": 5933,
+            "total": 6330,
+            "coverage": 0.937283,
+            "full6Races": 983
+          },
+          "tilt": {
+            "present": 6324,
+            "total": 6330,
+            "coverage": 0.999052,
+            "full6Races": 1049
+          }
+        }
+      },
+      "stt": {
+        "rows": 1055,
+        "accepted": 1055,
+        "raceCoverage": 0.956482,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6323,
+            "total": 6330,
+            "coverage": 0.998894,
+            "full6Races": 1048
+          },
+          "exhibitionST": {
+            "present": 6323,
+            "total": 6330,
+            "coverage": 0.998894,
+            "full6Races": 1048
+          }
+        }
+      },
+      "sui": {
+        "rows": 1055,
+        "accepted": 1055,
+        "raceCoverage": 0.956482,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 815,
+            "totalRaces": 1055,
+            "coverage": 0.772512
+          },
+          "windSpeedMps": {
+            "presentRaces": 1055,
+            "totalRaces": 1055,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1019,
+            "totalRaces": 1055,
+            "coverage": 0.965877
+          },
+          "waveHeightCm": {
+            "presentRaces": 1055,
+            "totalRaces": 1055,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1055,
+            "totalRaces": 1055,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1055,
+            "totalRaces": 1055,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1055,
+            "totalRaces": 1055,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1054,
+        "accepted": 1054,
+        "raceCoverage": 0.955576,
+        "measureCountDistribution": {
+          "3": 1054
+        },
+        "full6RacesByValueIndex": {
+          "1": 1047,
+          "2": 1047,
+          "3": 1047
+        },
+        "labelCounts": {
+          "一周": 1054,
+          "まわり足": 1054,
+          "直線": 1054
+        }
+      }
+    },
+    {
+      "code": "16",
+      "slug": "kojima",
+      "targetRaces": 1259,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1259,
+        "identityMatched": 1259,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 7554,
+        "fieldCoverage": {
+          "name": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "period": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "branch": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "birthplace": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "age": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "class": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "prizeExclusion": {
+            "present": 128,
+            "total": 7554,
+            "coverage": 0.016945,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "lCount": {
+            "present": 7554,
+            "total": 7554,
+            "coverage": 1.0,
+            "full6Races": 1259
+          },
+          "avgST": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "nationalWinRate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "national2Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "national3Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "localWinRate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "local2Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "local3Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "motor": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "motor2Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "motor3Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "boat": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "boat2Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "boat3Rate": {
+            "present": 7550,
+            "total": 7554,
+            "coverage": 0.99947,
+            "full6Races": 1255
+          },
+          "quickRace": {
+            "present": 5737,
+            "total": 7554,
+            "coverage": 0.759465,
+            "full6Races": 310
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1115,
+          "raceCoverage": 0.885624,
+          "slots": 32897,
+          "entryValues": 32889,
+          "stValues": 32889,
+          "finishValues": 32895
+        }
+      },
+      "tkz": {
+        "rows": 1185,
+        "accepted": 1185,
+        "raceCoverage": 0.941223,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 7107,
+            "total": 7110,
+            "coverage": 0.999578,
+            "full6Races": 1182
+          },
+          "adjustWeightKg": {
+            "present": 7107,
+            "total": 7110,
+            "coverage": 0.999578,
+            "full6Races": 1182
+          },
+          "exhibitionTime": {
+            "present": 7105,
+            "total": 7110,
+            "coverage": 0.999297,
+            "full6Races": 1180
+          },
+          "tilt": {
+            "present": 7105,
+            "total": 7110,
+            "coverage": 0.999297,
+            "full6Races": 1180
+          }
+        }
+      },
+      "stt": {
+        "rows": 1185,
+        "accepted": 1185,
+        "raceCoverage": 0.941223,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 7105,
+            "total": 7110,
+            "coverage": 0.999297,
+            "full6Races": 1180
+          },
+          "exhibitionST": {
+            "present": 7103,
+            "total": 7110,
+            "coverage": 0.999015,
+            "full6Races": 1178
+          }
+        }
+      },
+      "sui": {
+        "rows": 1185,
+        "accepted": 1185,
+        "raceCoverage": 0.941223,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 945,
+            "totalRaces": 1185,
+            "coverage": 0.797468
+          },
+          "windSpeedMps": {
+            "presentRaces": 1185,
+            "totalRaces": 1185,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1176,
+            "totalRaces": 1185,
+            "coverage": 0.992405
+          },
+          "waveHeightCm": {
+            "presentRaces": 1185,
+            "totalRaces": 1185,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1185,
+            "totalRaces": 1185,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1185,
+            "totalRaces": 1185,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1185,
+            "totalRaces": 1185,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1185,
+        "accepted": 1185,
+        "raceCoverage": 0.941223,
+        "measureCountDistribution": {
+          "3": 1185
+        },
+        "full6RacesByValueIndex": {
+          "1": 1180,
+          "2": 1180,
+          "3": 1180
+        },
+        "labelCounts": {
+          "一周": 1185,
+          "まわり足": 1185,
+          "直線": 1185
+        }
+      }
+    },
+    {
+      "code": "17",
+      "slug": "miyajima",
+      "targetRaces": 1194,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1182,
+        "identityMatched": 1182,
+        "identityRejected": 0,
+        "identityCoverage": 0.98995,
+        "classMismatchRaces": 0,
+        "boatRows": 7092,
+        "fieldCoverage": {
+          "name": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "period": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "branch": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "birthplace": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "age": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "class": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "prizeExclusion": {
+            "present": 125,
+            "total": 7092,
+            "coverage": 0.017625,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "lCount": {
+            "present": 7092,
+            "total": 7092,
+            "coverage": 1.0,
+            "full6Races": 1182
+          },
+          "avgST": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "nationalWinRate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "national2Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "national3Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "localWinRate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "local2Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "local3Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "motor": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "motor2Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "motor3Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "boat": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "boat2Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "boat3Rate": {
+            "present": 7087,
+            "total": 7092,
+            "coverage": 0.999295,
+            "full6Races": 1177
+          },
+          "quickRace": {
+            "present": 5354,
+            "total": 7092,
+            "coverage": 0.754935,
+            "full6Races": 360
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1038,
+          "raceCoverage": 0.878173,
+          "slots": 30446,
+          "entryValues": 30437,
+          "stValues": 30437,
+          "finishValues": 30446
+        }
+      },
+      "tkz": {
+        "rows": 1137,
+        "accepted": 1125,
+        "raceCoverage": 0.942211,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6735,
+            "total": 6750,
+            "coverage": 0.997778,
+            "full6Races": 1110
+          },
+          "adjustWeightKg": {
+            "present": 6735,
+            "total": 6750,
+            "coverage": 0.997778,
+            "full6Races": 1110
+          },
+          "exhibitionTime": {
+            "present": 6684,
+            "total": 6750,
+            "coverage": 0.990222,
+            "full6Races": 1099
+          },
+          "tilt": {
+            "present": 6733,
+            "total": 6750,
+            "coverage": 0.997481,
+            "full6Races": 1108
+          }
+        }
+      },
+      "stt": {
+        "rows": 1137,
+        "accepted": 1125,
+        "raceCoverage": 0.942211,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6733,
+            "total": 6750,
+            "coverage": 0.997481,
+            "full6Races": 1108
+          },
+          "exhibitionST": {
+            "present": 6732,
+            "total": 6750,
+            "coverage": 0.997333,
+            "full6Races": 1107
+          }
+        }
+      },
+      "sui": {
+        "rows": 1137,
+        "accepted": 1125,
+        "raceCoverage": 0.942211,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 873,
+            "totalRaces": 1125,
+            "coverage": 0.776
+          },
+          "windSpeedMps": {
+            "presentRaces": 1125,
+            "totalRaces": 1125,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1058,
+            "totalRaces": 1125,
+            "coverage": 0.940444
+          },
+          "waveHeightCm": {
+            "presentRaces": 1125,
+            "totalRaces": 1125,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1125,
+            "totalRaces": 1125,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1125,
+            "totalRaces": 1125,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1125,
+            "totalRaces": 1125,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1137,
+        "accepted": 1125,
+        "raceCoverage": 0.942211,
+        "measureCountDistribution": {
+          "3": 1125
+        },
+        "full6RacesByValueIndex": {
+          "1": 1103,
+          "2": 1103,
+          "3": 1102
+        },
+        "labelCounts": {
+          "一周": 1125,
+          "まわり足": 1125,
+          "直線": 1125
+        }
+      }
+    },
+    {
+      "code": "18",
+      "slug": "tokuyama",
+      "targetRaces": 1208,
+      "dateMin": "2026-03-24",
+      "dateMax": "2026-09-17",
+      "raceCards": {
+        "rows": 1196,
+        "identityMatched": 1196,
+        "identityRejected": 0,
+        "identityCoverage": 0.990066,
+        "classMismatchRaces": 0,
+        "boatRows": 7176,
+        "fieldCoverage": {
+          "name": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "period": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "branch": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "birthplace": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "age": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "class": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "prizeExclusion": {
+            "present": 59,
+            "total": 7176,
+            "coverage": 0.008222,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "lCount": {
+            "present": 7176,
+            "total": 7176,
+            "coverage": 1.0,
+            "full6Races": 1196
+          },
+          "avgST": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "nationalWinRate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "national2Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "national3Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "localWinRate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "local2Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "local3Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "motor": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "motor2Rate": {
+            "present": 6810,
+            "total": 7176,
+            "coverage": 0.948997,
+            "full6Races": 1130
+          },
+          "motor3Rate": {
+            "present": 6810,
+            "total": 7176,
+            "coverage": 0.948997,
+            "full6Races": 1130
+          },
+          "boat": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "boat2Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "boat3Rate": {
+            "present": 7170,
+            "total": 7176,
+            "coverage": 0.999164,
+            "full6Races": 1190
+          },
+          "quickRace": {
+            "present": 5476,
+            "total": 7176,
+            "coverage": 0.763099,
+            "full6Races": 326
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 1052,
+          "raceCoverage": 0.879599,
+          "slots": 29938,
+          "entryValues": 29919,
+          "stValues": 29919,
+          "finishValues": 29938
+        }
+      },
+      "tkz": {
+        "rows": 1154,
+        "accepted": 1142,
+        "raceCoverage": 0.945364,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6843,
+            "total": 6852,
+            "coverage": 0.998687,
+            "full6Races": 1133
+          },
+          "adjustWeightKg": {
+            "present": 6843,
+            "total": 6852,
+            "coverage": 0.998687,
+            "full6Races": 1133
+          },
+          "exhibitionTime": {
+            "present": 6459,
+            "total": 6852,
+            "coverage": 0.942644,
+            "full6Races": 1069
+          },
+          "tilt": {
+            "present": 6843,
+            "total": 6852,
+            "coverage": 0.998687,
+            "full6Races": 1133
+          }
+        }
+      },
+      "stt": {
+        "rows": 1154,
+        "accepted": 1142,
+        "raceCoverage": 0.945364,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6843,
+            "total": 6852,
+            "coverage": 0.998687,
+            "full6Races": 1133
+          },
+          "exhibitionST": {
+            "present": 6842,
+            "total": 6852,
+            "coverage": 0.998541,
+            "full6Races": 1132
+          }
+        }
+      },
+      "sui": {
+        "rows": 1154,
+        "accepted": 1142,
+        "raceCoverage": 0.945364,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 962,
+            "totalRaces": 1142,
+            "coverage": 0.842382
+          },
+          "windSpeedMps": {
+            "presentRaces": 1142,
+            "totalRaces": 1142,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1103,
+            "totalRaces": 1142,
+            "coverage": 0.965849
+          },
+          "waveHeightCm": {
+            "presentRaces": 1142,
+            "totalRaces": 1142,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1142,
+            "totalRaces": 1142,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1142,
+            "totalRaces": 1142,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1142,
+            "totalRaces": 1142,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1150,
+        "accepted": 1138,
+        "raceCoverage": 0.942053,
+        "measureCountDistribution": {
+          "2": 1138
+        },
+        "full6RacesByValueIndex": {
+          "1": 1127,
+          "2": 1128
+        },
+        "labelCounts": {
+          "一周": 1138,
+          "まわり足": 1138
+        }
+      }
+    },
+    {
+      "code": "19",
+      "slug": "shimonoseki",
+      "targetRaces": 999,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-17",
+      "raceCards": {
+        "rows": 987,
+        "identityMatched": 987,
+        "identityRejected": 0,
+        "identityCoverage": 0.987988,
+        "classMismatchRaces": 0,
+        "boatRows": 5922,
+        "fieldCoverage": {
+          "name": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "period": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "branch": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "birthplace": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "age": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "class": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "prizeExclusion": {
+            "present": 103,
+            "total": 5922,
+            "coverage": 0.017393,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "lCount": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "avgST": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "nationalWinRate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "national2Rate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "national3Rate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "localWinRate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "local2Rate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "local3Rate": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "motor": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "motor2Rate": {
+            "present": 5532,
+            "total": 5922,
+            "coverage": 0.934144,
+            "full6Races": 922
+          },
+          "motor3Rate": {
+            "present": 5532,
+            "total": 5922,
+            "coverage": 0.934144,
+            "full6Races": 922
+          },
+          "boat": {
+            "present": 5922,
+            "total": 5922,
+            "coverage": 1.0,
+            "full6Races": 987
+          },
+          "boat2Rate": {
+            "present": 5532,
+            "total": 5922,
+            "coverage": 0.934144,
+            "full6Races": 922
+          },
+          "boat3Rate": {
+            "present": 5532,
+            "total": 5922,
+            "coverage": 0.934144,
+            "full6Races": 922
+          },
+          "quickRace": {
+            "present": 4513,
+            "total": 5922,
+            "coverage": 0.762074,
+            "full6Races": 298
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 825,
+          "raceCoverage": 0.835866,
+          "slots": 22093,
+          "entryValues": 22093,
+          "stValues": 22093,
+          "finishValues": 22093
+        }
+      },
+      "tkz": {
+        "rows": 973,
+        "accepted": 961,
+        "raceCoverage": 0.961962,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5756,
+            "total": 5766,
+            "coverage": 0.998266,
+            "full6Races": 951
+          },
+          "adjustWeightKg": {
+            "present": 5756,
+            "total": 5766,
+            "coverage": 0.998266,
+            "full6Races": 951
+          },
+          "exhibitionTime": {
+            "present": 5325,
+            "total": 5766,
+            "coverage": 0.923517,
+            "full6Races": 880
+          },
+          "tilt": {
+            "present": 5756,
+            "total": 5766,
+            "coverage": 0.998266,
+            "full6Races": 951
+          }
+        }
+      },
+      "stt": {
+        "rows": 972,
+        "accepted": 960,
+        "raceCoverage": 0.960961,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5750,
+            "total": 5760,
+            "coverage": 0.998264,
+            "full6Races": 950
+          },
+          "exhibitionST": {
+            "present": 5750,
+            "total": 5760,
+            "coverage": 0.998264,
+            "full6Races": 950
+          }
+        }
+      },
+      "sui": {
+        "rows": 973,
+        "accepted": 961,
+        "raceCoverage": 0.961962,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 869,
+            "totalRaces": 961,
+            "coverage": 0.904266
+          },
+          "windSpeedMps": {
+            "presentRaces": 960,
+            "totalRaces": 961,
+            "coverage": 0.998959
+          },
+          "windDirection": {
+            "presentRaces": 954,
+            "totalRaces": 961,
+            "coverage": 0.992716
+          },
+          "waveHeightCm": {
+            "presentRaces": 960,
+            "totalRaces": 961,
+            "coverage": 0.998959
+          },
+          "weather": {
+            "presentRaces": 961,
+            "totalRaces": 961,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 960,
+            "totalRaces": 961,
+            "coverage": 0.998959
+          },
+          "waterTempC": {
+            "presentRaces": 960,
+            "totalRaces": 961,
+            "coverage": 0.998959
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 971,
+        "accepted": 959,
+        "raceCoverage": 0.95996,
+        "measureCountDistribution": {
+          "3": 959
+        },
+        "full6RacesByValueIndex": {
+          "1": 947,
+          "2": 948,
+          "3": 948
+        },
+        "labelCounts": {
+          "一周": 959,
+          "まわり足": 959,
+          "直線": 959
+        }
+      }
+    },
+    {
+      "code": "20",
+      "slug": "wakamatsu",
+      "targetRaces": 1082,
+      "dateMin": "2026-04-14",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 1082,
+        "identityMatched": 1082,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6492,
+        "fieldCoverage": {
+          "name": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "period": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "branch": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "birthplace": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "age": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "class": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "prizeExclusion": {
+            "present": 59,
+            "total": 6492,
+            "coverage": 0.009088,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "lCount": {
+            "present": 6492,
+            "total": 6492,
+            "coverage": 1.0,
+            "full6Races": 1082
+          },
+          "avgST": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "nationalWinRate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "national2Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "national3Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "localWinRate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "local2Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "local3Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "motor": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "motor2Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "motor3Rate": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "boat": {
+            "present": 6491,
+            "total": 6492,
+            "coverage": 0.999846,
+            "full6Races": 1081
+          },
+          "boat2Rate": {
+            "present": 6131,
+            "total": 6492,
+            "coverage": 0.944393,
+            "full6Races": 1021
+          },
+          "boat3Rate": {
+            "present": 6131,
+            "total": 6492,
+            "coverage": 0.944393,
+            "full6Races": 1021
+          },
+          "quickRace": {
+            "present": 5021,
+            "total": 6492,
+            "coverage": 0.773413,
+            "full6Races": 358
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 913,
+          "raceCoverage": 0.843808,
+          "slots": 25453,
+          "entryValues": 25450,
+          "stValues": 25450,
+          "finishValues": 25453
+        }
+      },
+      "tkz": {
+        "rows": 1053,
+        "accepted": 1053,
+        "raceCoverage": 0.973198,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6311,
+            "total": 6318,
+            "coverage": 0.998892,
+            "full6Races": 1046
+          },
+          "adjustWeightKg": {
+            "present": 6311,
+            "total": 6318,
+            "coverage": 0.998892,
+            "full6Races": 1046
+          },
+          "exhibitionTime": {
+            "present": 6059,
+            "total": 6318,
+            "coverage": 0.959006,
+            "full6Races": 1004
+          },
+          "tilt": {
+            "present": 6311,
+            "total": 6318,
+            "coverage": 0.998892,
+            "full6Races": 1046
+          }
+        }
+      },
+      "stt": {
+        "rows": 1053,
+        "accepted": 1053,
+        "raceCoverage": 0.973198,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6312,
+            "total": 6318,
+            "coverage": 0.99905,
+            "full6Races": 1047
+          },
+          "exhibitionST": {
+            "present": 6312,
+            "total": 6318,
+            "coverage": 0.99905,
+            "full6Races": 1047
+          }
+        }
+      },
+      "sui": {
+        "rows": 1053,
+        "accepted": 1053,
+        "raceCoverage": 0.973198,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 934,
+            "totalRaces": 1053,
+            "coverage": 0.88699
+          },
+          "windSpeedMps": {
+            "presentRaces": 1053,
+            "totalRaces": 1053,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1043,
+            "totalRaces": 1053,
+            "coverage": 0.990503
+          },
+          "waveHeightCm": {
+            "presentRaces": 1053,
+            "totalRaces": 1053,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1053,
+            "totalRaces": 1053,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1053,
+            "totalRaces": 1053,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1053,
+            "totalRaces": 1053,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1053,
+        "accepted": 1053,
+        "raceCoverage": 0.973198,
+        "measureCountDistribution": {
+          "3": 1053
+        },
+        "full6RacesByValueIndex": {
+          "1": 1046,
+          "2": 1046,
+          "3": 1045
+        },
+        "labelCounts": {
+          "一周": 1053,
+          "まわり足": 1053,
+          "直線": 1053
+        }
+      }
+    },
+    {
+      "code": "21",
+      "slug": "ashiya",
+      "targetRaces": 1179,
+      "dateMin": "2026-03-26",
+      "dateMax": "2026-09-14",
+      "raceCards": {
+        "rows": 1072,
+        "identityMatched": 1072,
+        "identityRejected": 0,
+        "identityCoverage": 0.909245,
+        "classMismatchRaces": 0,
+        "boatRows": 6432,
+        "fieldCoverage": {
+          "name": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "period": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "branch": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "birthplace": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "age": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "class": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "prizeExclusion": {
+            "present": 81,
+            "total": 6432,
+            "coverage": 0.012593,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "lCount": {
+            "present": 6432,
+            "total": 6432,
+            "coverage": 1.0,
+            "full6Races": 1072
+          },
+          "avgST": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "nationalWinRate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "national2Rate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "national3Rate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "localWinRate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "local2Rate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "local3Rate": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "motor": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "motor2Rate": {
+            "present": 6093,
+            "total": 6432,
+            "coverage": 0.947295,
+            "full6Races": 1013
+          },
+          "motor3Rate": {
+            "present": 6093,
+            "total": 6432,
+            "coverage": 0.947295,
+            "full6Races": 1013
+          },
+          "boat": {
+            "present": 6429,
+            "total": 6432,
+            "coverage": 0.999534,
+            "full6Races": 1069
+          },
+          "boat2Rate": {
+            "present": 6093,
+            "total": 6432,
+            "coverage": 0.947295,
+            "full6Races": 1013
+          },
+          "boat3Rate": {
+            "present": 6093,
+            "total": 6432,
+            "coverage": 0.947295,
+            "full6Races": 1013
+          },
+          "quickRace": {
+            "present": 4988,
+            "total": 6432,
+            "coverage": 0.775498,
+            "full6Races": 313
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 928,
+          "raceCoverage": 0.865672,
+          "slots": 26653,
+          "entryValues": 26644,
+          "stValues": 26644,
+          "finishValues": 26653
+        }
+      },
+      "tkz": {
+        "rows": 1073,
+        "accepted": 998,
+        "raceCoverage": 0.84648,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5981,
+            "total": 5988,
+            "coverage": 0.998831,
+            "full6Races": 991
+          },
+          "adjustWeightKg": {
+            "present": 5981,
+            "total": 5988,
+            "coverage": 0.998831,
+            "full6Races": 991
+          },
+          "exhibitionTime": {
+            "present": 5915,
+            "total": 5988,
+            "coverage": 0.987809,
+            "full6Races": 980
+          },
+          "tilt": {
+            "present": 5981,
+            "total": 5988,
+            "coverage": 0.998831,
+            "full6Races": 991
+          }
+        }
+      },
+      "stt": {
+        "rows": 1073,
+        "accepted": 998,
+        "raceCoverage": 0.84648,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5982,
+            "total": 5988,
+            "coverage": 0.998998,
+            "full6Races": 992
+          },
+          "exhibitionST": {
+            "present": 5982,
+            "total": 5988,
+            "coverage": 0.998998,
+            "full6Races": 992
+          }
+        }
+      },
+      "sui": {
+        "rows": 1073,
+        "accepted": 998,
+        "raceCoverage": 0.84648,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 861,
+            "totalRaces": 998,
+            "coverage": 0.862725
+          },
+          "windSpeedMps": {
+            "presentRaces": 998,
+            "totalRaces": 998,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 917,
+            "totalRaces": 998,
+            "coverage": 0.918838
+          },
+          "waveHeightCm": {
+            "presentRaces": 998,
+            "totalRaces": 998,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 998,
+            "totalRaces": 998,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 998,
+            "totalRaces": 998,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 998,
+            "totalRaces": 998,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1073,
+        "accepted": 998,
+        "raceCoverage": 0.84648,
+        "measureCountDistribution": {
+          "3": 998
+        },
+        "full6RacesByValueIndex": {
+          "1": 991,
+          "2": 991,
+          "3": 991
+        },
+        "labelCounts": {
+          "一周": 998,
+          "まわり足": 998,
+          "直線": 998
+        }
+      }
+    },
+    {
+      "code": "22",
+      "slug": "fukuoka",
+      "targetRaces": 1150,
+      "dateMin": "2026-03-27",
+      "dateMax": "2026-09-22",
+      "raceCards": {
+        "rows": 983,
+        "identityMatched": 983,
+        "identityRejected": 0,
+        "identityCoverage": 0.854783,
+        "classMismatchRaces": 0,
+        "boatRows": 5898,
+        "fieldCoverage": {
+          "name": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "period": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "branch": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "birthplace": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "age": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "class": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "prizeExclusion": {
+            "present": 58,
+            "total": 5898,
+            "coverage": 0.009834,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "lCount": {
+            "present": 5898,
+            "total": 5898,
+            "coverage": 1.0,
+            "full6Races": 983
+          },
+          "avgST": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "nationalWinRate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "national2Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "national3Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "localWinRate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "local2Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "local3Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "motor": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "motor2Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "motor3Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "boat": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "boat2Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "boat3Rate": {
+            "present": 5896,
+            "total": 5898,
+            "coverage": 0.999661,
+            "full6Races": 981
+          },
+          "quickRace": {
+            "present": 4424,
+            "total": 5898,
+            "coverage": 0.750085,
+            "full6Races": 225
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 860,
+          "raceCoverage": 0.874873,
+          "slots": 26344,
+          "entryValues": 26339,
+          "stValues": 26339,
+          "finishValues": 26344
+        }
+      },
+      "tkz": {
+        "rows": 991,
+        "accepted": 901,
+        "raceCoverage": 0.783478,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 5403,
+            "total": 5406,
+            "coverage": 0.999445,
+            "full6Races": 898
+          },
+          "adjustWeightKg": {
+            "present": 5403,
+            "total": 5406,
+            "coverage": 0.999445,
+            "full6Races": 898
+          },
+          "exhibitionTime": {
+            "present": 5366,
+            "total": 5406,
+            "coverage": 0.992601,
+            "full6Races": 891
+          },
+          "tilt": {
+            "present": 5402,
+            "total": 5406,
+            "coverage": 0.99926,
+            "full6Races": 897
+          }
+        }
+      },
+      "stt": {
+        "rows": 991,
+        "accepted": 901,
+        "raceCoverage": 0.783478,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 5402,
+            "total": 5406,
+            "coverage": 0.99926,
+            "full6Races": 897
+          },
+          "exhibitionST": {
+            "present": 5402,
+            "total": 5406,
+            "coverage": 0.99926,
+            "full6Races": 897
+          }
+        }
+      },
+      "sui": {
+        "rows": 991,
+        "accepted": 901,
+        "raceCoverage": 0.783478,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 765,
+            "totalRaces": 901,
+            "coverage": 0.849057
+          },
+          "windSpeedMps": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          },
+          "waveHeightCm": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 901,
+            "totalRaces": 901,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 991,
+        "accepted": 901,
+        "raceCoverage": 0.783478,
+        "measureCountDistribution": {
+          "3": 901
+        },
+        "full6RacesByValueIndex": {
+          "1": 895,
+          "2": 897,
+          "3": 897
+        },
+        "labelCounts": {
+          "一周": 901,
+          "まわり足": 901,
+          "直線": 901
+        }
+      }
+    },
+    {
+      "code": "23",
+      "slug": "karatsu",
+      "targetRaces": 1138,
+      "dateMin": "2026-03-28",
+      "dateMax": "2026-09-19",
+      "raceCards": {
+        "rows": 1138,
+        "identityMatched": 1138,
+        "identityRejected": 0,
+        "identityCoverage": 1.0,
+        "classMismatchRaces": 0,
+        "boatRows": 6828,
+        "fieldCoverage": {
+          "name": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "period": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "branch": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "birthplace": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "age": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "class": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "prizeExclusion": {
+            "present": 110,
+            "total": 6828,
+            "coverage": 0.01611,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "lCount": {
+            "present": 6828,
+            "total": 6828,
+            "coverage": 1.0,
+            "full6Races": 1138
+          },
+          "avgST": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "nationalWinRate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "national2Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "national3Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "localWinRate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "local2Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "local3Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "motor": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "motor2Rate": {
+            "present": 6537,
+            "total": 6828,
+            "coverage": 0.957381,
+            "full6Races": 1087
+          },
+          "motor3Rate": {
+            "present": 6537,
+            "total": 6828,
+            "coverage": 0.957381,
+            "full6Races": 1087
+          },
+          "boat": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "boat2Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "boat3Rate": {
+            "present": 6825,
+            "total": 6828,
+            "coverage": 0.999561,
+            "full6Races": 1135
+          },
+          "quickRace": {
+            "present": 5330,
+            "total": 6828,
+            "coverage": 0.780609,
+            "full6Races": 301
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 989,
+          "raceCoverage": 0.869069,
+          "slots": 28170,
+          "entryValues": 28166,
+          "stValues": 28166,
+          "finishValues": 28170
+        }
+      },
+      "tkz": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.949033,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6470,
+            "total": 6480,
+            "coverage": 0.998457,
+            "full6Races": 1070
+          },
+          "adjustWeightKg": {
+            "present": 6470,
+            "total": 6480,
+            "coverage": 0.998457,
+            "full6Races": 1070
+          },
+          "exhibitionTime": {
+            "present": 6463,
+            "total": 6480,
+            "coverage": 0.997377,
+            "full6Races": 1068
+          },
+          "tilt": {
+            "present": 6469,
+            "total": 6480,
+            "coverage": 0.998302,
+            "full6Races": 1069
+          }
+        }
+      },
+      "stt": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.949033,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6468,
+            "total": 6480,
+            "coverage": 0.998148,
+            "full6Races": 1068
+          },
+          "exhibitionST": {
+            "present": 6467,
+            "total": 6480,
+            "coverage": 0.997994,
+            "full6Races": 1067
+          }
+        }
+      },
+      "sui": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.949033,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 849,
+            "totalRaces": 1080,
+            "coverage": 0.786111
+          },
+          "windSpeedMps": {
+            "presentRaces": 1079,
+            "totalRaces": 1080,
+            "coverage": 0.999074
+          },
+          "windDirection": {
+            "presentRaces": 1063,
+            "totalRaces": 1080,
+            "coverage": 0.984259
+          },
+          "waveHeightCm": {
+            "presentRaces": 1079,
+            "totalRaces": 1080,
+            "coverage": 0.999074
+          },
+          "weather": {
+            "presentRaces": 1080,
+            "totalRaces": 1080,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1079,
+            "totalRaces": 1080,
+            "coverage": 0.999074
+          },
+          "waterTempC": {
+            "presentRaces": 1079,
+            "totalRaces": 1080,
+            "coverage": 0.999074
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1080,
+        "accepted": 1080,
+        "raceCoverage": 0.949033,
+        "measureCountDistribution": {
+          "3": 1080
+        },
+        "full6RacesByValueIndex": {
+          "1": 1069,
+          "2": 1069,
+          "3": 1069
+        },
+        "labelCounts": {
+          "一周": 1080,
+          "まわり足": 1080,
+          "直線": 1080
+        }
+      }
+    },
+    {
+      "code": "24",
+      "slug": "omura",
+      "targetRaces": 1170,
+      "dateMin": "2026-03-28",
+      "dateMax": "2026-09-20",
+      "raceCards": {
+        "rows": 1161,
+        "identityMatched": 1161,
+        "identityRejected": 0,
+        "identityCoverage": 0.992308,
+        "classMismatchRaces": 0,
+        "boatRows": 6966,
+        "fieldCoverage": {
+          "name": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "period": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "branch": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "birthplace": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "age": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "class": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "prizeExclusion": {
+            "present": 144,
+            "total": 6966,
+            "coverage": 0.020672,
+            "full6Races": 0
+          },
+          "fCount": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "lCount": {
+            "present": 6966,
+            "total": 6966,
+            "coverage": 1.0,
+            "full6Races": 1161
+          },
+          "avgST": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "nationalWinRate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "national2Rate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "national3Rate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "localWinRate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "local2Rate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "local3Rate": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "motor": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "motor2Rate": {
+            "present": 6538,
+            "total": 6966,
+            "coverage": 0.938559,
+            "full6Races": 1088
+          },
+          "motor3Rate": {
+            "present": 6538,
+            "total": 6966,
+            "coverage": 0.938559,
+            "full6Races": 1088
+          },
+          "boat": {
+            "present": 6964,
+            "total": 6966,
+            "coverage": 0.999713,
+            "full6Races": 1159
+          },
+          "boat2Rate": {
+            "present": 6538,
+            "total": 6966,
+            "coverage": 0.938559,
+            "full6Races": 1088
+          },
+          "boat3Rate": {
+            "present": 6538,
+            "total": 6966,
+            "coverage": 0.938559,
+            "full6Races": 1088
+          },
+          "quickRace": {
+            "present": 5116,
+            "total": 6966,
+            "coverage": 0.734424,
+            "full6Races": 315
+          }
+        },
+        "currentMeetHistory": {
+          "racesWithAny": 985,
+          "raceCoverage": 0.848407,
+          "slots": 26487,
+          "entryValues": 26469,
+          "stValues": 26469,
+          "finishValues": 26487
+        }
+      },
+      "tkz": {
+        "rows": 1111,
+        "accepted": 1102,
+        "raceCoverage": 0.94188,
+        "fieldCoverage": {
+          "weightKg": {
+            "present": 6605,
+            "total": 6612,
+            "coverage": 0.998941,
+            "full6Races": 1095
+          },
+          "adjustWeightKg": {
+            "present": 6605,
+            "total": 6612,
+            "coverage": 0.998941,
+            "full6Races": 1095
+          },
+          "exhibitionTime": {
+            "present": 6318,
+            "total": 6612,
+            "coverage": 0.955535,
+            "full6Races": 1048
+          },
+          "tilt": {
+            "present": 6605,
+            "total": 6612,
+            "coverage": 0.998941,
+            "full6Races": 1095
+          }
+        }
+      },
+      "stt": {
+        "rows": 1111,
+        "accepted": 1102,
+        "raceCoverage": 0.94188,
+        "fieldCoverage": {
+          "exhibitionCourse": {
+            "present": 6606,
+            "total": 6612,
+            "coverage": 0.999093,
+            "full6Races": 1096
+          },
+          "exhibitionST": {
+            "present": 6606,
+            "total": 6612,
+            "coverage": 0.999093,
+            "full6Races": 1096
+          }
+        }
+      },
+      "sui": {
+        "rows": 1111,
+        "accepted": 1102,
+        "raceCoverage": 0.94188,
+        "fieldRaceCoverage": {
+          "weatherObservationTime": {
+            "presentRaces": 850,
+            "totalRaces": 1102,
+            "coverage": 0.771325
+          },
+          "windSpeedMps": {
+            "presentRaces": 1102,
+            "totalRaces": 1102,
+            "coverage": 1.0
+          },
+          "windDirection": {
+            "presentRaces": 1073,
+            "totalRaces": 1102,
+            "coverage": 0.973684
+          },
+          "waveHeightCm": {
+            "presentRaces": 1102,
+            "totalRaces": 1102,
+            "coverage": 1.0
+          },
+          "weather": {
+            "presentRaces": 1102,
+            "totalRaces": 1102,
+            "coverage": 1.0
+          },
+          "airTempC": {
+            "presentRaces": 1102,
+            "totalRaces": 1102,
+            "coverage": 1.0
+          },
+          "waterTempC": {
+            "presentRaces": 1102,
+            "totalRaces": 1102,
+            "coverage": 1.0
+          }
+        }
+      },
+      "originalExhibition": {
+        "rows": 1111,
+        "accepted": 1102,
+        "raceCoverage": 0.94188,
+        "measureCountDistribution": {
+          "3": 1102
+        },
+        "full6RacesByValueIndex": {
+          "1": 1092,
+          "2": 1092,
+          "3": 1092
+        },
+        "labelCounts": {
+          "一周": 1102,
+          "まわり足": 1102,
+          "直線": 1102
+        }
+      }
+    }
+  ]
+}
