@@ -1,0 +1,73 @@
+name: Racer course second-place rolling v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-course-second-place-rolling-v1.yml'
+      - 'scripts/racer-course-second-place-rolling-v1.py'
+      - 'scripts/racer-course-second-place-gated-v1.py'
+      - 'scripts/racer-period-second-place-audit-v1.py'
+      - 'rich-history-24/**'
+      - 'racer-period-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  robustness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run rolling-origin robustness test
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-course-second-place-rolling-v1.py
+          python3 scripts/racer-course-second-place-rolling-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-course-second-place-rolling-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-course-second-place-rolling-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['promotionEligible'] is False
+          assert x['featureBoundary']['firstPredictionFrozen'] is True
+          assert x['featureBoundary']['resultsUsedForFeatureConstruction'] is False
+          assert x['featureBoundary']['resultsUsedForEvaluationOnly'] is True
+          assert x['summary']['folds']==4
+          assert x['summary']['testRaces']>10000
+          assert abs(x['summary']['headAccuracyDelta']) < 1e-12
+          print('COURSE_SECOND_PLACE_ROLLING_BOUNDARY_PASS',x['summary'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-course-second-place-rolling-v1
+          path: research/racer-course-second-place-rolling-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save robustness report to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/racer-course-second-place-rolling-v1.json /tmp/racer-course-second-place-rolling-v1.json
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/racer-course-second-place-rolling-v1.json research/
+          git config user.name 'boat-command-course-rolling'
+          git config user.email 'boat-command-course-rolling@users.noreply.github.com'
+          git add research/racer-course-second-place-rolling-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store rolling course second-place test [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
