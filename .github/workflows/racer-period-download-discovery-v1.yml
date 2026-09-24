@@ -31,6 +31,32 @@ jobs:
           assert x['candidateLinks']
           print('RACER_PERIOD_DISCOVERY_PASS',len(x['candidateLinks']))
           PY
+      - name: Probe one current archive structure
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+          URL=$(python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-download-discovery-v1.json',encoding='utf-8'))
+          rows=[r['url'] for r in x['candidateLinks'] if r['url'].endswith('/fan2510.lzh')]
+          assert len(rows)==1, rows
+          print(rows[0])
+          PY
+          )
+          curl -fsSL --connect-timeout 20 --max-time 60 "$URL" -o /tmp/fan2510.lzh
+          rm -rf /tmp/fan2510 && mkdir -p /tmp/fan2510
+          lha xw=/tmp/fan2510 /tmp/fan2510.lzh >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          fs=[p for p in Path('/tmp/fan2510').rglob('*') if p.is_file()]
+          assert fs
+          p=fs[0]; raw=p.read_bytes(); lines=raw.splitlines()
+          print('ARCHIVE_FILE',p.name,'BYTES',len(raw),'LINES',len(lines))
+          for i,b in enumerate(lines[:2],1):
+              print('LINE',i,'BYTE_LEN',len(b),'TEXT',b.decode('cp932','replace')[:260])
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: racer-period-download-discovery-v1
