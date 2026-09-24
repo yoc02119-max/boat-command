@@ -29,17 +29,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m py_compile scripts/historical-beforeinfo-field-probe-v1.py
-          if [ ! -f research/historical-beforeinfo-field-probe-v1.json ]; then
-            python3 scripts/historical-beforeinfo-field-probe-v1.py
-          else
-            echo 'REUSE_OLDEST_PROBE_REPORT'
-          fi
+          python3 scripts/historical-beforeinfo-field-probe-v1.py
           python3 -m py_compile scripts/historical-beforeinfo-recent-probe-v1.py
-          if [ ! -f research/historical-beforeinfo-recent-probe-v1.json ]; then
-            python3 scripts/historical-beforeinfo-recent-probe-v1.py
-          else
-            echo 'REUSE_RECENT_PROBE_REPORT'
-          fi
+          python3 scripts/historical-beforeinfo-recent-probe-v1.py
           python3 -m py_compile scripts/beforeinfo-latency-control-v1.py
           python3 scripts/beforeinfo-latency-control-v1.py
           python3 - <<'PY'
