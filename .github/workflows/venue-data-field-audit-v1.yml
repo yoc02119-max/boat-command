@@ -1,0 +1,61 @@
+name: Venue data field audit v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/venue-data-field-audit-v1.yml'
+      - 'scripts/venue-data-field-audit-v1.py'
+      - 'scripts/historical-racelist-field-probe-v1.py'
+      - 'scripts/venue-program-collector-v1.py'
+      - 'rich-history-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Audit stored historical and current-live field coverage
+        run: |
+          set -euo pipefail
+          python3 scripts/venue-data-field-audit-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/venue-data-field-audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-venue-data-field-audit-v1'
+          assert len(x['venues'])==24
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          print('STORED_FIELD_AUDIT_PASS',x['totals']['richRaces'])
+          PY
+
+      - name: Probe richer PRE-RACE fields from historical official racelist pages
+        run: |
+          set -euo pipefail
+          python3 scripts/historical-racelist-field-probe-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/historical-racelist-field-probe-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-historical-racelist-field-probe-v1'
+          assert len(x['venues'])==24
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          print('HISTORICAL_FIELD_PROBE_PASS',x['summary'])
+          PY
+
+      - name: Upload transparent field-coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: venue-data-field-audit-v1
+          path: |
+            research/venue-data-field-audit-v1.json
+            research/historical-racelist-field-probe-v1.json
+          retention-days: 30
+          if-no-files-found: error
