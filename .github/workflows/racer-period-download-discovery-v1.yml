@@ -84,8 +84,43 @@ jobs:
           assert x['predictionInputChanged'] is False
           assert x['totals']['venues']==24
           assert x['totals']['boatRows']>150000
+          assert x['totals']['matchCoverage']>=0.99
+          assert x['totals']['safeJoinCoverage']>=0.98
+          assert x['totals']['periodAvgSTCoverage']>=0.99
+          assert len(x['packFiles'])==2
           print('RACER_PERIOD_ENRICHMENT_AUDIT_PASS',x['totals'])
           PY
+
+      - name: Save audited racer-period research packs to source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('racer-period-24/audit-v1.json',encoding='utf-8'))
+          assert x['totals']['venues']==24
+          assert x['totals']['matchCoverage']>=0.99
+          assert x['totals']['safeJoinCoverage']>=0.98
+          assert x['recommendedJoinPolicy']=='RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED'
+          assert len(x['packFiles'])==2
+          print('RACER_PERIOD_SAVE_GATE_PASS',x['totals'])
+          PY
+          rm -rf /tmp/racer-period-save
+          mkdir -p /tmp/racer-period-save
+          cp -a racer-period-24/. /tmp/racer-period-save/
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          rm -rf racer-period-24
+          mkdir -p racer-period-24
+          cp -a /tmp/racer-period-save/. racer-period-24/
+          git config user.name 'boat-command-racer-period-research'
+          git config user.email 'boat-command-racer-period-research@users.noreply.github.com'
+          git add racer-period-24
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(research): store audited racer-period features [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
 
       - uses: actions/upload-artifact@v4
         with:
