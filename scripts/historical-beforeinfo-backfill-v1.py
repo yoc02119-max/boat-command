@@ -213,11 +213,17 @@ def main():
     ap.add_argument("--max-groups",type=int,default=8)
     ap.add_argument("--verify-candidates",type=int,default=16)
     ap.add_argument("--workers",type=int,default=4)
+    ap.add_argument("--one-per-venue",action="store_true")
     ap.add_argument("--self-test",action="store_true")
     args=ap.parse_args()
     if args.self_test:self_test();return
     groups=rich_groups()
     missing=[g for g in groups if not g["out"].exists()]
+    if args.one_per_venue:
+        first={}
+        for g in missing:
+            first.setdefault(g["slug"],g)
+        missing=[first[k] for k in sorted(first)]
     candidates=missing[:max(args.max_groups,args.verify_candidates)]
     verified=[]
     if candidates:
