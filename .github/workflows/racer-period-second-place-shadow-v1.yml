@@ -1,0 +1,71 @@
+name: Racer period second-place SHADOW v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-second-place-shadow-v1.yml'
+      - 'scripts/racer-period-second-place-shadow-v1.js'
+      - 'racer-period-24/**'
+      - 'rich-history-24/**'
+      - '*-research-model-v1.js'
+      - 'edogawa-research-model-v2.js'
+      - '*-baseline-backtest-v1.json'
+      - '*-history-bootstrap-v1.json'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run strict H1-design / H2-holdout second-place SHADOW
+        run: |
+          set -euo pipefail
+          node --check scripts/racer-period-second-place-shadow-v1.js
+          node scripts/racer-period-second-place-shadow-v1.js
+
+      - name: Audit no-production boundary and print verdict
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const x=require('./research/racer-period-second-place-shadow-v1.json');
+          if(x.schema!=='boat-command-racer-period-second-place-shadow-v1')throw new Error('SCHEMA');
+          if(x.researchOnly!==true||x.productionChanged!==false||x.predictionInputChanged!==false)throw new Error('BOUNDARY');
+          if(x.bankrollChanged!==false||x.tryChanged!==false||x.firstPlaceMutation!==false)throw new Error('MUTATION');
+          if(x.promotionEligible!==false)throw new Error('PROMOTION');
+          if(x.totals.venuesEvaluated<20)throw new Error('VENUE_COVERAGE');
+          console.log('SECOND_PLACE_SHADOW_TOTALS',JSON.stringify(x.totals,null,2));
+          console.log('NEXT_GATE',x.nextGate);
+          NODE
+
+      - name: Save audited holdout report to source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/racer-period-second-place-shadow-v1.json /tmp/racer-period-second-place-shadow-v1.json
+          git fetch origin "$HEAD_REF"
+          rm -f research/racer-period-second-place-shadow-v1.json
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/racer-period-second-place-shadow-v1.json research/
+          git config user.name 'boat-command-racer-period-shadow'
+          git config user.email 'boat-command-racer-period-shadow@users.noreply.github.com'
+          git add research/racer-period-second-place-shadow-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store racer-period second-place holdout [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-period-second-place-shadow-v1
+          path: research/racer-period-second-place-shadow-v1.json
+          retention-days: 30
+          if-no-files-found: error
