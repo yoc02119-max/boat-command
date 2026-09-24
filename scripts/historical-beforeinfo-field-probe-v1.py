@@ -57,7 +57,7 @@ class Tables(HTMLParser):
 
 def fetch(url,code):
     req=urllib.request.Request(url,headers={"User-Agent":f"BOAT-COMMAND-HISTORICAL-BEFOREINFO-PROBE/{code}"})
-    with urllib.request.urlopen(req,timeout=6) as resp:raw=resp.read()
+    with urllib.request.urlopen(req,timeout=20) as resp:raw=resp.read()
     for enc in ("utf-8","cp932","shift_jis","euc_jp"):
         try:return raw.decode(enc)
         except UnicodeDecodeError:pass
@@ -141,37 +141,44 @@ def parse_beforeinfo(raw):
       "pageMarkers":labels,
     }
 
+def probe_one(code,slug):
+    row=oldest_row(slug)
+    item={"code":code,"slug":slug,"status":"NO_SAMPLE","verifiedRacelistIdentity":False}
+    if not row:return item
+    d=row["d"];race=int(row["r"]);hd=d.replace("-","")
+    rl=f"https://www.boatrace.jp/owpc/pc/race/racelist?hd={hd}&jcd={code}&rno={race}"
+    bi=f"https://www.boatrace.jp/owpc/pc/race/beforeinfo?hd={hd}&jcd={code}&rno={race}"
+    item.update({"date":d,"race":race,"racelistUrl":rl,"beforeinfoUrl":bi})
+    try:
+        rlraw=fetch(rl,code);pack=C.parse_race(rlraw,d,race,slug.upper(),code)
+        if not pack or not identity_ok(row,pack):
+            item["status"]="RACELIST_IDENTITY_MISMATCH"
+        else:
+            item["verifiedRacelistIdentity"]=True
+            item.update(parse_beforeinfo(fetch(bi,code)))
+            item["status"]="VERIFIED_BEFOREINFO"
+    except Exception as e:
+        item["status"]="FETCH_OR_PARSE_ERROR";item["error"]=type(e).__name__
+    return item
+
 def main():
+    import concurrent.futures
     report={
       "schema":"boat-command-historical-beforeinfo-field-probe-v1",
       "researchOnly":True,"productionChanged":False,"predictionInputChanged":False,
       "sampleStrategy":"oldest accepted rich-history race per venue",
       "source":"BOAT RACE official racelist + beforeinfo; no result/payout endpoints",
+      "fetchTimeoutSec":20,"maxWorkers":6,
       "venues":[],
     }
-    for code,slug in VENUES.items():
-        row=oldest_row(slug)
-        item={"code":code,"slug":slug,"status":"NO_SAMPLE","verifiedRacelistIdentity":False}
-        if row:
-            d=row["d"];race=int(row["r"]);hd=d.replace("-","")
-            rl=f"https://www.boatrace.jp/owpc/pc/race/racelist?hd={hd}&jcd={code}&rno={race}"
-            bi=f"https://www.boatrace.jp/owpc/pc/race/beforeinfo?hd={hd}&jcd={code}&rno={race}"
-            item.update({"date":d,"race":race,"racelistUrl":rl,"beforeinfoUrl":bi})
-            try:
-                rlraw=fetch(rl,code);pack=C.parse_race(rlraw,d,race,slug.upper(),code)
-                if not pack or not identity_ok(row,pack):
-                    item["status"]="RACELIST_IDENTITY_MISMATCH"
-                else:
-                    item["verifiedRacelistIdentity"]=True
-                    biraw=fetch(bi,code)
-                    parsed=parse_beforeinfo(biraw)
-                    item.update(parsed)
-                    item["status"]="VERIFIED_BEFOREINFO"
-            except Exception as e:
-                item["status"]="FETCH_OR_PARSE_ERROR";item["error"]=type(e).__name__
-        report["venues"].append(item)
-        print(code,slug,item["status"],flush=True)
-    ok=[x for x in report["venues"] if x["status"]=="VERIFIED_BEFOREINFO"]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+        fut=[ex.submit(probe_one,code,slug) for code,slug in VENUES.items()]
+        rows=[f.result() for f in concurrent.futures.as_completed(fut)]
+    rows.sort(key=lambda x:x["code"])
+    report["venues"]=rows
+    for item in rows:
+        print(item["code"],item["slug"],item["status"],flush=True)
+    ok=[x for x in rows if x["status"]=="VERIFIED_BEFOREINFO"]
     report["summary"]={
       "venuesProbed":24,
       "verifiedBeforeinfoPages":len(ok),
