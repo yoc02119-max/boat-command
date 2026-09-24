@@ -1,0 +1,4161 @@
+{
+  "schema": "boat-command-racer-period-shadow-backtest-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "tryChanged": false,
+  "hardLockChanged": false,
+  "featureBoundary": {
+    "featuresAdded": [
+      "periodAvgST",
+      "periodFCountDerived",
+      "periodLCountDerived",
+      "currentAbility",
+      "period3RateDerived"
+    ],
+    "courseSpecificStatsUsed": false,
+    "resultUsedForFeatureConstruction": false,
+    "payoutUsedForFeatureConstruction": false,
+    "resultAndPayoutUse": "EVALUATION_AFTER_PICKS_ONLY",
+    "joinPolicy": "RACE_DATE_HALF_YEAR + REGISTRATION + CLASS_MATCH"
+  },
+  "selectionPolicy": "profile chosen on first 70% dates; final comparison on untouched last 30% dates",
+  "summary": {
+    "venues": 24,
+    "holdoutRaces": 8307,
+    "aggregateBase4": {
+      "races": 8307,
+      "hits": 1036,
+      "hitRate": 0.12471409654508246,
+      "stake": 3322800,
+      "returns": 2139020,
+      "roi": 0.6437402190923318,
+      "top1Exact": 274,
+      "top1ExactRate": 0.03298423016732876,
+      "firstCorrect": 2778,
+      "firstAccuracy": 0.3344167569519682,
+      "secondCorrect": 1737,
+      "secondAccuracy": 0.20910075839653305,
+      "thirdCorrect": 1567,
+      "thirdAccuracy": 0.18863609004454074
+    },
+    "aggregatePeriodEnriched4": {
+      "races": 8307,
+      "hits": 1040,
+      "hitRate": 0.12519561815336464,
+      "stake": 3322800,
+      "returns": 2084400,
+      "roi": 0.6273022751895991,
+      "top1Exact": 266,
+      "top1ExactRate": 0.03202118695076442,
+      "firstCorrect": 2811,
+      "firstAccuracy": 0.3383893102202961,
+      "secondCorrect": 1698,
+      "secondAccuracy": 0.20440592271578187,
+      "thirdCorrect": 1551,
+      "thirdAccuracy": 0.18671000361141207
+    },
+    "aggregateHitRateDelta": 0.0004815216082821733,
+    "aggregateRoiDelta": -0.016437943902732677,
+    "aggregateFirstAccuracyDelta": 0.003972553268327905,
+    "aggregateSecondAccuracyDelta": -0.004694835680751186,
+    "aggregateThirdAccuracyDelta": -0.0019260864331286653,
+    "venuesHitRateImproved": 12,
+    "venuesSecondAccuracyImproved": 5,
+    "venuesBothImproved": 2,
+    "venuesNoHitRegression": 15
+  },
+  "venuesData": [
+    {
+      "slug": "amagasaki",
+      "venueCode": "13",
+      "source": "rich-history-24/amagasaki-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 76,
+      "holdoutDateCount": 33,
+      "calibrationLastDate": "2026-08-04",
+      "holdoutFirstDate": "2026-08-09",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 886,
+            "hits": 125,
+            "hitRate": 0.14108352144469527,
+            "stake": 354400,
+            "returns": 266320,
+            "roi": 0.7514672686230248,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04288939051918736,
+            "firstCorrect": 282,
+            "firstAccuracy": 0.3182844243792325,
+            "secondCorrect": 201,
+            "secondAccuracy": 0.22686230248307,
+            "thirdCorrect": 166,
+            "thirdAccuracy": 0.1873589164785553
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 886,
+            "hits": 125,
+            "hitRate": 0.14108352144469527,
+            "stake": 354400,
+            "returns": 262350,
+            "roi": 0.740265237020316,
+            "top1Exact": 37,
+            "top1ExactRate": 0.0417607223476298,
+            "firstCorrect": 286,
+            "firstAccuracy": 0.3227990970654628,
+            "secondCorrect": 197,
+            "secondAccuracy": 0.22234762979683972,
+            "thirdCorrect": 159,
+            "thirdAccuracy": 0.17945823927765236
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 886,
+            "hits": 123,
+            "hitRate": 0.13882618510158012,
+            "stake": 354400,
+            "returns": 261270,
+            "roi": 0.7372178329571106,
+            "top1Exact": 34,
+            "top1ExactRate": 0.03837471783295711,
+            "firstCorrect": 285,
+            "firstAccuracy": 0.3216704288939052,
+            "secondCorrect": 199,
+            "secondAccuracy": 0.22460496613995484,
+            "thirdCorrect": 157,
+            "thirdAccuracy": 0.17720090293453725
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 886,
+            "hits": 123,
+            "hitRate": 0.13882618510158012,
+            "stake": 354400,
+            "returns": 259960,
+            "roi": 0.7335214446952596,
+            "top1Exact": 33,
+            "top1ExactRate": 0.03724604966139955,
+            "firstCorrect": 287,
+            "firstAccuracy": 0.3239277652370203,
+            "secondCorrect": 195,
+            "secondAccuracy": 0.2200902934537246,
+            "thirdCorrect": 155,
+            "thirdAccuracy": 0.17494356659142213
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 396,
+          "hits": 60,
+          "hitRate": 0.15151515151515152,
+          "stake": 158400,
+          "returns": 95880,
+          "roi": 0.6053030303030303,
+          "top1Exact": 13,
+          "top1ExactRate": 0.03282828282828283,
+          "firstCorrect": 147,
+          "firstAccuracy": 0.3712121212121212,
+          "secondCorrect": 71,
+          "secondAccuracy": 0.17929292929292928,
+          "thirdCorrect": 73,
+          "thirdAccuracy": 0.18434343434343434
+        },
+        "periodEnriched4": {
+          "races": 396,
+          "hits": 59,
+          "hitRate": 0.14898989898989898,
+          "stake": 158400,
+          "returns": 95460,
+          "roi": 0.6026515151515152,
+          "top1Exact": 13,
+          "top1ExactRate": 0.03282828282828283,
+          "firstCorrect": 146,
+          "firstAccuracy": 0.3686868686868687,
+          "secondCorrect": 71,
+          "secondAccuracy": 0.17929292929292928,
+          "thirdCorrect": 78,
+          "thirdAccuracy": 0.19696969696969696
+        },
+        "hitRateDelta": -0.0025252525252525415,
+        "roiDelta": -0.0026515151515151825,
+        "firstAccuracyDelta": -0.0025252525252525415,
+        "secondAccuracyDelta": 0.0,
+        "thirdAccuracyDelta": 0.012626262626262624,
+        "safeJoinedBoats": 2376,
+        "boatRows": 2376,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "ashiya",
+      "venueCode": "21",
+      "source": "rich-history-24/ashiya-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 69,
+      "holdoutDateCount": 30,
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "BALANCED",
+        "stW": 4.5,
+        "fW": 0.05,
+        "lW": 0.12,
+        "abilityW": 0.03,
+        "threeW": 0.3
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 819,
+            "hits": 108,
+            "hitRate": 0.13186813186813187,
+            "stake": 327600,
+            "returns": 357840,
+            "roi": 1.0923076923076922,
+            "top1Exact": 22,
+            "top1ExactRate": 0.026862026862026864,
+            "firstCorrect": 296,
+            "firstAccuracy": 0.3614163614163614,
+            "secondCorrect": 157,
+            "secondAccuracy": 0.1916971916971917,
+            "thirdCorrect": 158,
+            "thirdAccuracy": 0.19291819291819293
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 819,
+            "hits": 107,
+            "hitRate": 0.13064713064713065,
+            "stake": 327600,
+            "returns": 315910,
+            "roi": 0.9643162393162393,
+            "top1Exact": 23,
+            "top1ExactRate": 0.028083028083028084,
+            "firstCorrect": 295,
+            "firstAccuracy": 0.3601953601953602,
+            "secondCorrect": 162,
+            "secondAccuracy": 0.1978021978021978,
+            "thirdCorrect": 163,
+            "thirdAccuracy": 0.199023199023199
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 819,
+            "hits": 106,
+            "hitRate": 0.12942612942612944,
+            "stake": 327600,
+            "returns": 341510,
+            "roi": 1.0424603174603175,
+            "top1Exact": 23,
+            "top1ExactRate": 0.028083028083028084,
+            "firstCorrect": 293,
+            "firstAccuracy": 0.35775335775335776,
+            "secondCorrect": 163,
+            "secondAccuracy": 0.199023199023199,
+            "thirdCorrect": 161,
+            "thirdAccuracy": 0.19658119658119658
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 819,
+            "hits": 104,
+            "hitRate": 0.12698412698412698,
+            "stake": 327600,
+            "returns": 327000,
+            "roi": 0.9981684981684982,
+            "top1Exact": 21,
+            "top1ExactRate": 0.02564102564102564,
+            "firstCorrect": 291,
+            "firstAccuracy": 0.3553113553113553,
+            "secondCorrect": 166,
+            "secondAccuracy": 0.2026862026862027,
+            "thirdCorrect": 155,
+            "thirdAccuracy": 0.18925518925518925
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 360,
+          "hits": 40,
+          "hitRate": 0.1111111111111111,
+          "stake": 144000,
+          "returns": 102630,
+          "roi": 0.7127083333333334,
+          "top1Exact": 5,
+          "top1ExactRate": 0.013888888888888888,
+          "firstCorrect": 136,
+          "firstAccuracy": 0.37777777777777777,
+          "secondCorrect": 57,
+          "secondAccuracy": 0.15833333333333333,
+          "thirdCorrect": 64,
+          "thirdAccuracy": 0.17777777777777778
+        },
+        "periodEnriched4": {
+          "races": 360,
+          "hits": 36,
+          "hitRate": 0.1,
+          "stake": 144000,
+          "returns": 58560,
+          "roi": 0.4066666666666667,
+          "top1Exact": 9,
+          "top1ExactRate": 0.025,
+          "firstCorrect": 138,
+          "firstAccuracy": 0.38333333333333336,
+          "secondCorrect": 54,
+          "secondAccuracy": 0.15,
+          "thirdCorrect": 66,
+          "thirdAccuracy": 0.18333333333333332
+        },
+        "hitRateDelta": -0.0111111111111111,
+        "roiDelta": -0.3060416666666667,
+        "firstAccuracyDelta": 0.005555555555555591,
+        "secondAccuracyDelta": -0.008333333333333331,
+        "thirdAccuracyDelta": 0.005555555555555536,
+        "safeJoinedBoats": 2160,
+        "boatRows": 2160,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "biwako",
+      "venueCode": "11",
+      "source": "rich-history-24/biwako-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 63,
+      "holdoutDateCount": 28,
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 683,
+            "hits": 79,
+            "hitRate": 0.11566617862371889,
+            "stake": 273200,
+            "returns": 215770,
+            "roi": 0.7897877013177159,
+            "top1Exact": 27,
+            "top1ExactRate": 0.03953147877013177,
+            "firstCorrect": 213,
+            "firstAccuracy": 0.3118594436310395,
+            "secondCorrect": 153,
+            "secondAccuracy": 0.2240117130307467,
+            "thirdCorrect": 139,
+            "thirdAccuracy": 0.20351390922401172
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 683,
+            "hits": 79,
+            "hitRate": 0.11566617862371889,
+            "stake": 273200,
+            "returns": 177670,
+            "roi": 0.6503294289897511,
+            "top1Exact": 29,
+            "top1ExactRate": 0.0424597364568082,
+            "firstCorrect": 204,
+            "firstAccuracy": 0.2986822840409956,
+            "secondCorrect": 139,
+            "secondAccuracy": 0.20351390922401172,
+            "thirdCorrect": 140,
+            "thirdAccuracy": 0.20497803806734993
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 683,
+            "hits": 78,
+            "hitRate": 0.11420204978038068,
+            "stake": 273200,
+            "returns": 168730,
+            "roi": 0.617606149341142,
+            "top1Exact": 28,
+            "top1ExactRate": 0.040995607613469986,
+            "firstCorrect": 211,
+            "firstAccuracy": 0.3089311859443631,
+            "secondCorrect": 142,
+            "secondAccuracy": 0.20790629575402636,
+            "thirdCorrect": 137,
+            "thirdAccuracy": 0.2005856515373353
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 683,
+            "hits": 77,
+            "hitRate": 0.11273792093704246,
+            "stake": 273200,
+            "returns": 218700,
+            "roi": 0.8005124450951684,
+            "top1Exact": 28,
+            "top1ExactRate": 0.040995607613469986,
+            "firstCorrect": 208,
+            "firstAccuracy": 0.30453879941434847,
+            "secondCorrect": 143,
+            "secondAccuracy": 0.20937042459736457,
+            "thirdCorrect": 132,
+            "thirdAccuracy": 0.19326500732064422
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 330,
+          "hits": 36,
+          "hitRate": 0.10909090909090909,
+          "stake": 132000,
+          "returns": 79590,
+          "roi": 0.6029545454545454,
+          "top1Exact": 11,
+          "top1ExactRate": 0.03333333333333333,
+          "firstCorrect": 104,
+          "firstAccuracy": 0.3151515151515151,
+          "secondCorrect": 69,
+          "secondAccuracy": 0.20909090909090908,
+          "thirdCorrect": 66,
+          "thirdAccuracy": 0.2
+        },
+        "periodEnriched4": {
+          "races": 330,
+          "hits": 38,
+          "hitRate": 0.11515151515151516,
+          "stake": 132000,
+          "returns": 75460,
+          "roi": 0.5716666666666667,
+          "top1Exact": 6,
+          "top1ExactRate": 0.01818181818181818,
+          "firstCorrect": 109,
+          "firstAccuracy": 0.3303030303030303,
+          "secondCorrect": 68,
+          "secondAccuracy": 0.20606060606060606,
+          "thirdCorrect": 65,
+          "thirdAccuracy": 0.19696969696969696
+        },
+        "hitRateDelta": 0.006060606060606072,
+        "roiDelta": -0.03128787878787875,
+        "firstAccuracyDelta": 0.015151515151515194,
+        "secondAccuracyDelta": -0.003030303030303022,
+        "thirdAccuracyDelta": -0.00303030303030305,
+        "safeJoinedBoats": 1980,
+        "boatRows": 1980,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "edogawa",
+      "venueCode": "03",
+      "source": "rich-history-24/edogawa-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 49,
+      "holdoutDateCount": 22,
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 543,
+            "hits": 74,
+            "hitRate": 0.13627992633517497,
+            "stake": 217200,
+            "returns": 150020,
+            "roi": 0.6906998158379374,
+            "top1Exact": 16,
+            "top1ExactRate": 0.029465930018416207,
+            "firstCorrect": 176,
+            "firstAccuracy": 0.3241252302025783,
+            "secondCorrect": 127,
+            "secondAccuracy": 0.23388581952117865,
+            "thirdCorrect": 114,
+            "thirdAccuracy": 0.20994475138121546
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 543,
+            "hits": 73,
+            "hitRate": 0.13443830570902393,
+            "stake": 217200,
+            "returns": 142760,
+            "roi": 0.6572744014732965,
+            "top1Exact": 18,
+            "top1ExactRate": 0.03314917127071823,
+            "firstCorrect": 173,
+            "firstAccuracy": 0.31860036832412525,
+            "secondCorrect": 121,
+            "secondAccuracy": 0.22283609576427257,
+            "thirdCorrect": 118,
+            "thirdAccuracy": 0.21731123388581952
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 543,
+            "hits": 72,
+            "hitRate": 0.13259668508287292,
+            "stake": 217200,
+            "returns": 139440,
+            "roi": 0.6419889502762431,
+            "top1Exact": 18,
+            "top1ExactRate": 0.03314917127071823,
+            "firstCorrect": 170,
+            "firstAccuracy": 0.31307550644567217,
+            "secondCorrect": 124,
+            "secondAccuracy": 0.2283609576427256,
+            "thirdCorrect": 123,
+            "thirdAccuracy": 0.2265193370165746
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 543,
+            "hits": 72,
+            "hitRate": 0.13259668508287292,
+            "stake": 217200,
+            "returns": 137120,
+            "roi": 0.6313075506445672,
+            "top1Exact": 16,
+            "top1ExactRate": 0.029465930018416207,
+            "firstCorrect": 173,
+            "firstAccuracy": 0.31860036832412525,
+            "secondCorrect": 123,
+            "secondAccuracy": 0.2265193370165746,
+            "thirdCorrect": 118,
+            "thirdAccuracy": 0.21731123388581952
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 251,
+          "hits": 24,
+          "hitRate": 0.09561752988047809,
+          "stake": 100400,
+          "returns": 68270,
+          "roi": 0.6799800796812749,
+          "top1Exact": 12,
+          "top1ExactRate": 0.04780876494023904,
+          "firstCorrect": 80,
+          "firstAccuracy": 0.3187250996015936,
+          "secondCorrect": 61,
+          "secondAccuracy": 0.24302788844621515,
+          "thirdCorrect": 44,
+          "thirdAccuracy": 0.1752988047808765
+        },
+        "periodEnriched4": {
+          "races": 251,
+          "hits": 26,
+          "hitRate": 0.10358565737051793,
+          "stake": 100400,
+          "returns": 70160,
+          "roi": 0.698804780876494,
+          "top1Exact": 11,
+          "top1ExactRate": 0.043824701195219126,
+          "firstCorrect": 83,
+          "firstAccuracy": 0.33067729083665337,
+          "secondCorrect": 61,
+          "secondAccuracy": 0.24302788844621515,
+          "thirdCorrect": 41,
+          "thirdAccuracy": 0.16334661354581673
+        },
+        "hitRateDelta": 0.007968127490039847,
+        "roiDelta": 0.018824701195219062,
+        "firstAccuracyDelta": 0.01195219123505975,
+        "secondAccuracyDelta": 0.0,
+        "thirdAccuracyDelta": -0.011952191235059778,
+        "safeJoinedBoats": 1506,
+        "boatRows": 1506,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "fukuoka",
+      "venueCode": "22",
+      "source": "rich-history-24/fukuoka-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 67,
+      "holdoutDateCount": 29,
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 802,
+            "hits": 95,
+            "hitRate": 0.11845386533665836,
+            "stake": 320800,
+            "returns": 172780,
+            "roi": 0.5385910224438902,
+            "top1Exact": 24,
+            "top1ExactRate": 0.029925187032418952,
+            "firstCorrect": 262,
+            "firstAccuracy": 0.3266832917705736,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.21321695760598502,
+            "thirdCorrect": 154,
+            "thirdAccuracy": 0.19201995012468828
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 802,
+            "hits": 91,
+            "hitRate": 0.11346633416458853,
+            "stake": 320800,
+            "returns": 168200,
+            "roi": 0.5243142144638404,
+            "top1Exact": 26,
+            "top1ExactRate": 0.032418952618453865,
+            "firstCorrect": 271,
+            "firstAccuracy": 0.33790523690773067,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.21321695760598502,
+            "thirdCorrect": 142,
+            "thirdAccuracy": 0.1770573566084788
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 802,
+            "hits": 90,
+            "hitRate": 0.11221945137157108,
+            "stake": 320800,
+            "returns": 167330,
+            "roi": 0.5216022443890275,
+            "top1Exact": 27,
+            "top1ExactRate": 0.03366583541147132,
+            "firstCorrect": 267,
+            "firstAccuracy": 0.3329177057356609,
+            "secondCorrect": 173,
+            "secondAccuracy": 0.21571072319201995,
+            "thirdCorrect": 146,
+            "thirdAccuracy": 0.18204488778054864
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 802,
+            "hits": 90,
+            "hitRate": 0.11221945137157108,
+            "stake": 320800,
+            "returns": 167330,
+            "roi": 0.5216022443890275,
+            "top1Exact": 25,
+            "top1ExactRate": 0.03117206982543641,
+            "firstCorrect": 269,
+            "firstAccuracy": 0.33541147132169574,
+            "secondCorrect": 169,
+            "secondAccuracy": 0.21072319201995013,
+            "thirdCorrect": 146,
+            "thirdAccuracy": 0.18204488778054864
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 348,
+          "hits": 34,
+          "hitRate": 0.09770114942528736,
+          "stake": 139200,
+          "returns": 66680,
+          "roi": 0.47902298850574715,
+          "top1Exact": 4,
+          "top1ExactRate": 0.011494252873563218,
+          "firstCorrect": 108,
+          "firstAccuracy": 0.3103448275862069,
+          "secondCorrect": 74,
+          "secondAccuracy": 0.21264367816091953,
+          "thirdCorrect": 61,
+          "thirdAccuracy": 0.1752873563218391
+        },
+        "periodEnriched4": {
+          "races": 348,
+          "hits": 37,
+          "hitRate": 0.10632183908045977,
+          "stake": 139200,
+          "returns": 69220,
+          "roi": 0.49727011494252876,
+          "top1Exact": 5,
+          "top1ExactRate": 0.014367816091954023,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3160919540229885,
+          "secondCorrect": 72,
+          "secondAccuracy": 0.20689655172413793,
+          "thirdCorrect": 61,
+          "thirdAccuracy": 0.1752873563218391
+        },
+        "hitRateDelta": 0.008620689655172403,
+        "roiDelta": 0.018247126436781613,
+        "firstAccuracyDelta": 0.005747126436781602,
+        "secondAccuracyDelta": -0.005747126436781602,
+        "thirdAccuracyDelta": 0.0,
+        "safeJoinedBoats": 2078,
+        "boatRows": 2088,
+        "safeJoinCoverage": 0.9952107279693486,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 10
+        }
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "gamagori",
+      "venueCode": "07",
+      "source": "rich-history-24/gamagori-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 66,
+      "holdoutDateCount": 29,
+      "calibrationLastDate": "2026-07-16",
+      "holdoutFirstDate": "2026-07-17",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 768,
+            "hits": 110,
+            "hitRate": 0.14322916666666666,
+            "stake": 307200,
+            "returns": 223070,
+            "roi": 0.7261393229166667,
+            "top1Exact": 29,
+            "top1ExactRate": 0.037760416666666664,
+            "firstCorrect": 238,
+            "firstAccuracy": 0.3098958333333333,
+            "secondCorrect": 164,
+            "secondAccuracy": 0.21354166666666666,
+            "thirdCorrect": 139,
+            "thirdAccuracy": 0.18098958333333334
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 768,
+            "hits": 106,
+            "hitRate": 0.13802083333333334,
+            "stake": 307200,
+            "returns": 212610,
+            "roi": 0.69208984375,
+            "top1Exact": 30,
+            "top1ExactRate": 0.0390625,
+            "firstCorrect": 241,
+            "firstAccuracy": 0.3138020833333333,
+            "secondCorrect": 166,
+            "secondAccuracy": 0.21614583333333334,
+            "thirdCorrect": 146,
+            "thirdAccuracy": 0.19010416666666666
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 768,
+            "hits": 104,
+            "hitRate": 0.13541666666666666,
+            "stake": 307200,
+            "returns": 200290,
+            "roi": 0.6519856770833333,
+            "top1Exact": 29,
+            "top1ExactRate": 0.037760416666666664,
+            "firstCorrect": 244,
+            "firstAccuracy": 0.3177083333333333,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.22265625,
+            "thirdCorrect": 143,
+            "thirdAccuracy": 0.18619791666666666
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 768,
+            "hits": 103,
+            "hitRate": 0.13411458333333334,
+            "stake": 307200,
+            "returns": 205460,
+            "roi": 0.6688151041666667,
+            "top1Exact": 28,
+            "top1ExactRate": 0.036458333333333336,
+            "firstCorrect": 236,
+            "firstAccuracy": 0.3072916666666667,
+            "secondCorrect": 164,
+            "secondAccuracy": 0.21354166666666666,
+            "thirdCorrect": 143,
+            "thirdAccuracy": 0.18619791666666666
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 348,
+          "hits": 57,
+          "hitRate": 0.16379310344827586,
+          "stake": 139200,
+          "returns": 129090,
+          "roi": 0.9273706896551724,
+          "top1Exact": 15,
+          "top1ExactRate": 0.04310344827586207,
+          "firstCorrect": 125,
+          "firstAccuracy": 0.35919540229885055,
+          "secondCorrect": 66,
+          "secondAccuracy": 0.1896551724137931,
+          "thirdCorrect": 70,
+          "thirdAccuracy": 0.20114942528735633
+        },
+        "periodEnriched4": {
+          "races": 348,
+          "hits": 61,
+          "hitRate": 0.1752873563218391,
+          "stake": 139200,
+          "returns": 132380,
+          "roi": 0.9510057471264368,
+          "top1Exact": 14,
+          "top1ExactRate": 0.040229885057471264,
+          "firstCorrect": 122,
+          "firstAccuracy": 0.3505747126436782,
+          "secondCorrect": 63,
+          "secondAccuracy": 0.1810344827586207,
+          "thirdCorrect": 69,
+          "thirdAccuracy": 0.19827586206896552
+        },
+        "hitRateDelta": 0.011494252873563232,
+        "roiDelta": 0.023635057471264376,
+        "firstAccuracyDelta": -0.008620689655172376,
+        "secondAccuracyDelta": -0.008620689655172403,
+        "thirdAccuracyDelta": -0.002873563218390801,
+        "safeJoinedBoats": 2088,
+        "boatRows": 2088,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "hamanako",
+      "venueCode": "06",
+      "source": "rich-history-24/hamanako-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 70,
+      "holdoutDateCount": 31,
+      "calibrationLastDate": "2026-08-01",
+      "holdoutFirstDate": "2026-08-02",
+      "selectedProfile": {
+        "name": "ST_FL",
+        "stW": 4.0,
+        "fW": 0.06,
+        "lW": 0.14,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 105,
+            "hitRate": 0.1255980861244019,
+            "stake": 334400,
+            "returns": 250080,
+            "roi": 0.7478468899521531,
+            "top1Exact": 25,
+            "top1ExactRate": 0.029904306220095694,
+            "firstCorrect": 277,
+            "firstAccuracy": 0.33133971291866027,
+            "secondCorrect": 187,
+            "secondAccuracy": 0.2236842105263158,
+            "thirdCorrect": 153,
+            "thirdAccuracy": 0.18301435406698566
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 104,
+            "hitRate": 0.12440191387559808,
+            "stake": 334400,
+            "returns": 208380,
+            "roi": 0.6231459330143541,
+            "top1Exact": 23,
+            "top1ExactRate": 0.02751196172248804,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.33014354066985646,
+            "secondCorrect": 191,
+            "secondAccuracy": 0.2284688995215311,
+            "thirdCorrect": 158,
+            "thirdAccuracy": 0.18899521531100477
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 103,
+            "hitRate": 0.12320574162679426,
+            "stake": 334400,
+            "returns": 245050,
+            "roi": 0.7328050239234449,
+            "top1Exact": 24,
+            "top1ExactRate": 0.028708133971291867,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.33014354066985646,
+            "secondCorrect": 188,
+            "secondAccuracy": 0.22488038277511962,
+            "thirdCorrect": 154,
+            "thirdAccuracy": 0.18421052631578946
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 102,
+            "hitRate": 0.12200956937799043,
+            "stake": 334400,
+            "returns": 207850,
+            "roi": 0.621561004784689,
+            "top1Exact": 20,
+            "top1ExactRate": 0.023923444976076555,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.33014354066985646,
+            "secondCorrect": 186,
+            "secondAccuracy": 0.22248803827751196,
+            "thirdCorrect": 151,
+            "thirdAccuracy": 0.180622009569378
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 368,
+          "hits": 48,
+          "hitRate": 0.13043478260869565,
+          "stake": 147200,
+          "returns": 89590,
+          "roi": 0.6086277173913044,
+          "top1Exact": 11,
+          "top1ExactRate": 0.029891304347826088,
+          "firstCorrect": 128,
+          "firstAccuracy": 0.34782608695652173,
+          "secondCorrect": 78,
+          "secondAccuracy": 0.21195652173913043,
+          "thirdCorrect": 70,
+          "thirdAccuracy": 0.19021739130434784
+        },
+        "periodEnriched4": {
+          "races": 368,
+          "hits": 43,
+          "hitRate": 0.11684782608695653,
+          "stake": 147200,
+          "returns": 75060,
+          "roi": 0.5099184782608696,
+          "top1Exact": 11,
+          "top1ExactRate": 0.029891304347826088,
+          "firstCorrect": 125,
+          "firstAccuracy": 0.33967391304347827,
+          "secondCorrect": 76,
+          "secondAccuracy": 0.20652173913043478,
+          "thirdCorrect": 71,
+          "thirdAccuracy": 0.19293478260869565
+        },
+        "hitRateDelta": -0.013586956521739121,
+        "roiDelta": -0.09870923913043483,
+        "firstAccuracyDelta": -0.008152173913043459,
+        "secondAccuracyDelta": -0.0054347826086956486,
+        "thirdAccuracyDelta": 0.0027173913043478104,
+        "safeJoinedBoats": 2208,
+        "boatRows": 2208,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "heiwajima",
+      "venueCode": "04",
+      "source": "rich-history-24/heiwajima-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 64,
+      "holdoutDateCount": 28,
+      "calibrationLastDate": "2026-08-07",
+      "holdoutFirstDate": "2026-08-08",
+      "selectedProfile": {
+        "name": "ST_3RATE",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.0,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 756,
+            "hits": 107,
+            "hitRate": 0.14153439153439154,
+            "stake": 302400,
+            "returns": 240070,
+            "roi": 0.7938822751322752,
+            "top1Exact": 32,
+            "top1ExactRate": 0.042328042328042326,
+            "firstCorrect": 260,
+            "firstAccuracy": 0.3439153439153439,
+            "secondCorrect": 178,
+            "secondAccuracy": 0.23544973544973544,
+            "thirdCorrect": 138,
+            "thirdAccuracy": 0.18253968253968253
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 756,
+            "hits": 106,
+            "hitRate": 0.1402116402116402,
+            "stake": 302400,
+            "returns": 225200,
+            "roi": 0.7447089947089947,
+            "top1Exact": 32,
+            "top1ExactRate": 0.042328042328042326,
+            "firstCorrect": 252,
+            "firstAccuracy": 0.3333333333333333,
+            "secondCorrect": 177,
+            "secondAccuracy": 0.23412698412698413,
+            "thirdCorrect": 147,
+            "thirdAccuracy": 0.19444444444444445
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 756,
+            "hits": 106,
+            "hitRate": 0.1402116402116402,
+            "stake": 302400,
+            "returns": 238030,
+            "roi": 0.7871362433862434,
+            "top1Exact": 32,
+            "top1ExactRate": 0.042328042328042326,
+            "firstCorrect": 259,
+            "firstAccuracy": 0.3425925925925926,
+            "secondCorrect": 176,
+            "secondAccuracy": 0.2328042328042328,
+            "thirdCorrect": 138,
+            "thirdAccuracy": 0.18253968253968253
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 756,
+            "hits": 106,
+            "hitRate": 0.1402116402116402,
+            "stake": 302400,
+            "returns": 236350,
+            "roi": 0.7815806878306878,
+            "top1Exact": 32,
+            "top1ExactRate": 0.042328042328042326,
+            "firstCorrect": 258,
+            "firstAccuracy": 0.3412698412698413,
+            "secondCorrect": 175,
+            "secondAccuracy": 0.23148148148148148,
+            "thirdCorrect": 147,
+            "thirdAccuracy": 0.19444444444444445
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 336,
+          "hits": 36,
+          "hitRate": 0.10714285714285714,
+          "stake": 134400,
+          "returns": 72230,
+          "roi": 0.5374255952380952,
+          "top1Exact": 9,
+          "top1ExactRate": 0.026785714285714284,
+          "firstCorrect": 101,
+          "firstAccuracy": 0.3005952380952381,
+          "secondCorrect": 56,
+          "secondAccuracy": 0.16666666666666666,
+          "thirdCorrect": 63,
+          "thirdAccuracy": 0.1875
+        },
+        "periodEnriched4": {
+          "races": 336,
+          "hits": 33,
+          "hitRate": 0.09821428571428571,
+          "stake": 134400,
+          "returns": 81820,
+          "roi": 0.6087797619047619,
+          "top1Exact": 7,
+          "top1ExactRate": 0.020833333333333332,
+          "firstCorrect": 100,
+          "firstAccuracy": 0.2976190476190476,
+          "secondCorrect": 52,
+          "secondAccuracy": 0.15476190476190477,
+          "thirdCorrect": 63,
+          "thirdAccuracy": 0.1875
+        },
+        "hitRateDelta": -0.008928571428571425,
+        "roiDelta": 0.07135416666666672,
+        "firstAccuracyDelta": -0.0029761904761904656,
+        "secondAccuracyDelta": -0.01190476190476189,
+        "thirdAccuracyDelta": 0.0,
+        "safeJoinedBoats": 2016,
+        "boatRows": 2016,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "karatsu",
+      "venueCode": "23",
+      "source": "rich-history-24/karatsu-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 67,
+      "holdoutDateCount": 29,
+      "calibrationLastDate": "2026-07-21",
+      "holdoutFirstDate": "2026-07-22",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 795,
+            "hits": 118,
+            "hitRate": 0.14842767295597484,
+            "stake": 318000,
+            "returns": 181230,
+            "roi": 0.5699056603773585,
+            "top1Exact": 30,
+            "top1ExactRate": 0.03773584905660377,
+            "firstCorrect": 324,
+            "firstAccuracy": 0.4075471698113208,
+            "secondCorrect": 176,
+            "secondAccuracy": 0.22138364779874214,
+            "thirdCorrect": 149,
+            "thirdAccuracy": 0.18742138364779873
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 795,
+            "hits": 116,
+            "hitRate": 0.1459119496855346,
+            "stake": 318000,
+            "returns": 167680,
+            "roi": 0.5272955974842767,
+            "top1Exact": 32,
+            "top1ExactRate": 0.04025157232704402,
+            "firstCorrect": 323,
+            "firstAccuracy": 0.40628930817610065,
+            "secondCorrect": 178,
+            "secondAccuracy": 0.2238993710691824,
+            "thirdCorrect": 144,
+            "thirdAccuracy": 0.1811320754716981
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 795,
+            "hits": 115,
+            "hitRate": 0.14465408805031446,
+            "stake": 318000,
+            "returns": 177030,
+            "roi": 0.5566981132075471,
+            "top1Exact": 33,
+            "top1ExactRate": 0.04150943396226415,
+            "firstCorrect": 318,
+            "firstAccuracy": 0.4,
+            "secondCorrect": 181,
+            "secondAccuracy": 0.22767295597484277,
+            "thirdCorrect": 144,
+            "thirdAccuracy": 0.1811320754716981
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 795,
+            "hits": 115,
+            "hitRate": 0.14465408805031446,
+            "stake": 318000,
+            "returns": 177030,
+            "roi": 0.5566981132075471,
+            "top1Exact": 32,
+            "top1ExactRate": 0.04025157232704402,
+            "firstCorrect": 320,
+            "firstAccuracy": 0.4025157232704403,
+            "secondCorrect": 180,
+            "secondAccuracy": 0.22641509433962265,
+            "thirdCorrect": 141,
+            "thirdAccuracy": 0.17735849056603772
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 343,
+          "hits": 53,
+          "hitRate": 0.15451895043731778,
+          "stake": 137200,
+          "returns": 72490,
+          "roi": 0.5283527696793003,
+          "top1Exact": 15,
+          "top1ExactRate": 0.043731778425655975,
+          "firstCorrect": 144,
+          "firstAccuracy": 0.4198250728862974,
+          "secondCorrect": 81,
+          "secondAccuracy": 0.23615160349854228,
+          "thirdCorrect": 72,
+          "thirdAccuracy": 0.2099125364431487
+        },
+        "periodEnriched4": {
+          "races": 343,
+          "hits": 52,
+          "hitRate": 0.15160349854227406,
+          "stake": 137200,
+          "returns": 75400,
+          "roi": 0.5495626822157434,
+          "top1Exact": 18,
+          "top1ExactRate": 0.052478134110787174,
+          "firstCorrect": 150,
+          "firstAccuracy": 0.43731778425655976,
+          "secondCorrect": 84,
+          "secondAccuracy": 0.24489795918367346,
+          "thirdCorrect": 75,
+          "thirdAccuracy": 0.21865889212827988
+        },
+        "hitRateDelta": -0.002915451895043719,
+        "roiDelta": 0.02120991253644311,
+        "firstAccuracyDelta": 0.01749271137026237,
+        "secondAccuracyDelta": 0.008746355685131185,
+        "thirdAccuracyDelta": 0.008746355685131185,
+        "safeJoinedBoats": 2058,
+        "boatRows": 2058,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "kiryu",
+      "venueCode": "01",
+      "source": "rich-history-24/kiryu-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 69,
+      "holdoutDateCount": 30,
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 799,
+            "hits": 111,
+            "hitRate": 0.13892365456821026,
+            "stake": 319600,
+            "returns": 248740,
+            "roi": 0.7782853566958698,
+            "top1Exact": 27,
+            "top1ExactRate": 0.03379224030037547,
+            "firstCorrect": 278,
+            "firstAccuracy": 0.3479349186483104,
+            "secondCorrect": 165,
+            "secondAccuracy": 0.2065081351689612,
+            "thirdCorrect": 150,
+            "thirdAccuracy": 0.18773466833541927
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 799,
+            "hits": 107,
+            "hitRate": 0.13391739674593242,
+            "stake": 319600,
+            "returns": 242610,
+            "roi": 0.7591051314142678,
+            "top1Exact": 25,
+            "top1ExactRate": 0.03128911138923655,
+            "firstCorrect": 280,
+            "firstAccuracy": 0.3504380475594493,
+            "secondCorrect": 168,
+            "secondAccuracy": 0.21026282853566958,
+            "thirdCorrect": 149,
+            "thirdAccuracy": 0.18648310387984982
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 799,
+            "hits": 102,
+            "hitRate": 0.1276595744680851,
+            "stake": 319600,
+            "returns": 244150,
+            "roi": 0.7639236545682102,
+            "top1Exact": 23,
+            "top1ExactRate": 0.028785982478097622,
+            "firstCorrect": 278,
+            "firstAccuracy": 0.3479349186483104,
+            "secondCorrect": 165,
+            "secondAccuracy": 0.2065081351689612,
+            "thirdCorrect": 142,
+            "thirdAccuracy": 0.17772215269086358
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 799,
+            "hits": 102,
+            "hitRate": 0.1276595744680851,
+            "stake": 319600,
+            "returns": 229580,
+            "roi": 0.7183354192740926,
+            "top1Exact": 25,
+            "top1ExactRate": 0.03128911138923655,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.3454317897371715,
+            "secondCorrect": 164,
+            "secondAccuracy": 0.20525657071339173,
+            "thirdCorrect": 149,
+            "thirdAccuracy": 0.18648310387984982
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 352,
+          "hits": 43,
+          "hitRate": 0.12215909090909091,
+          "stake": 140800,
+          "returns": 98360,
+          "roi": 0.6985795454545455,
+          "top1Exact": 16,
+          "top1ExactRate": 0.045454545454545456,
+          "firstCorrect": 104,
+          "firstAccuracy": 0.29545454545454547,
+          "secondCorrect": 82,
+          "secondAccuracy": 0.23295454545454544,
+          "thirdCorrect": 76,
+          "thirdAccuracy": 0.2159090909090909
+        },
+        "periodEnriched4": {
+          "races": 352,
+          "hits": 44,
+          "hitRate": 0.125,
+          "stake": 140800,
+          "returns": 101570,
+          "roi": 0.721377840909091,
+          "top1Exact": 18,
+          "top1ExactRate": 0.05113636363636364,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3125,
+          "secondCorrect": 80,
+          "secondAccuracy": 0.22727272727272727,
+          "thirdCorrect": 72,
+          "thirdAccuracy": 0.20454545454545456
+        },
+        "hitRateDelta": 0.0028409090909090884,
+        "roiDelta": 0.02279829545454548,
+        "firstAccuracyDelta": 0.01704545454545453,
+        "secondAccuracyDelta": -0.005681818181818177,
+        "thirdAccuracyDelta": -0.011363636363636354,
+        "safeJoinedBoats": 2112,
+        "boatRows": 2112,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "kojima",
+      "venueCode": "16",
+      "source": "rich-history-24/kojima-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 73,
+      "holdoutDateCount": 32,
+      "calibrationLastDate": "2026-07-31",
+      "holdoutFirstDate": "2026-08-01",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 875,
+            "hits": 93,
+            "hitRate": 0.10628571428571429,
+            "stake": 350000,
+            "returns": 277340,
+            "roi": 0.7924,
+            "top1Exact": 23,
+            "top1ExactRate": 0.026285714285714287,
+            "firstCorrect": 309,
+            "firstAccuracy": 0.35314285714285715,
+            "secondCorrect": 166,
+            "secondAccuracy": 0.18971428571428572,
+            "thirdCorrect": 160,
+            "thirdAccuracy": 0.18285714285714286
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 875,
+            "hits": 92,
+            "hitRate": 0.10514285714285715,
+            "stake": 350000,
+            "returns": 262800,
+            "roi": 0.7508571428571429,
+            "top1Exact": 23,
+            "top1ExactRate": 0.026285714285714287,
+            "firstCorrect": 307,
+            "firstAccuracy": 0.35085714285714287,
+            "secondCorrect": 173,
+            "secondAccuracy": 0.1977142857142857,
+            "thirdCorrect": 160,
+            "thirdAccuracy": 0.18285714285714286
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 875,
+            "hits": 92,
+            "hitRate": 0.10514285714285715,
+            "stake": 350000,
+            "returns": 258930,
+            "roi": 0.7398,
+            "top1Exact": 23,
+            "top1ExactRate": 0.026285714285714287,
+            "firstCorrect": 309,
+            "firstAccuracy": 0.35314285714285715,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.19542857142857142,
+            "thirdCorrect": 158,
+            "thirdAccuracy": 0.18057142857142858
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 875,
+            "hits": 90,
+            "hitRate": 0.10285714285714286,
+            "stake": 350000,
+            "returns": 258910,
+            "roi": 0.7397428571428571,
+            "top1Exact": 24,
+            "top1ExactRate": 0.027428571428571427,
+            "firstCorrect": 311,
+            "firstAccuracy": 0.3554285714285714,
+            "secondCorrect": 178,
+            "secondAccuracy": 0.20342857142857143,
+            "thirdCorrect": 162,
+            "thirdAccuracy": 0.18514285714285714
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 384,
+          "hits": 49,
+          "hitRate": 0.12760416666666666,
+          "stake": 153600,
+          "returns": 103010,
+          "roi": 0.6706380208333333,
+          "top1Exact": 14,
+          "top1ExactRate": 0.036458333333333336,
+          "firstCorrect": 119,
+          "firstAccuracy": 0.3098958333333333,
+          "secondCorrect": 86,
+          "secondAccuracy": 0.22395833333333334,
+          "thirdCorrect": 68,
+          "thirdAccuracy": 0.17708333333333334
+        },
+        "periodEnriched4": {
+          "races": 384,
+          "hits": 46,
+          "hitRate": 0.11979166666666667,
+          "stake": 153600,
+          "returns": 89830,
+          "roi": 0.5848307291666667,
+          "top1Exact": 14,
+          "top1ExactRate": 0.036458333333333336,
+          "firstCorrect": 120,
+          "firstAccuracy": 0.3125,
+          "secondCorrect": 90,
+          "secondAccuracy": 0.234375,
+          "thirdCorrect": 66,
+          "thirdAccuracy": 0.171875
+        },
+        "hitRateDelta": -0.007812499999999986,
+        "roiDelta": -0.08580729166666667,
+        "firstAccuracyDelta": 0.002604166666666685,
+        "secondAccuracyDelta": 0.010416666666666657,
+        "thirdAccuracyDelta": -0.005208333333333343,
+        "safeJoinedBoats": 2304,
+        "boatRows": 2304,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "marugame",
+      "venueCode": "15",
+      "source": "rich-history-24/marugame-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 65,
+      "holdoutDateCount": 28,
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "BALANCED",
+        "stW": 4.5,
+        "fW": 0.05,
+        "lW": 0.12,
+        "abilityW": 0.03,
+        "threeW": 0.3
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 773,
+            "hits": 102,
+            "hitRate": 0.13195342820181113,
+            "stake": 309200,
+            "returns": 288380,
+            "roi": 0.9326649417852523,
+            "top1Exact": 30,
+            "top1ExactRate": 0.03880983182406209,
+            "firstCorrect": 229,
+            "firstAccuracy": 0.296248382923674,
+            "secondCorrect": 175,
+            "secondAccuracy": 0.22639068564036222,
+            "thirdCorrect": 145,
+            "thirdAccuracy": 0.18758085381630013
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 773,
+            "hits": 99,
+            "hitRate": 0.12807244501940493,
+            "stake": 309200,
+            "returns": 275230,
+            "roi": 0.8901358344113842,
+            "top1Exact": 29,
+            "top1ExactRate": 0.037516170763260026,
+            "firstCorrect": 227,
+            "firstAccuracy": 0.2936610608020699,
+            "secondCorrect": 172,
+            "secondAccuracy": 0.222509702457956,
+            "thirdCorrect": 141,
+            "thirdAccuracy": 0.18240620957309184
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 773,
+            "hits": 99,
+            "hitRate": 0.12807244501940493,
+            "stake": 309200,
+            "returns": 285000,
+            "roi": 0.9217335058214747,
+            "top1Exact": 29,
+            "top1ExactRate": 0.037516170763260026,
+            "firstCorrect": 230,
+            "firstAccuracy": 0.2975420439844761,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.22121604139715395,
+            "thirdCorrect": 143,
+            "thirdAccuracy": 0.18499353169469598
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 773,
+            "hits": 99,
+            "hitRate": 0.12807244501940493,
+            "stake": 309200,
+            "returns": 283060,
+            "roi": 0.9154592496765848,
+            "top1Exact": 28,
+            "top1ExactRate": 0.03622250970245795,
+            "firstCorrect": 229,
+            "firstAccuracy": 0.296248382923674,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.22121604139715395,
+            "thirdCorrect": 140,
+            "thirdAccuracy": 0.18111254851228978
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 330,
+          "hits": 45,
+          "hitRate": 0.13636363636363635,
+          "stake": 132000,
+          "returns": 75810,
+          "roi": 0.5743181818181818,
+          "top1Exact": 12,
+          "top1ExactRate": 0.03636363636363636,
+          "firstCorrect": 95,
+          "firstAccuracy": 0.2878787878787879,
+          "secondCorrect": 70,
+          "secondAccuracy": 0.21212121212121213,
+          "thirdCorrect": 62,
+          "thirdAccuracy": 0.18787878787878787
+        },
+        "periodEnriched4": {
+          "races": 330,
+          "hits": 45,
+          "hitRate": 0.13636363636363635,
+          "stake": 132000,
+          "returns": 73840,
+          "roi": 0.5593939393939394,
+          "top1Exact": 11,
+          "top1ExactRate": 0.03333333333333333,
+          "firstCorrect": 94,
+          "firstAccuracy": 0.28484848484848485,
+          "secondCorrect": 68,
+          "secondAccuracy": 0.20606060606060606,
+          "thirdCorrect": 62,
+          "thirdAccuracy": 0.18787878787878787
+        },
+        "hitRateDelta": 0.0,
+        "roiDelta": -0.014924242424242395,
+        "firstAccuracyDelta": -0.00303030303030305,
+        "secondAccuracyDelta": -0.006060606060606072,
+        "thirdAccuracyDelta": 0.0,
+        "safeJoinedBoats": 1980,
+        "boatRows": 1980,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "mikuni",
+      "venueCode": "10",
+      "source": "rich-history-24/mikuni-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 68,
+      "holdoutDateCount": 30,
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 778,
+            "hits": 96,
+            "hitRate": 0.12339331619537275,
+            "stake": 311200,
+            "returns": 204130,
+            "roi": 0.6559447300771208,
+            "top1Exact": 25,
+            "top1ExactRate": 0.032133676092544985,
+            "firstCorrect": 275,
+            "firstAccuracy": 0.35347043701799485,
+            "secondCorrect": 166,
+            "secondAccuracy": 0.2133676092544987,
+            "thirdCorrect": 152,
+            "thirdAccuracy": 0.1953727506426735
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 778,
+            "hits": 95,
+            "hitRate": 0.12210796915167095,
+            "stake": 311200,
+            "returns": 197940,
+            "roi": 0.6360539845758355,
+            "top1Exact": 25,
+            "top1ExactRate": 0.032133676092544985,
+            "firstCorrect": 279,
+            "firstAccuracy": 0.35861182519280205,
+            "secondCorrect": 165,
+            "secondAccuracy": 0.2120822622107969,
+            "thirdCorrect": 152,
+            "thirdAccuracy": 0.1953727506426735
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 778,
+            "hits": 94,
+            "hitRate": 0.12082262210796915,
+            "stake": 311200,
+            "returns": 195330,
+            "roi": 0.6276670951156812,
+            "top1Exact": 24,
+            "top1ExactRate": 0.030848329048843187,
+            "firstCorrect": 277,
+            "firstAccuracy": 0.3560411311053985,
+            "secondCorrect": 166,
+            "secondAccuracy": 0.2133676092544987,
+            "thirdCorrect": 150,
+            "thirdAccuracy": 0.1928020565552699
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 778,
+            "hits": 93,
+            "hitRate": 0.11953727506426735,
+            "stake": 311200,
+            "returns": 194210,
+            "roi": 0.6240681233933162,
+            "top1Exact": 23,
+            "top1ExactRate": 0.02956298200514139,
+            "firstCorrect": 278,
+            "firstAccuracy": 0.35732647814910024,
+            "secondCorrect": 167,
+            "secondAccuracy": 0.21465295629820053,
+            "thirdCorrect": 149,
+            "thirdAccuracy": 0.19151670951156813
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 346,
+          "hits": 41,
+          "hitRate": 0.11849710982658959,
+          "stake": 138400,
+          "returns": 87430,
+          "roi": 0.6317196531791908,
+          "top1Exact": 11,
+          "top1ExactRate": 0.031791907514450865,
+          "firstCorrect": 106,
+          "firstAccuracy": 0.3063583815028902,
+          "secondCorrect": 68,
+          "secondAccuracy": 0.19653179190751446,
+          "thirdCorrect": 65,
+          "thirdAccuracy": 0.18786127167630057
+        },
+        "periodEnriched4": {
+          "races": 346,
+          "hits": 45,
+          "hitRate": 0.13005780346820808,
+          "stake": 138400,
+          "returns": 89070,
+          "roi": 0.6435693641618497,
+          "top1Exact": 11,
+          "top1ExactRate": 0.031791907514450865,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3179190751445087,
+          "secondCorrect": 70,
+          "secondAccuracy": 0.2023121387283237,
+          "thirdCorrect": 67,
+          "thirdAccuracy": 0.1936416184971098
+        },
+        "hitRateDelta": 0.011560693641618491,
+        "roiDelta": 0.011849710982658967,
+        "firstAccuracyDelta": 0.011560693641618491,
+        "secondAccuracyDelta": 0.005780346820809246,
+        "thirdAccuracyDelta": 0.005780346820809246,
+        "safeJoinedBoats": 2067,
+        "boatRows": 2076,
+        "safeJoinCoverage": 0.9956647398843931,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 9
+        }
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "miyajima",
+      "venueCode": "17",
+      "source": "rich-history-24/miyajima-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 70,
+      "holdoutDateCount": 31,
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 824,
+            "hits": 98,
+            "hitRate": 0.11893203883495146,
+            "stake": 329600,
+            "returns": 174470,
+            "roi": 0.5293385922330097,
+            "top1Exact": 23,
+            "top1ExactRate": 0.027912621359223302,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.33495145631067963,
+            "secondCorrect": 155,
+            "secondAccuracy": 0.18810679611650485,
+            "thirdCorrect": 152,
+            "thirdAccuracy": 0.18446601941747573
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 824,
+            "hits": 96,
+            "hitRate": 0.11650485436893204,
+            "stake": 329600,
+            "returns": 192850,
+            "roi": 0.5851031553398058,
+            "top1Exact": 21,
+            "top1ExactRate": 0.025485436893203883,
+            "firstCorrect": 275,
+            "firstAccuracy": 0.3337378640776699,
+            "secondCorrect": 148,
+            "secondAccuracy": 0.1796116504854369,
+            "thirdCorrect": 151,
+            "thirdAccuracy": 0.18325242718446602
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 824,
+            "hits": 95,
+            "hitRate": 0.11529126213592233,
+            "stake": 329600,
+            "returns": 167340,
+            "roi": 0.5077063106796117,
+            "top1Exact": 21,
+            "top1ExactRate": 0.025485436893203883,
+            "firstCorrect": 273,
+            "firstAccuracy": 0.3313106796116505,
+            "secondCorrect": 151,
+            "secondAccuracy": 0.18325242718446602,
+            "thirdCorrect": 151,
+            "thirdAccuracy": 0.18325242718446602
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 824,
+            "hits": 95,
+            "hitRate": 0.11529126213592233,
+            "stake": 329600,
+            "returns": 191710,
+            "roi": 0.5816444174757281,
+            "top1Exact": 21,
+            "top1ExactRate": 0.025485436893203883,
+            "firstCorrect": 275,
+            "firstAccuracy": 0.3337378640776699,
+            "secondCorrect": 146,
+            "secondAccuracy": 0.17718446601941748,
+            "thirdCorrect": 148,
+            "thirdAccuracy": 0.1796116504854369
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 370,
+          "hits": 43,
+          "hitRate": 0.11621621621621622,
+          "stake": 148000,
+          "returns": 82200,
+          "roi": 0.5554054054054054,
+          "top1Exact": 12,
+          "top1ExactRate": 0.032432432432432434,
+          "firstCorrect": 133,
+          "firstAccuracy": 0.35945945945945945,
+          "secondCorrect": 83,
+          "secondAccuracy": 0.22432432432432434,
+          "thirdCorrect": 73,
+          "thirdAccuracy": 0.1972972972972973
+        },
+        "periodEnriched4": {
+          "races": 370,
+          "hits": 41,
+          "hitRate": 0.11081081081081082,
+          "stake": 148000,
+          "returns": 79290,
+          "roi": 0.5357432432432433,
+          "top1Exact": 13,
+          "top1ExactRate": 0.03513513513513514,
+          "firstCorrect": 132,
+          "firstAccuracy": 0.3567567567567568,
+          "secondCorrect": 79,
+          "secondAccuracy": 0.21351351351351353,
+          "thirdCorrect": 75,
+          "thirdAccuracy": 0.20270270270270271
+        },
+        "hitRateDelta": -0.005405405405405406,
+        "roiDelta": -0.0196621621621621,
+        "firstAccuracyDelta": -0.002702702702702675,
+        "secondAccuracyDelta": -0.010810810810810811,
+        "thirdAccuracyDelta": 0.005405405405405406,
+        "safeJoinedBoats": 2212,
+        "boatRows": 2220,
+        "safeJoinCoverage": 0.9963963963963964,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 8
+        }
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "naruto",
+      "venueCode": "14",
+      "source": "rich-history-24/naruto-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 55,
+      "holdoutDateCount": 24,
+      "calibrationLastDate": "2026-08-06",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 645,
+            "hits": 82,
+            "hitRate": 0.12713178294573643,
+            "stake": 258000,
+            "returns": 160930,
+            "roi": 0.6237596899224807,
+            "top1Exact": 22,
+            "top1ExactRate": 0.034108527131782945,
+            "firstCorrect": 215,
+            "firstAccuracy": 0.3333333333333333,
+            "secondCorrect": 126,
+            "secondAccuracy": 0.19534883720930232,
+            "thirdCorrect": 123,
+            "thirdAccuracy": 0.19069767441860466
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 645,
+            "hits": 80,
+            "hitRate": 0.12403100775193798,
+            "stake": 258000,
+            "returns": 166900,
+            "roi": 0.6468992248062015,
+            "top1Exact": 22,
+            "top1ExactRate": 0.034108527131782945,
+            "firstCorrect": 212,
+            "firstAccuracy": 0.32868217054263565,
+            "secondCorrect": 126,
+            "secondAccuracy": 0.19534883720930232,
+            "thirdCorrect": 130,
+            "thirdAccuracy": 0.20155038759689922
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 645,
+            "hits": 80,
+            "hitRate": 0.12403100775193798,
+            "stake": 258000,
+            "returns": 165650,
+            "roi": 0.6420542635658915,
+            "top1Exact": 21,
+            "top1ExactRate": 0.03255813953488372,
+            "firstCorrect": 211,
+            "firstAccuracy": 0.3271317829457364,
+            "secondCorrect": 123,
+            "secondAccuracy": 0.19069767441860466,
+            "thirdCorrect": 131,
+            "thirdAccuracy": 0.20310077519379846
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 645,
+            "hits": 79,
+            "hitRate": 0.12248062015503876,
+            "stake": 258000,
+            "returns": 154820,
+            "roi": 0.600077519379845,
+            "top1Exact": 22,
+            "top1ExactRate": 0.034108527131782945,
+            "firstCorrect": 213,
+            "firstAccuracy": 0.3302325581395349,
+            "secondCorrect": 123,
+            "secondAccuracy": 0.19069767441860466,
+            "thirdCorrect": 128,
+            "thirdAccuracy": 0.19844961240310077
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 278,
+          "hits": 33,
+          "hitRate": 0.11870503597122302,
+          "stake": 111200,
+          "returns": 101250,
+          "roi": 0.9105215827338129,
+          "top1Exact": 10,
+          "top1ExactRate": 0.03597122302158273,
+          "firstCorrect": 96,
+          "firstAccuracy": 0.34532374100719426,
+          "secondCorrect": 64,
+          "secondAccuracy": 0.2302158273381295,
+          "thirdCorrect": 45,
+          "thirdAccuracy": 0.1618705035971223
+        },
+        "periodEnriched4": {
+          "races": 278,
+          "hits": 34,
+          "hitRate": 0.1223021582733813,
+          "stake": 111200,
+          "returns": 92260,
+          "roi": 0.8296762589928057,
+          "top1Exact": 9,
+          "top1ExactRate": 0.03237410071942446,
+          "firstCorrect": 98,
+          "firstAccuracy": 0.35251798561151076,
+          "secondCorrect": 63,
+          "secondAccuracy": 0.22661870503597123,
+          "thirdCorrect": 46,
+          "thirdAccuracy": 0.16546762589928057
+        },
+        "hitRateDelta": 0.0035971223021582788,
+        "roiDelta": -0.08084532374100717,
+        "firstAccuracyDelta": 0.007194244604316502,
+        "secondAccuracyDelta": -0.0035971223021582788,
+        "thirdAccuracyDelta": 0.0035971223021582788,
+        "safeJoinedBoats": 1668,
+        "boatRows": 1668,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "omura",
+      "venueCode": "24",
+      "source": "rich-history-24/omura-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 71,
+      "holdoutDateCount": 31,
+      "calibrationLastDate": "2026-07-29",
+      "holdoutFirstDate": "2026-07-30",
+      "selectedProfile": {
+        "name": "ST_3RATE",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.0,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 118,
+            "hitRate": 0.14658385093167703,
+            "stake": 322000,
+            "returns": 230750,
+            "roi": 0.7166149068322981,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04720496894409938,
+            "firstCorrect": 280,
+            "firstAccuracy": 0.34782608695652173,
+            "secondCorrect": 180,
+            "secondAccuracy": 0.2236024844720497,
+            "thirdCorrect": 152,
+            "thirdAccuracy": 0.18881987577639753
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 118,
+            "hitRate": 0.14658385093167703,
+            "stake": 322000,
+            "returns": 218600,
+            "roi": 0.6788819875776397,
+            "top1Exact": 37,
+            "top1ExactRate": 0.04596273291925466,
+            "firstCorrect": 281,
+            "firstAccuracy": 0.3490683229813665,
+            "secondCorrect": 179,
+            "secondAccuracy": 0.22236024844720498,
+            "thirdCorrect": 151,
+            "thirdAccuracy": 0.18757763975155278
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 115,
+            "hitRate": 0.14285714285714285,
+            "stake": 322000,
+            "returns": 231130,
+            "roi": 0.7177950310559006,
+            "top1Exact": 36,
+            "top1ExactRate": 0.04472049689440994,
+            "firstCorrect": 281,
+            "firstAccuracy": 0.3490683229813665,
+            "secondCorrect": 182,
+            "secondAccuracy": 0.22608695652173913,
+            "thirdCorrect": 144,
+            "thirdAccuracy": 0.17888198757763976
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 115,
+            "hitRate": 0.14285714285714285,
+            "stake": 322000,
+            "returns": 215820,
+            "roi": 0.6702484472049689,
+            "top1Exact": 36,
+            "top1ExactRate": 0.04472049689440994,
+            "firstCorrect": 277,
+            "firstAccuracy": 0.3440993788819876,
+            "secondCorrect": 179,
+            "secondAccuracy": 0.22236024844720498,
+            "thirdCorrect": 155,
+            "thirdAccuracy": 0.19254658385093168
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 365,
+          "hits": 43,
+          "hitRate": 0.1178082191780822,
+          "stake": 146000,
+          "returns": 91670,
+          "roi": 0.6278767123287671,
+          "top1Exact": 12,
+          "top1ExactRate": 0.03287671232876712,
+          "firstCorrect": 117,
+          "firstAccuracy": 0.32054794520547947,
+          "secondCorrect": 91,
+          "secondAccuracy": 0.2493150684931507,
+          "thirdCorrect": 63,
+          "thirdAccuracy": 0.1726027397260274
+        },
+        "periodEnriched4": {
+          "races": 365,
+          "hits": 47,
+          "hitRate": 0.12876712328767123,
+          "stake": 146000,
+          "returns": 97170,
+          "roi": 0.6655479452054794,
+          "top1Exact": 13,
+          "top1ExactRate": 0.03561643835616438,
+          "firstCorrect": 117,
+          "firstAccuracy": 0.32054794520547947,
+          "secondCorrect": 77,
+          "secondAccuracy": 0.21095890410958903,
+          "thirdCorrect": 65,
+          "thirdAccuracy": 0.1780821917808219
+        },
+        "hitRateDelta": 0.010958904109589038,
+        "roiDelta": 0.03767123287671237,
+        "firstAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.03835616438356165,
+        "thirdAccuracyDelta": 0.005479452054794498,
+        "safeJoinedBoats": 2190,
+        "boatRows": 2190,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "shimonoseki",
+      "venueCode": "19",
+      "source": "rich-history-24/shimonoseki-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 59,
+      "holdoutDateCount": 26,
+      "calibrationLastDate": "2026-08-05",
+      "holdoutFirstDate": "2026-08-06",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 687,
+            "hits": 91,
+            "hitRate": 0.1324599708879185,
+            "stake": 274800,
+            "returns": 209870,
+            "roi": 0.7637190684133915,
+            "top1Exact": 26,
+            "top1ExactRate": 0.03784570596797671,
+            "firstCorrect": 229,
+            "firstAccuracy": 0.3333333333333333,
+            "secondCorrect": 153,
+            "secondAccuracy": 0.22270742358078602,
+            "thirdCorrect": 120,
+            "thirdAccuracy": 0.17467248908296942
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 687,
+            "hits": 90,
+            "hitRate": 0.13100436681222707,
+            "stake": 274800,
+            "returns": 205910,
+            "roi": 0.7493085880640465,
+            "top1Exact": 29,
+            "top1ExactRate": 0.042212518195050945,
+            "firstCorrect": 227,
+            "firstAccuracy": 0.3304221251819505,
+            "secondCorrect": 150,
+            "secondAccuracy": 0.2183406113537118,
+            "thirdCorrect": 135,
+            "thirdAccuracy": 0.1965065502183406
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 687,
+            "hits": 89,
+            "hitRate": 0.12954876273653565,
+            "stake": 274800,
+            "returns": 205380,
+            "roi": 0.7473799126637555,
+            "top1Exact": 29,
+            "top1ExactRate": 0.042212518195050945,
+            "firstCorrect": 229,
+            "firstAccuracy": 0.3333333333333333,
+            "secondCorrect": 154,
+            "secondAccuracy": 0.22416302765647744,
+            "thirdCorrect": 132,
+            "thirdAccuracy": 0.19213973799126638
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 687,
+            "hits": 89,
+            "hitRate": 0.12954876273653565,
+            "stake": 274800,
+            "returns": 208850,
+            "roi": 0.7600072780203785,
+            "top1Exact": 28,
+            "top1ExactRate": 0.040756914119359534,
+            "firstCorrect": 232,
+            "firstAccuracy": 0.33770014556040756,
+            "secondCorrect": 152,
+            "secondAccuracy": 0.22125181950509462,
+            "thirdCorrect": 125,
+            "thirdAccuracy": 0.1819505094614265
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 312,
+          "hits": 48,
+          "hitRate": 0.15384615384615385,
+          "stake": 124800,
+          "returns": 86830,
+          "roi": 0.6957532051282052,
+          "top1Exact": 16,
+          "top1ExactRate": 0.05128205128205128,
+          "firstCorrect": 112,
+          "firstAccuracy": 0.358974358974359,
+          "secondCorrect": 63,
+          "secondAccuracy": 0.20192307692307693,
+          "thirdCorrect": 67,
+          "thirdAccuracy": 0.21474358974358973
+        },
+        "periodEnriched4": {
+          "races": 312,
+          "hits": 55,
+          "hitRate": 0.1762820512820513,
+          "stake": 124800,
+          "returns": 106980,
+          "roi": 0.8572115384615384,
+          "top1Exact": 13,
+          "top1ExactRate": 0.041666666666666664,
+          "firstCorrect": 112,
+          "firstAccuracy": 0.358974358974359,
+          "secondCorrect": 63,
+          "secondAccuracy": 0.20192307692307693,
+          "thirdCorrect": 65,
+          "thirdAccuracy": 0.20833333333333334
+        },
+        "hitRateDelta": 0.02243589743589744,
+        "roiDelta": 0.16145833333333326,
+        "firstAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.0,
+        "thirdAccuracyDelta": -0.0064102564102563875,
+        "safeJoinedBoats": 1872,
+        "boatRows": 1872,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "suminoe",
+      "venueCode": "12",
+      "source": "rich-history-24/suminoe-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 66,
+      "holdoutDateCount": 29,
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 791,
+            "hits": 89,
+            "hitRate": 0.1125158027812895,
+            "stake": 316400,
+            "returns": 240530,
+            "roi": 0.7602085967130215,
+            "top1Exact": 21,
+            "top1ExactRate": 0.02654867256637168,
+            "firstCorrect": 215,
+            "firstAccuracy": 0.2718078381795196,
+            "secondCorrect": 148,
+            "secondAccuracy": 0.18710493046776233,
+            "thirdCorrect": 148,
+            "thirdAccuracy": 0.18710493046776233
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 791,
+            "hits": 88,
+            "hitRate": 0.11125158027812895,
+            "stake": 316400,
+            "returns": 220270,
+            "roi": 0.6961757269279393,
+            "top1Exact": 21,
+            "top1ExactRate": 0.02654867256637168,
+            "firstCorrect": 215,
+            "firstAccuracy": 0.2718078381795196,
+            "secondCorrect": 147,
+            "secondAccuracy": 0.18584070796460178,
+            "thirdCorrect": 142,
+            "thirdAccuracy": 0.179519595448799
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 791,
+            "hits": 87,
+            "hitRate": 0.10998735777496839,
+            "stake": 316400,
+            "returns": 215560,
+            "roi": 0.6812895069532238,
+            "top1Exact": 21,
+            "top1ExactRate": 0.02654867256637168,
+            "firstCorrect": 212,
+            "firstAccuracy": 0.26801517067003794,
+            "secondCorrect": 144,
+            "secondAccuracy": 0.1820480404551201,
+            "thirdCorrect": 139,
+            "thirdAccuracy": 0.17572692793931732
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 791,
+            "hits": 86,
+            "hitRate": 0.10872313527180784,
+            "stake": 316400,
+            "returns": 214130,
+            "roi": 0.6767699115044248,
+            "top1Exact": 23,
+            "top1ExactRate": 0.029077117572692796,
+            "firstCorrect": 213,
+            "firstAccuracy": 0.2692793931731985,
+            "secondCorrect": 147,
+            "secondAccuracy": 0.18584070796460178,
+            "thirdCorrect": 138,
+            "thirdAccuracy": 0.17446270543615677
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 348,
+          "hits": 37,
+          "hitRate": 0.10632183908045977,
+          "stake": 139200,
+          "returns": 72540,
+          "roi": 0.5211206896551724,
+          "top1Exact": 9,
+          "top1ExactRate": 0.02586206896551724,
+          "firstCorrect": 111,
+          "firstAccuracy": 0.31896551724137934,
+          "secondCorrect": 70,
+          "secondAccuracy": 0.20114942528735633,
+          "thirdCorrect": 57,
+          "thirdAccuracy": 0.16379310344827586
+        },
+        "periodEnriched4": {
+          "races": 348,
+          "hits": 39,
+          "hitRate": 0.11206896551724138,
+          "stake": 139200,
+          "returns": 81840,
+          "roi": 0.5879310344827586,
+          "top1Exact": 8,
+          "top1ExactRate": 0.022988505747126436,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3160919540229885,
+          "secondCorrect": 66,
+          "secondAccuracy": 0.1896551724137931,
+          "thirdCorrect": 58,
+          "thirdAccuracy": 0.16666666666666666
+        },
+        "hitRateDelta": 0.005747126436781616,
+        "roiDelta": 0.06681034482758619,
+        "firstAccuracyDelta": -0.002873563218390829,
+        "secondAccuracyDelta": -0.011494252873563232,
+        "thirdAccuracyDelta": 0.002873563218390801,
+        "safeJoinedBoats": 2088,
+        "boatRows": 2088,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "tamagawa",
+      "venueCode": "05",
+      "source": "rich-history-24/tamagawa-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 68,
+      "holdoutDateCount": 30,
+      "calibrationLastDate": "2026-08-02",
+      "holdoutFirstDate": "2026-08-03",
+      "selectedProfile": {
+        "name": "BALANCED",
+        "stW": 4.5,
+        "fW": 0.05,
+        "lW": 0.12,
+        "abilityW": 0.03,
+        "threeW": 0.3
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 112,
+            "hitRate": 0.1391304347826087,
+            "stake": 322000,
+            "returns": 180090,
+            "roi": 0.5592857142857143,
+            "top1Exact": 29,
+            "top1ExactRate": 0.03602484472049689,
+            "firstCorrect": 225,
+            "firstAccuracy": 0.2795031055900621,
+            "secondCorrect": 164,
+            "secondAccuracy": 0.20372670807453416,
+            "thirdCorrect": 153,
+            "thirdAccuracy": 0.19006211180124225
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 111,
+            "hitRate": 0.13788819875776398,
+            "stake": 322000,
+            "returns": 182740,
+            "roi": 0.5675155279503106,
+            "top1Exact": 29,
+            "top1ExactRate": 0.03602484472049689,
+            "firstCorrect": 228,
+            "firstAccuracy": 0.28322981366459626,
+            "secondCorrect": 169,
+            "secondAccuracy": 0.20993788819875778,
+            "thirdCorrect": 157,
+            "thirdAccuracy": 0.19503105590062111
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 111,
+            "hitRate": 0.13788819875776398,
+            "stake": 322000,
+            "returns": 178260,
+            "roi": 0.5536024844720497,
+            "top1Exact": 27,
+            "top1ExactRate": 0.03354037267080745,
+            "firstCorrect": 220,
+            "firstAccuracy": 0.2732919254658385,
+            "secondCorrect": 168,
+            "secondAccuracy": 0.20869565217391303,
+            "thirdCorrect": 154,
+            "thirdAccuracy": 0.19130434782608696
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 805,
+            "hits": 110,
+            "hitRate": 0.13664596273291926,
+            "stake": 322000,
+            "returns": 166120,
+            "roi": 0.5159006211180124,
+            "top1Exact": 28,
+            "top1ExactRate": 0.034782608695652174,
+            "firstCorrect": 227,
+            "firstAccuracy": 0.2819875776397516,
+            "secondCorrect": 164,
+            "secondAccuracy": 0.20372670807453416,
+            "thirdCorrect": 151,
+            "thirdAccuracy": 0.18757763975155278
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 360,
+          "hits": 42,
+          "hitRate": 0.11666666666666667,
+          "stake": 144000,
+          "returns": 87690,
+          "roi": 0.6089583333333334,
+          "top1Exact": 12,
+          "top1ExactRate": 0.03333333333333333,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3055555555555556,
+          "secondCorrect": 74,
+          "secondAccuracy": 0.20555555555555555,
+          "thirdCorrect": 74,
+          "thirdAccuracy": 0.20555555555555555
+        },
+        "periodEnriched4": {
+          "races": 360,
+          "hits": 42,
+          "hitRate": 0.11666666666666667,
+          "stake": 144000,
+          "returns": 89690,
+          "roi": 0.6228472222222222,
+          "top1Exact": 12,
+          "top1ExactRate": 0.03333333333333333,
+          "firstCorrect": 114,
+          "firstAccuracy": 0.31666666666666665,
+          "secondCorrect": 66,
+          "secondAccuracy": 0.18333333333333332,
+          "thirdCorrect": 73,
+          "thirdAccuracy": 0.20277777777777778
+        },
+        "hitRateDelta": 0.0,
+        "roiDelta": 0.01388888888888884,
+        "firstAccuracyDelta": 0.011111111111111072,
+        "secondAccuracyDelta": -0.022222222222222227,
+        "thirdAccuracyDelta": -0.002777777777777768,
+        "safeJoinedBoats": 2160,
+        "boatRows": 2160,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "toda",
+      "venueCode": "02",
+      "source": "rich-history-24/toda-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 58,
+      "holdoutDateCount": 26,
+      "calibrationLastDate": "2026-07-25",
+      "holdoutFirstDate": "2026-07-26",
+      "selectedProfile": {
+        "name": "ST_FL",
+        "stW": 4.0,
+        "fW": 0.06,
+        "lW": 0.14,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 694,
+            "hits": 94,
+            "hitRate": 0.13544668587896252,
+            "stake": 277600,
+            "returns": 203750,
+            "roi": 0.7339697406340058,
+            "top1Exact": 24,
+            "top1ExactRate": 0.0345821325648415,
+            "firstCorrect": 213,
+            "firstAccuracy": 0.3069164265129683,
+            "secondCorrect": 149,
+            "secondAccuracy": 0.21469740634005763,
+            "thirdCorrect": 131,
+            "thirdAccuracy": 0.18876080691642652
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 694,
+            "hits": 94,
+            "hitRate": 0.13544668587896252,
+            "stake": 277600,
+            "returns": 192520,
+            "roi": 0.6935158501440922,
+            "top1Exact": 26,
+            "top1ExactRate": 0.037463976945244955,
+            "firstCorrect": 212,
+            "firstAccuracy": 0.30547550432276654,
+            "secondCorrect": 143,
+            "secondAccuracy": 0.20605187319884727,
+            "thirdCorrect": 136,
+            "thirdAccuracy": 0.19596541786743515
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 694,
+            "hits": 93,
+            "hitRate": 0.1340057636887608,
+            "stake": 277600,
+            "returns": 203480,
+            "roi": 0.7329971181556196,
+            "top1Exact": 28,
+            "top1ExactRate": 0.040345821325648415,
+            "firstCorrect": 213,
+            "firstAccuracy": 0.3069164265129683,
+            "secondCorrect": 150,
+            "secondAccuracy": 0.21613832853025935,
+            "thirdCorrect": 137,
+            "thirdAccuracy": 0.19740634005763688
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 694,
+            "hits": 93,
+            "hitRate": 0.1340057636887608,
+            "stake": 277600,
+            "returns": 195360,
+            "roi": 0.7037463976945245,
+            "top1Exact": 25,
+            "top1ExactRate": 0.03602305475504323,
+            "firstCorrect": 212,
+            "firstAccuracy": 0.30547550432276654,
+            "secondCorrect": 150,
+            "secondAccuracy": 0.21613832853025935,
+            "thirdCorrect": 133,
+            "thirdAccuracy": 0.19164265129682997
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 295,
+          "hits": 33,
+          "hitRate": 0.11186440677966102,
+          "stake": 118000,
+          "returns": 101790,
+          "roi": 0.8626271186440678,
+          "top1Exact": 11,
+          "top1ExactRate": 0.03728813559322034,
+          "firstCorrect": 110,
+          "firstAccuracy": 0.3728813559322034,
+          "secondCorrect": 67,
+          "secondAccuracy": 0.2271186440677966,
+          "thirdCorrect": 59,
+          "thirdAccuracy": 0.2
+        },
+        "periodEnriched4": {
+          "races": 295,
+          "hits": 36,
+          "hitRate": 0.12203389830508475,
+          "stake": 118000,
+          "returns": 105680,
+          "roi": 0.895593220338983,
+          "top1Exact": 8,
+          "top1ExactRate": 0.02711864406779661,
+          "firstCorrect": 109,
+          "firstAccuracy": 0.3694915254237288,
+          "secondCorrect": 66,
+          "secondAccuracy": 0.22372881355932203,
+          "thirdCorrect": 52,
+          "thirdAccuracy": 0.17627118644067796
+        },
+        "hitRateDelta": 0.010169491525423735,
+        "roiDelta": 0.032966101694915206,
+        "firstAccuracyDelta": -0.0033898305084745783,
+        "secondAccuracyDelta": -0.0033898305084745783,
+        "thirdAccuracyDelta": -0.02372881355932205,
+        "safeJoinedBoats": 1765,
+        "boatRows": 1770,
+        "safeJoinCoverage": 0.9971751412429378,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 5
+        }
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "tokoname",
+      "venueCode": "08",
+      "source": "rich-history-24/tokoname-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 77,
+      "holdoutDateCount": 33,
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.025,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.025,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 906,
+            "hits": 143,
+            "hitRate": 0.15783664459161148,
+            "stake": 362400,
+            "returns": 242780,
+            "roi": 0.6699227373068433,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04194260485651214,
+            "firstCorrect": 314,
+            "firstAccuracy": 0.3465783664459161,
+            "secondCorrect": 197,
+            "secondAccuracy": 0.217439293598234,
+            "thirdCorrect": 167,
+            "thirdAccuracy": 0.18432671081677704
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 906,
+            "hits": 143,
+            "hitRate": 0.15783664459161148,
+            "stake": 362400,
+            "returns": 242130,
+            "roi": 0.6681291390728477,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04194260485651214,
+            "firstCorrect": 312,
+            "firstAccuracy": 0.3443708609271523,
+            "secondCorrect": 192,
+            "secondAccuracy": 0.2119205298013245,
+            "thirdCorrect": 165,
+            "thirdAccuracy": 0.18211920529801323
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 906,
+            "hits": 141,
+            "hitRate": 0.15562913907284767,
+            "stake": 362400,
+            "returns": 253120,
+            "roi": 0.6984547461368653,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04194260485651214,
+            "firstCorrect": 312,
+            "firstAccuracy": 0.3443708609271523,
+            "secondCorrect": 195,
+            "secondAccuracy": 0.2152317880794702,
+            "thirdCorrect": 162,
+            "thirdAccuracy": 0.17880794701986755
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 906,
+            "hits": 141,
+            "hitRate": 0.15562913907284767,
+            "stake": 362400,
+            "returns": 251840,
+            "roi": 0.6949227373068433,
+            "top1Exact": 38,
+            "top1ExactRate": 0.04194260485651214,
+            "firstCorrect": 315,
+            "firstAccuracy": 0.347682119205298,
+            "secondCorrect": 195,
+            "secondAccuracy": 0.2152317880794702,
+            "thirdCorrect": 167,
+            "thirdAccuracy": 0.18432671081677704
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 396,
+          "hits": 63,
+          "hitRate": 0.1590909090909091,
+          "stake": 158400,
+          "returns": 139240,
+          "roi": 0.8790404040404041,
+          "top1Exact": 13,
+          "top1ExactRate": 0.03282828282828283,
+          "firstCorrect": 132,
+          "firstAccuracy": 0.3333333333333333,
+          "secondCorrect": 83,
+          "secondAccuracy": 0.20959595959595959,
+          "thirdCorrect": 81,
+          "thirdAccuracy": 0.20454545454545456
+        },
+        "periodEnriched4": {
+          "races": 396,
+          "hits": 64,
+          "hitRate": 0.16161616161616163,
+          "stake": 158400,
+          "returns": 141320,
+          "roi": 0.8921717171717172,
+          "top1Exact": 12,
+          "top1ExactRate": 0.030303030303030304,
+          "firstCorrect": 132,
+          "firstAccuracy": 0.3333333333333333,
+          "secondCorrect": 85,
+          "secondAccuracy": 0.21464646464646464,
+          "thirdCorrect": 79,
+          "thirdAccuracy": 0.1994949494949495
+        },
+        "hitRateDelta": 0.0025252525252525415,
+        "roiDelta": 0.013131313131313105,
+        "firstAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.005050505050505055,
+        "thirdAccuracyDelta": -0.005050505050505055,
+        "safeJoinedBoats": 2375,
+        "boatRows": 2376,
+        "safeJoinCoverage": 0.9995791245791246,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 1
+        }
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "tokuyama",
+      "venueCode": "18",
+      "source": "rich-history-24/tokuyama-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 70,
+      "holdoutDateCount": 31,
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 110,
+            "hitRate": 0.13157894736842105,
+            "stake": 334400,
+            "returns": 178010,
+            "roi": 0.5323265550239235,
+            "top1Exact": 22,
+            "top1ExactRate": 0.02631578947368421,
+            "firstCorrect": 311,
+            "firstAccuracy": 0.37200956937799046,
+            "secondCorrect": 168,
+            "secondAccuracy": 0.20095693779904306,
+            "thirdCorrect": 167,
+            "thirdAccuracy": 0.19976076555023922
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 108,
+            "hitRate": 0.1291866028708134,
+            "stake": 334400,
+            "returns": 174940,
+            "roi": 0.5231459330143541,
+            "top1Exact": 22,
+            "top1ExactRate": 0.02631578947368421,
+            "firstCorrect": 309,
+            "firstAccuracy": 0.3696172248803828,
+            "secondCorrect": 168,
+            "secondAccuracy": 0.20095693779904306,
+            "thirdCorrect": 169,
+            "thirdAccuracy": 0.2021531100478469
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 108,
+            "hitRate": 0.1291866028708134,
+            "stake": 334400,
+            "returns": 174940,
+            "roi": 0.5231459330143541,
+            "top1Exact": 23,
+            "top1ExactRate": 0.02751196172248804,
+            "firstCorrect": 304,
+            "firstAccuracy": 0.36363636363636365,
+            "secondCorrect": 168,
+            "secondAccuracy": 0.20095693779904306,
+            "thirdCorrect": 170,
+            "thirdAccuracy": 0.20334928229665072
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 836,
+            "hits": 107,
+            "hitRate": 0.12799043062200957,
+            "stake": 334400,
+            "returns": 172180,
+            "roi": 0.5148923444976077,
+            "top1Exact": 21,
+            "top1ExactRate": 0.025119617224880382,
+            "firstCorrect": 303,
+            "firstAccuracy": 0.3624401913875598,
+            "secondCorrect": 171,
+            "secondAccuracy": 0.20454545454545456,
+            "thirdCorrect": 170,
+            "thirdAccuracy": 0.20334928229665072
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 372,
+          "hits": 28,
+          "hitRate": 0.07526881720430108,
+          "stake": 148800,
+          "returns": 40850,
+          "roi": 0.2745295698924731,
+          "top1Exact": 6,
+          "top1ExactRate": 0.016129032258064516,
+          "firstCorrect": 112,
+          "firstAccuracy": 0.3010752688172043,
+          "secondCorrect": 71,
+          "secondAccuracy": 0.19086021505376344,
+          "thirdCorrect": 70,
+          "thirdAccuracy": 0.1881720430107527
+        },
+        "periodEnriched4": {
+          "races": 372,
+          "hits": 25,
+          "hitRate": 0.06720430107526881,
+          "stake": 148800,
+          "returns": 33840,
+          "roi": 0.22741935483870968,
+          "top1Exact": 4,
+          "top1ExactRate": 0.010752688172043012,
+          "firstCorrect": 112,
+          "firstAccuracy": 0.3010752688172043,
+          "secondCorrect": 71,
+          "secondAccuracy": 0.19086021505376344,
+          "thirdCorrect": 59,
+          "thirdAccuracy": 0.1586021505376344
+        },
+        "hitRateDelta": -0.008064516129032265,
+        "roiDelta": -0.04711021505376345,
+        "firstAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.0,
+        "thirdAccuracyDelta": -0.02956989247311828,
+        "safeJoinedBoats": 2232,
+        "boatRows": 2232,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "tsu",
+      "venueCode": "09",
+      "source": "rich-history-24/tsu-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 80,
+      "holdoutDateCount": 35,
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "ST_MED",
+        "stW": 4.0,
+        "fW": 0.035,
+        "lW": 0.08,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.035,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 921,
+            "hits": 105,
+            "hitRate": 0.11400651465798045,
+            "stake": 368400,
+            "returns": 179180,
+            "roi": 0.4863735070575462,
+            "top1Exact": 28,
+            "top1ExactRate": 0.03040173724212812,
+            "firstCorrect": 316,
+            "firstAccuracy": 0.34310532030401736,
+            "secondCorrect": 192,
+            "secondAccuracy": 0.20846905537459284,
+            "thirdCorrect": 163,
+            "thirdAccuracy": 0.1769815418023887
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 921,
+            "hits": 102,
+            "hitRate": 0.11074918566775244,
+            "stake": 368400,
+            "returns": 159550,
+            "roi": 0.43308903365906626,
+            "top1Exact": 29,
+            "top1ExactRate": 0.031487513572204126,
+            "firstCorrect": 324,
+            "firstAccuracy": 0.3517915309446254,
+            "secondCorrect": 193,
+            "secondAccuracy": 0.20955483170466885,
+            "thirdCorrect": 165,
+            "thirdAccuracy": 0.1791530944625407
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 921,
+            "hits": 102,
+            "hitRate": 0.11074918566775244,
+            "stake": 368400,
+            "returns": 159550,
+            "roi": 0.43308903365906626,
+            "top1Exact": 32,
+            "top1ExactRate": 0.03474484256243214,
+            "firstCorrect": 323,
+            "firstAccuracy": 0.3507057546145494,
+            "secondCorrect": 193,
+            "secondAccuracy": 0.20955483170466885,
+            "thirdCorrect": 165,
+            "thirdAccuracy": 0.1791530944625407
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 921,
+            "hits": 102,
+            "hitRate": 0.11074918566775244,
+            "stake": 368400,
+            "returns": 157630,
+            "roi": 0.4278773072747014,
+            "top1Exact": 26,
+            "top1ExactRate": 0.02823018458197611,
+            "firstCorrect": 317,
+            "firstAccuracy": 0.34419109663409336,
+            "secondCorrect": 192,
+            "secondAccuracy": 0.20846905537459284,
+            "thirdCorrect": 161,
+            "thirdAccuracy": 0.1748099891422367
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 397,
+          "hits": 41,
+          "hitRate": 0.10327455919395466,
+          "stake": 158800,
+          "returns": 88570,
+          "roi": 0.5577455919395466,
+          "top1Exact": 12,
+          "top1ExactRate": 0.030226700251889168,
+          "firstCorrect": 132,
+          "firstAccuracy": 0.33249370277078083,
+          "secondCorrect": 80,
+          "secondAccuracy": 0.20151133501259447,
+          "thirdCorrect": 67,
+          "thirdAccuracy": 0.16876574307304787
+        },
+        "periodEnriched4": {
+          "races": 397,
+          "hits": 41,
+          "hitRate": 0.10327455919395466,
+          "stake": 158800,
+          "returns": 91420,
+          "roi": 0.5756926952141058,
+          "top1Exact": 13,
+          "top1ExactRate": 0.0327455919395466,
+          "firstCorrect": 135,
+          "firstAccuracy": 0.34005037783375314,
+          "secondCorrect": 83,
+          "secondAccuracy": 0.20906801007556675,
+          "thirdCorrect": 69,
+          "thirdAccuracy": 0.17380352644836272
+        },
+        "hitRateDelta": 0.0,
+        "roiDelta": 0.017947103274559173,
+        "firstAccuracyDelta": 0.007556675062972307,
+        "secondAccuracyDelta": 0.007556675062972279,
+        "thirdAccuracyDelta": 0.005037783375314853,
+        "safeJoinedBoats": 2382,
+        "boatRows": 2382,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    },
+    {
+      "slug": "wakamatsu",
+      "venueCode": "20",
+      "source": "rich-history-24/wakamatsu-rich-history-v1.json",
+      "strictHoldout": true,
+      "calibrationDateCount": 67,
+      "holdoutDateCount": 29,
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.045,
+        "threeW": 0.45
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.045,
+            "threeW": 0.45
+          },
+          "metrics4": {
+            "races": 760,
+            "hits": 125,
+            "hitRate": 0.16447368421052633,
+            "stake": 304000,
+            "returns": 227080,
+            "roi": 0.7469736842105263,
+            "top1Exact": 39,
+            "top1ExactRate": 0.05131578947368421,
+            "firstCorrect": 277,
+            "firstAccuracy": 0.36447368421052634,
+            "secondCorrect": 195,
+            "secondAccuracy": 0.2565789473684211,
+            "thirdCorrect": 160,
+            "thirdAccuracy": 0.21052631578947367
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.03,
+            "threeW": 0.3
+          },
+          "metrics4": {
+            "races": 760,
+            "hits": 124,
+            "hitRate": 0.1631578947368421,
+            "stake": 304000,
+            "returns": 227130,
+            "roi": 0.7471381578947368,
+            "top1Exact": 40,
+            "top1ExactRate": 0.05263157894736842,
+            "firstCorrect": 277,
+            "firstAccuracy": 0.36447368421052634,
+            "secondCorrect": 202,
+            "secondAccuracy": 0.2657894736842105,
+            "thirdCorrect": 156,
+            "thirdAccuracy": 0.20526315789473684
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 760,
+            "hits": 120,
+            "hitRate": 0.15789473684210525,
+            "stake": 304000,
+            "returns": 221020,
+            "roi": 0.7270394736842105,
+            "top1Exact": 44,
+            "top1ExactRate": 0.05789473684210526,
+            "firstCorrect": 278,
+            "firstAccuracy": 0.36578947368421055,
+            "secondCorrect": 202,
+            "secondAccuracy": 0.2657894736842105,
+            "thirdCorrect": 156,
+            "thirdAccuracy": 0.20526315789473684
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.04,
+            "threeW": 0.0
+          },
+          "metrics4": {
+            "races": 760,
+            "hits": 120,
+            "hitRate": 0.15789473684210525,
+            "stake": 304000,
+            "returns": 217270,
+            "roi": 0.714703947368421,
+            "top1Exact": 41,
+            "top1ExactRate": 0.05394736842105263,
+            "firstCorrect": 276,
+            "firstAccuracy": 0.3631578947368421,
+            "secondCorrect": 202,
+            "secondAccuracy": 0.2657894736842105,
+            "thirdCorrect": 155,
+            "thirdAccuracy": 0.20394736842105263
+          }
+        }
+      ],
+      "holdout": {
+        "richBase4": {
+          "races": 322,
+          "hits": 59,
+          "hitRate": 0.18322981366459629,
+          "stake": 128800,
+          "returns": 105330,
+          "roi": 0.8177795031055901,
+          "top1Exact": 13,
+          "top1ExactRate": 0.040372670807453416,
+          "firstCorrect": 116,
+          "firstAccuracy": 0.36024844720496896,
+          "secondCorrect": 72,
+          "secondAccuracy": 0.2236024844720497,
+          "thirdCorrect": 57,
+          "thirdAccuracy": 0.17701863354037267
+        },
+        "periodEnriched4": {
+          "races": 322,
+          "hits": 51,
+          "hitRate": 0.15838509316770186,
+          "stake": 128800,
+          "returns": 77080,
+          "roi": 0.5984472049689441,
+          "top1Exact": 13,
+          "top1ExactRate": 0.040372670807453416,
+          "firstCorrect": 123,
+          "firstAccuracy": 0.38198757763975155,
+          "secondCorrect": 70,
+          "secondAccuracy": 0.21739130434782608,
+          "thirdCorrect": 54,
+          "thirdAccuracy": 0.16770186335403728
+        },
+        "hitRateDelta": -0.02484472049689443,
+        "roiDelta": -0.219332298136646,
+        "firstAccuracyDelta": 0.021739130434782594,
+        "secondAccuracyDelta": -0.006211180124223614,
+        "thirdAccuracyDelta": -0.009316770186335394,
+        "safeJoinedBoats": 1932,
+        "boatRows": 1932,
+        "safeJoinCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "promotionEligible": false,
+      "productionChanged": false,
+      "tryChanged": false
+    }
+  ],
+  "promotionEligible": false
+}
