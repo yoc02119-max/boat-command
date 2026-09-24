@@ -1,0 +1,80 @@
+name: B archive rich field probe v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/b-archive-rich-field-probe-v1.yml'
+      - 'scripts/b-archive-rich-field-probe-v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install LZH extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lhasa
+
+      - name: Download representative 2026 B archives only
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/b-probe && mkdir -p /tmp/b-probe
+          for d in 20260415 20260615 20260815 20260915; do
+            yy="${d:2:2}"; mm="${d:4:2}"; dd="${d:6:2}"; ym="${d:0:6}"
+            f="b${yy}${mm}${dd}.lzh"
+            mkdir -p "/tmp/b-probe/$d"
+            curl -fsSL --connect-timeout 20 --max-time 60               "https://www1.mbrace.or.jp/od2/B/$ym/$f" -o "/tmp/b-probe/$f"
+            lha "xw=/tmp/b-probe/$d" "/tmp/b-probe/$f" >/dev/null
+          done
+
+      - name: Probe additional PRE-RACE fields
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/b-archive-rich-field-probe-v1.py
+          python3 scripts/b-archive-rich-field-probe-v1.py --root /tmp/b-probe
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/b-archive-rich-field-probe-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-b-archive-rich-field-probe-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['resultFilesRead'] is False
+          assert x['aggregate']['files']>=4
+          assert x['aggregate']['entryRows']>0
+          print('B_ARCHIVE_FIELD_PROBE_BOUNDARY_PASS',x['aggregate'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b-archive-rich-field-probe-v1
+          path: research/b-archive-rich-field-probe-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save probe report to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/b-archive-rich-field-probe-v1.json /tmp/b-archive-rich-field-probe-v1.json
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/b-archive-rich-field-probe-v1.json research/
+          git config user.name 'boat-command-b-field-probe'
+          git config user.email 'boat-command-b-field-probe@users.noreply.github.com'
+          git add research/b-archive-rich-field-probe-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store B archive field probe [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
