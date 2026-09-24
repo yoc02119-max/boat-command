@@ -257,7 +257,7 @@ def build(archive_root:Path,out_root:Path):
         }
         fp=out_root/f"{year}-{term}.json"
         fp.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
-        pack_files.append(str(fp.relative_to(ROOT)))
+        pack_files.append(str(fp.resolve().relative_to(ROOT.resolve())))
 
     total=global_counts["boatRows"];matched=global_counts["matched"]
     audit={
