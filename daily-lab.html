@@ -15,7 +15,7 @@
 @media(max-width:680px){.shell{padding:14px 11px 80px}.hero{padding:18px}.hero-row{display:block}.safe{justify-content:flex-start;margin-top:13px}.summary{grid-template-columns:repeat(2,1fr)}.lab-grid{grid-template-columns:repeat(2,1fr);gap:7px}.lab-venue{padding:10px}.lab-venue-top b{font-size:15px}.lab-venue-kpis{grid-template-columns:1fr 1fr}.detail-head{align-items:flex-start;flex-direction:column}.lab-variant-row{grid-template-columns:1.2fr .6fr .6fr}.lab-variant-row>em,.lab-variant-row>i{display:none}.race-grid{grid-template-columns:1fr}.brand{display:none}}
 select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radius:8px;padding:8px} .history-table{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th:first-child{text-align:left} #labHistoryMeta{color:var(--muted);font-size:11px;line-height:1.7}
 </style>
-<link rel="stylesheet" href="daily-lab-reference-v1.css?v=20260923-2">
+<link rel="stylesheet" href="daily-lab-reference-v1.css?v=20260924-1">
 </head>
 <body class="lab-reference" style="visibility:hidden">
 <div class="matrix-rain" aria-hidden="true"></div>
@@ -54,7 +54,8 @@ select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radi
  <section id="labDetail" class="detail" hidden>
   <div class="detail-shell">
    <div class="detail-head"><div><h2 id="labDetailTitle">DAILY LAB</h2><p id="labDetailMeta"></p></div><span class="lock-badge">観察専用 · 自動昇格なし</span></div>
-   <div id="labVariantTable" class="variant-table"></div>
+   <section class="lab-hit-summary" aria-label="この場の的中レース"><h3>的中レース・出目</h3><div id="labHitSummary"></div></section>
+    <div id="labVariantTable" class="variant-table"></div>
    <div id="labRaceGrid" class="race-grid"></div>
    <div class="foot-note">回収値は払戻のみを使った参考値で、返還を完全精算した正式ROIではありません。日次成績だけで本番ロジックを変更せず、30日・HOLDOUT・FORWARD検証を経て別工程で判断します。</div>
   </div>
@@ -80,7 +81,7 @@ select{background:#102d45;color:var(--text);border:1px solid #31556f;border-radi
  if(!allowed)allowed=localSession();
  if(!allowed){location.replace('./portal.html?developer=locked');return;}
  document.body.style.visibility='visible';
- for(const src of ['daily-lab-v1.js?v=8','browser-controls-v1.js?v=3']){
+ for(const src of ['daily-lab-v1.js?v=9','browser-controls-v1.js?v=3']){
   await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=reject;document.body.appendChild(el)});
  }
 })();
