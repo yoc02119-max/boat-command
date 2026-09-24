@@ -1,0 +1,68 @@
+name: BoatraceCSV core backfill audit v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/boatracecsv-core-backfill-audit-v1.yml'
+      - 'scripts/boatracecsv-core-backfill-audit-v1.py'
+      - 'rich-history-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Audit race-card and preview backfill coverage
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/boatracecsv-core-backfill-audit-v1.py
+          python3 scripts/boatracecsv-core-backfill-audit-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/boatracecsv-core-backfill-audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-boatracecsv-core-backfill-audit-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['safety']['resultsFetched'] is False
+          assert x['safety']['payoutsFetched'] is False
+          assert x['safety']['previewAcceptedOnlyAfterSixRegistrationIdentityMatch'] is True
+          assert len(x['venues'])==24
+          assert x['totals']['targetRaces']>=27000
+          print('BOATRACECSV_CORE_AUDIT_BOUNDARY_PASS',x['totals'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boatracecsv-core-backfill-audit-v1
+          path: research/boatracecsv-core-backfill-audit-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save research report to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/boatracecsv-core-backfill-audit-v1.json /tmp/boatracecsv-core-backfill-audit-v1.json
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/boatracecsv-core-backfill-audit-v1.json research/
+          git config user.name 'boat-command-backfill-research'
+          git config user.email 'boat-command-backfill-research@users.noreply.github.com'
+          git add research/boatracecsv-core-backfill-audit-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store BoatraceCSV core backfill audit [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
