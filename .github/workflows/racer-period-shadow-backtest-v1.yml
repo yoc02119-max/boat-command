@@ -1,0 +1,70 @@
+name: Racer period SHADOW backtest v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-shadow-backtest-v1.yml'
+      - 'scripts/racer-period-shadow-backtest-v1.py'
+      - 'rich-history-24/**'
+      - 'racer-period-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run strict holdout feature-uplift SHADOW
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-shadow-backtest-v1.py
+          python3 scripts/racer-period-shadow-backtest-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-shadow-backtest-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-shadow-backtest-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['promotionEligible'] is False
+          assert x['featureBoundary']['resultUsedForFeatureConstruction'] is False
+          assert x['featureBoundary']['payoutUsedForFeatureConstruction'] is False
+          assert x['featureBoundary']['courseSpecificStatsUsed'] is False
+          assert x['summary']['venues']==24
+          assert x['summary']['holdoutRaces']>5000
+          print('RACER_PERIOD_SHADOW_BOUNDARY_PASS',x['summary'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-period-shadow-backtest-v1
+          path: research/racer-period-shadow-backtest-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save research report to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/racer-period-shadow-backtest-v1.json /tmp/racer-period-shadow-backtest-v1.json
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/racer-period-shadow-backtest-v1.json research/
+          git config user.name 'boat-command-racer-period-shadow'
+          git config user.email 'boat-command-racer-period-shadow@users.noreply.github.com'
+          git add research/racer-period-shadow-backtest-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store racer-period shadow backtest [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
