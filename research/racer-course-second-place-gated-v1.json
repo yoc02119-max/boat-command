@@ -1,0 +1,4949 @@
+{
+  "schema": "boat-command-racer-course-second-place-gated-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "tryChanged": false,
+  "hardLockChanged": false,
+  "promotionEligible": false,
+  "question": "Do PRE-RACE-safe course-specific half-year racer features robustly improve second-place ranking?",
+  "selectionPolicy": "60% calibration profile -> 20% validation venue gate -> untouched final 20% test",
+  "gatePolicy": {
+    "minValidationHeadCorrectRaces": 50,
+    "minValidationSecondAccuracyDelta": 0.005,
+    "requireValidationTop2NonRegression": true
+  },
+  "featureBoundary": {
+    "firstPredictionFrozen": true,
+    "featuresAddedToSecondOnly": [
+      "courseAvgST",
+      "course2Rate",
+      "courseAvgStartRank",
+      "course3RateDerived",
+      "courseFCount",
+      "periodAvgST",
+      "currentAbility"
+    ],
+    "courseReliabilityShrinkage": "min(1, courseEntries/30)",
+    "joinPolicy": "RACE_DATE_HALF_YEAR + REGISTRATION + CLASS_MATCH + CURRENT_LANE_COURSE",
+    "resultsUsedForFeatureConstruction": false,
+    "resultsUsedForEvaluationOnly": true
+  },
+  "summary": {
+    "venues": 24,
+    "enabledVenues": [
+      "ashiya",
+      "biwako",
+      "edogawa",
+      "fukuoka",
+      "gamagori",
+      "heiwajima",
+      "karatsu",
+      "kiryu",
+      "kojima",
+      "marugame",
+      "mikuni",
+      "miyajima",
+      "omura",
+      "shimonoseki",
+      "suminoe",
+      "tamagawa",
+      "toda",
+      "tokuyama",
+      "tsu",
+      "wakamatsu"
+    ],
+    "enabledVenueCount": 20,
+    "testRaces": 5596,
+    "baseline": {
+      "races": 5596,
+      "headCorrect": 1859,
+      "headAccuracy": 0.33220157255182275,
+      "headCorrectRaces": 1859,
+      "secondHitsWhenHeadCorrect": 511,
+      "secondAccuracyWhenHeadCorrect": 0.2748789671866595,
+      "secondTop2HitsWhenHeadCorrect": 958,
+      "secondTop2CoverageWhenHeadCorrect": 0.5153308230231307,
+      "pairHits": 511,
+      "pairAccuracy": 0.09131522516082917
+    },
+    "gatedPolicy": {
+      "races": 5596,
+      "headCorrect": 1859,
+      "headAccuracy": 0.33220157255182275,
+      "headCorrectRaces": 1859,
+      "secondHitsWhenHeadCorrect": 589,
+      "secondAccuracyWhenHeadCorrect": 0.3168370091447015,
+      "secondTop2HitsWhenHeadCorrect": 1047,
+      "secondTop2CoverageWhenHeadCorrect": 0.5632060247444863,
+      "pairHits": 589,
+      "pairAccuracy": 0.10525375268048606
+    },
+    "headAccuracyDelta": 0.0,
+    "secondAccuracyDelta": 0.04195804195804198,
+    "secondTop2CoverageDelta": 0.04787520172135562,
+    "pairAccuracyDelta": 0.013938527519656893,
+    "enabledVenuesTestSecondImproved": 16,
+    "enabledVenuesTestSecondRegressed": 4
+  },
+  "venuesData": [
+    {
+      "slug": "amagasaki",
+      "venueCode": "13",
+      "split": {
+        "calibrationDates": 65,
+        "validationDates": 22,
+        "testDates": 22,
+        "calibrationLastDate": "2026-07-17",
+        "validationFirstDate": "2026-07-18",
+        "validationLastDate": "2026-08-21",
+        "testFirstDate": "2026-08-24"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 754,
+            "headCorrect": 238,
+            "headAccuracy": 0.3156498673740053,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 83,
+            "secondAccuracyWhenHeadCorrect": 0.3487394957983193,
+            "secondTop2HitsWhenHeadCorrect": 145,
+            "secondTop2CoverageWhenHeadCorrect": 0.6092436974789915,
+            "pairHits": 83,
+            "pairAccuracy": 0.11007957559681697
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 754,
+            "headCorrect": 238,
+            "headAccuracy": 0.3156498673740053,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.33613445378151263,
+            "secondTop2HitsWhenHeadCorrect": 147,
+            "secondTop2CoverageWhenHeadCorrect": 0.6176470588235294,
+            "pairHits": 80,
+            "pairAccuracy": 0.10610079575596817
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 754,
+            "headCorrect": 238,
+            "headAccuracy": 0.3156498673740053,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.3319327731092437,
+            "secondTop2HitsWhenHeadCorrect": 146,
+            "secondTop2CoverageWhenHeadCorrect": 0.6134453781512605,
+            "pairHits": 79,
+            "pairAccuracy": 0.10477453580901856
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 754,
+            "headCorrect": 238,
+            "headAccuracy": 0.3156498673740053,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.3319327731092437,
+            "secondTop2HitsWhenHeadCorrect": 145,
+            "secondTop2CoverageWhenHeadCorrect": 0.6092436974789915,
+            "pairHits": 79,
+            "pairAccuracy": 0.10477453580901856
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 264,
+          "headCorrect": 92,
+          "headAccuracy": 0.3484848484848485,
+          "headCorrectRaces": 92,
+          "secondHitsWhenHeadCorrect": 35,
+          "secondAccuracyWhenHeadCorrect": 0.3804347826086957,
+          "secondTop2HitsWhenHeadCorrect": 60,
+          "secondTop2CoverageWhenHeadCorrect": 0.6521739130434783,
+          "pairHits": 35,
+          "pairAccuracy": 0.13257575757575757
+        },
+        "candidate": {
+          "races": 264,
+          "headCorrect": 92,
+          "headAccuracy": 0.3484848484848485,
+          "headCorrectRaces": 92,
+          "secondHitsWhenHeadCorrect": 40,
+          "secondAccuracyWhenHeadCorrect": 0.43478260869565216,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5978260869565217,
+          "pairHits": 40,
+          "pairAccuracy": 0.15151515151515152
+        },
+        "candidateEnabled": false,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.054347826086956486,
+          "top2Delta": -0.05434782608695654,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 264,
+          "headCorrect": 98,
+          "headAccuracy": 0.3712121212121212,
+          "headCorrectRaces": 98,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.24489795918367346,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5612244897959183,
+          "pairHits": 24,
+          "pairAccuracy": 0.09090909090909091
+        },
+        "rawCandidate": {
+          "races": 264,
+          "headCorrect": 98,
+          "headAccuracy": 0.3712121212121212,
+          "headCorrectRaces": 98,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.3163265306122449,
+          "secondTop2HitsWhenHeadCorrect": 59,
+          "secondTop2CoverageWhenHeadCorrect": 0.6020408163265306,
+          "pairHits": 31,
+          "pairAccuracy": 0.11742424242424243
+        },
+        "gatedPolicy": {
+          "races": 264,
+          "headCorrect": 98,
+          "headAccuracy": 0.3712121212121212,
+          "headCorrectRaces": 98,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.24489795918367346,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5612244897959183,
+          "pairHits": 24,
+          "pairAccuracy": 0.09090909090909091
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0,
+        "secondTop2DeltaVsBaseline": 0.0,
+        "pairAccuracyDeltaVsBaseline": 0.0,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "ashiya",
+      "venueCode": "21",
+      "split": {
+        "calibrationDates": 59,
+        "validationDates": 20,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-04",
+        "validationFirstDate": "2026-07-05",
+        "validationLastDate": "2026-08-11",
+        "testFirstDate": "2026-08-12"
+      },
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "cStW": 0.0,
+        "c2W": 1.2,
+        "cStartRankW": 0.0,
+        "c3W": 0.0,
+        "cFW": 0.0,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 699,
+            "headCorrect": 248,
+            "headAccuracy": 0.3547925608011445,
+            "headCorrectRaces": 248,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.3185483870967742,
+            "secondTop2HitsWhenHeadCorrect": 129,
+            "secondTop2CoverageWhenHeadCorrect": 0.5201612903225806,
+            "pairHits": 79,
+            "pairAccuracy": 0.11301859799713877
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 699,
+            "headCorrect": 248,
+            "headAccuracy": 0.3547925608011445,
+            "headCorrectRaces": 248,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.31451612903225806,
+            "secondTop2HitsWhenHeadCorrect": 129,
+            "secondTop2CoverageWhenHeadCorrect": 0.5201612903225806,
+            "pairHits": 78,
+            "pairAccuracy": 0.11158798283261803
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 699,
+            "headCorrect": 248,
+            "headAccuracy": 0.3547925608011445,
+            "headCorrectRaces": 248,
+            "secondHitsWhenHeadCorrect": 76,
+            "secondAccuracyWhenHeadCorrect": 0.3064516129032258,
+            "secondTop2HitsWhenHeadCorrect": 133,
+            "secondTop2CoverageWhenHeadCorrect": 0.5362903225806451,
+            "pairHits": 76,
+            "pairAccuracy": 0.10872675250357654
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 699,
+            "headCorrect": 248,
+            "headAccuracy": 0.3547925608011445,
+            "headCorrectRaces": 248,
+            "secondHitsWhenHeadCorrect": 76,
+            "secondAccuracyWhenHeadCorrect": 0.3064516129032258,
+            "secondTop2HitsWhenHeadCorrect": 133,
+            "secondTop2CoverageWhenHeadCorrect": 0.5362903225806451,
+            "pairHits": 76,
+            "pairAccuracy": 0.10872675250357654
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 91,
+          "headAccuracy": 0.37916666666666665,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.1978021978021978,
+          "secondTop2HitsWhenHeadCorrect": 47,
+          "secondTop2CoverageWhenHeadCorrect": 0.5164835164835165,
+          "pairHits": 18,
+          "pairAccuracy": 0.075
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 91,
+          "headAccuracy": 0.37916666666666665,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.2967032967032967,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.5274725274725275,
+          "pairHits": 27,
+          "pairAccuracy": 0.1125
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.09890109890109891,
+          "top2Delta": 0.01098901098901095,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 87,
+          "headAccuracy": 0.3625,
+          "headCorrectRaces": 87,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.22988505747126436,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.4942528735632184,
+          "pairHits": 20,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "rawCandidate": {
+          "races": 240,
+          "headCorrect": 87,
+          "headAccuracy": 0.3625,
+          "headCorrectRaces": 87,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.25287356321839083,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5057471264367817,
+          "pairHits": 22,
+          "pairAccuracy": 0.09166666666666666
+        },
+        "gatedPolicy": {
+          "races": 240,
+          "headCorrect": 87,
+          "headAccuracy": 0.3625,
+          "headCorrectRaces": 87,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.25287356321839083,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5057471264367817,
+          "pairHits": 22,
+          "pairAccuracy": 0.09166666666666666
+        },
+        "secondAccuracyDeltaVsBaseline": 0.022988505747126464,
+        "secondTop2DeltaVsBaseline": 0.01149425287356326,
+        "pairAccuracyDeltaVsBaseline": 0.008333333333333331,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "biwako",
+      "venueCode": "11",
+      "split": {
+        "calibrationDates": 54,
+        "validationDates": 18,
+        "testDates": 19,
+        "calibrationLastDate": "2026-07-12",
+        "validationFirstDate": "2026-07-16",
+        "validationLastDate": "2026-08-20",
+        "testFirstDate": "2026-08-26"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 579,
+            "headCorrect": 170,
+            "headAccuracy": 0.29360967184801384,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 61,
+            "secondAccuracyWhenHeadCorrect": 0.3588235294117647,
+            "secondTop2HitsWhenHeadCorrect": 111,
+            "secondTop2CoverageWhenHeadCorrect": 0.6529411764705882,
+            "pairHits": 61,
+            "pairAccuracy": 0.10535405872193437
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 579,
+            "headCorrect": 170,
+            "headAccuracy": 0.29360967184801384,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.3411764705882353,
+            "secondTop2HitsWhenHeadCorrect": 103,
+            "secondTop2CoverageWhenHeadCorrect": 0.6058823529411764,
+            "pairHits": 58,
+            "pairAccuracy": 0.1001727115716753
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 579,
+            "headCorrect": 170,
+            "headAccuracy": 0.29360967184801384,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.3411764705882353,
+            "secondTop2HitsWhenHeadCorrect": 101,
+            "secondTop2CoverageWhenHeadCorrect": 0.5941176470588235,
+            "pairHits": 58,
+            "pairAccuracy": 0.1001727115716753
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 579,
+            "headCorrect": 170,
+            "headAccuracy": 0.29360967184801384,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.3352941176470588,
+            "secondTop2HitsWhenHeadCorrect": 105,
+            "secondTop2CoverageWhenHeadCorrect": 0.6176470588235294,
+            "pairHits": 57,
+            "pairAccuracy": 0.09844559585492228
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 207,
+          "headCorrect": 61,
+          "headAccuracy": 0.2946859903381642,
+          "headCorrectRaces": 61,
+          "secondHitsWhenHeadCorrect": 17,
+          "secondAccuracyWhenHeadCorrect": 0.2786885245901639,
+          "secondTop2HitsWhenHeadCorrect": 34,
+          "secondTop2CoverageWhenHeadCorrect": 0.5573770491803278,
+          "pairHits": 17,
+          "pairAccuracy": 0.0821256038647343
+        },
+        "candidate": {
+          "races": 207,
+          "headCorrect": 61,
+          "headAccuracy": 0.2946859903381642,
+          "headCorrectRaces": 61,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.3442622950819672,
+          "secondTop2HitsWhenHeadCorrect": 34,
+          "secondTop2CoverageWhenHeadCorrect": 0.5573770491803278,
+          "pairHits": 21,
+          "pairAccuracy": 0.10144927536231885
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.0655737704918033,
+          "top2Delta": 0.0,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 227,
+          "headCorrect": 73,
+          "headAccuracy": 0.32158590308370044,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 17,
+          "secondAccuracyWhenHeadCorrect": 0.2328767123287671,
+          "secondTop2HitsWhenHeadCorrect": 28,
+          "secondTop2CoverageWhenHeadCorrect": 0.3835616438356164,
+          "pairHits": 17,
+          "pairAccuracy": 0.07488986784140969
+        },
+        "rawCandidate": {
+          "races": 227,
+          "headCorrect": 73,
+          "headAccuracy": 0.32158590308370044,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 16,
+          "secondAccuracyWhenHeadCorrect": 0.2191780821917808,
+          "secondTop2HitsWhenHeadCorrect": 34,
+          "secondTop2CoverageWhenHeadCorrect": 0.4657534246575342,
+          "pairHits": 16,
+          "pairAccuracy": 0.07048458149779736
+        },
+        "gatedPolicy": {
+          "races": 227,
+          "headCorrect": 73,
+          "headAccuracy": 0.32158590308370044,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 16,
+          "secondAccuracyWhenHeadCorrect": 0.2191780821917808,
+          "secondTop2HitsWhenHeadCorrect": 34,
+          "secondTop2CoverageWhenHeadCorrect": 0.4657534246575342,
+          "pairHits": 16,
+          "pairAccuracy": 0.07048458149779736
+        },
+        "secondAccuracyDeltaVsBaseline": -0.0136986301369863,
+        "secondTop2DeltaVsBaseline": 0.0821917808219178,
+        "pairAccuracyDeltaVsBaseline": -0.004405286343612327,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "edogawa",
+      "venueCode": "03",
+      "split": {
+        "calibrationDates": 42,
+        "validationDates": 14,
+        "testDates": 15,
+        "calibrationLastDate": "2026-07-13",
+        "validationFirstDate": "2026-07-14",
+        "validationLastDate": "2026-08-15",
+        "testFirstDate": "2026-08-21"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 459,
+            "headCorrect": 162,
+            "headAccuracy": 0.35294117647058826,
+            "headCorrectRaces": 162,
+            "secondHitsWhenHeadCorrect": 53,
+            "secondAccuracyWhenHeadCorrect": 0.3271604938271605,
+            "secondTop2HitsWhenHeadCorrect": 95,
+            "secondTop2CoverageWhenHeadCorrect": 0.5864197530864198,
+            "pairHits": 53,
+            "pairAccuracy": 0.11546840958605664
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 459,
+            "headCorrect": 162,
+            "headAccuracy": 0.35294117647058826,
+            "headCorrectRaces": 162,
+            "secondHitsWhenHeadCorrect": 50,
+            "secondAccuracyWhenHeadCorrect": 0.30864197530864196,
+            "secondTop2HitsWhenHeadCorrect": 95,
+            "secondTop2CoverageWhenHeadCorrect": 0.5864197530864198,
+            "pairHits": 50,
+            "pairAccuracy": 0.10893246187363835
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 459,
+            "headCorrect": 162,
+            "headAccuracy": 0.35294117647058826,
+            "headCorrectRaces": 162,
+            "secondHitsWhenHeadCorrect": 50,
+            "secondAccuracyWhenHeadCorrect": 0.30864197530864196,
+            "secondTop2HitsWhenHeadCorrect": 95,
+            "secondTop2CoverageWhenHeadCorrect": 0.5864197530864198,
+            "pairHits": 50,
+            "pairAccuracy": 0.10893246187363835
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 459,
+            "headCorrect": 162,
+            "headAccuracy": 0.35294117647058826,
+            "headCorrectRaces": 162,
+            "secondHitsWhenHeadCorrect": 50,
+            "secondAccuracyWhenHeadCorrect": 0.30864197530864196,
+            "secondTop2HitsWhenHeadCorrect": 95,
+            "secondTop2CoverageWhenHeadCorrect": 0.5864197530864198,
+            "pairHits": 50,
+            "pairAccuracy": 0.10893246187363835
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 163,
+          "headCorrect": 50,
+          "headAccuracy": 0.3067484662576687,
+          "headCorrectRaces": 50,
+          "secondHitsWhenHeadCorrect": 19,
+          "secondAccuracyWhenHeadCorrect": 0.38,
+          "secondTop2HitsWhenHeadCorrect": 31,
+          "secondTop2CoverageWhenHeadCorrect": 0.62,
+          "pairHits": 19,
+          "pairAccuracy": 0.1165644171779141
+        },
+        "candidate": {
+          "races": 163,
+          "headCorrect": 50,
+          "headAccuracy": 0.3067484662576687,
+          "headCorrectRaces": 50,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.4,
+          "secondTop2HitsWhenHeadCorrect": 31,
+          "secondTop2CoverageWhenHeadCorrect": 0.62,
+          "pairHits": 20,
+          "pairAccuracy": 0.12269938650306748
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.020000000000000018,
+          "top2Delta": 0.0,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 172,
+          "headCorrect": 54,
+          "headAccuracy": 0.313953488372093,
+          "headCorrectRaces": 54,
+          "secondHitsWhenHeadCorrect": 19,
+          "secondAccuracyWhenHeadCorrect": 0.35185185185185186,
+          "secondTop2HitsWhenHeadCorrect": 28,
+          "secondTop2CoverageWhenHeadCorrect": 0.5185185185185185,
+          "pairHits": 19,
+          "pairAccuracy": 0.11046511627906977
+        },
+        "rawCandidate": {
+          "races": 172,
+          "headCorrect": 54,
+          "headAccuracy": 0.313953488372093,
+          "headCorrectRaces": 54,
+          "secondHitsWhenHeadCorrect": 25,
+          "secondAccuracyWhenHeadCorrect": 0.46296296296296297,
+          "secondTop2HitsWhenHeadCorrect": 27,
+          "secondTop2CoverageWhenHeadCorrect": 0.5,
+          "pairHits": 25,
+          "pairAccuracy": 0.14534883720930233
+        },
+        "gatedPolicy": {
+          "races": 172,
+          "headCorrect": 54,
+          "headAccuracy": 0.313953488372093,
+          "headCorrectRaces": 54,
+          "secondHitsWhenHeadCorrect": 25,
+          "secondAccuracyWhenHeadCorrect": 0.46296296296296297,
+          "secondTop2HitsWhenHeadCorrect": 27,
+          "secondTop2CoverageWhenHeadCorrect": 0.5,
+          "pairHits": 25,
+          "pairAccuracy": 0.14534883720930233
+        },
+        "secondAccuracyDeltaVsBaseline": 0.1111111111111111,
+        "secondTop2DeltaVsBaseline": -0.01851851851851849,
+        "pairAccuracyDeltaVsBaseline": 0.034883720930232565,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "fukuoka",
+      "venueCode": "22",
+      "split": {
+        "calibrationDates": 57,
+        "validationDates": 19,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-20",
+        "validationFirstDate": "2026-07-21",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-17"
+      },
+      "selectedProfile": {
+        "name": "COURSE_ST_2RATE",
+        "cStW": 4.0,
+        "c2W": 1.0,
+        "cStartRankW": 0.0,
+        "c3W": 0.0,
+        "cFW": 0.0,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 682,
+            "headCorrect": 230,
+            "headAccuracy": 0.33724340175953077,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 82,
+            "secondAccuracyWhenHeadCorrect": 0.3565217391304348,
+            "secondTop2HitsWhenHeadCorrect": 132,
+            "secondTop2CoverageWhenHeadCorrect": 0.5739130434782609,
+            "pairHits": 82,
+            "pairAccuracy": 0.12023460410557185
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 682,
+            "headCorrect": 230,
+            "headAccuracy": 0.33724340175953077,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.34782608695652173,
+            "secondTop2HitsWhenHeadCorrect": 133,
+            "secondTop2CoverageWhenHeadCorrect": 0.5782608695652174,
+            "pairHits": 80,
+            "pairAccuracy": 0.11730205278592376
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 682,
+            "headCorrect": 230,
+            "headAccuracy": 0.33724340175953077,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.3391304347826087,
+            "secondTop2HitsWhenHeadCorrect": 143,
+            "secondTop2CoverageWhenHeadCorrect": 0.6217391304347826,
+            "pairHits": 78,
+            "pairAccuracy": 0.11436950146627566
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 682,
+            "headCorrect": 230,
+            "headAccuracy": 0.33724340175953077,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 76,
+            "secondAccuracyWhenHeadCorrect": 0.33043478260869563,
+            "secondTop2HitsWhenHeadCorrect": 131,
+            "secondTop2CoverageWhenHeadCorrect": 0.5695652173913044,
+            "pairHits": 76,
+            "pairAccuracy": 0.11143695014662756
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 64,
+          "headAccuracy": 0.2807017543859649,
+          "headCorrectRaces": 64,
+          "secondHitsWhenHeadCorrect": 14,
+          "secondAccuracyWhenHeadCorrect": 0.21875,
+          "secondTop2HitsWhenHeadCorrect": 28,
+          "secondTop2CoverageWhenHeadCorrect": 0.4375,
+          "pairHits": 14,
+          "pairAccuracy": 0.06140350877192982
+        },
+        "candidate": {
+          "races": 228,
+          "headCorrect": 64,
+          "headAccuracy": 0.2807017543859649,
+          "headCorrectRaces": 64,
+          "secondHitsWhenHeadCorrect": 17,
+          "secondAccuracyWhenHeadCorrect": 0.265625,
+          "secondTop2HitsWhenHeadCorrect": 31,
+          "secondTop2CoverageWhenHeadCorrect": 0.484375,
+          "pairHits": 17,
+          "pairAccuracy": 0.07456140350877193
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.046875,
+          "top2Delta": 0.046875,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 73,
+          "headAccuracy": 0.30416666666666664,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 17,
+          "secondAccuracyWhenHeadCorrect": 0.2328767123287671,
+          "secondTop2HitsWhenHeadCorrect": 31,
+          "secondTop2CoverageWhenHeadCorrect": 0.4246575342465753,
+          "pairHits": 17,
+          "pairAccuracy": 0.07083333333333333
+        },
+        "rawCandidate": {
+          "races": 240,
+          "headCorrect": 73,
+          "headAccuracy": 0.30416666666666664,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.2876712328767123,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.5342465753424658,
+          "pairHits": 21,
+          "pairAccuracy": 0.0875
+        },
+        "gatedPolicy": {
+          "races": 240,
+          "headCorrect": 73,
+          "headAccuracy": 0.30416666666666664,
+          "headCorrectRaces": 73,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.2876712328767123,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.5342465753424658,
+          "pairHits": 21,
+          "pairAccuracy": 0.0875
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0547945205479452,
+        "secondTop2DeltaVsBaseline": 0.10958904109589046,
+        "pairAccuracyDeltaVsBaseline": 0.016666666666666663,
+        "rawCandidateSafeCourseJoinCoverage": 0.9916666666666667,
+        "rawCandidateJoinMiss": {
+          "NO_REGISTRATION_MATCH": 10
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "gamagori",
+      "venueCode": "07",
+      "split": {
+        "calibrationDates": 57,
+        "validationDates": 19,
+        "testDates": 19,
+        "calibrationLastDate": "2026-07-01",
+        "validationFirstDate": "2026-07-02",
+        "validationLastDate": "2026-08-22",
+        "testFirstDate": "2026-08-23"
+      },
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "cStW": 0.0,
+        "c2W": 1.2,
+        "cStartRankW": 0.0,
+        "c3W": 0.0,
+        "cFW": 0.0,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 207,
+            "headAccuracy": 0.31363636363636366,
+            "headCorrectRaces": 207,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.3864734299516908,
+            "secondTop2HitsWhenHeadCorrect": 119,
+            "secondTop2CoverageWhenHeadCorrect": 0.5748792270531401,
+            "pairHits": 80,
+            "pairAccuracy": 0.12121212121212122
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 207,
+            "headAccuracy": 0.31363636363636366,
+            "headCorrectRaces": 207,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.37681159420289856,
+            "secondTop2HitsWhenHeadCorrect": 128,
+            "secondTop2CoverageWhenHeadCorrect": 0.6183574879227053,
+            "pairHits": 78,
+            "pairAccuracy": 0.11818181818181818
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 207,
+            "headAccuracy": 0.31363636363636366,
+            "headCorrectRaces": 207,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.37681159420289856,
+            "secondTop2HitsWhenHeadCorrect": 120,
+            "secondTop2CoverageWhenHeadCorrect": 0.5797101449275363,
+            "pairHits": 78,
+            "pairAccuracy": 0.11818181818181818
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 207,
+            "headAccuracy": 0.31363636363636366,
+            "headCorrectRaces": 207,
+            "secondHitsWhenHeadCorrect": 75,
+            "secondAccuracyWhenHeadCorrect": 0.36231884057971014,
+            "secondTop2HitsWhenHeadCorrect": 125,
+            "secondTop2CoverageWhenHeadCorrect": 0.6038647342995169,
+            "pairHits": 75,
+            "pairAccuracy": 0.11363636363636363
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 80,
+          "headAccuracy": 0.3508771929824561,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.2875,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.5375,
+          "pairHits": 23,
+          "pairAccuracy": 0.10087719298245613
+        },
+        "candidate": {
+          "races": 228,
+          "headCorrect": 80,
+          "headAccuracy": 0.3508771929824561,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.325,
+          "secondTop2HitsWhenHeadCorrect": 45,
+          "secondTop2CoverageWhenHeadCorrect": 0.5625,
+          "pairHits": 26,
+          "pairAccuracy": 0.11403508771929824
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.03750000000000003,
+          "top2Delta": 0.025000000000000022,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.2631578947368421,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.5526315789473685,
+          "pairHits": 20,
+          "pairAccuracy": 0.08771929824561403
+        },
+        "rawCandidate": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.3026315789473684,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.5657894736842105,
+          "pairHits": 23,
+          "pairAccuracy": 0.10087719298245613
+        },
+        "gatedPolicy": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.3026315789473684,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.5657894736842105,
+          "pairHits": 23,
+          "pairAccuracy": 0.10087719298245613
+        },
+        "secondAccuracyDeltaVsBaseline": 0.03947368421052633,
+        "secondTop2DeltaVsBaseline": 0.013157894736842035,
+        "pairAccuracyDeltaVsBaseline": 0.013157894736842105,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "hamanako",
+      "venueCode": "06",
+      "split": {
+        "calibrationDates": 60,
+        "validationDates": 20,
+        "testDates": 21,
+        "calibrationLastDate": "2026-07-11",
+        "validationFirstDate": "2026-07-12",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-21"
+      },
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "cStW": 4.5,
+        "c2W": 1.0,
+        "cStartRankW": 0.2,
+        "c3W": 0.55,
+        "cFW": 0.04,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 242,
+            "headAccuracy": 0.33798882681564246,
+            "headCorrectRaces": 242,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.32644628099173556,
+            "secondTop2HitsWhenHeadCorrect": 137,
+            "secondTop2CoverageWhenHeadCorrect": 0.5661157024793388,
+            "pairHits": 79,
+            "pairAccuracy": 0.11033519553072625
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 242,
+            "headAccuracy": 0.33798882681564246,
+            "headCorrectRaces": 242,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.32231404958677684,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.5743801652892562,
+            "pairHits": 78,
+            "pairAccuracy": 0.10893854748603352
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 242,
+            "headAccuracy": 0.33798882681564246,
+            "headCorrectRaces": 242,
+            "secondHitsWhenHeadCorrect": 75,
+            "secondAccuracyWhenHeadCorrect": 0.30991735537190085,
+            "secondTop2HitsWhenHeadCorrect": 134,
+            "secondTop2CoverageWhenHeadCorrect": 0.5537190082644629,
+            "pairHits": 75,
+            "pairAccuracy": 0.10474860335195531
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 242,
+            "headAccuracy": 0.33798882681564246,
+            "headCorrectRaces": 242,
+            "secondHitsWhenHeadCorrect": 69,
+            "secondAccuracyWhenHeadCorrect": 0.28512396694214875,
+            "secondTop2HitsWhenHeadCorrect": 131,
+            "secondTop2CoverageWhenHeadCorrect": 0.5413223140495868,
+            "pairHits": 69,
+            "pairAccuracy": 0.09636871508379888
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 71,
+          "headAccuracy": 0.29583333333333334,
+          "headCorrectRaces": 71,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.38028169014084506,
+          "secondTop2HitsWhenHeadCorrect": 37,
+          "secondTop2CoverageWhenHeadCorrect": 0.5211267605633803,
+          "pairHits": 27,
+          "pairAccuracy": 0.1125
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 71,
+          "headAccuracy": 0.29583333333333334,
+          "headCorrectRaces": 71,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.36619718309859156,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.5492957746478874,
+          "pairHits": 26,
+          "pairAccuracy": 0.10833333333333334
+        },
+        "candidateEnabled": false,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": -0.014084507042253502,
+          "top2Delta": 0.028169014084507116,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 248,
+          "headCorrect": 89,
+          "headAccuracy": 0.3588709677419355,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.24719101123595505,
+          "secondTop2HitsWhenHeadCorrect": 49,
+          "secondTop2CoverageWhenHeadCorrect": 0.550561797752809,
+          "pairHits": 22,
+          "pairAccuracy": 0.08870967741935484
+        },
+        "rawCandidate": {
+          "races": 248,
+          "headCorrect": 89,
+          "headAccuracy": 0.3588709677419355,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.3258426966292135,
+          "secondTop2HitsWhenHeadCorrect": 53,
+          "secondTop2CoverageWhenHeadCorrect": 0.5955056179775281,
+          "pairHits": 29,
+          "pairAccuracy": 0.11693548387096774
+        },
+        "gatedPolicy": {
+          "races": 248,
+          "headCorrect": 89,
+          "headAccuracy": 0.3588709677419355,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.24719101123595505,
+          "secondTop2HitsWhenHeadCorrect": 49,
+          "secondTop2CoverageWhenHeadCorrect": 0.550561797752809,
+          "pairHits": 22,
+          "pairAccuracy": 0.08870967741935484
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0,
+        "secondTop2DeltaVsBaseline": 0.0,
+        "pairAccuracyDeltaVsBaseline": 0.0,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "heiwajima",
+      "venueCode": "04",
+      "split": {
+        "calibrationDates": 55,
+        "validationDates": 18,
+        "testDates": 19,
+        "calibrationLastDate": "2026-07-26",
+        "validationFirstDate": "2026-07-27",
+        "validationLastDate": "2026-08-21",
+        "testFirstDate": "2026-08-22"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 648,
+            "headCorrect": 224,
+            "headAccuracy": 0.345679012345679,
+            "headCorrectRaces": 224,
+            "secondHitsWhenHeadCorrect": 84,
+            "secondAccuracyWhenHeadCorrect": 0.375,
+            "secondTop2HitsWhenHeadCorrect": 125,
+            "secondTop2CoverageWhenHeadCorrect": 0.5580357142857143,
+            "pairHits": 84,
+            "pairAccuracy": 0.12962962962962962
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 648,
+            "headCorrect": 224,
+            "headAccuracy": 0.345679012345679,
+            "headCorrectRaces": 224,
+            "secondHitsWhenHeadCorrect": 81,
+            "secondAccuracyWhenHeadCorrect": 0.36160714285714285,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5625,
+            "pairHits": 81,
+            "pairAccuracy": 0.125
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 648,
+            "headCorrect": 224,
+            "headAccuracy": 0.345679012345679,
+            "headCorrectRaces": 224,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.35714285714285715,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5625,
+            "pairHits": 80,
+            "pairAccuracy": 0.12345679012345678
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 648,
+            "headCorrect": 224,
+            "headAccuracy": 0.345679012345679,
+            "headCorrectRaces": 224,
+            "secondHitsWhenHeadCorrect": 77,
+            "secondAccuracyWhenHeadCorrect": 0.34375,
+            "secondTop2HitsWhenHeadCorrect": 120,
+            "secondTop2CoverageWhenHeadCorrect": 0.5357142857142857,
+            "pairHits": 77,
+            "pairAccuracy": 0.11882716049382716
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 216,
+          "headCorrect": 67,
+          "headAccuracy": 0.3101851851851852,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.3283582089552239,
+          "secondTop2HitsWhenHeadCorrect": 41,
+          "secondTop2CoverageWhenHeadCorrect": 0.6119402985074627,
+          "pairHits": 22,
+          "pairAccuracy": 0.10185185185185185
+        },
+        "candidate": {
+          "races": 216,
+          "headCorrect": 67,
+          "headAccuracy": 0.3101851851851852,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.3582089552238806,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.6417910447761194,
+          "pairHits": 24,
+          "pairAccuracy": 0.1111111111111111
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.02985074626865669,
+          "top2Delta": 0.02985074626865669,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 68,
+          "headAccuracy": 0.2982456140350877,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 19,
+          "secondAccuracyWhenHeadCorrect": 0.27941176470588236,
+          "secondTop2HitsWhenHeadCorrect": 32,
+          "secondTop2CoverageWhenHeadCorrect": 0.47058823529411764,
+          "pairHits": 19,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "rawCandidate": {
+          "races": 228,
+          "headCorrect": 68,
+          "headAccuracy": 0.2982456140350877,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.3088235294117647,
+          "secondTop2HitsWhenHeadCorrect": 30,
+          "secondTop2CoverageWhenHeadCorrect": 0.4411764705882353,
+          "pairHits": 21,
+          "pairAccuracy": 0.09210526315789473
+        },
+        "gatedPolicy": {
+          "races": 228,
+          "headCorrect": 68,
+          "headAccuracy": 0.2982456140350877,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.3088235294117647,
+          "secondTop2HitsWhenHeadCorrect": 30,
+          "secondTop2CoverageWhenHeadCorrect": 0.4411764705882353,
+          "pairHits": 21,
+          "pairAccuracy": 0.09210526315789473
+        },
+        "secondAccuracyDeltaVsBaseline": 0.02941176470588236,
+        "secondTop2DeltaVsBaseline": -0.02941176470588236,
+        "pairAccuracyDeltaVsBaseline": 0.008771929824561403,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "karatsu",
+      "venueCode": "23",
+      "split": {
+        "calibrationDates": 57,
+        "validationDates": 19,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-02",
+        "validationFirstDate": "2026-07-03",
+        "validationLastDate": "2026-08-01",
+        "testFirstDate": "2026-08-02"
+      },
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "cStW": 4.5,
+        "c2W": 1.0,
+        "cStartRankW": 0.2,
+        "c3W": 0.55,
+        "cFW": 0.04,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 675,
+            "headCorrect": 257,
+            "headAccuracy": 0.38074074074074077,
+            "headCorrectRaces": 257,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.35019455252918286,
+            "secondTop2HitsWhenHeadCorrect": 147,
+            "secondTop2CoverageWhenHeadCorrect": 0.5719844357976653,
+            "pairHits": 90,
+            "pairAccuracy": 0.13333333333333333
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 675,
+            "headCorrect": 257,
+            "headAccuracy": 0.38074074074074077,
+            "headCorrectRaces": 257,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.35019455252918286,
+            "secondTop2HitsWhenHeadCorrect": 146,
+            "secondTop2CoverageWhenHeadCorrect": 0.5680933852140078,
+            "pairHits": 90,
+            "pairAccuracy": 0.13333333333333333
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 675,
+            "headCorrect": 257,
+            "headAccuracy": 0.38074074074074077,
+            "headCorrectRaces": 257,
+            "secondHitsWhenHeadCorrect": 89,
+            "secondAccuracyWhenHeadCorrect": 0.3463035019455253,
+            "secondTop2HitsWhenHeadCorrect": 150,
+            "secondTop2CoverageWhenHeadCorrect": 0.5836575875486382,
+            "pairHits": 89,
+            "pairAccuracy": 0.13185185185185186
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 675,
+            "headCorrect": 257,
+            "headAccuracy": 0.38074074074074077,
+            "headCorrectRaces": 257,
+            "secondHitsWhenHeadCorrect": 88,
+            "secondAccuracyWhenHeadCorrect": 0.3424124513618677,
+            "secondTop2HitsWhenHeadCorrect": 154,
+            "secondTop2CoverageWhenHeadCorrect": 0.5992217898832685,
+            "pairHits": 88,
+            "pairAccuracy": 0.13037037037037036
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 94,
+          "headAccuracy": 0.41228070175438597,
+          "headCorrectRaces": 94,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.3191489361702128,
+          "secondTop2HitsWhenHeadCorrect": 47,
+          "secondTop2CoverageWhenHeadCorrect": 0.5,
+          "pairHits": 30,
+          "pairAccuracy": 0.13157894736842105
+        },
+        "candidate": {
+          "races": 228,
+          "headCorrect": 94,
+          "headAccuracy": 0.41228070175438597,
+          "headCorrectRaces": 94,
+          "secondHitsWhenHeadCorrect": 38,
+          "secondAccuracyWhenHeadCorrect": 0.40425531914893614,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5851063829787234,
+          "pairHits": 38,
+          "pairAccuracy": 0.16666666666666666
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.08510638297872336,
+          "top2Delta": 0.08510638297872342,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 235,
+          "headCorrect": 103,
+          "headAccuracy": 0.43829787234042555,
+          "headCorrectRaces": 103,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.30097087378640774,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.4854368932038835,
+          "pairHits": 31,
+          "pairAccuracy": 0.13191489361702127
+        },
+        "rawCandidate": {
+          "races": 235,
+          "headCorrect": 103,
+          "headAccuracy": 0.43829787234042555,
+          "headCorrectRaces": 103,
+          "secondHitsWhenHeadCorrect": 36,
+          "secondAccuracyWhenHeadCorrect": 0.34951456310679613,
+          "secondTop2HitsWhenHeadCorrect": 59,
+          "secondTop2CoverageWhenHeadCorrect": 0.5728155339805825,
+          "pairHits": 36,
+          "pairAccuracy": 0.15319148936170213
+        },
+        "gatedPolicy": {
+          "races": 235,
+          "headCorrect": 103,
+          "headAccuracy": 0.43829787234042555,
+          "headCorrectRaces": 103,
+          "secondHitsWhenHeadCorrect": 36,
+          "secondAccuracyWhenHeadCorrect": 0.34951456310679613,
+          "secondTop2HitsWhenHeadCorrect": 59,
+          "secondTop2CoverageWhenHeadCorrect": 0.5728155339805825,
+          "pairHits": 36,
+          "pairAccuracy": 0.15319148936170213
+        },
+        "secondAccuracyDeltaVsBaseline": 0.04854368932038838,
+        "secondTop2DeltaVsBaseline": 0.08737864077669899,
+        "pairAccuracyDeltaVsBaseline": 0.021276595744680854,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kiryu",
+      "venueCode": "01",
+      "split": {
+        "calibrationDates": 59,
+        "validationDates": 20,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-07",
+        "validationFirstDate": "2026-07-08",
+        "validationLastDate": "2026-08-11",
+        "testFirstDate": "2026-08-12"
+      },
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "cStW": 4.5,
+        "c2W": 1.0,
+        "cStartRankW": 0.2,
+        "c3W": 0.55,
+        "cFW": 0.04,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 681,
+            "headCorrect": 230,
+            "headAccuracy": 0.3377386196769457,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 82,
+            "secondAccuracyWhenHeadCorrect": 0.3565217391304348,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5478260869565217,
+            "pairHits": 82,
+            "pairAccuracy": 0.12041116005873716
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 681,
+            "headCorrect": 230,
+            "headAccuracy": 0.3377386196769457,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 82,
+            "secondAccuracyWhenHeadCorrect": 0.3565217391304348,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5478260869565217,
+            "pairHits": 82,
+            "pairAccuracy": 0.12041116005873716
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 681,
+            "headCorrect": 230,
+            "headAccuracy": 0.3377386196769457,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 81,
+            "secondAccuracyWhenHeadCorrect": 0.3521739130434783,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5478260869565217,
+            "pairHits": 81,
+            "pairAccuracy": 0.11894273127753303
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 681,
+            "headCorrect": 230,
+            "headAccuracy": 0.3377386196769457,
+            "headCorrectRaces": 230,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.3391304347826087,
+            "secondTop2HitsWhenHeadCorrect": 122,
+            "secondTop2CoverageWhenHeadCorrect": 0.5304347826086957,
+            "pairHits": 78,
+            "pairAccuracy": 0.1145374449339207
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 230,
+          "headCorrect": 76,
+          "headAccuracy": 0.33043478260869563,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.4473684210526316,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.6578947368421053,
+          "pairHits": 34,
+          "pairAccuracy": 0.14782608695652175
+        },
+        "candidate": {
+          "races": 230,
+          "headCorrect": 76,
+          "headAccuracy": 0.33043478260869563,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 37,
+          "secondAccuracyWhenHeadCorrect": 0.4868421052631579,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.6578947368421053,
+          "pairHits": 37,
+          "pairAccuracy": 0.1608695652173913
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.03947368421052633,
+          "top2Delta": 0.0,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 71,
+          "headAccuracy": 0.29583333333333334,
+          "headCorrectRaces": 71,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.3380281690140845,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.5915492957746479,
+          "pairHits": 24,
+          "pairAccuracy": 0.1
+        },
+        "rawCandidate": {
+          "races": 240,
+          "headCorrect": 71,
+          "headAccuracy": 0.29583333333333334,
+          "headCorrectRaces": 71,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.4225352112676056,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.647887323943662,
+          "pairHits": 30,
+          "pairAccuracy": 0.125
+        },
+        "gatedPolicy": {
+          "races": 240,
+          "headCorrect": 71,
+          "headAccuracy": 0.29583333333333334,
+          "headCorrectRaces": 71,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.4225352112676056,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.647887323943662,
+          "pairHits": 30,
+          "pairAccuracy": 0.125
+        },
+        "secondAccuracyDeltaVsBaseline": 0.08450704225352113,
+        "secondTop2DeltaVsBaseline": 0.05633802816901412,
+        "pairAccuracyDeltaVsBaseline": 0.024999999999999994,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kojima",
+      "venueCode": "16",
+      "split": {
+        "calibrationDates": 63,
+        "validationDates": 21,
+        "testDates": 21,
+        "calibrationLastDate": "2026-07-13",
+        "validationFirstDate": "2026-07-17",
+        "validationLastDate": "2026-08-20",
+        "testFirstDate": "2026-08-21"
+      },
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "cStW": 4.5,
+        "c2W": 1.0,
+        "cStartRankW": 0.2,
+        "c3W": 0.55,
+        "cFW": 0.04,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 755,
+            "headCorrect": 259,
+            "headAccuracy": 0.343046357615894,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 88,
+            "secondAccuracyWhenHeadCorrect": 0.33976833976833976,
+            "secondTop2HitsWhenHeadCorrect": 158,
+            "secondTop2CoverageWhenHeadCorrect": 0.61003861003861,
+            "pairHits": 88,
+            "pairAccuracy": 0.11655629139072848
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 755,
+            "headCorrect": 259,
+            "headAccuracy": 0.343046357615894,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 87,
+            "secondAccuracyWhenHeadCorrect": 0.3359073359073359,
+            "secondTop2HitsWhenHeadCorrect": 157,
+            "secondTop2CoverageWhenHeadCorrect": 0.6061776061776062,
+            "pairHits": 87,
+            "pairAccuracy": 0.1152317880794702
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 755,
+            "headCorrect": 259,
+            "headAccuracy": 0.343046357615894,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 85,
+            "secondAccuracyWhenHeadCorrect": 0.3281853281853282,
+            "secondTop2HitsWhenHeadCorrect": 155,
+            "secondTop2CoverageWhenHeadCorrect": 0.5984555984555985,
+            "pairHits": 85,
+            "pairAccuracy": 0.11258278145695365
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 755,
+            "headCorrect": 259,
+            "headAccuracy": 0.343046357615894,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 85,
+            "secondAccuracyWhenHeadCorrect": 0.3281853281853282,
+            "secondTop2HitsWhenHeadCorrect": 153,
+            "secondTop2CoverageWhenHeadCorrect": 0.5907335907335908,
+            "pairHits": 85,
+            "pairAccuracy": 0.11258278145695365
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 252,
+          "headCorrect": 89,
+          "headAccuracy": 0.3531746031746032,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.34831460674157305,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.5393258426966292,
+          "pairHits": 31,
+          "pairAccuracy": 0.12301587301587301
+        },
+        "candidate": {
+          "races": 252,
+          "headCorrect": 89,
+          "headAccuracy": 0.3531746031746032,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.3595505617977528,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.5617977528089888,
+          "pairHits": 32,
+          "pairAccuracy": 0.12698412698412698
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.011235955056179747,
+          "top2Delta": 0.022471910112359605,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 252,
+          "headCorrect": 80,
+          "headAccuracy": 0.31746031746031744,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.2875,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.5375,
+          "pairHits": 23,
+          "pairAccuracy": 0.09126984126984126
+        },
+        "rawCandidate": {
+          "races": 252,
+          "headCorrect": 80,
+          "headAccuracy": 0.31746031746031744,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.2625,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.6,
+          "pairHits": 21,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "gatedPolicy": {
+          "races": 252,
+          "headCorrect": 80,
+          "headAccuracy": 0.31746031746031744,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.2625,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.6,
+          "pairHits": 21,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "secondAccuracyDeltaVsBaseline": -0.024999999999999967,
+        "secondTop2DeltaVsBaseline": 0.0625,
+        "pairAccuracyDeltaVsBaseline": -0.007936507936507936,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "marugame",
+      "venueCode": "15",
+      "split": {
+        "calibrationDates": 55,
+        "validationDates": 19,
+        "testDates": 19,
+        "calibrationLastDate": "2026-06-25",
+        "validationFirstDate": "2026-07-09",
+        "validationLastDate": "2026-08-07",
+        "testFirstDate": "2026-08-08"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 187,
+            "headAccuracy": 0.2833333333333333,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 75,
+            "secondAccuracyWhenHeadCorrect": 0.40106951871657753,
+            "secondTop2HitsWhenHeadCorrect": 124,
+            "secondTop2CoverageWhenHeadCorrect": 0.6631016042780749,
+            "pairHits": 75,
+            "pairAccuracy": 0.11363636363636363
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 187,
+            "headAccuracy": 0.2833333333333333,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 74,
+            "secondAccuracyWhenHeadCorrect": 0.39572192513368987,
+            "secondTop2HitsWhenHeadCorrect": 117,
+            "secondTop2CoverageWhenHeadCorrect": 0.6256684491978609,
+            "pairHits": 74,
+            "pairAccuracy": 0.11212121212121212
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 187,
+            "headAccuracy": 0.2833333333333333,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 73,
+            "secondAccuracyWhenHeadCorrect": 0.39037433155080214,
+            "secondTop2HitsWhenHeadCorrect": 121,
+            "secondTop2CoverageWhenHeadCorrect": 0.6470588235294118,
+            "pairHits": 73,
+            "pairAccuracy": 0.11060606060606061
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 660,
+            "headCorrect": 187,
+            "headAccuracy": 0.2833333333333333,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 71,
+            "secondAccuracyWhenHeadCorrect": 0.37967914438502676,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.6096256684491979,
+            "pairHits": 71,
+            "pairAccuracy": 0.10757575757575757
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 217,
+          "headCorrect": 74,
+          "headAccuracy": 0.34101382488479265,
+          "headCorrectRaces": 74,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.35135135135135137,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.5135135135135135,
+          "pairHits": 26,
+          "pairAccuracy": 0.11981566820276497
+        },
+        "candidate": {
+          "races": 217,
+          "headCorrect": 74,
+          "headAccuracy": 0.34101382488479265,
+          "headCorrectRaces": 74,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.43243243243243246,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.6486486486486487,
+          "pairHits": 32,
+          "pairAccuracy": 0.14746543778801843
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.08108108108108109,
+          "top2Delta": 0.1351351351351352,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 226,
+          "headCorrect": 60,
+          "headAccuracy": 0.26548672566371684,
+          "headCorrectRaces": 60,
+          "secondHitsWhenHeadCorrect": 17,
+          "secondAccuracyWhenHeadCorrect": 0.2833333333333333,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.6333333333333333,
+          "pairHits": 17,
+          "pairAccuracy": 0.0752212389380531
+        },
+        "rawCandidate": {
+          "races": 226,
+          "headCorrect": 60,
+          "headAccuracy": 0.26548672566371684,
+          "headCorrectRaces": 60,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.3333333333333333,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.6333333333333333,
+          "pairHits": 20,
+          "pairAccuracy": 0.08849557522123894
+        },
+        "gatedPolicy": {
+          "races": 226,
+          "headCorrect": 60,
+          "headAccuracy": 0.26548672566371684,
+          "headCorrectRaces": 60,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.3333333333333333,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.6333333333333333,
+          "pairHits": 20,
+          "pairAccuracy": 0.08849557522123894
+        },
+        "secondAccuracyDeltaVsBaseline": 0.04999999999999999,
+        "secondTop2DeltaVsBaseline": 0.0,
+        "pairAccuracyDeltaVsBaseline": 0.013274336283185834,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "mikuni",
+      "venueCode": "10",
+      "split": {
+        "calibrationDates": 58,
+        "validationDates": 20,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-11",
+        "validationFirstDate": "2026-07-12",
+        "validationLastDate": "2026-08-15",
+        "testFirstDate": "2026-08-16"
+      },
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "cStW": 4.5,
+        "c2W": 1.0,
+        "cStartRankW": 0.2,
+        "c3W": 0.55,
+        "cFW": 0.04,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 658,
+            "headCorrect": 231,
+            "headAccuracy": 0.35106382978723405,
+            "headCorrectRaces": 231,
+            "secondHitsWhenHeadCorrect": 85,
+            "secondAccuracyWhenHeadCorrect": 0.36796536796536794,
+            "secondTop2HitsWhenHeadCorrect": 136,
+            "secondTop2CoverageWhenHeadCorrect": 0.5887445887445888,
+            "pairHits": 85,
+            "pairAccuracy": 0.12917933130699089
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 658,
+            "headCorrect": 231,
+            "headAccuracy": 0.35106382978723405,
+            "headCorrectRaces": 231,
+            "secondHitsWhenHeadCorrect": 83,
+            "secondAccuracyWhenHeadCorrect": 0.3593073593073593,
+            "secondTop2HitsWhenHeadCorrect": 134,
+            "secondTop2CoverageWhenHeadCorrect": 0.5800865800865801,
+            "pairHits": 83,
+            "pairAccuracy": 0.12613981762917933
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 658,
+            "headCorrect": 231,
+            "headAccuracy": 0.35106382978723405,
+            "headCorrectRaces": 231,
+            "secondHitsWhenHeadCorrect": 82,
+            "secondAccuracyWhenHeadCorrect": 0.354978354978355,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5627705627705628,
+            "pairHits": 82,
+            "pairAccuracy": 0.12462006079027356
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 658,
+            "headCorrect": 231,
+            "headAccuracy": 0.35106382978723405,
+            "headCorrectRaces": 231,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.3463203463203463,
+            "secondTop2HitsWhenHeadCorrect": 131,
+            "secondTop2CoverageWhenHeadCorrect": 0.5670995670995671,
+            "pairHits": 80,
+            "pairAccuracy": 0.12158054711246201
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 84,
+          "headAccuracy": 0.35,
+          "headCorrectRaces": 84,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.2857142857142857,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.5476190476190477,
+          "pairHits": 24,
+          "pairAccuracy": 0.1
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 84,
+          "headAccuracy": 0.35,
+          "headCorrectRaces": 84,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.32142857142857145,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.5714285714285714,
+          "pairHits": 27,
+          "pairAccuracy": 0.1125
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.035714285714285754,
+          "top2Delta": 0.023809523809523725,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 226,
+          "headCorrect": 68,
+          "headAccuracy": 0.3008849557522124,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.29411764705882354,
+          "secondTop2HitsWhenHeadCorrect": 41,
+          "secondTop2CoverageWhenHeadCorrect": 0.6029411764705882,
+          "pairHits": 20,
+          "pairAccuracy": 0.08849557522123894
+        },
+        "rawCandidate": {
+          "races": 226,
+          "headCorrect": 68,
+          "headAccuracy": 0.3008849557522124,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.35294117647058826,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.6323529411764706,
+          "pairHits": 24,
+          "pairAccuracy": 0.10619469026548672
+        },
+        "gatedPolicy": {
+          "races": 226,
+          "headCorrect": 68,
+          "headAccuracy": 0.3008849557522124,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.35294117647058826,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.6323529411764706,
+          "pairHits": 24,
+          "pairAccuracy": 0.10619469026548672
+        },
+        "secondAccuracyDeltaVsBaseline": 0.05882352941176472,
+        "secondTop2DeltaVsBaseline": 0.02941176470588236,
+        "pairAccuracyDeltaVsBaseline": 0.017699115044247787,
+        "rawCandidateSafeCourseJoinCoverage": 0.9946902654867257,
+        "rawCandidateJoinMiss": {
+          "NO_REGISTRATION_MATCH": 6
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "miyajima",
+      "venueCode": "17",
+      "split": {
+        "calibrationDates": 60,
+        "validationDates": 20,
+        "testDates": 21,
+        "calibrationLastDate": "2026-07-16",
+        "validationFirstDate": "2026-07-17",
+        "validationLastDate": "2026-08-18",
+        "testFirstDate": "2026-08-19"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 704,
+            "headCorrect": 229,
+            "headAccuracy": 0.3252840909090909,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 62,
+            "secondAccuracyWhenHeadCorrect": 0.27074235807860264,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5676855895196506,
+            "pairHits": 62,
+            "pairAccuracy": 0.08806818181818182
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 704,
+            "headCorrect": 229,
+            "headAccuracy": 0.3252840909090909,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.25327510917030566,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5676855895196506,
+            "pairHits": 58,
+            "pairAccuracy": 0.08238636363636363
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 704,
+            "headCorrect": 229,
+            "headAccuracy": 0.3252840909090909,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.24890829694323144,
+            "secondTop2HitsWhenHeadCorrect": 129,
+            "secondTop2CoverageWhenHeadCorrect": 0.5633187772925764,
+            "pairHits": 57,
+            "pairAccuracy": 0.08096590909090909
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 704,
+            "headCorrect": 229,
+            "headAccuracy": 0.3252840909090909,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 56,
+            "secondAccuracyWhenHeadCorrect": 0.2445414847161572,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5676855895196506,
+            "pairHits": 56,
+            "pairAccuracy": 0.07954545454545454
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 89,
+          "headAccuracy": 0.37083333333333335,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.30337078651685395,
+          "secondTop2HitsWhenHeadCorrect": 49,
+          "secondTop2CoverageWhenHeadCorrect": 0.550561797752809,
+          "pairHits": 27,
+          "pairAccuracy": 0.1125
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 89,
+          "headAccuracy": 0.37083333333333335,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.33707865168539325,
+          "secondTop2HitsWhenHeadCorrect": 53,
+          "secondTop2CoverageWhenHeadCorrect": 0.5955056179775281,
+          "pairHits": 30,
+          "pairAccuracy": 0.125
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.0337078651685393,
+          "top2Delta": 0.0449438202247191,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 250,
+          "headCorrect": 91,
+          "headAccuracy": 0.364,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.23076923076923078,
+          "secondTop2HitsWhenHeadCorrect": 36,
+          "secondTop2CoverageWhenHeadCorrect": 0.3956043956043956,
+          "pairHits": 21,
+          "pairAccuracy": 0.084
+        },
+        "rawCandidate": {
+          "races": 250,
+          "headCorrect": 91,
+          "headAccuracy": 0.364,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.2857142857142857,
+          "secondTop2HitsWhenHeadCorrect": 41,
+          "secondTop2CoverageWhenHeadCorrect": 0.45054945054945056,
+          "pairHits": 26,
+          "pairAccuracy": 0.104
+        },
+        "gatedPolicy": {
+          "races": 250,
+          "headCorrect": 91,
+          "headAccuracy": 0.364,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.2857142857142857,
+          "secondTop2HitsWhenHeadCorrect": 41,
+          "secondTop2CoverageWhenHeadCorrect": 0.45054945054945056,
+          "pairHits": 26,
+          "pairAccuracy": 0.104
+        },
+        "secondAccuracyDeltaVsBaseline": 0.054945054945054916,
+        "secondTop2DeltaVsBaseline": 0.05494505494505497,
+        "pairAccuracyDeltaVsBaseline": 0.01999999999999999,
+        "rawCandidateSafeCourseJoinCoverage": 0.9936,
+        "rawCandidateJoinMiss": {
+          "NO_REGISTRATION_MATCH": 8
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "naruto",
+      "venueCode": "14",
+      "split": {
+        "calibrationDates": 47,
+        "validationDates": 16,
+        "testDates": 16,
+        "calibrationLastDate": "2026-07-13",
+        "validationFirstDate": "2026-07-22",
+        "validationLastDate": "2026-08-19",
+        "testFirstDate": "2026-08-26"
+      },
+      "selectedProfile": {
+        "name": "COURSE_START",
+        "cStW": 3.0,
+        "c2W": 0.8,
+        "cStartRankW": 0.18,
+        "c3W": 0.0,
+        "cFW": 0.0,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 549,
+            "headCorrect": 170,
+            "headAccuracy": 0.30965391621129323,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 50,
+            "secondAccuracyWhenHeadCorrect": 0.29411764705882354,
+            "secondTop2HitsWhenHeadCorrect": 83,
+            "secondTop2CoverageWhenHeadCorrect": 0.48823529411764705,
+            "pairHits": 50,
+            "pairAccuracy": 0.09107468123861566
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 549,
+            "headCorrect": 170,
+            "headAccuracy": 0.30965391621129323,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 50,
+            "secondAccuracyWhenHeadCorrect": 0.29411764705882354,
+            "secondTop2HitsWhenHeadCorrect": 82,
+            "secondTop2CoverageWhenHeadCorrect": 0.4823529411764706,
+            "pairHits": 50,
+            "pairAccuracy": 0.09107468123861566
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 549,
+            "headCorrect": 170,
+            "headAccuracy": 0.30965391621129323,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 48,
+            "secondAccuracyWhenHeadCorrect": 0.2823529411764706,
+            "secondTop2HitsWhenHeadCorrect": 87,
+            "secondTop2CoverageWhenHeadCorrect": 0.5117647058823529,
+            "pairHits": 48,
+            "pairAccuracy": 0.08743169398907104
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 549,
+            "headCorrect": 170,
+            "headAccuracy": 0.30965391621129323,
+            "headCorrectRaces": 170,
+            "secondHitsWhenHeadCorrect": 48,
+            "secondAccuracyWhenHeadCorrect": 0.2823529411764706,
+            "secondTop2HitsWhenHeadCorrect": 84,
+            "secondTop2CoverageWhenHeadCorrect": 0.49411764705882355,
+            "pairHits": 48,
+            "pairAccuracy": 0.08743169398907104
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 192,
+          "headCorrect": 68,
+          "headAccuracy": 0.3541666666666667,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.3235294117647059,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.5588235294117647,
+          "pairHits": 22,
+          "pairAccuracy": 0.11458333333333333
+        },
+        "candidate": {
+          "races": 192,
+          "headCorrect": 68,
+          "headAccuracy": 0.3541666666666667,
+          "headCorrectRaces": 68,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.3235294117647059,
+          "secondTop2HitsWhenHeadCorrect": 36,
+          "secondTop2CoverageWhenHeadCorrect": 0.5294117647058824,
+          "pairHits": 22,
+          "pairAccuracy": 0.11458333333333333
+        },
+        "candidateEnabled": false,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.0,
+          "top2Delta": -0.02941176470588236,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 182,
+          "headCorrect": 67,
+          "headAccuracy": 0.36813186813186816,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.26865671641791045,
+          "secondTop2HitsWhenHeadCorrect": 33,
+          "secondTop2CoverageWhenHeadCorrect": 0.4925373134328358,
+          "pairHits": 18,
+          "pairAccuracy": 0.0989010989010989
+        },
+        "rawCandidate": {
+          "races": 182,
+          "headCorrect": 67,
+          "headAccuracy": 0.36813186813186816,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 19,
+          "secondAccuracyWhenHeadCorrect": 0.2835820895522388,
+          "secondTop2HitsWhenHeadCorrect": 37,
+          "secondTop2CoverageWhenHeadCorrect": 0.5522388059701493,
+          "pairHits": 19,
+          "pairAccuracy": 0.1043956043956044
+        },
+        "gatedPolicy": {
+          "races": 182,
+          "headCorrect": 67,
+          "headAccuracy": 0.36813186813186816,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.26865671641791045,
+          "secondTop2HitsWhenHeadCorrect": 33,
+          "secondTop2CoverageWhenHeadCorrect": 0.4925373134328358,
+          "pairHits": 18,
+          "pairAccuracy": 0.0989010989010989
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0,
+        "secondTop2DeltaVsBaseline": 0.0,
+        "pairAccuracyDeltaVsBaseline": 0.0,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "omura",
+      "venueCode": "24",
+      "split": {
+        "calibrationDates": 61,
+        "validationDates": 20,
+        "testDates": 21,
+        "calibrationLastDate": "2026-07-09",
+        "validationFirstDate": "2026-07-14",
+        "validationLastDate": "2026-08-14",
+        "testFirstDate": "2026-08-15"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 236,
+            "headAccuracy": 0.3445255474452555,
+            "headCorrectRaces": 236,
+            "secondHitsWhenHeadCorrect": 98,
+            "secondAccuracyWhenHeadCorrect": 0.4152542372881356,
+            "secondTop2HitsWhenHeadCorrect": 151,
+            "secondTop2CoverageWhenHeadCorrect": 0.6398305084745762,
+            "pairHits": 98,
+            "pairAccuracy": 0.14306569343065692
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 236,
+            "headAccuracy": 0.3445255474452555,
+            "headCorrectRaces": 236,
+            "secondHitsWhenHeadCorrect": 94,
+            "secondAccuracyWhenHeadCorrect": 0.3983050847457627,
+            "secondTop2HitsWhenHeadCorrect": 155,
+            "secondTop2CoverageWhenHeadCorrect": 0.6567796610169492,
+            "pairHits": 94,
+            "pairAccuracy": 0.13722627737226278
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 236,
+            "headAccuracy": 0.3445255474452555,
+            "headCorrectRaces": 236,
+            "secondHitsWhenHeadCorrect": 93,
+            "secondAccuracyWhenHeadCorrect": 0.3940677966101695,
+            "secondTop2HitsWhenHeadCorrect": 154,
+            "secondTop2CoverageWhenHeadCorrect": 0.652542372881356,
+            "pairHits": 93,
+            "pairAccuracy": 0.13576642335766423
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 236,
+            "headAccuracy": 0.3445255474452555,
+            "headCorrectRaces": 236,
+            "secondHitsWhenHeadCorrect": 93,
+            "secondAccuracyWhenHeadCorrect": 0.3940677966101695,
+            "secondTop2HitsWhenHeadCorrect": 151,
+            "secondTop2CoverageWhenHeadCorrect": 0.6398305084745762,
+            "pairHits": 93,
+            "pairAccuracy": 0.13576642335766423
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 239,
+          "headCorrect": 85,
+          "headAccuracy": 0.35564853556485354,
+          "headCorrectRaces": 85,
+          "secondHitsWhenHeadCorrect": 33,
+          "secondAccuracyWhenHeadCorrect": 0.38823529411764707,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.6470588235294118,
+          "pairHits": 33,
+          "pairAccuracy": 0.13807531380753138
+        },
+        "candidate": {
+          "races": 239,
+          "headCorrect": 85,
+          "headAccuracy": 0.35564853556485354,
+          "headCorrectRaces": 85,
+          "secondHitsWhenHeadCorrect": 39,
+          "secondAccuracyWhenHeadCorrect": 0.4588235294117647,
+          "secondTop2HitsWhenHeadCorrect": 57,
+          "secondTop2CoverageWhenHeadCorrect": 0.6705882352941176,
+          "pairHits": 39,
+          "pairAccuracy": 0.16317991631799164
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.07058823529411762,
+          "top2Delta": 0.0235294117647058,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 246,
+          "headCorrect": 72,
+          "headAccuracy": 0.2926829268292683,
+          "headCorrectRaces": 72,
+          "secondHitsWhenHeadCorrect": 16,
+          "secondAccuracyWhenHeadCorrect": 0.2222222222222222,
+          "secondTop2HitsWhenHeadCorrect": 37,
+          "secondTop2CoverageWhenHeadCorrect": 0.5138888888888888,
+          "pairHits": 16,
+          "pairAccuracy": 0.06504065040650407
+        },
+        "rawCandidate": {
+          "races": 246,
+          "headCorrect": 72,
+          "headAccuracy": 0.2926829268292683,
+          "headCorrectRaces": 72,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.25,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.5416666666666666,
+          "pairHits": 18,
+          "pairAccuracy": 0.07317073170731707
+        },
+        "gatedPolicy": {
+          "races": 246,
+          "headCorrect": 72,
+          "headAccuracy": 0.2926829268292683,
+          "headCorrectRaces": 72,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.25,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.5416666666666666,
+          "pairHits": 18,
+          "pairAccuracy": 0.07317073170731707
+        },
+        "secondAccuracyDeltaVsBaseline": 0.02777777777777779,
+        "secondTop2DeltaVsBaseline": 0.02777777777777779,
+        "pairAccuracyDeltaVsBaseline": 0.008130081300812997,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "shimonoseki",
+      "venueCode": "19",
+      "split": {
+        "calibrationDates": 51,
+        "validationDates": 17,
+        "testDates": 17,
+        "calibrationLastDate": "2026-07-24",
+        "validationFirstDate": "2026-07-27",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-19"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 591,
+            "headCorrect": 187,
+            "headAccuracy": 0.3164128595600677,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 68,
+            "secondAccuracyWhenHeadCorrect": 0.36363636363636365,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.6096256684491979,
+            "pairHits": 68,
+            "pairAccuracy": 0.11505922165820642
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 591,
+            "headCorrect": 187,
+            "headAccuracy": 0.3164128595600677,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.34759358288770054,
+            "secondTop2HitsWhenHeadCorrect": 109,
+            "secondTop2CoverageWhenHeadCorrect": 0.5828877005347594,
+            "pairHits": 65,
+            "pairAccuracy": 0.10998307952622674
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 591,
+            "headCorrect": 187,
+            "headAccuracy": 0.3164128595600677,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.34759358288770054,
+            "secondTop2HitsWhenHeadCorrect": 106,
+            "secondTop2CoverageWhenHeadCorrect": 0.5668449197860963,
+            "pairHits": 65,
+            "pairAccuracy": 0.10998307952622674
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 591,
+            "headCorrect": 187,
+            "headAccuracy": 0.3164128595600677,
+            "headCorrectRaces": 187,
+            "secondHitsWhenHeadCorrect": 60,
+            "secondAccuracyWhenHeadCorrect": 0.32085561497326204,
+            "secondTop2HitsWhenHeadCorrect": 107,
+            "secondTop2CoverageWhenHeadCorrect": 0.5721925133689839,
+            "pairHits": 60,
+            "pairAccuracy": 0.10152284263959391
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 204,
+          "headCorrect": 86,
+          "headAccuracy": 0.4215686274509804,
+          "headCorrectRaces": 86,
+          "secondHitsWhenHeadCorrect": 25,
+          "secondAccuracyWhenHeadCorrect": 0.29069767441860467,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.5348837209302325,
+          "pairHits": 25,
+          "pairAccuracy": 0.12254901960784313
+        },
+        "candidate": {
+          "races": 204,
+          "headCorrect": 86,
+          "headAccuracy": 0.4215686274509804,
+          "headCorrectRaces": 86,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.37209302325581395,
+          "secondTop2HitsWhenHeadCorrect": 56,
+          "secondTop2CoverageWhenHeadCorrect": 0.6511627906976745,
+          "pairHits": 32,
+          "pairAccuracy": 0.1568627450980392
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.08139534883720928,
+          "top2Delta": 0.11627906976744196,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 204,
+          "headCorrect": 67,
+          "headAccuracy": 0.3284313725490196,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.34328358208955223,
+          "secondTop2HitsWhenHeadCorrect": 34,
+          "secondTop2CoverageWhenHeadCorrect": 0.5074626865671642,
+          "pairHits": 23,
+          "pairAccuracy": 0.11274509803921569
+        },
+        "rawCandidate": {
+          "races": 204,
+          "headCorrect": 67,
+          "headAccuracy": 0.3284313725490196,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.31343283582089554,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.6268656716417911,
+          "pairHits": 21,
+          "pairAccuracy": 0.10294117647058823
+        },
+        "gatedPolicy": {
+          "races": 204,
+          "headCorrect": 67,
+          "headAccuracy": 0.3284313725490196,
+          "headCorrectRaces": 67,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.31343283582089554,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.6268656716417911,
+          "pairHits": 21,
+          "pairAccuracy": 0.10294117647058823
+        },
+        "secondAccuracyDeltaVsBaseline": -0.02985074626865669,
+        "secondTop2DeltaVsBaseline": 0.11940298507462688,
+        "pairAccuracyDeltaVsBaseline": -0.009803921568627458,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "suminoe",
+      "venueCode": "12",
+      "split": {
+        "calibrationDates": 57,
+        "validationDates": 19,
+        "testDates": 19,
+        "calibrationLastDate": "2026-07-16",
+        "validationFirstDate": "2026-07-17",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-17"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 179,
+            "headAccuracy": 0.26207906295754024,
+            "headCorrectRaces": 179,
+            "secondHitsWhenHeadCorrect": 64,
+            "secondAccuracyWhenHeadCorrect": 0.3575418994413408,
+            "secondTop2HitsWhenHeadCorrect": 97,
+            "secondTop2CoverageWhenHeadCorrect": 0.5418994413407822,
+            "pairHits": 64,
+            "pairAccuracy": 0.09370424597364568
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 179,
+            "headAccuracy": 0.26207906295754024,
+            "headCorrectRaces": 179,
+            "secondHitsWhenHeadCorrect": 60,
+            "secondAccuracyWhenHeadCorrect": 0.33519553072625696,
+            "secondTop2HitsWhenHeadCorrect": 105,
+            "secondTop2CoverageWhenHeadCorrect": 0.5865921787709497,
+            "pairHits": 60,
+            "pairAccuracy": 0.08784773060029283
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 179,
+            "headAccuracy": 0.26207906295754024,
+            "headCorrectRaces": 179,
+            "secondHitsWhenHeadCorrect": 60,
+            "secondAccuracyWhenHeadCorrect": 0.33519553072625696,
+            "secondTop2HitsWhenHeadCorrect": 104,
+            "secondTop2CoverageWhenHeadCorrect": 0.5810055865921788,
+            "pairHits": 60,
+            "pairAccuracy": 0.08784773060029283
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 179,
+            "headAccuracy": 0.26207906295754024,
+            "headCorrectRaces": 179,
+            "secondHitsWhenHeadCorrect": 60,
+            "secondAccuracyWhenHeadCorrect": 0.33519553072625696,
+            "secondTop2HitsWhenHeadCorrect": 102,
+            "secondTop2CoverageWhenHeadCorrect": 0.5698324022346368,
+            "pairHits": 60,
+            "pairAccuracy": 0.08784773060029283
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 69,
+          "headAccuracy": 0.3026315789473684,
+          "headCorrectRaces": 69,
+          "secondHitsWhenHeadCorrect": 19,
+          "secondAccuracyWhenHeadCorrect": 0.2753623188405797,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.6376811594202898,
+          "pairHits": 19,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "candidate": {
+          "races": 228,
+          "headCorrect": 69,
+          "headAccuracy": 0.3026315789473684,
+          "headCorrectRaces": 69,
+          "secondHitsWhenHeadCorrect": 25,
+          "secondAccuracyWhenHeadCorrect": 0.36231884057971014,
+          "secondTop2HitsWhenHeadCorrect": 49,
+          "secondTop2CoverageWhenHeadCorrect": 0.7101449275362319,
+          "pairHits": 25,
+          "pairAccuracy": 0.10964912280701754
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.08695652173913043,
+          "top2Delta": 0.07246376811594213,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 22,
+          "secondAccuracyWhenHeadCorrect": 0.2894736842105263,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.5526315789473685,
+          "pairHits": 22,
+          "pairAccuracy": 0.09649122807017543
+        },
+        "rawCandidate": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.3815789473684211,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5789473684210527,
+          "pairHits": 29,
+          "pairAccuracy": 0.12719298245614036
+        },
+        "gatedPolicy": {
+          "races": 228,
+          "headCorrect": 76,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 76,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.3815789473684211,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5789473684210527,
+          "pairHits": 29,
+          "pairAccuracy": 0.12719298245614036
+        },
+        "secondAccuracyDeltaVsBaseline": 0.09210526315789475,
+        "secondTop2DeltaVsBaseline": 0.02631578947368418,
+        "pairAccuracyDeltaVsBaseline": 0.030701754385964924,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tamagawa",
+      "venueCode": "05",
+      "split": {
+        "calibrationDates": 58,
+        "validationDates": 20,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-14",
+        "validationFirstDate": "2026-07-15",
+        "validationLastDate": "2026-08-17",
+        "testFirstDate": "2026-08-18"
+      },
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "cStW": 0.0,
+        "c2W": 1.2,
+        "cStartRankW": 0.0,
+        "c3W": 0.0,
+        "cFW": 0.0,
+        "overallStW": 0.0,
+        "abilityW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 182,
+            "headAccuracy": 0.2656934306569343,
+            "headCorrectRaces": 182,
+            "secondHitsWhenHeadCorrect": 59,
+            "secondAccuracyWhenHeadCorrect": 0.3241758241758242,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.6263736263736264,
+            "pairHits": 59,
+            "pairAccuracy": 0.08613138686131387
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 182,
+            "headAccuracy": 0.2656934306569343,
+            "headCorrectRaces": 182,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.31868131868131866,
+            "secondTop2HitsWhenHeadCorrect": 111,
+            "secondTop2CoverageWhenHeadCorrect": 0.6098901098901099,
+            "pairHits": 58,
+            "pairAccuracy": 0.08467153284671533
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 182,
+            "headAccuracy": 0.2656934306569343,
+            "headCorrectRaces": 182,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.31868131868131866,
+            "secondTop2HitsWhenHeadCorrect": 111,
+            "secondTop2CoverageWhenHeadCorrect": 0.6098901098901099,
+            "pairHits": 58,
+            "pairAccuracy": 0.08467153284671533
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 685,
+            "headCorrect": 182,
+            "headAccuracy": 0.2656934306569343,
+            "headCorrectRaces": 182,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.3131868131868132,
+            "secondTop2HitsWhenHeadCorrect": 113,
+            "secondTop2CoverageWhenHeadCorrect": 0.6208791208791209,
+            "pairHits": 57,
+            "pairAccuracy": 0.08321167883211679
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 83,
+          "headAccuracy": 0.3458333333333333,
+          "headCorrectRaces": 83,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.27710843373493976,
+          "secondTop2HitsWhenHeadCorrect": 40,
+          "secondTop2CoverageWhenHeadCorrect": 0.4819277108433735,
+          "pairHits": 23,
+          "pairAccuracy": 0.09583333333333334
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 83,
+          "headAccuracy": 0.3458333333333333,
+          "headCorrectRaces": 83,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.2891566265060241,
+          "secondTop2HitsWhenHeadCorrect": 43,
+          "secondTop2CoverageWhenHeadCorrect": 0.5180722891566265,
+          "pairHits": 24,
+          "pairAccuracy": 0.1
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.01204819277108432,
+          "top2Delta": 0.03614457831325302,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 65,
+          "headAccuracy": 0.2708333333333333,
+          "headCorrectRaces": 65,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.35384615384615387,
+          "secondTop2HitsWhenHeadCorrect": 35,
+          "secondTop2CoverageWhenHeadCorrect": 0.5384615384615384,
+          "pairHits": 23,
+          "pairAccuracy": 0.09583333333333334
+        },
+        "rawCandidate": {
+          "races": 240,
+          "headCorrect": 65,
+          "headAccuracy": 0.2708333333333333,
+          "headCorrectRaces": 65,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.3230769230769231,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.6,
+          "pairHits": 21,
+          "pairAccuracy": 0.0875
+        },
+        "gatedPolicy": {
+          "races": 240,
+          "headCorrect": 65,
+          "headAccuracy": 0.2708333333333333,
+          "headCorrectRaces": 65,
+          "secondHitsWhenHeadCorrect": 21,
+          "secondAccuracyWhenHeadCorrect": 0.3230769230769231,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.6,
+          "pairHits": 21,
+          "pairAccuracy": 0.0875
+        },
+        "secondAccuracyDeltaVsBaseline": -0.03076923076923077,
+        "secondTop2DeltaVsBaseline": 0.06153846153846154,
+        "pairAccuracyDeltaVsBaseline": -0.008333333333333345,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "toda",
+      "venueCode": "02",
+      "split": {
+        "calibrationDates": 50,
+        "validationDates": 17,
+        "testDates": 17,
+        "calibrationLastDate": "2026-07-10",
+        "validationFirstDate": "2026-07-11",
+        "validationLastDate": "2026-08-14",
+        "testFirstDate": "2026-08-15"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 599,
+            "headCorrect": 183,
+            "headAccuracy": 0.3055091819699499,
+            "headCorrectRaces": 183,
+            "secondHitsWhenHeadCorrect": 63,
+            "secondAccuracyWhenHeadCorrect": 0.3442622950819672,
+            "secondTop2HitsWhenHeadCorrect": 100,
+            "secondTop2CoverageWhenHeadCorrect": 0.546448087431694,
+            "pairHits": 63,
+            "pairAccuracy": 0.10517529215358931
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 599,
+            "headCorrect": 183,
+            "headAccuracy": 0.3055091819699499,
+            "headCorrectRaces": 183,
+            "secondHitsWhenHeadCorrect": 59,
+            "secondAccuracyWhenHeadCorrect": 0.3224043715846995,
+            "secondTop2HitsWhenHeadCorrect": 100,
+            "secondTop2CoverageWhenHeadCorrect": 0.546448087431694,
+            "pairHits": 59,
+            "pairAccuracy": 0.09849749582637729
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 599,
+            "headCorrect": 183,
+            "headAccuracy": 0.3055091819699499,
+            "headCorrectRaces": 183,
+            "secondHitsWhenHeadCorrect": 59,
+            "secondAccuracyWhenHeadCorrect": 0.3224043715846995,
+            "secondTop2HitsWhenHeadCorrect": 98,
+            "secondTop2CoverageWhenHeadCorrect": 0.5355191256830601,
+            "pairHits": 59,
+            "pairAccuracy": 0.09849749582637729
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 599,
+            "headCorrect": 183,
+            "headAccuracy": 0.3055091819699499,
+            "headCorrectRaces": 183,
+            "secondHitsWhenHeadCorrect": 59,
+            "secondAccuracyWhenHeadCorrect": 0.3224043715846995,
+            "secondTop2HitsWhenHeadCorrect": 98,
+            "secondTop2CoverageWhenHeadCorrect": 0.5355191256830601,
+            "pairHits": 59,
+            "pairAccuracy": 0.09849749582637729
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 198,
+          "headCorrect": 64,
+          "headAccuracy": 0.32323232323232326,
+          "headCorrectRaces": 64,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.3125,
+          "secondTop2HitsWhenHeadCorrect": 36,
+          "secondTop2CoverageWhenHeadCorrect": 0.5625,
+          "pairHits": 20,
+          "pairAccuracy": 0.10101010101010101
+        },
+        "candidate": {
+          "races": 198,
+          "headCorrect": 64,
+          "headAccuracy": 0.32323232323232326,
+          "headCorrectRaces": 64,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.359375,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.59375,
+          "pairHits": 23,
+          "pairAccuracy": 0.11616161616161616
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.046875,
+          "top2Delta": 0.03125,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 192,
+          "headCorrect": 78,
+          "headAccuracy": 0.40625,
+          "headCorrectRaces": 78,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.2564102564102564,
+          "secondTop2HitsWhenHeadCorrect": 36,
+          "secondTop2CoverageWhenHeadCorrect": 0.46153846153846156,
+          "pairHits": 20,
+          "pairAccuracy": 0.10416666666666667
+        },
+        "rawCandidate": {
+          "races": 192,
+          "headCorrect": 78,
+          "headAccuracy": 0.40625,
+          "headCorrectRaces": 78,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.34615384615384615,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5641025641025641,
+          "pairHits": 27,
+          "pairAccuracy": 0.140625
+        },
+        "gatedPolicy": {
+          "races": 192,
+          "headCorrect": 78,
+          "headAccuracy": 0.40625,
+          "headCorrectRaces": 78,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.34615384615384615,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5641025641025641,
+          "pairHits": 27,
+          "pairAccuracy": 0.140625
+        },
+        "secondAccuracyDeltaVsBaseline": 0.08974358974358976,
+        "secondTop2DeltaVsBaseline": 0.10256410256410253,
+        "pairAccuracyDeltaVsBaseline": 0.03645833333333333,
+        "rawCandidateSafeCourseJoinCoverage": 0.9947916666666666,
+        "rawCandidateJoinMiss": {
+          "NO_REGISTRATION_MATCH": 5
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokoname",
+      "venueCode": "08",
+      "split": {
+        "calibrationDates": 66,
+        "validationDates": 22,
+        "testDates": 22,
+        "calibrationLastDate": "2026-07-08",
+        "validationFirstDate": "2026-07-09",
+        "validationLastDate": "2026-08-11",
+        "testFirstDate": "2026-08-12"
+      },
+      "selectedProfile": {
+        "name": "COURSE_PLUS_PERIOD",
+        "cStW": 4.0,
+        "c2W": 0.9,
+        "cStartRankW": 0.18,
+        "c3W": 0.45,
+        "cFW": 0.04,
+        "overallStW": 1.5,
+        "abilityW": 0.02
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 781,
+            "headCorrect": 266,
+            "headAccuracy": 0.3405889884763124,
+            "headCorrectRaces": 266,
+            "secondHitsWhenHeadCorrect": 109,
+            "secondAccuracyWhenHeadCorrect": 0.40977443609022557,
+            "secondTop2HitsWhenHeadCorrect": 185,
+            "secondTop2CoverageWhenHeadCorrect": 0.6954887218045113,
+            "pairHits": 109,
+            "pairAccuracy": 0.13956466069142126
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 781,
+            "headCorrect": 266,
+            "headAccuracy": 0.3405889884763124,
+            "headCorrectRaces": 266,
+            "secondHitsWhenHeadCorrect": 107,
+            "secondAccuracyWhenHeadCorrect": 0.40225563909774437,
+            "secondTop2HitsWhenHeadCorrect": 184,
+            "secondTop2CoverageWhenHeadCorrect": 0.6917293233082706,
+            "pairHits": 107,
+            "pairAccuracy": 0.13700384122919335
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 781,
+            "headCorrect": 266,
+            "headAccuracy": 0.3405889884763124,
+            "headCorrectRaces": 266,
+            "secondHitsWhenHeadCorrect": 107,
+            "secondAccuracyWhenHeadCorrect": 0.40225563909774437,
+            "secondTop2HitsWhenHeadCorrect": 183,
+            "secondTop2CoverageWhenHeadCorrect": 0.6879699248120301,
+            "pairHits": 107,
+            "pairAccuracy": 0.13700384122919335
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 781,
+            "headCorrect": 266,
+            "headAccuracy": 0.3405889884763124,
+            "headCorrectRaces": 266,
+            "secondHitsWhenHeadCorrect": 107,
+            "secondAccuracyWhenHeadCorrect": 0.40225563909774437,
+            "secondTop2HitsWhenHeadCorrect": 182,
+            "secondTop2CoverageWhenHeadCorrect": 0.6842105263157895,
+            "pairHits": 107,
+            "pairAccuracy": 0.13700384122919335
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 257,
+          "headCorrect": 87,
+          "headAccuracy": 0.33852140077821014,
+          "headCorrectRaces": 87,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.27586206896551724,
+          "secondTop2HitsWhenHeadCorrect": 42,
+          "secondTop2CoverageWhenHeadCorrect": 0.4827586206896552,
+          "pairHits": 24,
+          "pairAccuracy": 0.0933852140077821
+        },
+        "candidate": {
+          "races": 257,
+          "headCorrect": 87,
+          "headAccuracy": 0.33852140077821014,
+          "headCorrectRaces": 87,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.27586206896551724,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.5747126436781609,
+          "pairHits": 24,
+          "pairAccuracy": 0.0933852140077821
+        },
+        "candidateEnabled": false,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.0,
+          "top2Delta": 0.09195402298850569,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 264,
+          "headCorrect": 91,
+          "headAccuracy": 0.3446969696969697,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.32967032967032966,
+          "secondTop2HitsWhenHeadCorrect": 57,
+          "secondTop2CoverageWhenHeadCorrect": 0.6263736263736264,
+          "pairHits": 30,
+          "pairAccuracy": 0.11363636363636363
+        },
+        "rawCandidate": {
+          "races": 264,
+          "headCorrect": 91,
+          "headAccuracy": 0.3446969696969697,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.37362637362637363,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.6043956043956044,
+          "pairHits": 34,
+          "pairAccuracy": 0.12878787878787878
+        },
+        "gatedPolicy": {
+          "races": 264,
+          "headCorrect": 91,
+          "headAccuracy": 0.3446969696969697,
+          "headCorrectRaces": 91,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.32967032967032966,
+          "secondTop2HitsWhenHeadCorrect": 57,
+          "secondTop2CoverageWhenHeadCorrect": 0.6263736263736264,
+          "pairHits": 30,
+          "pairAccuracy": 0.11363636363636363
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0,
+        "secondTop2DeltaVsBaseline": 0.0,
+        "pairAccuracyDeltaVsBaseline": 0.0,
+        "rawCandidateSafeCourseJoinCoverage": 0.9992424242424243,
+        "rawCandidateJoinMiss": {
+          "NO_REGISTRATION_MATCH": 1
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokuyama",
+      "venueCode": "18",
+      "split": {
+        "calibrationDates": 60,
+        "validationDates": 20,
+        "testDates": 21,
+        "calibrationLastDate": "2026-07-07",
+        "validationFirstDate": "2026-07-08",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-17"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 255,
+            "headAccuracy": 0.35614525139664804,
+            "headCorrectRaces": 255,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.3058823529411765,
+            "secondTop2HitsWhenHeadCorrect": 140,
+            "secondTop2CoverageWhenHeadCorrect": 0.5490196078431373,
+            "pairHits": 78,
+            "pairAccuracy": 0.10893854748603352
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 255,
+            "headAccuracy": 0.35614525139664804,
+            "headCorrectRaces": 255,
+            "secondHitsWhenHeadCorrect": 73,
+            "secondAccuracyWhenHeadCorrect": 0.28627450980392155,
+            "secondTop2HitsWhenHeadCorrect": 134,
+            "secondTop2CoverageWhenHeadCorrect": 0.5254901960784314,
+            "pairHits": 73,
+            "pairAccuracy": 0.10195530726256984
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 255,
+            "headAccuracy": 0.35614525139664804,
+            "headCorrectRaces": 255,
+            "secondHitsWhenHeadCorrect": 70,
+            "secondAccuracyWhenHeadCorrect": 0.27450980392156865,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5098039215686274,
+            "pairHits": 70,
+            "pairAccuracy": 0.09776536312849161
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 716,
+            "headCorrect": 255,
+            "headAccuracy": 0.35614525139664804,
+            "headCorrectRaces": 255,
+            "secondHitsWhenHeadCorrect": 67,
+            "secondAccuracyWhenHeadCorrect": 0.2627450980392157,
+            "secondTop2HitsWhenHeadCorrect": 129,
+            "secondTop2CoverageWhenHeadCorrect": 0.5058823529411764,
+            "pairHits": 67,
+            "pairAccuracy": 0.0935754189944134
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 74,
+          "headAccuracy": 0.30833333333333335,
+          "headCorrectRaces": 74,
+          "secondHitsWhenHeadCorrect": 15,
+          "secondAccuracyWhenHeadCorrect": 0.20270270270270271,
+          "secondTop2HitsWhenHeadCorrect": 31,
+          "secondTop2CoverageWhenHeadCorrect": 0.4189189189189189,
+          "pairHits": 15,
+          "pairAccuracy": 0.0625
+        },
+        "candidate": {
+          "races": 240,
+          "headCorrect": 74,
+          "headAccuracy": 0.30833333333333335,
+          "headCorrectRaces": 74,
+          "secondHitsWhenHeadCorrect": 20,
+          "secondAccuracyWhenHeadCorrect": 0.2702702702702703,
+          "secondTop2HitsWhenHeadCorrect": 38,
+          "secondTop2CoverageWhenHeadCorrect": 0.5135135135135135,
+          "pairHits": 20,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.06756756756756757,
+          "top2Delta": 0.09459459459459457,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 252,
+          "headCorrect": 77,
+          "headAccuracy": 0.3055555555555556,
+          "headCorrectRaces": 77,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.3116883116883117,
+          "secondTop2HitsWhenHeadCorrect": 36,
+          "secondTop2CoverageWhenHeadCorrect": 0.4675324675324675,
+          "pairHits": 24,
+          "pairAccuracy": 0.09523809523809523
+        },
+        "rawCandidate": {
+          "races": 252,
+          "headCorrect": 77,
+          "headAccuracy": 0.3055555555555556,
+          "headCorrectRaces": 77,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.4155844155844156,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5714285714285714,
+          "pairHits": 32,
+          "pairAccuracy": 0.12698412698412698
+        },
+        "gatedPolicy": {
+          "races": 252,
+          "headCorrect": 77,
+          "headAccuracy": 0.3055555555555556,
+          "headCorrectRaces": 77,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.4155844155844156,
+          "secondTop2HitsWhenHeadCorrect": 44,
+          "secondTop2CoverageWhenHeadCorrect": 0.5714285714285714,
+          "pairHits": 32,
+          "pairAccuracy": 0.12698412698412698
+        },
+        "secondAccuracyDeltaVsBaseline": 0.10389610389610393,
+        "secondTop2DeltaVsBaseline": 0.10389610389610388,
+        "pairAccuracyDeltaVsBaseline": 0.031746031746031744,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tsu",
+      "venueCode": "09",
+      "split": {
+        "calibrationDates": 69,
+        "validationDates": 23,
+        "testDates": 23,
+        "calibrationLastDate": "2026-07-12",
+        "validationFirstDate": "2026-07-13",
+        "validationLastDate": "2026-08-16",
+        "testFirstDate": "2026-08-17"
+      },
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "cStW": 6.0,
+        "c2W": 1.4,
+        "cStartRankW": 0.28,
+        "c3W": 0.75,
+        "cFW": 0.06,
+        "overallStW": 2.0,
+        "abilityW": 0.03
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 270,
+            "headAccuracy": 0.3413400758533502,
+            "headCorrectRaces": 270,
+            "secondHitsWhenHeadCorrect": 98,
+            "secondAccuracyWhenHeadCorrect": 0.362962962962963,
+            "secondTop2HitsWhenHeadCorrect": 162,
+            "secondTop2CoverageWhenHeadCorrect": 0.6,
+            "pairHits": 98,
+            "pairAccuracy": 0.12389380530973451
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "cStW": 0.0,
+            "c2W": 1.2,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 270,
+            "headAccuracy": 0.3413400758533502,
+            "headCorrectRaces": 270,
+            "secondHitsWhenHeadCorrect": 95,
+            "secondAccuracyWhenHeadCorrect": 0.35185185185185186,
+            "secondTop2HitsWhenHeadCorrect": 159,
+            "secondTop2CoverageWhenHeadCorrect": 0.5888888888888889,
+            "pairHits": 95,
+            "pairAccuracy": 0.12010113780025285
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 270,
+            "headAccuracy": 0.3413400758533502,
+            "headCorrectRaces": 270,
+            "secondHitsWhenHeadCorrect": 93,
+            "secondAccuracyWhenHeadCorrect": 0.34444444444444444,
+            "secondTop2HitsWhenHeadCorrect": 156,
+            "secondTop2CoverageWhenHeadCorrect": 0.5777777777777777,
+            "pairHits": 93,
+            "pairAccuracy": 0.11757269279393173
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST_2RATE",
+            "cStW": 4.0,
+            "c2W": 1.0,
+            "cStartRankW": 0.0,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 270,
+            "headAccuracy": 0.3413400758533502,
+            "headCorrectRaces": 270,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.34074074074074073,
+            "secondTop2HitsWhenHeadCorrect": 156,
+            "secondTop2CoverageWhenHeadCorrect": 0.5777777777777777,
+            "pairHits": 92,
+            "pairAccuracy": 0.11630847029077118
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 255,
+          "headCorrect": 85,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 85,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.3058823529411765,
+          "secondTop2HitsWhenHeadCorrect": 45,
+          "secondTop2CoverageWhenHeadCorrect": 0.5294117647058824,
+          "pairHits": 26,
+          "pairAccuracy": 0.10196078431372549
+        },
+        "candidate": {
+          "races": 255,
+          "headCorrect": 85,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 85,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.3411764705882353,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.6470588235294118,
+          "pairHits": 29,
+          "pairAccuracy": 0.11372549019607843
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.03529411764705881,
+          "top2Delta": 0.11764705882352944,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 272,
+          "headCorrect": 86,
+          "headAccuracy": 0.3161764705882353,
+          "headCorrectRaces": 86,
+          "secondHitsWhenHeadCorrect": 18,
+          "secondAccuracyWhenHeadCorrect": 0.20930232558139536,
+          "secondTop2HitsWhenHeadCorrect": 37,
+          "secondTop2CoverageWhenHeadCorrect": 0.43023255813953487,
+          "pairHits": 18,
+          "pairAccuracy": 0.0661764705882353
+        },
+        "rawCandidate": {
+          "races": 272,
+          "headCorrect": 86,
+          "headAccuracy": 0.3161764705882353,
+          "headCorrectRaces": 86,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.37209302325581395,
+          "secondTop2HitsWhenHeadCorrect": 51,
+          "secondTop2CoverageWhenHeadCorrect": 0.5930232558139535,
+          "pairHits": 32,
+          "pairAccuracy": 0.11764705882352941
+        },
+        "gatedPolicy": {
+          "races": 272,
+          "headCorrect": 86,
+          "headAccuracy": 0.3161764705882353,
+          "headCorrectRaces": 86,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.37209302325581395,
+          "secondTop2HitsWhenHeadCorrect": 51,
+          "secondTop2CoverageWhenHeadCorrect": 0.5930232558139535,
+          "pairHits": 32,
+          "pairAccuracy": 0.11764705882352941
+        },
+        "secondAccuracyDeltaVsBaseline": 0.1627906976744186,
+        "secondTop2DeltaVsBaseline": 0.16279069767441867,
+        "pairAccuracyDeltaVsBaseline": 0.051470588235294115,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "wakamatsu",
+      "venueCode": "20",
+      "split": {
+        "calibrationDates": 57,
+        "validationDates": 19,
+        "testDates": 20,
+        "calibrationLastDate": "2026-07-20",
+        "validationFirstDate": "2026-07-21",
+        "validationLastDate": "2026-08-19",
+        "testFirstDate": "2026-08-20"
+      },
+      "selectedProfile": {
+        "name": "COURSE_PLUS_PERIOD",
+        "cStW": 4.0,
+        "c2W": 0.9,
+        "cStartRankW": 0.18,
+        "c3W": 0.45,
+        "cFW": 0.04,
+        "overallStW": 1.5,
+        "abilityW": 0.02
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD",
+            "cStW": 4.0,
+            "c2W": 0.9,
+            "cStartRankW": 0.18,
+            "c3W": 0.45,
+            "cFW": 0.04,
+            "overallStW": 1.5,
+            "abilityW": 0.02
+          },
+          "metrics": {
+            "races": 640,
+            "headCorrect": 229,
+            "headAccuracy": 0.3578125,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.4017467248908297,
+            "secondTop2HitsWhenHeadCorrect": 146,
+            "secondTop2CoverageWhenHeadCorrect": 0.6375545851528385,
+            "pairHits": 92,
+            "pairAccuracy": 0.14375
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "cStW": 6.0,
+            "c2W": 1.4,
+            "cStartRankW": 0.28,
+            "c3W": 0.75,
+            "cFW": 0.06,
+            "overallStW": 2.0,
+            "abilityW": 0.03
+          },
+          "metrics": {
+            "races": 640,
+            "headCorrect": 229,
+            "headAccuracy": 0.3578125,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.4017467248908297,
+            "secondTop2HitsWhenHeadCorrect": 146,
+            "secondTop2CoverageWhenHeadCorrect": 0.6375545851528385,
+            "pairHits": 92,
+            "pairAccuracy": 0.14375
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "cStW": 4.5,
+            "c2W": 1.0,
+            "cStartRankW": 0.2,
+            "c3W": 0.55,
+            "cFW": 0.04,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 640,
+            "headCorrect": 229,
+            "headAccuracy": 0.3578125,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 91,
+            "secondAccuracyWhenHeadCorrect": 0.39737991266375544,
+            "secondTop2HitsWhenHeadCorrect": 148,
+            "secondTop2CoverageWhenHeadCorrect": 0.6462882096069869,
+            "pairHits": 91,
+            "pairAccuracy": 0.1421875
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START",
+            "cStW": 3.0,
+            "c2W": 0.8,
+            "cStartRankW": 0.18,
+            "c3W": 0.0,
+            "cFW": 0.0,
+            "overallStW": 0.0,
+            "abilityW": 0.0
+          },
+          "metrics": {
+            "races": 640,
+            "headCorrect": 229,
+            "headAccuracy": 0.3578125,
+            "headCorrectRaces": 229,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.3930131004366812,
+            "secondTop2HitsWhenHeadCorrect": 148,
+            "secondTop2CoverageWhenHeadCorrect": 0.6462882096069869,
+            "pairHits": 90,
+            "pairAccuracy": 0.140625
+          }
+        }
+      ],
+      "validation": {
+        "baseline": {
+          "races": 202,
+          "headCorrect": 75,
+          "headAccuracy": 0.3712871287128713,
+          "headCorrectRaces": 75,
+          "secondHitsWhenHeadCorrect": 33,
+          "secondAccuracyWhenHeadCorrect": 0.44,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.6666666666666666,
+          "pairHits": 33,
+          "pairAccuracy": 0.16336633663366337
+        },
+        "candidate": {
+          "races": 202,
+          "headCorrect": 75,
+          "headAccuracy": 0.3712871287128713,
+          "headCorrectRaces": 75,
+          "secondHitsWhenHeadCorrect": 36,
+          "secondAccuracyWhenHeadCorrect": 0.48,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.7333333333333333,
+          "pairHits": 36,
+          "pairAccuracy": 0.1782178217821782
+        },
+        "candidateEnabled": true,
+        "decision": {
+          "enoughHeadCorrect": true,
+          "secondDelta": 0.03999999999999998,
+          "top2Delta": 0.06666666666666665,
+          "minHeadCorrect": 50,
+          "minSecondDelta": 0.005,
+          "requireTop2NonRegression": true
+        }
+      },
+      "test": {
+        "baseline": {
+          "races": 240,
+          "headCorrect": 89,
+          "headAccuracy": 0.37083333333333335,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.25842696629213485,
+          "secondTop2HitsWhenHeadCorrect": 53,
+          "secondTop2CoverageWhenHeadCorrect": 0.5955056179775281,
+          "pairHits": 23,
+          "pairAccuracy": 0.09583333333333334
+        },
+        "rawCandidate": {
+          "races": 240,
+          "headCorrect": 89,
+          "headAccuracy": 0.37083333333333335,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.33707865168539325,
+          "secondTop2HitsWhenHeadCorrect": 58,
+          "secondTop2CoverageWhenHeadCorrect": 0.651685393258427,
+          "pairHits": 30,
+          "pairAccuracy": 0.125
+        },
+        "gatedPolicy": {
+          "races": 240,
+          "headCorrect": 89,
+          "headAccuracy": 0.37083333333333335,
+          "headCorrectRaces": 89,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.33707865168539325,
+          "secondTop2HitsWhenHeadCorrect": 58,
+          "secondTop2CoverageWhenHeadCorrect": 0.651685393258427,
+          "pairHits": 30,
+          "pairAccuracy": 0.125
+        },
+        "secondAccuracyDeltaVsBaseline": 0.0786516853932584,
+        "secondTop2DeltaVsBaseline": 0.0561797752808989,
+        "pairAccuracyDeltaVsBaseline": 0.02916666666666666,
+        "rawCandidateSafeCourseJoinCoverage": 1.0,
+        "rawCandidateJoinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    }
+  ]
+}
