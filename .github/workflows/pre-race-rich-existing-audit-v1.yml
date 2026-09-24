@@ -1,0 +1,39 @@
+name: PRE-RACE rich existing audit v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/pre-race-rich-existing-audit-v1.yml'
+      - 'scripts/pre-race-rich-existing-audit-v1.py'
+      - 'live/**/pre/race-*-pack.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Audit existing result-blind PRE-RACE packs
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/pre-race-rich-existing-audit-v1.py
+          python3 scripts/pre-race-rich-existing-audit-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/pre-race-rich-existing-audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-pre-race-rich-existing-audit-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          print('TRANSPARENCY_AUDIT_PASS',x['totals'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pre-race-rich-existing-audit-v1
+          path: research/pre-race-rich-existing-audit-v1.json
+          retention-days: 30
+          if-no-files-found: error
