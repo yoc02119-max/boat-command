@@ -57,9 +57,40 @@ jobs:
               print('LINE',i,'BYTE_LEN',len(b),'TEXT',b.decode('cp932','replace')[:260])
           PY
 
+      - name: Build historical racer-period enrichment audit
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-enrichment-v1.py
+          python3 scripts/racer-period-enrichment-v1.py --self-test
+          rm -rf /tmp/racer-period && mkdir -p /tmp/racer-period
+          python3 scripts/racer-period-enrichment-v1.py --needed-files > /tmp/racer-period/needed.txt
+          echo 'NEEDED_PERIOD_ARCHIVES'
+          cat /tmp/racer-period/needed.txt
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            stem="${file%.lzh}"
+            mkdir -p "/tmp/racer-period/$stem"
+            curl -fsSL --connect-timeout 20 --max-time 60               "https://www.boatrace.jp/static_extra/pc_static/download/data/kibetsu/$file"               -o "/tmp/racer-period/$file"
+            lha "xw=/tmp/racer-period/$stem" "/tmp/racer-period/$file" >/dev/null
+          done < /tmp/racer-period/needed.txt
+          python3 scripts/racer-period-enrichment-v1.py             --archive-root /tmp/racer-period             --out-root racer-period-24
+          python3 - <<'PY'
+          import json
+          x=json.load(open('racer-period-24/audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-enrichment-audit-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['totals']['venues']==24
+          assert x['totals']['boatRows']>150000
+          print('RACER_PERIOD_ENRICHMENT_AUDIT_PASS',x['totals'])
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
-          name: racer-period-download-discovery-v1
-          path: research/racer-period-download-discovery-v1.json
-          retention-days: 7
+          name: racer-period-enrichment-v1
+          path: |
+            research/racer-period-download-discovery-v1.json
+            racer-period-24/
+          retention-days: 30
           if-no-files-found: error
