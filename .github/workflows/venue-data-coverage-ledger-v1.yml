@@ -1,0 +1,105 @@
+name: Venue data coverage ledger v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/venue-data-coverage-ledger-v1.yml'
+      - 'scripts/venue-data-coverage-ledger-v1.py'
+      - 'rich-history-24/**'
+      - 'racer-period-24/**'
+      - 'historical-beforeinfo-24/**'
+  schedule:
+    - cron: '20 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-data-coverage-ledger-v1
+  cancel-in-progress: true
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main for scheduled/manual run
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Build exact venue-by-field ledger
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/venue-data-coverage-ledger-v1.py
+          python3 scripts/venue-data-coverage-ledger-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/venue-data-coverage-ledger-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-venue-data-coverage-ledger-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert len(x['venues'])==24
+          assert x['totals']['historyRichRaces']>27000
+          assert x['totals']['racerPeriodSafeJoinedBoatRows']>160000
+          print('DATA_COVERAGE_LEDGER_BOUNDARY_PASS',x['totals'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: venue-data-coverage-ledger-v1
+          path: |
+            research/venue-data-coverage-ledger-v1.json
+            research/venue-data-coverage-ledger-v1.md
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save ledger to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/venue-data-coverage-ledger-v1.json /tmp/ledger.json
+          cp research/venue-data-coverage-ledger-v1.md /tmp/ledger.md
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/ledger.json research/venue-data-coverage-ledger-v1.json
+          cp /tmp/ledger.md research/venue-data-coverage-ledger-v1.md
+          git config user.name 'boat-command-data-coverage'
+          git config user.email 'boat-command-data-coverage@users.noreply.github.com'
+          git add research/venue-data-coverage-ledger-v1.json research/venue-data-coverage-ledger-v1.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store venue data coverage ledger [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
+
+      - name: Publish daily ledger
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          cp research/venue-data-coverage-ledger-v1.json /tmp/ledger.json
+          cp research/venue-data-coverage-ledger-v1.md /tmp/ledger.md
+          git config user.name 'boat-command-data-coverage'
+          git config user.email 'boat-command-data-coverage@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p research
+            cp /tmp/ledger.json research/venue-data-coverage-ledger-v1.json
+            cp /tmp/ledger.md research/venue-data-coverage-ledger-v1.md
+            git add research/venue-data-coverage-ledger-v1.json research/venue-data-coverage-ledger-v1.md
+            git diff --cached --quiet && exit 0
+            git commit -m 'analysis(research): refresh venue data coverage ledger'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
