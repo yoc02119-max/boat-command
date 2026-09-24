@@ -1,0 +1,87 @@
+name: Historical beforeinfo field probe v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/historical-beforeinfo-field-probe-v1.yml'
+      - 'scripts/historical-beforeinfo-field-probe-v1.py'
+      - 'scripts/venue-program-collector-v1.py'
+      - 'rich-history-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-beforeinfo-field-probe-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Probe oldest accepted race in all 24 venues
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/historical-beforeinfo-field-probe-v1.py
+          python3 scripts/historical-beforeinfo-field-probe-v1.py
+          python3 -m py_compile scripts/historical-beforeinfo-recent-probe-v1.py
+          python3 scripts/historical-beforeinfo-recent-probe-v1.py
+          python3 -m py_compile scripts/beforeinfo-latency-control-v1.py
+          python3 scripts/beforeinfo-latency-control-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/historical-beforeinfo-field-probe-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-historical-beforeinfo-field-probe-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['summary']['venuesProbed']==24
+          y=json.load(open('research/historical-beforeinfo-recent-probe-v1.json',encoding='utf-8'))
+          assert y['schema']=='boat-command-historical-beforeinfo-recent-probe-v1'
+          assert y['researchOnly'] is True and y['productionChanged'] is False and y['predictionInputChanged'] is False
+          assert y['summary']['venuesProbed']==24
+          z=json.load(open('research/beforeinfo-latency-control-v1.json',encoding='utf-8'))
+          assert z['schema']=='boat-command-beforeinfo-latency-control-v1'
+          assert z['researchOnly'] is True and z['productionChanged'] is False and z['predictionInputChanged'] is False
+          print('HISTORICAL_BEFOREINFO_BOUNDARY_PASS',{'oldest':x['summary'],'recent':y['summary'],'latency':z['samples']})
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-beforeinfo-field-probe-v1
+          path: |
+            research/historical-beforeinfo-field-probe-v1.json
+            research/historical-beforeinfo-recent-probe-v1.json
+            research/beforeinfo-latency-control-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save probe report to source PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/historical-beforeinfo-field-probe-v1.json /tmp/historical-beforeinfo-field-probe-v1.json
+          cp research/historical-beforeinfo-recent-probe-v1.json /tmp/historical-beforeinfo-recent-probe-v1.json
+          cp research/beforeinfo-latency-control-v1.json /tmp/beforeinfo-latency-control-v1.json
+          git reset --hard
+          git clean -fd
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/historical-beforeinfo-field-probe-v1.json research/
+          cp /tmp/historical-beforeinfo-recent-probe-v1.json research/
+          cp /tmp/beforeinfo-latency-control-v1.json research/
+          git config user.name 'boat-command-historical-beforeinfo'
+          git config user.email 'boat-command-historical-beforeinfo@users.noreply.github.com'
+          git add research/historical-beforeinfo-field-probe-v1.json research/historical-beforeinfo-recent-probe-v1.json research/beforeinfo-latency-control-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store historical beforeinfo field probe [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
