@@ -122,11 +122,11 @@ def compact_beforeinfo(g,row):
                 if item.get("exhibitionTime") is None:
                     for cell in row_cells:
                         v=str(cell).strip()
-                        if re.fullmatch(r"6\\.\\d{2}",v):
+                        if re.fullmatch(r"6\.\d{2}",v):
                             item["exhibitionTime"]=float(v);break
                 if item.get("tilt") is None and len(row_cells)>5:
                     v=str(row_cells[5]).strip()
-                    if re.fullmatch(r"-?\\d+(?:\\.\\d+)?",v):
+                    if re.fullmatch(r"-?\d+(?:\.\d+)?",v):
                         item["tilt"]=float(v)
                 ex[lane]=item
             break
