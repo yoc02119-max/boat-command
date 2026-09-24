@@ -9,7 +9,7 @@ on:
       - 'scripts/venue-program-collector-v1.py'
       - 'rich-history-24/**'
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -41,9 +41,9 @@ jobs:
           python3 -m py_compile scripts/historical-beforeinfo-backfill-v1.py
           python3 scripts/historical-beforeinfo-backfill-v1.py --self-test
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            python3 scripts/historical-beforeinfo-backfill-v1.py               --one-per-venue --max-groups 24 --verify-candidates 24 --workers 6
+            python3 scripts/historical-beforeinfo-backfill-v1.py               --one-per-venue --max-groups 4 --verify-candidates 8 --workers 3
           else
-            python3 scripts/historical-beforeinfo-backfill-v1.py               --max-groups 24 --verify-candidates 36 --workers 6
+            python3 scripts/historical-beforeinfo-backfill-v1.py               --max-groups 4 --verify-candidates 8 --workers 3
           fi
 
       - name: Safety and completeness audit
