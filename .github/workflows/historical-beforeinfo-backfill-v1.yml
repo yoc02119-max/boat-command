@@ -43,7 +43,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             python3 scripts/historical-beforeinfo-backfill-v1.py               --one-per-venue --max-groups 4 --verify-candidates 8 --workers 3
           else
-            python3 scripts/historical-beforeinfo-backfill-v1.py               --max-groups 4 --verify-candidates 8 --workers 3
+            python3 scripts/historical-beforeinfo-backfill-v1.py               --balanced --max-groups 4 --verify-candidates 8 --workers 3
           fi
 
       - name: Safety and completeness audit
