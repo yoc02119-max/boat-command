@@ -1,0 +1,84 @@
+name: Course-second FORWARD evaluation v1
+
+on:
+  workflow_run:
+    workflows: ["Venue POST-RACE batch generic v1"]
+    types: [completed]
+  schedule:
+    - cron: '25 0-14 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/course-second-forward-evaluation-v1.yml'
+      - 'scripts/racer-period-course-second-forward-evaluate-v1.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: course-second-forward-evaluation-v1
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify evaluator contract
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-course-second-forward-evaluate-v1.py
+          python3 scripts/racer-period-course-second-forward-evaluate-v1.py --self-test
+
+  evaluate:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main and evaluate immutable snapshots
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+          python3 scripts/racer-period-course-second-forward-evaluate-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/course-second-forward-evaluation-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-course-second-forward-evaluation-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['promotionEligible'] is False
+          assert x['featureBoundary']['resultsUsedOnlyAfterSnapshot'] is True
+          assert x['featureBoundary']['payoutUsed'] is False
+          print('COURSE_SECOND_FORWARD_EVAL_BOUNDARY_PASS',x['summary'])
+          PY
+          cp research/course-second-forward-evaluation-v1.json /tmp/course-second-forward-evaluation-v1.json
+
+      - name: Publish research evaluation only
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-course-second-eval'
+          git config user.email 'boat-command-course-second-eval@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p research
+            cp /tmp/course-second-forward-evaluation-v1.json research/
+            git add research/course-second-forward-evaluation-v1.json
+            git diff --cached --quiet && { echo 'COURSE_SECOND_EVAL_CURRENT'; exit 0; }
+            test "$(git diff --cached --name-only | wc -l)" -eq 1
+            test "$(git diff --cached --name-only)" = "research/course-second-forward-evaluation-v1.json"
+            git commit -m 'analysis: update course-second forward evaluation'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
