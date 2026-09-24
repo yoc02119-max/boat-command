@@ -67,9 +67,16 @@ function variantRow(v,key){
   <i>${key==='BASE4'?'—':`${Number(s.addedHits)||0}R追加的中`}</i>
  </div>`;
 }
-function pickChips(xs,cls=''){return (xs||[]).map(x=>`<i class="${cls}">${esc(x)}</i>`).join('')}
+function pickChips(xs,actual=''){return (xs||[]).map(x=>`<i class="${actual&&String(x)===String(actual)?'hit':''}">${esc(x)}</i>`).join('')}
+function isSettled(r){return r.status==='SETTLED'||r.status==='SETTLED_REPLAY'}
+function hitMethods(r){return isSettled(r)?Object.keys(LABELS).filter(key=>r.variants?.[key]?.hit):[]}
+function hitSummary(v){
+ const hits=(v.races||[]).map(r=>({race:r,methods:hitMethods(r)})).filter(x=>x.methods.length);
+ if(!hits.length)return '<p class="lab-hit-empty">的中レースはありません（結果待ちは集計対象外）。</p>';
+ return `<div class="lab-hit-list">${hits.map(({race:r,methods})=>`<a class="lab-hit-item" href="#lab-race-${Number(r.race)}"><strong>${Number(r.race)}R</strong><span>出目 <b>${esc(r.actual)}</b></span><small>${methods.map(key=>esc(LABELS[key])).join(' · ')} 的中</small></a>`).join('')}</div>`;
+}
 function raceCard(r){
- const settled=r.status==='SETTLED'||r.status==='SETTLED_REPLAY';
+ const settled=isSettled(r);
  const v=r.variants||{};
  const base=settled?(v.BASE4?.picks||r.base||[]):r.base||[];
  const variants=['RANK6','RANK8','HEAD6','SECOND6','THIRD6'];
@@ -79,14 +86,15 @@ function raceCard(r){
    const hit=settled?row?.hit:null,addedHit=settled?row?.addedHit:null;
    return `<div class="lab-race-variant ${addedHit?'rescued':''}">
     <span>${esc(LABELS[key])}</span>
-    <div class="lab-added">${pickChips(added,addedHit?'hit':'')}</div>
+    <div class="lab-added">${pickChips(added,settled?r.actual:'')}</div>
     <b>${!settled?'待ち':hit?(addedHit?'追加点HIT':'HIT'):'MISS'}</b>
    </div>`;
  }).join('');
  const baseHit=settled?v.BASE4?.hit:null;
- return `<article class="lab-race ${settled?(baseHit?'base-hit':'base-miss'):'pending'}">
-   <header><div><strong>${Number(r.race)}R</strong><span>${settled?`結果 ${esc(r.actual)}`:r.status==='RESULT_EXCLUDED'?'結果データ確認待ち':'結果待ち'}</span></div><em>${settled&&r.actualRank?`実着順ランク #${r.actualRank}`:'PRE-RACE固定'}</em></header>
-   <div class="lab-base"><span>BASE4</span><div>${pickChips(base)}</div><b>${!settled?'固定済み':baseHit?'HIT':`MISS · ${esc(r.baselineMiss||'')}`}</b></div>
+ const methods=hitMethods(r);
+ return `<article id="lab-race-${Number(r.race)}" class="lab-race ${settled?(baseHit?'base-hit':methods.length?'variant-hit':'base-miss'):'pending'}">
+   <header><strong>${Number(r.race)}R</strong><span class="lab-race-result">${settled?`出目 <b>${esc(r.actual)}</b>`:r.status==='RESULT_EXCLUDED'?'結果データ確認待ち':'結果待ち'}</span><em class="lab-race-state ${methods.length?'hit':''}">${settled?(baseHit?'BASE4 的中':methods.length?'追加試験で的中':'不的中'):'結果待ち'}</em></header>
+   <div class="lab-base"><span>BASE4 · ${!settled?'固定済み':baseHit?'的中':'不的中'}</span><div>${pickChips(base,settled?r.actual:'')}</div><b>${settled&&!baseHit?esc(r.baselineMiss||''):''}</b></div>
    <div class="lab-race-variants">${rows}</div>
   </article>`;
 }
@@ -98,6 +106,7 @@ function renderDetail(data,code){
  box.hidden=false;
  q('#labDetailTitle').textContent=`${v.name} DAILY LAB`;
  q('#labDetailMeta').textContent=`${data.date} · ${data.sourceMode==='STRICT_HISTORICAL_REPLAY_V1'?'厳密過去再生':'結果前固定'} · ${v.captured}R · ${v.evaluated}R評価 · 自動昇格なし`;
+ q('#labHitSummary').innerHTML=hitSummary(v);
  q('#labVariantTable').innerHTML=['BASE4','RANK6','RANK8','HEAD6','SECOND6','THIRD6'].map(k=>variantRow(v,k)).join('');
  q('#labRaceGrid').innerHTML=v.races.length?v.races.map(raceCard).join(''):'<div class="lab-empty">この日の締切前に固定された試験データはありません。</div>';
  document.querySelectorAll('.lab-venue').forEach(x=>x.classList.toggle('selected',x.dataset.code===v.code));
