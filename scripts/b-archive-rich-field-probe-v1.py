@@ -41,6 +41,29 @@ def redact_entry(line):
     return {"lane":int(lane),"registrationDigits":len(reg),"class":grade.upper(),
             "numericTokens":nums[:20],"numericTokenCount":len(nums)}
 
+def structural_line(line):
+    x=B._norm_line(line)
+    x=x.replace("進入","[ENTRY_COURSE]").replace("平均ST","[AVG_ST]")
+    x=x.replace("全国","[NATIONAL]").replace("当地","[LOCAL]")
+    x=x.replace("モーター","[MOTOR]").replace("ボート","[BOAT]")
+    x=x.replace("今節","[CURRENT_SERIES]").replace("勝率","[WIN_RATE]")
+    # Preserve grades/ASCII/numbers and the explicit placeholders above;
+    # redact all remaining Japanese/name text.
+    x=re.sub(r'[^\x00-\x7F]', 'X', x)
+    x=re.sub(r'X+', 'X', x)
+    return x[:240]
+
+def label_contexts(section):
+    lines=section.splitlines()
+    out=[]
+    for i,line in enumerate(lines):
+        if "進入" not in line and not re.search(r'(^|[^A-Za-z])F([^A-Za-z]|$)',B._norm_line(line)):
+            continue
+        a=max(0,i-2);z=min(len(lines),i+4)
+        out.append({"line":i+1,"context":[structural_line(lines[j]) for j in range(a,z)]})
+        if len(out)>=8:break
+    return out
+
 def venue_sections(text):
     out={}
     for code in B.VENUE_NAMES:
@@ -82,6 +105,7 @@ def main():
                 "entryRows":len(entries),
                 "numericTokenCountDistribution":dict(Counter(x["numericTokenCount"] for x in entries)),
                 "entrySkeletonExamples":entries[:3],
+                "labelContexts":label_contexts(sec) if ("進入" in labels or "F" in labels) else [],
             })
         report["files"].append(item)
 
