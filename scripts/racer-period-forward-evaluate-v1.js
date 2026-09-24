@@ -144,7 +144,7 @@ const aggregate=summarize(rows);
 const report={
   schema:'boat-command-racer-period-forward-evaluation-v1',
   version:'RACER-PERIOD-FORWARD-EVALUATION-V1',
-  generatedAt:new Date().toISOString(),
+  generatedAt:null,
   researchOnly:true,productionChanged:false,predictionInputChanged:false,tryChanged:false,
   bankrollChanged:false,hardLockChanged:false,promotionEligible:false,
   source:{
@@ -161,6 +161,11 @@ const report={
   invalid,aggregate,venues,rows
 };
 fs.mkdirSync(path.dirname(OUT),{recursive:true});
+const old=read(OUT);
+const comparable=x=>{if(!x)return null;const y=JSON.parse(JSON.stringify(x));delete y.generatedAt;return y};
+report.generatedAt=old&&JSON.stringify(comparable(old))===JSON.stringify(comparable(report))
+  ?(old.generatedAt||new Date().toISOString())
+  :new Date().toISOString();
 fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');
 console.log('RACER_PERIOD_FORWARD_EVALUATION',JSON.stringify({
   evaluated:rows.length,venues:venues.length,
