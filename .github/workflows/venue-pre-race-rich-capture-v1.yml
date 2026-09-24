@@ -1,0 +1,106 @@
+name: Venue PRE-RACE rich research capture v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/venue-pre-race-rich-capture-v1.yml'
+      - 'scripts/venue-pre-race-rich-collector-v1.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/venue-pre-race-rich-capture-v1.yml'
+      - 'scripts/venue-pre-race-rich-collector-v1.py'
+  schedule:
+    - cron: '*/5 0-13,23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: venue-pre-race-rich-capture-v1
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Parser and safety self-test
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/venue-pre-race-rich-collector-v1.py
+          python3 scripts/venue-pre-race-rich-collector-v1.py --self-test
+
+  collect:
+    if: github.event_name != 'pull_request'
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh to latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Capture richer PRE-RACE research fields only
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          python3 scripts/venue-pre-race-rich-collector-v1.py --date "$DATE" --min-margin 3 --max-margin 20 --max-fetch 12
+
+      - name: Safety audit staged research packs
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          python3 - <<'PY'
+          import glob,json,os
+          date=os.popen('TZ=Asia/Tokyo date +%F').read().strip()
+          files=glob.glob(f'live/*/{date}/pre-rich/race-*.json')
+          for p in files:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-pre-race-rich-research-v1'
+              assert x['date']==date
+              assert x['researchOnly'] is True
+              assert x['predictionEnabled'] is False
+              assert x['hardLockEnabled'] is False
+              assert x['resultEndpointsIncluded'] is False
+              assert x['payoutEndpointsIncluded'] is False
+              assert len(x['boats'])==6
+              assert x['startExhibitionInterpretation']=='DISPLAY_TOKENS_ONLY_NOT_ASSERTED_AS_ACTUAL_ENTRY_COURSES'
+              assert 0 <= x['fieldStatus']['exhibitionTimeCount'] <= 6
+              assert 0 <= x['fieldStatus']['weatherCoreCount'] <= 4
+              assert x['minutesBeforeDeadline'] >= 0
+          print('PRE_RACE_RICH_SAFETY_PASS',len(files))
+          PY
+
+      - name: Publish research packs without overwriting concurrent main work
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          find live -path "*/$DATE/pre-rich/race-*.json" -print0 | xargs -0 -r git add --
+          git diff --cached --quiet && { echo 'NO_PRE_RACE_RICH_CHANGE'; exit 0; }
+
+          git diff --cached --name-only -z > /tmp/pre-rich-files.z
+          tar --null -T /tmp/pre-rich-files.z -cf /tmp/pre-rich-publish.tar
+
+          git config user.name 'boat-command-pre-race-rich'
+          git config user.email 'boat-command-pre-race-rich@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            tar -xf /tmp/pre-rich-publish.tar
+            while IFS= read -r -d '' f; do git add -- "$f"; done < /tmp/pre-rich-files.z
+            git diff --cached --quiet && exit 0
+            git commit -m "research: capture $DATE pre-race rich fields"
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
