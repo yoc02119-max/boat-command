@@ -1,0 +1,52 @@
+name: Racer period second-place SHADOW v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-second-place-shadow-v1.yml'
+      - 'scripts/racer-period-second-place-shadow-v1.js'
+      - 'racer-period-24/**'
+      - 'rich-history-24/**'
+      - '*-research-model-v1.js'
+      - 'edogawa-research-model-v2.js'
+      - '*-baseline-backtest-v1.json'
+      - '*-history-bootstrap-v1.json'
+      - 'venue-registry-v1.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run strict H1-design / H2-holdout second-place SHADOW
+        run: |
+          set -euo pipefail
+          node --check scripts/racer-period-second-place-shadow-v1.js
+          node scripts/racer-period-second-place-shadow-v1.js
+
+      - name: Audit no-production boundary and print verdict
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const x=require('./research/racer-period-second-place-shadow-v1.json');
+          if(x.schema!=='boat-command-racer-period-second-place-shadow-v1')throw new Error('SCHEMA');
+          if(x.researchOnly!==true||x.productionChanged!==false||x.predictionInputChanged!==false)throw new Error('BOUNDARY');
+          if(x.bankrollChanged!==false||x.tryChanged!==false||x.firstPlaceMutation!==false)throw new Error('MUTATION');
+          if(x.promotionEligible!==false)throw new Error('PROMOTION');
+          if(x.totals.venuesEvaluated<20)throw new Error('VENUE_COVERAGE');
+          console.log('SECOND_PLACE_SHADOW_TOTALS',JSON.stringify(x.totals,null,2));
+          console.log('NEXT_GATE',x.nextGate);
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-period-second-place-shadow-v1
+          path: research/racer-period-second-place-shadow-v1.json
+          retention-days: 30
+          if-no-files-found: error
