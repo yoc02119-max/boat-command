@@ -1,7 +1,7 @@
 // BOAT COMMAND DAILY LAB v1
 (function(){
 'use strict';
-const LABELS={BASE4:'現行4点',RANK6:'順位6点',RANK8:'順位8点',HEAD6:'1着筋拡張',SECOND6:'2着筋拡張',THIRD6:'3着筋拡張'};
+const LABELS={BASE4:'本線4点',RANK6:'順位6点',RANK8:'順位8点',HEAD6:'1着筋拡張',SECOND6:'2着筋拡張',THIRD6:'3着筋拡張'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pct=v=>v!=null&&v!==''&&Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:'—';
 const signed=n=>`${Number(n)>0?'+':''}${Number(n)||0}`;
@@ -50,7 +50,7 @@ function venueCard(v){
    <div class="lab-venue-top"><span>${esc(v.code)}</span><b>${esc(v.name)}</b><em>${v.captured?`${v.captured}/12固定`:'未固定'}</em></div>
    <div class="lab-venue-kpis">
     <div><small>評価</small><strong>${Number(v.evaluated)||0}R</strong></div>
-    <div><small>BASE4</small><strong>${Number(base.hits)||0}的中</strong></div>
+    <div><small>本線4点</small><strong>${Number(base.hits)||0}的中</strong></div>
     <div><small>RANK6</small><strong class="${d6>0?'up':''}">${signed(d6)}</strong></div>
     <div><small>RANK8</small><strong class="${d8>0?'up':''}">${signed(d8)}</strong></div>
    </div>
@@ -60,7 +60,7 @@ function venueCard(v){
 function variantRow(v,key){
  const s=v.summary?.[key]||{},delta=(Number(s.hits)||0)-(Number(v.summary?.BASE4?.hits)||0);
  return `<div class="lab-variant-row">
-  <div><b>${esc(LABELS[key]||key)}</b><small>${key==='BASE4'?'現行基準':key==='RANK8'?'4点追加':'2点追加'}</small></div>
+  <div><b>${esc(LABELS[key]||key)}</b><small>${key==='BASE4'?'本線との比較基準':key==='RANK8'?'4点追加':'2点追加'}</small></div>
   <strong>${Number(s.hits)||0}/${Number(s.races)||0}</strong>
   <span>${pct(s.hitRate)}</span>
   <em class="${delta>0?'up':''}">${key==='BASE4'?'基準':`${signed(delta)}的中`}</em>
@@ -71,9 +71,20 @@ function pickChips(xs,actual=''){return (xs||[]).map(x=>`<i class="${actual&&Str
 function isSettled(r){return r.status==='SETTLED'||r.status==='SETTLED_REPLAY'}
 function hitMethods(r){return isSettled(r)?Object.keys(LABELS).filter(key=>r.variants?.[key]?.hit):[]}
 function hitSummary(v){
- const hits=(v.races||[]).map(r=>({race:r,methods:hitMethods(r)})).filter(x=>x.methods.length);
- if(!hits.length)return '<p class="lab-hit-empty">的中レースはありません（結果待ちは集計対象外）。</p>';
- return `<div class="lab-hit-list">${hits.map(({race:r,methods})=>`<a class="lab-hit-item" href="#lab-race-${Number(r.race)}"><strong>${Number(r.race)}R</strong><span>出目 <b>${esc(r.actual)}</b></span><small>${methods.map(key=>esc(LABELS[key])).join(' · ')} 的中</small></a>`).join('')}</div>`;
+ const settled=(v.races||[]).filter(isSettled);
+ const base=settled.filter(r=>r.variants?.BASE4?.hit);
+ const labOnly=settled.filter(r=>!r.variants?.BASE4?.hit&&hitMethods(r).length);
+ function list(rows,extra){
+  if(!rows.length)return '<p class="lab-hit-empty">該当なし</p>';
+  return `<div class="lab-hit-list">${rows.map(r=>{
+   const methods=extra?Object.keys(LABELS).filter(key=>key!=='BASE4'&&r.variants?.[key]?.addedHit):[];
+   return `<a class="lab-hit-item" href="#lab-race-${Number(r.race)}"><strong>${Number(r.race)}R</strong><span>出目 <b>${esc(r.actual)}</b></span>${extra?`<small>${methods.map(key=>esc(LABELS[key])).join(' · ')} の追加点</small>`:''}</a>`;
+  }).join('')}</div>`;
+ }
+ return `<div class="lab-hit-counts"><span>本線4点 <b>${base.length}R</b></span><span>LAB追加点のみ <b>${labOnly.length}R</b></span></div>
+  ${settled.length?'':'<p class="lab-hit-empty">評価結果待ちです。</p>'}
+  <h4>本線4点で的中</h4>${list(base,false)}
+  <h4>本線では外れ、LABの追加点で的中</h4>${list(labOnly,true)}`;
 }
 function raceCard(r){
  const settled=isSettled(r);
@@ -87,14 +98,14 @@ function raceCard(r){
    return `<div class="lab-race-variant ${addedHit?'rescued':''}">
     <span>${esc(LABELS[key])}</span>
     <div class="lab-added">${pickChips(added,settled?r.actual:'')}</div>
-    <b>${!settled?'待ち':hit?(addedHit?'追加点HIT':'HIT'):'MISS'}</b>
+    <b>${!settled?'待ち':hit?(addedHit?'追加点的中':'本線と同じ的中'):'不的中'}</b>
    </div>`;
  }).join('');
  const baseHit=settled?v.BASE4?.hit:null;
  const methods=hitMethods(r);
  return `<article id="lab-race-${Number(r.race)}" class="lab-race ${settled?(baseHit?'base-hit':methods.length?'variant-hit':'base-miss'):'pending'}">
-   <header><strong>${Number(r.race)}R</strong><span class="lab-race-result">${settled?`出目 <b>${esc(r.actual)}</b>`:r.status==='RESULT_EXCLUDED'?'結果データ確認待ち':'結果待ち'}</span><em class="lab-race-state ${methods.length?'hit':''}">${settled?(baseHit?'BASE4 的中':methods.length?'追加試験で的中':'不的中'):'結果待ち'}</em></header>
-   <div class="lab-base"><span>BASE4 · ${!settled?'固定済み':baseHit?'的中':'不的中'}</span><div>${pickChips(base,settled?r.actual:'')}</div><b>${settled&&!baseHit?esc(r.baselineMiss||''):''}</b></div>
+   <header><strong>${Number(r.race)}R</strong><span class="lab-race-result">${settled?`出目 <b>${esc(r.actual)}</b>`:r.status==='RESULT_EXCLUDED'?'結果データ確認待ち':'結果待ち'}</span><em class="lab-race-state ${methods.length?'hit':''}">${settled?(baseHit?'本線4点で的中':methods.length?'LAB追加点で的中':'不的中'):'結果待ち'}</em></header>
+   <div class="lab-base"><span>本線4点 · ${!settled?'固定済み':baseHit?'的中':'不的中'}</span><div>${pickChips(base,settled?r.actual:'')}</div><b>${settled&&!baseHit?esc(r.baselineMiss||''):''}</b></div>
    <div class="lab-race-variants">${rows}</div>
   </article>`;
 }
@@ -123,7 +134,7 @@ function render(data){
  metric('#labVenues',`${data.totals.venuesCaptured}/24場`,strictReplay?'過去再生できた場':'選択日の固定あり');
  metric('#labCaptured',`${data.totals.capturedRaces}R`,strictReplay?'対象日より前だけで再生成':'結果前固定');
  metric('#labEvaluated',`${data.totals.evaluatedRaces}R`,'結果照合済み');
- metric('#labBaseHits',`${data.totals.baseHits}的中`,'現行BASE4');
+ metric('#labBaseHits',`${data.totals.baseHits}的中`,'本線4点（比較）');
  metric('#labRank6',signed(data.totals.rank6Hits-data.totals.baseHits),'RANK6追加差');
  metric('#labRank8',signed(data.totals.rank8Hits-data.totals.baseHits),'RANK8追加差');
  q('#labVenueGrid').innerHTML=data.venues.map(venueCard).join('');
