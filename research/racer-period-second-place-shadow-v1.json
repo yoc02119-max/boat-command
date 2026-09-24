@@ -1,0 +1,2055 @@
+{
+  "schema": "boat-command-racer-period-second-place-shadow-v1",
+  "version": "RACER-PERIOD-SECOND-PLACE-SHADOW-V1",
+  "generatedAt": "2026-09-24T21:18:10.755Z",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "bankrollChanged": false,
+  "tryChanged": false,
+  "firstPlaceMutation": false,
+  "source": {
+    "baseline": "FROZEN_EXISTING_VENUE_RESEARCH_MODELS_AND_BASELINE_CONFIG",
+    "racerPeriod": "BOAT_RACE_OFFICIAL_HALF_YEAR_ARCHIVE",
+    "history": "STRICTLY_PAST_BY_TARGET_DATE",
+    "resultUse": "SCORING_ONLY_AFTER_EACH_HISTORICAL_PREDICTION"
+  },
+  "joinPolicy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+  "split": {
+    "design": "2026-01-01..2026-06-30",
+    "holdout": "2026-07-01..latest"
+  },
+  "candidate": {
+    "designSelection": "PER_VENUE_PRESET_AND_LAMBDA_SELECTED_ON_H1_ONLY",
+    "preservesBaselineFirst": true,
+    "secondBase": "MODEL_CONDITIONAL_SECOND_MARGINAL",
+    "thirdAfterSecond": "HIGHEST_BASELINE_PROBABILITY_CONDITIONAL_ON_FIXED_FIRST_SECOND",
+    "presets": {
+      "ST_GLOBAL": {
+        "three": 0,
+        "st": -1,
+        "ability": 0,
+        "f": -0.05,
+        "l": -0.05,
+        "c2": 0,
+        "cst": 0,
+        "crank": 0
+      },
+      "TOP3_GLOBAL": {
+        "three": 1,
+        "st": -0.15,
+        "ability": 0.15,
+        "f": -0.05,
+        "l": -0.05,
+        "c2": 0,
+        "cst": 0,
+        "crank": 0
+      },
+      "GLOBAL_MIX": {
+        "three": 0.9,
+        "st": -0.85,
+        "ability": 0.35,
+        "f": -0.12,
+        "l": -0.08,
+        "c2": 0,
+        "cst": 0,
+        "crank": 0
+      },
+      "COURSE_MIX": {
+        "three": 0.45,
+        "st": -0.45,
+        "ability": 0.2,
+        "f": -0.08,
+        "l": -0.05,
+        "c2": 0.6,
+        "cst": -0.55,
+        "crank": -0.25
+      },
+      "START_COURSE": {
+        "three": 0.15,
+        "st": -0.8,
+        "ability": 0.1,
+        "f": -0.1,
+        "l": -0.05,
+        "c2": 0.35,
+        "cst": -0.75,
+        "crank": -0.35
+      }
+    },
+    "lambdas": [
+      0.15,
+      0.3,
+      0.5,
+      0.75,
+      1
+    ]
+  },
+  "totals": {
+    "venuesEvaluated": 24,
+    "holdoutRaces": 12693,
+    "firstCorrect": 6818,
+    "baselineSecondHitsWhenFirstCorrect": 2391,
+    "marginalSecondHitsWhenFirstCorrect": 2484,
+    "periodSecondHitsWhenFirstCorrect": 2637,
+    "baselineSecondRateWhenFirstCorrect": 0.350689,
+    "marginalSecondRateWhenFirstCorrect": 0.36433,
+    "periodSecondRateWhenFirstCorrect": 0.38677,
+    "periodDeltaVsMarginal": 0.022441,
+    "periodDeltaVsTop": 0.036081,
+    "baselineExactRate": 0.064996,
+    "marginalExactRate": 0.067281,
+    "periodExactRate": 0.069802,
+    "periodExactDeltaVsTop": 0.004806,
+    "venuesPeriodBetterThanMarginal": 19,
+    "venuesPeriodEqualMarginal": 1,
+    "venuesPeriodWorseThanMarginal": 4
+  },
+  "promotionEligible": false,
+  "nextGate": "FORWARD_SHADOW_REQUIRED_BEFORE_ANY_MODEL_CHANGE",
+  "venues": [
+    {
+      "code": "01",
+      "slug": "kiryu",
+      "status": "EVALUATED",
+      "modelVersion": "KIRYU-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 825,
+      "designRaces": 307,
+      "holdoutRaces": 518,
+      "skip": {
+        "join": 23,
+        "model": 303,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 307,
+            "firstCorrect": 157,
+            "secondHitWhenFirst": 55,
+            "exact": 17,
+            "secondHitRateWhenFirst": 0.350318,
+            "exactRate": 0.055375
+          },
+          "marginal": {
+            "races": 307,
+            "firstCorrect": 157,
+            "secondHitWhenFirst": 52,
+            "exact": 14,
+            "secondHitRateWhenFirst": 0.33121,
+            "exactRate": 0.045603
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.15,
+            "races": 307,
+            "firstCorrect": 157,
+            "secondHitWhenFirst": 62,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.394904,
+            "exactRate": 0.065147
+          },
+          "periodSecondDeltaVsMarginal": 0.063694,
+          "periodSecondDeltaVsTop": 0.044586
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 518,
+          "firstCorrect": 273,
+          "secondHitWhenFirst": 101,
+          "exact": 37,
+          "secondHitRateWhenFirst": 0.369963,
+          "exactRate": 0.071429
+        },
+        "marginal": {
+          "races": 518,
+          "firstCorrect": 273,
+          "secondHitWhenFirst": 104,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.380952,
+          "exactRate": 0.073359
+        },
+        "period": {
+          "races": 518,
+          "firstCorrect": 273,
+          "secondHitWhenFirst": 105,
+          "exact": 40,
+          "secondHitRateWhenFirst": 0.384615,
+          "exactRate": 0.07722
+        },
+        "periodSecondDeltaVsMarginal": 0.003663,
+        "periodSecondDeltaVsTop": 0.014652,
+        "periodExactDeltaVsTop": 0.005792
+      }
+    },
+    {
+      "code": "02",
+      "slug": "toda",
+      "status": "EVALUATED",
+      "modelVersion": "TODA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 650,
+      "designRaces": 216,
+      "holdoutRaces": 434,
+      "skip": {
+        "join": 44,
+        "model": 295,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 216,
+            "firstCorrect": 82,
+            "secondHitWhenFirst": 33,
+            "exact": 8,
+            "secondHitRateWhenFirst": 0.402439,
+            "exactRate": 0.037037
+          },
+          "marginal": {
+            "races": 216,
+            "firstCorrect": 82,
+            "secondHitWhenFirst": 30,
+            "exact": 9,
+            "secondHitRateWhenFirst": 0.365854,
+            "exactRate": 0.041667
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.5,
+            "races": 216,
+            "firstCorrect": 82,
+            "secondHitWhenFirst": 36,
+            "exact": 8,
+            "secondHitRateWhenFirst": 0.439024,
+            "exactRate": 0.037037
+          },
+          "periodSecondDeltaVsMarginal": 0.073171,
+          "periodSecondDeltaVsTop": 0.036585
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 434,
+          "firstCorrect": 158,
+          "secondHitWhenFirst": 57,
+          "exact": 14,
+          "secondHitRateWhenFirst": 0.360759,
+          "exactRate": 0.032258
+        },
+        "marginal": {
+          "races": 434,
+          "firstCorrect": 158,
+          "secondHitWhenFirst": 61,
+          "exact": 17,
+          "secondHitRateWhenFirst": 0.386076,
+          "exactRate": 0.039171
+        },
+        "period": {
+          "races": 434,
+          "firstCorrect": 158,
+          "secondHitWhenFirst": 72,
+          "exact": 16,
+          "secondHitRateWhenFirst": 0.455696,
+          "exactRate": 0.036866
+        },
+        "periodSecondDeltaVsMarginal": 0.06962,
+        "periodSecondDeltaVsTop": 0.094937,
+        "periodExactDeltaVsTop": 0.004608
+      }
+    },
+    {
+      "code": "03",
+      "slug": "edogawa",
+      "status": "EVALUATED",
+      "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 502,
+      "designRaces": 134,
+      "holdoutRaces": 368,
+      "skip": {
+        "join": 0,
+        "model": 292,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "START_COURSE",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 134,
+            "firstCorrect": 55,
+            "secondHitWhenFirst": 21,
+            "exact": 7,
+            "secondHitRateWhenFirst": 0.381818,
+            "exactRate": 0.052239
+          },
+          "marginal": {
+            "races": 134,
+            "firstCorrect": 55,
+            "secondHitWhenFirst": 19,
+            "exact": 6,
+            "secondHitRateWhenFirst": 0.345455,
+            "exactRate": 0.044776
+          },
+          "period": {
+            "preset": "START_COURSE",
+            "lambda": 0.5,
+            "races": 134,
+            "firstCorrect": 55,
+            "secondHitWhenFirst": 24,
+            "exact": 9,
+            "secondHitRateWhenFirst": 0.436364,
+            "exactRate": 0.067164
+          },
+          "periodSecondDeltaVsMarginal": 0.090909,
+          "periodSecondDeltaVsTop": 0.054545
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 368,
+          "firstCorrect": 143,
+          "secondHitWhenFirst": 53,
+          "exact": 22,
+          "secondHitRateWhenFirst": 0.370629,
+          "exactRate": 0.059783
+        },
+        "marginal": {
+          "races": 368,
+          "firstCorrect": 143,
+          "secondHitWhenFirst": 51,
+          "exact": 19,
+          "secondHitRateWhenFirst": 0.356643,
+          "exactRate": 0.05163
+        },
+        "period": {
+          "races": 368,
+          "firstCorrect": 143,
+          "secondHitWhenFirst": 57,
+          "exact": 24,
+          "secondHitRateWhenFirst": 0.398601,
+          "exactRate": 0.065217
+        },
+        "periodSecondDeltaVsMarginal": 0.041958,
+        "periodSecondDeltaVsTop": 0.027972,
+        "periodExactDeltaVsTop": 0.005435
+      }
+    },
+    {
+      "code": "04",
+      "slug": "heiwajima",
+      "status": "EVALUATED",
+      "modelVersion": "HEIWAJIMA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 792,
+      "designRaces": 156,
+      "holdoutRaces": 636,
+      "skip": {
+        "join": 0,
+        "model": 300,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 156,
+            "firstCorrect": 70,
+            "secondHitWhenFirst": 23,
+            "exact": 12,
+            "secondHitRateWhenFirst": 0.328571,
+            "exactRate": 0.076923
+          },
+          "marginal": {
+            "races": 156,
+            "firstCorrect": 70,
+            "secondHitWhenFirst": 24,
+            "exact": 8,
+            "secondHitRateWhenFirst": 0.342857,
+            "exactRate": 0.051282
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.3,
+            "races": 156,
+            "firstCorrect": 70,
+            "secondHitWhenFirst": 25,
+            "exact": 12,
+            "secondHitRateWhenFirst": 0.357143,
+            "exactRate": 0.076923
+          },
+          "periodSecondDeltaVsMarginal": 0.014286,
+          "periodSecondDeltaVsTop": 0.028571
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 636,
+          "firstCorrect": 264,
+          "secondHitWhenFirst": 88,
+          "exact": 26,
+          "secondHitRateWhenFirst": 0.333333,
+          "exactRate": 0.040881
+        },
+        "marginal": {
+          "races": 636,
+          "firstCorrect": 264,
+          "secondHitWhenFirst": 101,
+          "exact": 24,
+          "secondHitRateWhenFirst": 0.382576,
+          "exactRate": 0.037736
+        },
+        "period": {
+          "races": 636,
+          "firstCorrect": 264,
+          "secondHitWhenFirst": 105,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.397727,
+          "exactRate": 0.048742
+        },
+        "periodSecondDeltaVsMarginal": 0.015152,
+        "periodSecondDeltaVsTop": 0.064394,
+        "periodExactDeltaVsTop": 0.007862
+      }
+    },
+    {
+      "code": "05",
+      "slug": "tamagawa",
+      "status": "EVALUATED",
+      "modelVersion": "TAMAGAWA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 831,
+      "designRaces": 253,
+      "holdoutRaces": 578,
+      "skip": {
+        "join": 38,
+        "model": 296,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 253,
+            "firstCorrect": 155,
+            "secondHitWhenFirst": 49,
+            "exact": 13,
+            "secondHitRateWhenFirst": 0.316129,
+            "exactRate": 0.051383
+          },
+          "marginal": {
+            "races": 253,
+            "firstCorrect": 155,
+            "secondHitWhenFirst": 52,
+            "exact": 16,
+            "secondHitRateWhenFirst": 0.335484,
+            "exactRate": 0.063241
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.3,
+            "races": 253,
+            "firstCorrect": 155,
+            "secondHitWhenFirst": 70,
+            "exact": 23,
+            "secondHitRateWhenFirst": 0.451613,
+            "exactRate": 0.090909
+          },
+          "periodSecondDeltaVsMarginal": 0.116129,
+          "periodSecondDeltaVsTop": 0.135484
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 578,
+          "firstCorrect": 309,
+          "secondHitWhenFirst": 114,
+          "exact": 40,
+          "secondHitRateWhenFirst": 0.368932,
+          "exactRate": 0.069204
+        },
+        "marginal": {
+          "races": 578,
+          "firstCorrect": 309,
+          "secondHitWhenFirst": 115,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.372168,
+          "exactRate": 0.065744
+        },
+        "period": {
+          "races": 578,
+          "firstCorrect": 309,
+          "secondHitWhenFirst": 129,
+          "exact": 42,
+          "secondHitRateWhenFirst": 0.417476,
+          "exactRate": 0.072664
+        },
+        "periodSecondDeltaVsMarginal": 0.045307,
+        "periodSecondDeltaVsTop": 0.048544,
+        "periodExactDeltaVsTop": 0.00346
+      }
+    },
+    {
+      "code": "06",
+      "slug": "hamanako",
+      "status": "EVALUATED",
+      "modelVersion": "HAMANAKO-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 859,
+      "designRaces": 295,
+      "holdoutRaces": 564,
+      "skip": {
+        "join": 37,
+        "model": 308,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 295,
+            "firstCorrect": 162,
+            "secondHitWhenFirst": 56,
+            "exact": 22,
+            "secondHitRateWhenFirst": 0.345679,
+            "exactRate": 0.074576
+          },
+          "marginal": {
+            "races": 295,
+            "firstCorrect": 162,
+            "secondHitWhenFirst": 59,
+            "exact": 23,
+            "secondHitRateWhenFirst": 0.364198,
+            "exactRate": 0.077966
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.15,
+            "races": 295,
+            "firstCorrect": 162,
+            "secondHitWhenFirst": 61,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.376543,
+            "exactRate": 0.067797
+          },
+          "periodSecondDeltaVsMarginal": 0.012346,
+          "periodSecondDeltaVsTop": 0.030864
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 564,
+          "firstCorrect": 295,
+          "secondHitWhenFirst": 97,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.328814,
+          "exactRate": 0.054965
+        },
+        "marginal": {
+          "races": 564,
+          "firstCorrect": 295,
+          "secondHitWhenFirst": 100,
+          "exact": 33,
+          "secondHitRateWhenFirst": 0.338983,
+          "exactRate": 0.058511
+        },
+        "period": {
+          "races": 564,
+          "firstCorrect": 295,
+          "secondHitWhenFirst": 104,
+          "exact": 30,
+          "secondHitRateWhenFirst": 0.352542,
+          "exactRate": 0.053191
+        },
+        "periodSecondDeltaVsMarginal": 0.013559,
+        "periodSecondDeltaVsTop": 0.023729,
+        "periodExactDeltaVsTop": -0.001773
+      }
+    },
+    {
+      "code": "07",
+      "slug": "gamagori",
+      "status": "EVALUATED",
+      "modelVersion": "GAMAGORI-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 797,
+      "designRaces": 329,
+      "holdoutRaces": 468,
+      "skip": {
+        "join": 22,
+        "model": 297,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 329,
+            "firstCorrect": 169,
+            "secondHitWhenFirst": 53,
+            "exact": 17,
+            "secondHitRateWhenFirst": 0.313609,
+            "exactRate": 0.051672
+          },
+          "marginal": {
+            "races": 329,
+            "firstCorrect": 169,
+            "secondHitWhenFirst": 60,
+            "exact": 21,
+            "secondHitRateWhenFirst": 0.35503,
+            "exactRate": 0.06383
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.15,
+            "races": 329,
+            "firstCorrect": 169,
+            "secondHitWhenFirst": 75,
+            "exact": 24,
+            "secondHitRateWhenFirst": 0.443787,
+            "exactRate": 0.072948
+          },
+          "periodSecondDeltaVsMarginal": 0.088757,
+          "periodSecondDeltaVsTop": 0.130178
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 468,
+          "firstCorrect": 258,
+          "secondHitWhenFirst": 87,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.337209,
+          "exactRate": 0.081197
+        },
+        "marginal": {
+          "races": 468,
+          "firstCorrect": 258,
+          "secondHitWhenFirst": 85,
+          "exact": 36,
+          "secondHitRateWhenFirst": 0.329457,
+          "exactRate": 0.076923
+        },
+        "period": {
+          "races": 468,
+          "firstCorrect": 258,
+          "secondHitWhenFirst": 106,
+          "exact": 41,
+          "secondHitRateWhenFirst": 0.410853,
+          "exactRate": 0.087607
+        },
+        "periodSecondDeltaVsMarginal": 0.081395,
+        "periodSecondDeltaVsTop": 0.073643,
+        "periodExactDeltaVsTop": 0.00641
+      }
+    },
+    {
+      "code": "08",
+      "slug": "tokoname",
+      "status": "EVALUATED",
+      "modelVersion": "TOKONAME-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 904,
+      "designRaces": 353,
+      "holdoutRaces": 551,
+      "skip": {
+        "join": 93,
+        "model": 305,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 353,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 87,
+            "exact": 35,
+            "secondHitRateWhenFirst": 0.412322,
+            "exactRate": 0.09915
+          },
+          "marginal": {
+            "races": 353,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 83,
+            "exact": 31,
+            "secondHitRateWhenFirst": 0.393365,
+            "exactRate": 0.087819
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.3,
+            "races": 353,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 84,
+            "exact": 30,
+            "secondHitRateWhenFirst": 0.398104,
+            "exactRate": 0.084986
+          },
+          "periodSecondDeltaVsMarginal": 0.004739,
+          "periodSecondDeltaVsTop": -0.014218
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 551,
+          "firstCorrect": 329,
+          "secondHitWhenFirst": 110,
+          "exact": 39,
+          "secondHitRateWhenFirst": 0.334347,
+          "exactRate": 0.07078
+        },
+        "marginal": {
+          "races": 551,
+          "firstCorrect": 329,
+          "secondHitWhenFirst": 120,
+          "exact": 46,
+          "secondHitRateWhenFirst": 0.364742,
+          "exactRate": 0.083485
+        },
+        "period": {
+          "races": 551,
+          "firstCorrect": 329,
+          "secondHitWhenFirst": 118,
+          "exact": 41,
+          "secondHitRateWhenFirst": 0.358663,
+          "exactRate": 0.07441
+        },
+        "periodSecondDeltaVsMarginal": -0.006079,
+        "periodSecondDeltaVsTop": 0.024316,
+        "periodExactDeltaVsTop": 0.00363
+      }
+    },
+    {
+      "code": "09",
+      "slug": "tsu",
+      "status": "EVALUATED",
+      "modelVersion": "TSU-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 981,
+      "designRaces": 370,
+      "holdoutRaces": 611,
+      "skip": {
+        "join": 28,
+        "model": 309,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 370,
+            "firstCorrect": 213,
+            "secondHitWhenFirst": 78,
+            "exact": 30,
+            "secondHitRateWhenFirst": 0.366197,
+            "exactRate": 0.081081
+          },
+          "marginal": {
+            "races": 370,
+            "firstCorrect": 213,
+            "secondHitWhenFirst": 83,
+            "exact": 30,
+            "secondHitRateWhenFirst": 0.389671,
+            "exactRate": 0.081081
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.5,
+            "races": 370,
+            "firstCorrect": 213,
+            "secondHitWhenFirst": 95,
+            "exact": 35,
+            "secondHitRateWhenFirst": 0.446009,
+            "exactRate": 0.094595
+          },
+          "periodSecondDeltaVsMarginal": 0.056338,
+          "periodSecondDeltaVsTop": 0.079812
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 611,
+          "firstCorrect": 328,
+          "secondHitWhenFirst": 116,
+          "exact": 39,
+          "secondHitRateWhenFirst": 0.353659,
+          "exactRate": 0.06383
+        },
+        "marginal": {
+          "races": 611,
+          "firstCorrect": 328,
+          "secondHitWhenFirst": 109,
+          "exact": 37,
+          "secondHitRateWhenFirst": 0.332317,
+          "exactRate": 0.060556
+        },
+        "period": {
+          "races": 611,
+          "firstCorrect": 328,
+          "secondHitWhenFirst": 124,
+          "exact": 43,
+          "secondHitRateWhenFirst": 0.378049,
+          "exactRate": 0.070376
+        },
+        "periodSecondDeltaVsMarginal": 0.045732,
+        "periodSecondDeltaVsTop": 0.02439,
+        "periodExactDeltaVsTop": 0.006547
+      }
+    },
+    {
+      "code": "10",
+      "slug": "mikuni",
+      "status": "EVALUATED",
+      "modelVersion": "MIKUNI-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 798,
+      "designRaces": 277,
+      "holdoutRaces": 521,
+      "skip": {
+        "join": 55,
+        "model": 271,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 277,
+            "firstCorrect": 138,
+            "secondHitWhenFirst": 51,
+            "exact": 22,
+            "secondHitRateWhenFirst": 0.369565,
+            "exactRate": 0.079422
+          },
+          "marginal": {
+            "races": 277,
+            "firstCorrect": 138,
+            "secondHitWhenFirst": 49,
+            "exact": 18,
+            "secondHitRateWhenFirst": 0.355072,
+            "exactRate": 0.064982
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.15,
+            "races": 277,
+            "firstCorrect": 138,
+            "secondHitWhenFirst": 51,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.369565,
+            "exactRate": 0.068592
+          },
+          "periodSecondDeltaVsMarginal": 0.014493,
+          "periodSecondDeltaVsTop": 0
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 521,
+          "firstCorrect": 272,
+          "secondHitWhenFirst": 95,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.349265,
+          "exactRate": 0.059501
+        },
+        "marginal": {
+          "races": 521,
+          "firstCorrect": 272,
+          "secondHitWhenFirst": 94,
+          "exact": 34,
+          "secondHitRateWhenFirst": 0.345588,
+          "exactRate": 0.065259
+        },
+        "period": {
+          "races": 521,
+          "firstCorrect": 272,
+          "secondHitWhenFirst": 95,
+          "exact": 32,
+          "secondHitRateWhenFirst": 0.349265,
+          "exactRate": 0.06142
+        },
+        "periodSecondDeltaVsMarginal": 0.003676,
+        "periodSecondDeltaVsTop": 0,
+        "periodExactDeltaVsTop": 0.001919
+      }
+    },
+    {
+      "code": "11",
+      "slug": "biwako",
+      "status": "EVALUATED",
+      "modelVersion": "BIWAKO-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 705,
+      "designRaces": 183,
+      "holdoutRaces": 522,
+      "skip": {
+        "join": 38,
+        "model": 270,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 183,
+            "firstCorrect": 102,
+            "secondHitWhenFirst": 39,
+            "exact": 12,
+            "secondHitRateWhenFirst": 0.382353,
+            "exactRate": 0.065574
+          },
+          "marginal": {
+            "races": 183,
+            "firstCorrect": 102,
+            "secondHitWhenFirst": 37,
+            "exact": 11,
+            "secondHitRateWhenFirst": 0.362745,
+            "exactRate": 0.060109
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.5,
+            "races": 183,
+            "firstCorrect": 102,
+            "secondHitWhenFirst": 49,
+            "exact": 14,
+            "secondHitRateWhenFirst": 0.480392,
+            "exactRate": 0.076503
+          },
+          "periodSecondDeltaVsMarginal": 0.117647,
+          "periodSecondDeltaVsTop": 0.098039
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 522,
+          "firstCorrect": 288,
+          "secondHitWhenFirst": 93,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.322917,
+          "exactRate": 0.059387
+        },
+        "marginal": {
+          "races": 522,
+          "firstCorrect": 288,
+          "secondHitWhenFirst": 94,
+          "exact": 32,
+          "secondHitRateWhenFirst": 0.326389,
+          "exactRate": 0.061303
+        },
+        "period": {
+          "races": 522,
+          "firstCorrect": 288,
+          "secondHitWhenFirst": 110,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.381944,
+          "exactRate": 0.059387
+        },
+        "periodSecondDeltaVsMarginal": 0.055556,
+        "periodSecondDeltaVsTop": 0.059028,
+        "periodExactDeltaVsTop": 0
+      }
+    },
+    {
+      "code": "12",
+      "slug": "suminoe",
+      "status": "EVALUATED",
+      "modelVersion": "SUMINOE-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 826,
+      "designRaces": 274,
+      "holdoutRaces": 552,
+      "skip": {
+        "join": 29,
+        "model": 284,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 274,
+            "firstCorrect": 154,
+            "secondHitWhenFirst": 51,
+            "exact": 17,
+            "secondHitRateWhenFirst": 0.331169,
+            "exactRate": 0.062044
+          },
+          "marginal": {
+            "races": 274,
+            "firstCorrect": 154,
+            "secondHitWhenFirst": 58,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.376623,
+            "exactRate": 0.069343
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.15,
+            "races": 274,
+            "firstCorrect": 154,
+            "secondHitWhenFirst": 67,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.435065,
+            "exactRate": 0.072993
+          },
+          "periodSecondDeltaVsMarginal": 0.058442,
+          "periodSecondDeltaVsTop": 0.103896
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 552,
+          "firstCorrect": 286,
+          "secondHitWhenFirst": 106,
+          "exact": 30,
+          "secondHitRateWhenFirst": 0.370629,
+          "exactRate": 0.054348
+        },
+        "marginal": {
+          "races": 552,
+          "firstCorrect": 286,
+          "secondHitWhenFirst": 111,
+          "exact": 36,
+          "secondHitRateWhenFirst": 0.388112,
+          "exactRate": 0.065217
+        },
+        "period": {
+          "races": 552,
+          "firstCorrect": 286,
+          "secondHitWhenFirst": 123,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.43007,
+          "exactRate": 0.056159
+        },
+        "periodSecondDeltaVsMarginal": 0.041958,
+        "periodSecondDeltaVsTop": 0.059441,
+        "periodExactDeltaVsTop": 0.001812
+      }
+    },
+    {
+      "code": "13",
+      "slug": "amagasaki",
+      "status": "EVALUATED",
+      "modelVersion": "AMAGASAKI-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 966,
+      "designRaces": 306,
+      "holdoutRaces": 660,
+      "skip": {
+        "join": 24,
+        "model": 292,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "COURSE_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 306,
+            "firstCorrect": 195,
+            "secondHitWhenFirst": 70,
+            "exact": 29,
+            "secondHitRateWhenFirst": 0.358974,
+            "exactRate": 0.094771
+          },
+          "marginal": {
+            "races": 306,
+            "firstCorrect": 195,
+            "secondHitWhenFirst": 69,
+            "exact": 27,
+            "secondHitRateWhenFirst": 0.353846,
+            "exactRate": 0.088235
+          },
+          "period": {
+            "preset": "COURSE_MIX",
+            "lambda": 0.15,
+            "races": 306,
+            "firstCorrect": 195,
+            "secondHitWhenFirst": 77,
+            "exact": 28,
+            "secondHitRateWhenFirst": 0.394872,
+            "exactRate": 0.091503
+          },
+          "periodSecondDeltaVsMarginal": 0.041026,
+          "periodSecondDeltaVsTop": 0.035897
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 660,
+          "firstCorrect": 375,
+          "secondHitWhenFirst": 120,
+          "exact": 41,
+          "secondHitRateWhenFirst": 0.32,
+          "exactRate": 0.062121
+        },
+        "marginal": {
+          "races": 660,
+          "firstCorrect": 375,
+          "secondHitWhenFirst": 129,
+          "exact": 48,
+          "secondHitRateWhenFirst": 0.344,
+          "exactRate": 0.072727
+        },
+        "period": {
+          "races": 660,
+          "firstCorrect": 375,
+          "secondHitWhenFirst": 140,
+          "exact": 55,
+          "secondHitRateWhenFirst": 0.373333,
+          "exactRate": 0.083333
+        },
+        "periodSecondDeltaVsMarginal": 0.029333,
+        "periodSecondDeltaVsTop": 0.053333,
+        "periodExactDeltaVsTop": 0.021212
+      }
+    },
+    {
+      "code": "14",
+      "slug": "naruto",
+      "status": "EVALUATED",
+      "modelVersion": "NARUTO-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 593,
+      "designRaces": 159,
+      "holdoutRaces": 434,
+      "skip": {
+        "join": 21,
+        "model": 309,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 159,
+            "firstCorrect": 86,
+            "secondHitWhenFirst": 23,
+            "exact": 6,
+            "secondHitRateWhenFirst": 0.267442,
+            "exactRate": 0.037736
+          },
+          "marginal": {
+            "races": 159,
+            "firstCorrect": 86,
+            "secondHitWhenFirst": 26,
+            "exact": 6,
+            "secondHitRateWhenFirst": 0.302326,
+            "exactRate": 0.037736
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.3,
+            "races": 159,
+            "firstCorrect": 86,
+            "secondHitWhenFirst": 37,
+            "exact": 11,
+            "secondHitRateWhenFirst": 0.430233,
+            "exactRate": 0.069182
+          },
+          "periodSecondDeltaVsMarginal": 0.127907,
+          "periodSecondDeltaVsTop": 0.162791
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 434,
+          "firstCorrect": 228,
+          "secondHitWhenFirst": 68,
+          "exact": 18,
+          "secondHitRateWhenFirst": 0.298246,
+          "exactRate": 0.041475
+        },
+        "marginal": {
+          "races": 434,
+          "firstCorrect": 228,
+          "secondHitWhenFirst": 73,
+          "exact": 20,
+          "secondHitRateWhenFirst": 0.320175,
+          "exactRate": 0.046083
+        },
+        "period": {
+          "races": 434,
+          "firstCorrect": 228,
+          "secondHitWhenFirst": 84,
+          "exact": 21,
+          "secondHitRateWhenFirst": 0.368421,
+          "exactRate": 0.048387
+        },
+        "periodSecondDeltaVsMarginal": 0.048246,
+        "periodSecondDeltaVsTop": 0.070175,
+        "periodExactDeltaVsTop": 0.006912
+      }
+    },
+    {
+      "code": "15",
+      "slug": "marugame",
+      "status": "EVALUATED",
+      "modelVersion": "MARUGAME-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 793,
+      "designRaces": 350,
+      "holdoutRaces": 443,
+      "skip": {
+        "join": 10,
+        "model": 300,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "ST_GLOBAL",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 350,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 72,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.373057,
+            "exactRate": 0.057143
+          },
+          "marginal": {
+            "races": 350,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 72,
+            "exact": 21,
+            "secondHitRateWhenFirst": 0.373057,
+            "exactRate": 0.06
+          },
+          "period": {
+            "preset": "ST_GLOBAL",
+            "lambda": 0.15,
+            "races": 350,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 81,
+            "exact": 26,
+            "secondHitRateWhenFirst": 0.419689,
+            "exactRate": 0.074286
+          },
+          "periodSecondDeltaVsMarginal": 0.046632,
+          "periodSecondDeltaVsTop": 0.046632
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 443,
+          "firstCorrect": 245,
+          "secondHitWhenFirst": 92,
+          "exact": 31,
+          "secondHitRateWhenFirst": 0.37551,
+          "exactRate": 0.069977
+        },
+        "marginal": {
+          "races": 443,
+          "firstCorrect": 245,
+          "secondHitWhenFirst": 88,
+          "exact": 29,
+          "secondHitRateWhenFirst": 0.359184,
+          "exactRate": 0.065463
+        },
+        "period": {
+          "races": 443,
+          "firstCorrect": 245,
+          "secondHitWhenFirst": 94,
+          "exact": 32,
+          "secondHitRateWhenFirst": 0.383673,
+          "exactRate": 0.072235
+        },
+        "periodSecondDeltaVsMarginal": 0.02449,
+        "periodSecondDeltaVsTop": 0.008163,
+        "periodExactDeltaVsTop": 0.002257
+      }
+    },
+    {
+      "code": "16",
+      "slug": "kojima",
+      "status": "EVALUATED",
+      "modelVersion": "KOJIMA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 869,
+      "designRaces": 295,
+      "holdoutRaces": 574,
+      "skip": {
+        "join": 90,
+        "model": 300,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 295,
+            "firstCorrect": 163,
+            "secondHitWhenFirst": 66,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.404908,
+            "exactRate": 0.064407
+          },
+          "marginal": {
+            "races": 295,
+            "firstCorrect": 163,
+            "secondHitWhenFirst": 69,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.423313,
+            "exactRate": 0.064407
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.3,
+            "races": 295,
+            "firstCorrect": 163,
+            "secondHitWhenFirst": 75,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.460123,
+            "exactRate": 0.067797
+          },
+          "periodSecondDeltaVsMarginal": 0.03681,
+          "periodSecondDeltaVsTop": 0.055215
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 574,
+          "firstCorrect": 285,
+          "secondHitWhenFirst": 96,
+          "exact": 37,
+          "secondHitRateWhenFirst": 0.336842,
+          "exactRate": 0.06446
+        },
+        "marginal": {
+          "races": 574,
+          "firstCorrect": 285,
+          "secondHitWhenFirst": 101,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.354386,
+          "exactRate": 0.066202
+        },
+        "period": {
+          "races": 574,
+          "firstCorrect": 285,
+          "secondHitWhenFirst": 98,
+          "exact": 34,
+          "secondHitRateWhenFirst": 0.34386,
+          "exactRate": 0.059233
+        },
+        "periodSecondDeltaVsMarginal": -0.010526,
+        "periodSecondDeltaVsTop": 0.007018,
+        "periodExactDeltaVsTop": -0.005226
+      }
+    },
+    {
+      "code": "17",
+      "slug": "miyajima",
+      "status": "EVALUATED",
+      "modelVersion": "MIYAJIMA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 845,
+      "designRaces": 339,
+      "holdoutRaces": 506,
+      "skip": {
+        "join": 44,
+        "model": 305,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "COURSE_MIX",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 339,
+            "firstCorrect": 207,
+            "secondHitWhenFirst": 61,
+            "exact": 22,
+            "secondHitRateWhenFirst": 0.294686,
+            "exactRate": 0.064897
+          },
+          "marginal": {
+            "races": 339,
+            "firstCorrect": 207,
+            "secondHitWhenFirst": 67,
+            "exact": 27,
+            "secondHitRateWhenFirst": 0.323671,
+            "exactRate": 0.079646
+          },
+          "period": {
+            "preset": "COURSE_MIX",
+            "lambda": 0.5,
+            "races": 339,
+            "firstCorrect": 207,
+            "secondHitWhenFirst": 74,
+            "exact": 32,
+            "secondHitRateWhenFirst": 0.357488,
+            "exactRate": 0.094395
+          },
+          "periodSecondDeltaVsMarginal": 0.033816,
+          "periodSecondDeltaVsTop": 0.062802
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 506,
+          "firstCorrect": 279,
+          "secondHitWhenFirst": 79,
+          "exact": 28,
+          "secondHitRateWhenFirst": 0.283154,
+          "exactRate": 0.055336
+        },
+        "marginal": {
+          "races": 506,
+          "firstCorrect": 279,
+          "secondHitWhenFirst": 91,
+          "exact": 27,
+          "secondHitRateWhenFirst": 0.326165,
+          "exactRate": 0.05336
+        },
+        "period": {
+          "races": 506,
+          "firstCorrect": 279,
+          "secondHitWhenFirst": 105,
+          "exact": 29,
+          "secondHitRateWhenFirst": 0.376344,
+          "exactRate": 0.057312
+        },
+        "periodSecondDeltaVsMarginal": 0.050179,
+        "periodSecondDeltaVsTop": 0.09319,
+        "periodExactDeltaVsTop": 0.001976
+      }
+    },
+    {
+      "code": "18",
+      "slug": "tokuyama",
+      "status": "EVALUATED",
+      "modelVersion": "TOKUYAMA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 859,
+      "designRaces": 319,
+      "holdoutRaces": 540,
+      "skip": {
+        "join": 53,
+        "model": 296,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 319,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 83,
+            "exact": 32,
+            "secondHitRateWhenFirst": 0.430052,
+            "exactRate": 0.100313
+          },
+          "marginal": {
+            "races": 319,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 85,
+            "exact": 32,
+            "secondHitRateWhenFirst": 0.440415,
+            "exactRate": 0.100313
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.15,
+            "races": 319,
+            "firstCorrect": 193,
+            "secondHitWhenFirst": 81,
+            "exact": 32,
+            "secondHitRateWhenFirst": 0.419689,
+            "exactRate": 0.100313
+          },
+          "periodSecondDeltaVsMarginal": -0.020725,
+          "periodSecondDeltaVsTop": -0.010363
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 540,
+          "firstCorrect": 321,
+          "secondHitWhenFirst": 121,
+          "exact": 47,
+          "secondHitRateWhenFirst": 0.376947,
+          "exactRate": 0.087037
+        },
+        "marginal": {
+          "races": 540,
+          "firstCorrect": 321,
+          "secondHitWhenFirst": 128,
+          "exact": 46,
+          "secondHitRateWhenFirst": 0.398754,
+          "exactRate": 0.085185
+        },
+        "period": {
+          "races": 540,
+          "firstCorrect": 321,
+          "secondHitWhenFirst": 119,
+          "exact": 40,
+          "secondHitRateWhenFirst": 0.370717,
+          "exactRate": 0.074074
+        },
+        "periodSecondDeltaVsMarginal": -0.028037,
+        "periodSecondDeltaVsTop": -0.006231,
+        "periodExactDeltaVsTop": -0.012963
+      }
+    },
+    {
+      "code": "19",
+      "slug": "shimonoseki",
+      "status": "EVALUATED",
+      "modelVersion": "SHIMONOSEKI-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 654,
+      "designRaces": 124,
+      "holdoutRaces": 530,
+      "skip": {
+        "join": 71,
+        "model": 274,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.75,
+        "design": {
+          "baseline": {
+            "races": 124,
+            "firstCorrect": 75,
+            "secondHitWhenFirst": 28,
+            "exact": 9,
+            "secondHitRateWhenFirst": 0.373333,
+            "exactRate": 0.072581
+          },
+          "marginal": {
+            "races": 124,
+            "firstCorrect": 75,
+            "secondHitWhenFirst": 25,
+            "exact": 8,
+            "secondHitRateWhenFirst": 0.333333,
+            "exactRate": 0.064516
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.75,
+            "races": 124,
+            "firstCorrect": 75,
+            "secondHitWhenFirst": 32,
+            "exact": 16,
+            "secondHitRateWhenFirst": 0.426667,
+            "exactRate": 0.129032
+          },
+          "periodSecondDeltaVsMarginal": 0.093333,
+          "periodSecondDeltaVsTop": 0.053333
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 530,
+          "firstCorrect": 334,
+          "secondHitWhenFirst": 121,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.362275,
+          "exactRate": 0.071698
+        },
+        "marginal": {
+          "races": 530,
+          "firstCorrect": 334,
+          "secondHitWhenFirst": 128,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.383234,
+          "exactRate": 0.071698
+        },
+        "period": {
+          "races": 530,
+          "firstCorrect": 334,
+          "secondHitWhenFirst": 118,
+          "exact": 36,
+          "secondHitRateWhenFirst": 0.353293,
+          "exactRate": 0.067925
+        },
+        "periodSecondDeltaVsMarginal": -0.02994,
+        "periodSecondDeltaVsTop": -0.008982,
+        "periodExactDeltaVsTop": -0.003774
+      }
+    },
+    {
+      "code": "20",
+      "slug": "wakamatsu",
+      "status": "EVALUATED",
+      "modelVersion": "WAKAMATSU-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 727,
+      "designRaces": 172,
+      "holdoutRaces": 555,
+      "skip": {
+        "join": 59,
+        "model": 296,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 172,
+            "firstCorrect": 99,
+            "secondHitWhenFirst": 36,
+            "exact": 17,
+            "secondHitRateWhenFirst": 0.363636,
+            "exactRate": 0.098837
+          },
+          "marginal": {
+            "races": 172,
+            "firstCorrect": 99,
+            "secondHitWhenFirst": 40,
+            "exact": 18,
+            "secondHitRateWhenFirst": 0.40404,
+            "exactRate": 0.104651
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.15,
+            "races": 172,
+            "firstCorrect": 99,
+            "secondHitWhenFirst": 47,
+            "exact": 15,
+            "secondHitRateWhenFirst": 0.474747,
+            "exactRate": 0.087209
+          },
+          "periodSecondDeltaVsMarginal": 0.070707,
+          "periodSecondDeltaVsTop": 0.111111
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 555,
+          "firstCorrect": 313,
+          "secondHitWhenFirst": 126,
+          "exact": 54,
+          "secondHitRateWhenFirst": 0.402556,
+          "exactRate": 0.097297
+        },
+        "marginal": {
+          "races": 555,
+          "firstCorrect": 313,
+          "secondHitWhenFirst": 130,
+          "exact": 53,
+          "secondHitRateWhenFirst": 0.415335,
+          "exactRate": 0.095495
+        },
+        "period": {
+          "races": 555,
+          "firstCorrect": 313,
+          "secondHitWhenFirst": 140,
+          "exact": 59,
+          "secondHitRateWhenFirst": 0.447284,
+          "exactRate": 0.106306
+        },
+        "periodSecondDeltaVsMarginal": 0.031949,
+        "periodSecondDeltaVsTop": 0.044728,
+        "periodExactDeltaVsTop": 0.009009
+      }
+    },
+    {
+      "code": "21",
+      "slug": "ashiya",
+      "status": "EVALUATED",
+      "modelVersion": "ASHIYA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 857,
+      "designRaces": 341,
+      "holdoutRaces": 516,
+      "skip": {
+        "join": 22,
+        "model": 300,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.5,
+        "design": {
+          "baseline": {
+            "races": 341,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 61,
+            "exact": 20,
+            "secondHitRateWhenFirst": 0.2891,
+            "exactRate": 0.058651
+          },
+          "marginal": {
+            "races": 341,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 67,
+            "exact": 22,
+            "secondHitRateWhenFirst": 0.317536,
+            "exactRate": 0.064516
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.5,
+            "races": 341,
+            "firstCorrect": 211,
+            "secondHitWhenFirst": 75,
+            "exact": 26,
+            "secondHitRateWhenFirst": 0.35545,
+            "exactRate": 0.076246
+          },
+          "periodSecondDeltaVsMarginal": 0.037915,
+          "periodSecondDeltaVsTop": 0.066351
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 516,
+          "firstCorrect": 299,
+          "secondHitWhenFirst": 107,
+          "exact": 25,
+          "secondHitRateWhenFirst": 0.35786,
+          "exactRate": 0.04845
+        },
+        "marginal": {
+          "races": 516,
+          "firstCorrect": 299,
+          "secondHitWhenFirst": 113,
+          "exact": 30,
+          "secondHitRateWhenFirst": 0.377926,
+          "exactRate": 0.05814
+        },
+        "period": {
+          "races": 516,
+          "firstCorrect": 299,
+          "secondHitWhenFirst": 119,
+          "exact": 35,
+          "secondHitRateWhenFirst": 0.397993,
+          "exactRate": 0.067829
+        },
+        "periodSecondDeltaVsMarginal": 0.020067,
+        "periodSecondDeltaVsTop": 0.040134,
+        "periodExactDeltaVsTop": 0.01938
+      }
+    },
+    {
+      "code": "22",
+      "slug": "fukuoka",
+      "status": "EVALUATED",
+      "modelVersion": "FUKUOKA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 814,
+      "designRaces": 188,
+      "holdoutRaces": 626,
+      "skip": {
+        "join": 37,
+        "model": 299,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "GLOBAL_MIX",
+        "lambda": 0.15,
+        "design": {
+          "baseline": {
+            "races": 188,
+            "firstCorrect": 113,
+            "secondHitWhenFirst": 35,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.309735,
+            "exactRate": 0.101064
+          },
+          "marginal": {
+            "races": 188,
+            "firstCorrect": 113,
+            "secondHitWhenFirst": 36,
+            "exact": 18,
+            "secondHitRateWhenFirst": 0.318584,
+            "exactRate": 0.095745
+          },
+          "period": {
+            "preset": "GLOBAL_MIX",
+            "lambda": 0.15,
+            "races": 188,
+            "firstCorrect": 113,
+            "secondHitWhenFirst": 48,
+            "exact": 19,
+            "secondHitRateWhenFirst": 0.424779,
+            "exactRate": 0.101064
+          },
+          "periodSecondDeltaVsMarginal": 0.106195,
+          "periodSecondDeltaVsTop": 0.115044
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 626,
+          "firstCorrect": 380,
+          "secondHitWhenFirst": 135,
+          "exact": 52,
+          "secondHitRateWhenFirst": 0.355263,
+          "exactRate": 0.083067
+        },
+        "marginal": {
+          "races": 626,
+          "firstCorrect": 380,
+          "secondHitWhenFirst": 147,
+          "exact": 58,
+          "secondHitRateWhenFirst": 0.386842,
+          "exactRate": 0.092652
+        },
+        "period": {
+          "races": 626,
+          "firstCorrect": 380,
+          "secondHitWhenFirst": 147,
+          "exact": 54,
+          "secondHitRateWhenFirst": 0.386842,
+          "exactRate": 0.086262
+        },
+        "periodSecondDeltaVsMarginal": 0,
+        "periodSecondDeltaVsTop": 0.031579,
+        "periodExactDeltaVsTop": 0.003195
+      }
+    },
+    {
+      "code": "23",
+      "slug": "karatsu",
+      "status": "EVALUATED",
+      "modelVersion": "KARATSU-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 739,
+      "designRaces": 303,
+      "holdoutRaces": 436,
+      "skip": {
+        "join": 107,
+        "model": 292,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 0.3,
+        "design": {
+          "baseline": {
+            "races": 303,
+            "firstCorrect": 168,
+            "secondHitWhenFirst": 55,
+            "exact": 24,
+            "secondHitRateWhenFirst": 0.327381,
+            "exactRate": 0.079208
+          },
+          "marginal": {
+            "races": 303,
+            "firstCorrect": 168,
+            "secondHitWhenFirst": 53,
+            "exact": 26,
+            "secondHitRateWhenFirst": 0.315476,
+            "exactRate": 0.085809
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 0.3,
+            "races": 303,
+            "firstCorrect": 168,
+            "secondHitWhenFirst": 61,
+            "exact": 25,
+            "secondHitRateWhenFirst": 0.363095,
+            "exactRate": 0.082508
+          },
+          "periodSecondDeltaVsMarginal": 0.047619,
+          "periodSecondDeltaVsTop": 0.035714
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 436,
+          "firstCorrect": 241,
+          "secondHitWhenFirst": 89,
+          "exact": 37,
+          "secondHitRateWhenFirst": 0.369295,
+          "exactRate": 0.084862
+        },
+        "marginal": {
+          "races": 436,
+          "firstCorrect": 241,
+          "secondHitWhenFirst": 91,
+          "exact": 38,
+          "secondHitRateWhenFirst": 0.377593,
+          "exactRate": 0.087156
+        },
+        "period": {
+          "races": 436,
+          "firstCorrect": 241,
+          "secondHitWhenFirst": 98,
+          "exact": 42,
+          "secondHitRateWhenFirst": 0.406639,
+          "exactRate": 0.09633
+        },
+        "periodSecondDeltaVsMarginal": 0.029046,
+        "periodSecondDeltaVsTop": 0.037344,
+        "periodExactDeltaVsTop": 0.011468
+      }
+    },
+    {
+      "code": "24",
+      "slug": "omura",
+      "status": "EVALUATED",
+      "modelVersion": "OMURA-RESEARCH-MODEL-V1",
+      "split": {
+        "designTo": "2026-06-30",
+        "holdoutFrom": "2026-07-01"
+      },
+      "samples": 848,
+      "designRaces": 298,
+      "holdoutRaces": 550,
+      "skip": {
+        "join": 22,
+        "model": 300,
+        "invalid": 0
+      },
+      "selected": {
+        "preset": "TOP3_GLOBAL",
+        "lambda": 1,
+        "design": {
+          "baseline": {
+            "races": 298,
+            "firstCorrect": 177,
+            "secondHitWhenFirst": 65,
+            "exact": 22,
+            "secondHitRateWhenFirst": 0.367232,
+            "exactRate": 0.073826
+          },
+          "marginal": {
+            "races": 298,
+            "firstCorrect": 177,
+            "secondHitWhenFirst": 65,
+            "exact": 23,
+            "secondHitRateWhenFirst": 0.367232,
+            "exactRate": 0.077181
+          },
+          "period": {
+            "preset": "TOP3_GLOBAL",
+            "lambda": 1,
+            "races": 298,
+            "firstCorrect": 177,
+            "secondHitWhenFirst": 69,
+            "exact": 18,
+            "secondHitRateWhenFirst": 0.389831,
+            "exactRate": 0.060403
+          },
+          "periodSecondDeltaVsMarginal": 0.022599,
+          "periodSecondDeltaVsTop": 0.022599
+        }
+      },
+      "holdout": {
+        "baseline": {
+          "races": 550,
+          "firstCorrect": 315,
+          "secondHitWhenFirst": 120,
+          "exact": 39,
+          "secondHitRateWhenFirst": 0.380952,
+          "exactRate": 0.070909
+        },
+        "marginal": {
+          "races": 550,
+          "firstCorrect": 315,
+          "secondHitWhenFirst": 120,
+          "exact": 39,
+          "secondHitRateWhenFirst": 0.380952,
+          "exactRate": 0.070909
+        },
+        "period": {
+          "races": 550,
+          "firstCorrect": 315,
+          "secondHitWhenFirst": 127,
+          "exact": 47,
+          "secondHitRateWhenFirst": 0.403175,
+          "exactRate": 0.085455
+        },
+        "periodSecondDeltaVsMarginal": 0.022222,
+        "periodSecondDeltaVsTop": 0.022222,
+        "periodExactDeltaVsTop": 0.014545
+      }
+    }
+  ]
+}
