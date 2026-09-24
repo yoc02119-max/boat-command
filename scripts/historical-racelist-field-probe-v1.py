@@ -37,15 +37,10 @@ def load(p):
 
 def sample_rows(rows):
     rows=sorted(rows,key=lambda r:(r["d"],int(r["r"])))
-    if not rows:return []
-    picks=[rows[0],rows[-1]]
-    out=[]
-    seen=set()
-    for r in picks:
-        key=(r["d"],r["r"])
-        if key not in seen:
-            out.append(r);seen.add(key)
-    return out
+    # First probe the oldest audited rich row for each venue. If even the
+    # oldest page is still served and identity-matches, a broader backfill
+    # probe can be justified without hammering the official site.
+    return rows[:1]
 
 def field_presence(pack):
     boats=pack.get("boats",[])
@@ -67,6 +62,7 @@ def main():
         "schema":"boat-command-historical-racelist-field-probe-v1",
         "researchOnly":True,"productionChanged":False,"predictionInputChanged":False,
         "source":"BOAT RACE official racelist only; no result endpoints",
+        "probeScope":"oldest audited rich-history race per venue",
         "acceptanceRule":"six lane+registration+grade tuples must exactly match audited rich-history row",
         "venues":[],
     }
