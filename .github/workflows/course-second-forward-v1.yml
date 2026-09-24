@@ -1,0 +1,137 @@
+name: Course-second FORWARD SHADOW v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/course-second-forward-v1.yml'
+      - 'scripts/racer-period-course-second-forward-v1.py'
+      - 'scripts/racer-period-course-second-forward-evaluate-v1.py'
+      - 'research/racer-period-course-second-audit-v1.json'
+      - 'racer-period-24/**'
+  schedule:
+    - cron: '*/5 0-13,21-23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: course-second-forward-v1
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify forward scripts and safety contract
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-course-second-forward-v1.py scripts/racer-period-course-second-forward-evaluate-v1.py
+          python3 scripts/racer-period-course-second-forward-v1.py --self-test
+          python3 scripts/racer-period-course-second-forward-evaluate-v1.py --self-test
+
+  freeze:
+    if: github.event_name != 'pull_request'
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main and freeze result-blind snapshots
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          python3 scripts/racer-period-course-second-forward-v1.py --date "$DATE"
+
+      - name: Stage only immutable course-second SHADOW files
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          ROOT=/tmp/course-second-forward
+          rm -rf "$ROOT" && mkdir -p "$ROOT"
+          found=0
+          while IFS= read -r -d '' f; do
+            rel="$f"
+            dst="$ROOT/$rel"
+            mkdir -p "$(dirname "$dst")"
+            cp "$f" "$dst"
+            found=$((found+1))
+          done < <(find live -path "*/$DATE/shadow/course-second-v1/race-*.json" -print0 2>/dev/null || true)
+          echo "FOUND=$found" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        if: env.FOUND != '0'
+        with:
+          name: course-second-forward-v1
+          path: /tmp/course-second-forward/
+          retention-days: 2
+          if-no-files-found: ignore
+
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: freeze
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          name: course-second-forward-v1
+          path: /tmp/course-second-forward
+        continue-on-error: true
+
+      - name: Publish only new immutable SHADOW files
+        run: |
+          set -euo pipefail
+          [ -d /tmp/course-second-forward/live ] || { echo 'NO_COURSE_SECOND_FORWARD_ARTIFACT'; exit 0; }
+          git config user.name 'boat-command-course-second-forward'
+          git config user.email 'boat-command-course-second-forward@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            changed=0
+            while IFS= read -r src; do
+              rel="${src#/tmp/course-second-forward/}"
+              dst="$rel"
+              if [ -f "$dst" ]; then
+                cmp -s "$src" "$dst" || { echo "COURSE_SECOND_IMMUTABILITY_CONFLICT $dst" >&2; exit 1; }
+                continue
+              fi
+              mkdir -p "$(dirname "$dst")"
+              cp "$src" "$dst"
+              changed=$((changed+1))
+            done < <(find /tmp/course-second-forward/live -type f -name 'race-*.json' | sort)
+
+            [ "$changed" -gt 0 ] || { echo 'COURSE_SECOND_FORWARD_CURRENT'; exit 0; }
+            git add live
+            python3 - <<'PY'
+          import json,re,subprocess
+          paths=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          bad=[]
+          for p in paths:
+              if not re.fullmatch(r'live/[^/]+/\d{4}-\d{2}-\d{2}/shadow/course-second-v1/race-(?:[1-9]|1[0-2])\.json',p):
+                  bad.append(p);continue
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-course-second-forward-v1'
+              assert x['resultInput'] is False and x['payoutInput'] is False and x['postRaceRead'] is False
+              assert x['productionEnabled'] is False and x['tryEnabled'] is False and x['hardLockEnabled'] is False
+              assert x['immutableAfterFirstWrite'] is True
+              assert x['laneAsCourseProxy'] is True and x['actualEntryCourseUsed'] is False
+          if bad: raise SystemExit('COURSE_SECOND_FORBIDDEN_CHANGE:'+repr(bad))
+          print('COURSE_SECOND_FORWARD_BOUNDARY_PASS',len(paths))
+          PY
+            git commit -m 'shadow: freeze course-second forward research'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
