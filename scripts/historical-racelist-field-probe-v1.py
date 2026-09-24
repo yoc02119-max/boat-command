@@ -62,6 +62,7 @@ def main():
         "schema":"boat-command-historical-racelist-field-probe-v1",
         "researchOnly":True,"productionChanged":False,"predictionInputChanged":False,
         "source":"BOAT RACE official racelist only; no result endpoints",
+        "sampleStrategy":"oldest stored rich-history race per venue",
         "probeScope":"oldest audited rich-history race per venue",
         "acceptanceRule":"six lane+registration+grade tuples must exactly match audited rich-history row",
         "venues":[],
@@ -75,7 +76,7 @@ def main():
             item={"date":d,"race":race,"url":url,"status":"ERROR","verifiedHistoricalPage":False}
             try:
                 req=urllib.request.Request(url,headers={"User-Agent":f"BOAT-COMMAND-HISTORY-FIELD-PROBE/{code}"})
-                with urllib.request.urlopen(req,timeout=8) as resp:
+                with urllib.request.urlopen(req,timeout=4) as resp:
                     raw=resp.read()
                 html=None
                 for enc in ("utf-8","cp932","shift_jis","euc_jp"):
