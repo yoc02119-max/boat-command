@@ -106,6 +106,30 @@ def compact_beforeinfo(g,row):
         raw,elapsed,size=fetch(url,f"{g['code']}-{race}")
         tables=PRE.table_rows(raw)
         ex=PRE.parse_exhibition(tables)
+        # Historical beforeinfo HTML uses an older table shape at several venues.
+        # The live parser can therefore see the table but miss the exhibition
+        # column. Fill only missing values using the conservative parser already
+        # validated by historical-beforeinfo-field-probe-v1.
+        for table in tables:
+            joined=" ".join(" ".join(row) for row in table[:8])
+            if "展示" not in joined or "タイム" not in joined or "体重" not in joined:
+                continue
+            for row_cells in table:
+                if not row_cells or str(row_cells[0]).strip() not in set("123456"):
+                    continue
+                lane=int(str(row_cells[0]).strip())
+                item=dict(ex.get(lane,{}) or {})
+                if item.get("exhibitionTime") is None:
+                    for cell in row_cells:
+                        v=str(cell).strip()
+                        if re.fullmatch(r"6\\.\\d{2}",v):
+                            item["exhibitionTime"]=float(v);break
+                if item.get("tilt") is None and len(row_cells)>5:
+                    v=str(row_cells[5]).strip()
+                    if re.fullmatch(r"-?\\d+(?:\\.\\d+)?",v):
+                        item["tilt"]=float(v)
+                ex[lane]=item
+            break
         starts=PRE.parse_start_exhibition(tables)
         water=PRE.parse_weather(raw)
         boats=[]
