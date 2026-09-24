@@ -1,0 +1,3696 @@
+{
+  "schema": "boat-command-racer-period-course-second-audit-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "tryChanged": false,
+  "hardLockChanged": false,
+  "promotionEligible": false,
+  "question": "With first place frozen, do same-number historical course features improve second-place ranking?",
+  "featureBoundary": {
+    "firstPredictionFrozen": true,
+    "officialSource": "BOAT RACE racer half-year archives",
+    "courseSpecificStatsUsed": true,
+    "laneAsCourseProxy": true,
+    "actualEntryCourseUsed": false,
+    "proxyWarning": "Frame/lane number is used only to select the same-number historical course profile. It is not asserted to equal actual entry course.",
+    "joinPolicy": "RACE_DATE_HALF_YEAR + REGISTRATION + CLASS_MATCH",
+    "resultsUsedForProfileSelection": "CALIBRATION_70_PERCENT_ONLY",
+    "resultsUsedForHoldoutFeatureConstruction": false,
+    "holdoutResultsUsedForEvaluationOnly": true
+  },
+  "selectionPolicy": "Per venue profile selected on first 70% dates; compared on untouched last 30% dates.",
+  "summary": {
+    "venues": 24,
+    "holdoutRaces": 8307,
+    "baseline": {
+      "races": 8307,
+      "headCorrect": 2778,
+      "headAccuracy": 0.3344167569519682,
+      "secondTop1Hits": 802,
+      "secondTop1Accuracy": 0.2886969042476602,
+      "secondTop2Hits": 1478,
+      "secondTop2Coverage": 0.5320374370050396,
+      "secondTop3Hits": 2046,
+      "secondTop3Coverage": 0.7365010799136069,
+      "pairAccuracy": 0.09654508246057542
+    },
+    "courseCandidate": {
+      "races": 8307,
+      "headCorrect": 2778,
+      "headAccuracy": 0.3344167569519682,
+      "secondTop1Hits": 888,
+      "secondTop1Accuracy": 0.31965442764578833,
+      "secondTop2Hits": 1575,
+      "secondTop2Coverage": 0.5669546436285097,
+      "secondTop3Hits": 2095,
+      "secondTop3Coverage": 0.7541396688264939,
+      "pairAccuracy": 0.1068977970386421
+    },
+    "headAccuracyDelta": 0.0,
+    "secondTop1Delta": 0.03095752339812813,
+    "secondTop2Delta": 0.03491720662347009,
+    "secondTop3Delta": 0.017638588912886943,
+    "pairAccuracyDelta": 0.01035271457806669,
+    "venuesTop1Improved": 20,
+    "venuesTop2Improved": 21,
+    "venuesBothImproved": 17,
+    "venuesNoTop1Regression": 21
+  },
+  "venuesData": [
+    {
+      "slug": "amagasaki",
+      "venueCode": "13",
+      "calibrationLastDate": "2026-08-04",
+      "holdoutFirstDate": "2026-08-09",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "secondTop1Hits": 103,
+            "secondTop1Accuracy": 0.3665480427046263,
+            "secondTop2Hits": 175,
+            "secondTop2Coverage": 0.6227758007117438,
+            "secondTop3Hits": 219,
+            "secondTop3Coverage": 0.7793594306049823,
+            "pairAccuracy": 0.1162528216704289
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "secondTop1Hits": 100,
+            "secondTop1Accuracy": 0.35587188612099646,
+            "secondTop2Hits": 171,
+            "secondTop2Coverage": 0.608540925266904,
+            "secondTop3Hits": 219,
+            "secondTop3Coverage": 0.7793594306049823,
+            "pairAccuracy": 0.11286681715575621
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "secondTop1Hits": 99,
+            "secondTop1Accuracy": 0.35231316725978645,
+            "secondTop2Hits": 171,
+            "secondTop2Coverage": 0.608540925266904,
+            "secondTop3Hits": 219,
+            "secondTop3Coverage": 0.7793594306049823,
+            "pairAccuracy": 0.11173814898419865
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "secondTop1Hits": 99,
+            "secondTop1Accuracy": 0.35231316725978645,
+            "secondTop2Hits": 171,
+            "secondTop2Coverage": 0.608540925266904,
+            "secondTop3Hits": 220,
+            "secondTop3Coverage": 0.7829181494661922,
+            "pairAccuracy": 0.11173814898419865
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 396,
+          "headCorrect": 147,
+          "headAccuracy": 0.3712121212121212,
+          "secondTop1Hits": 40,
+          "secondTop1Accuracy": 0.272108843537415,
+          "secondTop2Hits": 85,
+          "secondTop2Coverage": 0.5782312925170068,
+          "secondTop3Hits": 112,
+          "secondTop3Coverage": 0.7619047619047619,
+          "pairAccuracy": 0.10101010101010101
+        },
+        "courseCandidate": {
+          "races": 396,
+          "headCorrect": 147,
+          "headAccuracy": 0.3712121212121212,
+          "secondTop1Hits": 50,
+          "secondTop1Accuracy": 0.3401360544217687,
+          "secondTop2Hits": 86,
+          "secondTop2Coverage": 0.5850340136054422,
+          "secondTop3Hits": 113,
+          "secondTop3Coverage": 0.7687074829931972,
+          "pairAccuracy": 0.12626262626262627
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.0680272108843537,
+        "secondTop2Delta": 0.006802721088435382,
+        "secondTop3Delta": 0.006802721088435382,
+        "pairAccuracyDelta": 0.025252525252525262,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "ashiya",
+      "venueCode": "21",
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "secondTop1Hits": 87,
+            "secondTop1Accuracy": 0.3,
+            "secondTop2Hits": 149,
+            "secondTop2Coverage": 0.5137931034482759,
+            "secondTop3Hits": 207,
+            "secondTop3Coverage": 0.7137931034482758,
+            "pairAccuracy": 0.10622710622710622
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "secondTop1Hits": 85,
+            "secondTop1Accuracy": 0.29310344827586204,
+            "secondTop2Hits": 156,
+            "secondTop2Coverage": 0.5379310344827586,
+            "secondTop3Hits": 211,
+            "secondTop3Coverage": 0.7275862068965517,
+            "pairAccuracy": 0.10378510378510379
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "secondTop1Hits": 84,
+            "secondTop1Accuracy": 0.2896551724137931,
+            "secondTop2Hits": 148,
+            "secondTop2Coverage": 0.5103448275862069,
+            "secondTop3Hits": 210,
+            "secondTop3Coverage": 0.7241379310344828,
+            "pairAccuracy": 0.10256410256410256
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "secondTop1Hits": 83,
+            "secondTop1Accuracy": 0.28620689655172415,
+            "secondTop2Hits": 150,
+            "secondTop2Coverage": 0.5172413793103449,
+            "secondTop3Hits": 207,
+            "secondTop3Coverage": 0.7137931034482758,
+            "pairAccuracy": 0.10134310134310134
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 360,
+          "headCorrect": 136,
+          "headAccuracy": 0.37777777777777777,
+          "secondTop1Hits": 31,
+          "secondTop1Accuracy": 0.22794117647058823,
+          "secondTop2Hits": 67,
+          "secondTop2Coverage": 0.49264705882352944,
+          "secondTop3Hits": 96,
+          "secondTop3Coverage": 0.7058823529411765,
+          "pairAccuracy": 0.08611111111111111
+        },
+        "courseCandidate": {
+          "races": 360,
+          "headCorrect": 136,
+          "headAccuracy": 0.37777777777777777,
+          "secondTop1Hits": 36,
+          "secondTop1Accuracy": 0.2647058823529412,
+          "secondTop2Hits": 74,
+          "secondTop2Coverage": 0.5441176470588235,
+          "secondTop3Hits": 99,
+          "secondTop3Coverage": 0.7279411764705882,
+          "pairAccuracy": 0.1
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.03676470588235295,
+        "secondTop2Delta": 0.051470588235294046,
+        "secondTop3Delta": 0.022058823529411686,
+        "pairAccuracyDelta": 0.013888888888888895,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "biwako",
+      "venueCode": "11",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "secondTop1Hits": 65,
+            "secondTop1Accuracy": 0.325,
+            "secondTop2Hits": 119,
+            "secondTop2Coverage": 0.595,
+            "secondTop3Hits": 159,
+            "secondTop3Coverage": 0.795,
+            "pairAccuracy": 0.0951683748169839
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "secondTop1Hits": 64,
+            "secondTop1Accuracy": 0.32,
+            "secondTop2Hits": 115,
+            "secondTop2Coverage": 0.575,
+            "secondTop3Hits": 148,
+            "secondTop3Coverage": 0.74,
+            "pairAccuracy": 0.09370424597364568
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "secondTop1Hits": 64,
+            "secondTop1Accuracy": 0.32,
+            "secondTop2Hits": 113,
+            "secondTop2Coverage": 0.565,
+            "secondTop3Hits": 149,
+            "secondTop3Coverage": 0.745,
+            "pairAccuracy": 0.09370424597364568
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "secondTop1Hits": 63,
+            "secondTop1Accuracy": 0.315,
+            "secondTop2Hits": 118,
+            "secondTop2Coverage": 0.59,
+            "secondTop3Hits": 152,
+            "secondTop3Coverage": 0.76,
+            "pairAccuracy": 0.09224011713030747
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 330,
+          "headCorrect": 104,
+          "headAccuracy": 0.3151515151515151,
+          "secondTop1Hits": 29,
+          "secondTop1Accuracy": 0.27884615384615385,
+          "secondTop2Hits": 50,
+          "secondTop2Coverage": 0.4807692307692308,
+          "secondTop3Hits": 72,
+          "secondTop3Coverage": 0.6923076923076923,
+          "pairAccuracy": 0.08787878787878788
+        },
+        "courseCandidate": {
+          "races": 330,
+          "headCorrect": 104,
+          "headAccuracy": 0.3151515151515151,
+          "secondTop1Hits": 28,
+          "secondTop1Accuracy": 0.2692307692307692,
+          "secondTop2Hits": 56,
+          "secondTop2Coverage": 0.5384615384615384,
+          "secondTop3Hits": 74,
+          "secondTop3Coverage": 0.7115384615384616,
+          "pairAccuracy": 0.08484848484848485
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": -0.009615384615384637,
+        "secondTop2Delta": 0.057692307692307654,
+        "secondTop3Delta": 0.019230769230769273,
+        "pairAccuracyDelta": -0.003030303030303022,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "edogawa",
+      "venueCode": "03",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "secondTop1Hits": 61,
+            "secondTop1Accuracy": 0.3279569892473118,
+            "secondTop2Hits": 112,
+            "secondTop2Coverage": 0.6021505376344086,
+            "secondTop3Hits": 149,
+            "secondTop3Coverage": 0.8010752688172043,
+            "pairAccuracy": 0.11233885819521179
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "secondTop1Hits": 58,
+            "secondTop1Accuracy": 0.3118279569892473,
+            "secondTop2Hits": 111,
+            "secondTop2Coverage": 0.5967741935483871,
+            "secondTop3Hits": 149,
+            "secondTop3Coverage": 0.8010752688172043,
+            "pairAccuracy": 0.10681399631675875
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "secondTop1Hits": 58,
+            "secondTop1Accuracy": 0.3118279569892473,
+            "secondTop2Hits": 106,
+            "secondTop2Coverage": 0.5698924731182796,
+            "secondTop3Hits": 150,
+            "secondTop3Coverage": 0.8064516129032258,
+            "pairAccuracy": 0.10681399631675875
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "secondTop1Hits": 57,
+            "secondTop1Accuracy": 0.3064516129032258,
+            "secondTop2Hits": 114,
+            "secondTop2Coverage": 0.6129032258064516,
+            "secondTop3Hits": 151,
+            "secondTop3Coverage": 0.8118279569892473,
+            "pairAccuracy": 0.10497237569060773
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 251,
+          "headCorrect": 80,
+          "headAccuracy": 0.3187250996015936,
+          "secondTop1Hits": 27,
+          "secondTop1Accuracy": 0.3375,
+          "secondTop2Hits": 41,
+          "secondTop2Coverage": 0.5125,
+          "secondTop3Hits": 58,
+          "secondTop3Coverage": 0.725,
+          "pairAccuracy": 0.10756972111553785
+        },
+        "courseCandidate": {
+          "races": 251,
+          "headCorrect": 80,
+          "headAccuracy": 0.3187250996015936,
+          "secondTop1Hits": 29,
+          "secondTop1Accuracy": 0.3625,
+          "secondTop2Hits": 41,
+          "secondTop2Coverage": 0.5125,
+          "secondTop3Hits": 53,
+          "secondTop3Coverage": 0.6625,
+          "pairAccuracy": 0.11553784860557768
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.024999999999999967,
+        "secondTop2Delta": 0.0,
+        "secondTop3Delta": -0.0625,
+        "pairAccuracyDelta": 0.007968127490039834,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "fukuoka",
+      "venueCode": "22",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "COURSE_2_ST",
+        "twoW": 0.65,
+        "threeW": 0.0,
+        "stW": 3.5,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "secondTop1Hits": 87,
+            "secondTop1Accuracy": 0.3359073359073359,
+            "secondTop2Hits": 144,
+            "secondTop2Coverage": 0.555984555984556,
+            "secondTop3Hits": 186,
+            "secondTop3Coverage": 0.7181467181467182,
+            "pairAccuracy": 0.1084788029925187
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "secondTop1Hits": 86,
+            "secondTop1Accuracy": 0.33204633204633205,
+            "secondTop2Hits": 147,
+            "secondTop2Coverage": 0.5675675675675675,
+            "secondTop3Hits": 189,
+            "secondTop3Coverage": 0.7297297297297297,
+            "pairAccuracy": 0.10723192019950124
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "secondTop1Hits": 86,
+            "secondTop1Accuracy": 0.33204633204633205,
+            "secondTop2Hits": 142,
+            "secondTop2Coverage": 0.5482625482625483,
+            "secondTop3Hits": 186,
+            "secondTop3Coverage": 0.7181467181467182,
+            "pairAccuracy": 0.10723192019950124
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "secondTop1Hits": 85,
+            "secondTop1Accuracy": 0.3281853281853282,
+            "secondTop2Hits": 150,
+            "secondTop2Coverage": 0.5791505791505791,
+            "secondTop3Hits": 196,
+            "secondTop3Coverage": 0.7567567567567568,
+            "pairAccuracy": 0.1059850374064838
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 108,
+          "headAccuracy": 0.3103448275862069,
+          "secondTop1Hits": 24,
+          "secondTop1Accuracy": 0.2222222222222222,
+          "secondTop2Hits": 46,
+          "secondTop2Coverage": 0.42592592592592593,
+          "secondTop3Hits": 72,
+          "secondTop3Coverage": 0.6666666666666666,
+          "pairAccuracy": 0.06896551724137931
+        },
+        "courseCandidate": {
+          "races": 348,
+          "headCorrect": 108,
+          "headAccuracy": 0.3103448275862069,
+          "secondTop1Hits": 28,
+          "secondTop1Accuracy": 0.25925925925925924,
+          "secondTop2Hits": 55,
+          "secondTop2Coverage": 0.5092592592592593,
+          "secondTop3Hits": 77,
+          "secondTop3Coverage": 0.7129629629629629,
+          "pairAccuracy": 0.08045977011494253
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.037037037037037035,
+        "secondTop2Delta": 0.08333333333333337,
+        "secondTop3Delta": 0.04629629629629628,
+        "pairAccuracyDelta": 0.011494252873563218,
+        "safeJoinCoverage": 0.9942528735632183,
+        "sameNumberCourseFeatureCoverage": 0.9942528735632183,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 10
+        }
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "gamagori",
+      "venueCode": "07",
+      "calibrationLastDate": "2026-07-16",
+      "holdoutFirstDate": "2026-07-17",
+      "selectedProfile": {
+        "name": "COURSE_2_3_ST",
+        "twoW": 0.55,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "secondTop1Hits": 88,
+            "secondTop1Accuracy": 0.3697478991596639,
+            "secondTop2Hits": 145,
+            "secondTop2Coverage": 0.6092436974789915,
+            "secondTop3Hits": 185,
+            "secondTop3Coverage": 0.7773109243697479,
+            "pairAccuracy": 0.11458333333333333
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "secondTop1Hits": 87,
+            "secondTop1Accuracy": 0.36554621848739494,
+            "secondTop2Hits": 147,
+            "secondTop2Coverage": 0.6176470588235294,
+            "secondTop3Hits": 188,
+            "secondTop3Coverage": 0.7899159663865546,
+            "pairAccuracy": 0.11328125
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "secondTop1Hits": 87,
+            "secondTop1Accuracy": 0.36554621848739494,
+            "secondTop2Hits": 143,
+            "secondTop2Coverage": 0.6008403361344538,
+            "secondTop3Hits": 187,
+            "secondTop3Coverage": 0.7857142857142857,
+            "pairAccuracy": 0.11328125
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "secondTop1Hits": 87,
+            "secondTop1Accuracy": 0.36554621848739494,
+            "secondTop2Hits": 138,
+            "secondTop2Coverage": 0.5798319327731093,
+            "secondTop3Hits": 181,
+            "secondTop3Coverage": 0.7605042016806722,
+            "pairAccuracy": 0.11328125
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 125,
+          "headAccuracy": 0.35919540229885055,
+          "secondTop1Hits": 34,
+          "secondTop1Accuracy": 0.272,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.552,
+          "secondTop3Hits": 92,
+          "secondTop3Coverage": 0.736,
+          "pairAccuracy": 0.09770114942528736
+        },
+        "courseCandidate": {
+          "races": 348,
+          "headCorrect": 125,
+          "headAccuracy": 0.35919540229885055,
+          "secondTop1Hits": 37,
+          "secondTop1Accuracy": 0.296,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.552,
+          "secondTop3Hits": 95,
+          "secondTop3Coverage": 0.76,
+          "pairAccuracy": 0.10632183908045977
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.023999999999999966,
+        "secondTop2Delta": 0.0,
+        "secondTop3Delta": 0.02400000000000002,
+        "pairAccuracyDelta": 0.008620689655172403,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "hamanako",
+      "venueCode": "06",
+      "calibrationLastDate": "2026-08-01",
+      "holdoutFirstDate": "2026-08-02",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "secondTop1Hits": 84,
+            "secondTop1Accuracy": 0.30656934306569344,
+            "secondTop2Hits": 151,
+            "secondTop2Coverage": 0.551094890510949,
+            "secondTop3Hits": 200,
+            "secondTop3Coverage": 0.7299270072992701,
+            "pairAccuracy": 0.10047846889952153
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "secondTop1Hits": 83,
+            "secondTop1Accuracy": 0.3029197080291971,
+            "secondTop2Hits": 146,
+            "secondTop2Coverage": 0.5328467153284672,
+            "secondTop3Hits": 198,
+            "secondTop3Coverage": 0.7226277372262774,
+            "pairAccuracy": 0.09928229665071771
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "secondTop1Hits": 83,
+            "secondTop1Accuracy": 0.3029197080291971,
+            "secondTop2Hits": 145,
+            "secondTop2Coverage": 0.5291970802919708,
+            "secondTop3Hits": 194,
+            "secondTop3Coverage": 0.708029197080292,
+            "pairAccuracy": 0.09928229665071771
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "secondTop1Hits": 80,
+            "secondTop1Accuracy": 0.291970802919708,
+            "secondTop2Hits": 144,
+            "secondTop2Coverage": 0.5255474452554745,
+            "secondTop3Hits": 189,
+            "secondTop3Coverage": 0.6897810218978102,
+            "pairAccuracy": 0.09569377990430622
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 368,
+          "headCorrect": 128,
+          "headAccuracy": 0.34782608695652173,
+          "secondTop1Hits": 39,
+          "secondTop1Accuracy": 0.3046875,
+          "secondTop2Hits": 73,
+          "secondTop2Coverage": 0.5703125,
+          "secondTop3Hits": 99,
+          "secondTop3Coverage": 0.7734375,
+          "pairAccuracy": 0.10597826086956522
+        },
+        "courseCandidate": {
+          "races": 368,
+          "headCorrect": 128,
+          "headAccuracy": 0.34782608695652173,
+          "secondTop1Hits": 42,
+          "secondTop1Accuracy": 0.328125,
+          "secondTop2Hits": 74,
+          "secondTop2Coverage": 0.578125,
+          "secondTop3Hits": 101,
+          "secondTop3Coverage": 0.7890625,
+          "pairAccuracy": 0.11413043478260869
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.0234375,
+        "secondTop2Delta": 0.0078125,
+        "secondTop3Delta": 0.015625,
+        "pairAccuracyDelta": 0.008152173913043473,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "heiwajima",
+      "venueCode": "04",
+      "calibrationLastDate": "2026-08-07",
+      "holdoutFirstDate": "2026-08-08",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "secondTop1Hits": 95,
+            "secondTop1Accuracy": 0.3682170542635659,
+            "secondTop2Hits": 153,
+            "secondTop2Coverage": 0.5930232558139535,
+            "secondTop3Hits": 189,
+            "secondTop3Coverage": 0.7325581395348837,
+            "pairAccuracy": 0.12566137566137567
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "secondTop1Hits": 95,
+            "secondTop1Accuracy": 0.3682170542635659,
+            "secondTop2Hits": 152,
+            "secondTop2Coverage": 0.5891472868217055,
+            "secondTop3Hits": 192,
+            "secondTop3Coverage": 0.7441860465116279,
+            "pairAccuracy": 0.12566137566137567
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "secondTop1Hits": 94,
+            "secondTop1Accuracy": 0.3643410852713178,
+            "secondTop2Hits": 150,
+            "secondTop2Coverage": 0.5813953488372093,
+            "secondTop3Hits": 185,
+            "secondTop3Coverage": 0.7170542635658915,
+            "pairAccuracy": 0.12433862433862433
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "secondTop1Hits": 94,
+            "secondTop1Accuracy": 0.3643410852713178,
+            "secondTop2Hits": 150,
+            "secondTop2Coverage": 0.5813953488372093,
+            "secondTop3Hits": 183,
+            "secondTop3Coverage": 0.7093023255813954,
+            "pairAccuracy": 0.12433862433862433
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 336,
+          "headCorrect": 101,
+          "headAccuracy": 0.3005952380952381,
+          "secondTop1Hits": 24,
+          "secondTop1Accuracy": 0.2376237623762376,
+          "secondTop2Hits": 46,
+          "secondTop2Coverage": 0.45544554455445546,
+          "secondTop3Hits": 69,
+          "secondTop3Coverage": 0.6831683168316832,
+          "pairAccuracy": 0.07142857142857142
+        },
+        "courseCandidate": {
+          "races": 336,
+          "headCorrect": 101,
+          "headAccuracy": 0.3005952380952381,
+          "secondTop1Hits": 25,
+          "secondTop1Accuracy": 0.24752475247524752,
+          "secondTop2Hits": 47,
+          "secondTop2Coverage": 0.46534653465346537,
+          "secondTop3Hits": 73,
+          "secondTop3Coverage": 0.7227722772277227,
+          "pairAccuracy": 0.0744047619047619
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.00990099009900991,
+        "secondTop2Delta": 0.00990099009900991,
+        "secondTop3Delta": 0.03960396039603953,
+        "pairAccuracyDelta": 0.0029761904761904795,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "karatsu",
+      "venueCode": "23",
+      "calibrationLastDate": "2026-07-21",
+      "holdoutFirstDate": "2026-07-22",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "secondTop1Hits": 109,
+            "secondTop1Accuracy": 0.35161290322580646,
+            "secondTop2Hits": 178,
+            "secondTop2Coverage": 0.5741935483870968,
+            "secondTop3Hits": 232,
+            "secondTop3Coverage": 0.7483870967741936,
+            "pairAccuracy": 0.1371069182389937
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "secondTop1Hits": 107,
+            "secondTop1Accuracy": 0.34516129032258064,
+            "secondTop2Hits": 177,
+            "secondTop2Coverage": 0.5709677419354838,
+            "secondTop3Hits": 233,
+            "secondTop3Coverage": 0.7516129032258064,
+            "pairAccuracy": 0.13459119496855346
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "secondTop1Hits": 106,
+            "secondTop1Accuracy": 0.3419354838709677,
+            "secondTop2Hits": 180,
+            "secondTop2Coverage": 0.5806451612903226,
+            "secondTop3Hits": 233,
+            "secondTop3Coverage": 0.7516129032258064,
+            "pairAccuracy": 0.13333333333333333
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "secondTop1Hits": 106,
+            "secondTop1Accuracy": 0.3419354838709677,
+            "secondTop2Hits": 171,
+            "secondTop2Coverage": 0.5516129032258065,
+            "secondTop3Hits": 229,
+            "secondTop3Coverage": 0.7387096774193549,
+            "pairAccuracy": 0.13333333333333333
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 343,
+          "headCorrect": 144,
+          "headAccuracy": 0.4198250728862974,
+          "secondTop1Hits": 45,
+          "secondTop1Accuracy": 0.3125,
+          "secondTop2Hits": 71,
+          "secondTop2Coverage": 0.4930555555555556,
+          "secondTop3Hits": 103,
+          "secondTop3Coverage": 0.7152777777777778,
+          "pairAccuracy": 0.13119533527696792
+        },
+        "courseCandidate": {
+          "races": 343,
+          "headCorrect": 144,
+          "headAccuracy": 0.4198250728862974,
+          "secondTop1Hits": 50,
+          "secondTop1Accuracy": 0.3472222222222222,
+          "secondTop2Hits": 85,
+          "secondTop2Coverage": 0.5902777777777778,
+          "secondTop3Hits": 108,
+          "secondTop3Coverage": 0.75,
+          "pairAccuracy": 0.1457725947521866
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.03472222222222221,
+        "secondTop2Delta": 0.09722222222222221,
+        "secondTop3Delta": 0.03472222222222221,
+        "pairAccuracyDelta": 0.014577259475218679,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kiryu",
+      "venueCode": "01",
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "secondTop1Hits": 99,
+            "secondTop1Accuracy": 0.3626373626373626,
+            "secondTop2Hits": 151,
+            "secondTop2Coverage": 0.5531135531135531,
+            "secondTop3Hits": 208,
+            "secondTop3Coverage": 0.7619047619047619,
+            "pairAccuracy": 0.12390488110137672
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "secondTop1Hits": 99,
+            "secondTop1Accuracy": 0.3626373626373626,
+            "secondTop2Hits": 149,
+            "secondTop2Coverage": 0.5457875457875457,
+            "secondTop3Hits": 202,
+            "secondTop3Coverage": 0.73992673992674,
+            "pairAccuracy": 0.12390488110137672
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "secondTop1Hits": 95,
+            "secondTop1Accuracy": 0.34798534798534797,
+            "secondTop2Hits": 152,
+            "secondTop2Coverage": 0.5567765567765568,
+            "secondTop3Hits": 207,
+            "secondTop3Coverage": 0.7582417582417582,
+            "pairAccuracy": 0.11889862327909888
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "secondTop1Hits": 94,
+            "secondTop1Accuracy": 0.3443223443223443,
+            "secondTop2Hits": 151,
+            "secondTop2Coverage": 0.5531135531135531,
+            "secondTop3Hits": 205,
+            "secondTop3Coverage": 0.7509157509157509,
+            "pairAccuracy": 0.11764705882352941
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 352,
+          "headCorrect": 104,
+          "headAccuracy": 0.29545454545454547,
+          "secondTop1Hits": 38,
+          "secondTop1Accuracy": 0.36538461538461536,
+          "secondTop2Hits": 62,
+          "secondTop2Coverage": 0.5961538461538461,
+          "secondTop3Hits": 79,
+          "secondTop3Coverage": 0.7596153846153846,
+          "pairAccuracy": 0.10795454545454546
+        },
+        "courseCandidate": {
+          "races": 352,
+          "headCorrect": 104,
+          "headAccuracy": 0.29545454545454547,
+          "secondTop1Hits": 42,
+          "secondTop1Accuracy": 0.40384615384615385,
+          "secondTop2Hits": 67,
+          "secondTop2Coverage": 0.6442307692307693,
+          "secondTop3Hits": 84,
+          "secondTop3Coverage": 0.8076923076923077,
+          "pairAccuracy": 0.11931818181818182
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.03846153846153849,
+        "secondTop2Delta": 0.04807692307692313,
+        "secondTop3Delta": 0.04807692307692313,
+        "pairAccuracyDelta": 0.011363636363636367,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kojima",
+      "venueCode": "16",
+      "calibrationLastDate": "2026-07-31",
+      "holdoutFirstDate": "2026-08-01",
+      "selectedProfile": {
+        "name": "COURSE_2_3_ST",
+        "twoW": 0.55,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "secondTop1Hits": 104,
+            "secondTop1Accuracy": 0.3365695792880259,
+            "secondTop2Hits": 176,
+            "secondTop2Coverage": 0.56957928802589,
+            "secondTop3Hits": 230,
+            "secondTop3Coverage": 0.7443365695792881,
+            "pairAccuracy": 0.11885714285714286
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "secondTop1Hits": 103,
+            "secondTop1Accuracy": 0.3333333333333333,
+            "secondTop2Hits": 178,
+            "secondTop2Coverage": 0.5760517799352751,
+            "secondTop3Hits": 231,
+            "secondTop3Coverage": 0.7475728155339806,
+            "pairAccuracy": 0.11771428571428572
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "secondTop1Hits": 103,
+            "secondTop1Accuracy": 0.3333333333333333,
+            "secondTop2Hits": 175,
+            "secondTop2Coverage": 0.5663430420711975,
+            "secondTop3Hits": 227,
+            "secondTop3Coverage": 0.7346278317152104,
+            "pairAccuracy": 0.11771428571428572
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "secondTop1Hits": 100,
+            "secondTop1Accuracy": 0.32362459546925565,
+            "secondTop2Hits": 178,
+            "secondTop2Coverage": 0.5760517799352751,
+            "secondTop3Hits": 229,
+            "secondTop3Coverage": 0.7411003236245954,
+            "pairAccuracy": 0.11428571428571428
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 384,
+          "headCorrect": 119,
+          "headAccuracy": 0.3098958333333333,
+          "secondTop1Hits": 41,
+          "secondTop1Accuracy": 0.3445378151260504,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.5798319327731093,
+          "secondTop3Hits": 93,
+          "secondTop3Coverage": 0.7815126050420168,
+          "pairAccuracy": 0.10677083333333333
+        },
+        "courseCandidate": {
+          "races": 384,
+          "headCorrect": 119,
+          "headAccuracy": 0.3098958333333333,
+          "secondTop1Hits": 41,
+          "secondTop1Accuracy": 0.3445378151260504,
+          "secondTop2Hits": 74,
+          "secondTop2Coverage": 0.6218487394957983,
+          "secondTop3Hits": 95,
+          "secondTop3Coverage": 0.7983193277310925,
+          "pairAccuracy": 0.10677083333333333
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.0,
+        "secondTop2Delta": 0.04201680672268904,
+        "secondTop3Delta": 0.01680672268907568,
+        "pairAccuracyDelta": 0.0,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "marugame",
+      "venueCode": "15",
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "secondTop1Hits": 94,
+            "secondTop1Accuracy": 0.415929203539823,
+            "secondTop2Hits": 140,
+            "secondTop2Coverage": 0.6194690265486725,
+            "secondTop3Hits": 180,
+            "secondTop3Coverage": 0.7964601769911505,
+            "pairAccuracy": 0.12160413971539456
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "secondTop1Hits": 94,
+            "secondTop1Accuracy": 0.415929203539823,
+            "secondTop2Hits": 135,
+            "secondTop2Coverage": 0.5973451327433629,
+            "secondTop3Hits": 173,
+            "secondTop3Coverage": 0.7654867256637168,
+            "pairAccuracy": 0.12160413971539456
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "secondTop1Hits": 93,
+            "secondTop1Accuracy": 0.41150442477876104,
+            "secondTop2Hits": 137,
+            "secondTop2Coverage": 0.6061946902654868,
+            "secondTop3Hits": 176,
+            "secondTop3Coverage": 0.7787610619469026,
+            "pairAccuracy": 0.1203104786545925
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "secondTop1Hits": 92,
+            "secondTop1Accuracy": 0.40707964601769914,
+            "secondTop2Hits": 141,
+            "secondTop2Coverage": 0.6238938053097345,
+            "secondTop3Hits": 175,
+            "secondTop3Coverage": 0.7743362831858407,
+            "pairAccuracy": 0.11901681759379043
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 330,
+          "headCorrect": 95,
+          "headAccuracy": 0.2878787878787879,
+          "secondTop1Hits": 23,
+          "secondTop1Accuracy": 0.24210526315789474,
+          "secondTop2Hits": 53,
+          "secondTop2Coverage": 0.5578947368421052,
+          "secondTop3Hits": 72,
+          "secondTop3Coverage": 0.7578947368421053,
+          "pairAccuracy": 0.0696969696969697
+        },
+        "courseCandidate": {
+          "races": 330,
+          "headCorrect": 95,
+          "headAccuracy": 0.2878787878787879,
+          "secondTop1Hits": 26,
+          "secondTop1Accuracy": 0.2736842105263158,
+          "secondTop2Hits": 56,
+          "secondTop2Coverage": 0.5894736842105263,
+          "secondTop3Hits": 72,
+          "secondTop3Coverage": 0.7578947368421053,
+          "pairAccuracy": 0.07878787878787878
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.03157894736842107,
+        "secondTop2Delta": 0.03157894736842104,
+        "secondTop3Delta": 0.0,
+        "pairAccuracyDelta": 0.00909090909090908,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "mikuni",
+      "venueCode": "10",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "secondTop1Hits": 91,
+            "secondTop1Accuracy": 0.3285198555956679,
+            "secondTop2Hits": 151,
+            "secondTop2Coverage": 0.5451263537906137,
+            "secondTop3Hits": 204,
+            "secondTop3Coverage": 0.7364620938628159,
+            "pairAccuracy": 0.11696658097686376
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "secondTop1Hits": 90,
+            "secondTop1Accuracy": 0.3249097472924188,
+            "secondTop2Hits": 150,
+            "secondTop2Coverage": 0.5415162454873647,
+            "secondTop3Hits": 206,
+            "secondTop3Coverage": 0.7436823104693141,
+            "pairAccuracy": 0.11568123393316196
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START_RANK",
+            "twoW": 0.0,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.18,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "secondTop1Hits": 89,
+            "secondTop1Accuracy": 0.3212996389891697,
+            "secondTop2Hits": 153,
+            "secondTop2Coverage": 0.5523465703971119,
+            "secondTop3Hits": 200,
+            "secondTop3Coverage": 0.7220216606498195,
+            "pairAccuracy": 0.11439588688946016
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "secondTop1Hits": 89,
+            "secondTop1Accuracy": 0.3212996389891697,
+            "secondTop2Hits": 152,
+            "secondTop2Coverage": 0.5487364620938628,
+            "secondTop3Hits": 205,
+            "secondTop3Coverage": 0.740072202166065,
+            "pairAccuracy": 0.11439588688946016
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 346,
+          "headCorrect": 106,
+          "headAccuracy": 0.3063583815028902,
+          "secondTop1Hits": 34,
+          "secondTop1Accuracy": 0.32075471698113206,
+          "secondTop2Hits": 63,
+          "secondTop2Coverage": 0.5943396226415094,
+          "secondTop3Hits": 84,
+          "secondTop3Coverage": 0.7924528301886793,
+          "pairAccuracy": 0.09826589595375723
+        },
+        "courseCandidate": {
+          "races": 346,
+          "headCorrect": 106,
+          "headAccuracy": 0.3063583815028902,
+          "secondTop1Hits": 38,
+          "secondTop1Accuracy": 0.3584905660377358,
+          "secondTop2Hits": 66,
+          "secondTop2Coverage": 0.6226415094339622,
+          "secondTop3Hits": 83,
+          "secondTop3Coverage": 0.7830188679245284,
+          "pairAccuracy": 0.10982658959537572
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.037735849056603765,
+        "secondTop2Delta": 0.028301886792452824,
+        "secondTop3Delta": -0.009433962264150941,
+        "pairAccuracyDelta": 0.011560693641618491,
+        "safeJoinCoverage": 0.9947976878612717,
+        "sameNumberCourseFeatureCoverage": 0.9947976878612717,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 9
+        }
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "miyajima",
+      "venueCode": "17",
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "secondTop1Hits": 74,
+            "secondTop1Accuracy": 0.26811594202898553,
+            "secondTop2Hits": 156,
+            "secondTop2Coverage": 0.5652173913043478,
+            "secondTop3Hits": 218,
+            "secondTop3Coverage": 0.7898550724637681,
+            "pairAccuracy": 0.08980582524271845
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "secondTop1Hits": 73,
+            "secondTop1Accuracy": 0.2644927536231884,
+            "secondTop2Hits": 148,
+            "secondTop2Coverage": 0.5362318840579711,
+            "secondTop3Hits": 209,
+            "secondTop3Coverage": 0.7572463768115942,
+            "pairAccuracy": 0.08859223300970874
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "secondTop1Hits": 71,
+            "secondTop1Accuracy": 0.2572463768115942,
+            "secondTop2Hits": 155,
+            "secondTop2Coverage": 0.5615942028985508,
+            "secondTop3Hits": 217,
+            "secondTop3Coverage": 0.7862318840579711,
+            "pairAccuracy": 0.08616504854368932
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "secondTop1Hits": 70,
+            "secondTop1Accuracy": 0.2536231884057971,
+            "secondTop2Hits": 152,
+            "secondTop2Coverage": 0.5507246376811594,
+            "secondTop3Hits": 210,
+            "secondTop3Coverage": 0.7608695652173914,
+            "pairAccuracy": 0.08495145631067962
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 370,
+          "headCorrect": 133,
+          "headAccuracy": 0.35945945945945945,
+          "secondTop1Hits": 34,
+          "secondTop1Accuracy": 0.2556390977443609,
+          "secondTop2Hits": 60,
+          "secondTop2Coverage": 0.45112781954887216,
+          "secondTop3Hits": 93,
+          "secondTop3Coverage": 0.6992481203007519,
+          "pairAccuracy": 0.0918918918918919
+        },
+        "courseCandidate": {
+          "races": 370,
+          "headCorrect": 133,
+          "headAccuracy": 0.35945945945945945,
+          "secondTop1Hits": 41,
+          "secondTop1Accuracy": 0.3082706766917293,
+          "secondTop2Hits": 64,
+          "secondTop2Coverage": 0.48120300751879697,
+          "secondTop3Hits": 89,
+          "secondTop3Coverage": 0.6691729323308271,
+          "pairAccuracy": 0.11081081081081082
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.05263157894736842,
+        "secondTop2Delta": 0.03007518796992481,
+        "secondTop3Delta": -0.03007518796992481,
+        "pairAccuracyDelta": 0.01891891891891892,
+        "safeJoinCoverage": 0.9956756756756757,
+        "sameNumberCourseFeatureCoverage": 0.9956756756756757,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 8
+        }
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "naruto",
+      "venueCode": "14",
+      "calibrationLastDate": "2026-08-06",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "twoW": 0.8,
+        "threeW": 0.0,
+        "stW": 0.0,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "secondTop1Hits": 60,
+            "secondTop1Accuracy": 0.28708133971291866,
+            "secondTop2Hits": 103,
+            "secondTop2Coverage": 0.49282296650717705,
+            "secondTop3Hits": 145,
+            "secondTop3Coverage": 0.69377990430622,
+            "pairAccuracy": 0.09302325581395349
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "secondTop1Hits": 59,
+            "secondTop1Accuracy": 0.2822966507177033,
+            "secondTop2Hits": 106,
+            "secondTop2Coverage": 0.507177033492823,
+            "secondTop3Hits": 147,
+            "secondTop3Coverage": 0.7033492822966507,
+            "pairAccuracy": 0.09147286821705426
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "secondTop1Hits": 59,
+            "secondTop1Accuracy": 0.2822966507177033,
+            "secondTop2Hits": 104,
+            "secondTop2Coverage": 0.49760765550239233,
+            "secondTop3Hits": 150,
+            "secondTop3Coverage": 0.7177033492822966,
+            "pairAccuracy": 0.09147286821705426
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START_RANK",
+            "twoW": 0.0,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.18,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "secondTop1Hits": 59,
+            "secondTop1Accuracy": 0.2822966507177033,
+            "secondTop2Hits": 99,
+            "secondTop2Coverage": 0.47368421052631576,
+            "secondTop3Hits": 146,
+            "secondTop3Coverage": 0.6985645933014354,
+            "pairAccuracy": 0.09147286821705426
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 278,
+          "headCorrect": 96,
+          "headAccuracy": 0.34532374100719426,
+          "secondTop1Hits": 31,
+          "secondTop1Accuracy": 0.3229166666666667,
+          "secondTop2Hits": 53,
+          "secondTop2Coverage": 0.5520833333333334,
+          "secondTop3Hits": 74,
+          "secondTop3Coverage": 0.7708333333333334,
+          "pairAccuracy": 0.11151079136690648
+        },
+        "courseCandidate": {
+          "races": 278,
+          "headCorrect": 96,
+          "headAccuracy": 0.34532374100719426,
+          "secondTop1Hits": 30,
+          "secondTop1Accuracy": 0.3125,
+          "secondTop2Hits": 55,
+          "secondTop2Coverage": 0.5729166666666666,
+          "secondTop3Hits": 75,
+          "secondTop3Coverage": 0.78125,
+          "pairAccuracy": 0.1079136690647482
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": -0.010416666666666685,
+        "secondTop2Delta": 0.02083333333333326,
+        "secondTop3Delta": 0.01041666666666663,
+        "pairAccuracyDelta": -0.0035971223021582788,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "omura",
+      "venueCode": "24",
+      "calibrationLastDate": "2026-07-29",
+      "holdoutFirstDate": "2026-07-30",
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "twoW": 0.8,
+        "threeW": 0.0,
+        "stW": 0.0,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "secondTop1Hits": 109,
+            "secondTop1Accuracy": 0.39492753623188404,
+            "secondTop2Hits": 179,
+            "secondTop2Coverage": 0.6485507246376812,
+            "secondTop3Hits": 220,
+            "secondTop3Coverage": 0.7971014492753623,
+            "pairAccuracy": 0.13540372670807455
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_ST",
+            "twoW": 0.65,
+            "threeW": 0.0,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "secondTop1Hits": 105,
+            "secondTop1Accuracy": 0.3804347826086957,
+            "secondTop2Hits": 179,
+            "secondTop2Coverage": 0.6485507246376812,
+            "secondTop3Hits": 212,
+            "secondTop3Coverage": 0.7681159420289855,
+            "pairAccuracy": 0.13043478260869565
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "secondTop1Hits": 105,
+            "secondTop1Accuracy": 0.3804347826086957,
+            "secondTop2Hits": 179,
+            "secondTop2Coverage": 0.6485507246376812,
+            "secondTop3Hits": 216,
+            "secondTop3Coverage": 0.782608695652174,
+            "pairAccuracy": 0.13043478260869565
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "secondTop1Hits": 105,
+            "secondTop1Accuracy": 0.3804347826086957,
+            "secondTop2Hits": 177,
+            "secondTop2Coverage": 0.6413043478260869,
+            "secondTop3Hits": 217,
+            "secondTop3Coverage": 0.7862318840579711,
+            "pairAccuracy": 0.13043478260869565
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 365,
+          "headCorrect": 117,
+          "headAccuracy": 0.32054794520547947,
+          "secondTop1Hits": 38,
+          "secondTop1Accuracy": 0.3247863247863248,
+          "secondTop2Hits": 66,
+          "secondTop2Coverage": 0.5641025641025641,
+          "secondTop3Hits": 91,
+          "secondTop3Coverage": 0.7777777777777778,
+          "pairAccuracy": 0.10410958904109589
+        },
+        "courseCandidate": {
+          "races": 365,
+          "headCorrect": 117,
+          "headAccuracy": 0.32054794520547947,
+          "secondTop1Hits": 41,
+          "secondTop1Accuracy": 0.3504273504273504,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.5897435897435898,
+          "secondTop3Hits": 94,
+          "secondTop3Coverage": 0.8034188034188035,
+          "pairAccuracy": 0.11232876712328767
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.025641025641025605,
+        "secondTop2Delta": 0.02564102564102566,
+        "secondTop3Delta": 0.02564102564102566,
+        "pairAccuracyDelta": 0.008219178082191775,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "shimonoseki",
+      "venueCode": "19",
+      "calibrationLastDate": "2026-08-05",
+      "holdoutFirstDate": "2026-08-06",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "secondTop1Hits": 77,
+            "secondTop1Accuracy": 0.33771929824561403,
+            "secondTop2Hits": 135,
+            "secondTop2Coverage": 0.5921052631578947,
+            "secondTop3Hits": 184,
+            "secondTop3Coverage": 0.8070175438596491,
+            "pairAccuracy": 0.11208151382823872
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "secondTop1Hits": 72,
+            "secondTop1Accuracy": 0.3157894736842105,
+            "secondTop2Hits": 130,
+            "secondTop2Coverage": 0.5701754385964912,
+            "secondTop3Hits": 176,
+            "secondTop3Coverage": 0.7719298245614035,
+            "pairAccuracy": 0.10480349344978165
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "secondTop1Hits": 69,
+            "secondTop1Accuracy": 0.3026315789473684,
+            "secondTop2Hits": 134,
+            "secondTop2Coverage": 0.5877192982456141,
+            "secondTop3Hits": 177,
+            "secondTop3Coverage": 0.7763157894736842,
+            "pairAccuracy": 0.10043668122270742
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "secondTop1Hits": 69,
+            "secondTop1Accuracy": 0.3026315789473684,
+            "secondTop2Hits": 132,
+            "secondTop2Coverage": 0.5789473684210527,
+            "secondTop3Hits": 178,
+            "secondTop3Coverage": 0.7807017543859649,
+            "pairAccuracy": 0.10043668122270742
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 312,
+          "headCorrect": 112,
+          "headAccuracy": 0.358974358974359,
+          "secondTop1Hits": 35,
+          "secondTop1Accuracy": 0.3125,
+          "secondTop2Hits": 58,
+          "secondTop2Coverage": 0.5178571428571429,
+          "secondTop3Hits": 83,
+          "secondTop3Coverage": 0.7410714285714286,
+          "pairAccuracy": 0.11217948717948718
+        },
+        "courseCandidate": {
+          "races": 312,
+          "headCorrect": 112,
+          "headAccuracy": 0.358974358974359,
+          "secondTop1Hits": 36,
+          "secondTop1Accuracy": 0.32142857142857145,
+          "secondTop2Hits": 63,
+          "secondTop2Coverage": 0.5625,
+          "secondTop3Hits": 86,
+          "secondTop3Coverage": 0.7678571428571429,
+          "pairAccuracy": 0.11538461538461539
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.008928571428571452,
+        "secondTop2Delta": 0.044642857142857095,
+        "secondTop3Delta": 0.0267857142857143,
+        "pairAccuracyDelta": 0.0032051282051282076,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "suminoe",
+      "venueCode": "12",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "secondTop1Hits": 73,
+            "secondTop1Accuracy": 0.3427230046948357,
+            "secondTop2Hits": 121,
+            "secondTop2Coverage": 0.568075117370892,
+            "secondTop3Hits": 162,
+            "secondTop3Coverage": 0.7605633802816901,
+            "pairAccuracy": 0.0922882427307206
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "secondTop1Hits": 68,
+            "secondTop1Accuracy": 0.3192488262910798,
+            "secondTop2Hits": 124,
+            "secondTop2Coverage": 0.5821596244131455,
+            "secondTop3Hits": 162,
+            "secondTop3Coverage": 0.7605633802816901,
+            "pairAccuracy": 0.08596713021491782
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "secondTop1Hits": 67,
+            "secondTop1Accuracy": 0.3145539906103286,
+            "secondTop2Hits": 125,
+            "secondTop2Coverage": 0.5868544600938967,
+            "secondTop3Hits": 160,
+            "secondTop3Coverage": 0.7511737089201878,
+            "pairAccuracy": 0.08470290771175727
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "secondTop1Hits": 67,
+            "secondTop1Accuracy": 0.3145539906103286,
+            "secondTop2Hits": 124,
+            "secondTop2Coverage": 0.5821596244131455,
+            "secondTop3Hits": 159,
+            "secondTop3Coverage": 0.7464788732394366,
+            "pairAccuracy": 0.08470290771175727
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 111,
+          "headAccuracy": 0.31896551724137934,
+          "secondTop1Hits": 33,
+          "secondTop1Accuracy": 0.2972972972972973,
+          "secondTop2Hits": 68,
+          "secondTop2Coverage": 0.6126126126126126,
+          "secondTop3Hits": 84,
+          "secondTop3Coverage": 0.7567567567567568,
+          "pairAccuracy": 0.09482758620689655
+        },
+        "courseCandidate": {
+          "races": 348,
+          "headCorrect": 111,
+          "headAccuracy": 0.31896551724137934,
+          "secondTop1Hits": 38,
+          "secondTop1Accuracy": 0.34234234234234234,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.6216216216216216,
+          "secondTop3Hits": 90,
+          "secondTop3Coverage": 0.8108108108108109,
+          "pairAccuracy": 0.10919540229885058
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.04504504504504503,
+        "secondTop2Delta": 0.009009009009009028,
+        "secondTop3Delta": 0.05405405405405406,
+        "pairAccuracyDelta": 0.014367816091954033,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tamagawa",
+      "venueCode": "05",
+      "calibrationLastDate": "2026-08-02",
+      "holdoutFirstDate": "2026-08-03",
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "twoW": 0.8,
+        "threeW": 0.0,
+        "stW": 0.0,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "secondTop1Hits": 71,
+            "secondTop1Accuracy": 0.32272727272727275,
+            "secondTop2Hits": 129,
+            "secondTop2Coverage": 0.5863636363636363,
+            "secondTop3Hits": 168,
+            "secondTop3Coverage": 0.7636363636363637,
+            "pairAccuracy": 0.08819875776397515
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_START_RANK",
+            "twoW": 0.0,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.18,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "secondTop1Hits": 70,
+            "secondTop1Accuracy": 0.3181818181818182,
+            "secondTop2Hits": 127,
+            "secondTop2Coverage": 0.5772727272727273,
+            "secondTop3Hits": 167,
+            "secondTop3Coverage": 0.759090909090909,
+            "pairAccuracy": 0.08695652173913043
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "secondTop1Hits": 68,
+            "secondTop1Accuracy": 0.3090909090909091,
+            "secondTop2Hits": 134,
+            "secondTop2Coverage": 0.6090909090909091,
+            "secondTop3Hits": 169,
+            "secondTop3Coverage": 0.7681818181818182,
+            "pairAccuracy": 0.084472049689441
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "secondTop1Hits": 68,
+            "secondTop1Accuracy": 0.3090909090909091,
+            "secondTop2Hits": 133,
+            "secondTop2Coverage": 0.6045454545454545,
+            "secondTop3Hits": 171,
+            "secondTop3Coverage": 0.7772727272727272,
+            "pairAccuracy": 0.084472049689441
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 360,
+          "headCorrect": 110,
+          "headAccuracy": 0.3055555555555556,
+          "secondTop1Hits": 33,
+          "secondTop1Accuracy": 0.3,
+          "secondTop2Hits": 56,
+          "secondTop2Coverage": 0.509090909090909,
+          "secondTop3Hits": 75,
+          "secondTop3Coverage": 0.6818181818181818,
+          "pairAccuracy": 0.09166666666666666
+        },
+        "courseCandidate": {
+          "races": 360,
+          "headCorrect": 110,
+          "headAccuracy": 0.3055555555555556,
+          "secondTop1Hits": 32,
+          "secondTop1Accuracy": 0.2909090909090909,
+          "secondTop2Hits": 60,
+          "secondTop2Coverage": 0.5454545454545454,
+          "secondTop3Hits": 78,
+          "secondTop3Coverage": 0.7090909090909091,
+          "pairAccuracy": 0.08888888888888889
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": -0.009090909090909094,
+        "secondTop2Delta": 0.036363636363636376,
+        "secondTop3Delta": 0.027272727272727337,
+        "pairAccuracyDelta": -0.002777777777777768,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "toda",
+      "venueCode": "02",
+      "calibrationLastDate": "2026-07-25",
+      "holdoutFirstDate": "2026-07-26",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "secondTop1Hits": 72,
+            "secondTop1Accuracy": 0.33488372093023255,
+            "secondTop2Hits": 116,
+            "secondTop2Coverage": 0.5395348837209303,
+            "secondTop3Hits": 160,
+            "secondTop3Coverage": 0.7441860465116279,
+            "pairAccuracy": 0.1037463976945245
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "secondTop1Hits": 71,
+            "secondTop1Accuracy": 0.3302325581395349,
+            "secondTop2Hits": 120,
+            "secondTop2Coverage": 0.5581395348837209,
+            "secondTop3Hits": 158,
+            "secondTop3Coverage": 0.7348837209302326,
+            "pairAccuracy": 0.10230547550432277
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "secondTop1Hits": 71,
+            "secondTop1Accuracy": 0.3302325581395349,
+            "secondTop2Hits": 117,
+            "secondTop2Coverage": 0.5441860465116279,
+            "secondTop3Hits": 160,
+            "secondTop3Coverage": 0.7441860465116279,
+            "pairAccuracy": 0.10230547550432277
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "secondTop1Hits": 69,
+            "secondTop1Accuracy": 0.3209302325581395,
+            "secondTop2Hits": 118,
+            "secondTop2Coverage": 0.5488372093023256,
+            "secondTop3Hits": 158,
+            "secondTop3Coverage": 0.7348837209302326,
+            "pairAccuracy": 0.0994236311239193
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 295,
+          "headCorrect": 110,
+          "headAccuracy": 0.3728813559322034,
+          "secondTop1Hits": 30,
+          "secondTop1Accuracy": 0.2727272727272727,
+          "secondTop2Hits": 56,
+          "secondTop2Coverage": 0.509090909090909,
+          "secondTop3Hits": 82,
+          "secondTop3Coverage": 0.7454545454545455,
+          "pairAccuracy": 0.1016949152542373
+        },
+        "courseCandidate": {
+          "races": 295,
+          "headCorrect": 110,
+          "headAccuracy": 0.3728813559322034,
+          "secondTop1Hits": 34,
+          "secondTop1Accuracy": 0.3090909090909091,
+          "secondTop2Hits": 61,
+          "secondTop2Coverage": 0.5545454545454546,
+          "secondTop3Hits": 85,
+          "secondTop3Coverage": 0.7727272727272727,
+          "pairAccuracy": 0.1152542372881356
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.036363636363636376,
+        "secondTop2Delta": 0.045454545454545525,
+        "secondTop3Delta": 0.027272727272727226,
+        "pairAccuracyDelta": 0.0135593220338983,
+        "safeJoinCoverage": 0.9966101694915255,
+        "sameNumberCourseFeatureCoverage": 0.9966101694915255,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 5
+        }
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokoname",
+      "venueCode": "08",
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "secondTop1Hits": 121,
+            "secondTop1Accuracy": 0.38782051282051283,
+            "secondTop2Hits": 206,
+            "secondTop2Coverage": 0.6602564102564102,
+            "secondTop3Hits": 258,
+            "secondTop3Coverage": 0.8269230769230769,
+            "pairAccuracy": 0.1335540838852097
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_ST",
+            "twoW": 0.0,
+            "threeW": 0.0,
+            "stW": 4.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "secondTop1Hits": 115,
+            "secondTop1Accuracy": 0.3685897435897436,
+            "secondTop2Hits": 195,
+            "secondTop2Coverage": 0.625,
+            "secondTop3Hits": 248,
+            "secondTop3Coverage": 0.7948717948717948,
+            "pairAccuracy": 0.12693156732891833
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "secondTop1Hits": 113,
+            "secondTop1Accuracy": 0.36217948717948717,
+            "secondTop2Hits": 209,
+            "secondTop2Coverage": 0.6698717948717948,
+            "secondTop3Hits": 256,
+            "secondTop3Coverage": 0.8205128205128205,
+            "pairAccuracy": 0.12472406181015452
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "secondTop1Hits": 113,
+            "secondTop1Accuracy": 0.36217948717948717,
+            "secondTop2Hits": 207,
+            "secondTop2Coverage": 0.6634615384615384,
+            "secondTop3Hits": 255,
+            "secondTop3Coverage": 0.8173076923076923,
+            "pairAccuracy": 0.12472406181015452
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 396,
+          "headCorrect": 132,
+          "headAccuracy": 0.3333333333333333,
+          "secondTop1Hits": 38,
+          "secondTop1Accuracy": 0.2878787878787879,
+          "secondTop2Hits": 77,
+          "secondTop2Coverage": 0.5833333333333334,
+          "secondTop3Hits": 105,
+          "secondTop3Coverage": 0.7954545454545454,
+          "pairAccuracy": 0.09595959595959595
+        },
+        "courseCandidate": {
+          "races": 396,
+          "headCorrect": 132,
+          "headAccuracy": 0.3333333333333333,
+          "secondTop1Hits": 48,
+          "secondTop1Accuracy": 0.36363636363636365,
+          "secondTop2Hits": 77,
+          "secondTop2Coverage": 0.5833333333333334,
+          "secondTop3Hits": 96,
+          "secondTop3Coverage": 0.7272727272727273,
+          "pairAccuracy": 0.12121212121212122
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.07575757575757575,
+        "secondTop2Delta": 0.0,
+        "secondTop3Delta": -0.06818181818181812,
+        "pairAccuracyDelta": 0.025252525252525262,
+        "safeJoinCoverage": 0.9994949494949495,
+        "sameNumberCourseFeatureCoverage": 0.9994949494949495,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 1
+        }
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokuyama",
+      "venueCode": "18",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "COURSE_STRONG",
+        "twoW": 0.9,
+        "threeW": 0.5,
+        "stW": 5.0,
+        "rankW": 0.18,
+        "fW": 0.1,
+        "lW": 0.18,
+        "periodStW": 2.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "secondTop1Hits": 83,
+            "secondTop1Accuracy": 0.282312925170068,
+            "secondTop2Hits": 155,
+            "secondTop2Coverage": 0.5272108843537415,
+            "secondTop3Hits": 216,
+            "secondTop3Coverage": 0.7346938775510204,
+            "pairAccuracy": 0.09928229665071771
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "secondTop1Hits": 77,
+            "secondTop1Accuracy": 0.2619047619047619,
+            "secondTop2Hits": 142,
+            "secondTop2Coverage": 0.48299319727891155,
+            "secondTop3Hits": 213,
+            "secondTop3Coverage": 0.7244897959183674,
+            "pairAccuracy": 0.09210526315789473
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "secondTop1Hits": 73,
+            "secondTop1Accuracy": 0.24829931972789115,
+            "secondTop2Hits": 147,
+            "secondTop2Coverage": 0.5,
+            "secondTop3Hits": 214,
+            "secondTop3Coverage": 0.7278911564625851,
+            "pairAccuracy": 0.08732057416267942
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "secondTop1Hits": 73,
+            "secondTop1Accuracy": 0.24829931972789115,
+            "secondTop2Hits": 144,
+            "secondTop2Coverage": 0.4897959183673469,
+            "secondTop3Hits": 215,
+            "secondTop3Coverage": 0.7312925170068028,
+            "pairAccuracy": 0.08732057416267942
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 372,
+          "headCorrect": 112,
+          "headAccuracy": 0.3010752688172043,
+          "secondTop1Hits": 31,
+          "secondTop1Accuracy": 0.2767857142857143,
+          "secondTop2Hits": 52,
+          "secondTop2Coverage": 0.4642857142857143,
+          "secondTop3Hits": 84,
+          "secondTop3Coverage": 0.75,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "courseCandidate": {
+          "races": 372,
+          "headCorrect": 112,
+          "headAccuracy": 0.3010752688172043,
+          "secondTop1Hits": 35,
+          "secondTop1Accuracy": 0.3125,
+          "secondTop2Hits": 61,
+          "secondTop2Coverage": 0.5446428571428571,
+          "secondTop3Hits": 86,
+          "secondTop3Coverage": 0.7678571428571429,
+          "pairAccuracy": 0.09408602150537634
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.0357142857142857,
+        "secondTop2Delta": 0.0803571428571428,
+        "secondTop3Delta": 0.017857142857142905,
+        "pairAccuracyDelta": 0.010752688172043015,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tsu",
+      "venueCode": "09",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "COURSE_2RATE",
+        "twoW": 0.8,
+        "threeW": 0.0,
+        "stW": 0.0,
+        "rankW": 0.0,
+        "fW": 0.0,
+        "lW": 0.0,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_2RATE",
+            "twoW": 0.8,
+            "threeW": 0.0,
+            "stW": 0.0,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "secondTop1Hits": 103,
+            "secondTop1Accuracy": 0.3333333333333333,
+            "secondTop2Hits": 177,
+            "secondTop2Coverage": 0.5728155339805825,
+            "secondTop3Hits": 230,
+            "secondTop3Coverage": 0.7443365695792881,
+            "pairAccuracy": 0.11183496199782844
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "secondTop1Hits": 99,
+            "secondTop1Accuracy": 0.32038834951456313,
+            "secondTop2Hits": 178,
+            "secondTop2Coverage": 0.5760517799352751,
+            "secondTop3Hits": 243,
+            "secondTop3Coverage": 0.7864077669902912,
+            "pairAccuracy": 0.10749185667752444
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "secondTop1Hits": 98,
+            "secondTop1Accuracy": 0.31715210355987056,
+            "secondTop2Hits": 173,
+            "secondTop2Coverage": 0.5598705501618123,
+            "secondTop3Hits": 229,
+            "secondTop3Coverage": 0.7411003236245954,
+            "pairAccuracy": 0.10640608034744843
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "secondTop1Hits": 97,
+            "secondTop1Accuracy": 0.313915857605178,
+            "secondTop2Hits": 176,
+            "secondTop2Coverage": 0.56957928802589,
+            "secondTop3Hits": 230,
+            "secondTop3Coverage": 0.7443365695792881,
+            "pairAccuracy": 0.10532030401737243
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 397,
+          "headCorrect": 132,
+          "headAccuracy": 0.33249370277078083,
+          "secondTop1Hits": 36,
+          "secondTop1Accuracy": 0.2727272727272727,
+          "secondTop2Hits": 64,
+          "secondTop2Coverage": 0.48484848484848486,
+          "secondTop3Hits": 88,
+          "secondTop3Coverage": 0.6666666666666666,
+          "pairAccuracy": 0.0906801007556675
+        },
+        "courseCandidate": {
+          "races": 397,
+          "headCorrect": 132,
+          "headAccuracy": 0.33249370277078083,
+          "secondTop1Hits": 42,
+          "secondTop1Accuracy": 0.3181818181818182,
+          "secondTop2Hits": 69,
+          "secondTop2Coverage": 0.5227272727272727,
+          "secondTop3Hits": 97,
+          "secondTop3Coverage": 0.7348484848484849,
+          "pairAccuracy": 0.10579345088161209
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.04545454545454547,
+        "secondTop2Delta": 0.037878787878787845,
+        "secondTop3Delta": 0.06818181818181823,
+        "pairAccuracyDelta": 0.015113350125944586,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "wakamatsu",
+      "venueCode": "20",
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "COURSE_BALANCED",
+        "twoW": 0.6,
+        "threeW": 0.35,
+        "stW": 3.5,
+        "rankW": 0.12,
+        "fW": 0.08,
+        "lW": 0.14,
+        "periodStW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "COURSE_BALANCED",
+            "twoW": 0.6,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.12,
+            "fW": 0.08,
+            "lW": 0.14,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "secondTop1Hits": 117,
+            "secondTop1Accuracy": 0.4223826714801444,
+            "secondTop2Hits": 180,
+            "secondTop2Coverage": 0.6498194945848376,
+            "secondTop3Hits": 223,
+            "secondTop3Coverage": 0.8050541516245487,
+            "pairAccuracy": 0.15394736842105264
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_STRONG",
+            "twoW": 0.9,
+            "threeW": 0.5,
+            "stW": 5.0,
+            "rankW": 0.18,
+            "fW": 0.1,
+            "lW": 0.18,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "secondTop1Hits": 117,
+            "secondTop1Accuracy": 0.4223826714801444,
+            "secondTop2Hits": 175,
+            "secondTop2Coverage": 0.631768953068592,
+            "secondTop3Hits": 223,
+            "secondTop3Coverage": 0.8050541516245487,
+            "pairAccuracy": 0.15394736842105264
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_PLUS_PERIOD_ST",
+            "twoW": 0.55,
+            "threeW": 0.3,
+            "stW": 3.0,
+            "rankW": 0.1,
+            "fW": 0.06,
+            "lW": 0.12,
+            "periodStW": 2.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "secondTop1Hits": 113,
+            "secondTop1Accuracy": 0.40794223826714804,
+            "secondTop2Hits": 181,
+            "secondTop2Coverage": 0.6534296028880866,
+            "secondTop3Hits": 223,
+            "secondTop3Coverage": 0.8050541516245487,
+            "pairAccuracy": 0.14868421052631578
+          }
+        },
+        {
+          "profile": {
+            "name": "COURSE_2_3_ST",
+            "twoW": 0.55,
+            "threeW": 0.35,
+            "stW": 3.5,
+            "rankW": 0.0,
+            "fW": 0.0,
+            "lW": 0.0,
+            "periodStW": 0.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "secondTop1Hits": 112,
+            "secondTop1Accuracy": 0.4043321299638989,
+            "secondTop2Hits": 182,
+            "secondTop2Coverage": 0.6570397111913358,
+            "secondTop3Hits": 222,
+            "secondTop3Coverage": 0.8014440433212996,
+            "pairAccuracy": 0.14736842105263157
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 322,
+          "headCorrect": 116,
+          "headAccuracy": 0.36024844720496896,
+          "secondTop1Hits": 34,
+          "secondTop1Accuracy": 0.29310344827586204,
+          "secondTop2Hits": 73,
+          "secondTop2Coverage": 0.6293103448275862,
+          "secondTop3Hits": 86,
+          "secondTop3Coverage": 0.7413793103448276,
+          "pairAccuracy": 0.10559006211180125
+        },
+        "courseCandidate": {
+          "races": 322,
+          "headCorrect": 116,
+          "headAccuracy": 0.36024844720496896,
+          "secondTop1Hits": 39,
+          "secondTop1Accuracy": 0.33620689655172414,
+          "secondTop2Hits": 77,
+          "secondTop2Coverage": 0.6637931034482759,
+          "secondTop3Hits": 92,
+          "secondTop3Coverage": 0.7931034482758621,
+          "pairAccuracy": 0.12111801242236025
+        },
+        "headAccuracyDelta": 0.0,
+        "secondTop1Delta": 0.0431034482758621,
+        "secondTop2Delta": 0.034482758620689724,
+        "secondTop3Delta": 0.051724137931034475,
+        "pairAccuracyDelta": 0.015527950310559008,
+        "safeJoinCoverage": 1.0,
+        "sameNumberCourseFeatureCoverage": 1.0,
+        "joinMiss": {}
+      },
+      "laneAsCourseProxy": true,
+      "actualEntryCourseUsed": false,
+      "promotionEligible": false
+    }
+  ]
+}
