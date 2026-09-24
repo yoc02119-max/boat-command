@@ -68,6 +68,7 @@ def trusted_section(section, code, kind):
 
 def exact_block(text, code, kind):
     section = PARSER.block(text, code, kind)
+    title = PARSER._base.VENUE_NAMES[code]
     # A broad fallback can contain another venue plus a later marker for code.
     # Do not trust a marker found in the middle of that broad block.
     if trusted_section(section, code, kind):
