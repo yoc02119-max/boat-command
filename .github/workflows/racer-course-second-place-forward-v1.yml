@@ -1,0 +1,143 @@
+name: Racer course second-place FORWARD v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-course-second-place-forward-v1.yml'
+      - 'scripts/racer-course-second-place-forward-v1.py'
+      - 'scripts/racer-course-second-place-forward-evaluate-v1.py'
+      - 'research/racer-course-second-place-gated-v1.json'
+      - 'racer-period-24/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/racer-course-second-place-forward-v1.yml'
+      - 'scripts/racer-course-second-place-forward-v1.py'
+      - 'scripts/racer-course-second-place-forward-evaluate-v1.py'
+      - 'research/racer-course-second-place-gated-v1.json'
+      - 'racer-period-24/**'
+  workflow_run:
+    workflows:
+      - "Venue program batch A v1"
+      - "Venue program batch B v1"
+      - "Venue program batch C v1"
+      - "Venue program batch D v1"
+    types: [completed]
+  schedule:
+    - cron: '*/5 0-13,21-23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: racer-course-second-place-forward-v1
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - name: Contract and policy-boundary tests
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-course-second-place-forward-v1.py
+          python3 -m py_compile scripts/racer-course-second-place-forward-evaluate-v1.py
+          python3 scripts/racer-course-second-place-forward-v1.py --self-test
+          python3 scripts/racer-course-second-place-forward-evaluate-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-course-second-place-forward-evaluation-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-course-second-place-forward-evaluation-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['promotionEligible'] is False
+          print('COURSE_SECOND_FORWARD_CONTRACT_PASS',x['summary'])
+          PY
+
+  forward:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Freeze result-blind second-place SHADOW and evaluate settled rows
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          python3 scripts/racer-course-second-place-forward-v1.py --date "$DATE"
+          python3 scripts/racer-course-second-place-forward-evaluate-v1.py
+
+      - name: Audit new forward boundaries
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,glob,json
+          for p in glob.glob('live/*/*/shadow/course-second-place-v1/race-*.json'):
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-course-second-place-forward-v1'
+              assert x['resultInput'] is False and x['payoutInput'] is False and x['postRaceRead'] is False
+              assert x['exhibitionInput'] is False
+              assert x['researchOnly'] is True and x['shadowOnly'] is True
+              assert x['productionEnabled'] is False and x['tryEnabled'] is False
+              assert x['cashNeutral'] is True and x['realMoney'] is False
+              assert x['immutableAfterFirstWrite'] is True
+              assert x['policySelectionUsesFinalTest'] is False
+              assert len(x['baselineSecondRanking'])==5 and len(set(x['baselineSecondRanking']))==5
+              assert len(x['candidateSecondRanking'])==5 and len(set(x['candidateSecondRanking']))==5
+              d=datetime.datetime.fromisoformat(f"{x['date']}T{x['deadline']}:00+09:00")
+              g=datetime.datetime.fromisoformat(x['generatedAt'].replace('Z','+00:00'))
+              assert g <= d-datetime.timedelta(minutes=float(x['freezeMarginMinutes']))
+              if not x['venueGateEnabled']:
+                  assert x['baselineSecondRanking']==x['candidateSecondRanking']
+                  assert x['changed'] is False
+          y=json.load(open('research/racer-course-second-place-forward-evaluation-v1.json',encoding='utf-8'))
+          assert y['productionChanged'] is False and y['tryChanged'] is False and y['hardLockChanged'] is False
+          print('COURSE_SECOND_FORWARD_BOUNDARY_PASS',len(glob.glob('live/*/*/shadow/course-second-place-v1/race-*.json')),y['summary'])
+          PY
+
+      - name: Preserve generated research outputs
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/course-second-forward
+          mkdir -p /tmp/course-second-forward
+          find live -path '*/shadow/course-second-place-v1/race-*.json' -print0 | while IFS= read -r -d '' f; do
+            mkdir -p "/tmp/course-second-forward/$(dirname "$f")"
+            cp "$f" "/tmp/course-second-forward/$f"
+          done
+          mkdir -p /tmp/course-second-forward/research
+          cp research/racer-course-second-place-forward-evaluation-v1.json /tmp/course-second-forward/research/
+
+      - name: Publish research-only forward data
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-course-second-forward'
+          git config user.email 'boat-command-course-second-forward@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            [ -d /tmp/course-second-forward/live ] && cp -a /tmp/course-second-forward/live/. live/ || true
+            mkdir -p research
+            cp /tmp/course-second-forward/research/racer-course-second-place-forward-evaluation-v1.json research/
+            git add live research/racer-course-second-place-forward-evaluation-v1.json
+            git diff --cached --quiet && { echo 'COURSE_SECOND_FORWARD_CURRENT'; exit 0; }
+            git commit -m 'research: update course second-place forward shadow'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
