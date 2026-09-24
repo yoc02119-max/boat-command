@@ -22,8 +22,8 @@
     "venues": 24,
     "venuesCaptured": 13,
     "capturedRaces": 156,
-    "evaluatedRaces": 29,
-    "pendingRaces": 127,
+    "evaluatedRaces": 30,
+    "pendingRaces": 126,
     "baseHits": 7,
     "rank6Hits": 8,
     "rank8Hits": 11
@@ -3984,8 +3984,8 @@
       "name": "津",
       "date": "2026-09-24",
       "captured": 12,
-      "evaluated": 2,
-      "pending": 10,
+      "evaluated": 3,
+      "pending": 9,
       "invalid": 0,
       "legacyExcluded": 0,
       "status": "COLLECTING",
@@ -3994,55 +3994,55 @@
       "productionChanged": false,
       "summary": {
         "BASE4": {
-          "races": 2,
+          "races": 3,
           "hits": 0,
           "addedHits": 0,
-          "stake100": 800,
+          "stake100": 1200,
           "payoutOnlyReturn100": 0,
           "hitRate": 0,
           "payoutOnlyRoi": 0
         },
         "RANK6": {
-          "races": 2,
+          "races": 3,
           "hits": 0,
           "addedHits": 0,
-          "stake100": 1200,
+          "stake100": 1800,
           "payoutOnlyReturn100": 0,
           "hitRate": 0,
           "payoutOnlyRoi": 0
         },
         "RANK8": {
-          "races": 2,
+          "races": 3,
           "hits": 1,
           "addedHits": 1,
-          "stake100": 1600,
+          "stake100": 2400,
           "payoutOnlyReturn100": 540,
-          "hitRate": 0.5,
-          "payoutOnlyRoi": 0.3375
+          "hitRate": 0.3333333333333333,
+          "payoutOnlyRoi": 0.225
         },
         "HEAD6": {
-          "races": 2,
+          "races": 3,
           "hits": 0,
           "addedHits": 0,
-          "stake100": 1200,
+          "stake100": 1800,
           "payoutOnlyReturn100": 0,
           "hitRate": 0,
           "payoutOnlyRoi": 0
         },
         "SECOND6": {
-          "races": 2,
+          "races": 3,
           "hits": 0,
           "addedHits": 0,
-          "stake100": 1200,
+          "stake100": 1800,
           "payoutOnlyReturn100": 0,
           "hitRate": 0,
           "payoutOnlyRoi": 0
         },
         "THIRD6": {
-          "races": 2,
+          "races": 3,
           "hits": 0,
           "addedHits": 0,
-          "stake100": 1200,
+          "stake100": 1800,
           "payoutOnlyReturn100": 0,
           "hitRate": 0,
           "payoutOnlyRoi": 0
@@ -4054,8 +4054,8 @@
           "hits": 1,
           "addedHits": 1,
           "deltaHits": 1,
-          "hitRate": 0.5,
-          "payoutOnlyRoi": 0.3375
+          "hitRate": 0.3333333333333333,
+          "payoutOnlyRoi": 0.225
         },
         {
           "key": "RANK6",
@@ -4315,7 +4315,9 @@
         },
         {
           "race": 3,
-          "status": "PENDING",
+          "status": "SETTLED",
+          "actual": "3-1-5",
+          "payout100": 3220,
           "base": [
             "1-3-2",
             "2-1-3",
@@ -4323,55 +4325,104 @@
             "3-1-4"
           ],
           "variants": {
-            "BASE4": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4"
-            ],
-            "RANK6": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4",
-              "1-3-6",
-              "1-2-3"
-            ],
-            "RANK8": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4",
-              "1-3-6",
-              "1-2-3",
-              "1-2-6",
-              "1-4-6"
-            ],
-            "HEAD6": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4",
-              "4-5-6",
-              "4-3-6"
-            ],
-            "SECOND6": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4",
-              "1-2-3",
-              "1-2-6"
-            ],
-            "THIRD6": [
-              "1-3-2",
-              "2-1-3",
-              "3-5-6",
-              "3-1-4",
-              "1-3-6",
-              "1-3-5"
-            ]
-          }
+            "BASE4": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": []
+            },
+            "RANK6": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4",
+                "1-3-6",
+                "1-2-3"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": [
+                "1-3-6",
+                "1-2-3"
+              ]
+            },
+            "RANK8": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4",
+                "1-3-6",
+                "1-2-3",
+                "1-2-6",
+                "1-4-6"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": [
+                "1-3-6",
+                "1-2-3",
+                "1-2-6",
+                "1-4-6"
+              ]
+            },
+            "HEAD6": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4",
+                "4-5-6",
+                "4-3-6"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": [
+                "4-5-6",
+                "4-3-6"
+              ]
+            },
+            "SECOND6": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4",
+                "1-2-3",
+                "1-2-6"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": [
+                "1-2-3",
+                "1-2-6"
+              ]
+            },
+            "THIRD6": {
+              "picks": [
+                "1-3-2",
+                "2-1-3",
+                "3-5-6",
+                "3-1-4",
+                "1-3-6",
+                "1-3-5"
+              ],
+              "hit": false,
+              "addedHit": false,
+              "added": [
+                "1-3-6",
+                "1-3-5"
+              ]
+            }
+          },
+          "baselineMiss": "THIRD",
+          "actualRank": 31
         },
         {
           "race": 4,
