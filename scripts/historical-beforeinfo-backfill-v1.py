@@ -195,7 +195,14 @@ def backfill_group(g,max_workers):
 def scan_status(groups,last_run):
     total_days=len(groups);done_days=0;rich_races=sum(len(g["rows"]) for g in groups)
     captured=ex6=st6=wx4=partial=0
-    venue=defaultdict(lambda:{"venueDaysTotal":0,"venueDaysDone":0,"richRaces":0,"capturedRaces":0})
+    venue=defaultdict(lambda:{
+      "venueDaysTotal":0,"venueDaysDone":0,"richRaces":0,"capturedRaces":0,
+      "exhibitionAnyRaces":0,"exhibition6of6Races":0,"tilt6of6Races":0,
+      "startExhibitionST6of6Races":0,"weather4of4Races":0,
+      "windDirectionPresentRaces":0,"weatherCodePresentRaces":0,
+      "lapTimeAnyRaces":0,"turnTimeAnyRaces":0,"straightTimeAnyRaces":0,
+      "partialCaptureRaces":0
+    })
     for g in groups:
         v=venue[g["slug"]];v["venueDaysTotal"]+=1;v["richRaces"]+=len(g["rows"])
         if not g["out"].exists():continue
@@ -204,11 +211,28 @@ def scan_status(groups,last_run):
         except Exception:continue
         rs=x.get("races",[]);captured+=len(rs);v["capturedRaces"]+=len(rs)
         for r in rs:
-            s=r.get("fieldStatus",{})
-            ex6+=s.get("exhibitionTimeCount")==6
-            st6+=s.get("startExhibitionSTCount",0)>=6
-            wx4+=s.get("weatherCoreCount")==4
-            partial+=not bool(r.get("captureComplete"))
+            fs=r.get("fieldStatus",{});water=r.get("water",{})
+            has_ex=fs.get("exhibitionTimeCount",0)>0
+            full_ex=fs.get("exhibitionTimeCount")==6
+            full_tilt=fs.get("tiltCount")==6
+            full_st=fs.get("startExhibitionSTCount",0)>=6
+            full_wx=fs.get("weatherCoreCount")==4
+            is_partial=not bool(r.get("captureComplete"))
+            ex6+=full_ex;st6+=full_st;wx4+=full_wx;partial+=is_partial
+            v["exhibitionAnyRaces"]+=has_ex
+            v["exhibition6of6Races"]+=full_ex
+            v["tilt6of6Races"]+=full_tilt
+            v["startExhibitionST6of6Races"]+=full_st
+            v["weather4of4Races"]+=full_wx
+            v["windDirectionPresentRaces"]+=bool(water.get("windDirectionCode"))
+            v["weatherCodePresentRaces"]+=bool(water.get("weatherCode"))
+            v["lapTimeAnyRaces"]+=fs.get("lapTimeCount",0)>0
+            v["turnTimeAnyRaces"]+=fs.get("turnTimeCount",0)>0
+            v["straightTimeAnyRaces"]+=fs.get("straightTimeCount",0)>0
+            v["partialCaptureRaces"]+=is_partial
+    for v in venue.values():
+        v["venueDaysRemaining"]=v["venueDaysTotal"]-v["venueDaysDone"]
+        v["richRacesRemaining"]=v["richRaces"]-v["capturedRaces"]
     return {
       "schema":"boat-command-historical-beforeinfo-backfill-status-v1",
       "researchOnly":True,"productionChanged":False,"predictionInputChanged":False,
