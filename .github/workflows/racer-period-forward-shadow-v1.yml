@@ -1,0 +1,168 @@
+name: Racer period second-place FORWARD SHADOW v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-forward-shadow-v1.yml'
+      - 'scripts/racer-period-forward-shadow-v1.js'
+      - 'scripts/racer-period-forward-evaluation-v1.py'
+      - 'research/racer-period-second-place-shadow-v1.json'
+      - 'racer-period-24/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/racer-period-forward-shadow-v1.yml'
+      - 'scripts/racer-period-forward-shadow-v1.js'
+      - 'scripts/racer-period-forward-evaluation-v1.py'
+      - 'research/racer-period-second-place-shadow-v1.json'
+      - 'racer-period-24/**'
+  workflow_run:
+    workflows:
+      - "Venue program batch A v1"
+      - "Venue program batch B v1"
+      - "Venue program batch C v1"
+      - "Venue program batch D v1"
+    types: [completed]
+  schedule:
+    - cron: '*/5 0-13,21-23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: racer-period-second-place-forward-shadow-v1
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify PRE-RACE snapshot and POST evaluator contracts
+        run: |
+          set -euo pipefail
+          node --check scripts/racer-period-forward-shadow-v1.js
+          node scripts/racer-period-forward-shadow-v1.js --self-test
+          python3 -m py_compile scripts/racer-period-forward-evaluation-v1.py
+          python3 scripts/racer-period-forward-evaluation-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-second-forward-evaluation-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-second-forward-evaluation-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['bankrollChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['firstPlaceMutation'] is False
+          assert x['promotionEligible'] is False
+          print('RACER_PERIOD_FORWARD_CONTRACT_PASS',x['status'])
+          PY
+
+  collect:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refresh latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Freeze result-blind racer-period second-place snapshots
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          node scripts/racer-period-forward-shadow-v1.js "$DATE"
+
+      - name: Evaluate only already paired POST results
+        run: |
+          set -euo pipefail
+          python3 scripts/racer-period-forward-evaluation-v1.py
+
+      - name: Audit immutable PRE/POST boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,glob,json,os,re
+          from zoneinfo import ZoneInfo
+          JST=ZoneInfo('Asia/Tokyo')
+          date=os.popen('TZ=Asia/Tokyo date +%F').read().strip()
+          paths=glob.glob(f'live/*/{date}/shadow/racer-period-second/race-*.json')
+          for p in paths:
+              x=json.load(open(p,encoding='utf-8'))
+              assert x['schema']=='boat-command-racer-period-forward-shadow-v1'
+              assert x['date']==date
+              assert x['resultInput'] is False and x['payoutInput'] is False
+              assert x['researchOnly'] is True and x['productionEnabled'] is False
+              assert x['tryEnabled'] is False and x['cashNeutral'] is True
+              assert x['hardLockEnabled'] is False and x['bankrollMutation'] is False
+              assert x['firstPlaceMutation'] is False and x['promotionEligible'] is False
+              assert x['immutableAfterFirstWrite'] is True
+              assert x['periodJoin']['allSixMatched'] is True
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['baselineTopOrder'])
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['marginalSecondOrder'])
+              assert re.fullmatch(r'[1-6]-[1-6]-[1-6]',x['periodCandidateOrder'])
+              heads={int(x[k].split('-')[0]) for k in ('baselineTopOrder','marginalSecondOrder','periodCandidateOrder')}
+              assert heads=={int(x['baselineFirst'])}
+              d=datetime.date.fromisoformat(x['date'])
+              hh,mm=map(int,x['deadline'].split(':'))
+              deadline=datetime.datetime(d.year,d.month,d.day,hh,mm,tzinfo=JST)
+              generated=datetime.datetime.fromisoformat(x['generatedAt'].replace('Z','+00:00')).astimezone(JST)
+              assert (deadline-generated).total_seconds()/60>=3
+          e=json.load(open('research/racer-period-second-forward-evaluation-v1.json',encoding='utf-8'))
+          assert e['promotionEligible'] is False
+          assert e['productionChanged'] is False
+          print('RACER_PERIOD_FORWARD_BOUNDARY_PASS',len(paths),e['status'],e['summary']['pairedRaces'])
+          PY
+
+      - name: Preserve only research outputs
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          rm -rf /tmp/racer-period-forward-publish
+          mkdir -p /tmp/racer-period-forward-publish/research
+          [ -f research/racer-period-second-forward-evaluation-v1.json ] && cp research/racer-period-second-forward-evaluation-v1.json /tmp/racer-period-forward-publish/research/
+          while IFS= read -r -d '' p; do
+            mkdir -p "/tmp/racer-period-forward-publish/$(dirname "$p")"
+            cp "$p" "/tmp/racer-period-forward-publish/$p"
+          done < <(find live -path "*/$DATE/shadow/racer-period-second/race-*.json" -print0)
+
+      - name: Publish new immutable snapshots and evaluation
+        run: |
+          set -euo pipefail
+          git config user.name 'boat-command-racer-period-forward'
+          git config user.email 'boat-command-racer-period-forward@users.noreply.github.com'
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            if [ -d /tmp/racer-period-forward-publish/live ]; then
+              while IFS= read -r src; do
+                rel="${src#/tmp/racer-period-forward-publish/}"
+                [ -f "$rel" ] && continue
+                mkdir -p "$(dirname "$rel")"
+                cp "$src" "$rel"
+              done < <(find /tmp/racer-period-forward-publish/live -type f -name '*.json' | sort)
+            fi
+
+            mkdir -p research
+            cp /tmp/racer-period-forward-publish/research/racer-period-second-forward-evaluation-v1.json research/
+
+            git add live research/racer-period-second-forward-evaluation-v1.json
+            git diff --cached --quiet && { echo 'RACER_PERIOD_FORWARD_CURRENT'; exit 0; }
+            git commit -m 'research: refresh racer-period second-place forward shadow'
+            git push origin HEAD:main && exit 0
+            sleep $((attempt*2))
+          done
+          exit 1
