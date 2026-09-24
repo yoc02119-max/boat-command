@@ -12,6 +12,7 @@ import json
 import pathlib
 import sys
 import time
+import urllib.request
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 COLLECTOR=ROOT/"scripts/venue-program-collector-v1.py"
@@ -77,7 +78,17 @@ def main():
             url=f"https://www.boatrace.jp/owpc/pc/race/racelist?hd={hd}&jcd={code}&rno={race}"
             item={"date":d,"race":race,"url":url,"status":"ERROR","verifiedHistoricalPage":False}
             try:
-                html=C.fetch(url,f"BOAT-COMMAND-HISTORY-FIELD-PROBE/{code}")
+                req=urllib.request.Request(url,headers={"User-Agent":f"BOAT-COMMAND-HISTORY-FIELD-PROBE/{code}"})
+                with urllib.request.urlopen(req,timeout=8) as resp:
+                    raw=resp.read()
+                html=None
+                for enc in ("utf-8","cp932","shift_jis","euc_jp"):
+                    try:
+                        html=raw.decode(enc);break
+                    except UnicodeDecodeError:
+                        pass
+                if html is None:
+                    html=raw.decode("utf-8","replace")
                 pack=C.parse_race(html,d,race,slug.upper(),code)
                 if not pack:
                     item["status"]="PARSE_MISS"
