@@ -40,6 +40,7 @@ jobs:
           set -euo pipefail
           python3 -m py_compile scripts/historical-beforeinfo-backfill-v1.py
           python3 scripts/historical-beforeinfo-backfill-v1.py --self-test
+          # Pilot 4-group runs passed; validate the 8-group throughput under the same safety gates.
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             python3 scripts/historical-beforeinfo-backfill-v1.py               --one-per-venue --max-groups 8 --verify-candidates 16 --workers 4
           else
