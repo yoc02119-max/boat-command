@@ -71,6 +71,8 @@ jobs:
           cp research/historical-beforeinfo-field-probe-v1.json /tmp/historical-beforeinfo-field-probe-v1.json
           cp research/historical-beforeinfo-recent-probe-v1.json /tmp/historical-beforeinfo-recent-probe-v1.json
           cp research/beforeinfo-latency-control-v1.json /tmp/beforeinfo-latency-control-v1.json
+          git reset --hard
+          git clean -fd
           git fetch origin "$HEAD_REF"
           git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
           mkdir -p research
