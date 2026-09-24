@@ -1,0 +1,3407 @@
+{
+  "schema": "boat-command-racer-period-second-place-audit-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "tryChanged": false,
+  "hardLockChanged": false,
+  "promotionEligible": false,
+  "question": "With first-place prediction frozen, do PRE-RACE-safe period features improve second place?",
+  "featureBoundary": {
+    "firstPredictionFrozen": true,
+    "featuresAddedToSecondOnly": [
+      "periodAvgST",
+      "periodFCountDerived",
+      "periodLCountDerived",
+      "currentAbility",
+      "period3RateDerived"
+    ],
+    "courseSpecificStatsUsed": false,
+    "joinPolicy": "RACE_DATE_HALF_YEAR + REGISTRATION + CLASS_MATCH",
+    "resultsUsedForFeatureSelection": false,
+    "resultsUsedForEvaluationOnly": true
+  },
+  "summary": {
+    "venues": 24,
+    "holdoutRaces": 8307,
+    "baseline": {
+      "races": 8307,
+      "headCorrect": 2778,
+      "headAccuracy": 0.3344167569519682,
+      "headCorrectRaces": 2778,
+      "secondHitsWhenHeadCorrect": 802,
+      "secondAccuracyWhenHeadCorrect": 0.2886969042476602,
+      "secondTop2HitsWhenHeadCorrect": 1478,
+      "secondTop2CoverageWhenHeadCorrect": 0.5320374370050396,
+      "pairHits": 802,
+      "pairAccuracy": 0.09654508246057542
+    },
+    "periodCandidate": {
+      "races": 8307,
+      "headCorrect": 2778,
+      "headAccuracy": 0.3344167569519682,
+      "headCorrectRaces": 2778,
+      "secondHitsWhenHeadCorrect": 784,
+      "secondAccuracyWhenHeadCorrect": 0.2822174226061915,
+      "secondTop2HitsWhenHeadCorrect": 1484,
+      "secondTop2CoverageWhenHeadCorrect": 0.5341972642188625,
+      "pairHits": 784,
+      "pairAccuracy": 0.09437823522330564
+    },
+    "headAccuracyDelta": 0.0,
+    "secondAccuracyDelta": -0.006479481641468721,
+    "secondTop2CoverageDelta": 0.002159827213822907,
+    "pairAccuracyDelta": -0.002166847237269773,
+    "venuesSecondAccuracyImproved": 10,
+    "venuesSecondTop2Improved": 13,
+    "venuesNoSecondRegression": 10
+  },
+  "venuesData": [
+    {
+      "slug": "amagasaki",
+      "venueCode": "13",
+      "calibrationLastDate": "2026-08-04",
+      "holdoutFirstDate": "2026-08-09",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.02,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "headCorrectRaces": 281,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.3274021352313167,
+            "secondTop2HitsWhenHeadCorrect": 155,
+            "secondTop2CoverageWhenHeadCorrect": 0.5516014234875445,
+            "pairHits": 92,
+            "pairAccuracy": 0.1038374717832957
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "headCorrectRaces": 281,
+            "secondHitsWhenHeadCorrect": 91,
+            "secondAccuracyWhenHeadCorrect": 0.3238434163701068,
+            "secondTop2HitsWhenHeadCorrect": 159,
+            "secondTop2CoverageWhenHeadCorrect": 0.5658362989323843,
+            "pairHits": 91,
+            "pairAccuracy": 0.10270880361173815
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "headCorrectRaces": 281,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.3202846975088968,
+            "secondTop2HitsWhenHeadCorrect": 163,
+            "secondTop2CoverageWhenHeadCorrect": 0.5800711743772242,
+            "pairHits": 90,
+            "pairAccuracy": 0.10158013544018059
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 886,
+            "headCorrect": 281,
+            "headAccuracy": 0.31715575620767494,
+            "headCorrectRaces": 281,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.3202846975088968,
+            "secondTop2HitsWhenHeadCorrect": 158,
+            "secondTop2CoverageWhenHeadCorrect": 0.5622775800711743,
+            "pairHits": 90,
+            "pairAccuracy": 0.10158013544018059
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 396,
+          "headCorrect": 147,
+          "headAccuracy": 0.3712121212121212,
+          "headCorrectRaces": 147,
+          "secondHitsWhenHeadCorrect": 40,
+          "secondAccuracyWhenHeadCorrect": 0.272108843537415,
+          "secondTop2HitsWhenHeadCorrect": 85,
+          "secondTop2CoverageWhenHeadCorrect": 0.5782312925170068,
+          "pairHits": 40,
+          "pairAccuracy": 0.10101010101010101
+        },
+        "periodCandidate": {
+          "races": 396,
+          "headCorrect": 147,
+          "headAccuracy": 0.3712121212121212,
+          "headCorrectRaces": 147,
+          "secondHitsWhenHeadCorrect": 41,
+          "secondAccuracyWhenHeadCorrect": 0.2789115646258503,
+          "secondTop2HitsWhenHeadCorrect": 80,
+          "secondTop2CoverageWhenHeadCorrect": 0.54421768707483,
+          "pairHits": 41,
+          "pairAccuracy": 0.10353535353535354
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.006802721088435326,
+        "secondTop2CoverageDelta": -0.0340136054421768,
+        "pairAccuracyDelta": 0.0025252525252525276,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "ashiya",
+      "venueCode": "21",
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "ST_3RATE",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.0,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "headCorrectRaces": 290,
+            "secondHitsWhenHeadCorrect": 75,
+            "secondAccuracyWhenHeadCorrect": 0.25862068965517243,
+            "secondTop2HitsWhenHeadCorrect": 149,
+            "secondTop2CoverageWhenHeadCorrect": 0.5137931034482759,
+            "pairHits": 75,
+            "pairAccuracy": 0.09157509157509157
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "headCorrectRaces": 290,
+            "secondHitsWhenHeadCorrect": 75,
+            "secondAccuracyWhenHeadCorrect": 0.25862068965517243,
+            "secondTop2HitsWhenHeadCorrect": 148,
+            "secondTop2CoverageWhenHeadCorrect": 0.5103448275862069,
+            "pairHits": 75,
+            "pairAccuracy": 0.09157509157509157
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "headCorrectRaces": 290,
+            "secondHitsWhenHeadCorrect": 74,
+            "secondAccuracyWhenHeadCorrect": 0.25517241379310346,
+            "secondTop2HitsWhenHeadCorrect": 149,
+            "secondTop2CoverageWhenHeadCorrect": 0.5137931034482759,
+            "pairHits": 74,
+            "pairAccuracy": 0.09035409035409035
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 819,
+            "headCorrect": 290,
+            "headAccuracy": 0.3540903540903541,
+            "headCorrectRaces": 290,
+            "secondHitsWhenHeadCorrect": 73,
+            "secondAccuracyWhenHeadCorrect": 0.2517241379310345,
+            "secondTop2HitsWhenHeadCorrect": 147,
+            "secondTop2CoverageWhenHeadCorrect": 0.506896551724138,
+            "pairHits": 73,
+            "pairAccuracy": 0.08913308913308914
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 360,
+          "headCorrect": 136,
+          "headAccuracy": 0.37777777777777777,
+          "headCorrectRaces": 136,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.22794117647058823,
+          "secondTop2HitsWhenHeadCorrect": 67,
+          "secondTop2CoverageWhenHeadCorrect": 0.49264705882352944,
+          "pairHits": 31,
+          "pairAccuracy": 0.08611111111111111
+        },
+        "periodCandidate": {
+          "races": 360,
+          "headCorrect": 136,
+          "headAccuracy": 0.37777777777777777,
+          "headCorrectRaces": 136,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.21323529411764705,
+          "secondTop2HitsWhenHeadCorrect": 65,
+          "secondTop2CoverageWhenHeadCorrect": 0.47794117647058826,
+          "pairHits": 29,
+          "pairAccuracy": 0.08055555555555556
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.01470588235294118,
+        "secondTop2CoverageDelta": -0.01470588235294118,
+        "pairAccuracyDelta": -0.00555555555555555,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "biwako",
+      "venueCode": "11",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_ABILITY",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.05,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "headCorrectRaces": 200,
+            "secondHitsWhenHeadCorrect": 62,
+            "secondAccuracyWhenHeadCorrect": 0.31,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.57,
+            "pairHits": 62,
+            "pairAccuracy": 0.09077598828696926
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "headCorrectRaces": 200,
+            "secondHitsWhenHeadCorrect": 61,
+            "secondAccuracyWhenHeadCorrect": 0.305,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.57,
+            "pairHits": 61,
+            "pairAccuracy": 0.08931185944363104
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "headCorrectRaces": 200,
+            "secondHitsWhenHeadCorrect": 61,
+            "secondAccuracyWhenHeadCorrect": 0.305,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.57,
+            "pairHits": 61,
+            "pairAccuracy": 0.08931185944363104
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 683,
+            "headCorrect": 200,
+            "headAccuracy": 0.29282576866764276,
+            "headCorrectRaces": 200,
+            "secondHitsWhenHeadCorrect": 61,
+            "secondAccuracyWhenHeadCorrect": 0.305,
+            "secondTop2HitsWhenHeadCorrect": 113,
+            "secondTop2CoverageWhenHeadCorrect": 0.565,
+            "pairHits": 61,
+            "pairAccuracy": 0.08931185944363104
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 330,
+          "headCorrect": 104,
+          "headAccuracy": 0.3151515151515151,
+          "headCorrectRaces": 104,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.27884615384615385,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.4807692307692308,
+          "pairHits": 29,
+          "pairAccuracy": 0.08787878787878788
+        },
+        "periodCandidate": {
+          "races": 330,
+          "headCorrect": 104,
+          "headAccuracy": 0.3151515151515151,
+          "headCorrectRaces": 104,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.25961538461538464,
+          "secondTop2HitsWhenHeadCorrect": 51,
+          "secondTop2CoverageWhenHeadCorrect": 0.49038461538461536,
+          "pairHits": 27,
+          "pairAccuracy": 0.08181818181818182
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.019230769230769218,
+        "secondTop2CoverageDelta": 0.009615384615384581,
+        "pairAccuracyDelta": -0.006060606060606058,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "edogawa",
+      "venueCode": "03",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "headCorrectRaces": 186,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.3118279569892473,
+            "secondTop2HitsWhenHeadCorrect": 103,
+            "secondTop2CoverageWhenHeadCorrect": 0.553763440860215,
+            "pairHits": 58,
+            "pairAccuracy": 0.10681399631675875
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "headCorrectRaces": 186,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.3064516129032258,
+            "secondTop2HitsWhenHeadCorrect": 102,
+            "secondTop2CoverageWhenHeadCorrect": 0.5483870967741935,
+            "pairHits": 57,
+            "pairAccuracy": 0.10497237569060773
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "headCorrectRaces": 186,
+            "secondHitsWhenHeadCorrect": 56,
+            "secondAccuracyWhenHeadCorrect": 0.3010752688172043,
+            "secondTop2HitsWhenHeadCorrect": 103,
+            "secondTop2CoverageWhenHeadCorrect": 0.553763440860215,
+            "pairHits": 56,
+            "pairAccuracy": 0.10313075506445672
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 543,
+            "headCorrect": 186,
+            "headAccuracy": 0.3425414364640884,
+            "headCorrectRaces": 186,
+            "secondHitsWhenHeadCorrect": 55,
+            "secondAccuracyWhenHeadCorrect": 0.2956989247311828,
+            "secondTop2HitsWhenHeadCorrect": 102,
+            "secondTop2CoverageWhenHeadCorrect": 0.5483870967741935,
+            "pairHits": 55,
+            "pairAccuracy": 0.10128913443830571
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 251,
+          "headCorrect": 80,
+          "headAccuracy": 0.3187250996015936,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.3375,
+          "secondTop2HitsWhenHeadCorrect": 41,
+          "secondTop2CoverageWhenHeadCorrect": 0.5125,
+          "pairHits": 27,
+          "pairAccuracy": 0.10756972111553785
+        },
+        "periodCandidate": {
+          "races": 251,
+          "headCorrect": 80,
+          "headAccuracy": 0.3187250996015936,
+          "headCorrectRaces": 80,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.375,
+          "secondTop2HitsWhenHeadCorrect": 39,
+          "secondTop2CoverageWhenHeadCorrect": 0.4875,
+          "pairHits": 30,
+          "pairAccuracy": 0.11952191235059761
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.03749999999999998,
+        "secondTop2CoverageDelta": -0.024999999999999967,
+        "pairAccuracyDelta": 0.011952191235059764,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "fukuoka",
+      "venueCode": "22",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.02,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 81,
+            "secondAccuracyWhenHeadCorrect": 0.3127413127413127,
+            "secondTop2HitsWhenHeadCorrect": 135,
+            "secondTop2CoverageWhenHeadCorrect": 0.5212355212355212,
+            "pairHits": 81,
+            "pairAccuracy": 0.10099750623441396
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.305019305019305,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.5366795366795367,
+            "pairHits": 79,
+            "pairAccuracy": 0.09850374064837905
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.30115830115830117,
+            "secondTop2HitsWhenHeadCorrect": 137,
+            "secondTop2CoverageWhenHeadCorrect": 0.528957528957529,
+            "pairHits": 78,
+            "pairAccuracy": 0.09725685785536159
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 802,
+            "headCorrect": 259,
+            "headAccuracy": 0.3229426433915212,
+            "headCorrectRaces": 259,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.30115830115830117,
+            "secondTop2HitsWhenHeadCorrect": 137,
+            "secondTop2CoverageWhenHeadCorrect": 0.528957528957529,
+            "pairHits": 78,
+            "pairAccuracy": 0.09725685785536159
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 108,
+          "headAccuracy": 0.3103448275862069,
+          "headCorrectRaces": 108,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.2222222222222222,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.42592592592592593,
+          "pairHits": 24,
+          "pairAccuracy": 0.06896551724137931
+        },
+        "periodCandidate": {
+          "races": 348,
+          "headCorrect": 108,
+          "headAccuracy": 0.3103448275862069,
+          "headCorrectRaces": 108,
+          "secondHitsWhenHeadCorrect": 25,
+          "secondAccuracyWhenHeadCorrect": 0.23148148148148148,
+          "secondTop2HitsWhenHeadCorrect": 47,
+          "secondTop2CoverageWhenHeadCorrect": 0.4351851851851852,
+          "pairHits": 25,
+          "pairAccuracy": 0.07183908045977011
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.009259259259259273,
+        "secondTop2CoverageDelta": 0.009259259259259245,
+        "pairAccuracyDelta": 0.002873563218390801,
+        "safeJoinCoverageAmongSecondCandidates": 0.9942528735632183,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 10
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "gamagori",
+      "venueCode": "07",
+      "calibrationLastDate": "2026-07-16",
+      "holdoutFirstDate": "2026-07-17",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.33613445378151263,
+            "secondTop2HitsWhenHeadCorrect": 144,
+            "secondTop2CoverageWhenHeadCorrect": 0.6050420168067226,
+            "pairHits": 80,
+            "pairAccuracy": 0.10416666666666667
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.3277310924369748,
+            "secondTop2HitsWhenHeadCorrect": 144,
+            "secondTop2CoverageWhenHeadCorrect": 0.6050420168067226,
+            "pairHits": 78,
+            "pairAccuracy": 0.1015625
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 78,
+            "secondAccuracyWhenHeadCorrect": 0.3277310924369748,
+            "secondTop2HitsWhenHeadCorrect": 142,
+            "secondTop2CoverageWhenHeadCorrect": 0.5966386554621849,
+            "pairHits": 78,
+            "pairAccuracy": 0.1015625
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 768,
+            "headCorrect": 238,
+            "headAccuracy": 0.3098958333333333,
+            "headCorrectRaces": 238,
+            "secondHitsWhenHeadCorrect": 76,
+            "secondAccuracyWhenHeadCorrect": 0.31932773109243695,
+            "secondTop2HitsWhenHeadCorrect": 143,
+            "secondTop2CoverageWhenHeadCorrect": 0.6008403361344538,
+            "pairHits": 76,
+            "pairAccuracy": 0.09895833333333333
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 125,
+          "headAccuracy": 0.35919540229885055,
+          "headCorrectRaces": 125,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.272,
+          "secondTop2HitsWhenHeadCorrect": 69,
+          "secondTop2CoverageWhenHeadCorrect": 0.552,
+          "pairHits": 34,
+          "pairAccuracy": 0.09770114942528736
+        },
+        "periodCandidate": {
+          "races": 348,
+          "headCorrect": 125,
+          "headAccuracy": 0.35919540229885055,
+          "headCorrectRaces": 125,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.248,
+          "secondTop2HitsWhenHeadCorrect": 70,
+          "secondTop2CoverageWhenHeadCorrect": 0.56,
+          "pairHits": 31,
+          "pairAccuracy": 0.08908045977011494
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.02400000000000002,
+        "secondTop2CoverageDelta": 0.008000000000000007,
+        "pairAccuracyDelta": -0.008620689655172417,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "hamanako",
+      "venueCode": "06",
+      "calibrationLastDate": "2026-08-01",
+      "holdoutFirstDate": "2026-08-02",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "headCorrectRaces": 274,
+            "secondHitsWhenHeadCorrect": 82,
+            "secondAccuracyWhenHeadCorrect": 0.29927007299270075,
+            "secondTop2HitsWhenHeadCorrect": 144,
+            "secondTop2CoverageWhenHeadCorrect": 0.5255474452554745,
+            "pairHits": 82,
+            "pairAccuracy": 0.09808612440191387
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "headCorrectRaces": 274,
+            "secondHitsWhenHeadCorrect": 81,
+            "secondAccuracyWhenHeadCorrect": 0.2956204379562044,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.5072992700729927,
+            "pairHits": 81,
+            "pairAccuracy": 0.09688995215311005
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "headCorrectRaces": 274,
+            "secondHitsWhenHeadCorrect": 80,
+            "secondAccuracyWhenHeadCorrect": 0.291970802919708,
+            "secondTop2HitsWhenHeadCorrect": 142,
+            "secondTop2CoverageWhenHeadCorrect": 0.5182481751824818,
+            "pairHits": 80,
+            "pairAccuracy": 0.09569377990430622
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 274,
+            "headAccuracy": 0.3277511961722488,
+            "headCorrectRaces": 274,
+            "secondHitsWhenHeadCorrect": 79,
+            "secondAccuracyWhenHeadCorrect": 0.28832116788321166,
+            "secondTop2HitsWhenHeadCorrect": 144,
+            "secondTop2CoverageWhenHeadCorrect": 0.5255474452554745,
+            "pairHits": 79,
+            "pairAccuracy": 0.09449760765550239
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 368,
+          "headCorrect": 128,
+          "headAccuracy": 0.34782608695652173,
+          "headCorrectRaces": 128,
+          "secondHitsWhenHeadCorrect": 39,
+          "secondAccuracyWhenHeadCorrect": 0.3046875,
+          "secondTop2HitsWhenHeadCorrect": 73,
+          "secondTop2CoverageWhenHeadCorrect": 0.5703125,
+          "pairHits": 39,
+          "pairAccuracy": 0.10597826086956522
+        },
+        "periodCandidate": {
+          "races": 368,
+          "headCorrect": 128,
+          "headAccuracy": 0.34782608695652173,
+          "headCorrectRaces": 128,
+          "secondHitsWhenHeadCorrect": 40,
+          "secondAccuracyWhenHeadCorrect": 0.3125,
+          "secondTop2HitsWhenHeadCorrect": 70,
+          "secondTop2CoverageWhenHeadCorrect": 0.546875,
+          "pairHits": 40,
+          "pairAccuracy": 0.10869565217391304
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.0078125,
+        "secondTop2CoverageDelta": -0.0234375,
+        "pairAccuracyDelta": 0.0027173913043478243,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "heiwajima",
+      "venueCode": "04",
+      "calibrationLastDate": "2026-08-07",
+      "holdoutFirstDate": "2026-08-08",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "headCorrectRaces": 258,
+            "secondHitsWhenHeadCorrect": 88,
+            "secondAccuracyWhenHeadCorrect": 0.34108527131782945,
+            "secondTop2HitsWhenHeadCorrect": 143,
+            "secondTop2CoverageWhenHeadCorrect": 0.5542635658914729,
+            "pairHits": 88,
+            "pairAccuracy": 0.1164021164021164
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "headCorrectRaces": 258,
+            "secondHitsWhenHeadCorrect": 87,
+            "secondAccuracyWhenHeadCorrect": 0.3372093023255814,
+            "secondTop2HitsWhenHeadCorrect": 145,
+            "secondTop2CoverageWhenHeadCorrect": 0.562015503875969,
+            "pairHits": 87,
+            "pairAccuracy": 0.11507936507936507
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "headCorrectRaces": 258,
+            "secondHitsWhenHeadCorrect": 87,
+            "secondAccuracyWhenHeadCorrect": 0.3372093023255814,
+            "secondTop2HitsWhenHeadCorrect": 145,
+            "secondTop2CoverageWhenHeadCorrect": 0.562015503875969,
+            "pairHits": 87,
+            "pairAccuracy": 0.11507936507936507
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 756,
+            "headCorrect": 258,
+            "headAccuracy": 0.3412698412698413,
+            "headCorrectRaces": 258,
+            "secondHitsWhenHeadCorrect": 86,
+            "secondAccuracyWhenHeadCorrect": 0.3333333333333333,
+            "secondTop2HitsWhenHeadCorrect": 146,
+            "secondTop2CoverageWhenHeadCorrect": 0.5658914728682171,
+            "pairHits": 86,
+            "pairAccuracy": 0.11375661375661375
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 336,
+          "headCorrect": 101,
+          "headAccuracy": 0.3005952380952381,
+          "headCorrectRaces": 101,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.2376237623762376,
+          "secondTop2HitsWhenHeadCorrect": 46,
+          "secondTop2CoverageWhenHeadCorrect": 0.45544554455445546,
+          "pairHits": 24,
+          "pairAccuracy": 0.07142857142857142
+        },
+        "periodCandidate": {
+          "races": 336,
+          "headCorrect": 101,
+          "headAccuracy": 0.3005952380952381,
+          "headCorrectRaces": 101,
+          "secondHitsWhenHeadCorrect": 26,
+          "secondAccuracyWhenHeadCorrect": 0.25742574257425743,
+          "secondTop2HitsWhenHeadCorrect": 48,
+          "secondTop2CoverageWhenHeadCorrect": 0.4752475247524752,
+          "pairHits": 26,
+          "pairAccuracy": 0.07738095238095238
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.01980198019801982,
+        "secondTop2CoverageDelta": 0.019801980198019764,
+        "pairAccuracyDelta": 0.005952380952380959,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "karatsu",
+      "venueCode": "23",
+      "calibrationLastDate": "2026-07-21",
+      "holdoutFirstDate": "2026-07-22",
+      "selectedProfile": {
+        "name": "ST_MED",
+        "stW": 4.0,
+        "fW": 0.03,
+        "lW": 0.08,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "headCorrectRaces": 310,
+            "secondHitsWhenHeadCorrect": 101,
+            "secondAccuracyWhenHeadCorrect": 0.3258064516129032,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.5387096774193548,
+            "pairHits": 101,
+            "pairAccuracy": 0.1270440251572327
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "headCorrectRaces": 310,
+            "secondHitsWhenHeadCorrect": 101,
+            "secondAccuracyWhenHeadCorrect": 0.3258064516129032,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.5387096774193548,
+            "pairHits": 101,
+            "pairAccuracy": 0.1270440251572327
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "headCorrectRaces": 310,
+            "secondHitsWhenHeadCorrect": 101,
+            "secondAccuracyWhenHeadCorrect": 0.3258064516129032,
+            "secondTop2HitsWhenHeadCorrect": 165,
+            "secondTop2CoverageWhenHeadCorrect": 0.532258064516129,
+            "pairHits": 101,
+            "pairAccuracy": 0.1270440251572327
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 795,
+            "headCorrect": 310,
+            "headAccuracy": 0.389937106918239,
+            "headCorrectRaces": 310,
+            "secondHitsWhenHeadCorrect": 100,
+            "secondAccuracyWhenHeadCorrect": 0.3225806451612903,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.5387096774193548,
+            "pairHits": 100,
+            "pairAccuracy": 0.12578616352201258
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 343,
+          "headCorrect": 144,
+          "headAccuracy": 0.4198250728862974,
+          "headCorrectRaces": 144,
+          "secondHitsWhenHeadCorrect": 45,
+          "secondAccuracyWhenHeadCorrect": 0.3125,
+          "secondTop2HitsWhenHeadCorrect": 71,
+          "secondTop2CoverageWhenHeadCorrect": 0.4930555555555556,
+          "pairHits": 45,
+          "pairAccuracy": 0.13119533527696792
+        },
+        "periodCandidate": {
+          "races": 343,
+          "headCorrect": 144,
+          "headAccuracy": 0.4198250728862974,
+          "headCorrectRaces": 144,
+          "secondHitsWhenHeadCorrect": 43,
+          "secondAccuracyWhenHeadCorrect": 0.2986111111111111,
+          "secondTop2HitsWhenHeadCorrect": 75,
+          "secondTop2CoverageWhenHeadCorrect": 0.5208333333333334,
+          "pairHits": 43,
+          "pairAccuracy": 0.12536443148688048
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.013888888888888895,
+        "secondTop2CoverageDelta": 0.02777777777777779,
+        "pairAccuracyDelta": -0.005830903790087438,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kiryu",
+      "venueCode": "01",
+      "calibrationLastDate": "2026-07-24",
+      "holdoutFirstDate": "2026-07-25",
+      "selectedProfile": {
+        "name": "ST_ABILITY",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.05,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "headCorrectRaces": 273,
+            "secondHitsWhenHeadCorrect": 86,
+            "secondAccuracyWhenHeadCorrect": 0.315018315018315,
+            "secondTop2HitsWhenHeadCorrect": 151,
+            "secondTop2CoverageWhenHeadCorrect": 0.5531135531135531,
+            "pairHits": 86,
+            "pairAccuracy": 0.10763454317897372
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "headCorrectRaces": 273,
+            "secondHitsWhenHeadCorrect": 86,
+            "secondAccuracyWhenHeadCorrect": 0.315018315018315,
+            "secondTop2HitsWhenHeadCorrect": 151,
+            "secondTop2CoverageWhenHeadCorrect": 0.5531135531135531,
+            "pairHits": 86,
+            "pairAccuracy": 0.10763454317897372
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "headCorrectRaces": 273,
+            "secondHitsWhenHeadCorrect": 86,
+            "secondAccuracyWhenHeadCorrect": 0.315018315018315,
+            "secondTop2HitsWhenHeadCorrect": 150,
+            "secondTop2CoverageWhenHeadCorrect": 0.5494505494505495,
+            "pairHits": 86,
+            "pairAccuracy": 0.10763454317897372
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 799,
+            "headCorrect": 273,
+            "headAccuracy": 0.34167709637046306,
+            "headCorrectRaces": 273,
+            "secondHitsWhenHeadCorrect": 85,
+            "secondAccuracyWhenHeadCorrect": 0.31135531135531136,
+            "secondTop2HitsWhenHeadCorrect": 154,
+            "secondTop2CoverageWhenHeadCorrect": 0.5641025641025641,
+            "pairHits": 85,
+            "pairAccuracy": 0.10638297872340426
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 352,
+          "headCorrect": 104,
+          "headAccuracy": 0.29545454545454547,
+          "headCorrectRaces": 104,
+          "secondHitsWhenHeadCorrect": 38,
+          "secondAccuracyWhenHeadCorrect": 0.36538461538461536,
+          "secondTop2HitsWhenHeadCorrect": 62,
+          "secondTop2CoverageWhenHeadCorrect": 0.5961538461538461,
+          "pairHits": 38,
+          "pairAccuracy": 0.10795454545454546
+        },
+        "periodCandidate": {
+          "races": 352,
+          "headCorrect": 104,
+          "headAccuracy": 0.29545454545454547,
+          "headCorrectRaces": 104,
+          "secondHitsWhenHeadCorrect": 39,
+          "secondAccuracyWhenHeadCorrect": 0.375,
+          "secondTop2HitsWhenHeadCorrect": 61,
+          "secondTop2CoverageWhenHeadCorrect": 0.5865384615384616,
+          "pairHits": 39,
+          "pairAccuracy": 0.11079545454545454
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.009615384615384637,
+        "secondTop2CoverageDelta": -0.009615384615384581,
+        "pairAccuracyDelta": 0.0028409090909090884,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "kojima",
+      "venueCode": "16",
+      "calibrationLastDate": "2026-07-31",
+      "holdoutFirstDate": "2026-08-01",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.02,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.2977346278317152,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.540453074433657,
+            "pairHits": 92,
+            "pairAccuracy": 0.10514285714285715
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.2977346278317152,
+            "secondTop2HitsWhenHeadCorrect": 166,
+            "secondTop2CoverageWhenHeadCorrect": 0.5372168284789643,
+            "pairHits": 92,
+            "pairAccuracy": 0.10514285714285715
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 92,
+            "secondAccuracyWhenHeadCorrect": 0.2977346278317152,
+            "secondTop2HitsWhenHeadCorrect": 166,
+            "secondTop2CoverageWhenHeadCorrect": 0.5372168284789643,
+            "pairHits": 92,
+            "pairAccuracy": 0.10514285714285715
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 875,
+            "headCorrect": 309,
+            "headAccuracy": 0.35314285714285715,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 91,
+            "secondAccuracyWhenHeadCorrect": 0.29449838187702265,
+            "secondTop2HitsWhenHeadCorrect": 166,
+            "secondTop2CoverageWhenHeadCorrect": 0.5372168284789643,
+            "pairHits": 91,
+            "pairAccuracy": 0.104
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 384,
+          "headCorrect": 119,
+          "headAccuracy": 0.3098958333333333,
+          "headCorrectRaces": 119,
+          "secondHitsWhenHeadCorrect": 41,
+          "secondAccuracyWhenHeadCorrect": 0.3445378151260504,
+          "secondTop2HitsWhenHeadCorrect": 69,
+          "secondTop2CoverageWhenHeadCorrect": 0.5798319327731093,
+          "pairHits": 41,
+          "pairAccuracy": 0.10677083333333333
+        },
+        "periodCandidate": {
+          "races": 384,
+          "headCorrect": 119,
+          "headAccuracy": 0.3098958333333333,
+          "headCorrectRaces": 119,
+          "secondHitsWhenHeadCorrect": 39,
+          "secondAccuracyWhenHeadCorrect": 0.3277310924369748,
+          "secondTop2HitsWhenHeadCorrect": 70,
+          "secondTop2CoverageWhenHeadCorrect": 0.5882352941176471,
+          "pairHits": 39,
+          "pairAccuracy": 0.1015625
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.016806722689075626,
+        "secondTop2CoverageDelta": 0.008403361344537785,
+        "pairAccuracyDelta": -0.005208333333333329,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "marugame",
+      "venueCode": "15",
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "BALANCED",
+        "stW": 4.5,
+        "fW": 0.05,
+        "lW": 0.12,
+        "abilityW": 0.04,
+        "threeW": 0.35
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "headCorrectRaces": 226,
+            "secondHitsWhenHeadCorrect": 84,
+            "secondAccuracyWhenHeadCorrect": 0.37168141592920356,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5752212389380531,
+            "pairHits": 84,
+            "pairAccuracy": 0.10866752910737387
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "headCorrectRaces": 226,
+            "secondHitsWhenHeadCorrect": 83,
+            "secondAccuracyWhenHeadCorrect": 0.3672566371681416,
+            "secondTop2HitsWhenHeadCorrect": 131,
+            "secondTop2CoverageWhenHeadCorrect": 0.5796460176991151,
+            "pairHits": 83,
+            "pairAccuracy": 0.1073738680465718
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "headCorrectRaces": 226,
+            "secondHitsWhenHeadCorrect": 83,
+            "secondAccuracyWhenHeadCorrect": 0.3672566371681416,
+            "secondTop2HitsWhenHeadCorrect": 130,
+            "secondTop2CoverageWhenHeadCorrect": 0.5752212389380531,
+            "pairHits": 83,
+            "pairAccuracy": 0.1073738680465718
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 773,
+            "headCorrect": 226,
+            "headAccuracy": 0.2923673997412678,
+            "headCorrectRaces": 226,
+            "secondHitsWhenHeadCorrect": 83,
+            "secondAccuracyWhenHeadCorrect": 0.3672566371681416,
+            "secondTop2HitsWhenHeadCorrect": 129,
+            "secondTop2CoverageWhenHeadCorrect": 0.5707964601769911,
+            "pairHits": 83,
+            "pairAccuracy": 0.1073738680465718
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 330,
+          "headCorrect": 95,
+          "headAccuracy": 0.2878787878787879,
+          "headCorrectRaces": 95,
+          "secondHitsWhenHeadCorrect": 23,
+          "secondAccuracyWhenHeadCorrect": 0.24210526315789474,
+          "secondTop2HitsWhenHeadCorrect": 53,
+          "secondTop2CoverageWhenHeadCorrect": 0.5578947368421052,
+          "pairHits": 23,
+          "pairAccuracy": 0.0696969696969697
+        },
+        "periodCandidate": {
+          "races": 330,
+          "headCorrect": 95,
+          "headAccuracy": 0.2878787878787879,
+          "headCorrectRaces": 95,
+          "secondHitsWhenHeadCorrect": 24,
+          "secondAccuracyWhenHeadCorrect": 0.25263157894736843,
+          "secondTop2HitsWhenHeadCorrect": 54,
+          "secondTop2CoverageWhenHeadCorrect": 0.5684210526315789,
+          "pairHits": 24,
+          "pairAccuracy": 0.07272727272727272
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.01052631578947369,
+        "secondTop2CoverageDelta": 0.010526315789473717,
+        "pairAccuracyDelta": 0.003030303030303022,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "mikuni",
+      "venueCode": "10",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_3RATE",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.0,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 86,
+            "secondAccuracyWhenHeadCorrect": 0.3104693140794224,
+            "secondTop2HitsWhenHeadCorrect": 148,
+            "secondTop2CoverageWhenHeadCorrect": 0.5342960288808665,
+            "pairHits": 86,
+            "pairAccuracy": 0.11053984575835475
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 85,
+            "secondAccuracyWhenHeadCorrect": 0.30685920577617326,
+            "secondTop2HitsWhenHeadCorrect": 148,
+            "secondTop2CoverageWhenHeadCorrect": 0.5342960288808665,
+            "pairHits": 85,
+            "pairAccuracy": 0.10925449871465295
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 84,
+            "secondAccuracyWhenHeadCorrect": 0.30324909747292417,
+            "secondTop2HitsWhenHeadCorrect": 147,
+            "secondTop2CoverageWhenHeadCorrect": 0.5306859205776173,
+            "pairHits": 84,
+            "pairAccuracy": 0.10796915167095116
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 778,
+            "headCorrect": 277,
+            "headAccuracy": 0.3560411311053985,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 84,
+            "secondAccuracyWhenHeadCorrect": 0.30324909747292417,
+            "secondTop2HitsWhenHeadCorrect": 147,
+            "secondTop2CoverageWhenHeadCorrect": 0.5306859205776173,
+            "pairHits": 84,
+            "pairAccuracy": 0.10796915167095116
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 346,
+          "headCorrect": 106,
+          "headAccuracy": 0.3063583815028902,
+          "headCorrectRaces": 106,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.32075471698113206,
+          "secondTop2HitsWhenHeadCorrect": 63,
+          "secondTop2CoverageWhenHeadCorrect": 0.5943396226415094,
+          "pairHits": 34,
+          "pairAccuracy": 0.09826589595375723
+        },
+        "periodCandidate": {
+          "races": 346,
+          "headCorrect": 106,
+          "headAccuracy": 0.3063583815028902,
+          "headCorrectRaces": 106,
+          "secondHitsWhenHeadCorrect": 37,
+          "secondAccuracyWhenHeadCorrect": 0.3490566037735849,
+          "secondTop2HitsWhenHeadCorrect": 66,
+          "secondTop2CoverageWhenHeadCorrect": 0.6226415094339622,
+          "pairHits": 37,
+          "pairAccuracy": 0.1069364161849711
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.028301886792452824,
+        "secondTop2CoverageDelta": 0.028301886792452824,
+        "pairAccuracyDelta": 0.008670520231213869,
+        "safeJoinCoverageAmongSecondCandidates": 0.9947976878612717,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 9
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "miyajima",
+      "venueCode": "17",
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 68,
+            "secondAccuracyWhenHeadCorrect": 0.2463768115942029,
+            "secondTop2HitsWhenHeadCorrect": 142,
+            "secondTop2CoverageWhenHeadCorrect": 0.5144927536231884,
+            "pairHits": 68,
+            "pairAccuracy": 0.0825242718446602
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 68,
+            "secondAccuracyWhenHeadCorrect": 0.2463768115942029,
+            "secondTop2HitsWhenHeadCorrect": 141,
+            "secondTop2CoverageWhenHeadCorrect": 0.5108695652173914,
+            "pairHits": 68,
+            "pairAccuracy": 0.0825242718446602
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 68,
+            "secondAccuracyWhenHeadCorrect": 0.2463768115942029,
+            "secondTop2HitsWhenHeadCorrect": 140,
+            "secondTop2CoverageWhenHeadCorrect": 0.5072463768115942,
+            "pairHits": 68,
+            "pairAccuracy": 0.0825242718446602
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 824,
+            "headCorrect": 276,
+            "headAccuracy": 0.33495145631067963,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 64,
+            "secondAccuracyWhenHeadCorrect": 0.2318840579710145,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.5036231884057971,
+            "pairHits": 64,
+            "pairAccuracy": 0.07766990291262135
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 370,
+          "headCorrect": 133,
+          "headAccuracy": 0.35945945945945945,
+          "headCorrectRaces": 133,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.2556390977443609,
+          "secondTop2HitsWhenHeadCorrect": 60,
+          "secondTop2CoverageWhenHeadCorrect": 0.45112781954887216,
+          "pairHits": 34,
+          "pairAccuracy": 0.0918918918918919
+        },
+        "periodCandidate": {
+          "races": 370,
+          "headCorrect": 133,
+          "headAccuracy": 0.35945945945945945,
+          "headCorrectRaces": 133,
+          "secondHitsWhenHeadCorrect": 32,
+          "secondAccuracyWhenHeadCorrect": 0.24060150375939848,
+          "secondTop2HitsWhenHeadCorrect": 63,
+          "secondTop2CoverageWhenHeadCorrect": 0.47368421052631576,
+          "pairHits": 32,
+          "pairAccuracy": 0.08648648648648649
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.015037593984962405,
+        "secondTop2CoverageDelta": 0.022556390977443608,
+        "pairAccuracyDelta": -0.005405405405405406,
+        "safeJoinCoverageAmongSecondCandidates": 0.9956756756756757,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 8
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "naruto",
+      "venueCode": "14",
+      "calibrationLastDate": "2026-08-06",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "ST_MED",
+        "stW": 4.0,
+        "fW": 0.03,
+        "lW": 0.08,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "headCorrectRaces": 209,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+            "secondTop2HitsWhenHeadCorrect": 103,
+            "secondTop2CoverageWhenHeadCorrect": 0.49282296650717705,
+            "pairHits": 57,
+            "pairAccuracy": 0.08837209302325581
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "headCorrectRaces": 209,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+            "secondTop2HitsWhenHeadCorrect": 103,
+            "secondTop2CoverageWhenHeadCorrect": 0.49282296650717705,
+            "pairHits": 57,
+            "pairAccuracy": 0.08837209302325581
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "headCorrectRaces": 209,
+            "secondHitsWhenHeadCorrect": 57,
+            "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+            "secondTop2HitsWhenHeadCorrect": 101,
+            "secondTop2CoverageWhenHeadCorrect": 0.48325358851674644,
+            "pairHits": 57,
+            "pairAccuracy": 0.08837209302325581
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 645,
+            "headCorrect": 209,
+            "headAccuracy": 0.324031007751938,
+            "headCorrectRaces": 209,
+            "secondHitsWhenHeadCorrect": 55,
+            "secondAccuracyWhenHeadCorrect": 0.2631578947368421,
+            "secondTop2HitsWhenHeadCorrect": 105,
+            "secondTop2CoverageWhenHeadCorrect": 0.5023923444976076,
+            "pairHits": 55,
+            "pairAccuracy": 0.08527131782945736
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 278,
+          "headCorrect": 96,
+          "headAccuracy": 0.34532374100719426,
+          "headCorrectRaces": 96,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.3229166666666667,
+          "secondTop2HitsWhenHeadCorrect": 53,
+          "secondTop2CoverageWhenHeadCorrect": 0.5520833333333334,
+          "pairHits": 31,
+          "pairAccuracy": 0.11151079136690648
+        },
+        "periodCandidate": {
+          "races": 278,
+          "headCorrect": 96,
+          "headAccuracy": 0.34532374100719426,
+          "headCorrectRaces": 96,
+          "secondHitsWhenHeadCorrect": 28,
+          "secondAccuracyWhenHeadCorrect": 0.2916666666666667,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5729166666666666,
+          "pairHits": 28,
+          "pairAccuracy": 0.10071942446043165
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.03125,
+        "secondTop2CoverageDelta": 0.02083333333333326,
+        "pairAccuracyDelta": -0.010791366906474822,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "omura",
+      "venueCode": "24",
+      "calibrationLastDate": "2026-07-29",
+      "holdoutFirstDate": "2026-07-30",
+      "selectedProfile": {
+        "name": "ST_LIGHT",
+        "stW": 2.0,
+        "fW": 0.02,
+        "lW": 0.05,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 105,
+            "secondAccuracyWhenHeadCorrect": 0.3804347826086957,
+            "secondTop2HitsWhenHeadCorrect": 171,
+            "secondTop2CoverageWhenHeadCorrect": 0.6195652173913043,
+            "pairHits": 105,
+            "pairAccuracy": 0.13043478260869565
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 105,
+            "secondAccuracyWhenHeadCorrect": 0.3804347826086957,
+            "secondTop2HitsWhenHeadCorrect": 171,
+            "secondTop2CoverageWhenHeadCorrect": 0.6195652173913043,
+            "pairHits": 105,
+            "pairAccuracy": 0.13043478260869565
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 105,
+            "secondAccuracyWhenHeadCorrect": 0.3804347826086957,
+            "secondTop2HitsWhenHeadCorrect": 171,
+            "secondTop2CoverageWhenHeadCorrect": 0.6195652173913043,
+            "pairHits": 105,
+            "pairAccuracy": 0.13043478260869565
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 276,
+            "headAccuracy": 0.34285714285714286,
+            "headCorrectRaces": 276,
+            "secondHitsWhenHeadCorrect": 105,
+            "secondAccuracyWhenHeadCorrect": 0.3804347826086957,
+            "secondTop2HitsWhenHeadCorrect": 168,
+            "secondTop2CoverageWhenHeadCorrect": 0.6086956521739131,
+            "pairHits": 105,
+            "pairAccuracy": 0.13043478260869565
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 365,
+          "headCorrect": 117,
+          "headAccuracy": 0.32054794520547947,
+          "headCorrectRaces": 117,
+          "secondHitsWhenHeadCorrect": 38,
+          "secondAccuracyWhenHeadCorrect": 0.3247863247863248,
+          "secondTop2HitsWhenHeadCorrect": 66,
+          "secondTop2CoverageWhenHeadCorrect": 0.5641025641025641,
+          "pairHits": 38,
+          "pairAccuracy": 0.10410958904109589
+        },
+        "periodCandidate": {
+          "races": 365,
+          "headCorrect": 117,
+          "headAccuracy": 0.32054794520547947,
+          "headCorrectRaces": 117,
+          "secondHitsWhenHeadCorrect": 35,
+          "secondAccuracyWhenHeadCorrect": 0.29914529914529914,
+          "secondTop2HitsWhenHeadCorrect": 65,
+          "secondTop2CoverageWhenHeadCorrect": 0.5555555555555556,
+          "pairHits": 35,
+          "pairAccuracy": 0.0958904109589041
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.02564102564102566,
+        "secondTop2CoverageDelta": -0.008547008547008517,
+        "pairAccuracyDelta": -0.008219178082191789,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "shimonoseki",
+      "venueCode": "19",
+      "calibrationLastDate": "2026-08-05",
+      "holdoutFirstDate": "2026-08-06",
+      "selectedProfile": {
+        "name": "ST_ABILITY",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.05,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "headCorrectRaces": 228,
+            "secondHitsWhenHeadCorrect": 71,
+            "secondAccuracyWhenHeadCorrect": 0.31140350877192985,
+            "secondTop2HitsWhenHeadCorrect": 124,
+            "secondTop2CoverageWhenHeadCorrect": 0.543859649122807,
+            "pairHits": 71,
+            "pairAccuracy": 0.10334788937409024
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "headCorrectRaces": 228,
+            "secondHitsWhenHeadCorrect": 69,
+            "secondAccuracyWhenHeadCorrect": 0.3026315789473684,
+            "secondTop2HitsWhenHeadCorrect": 124,
+            "secondTop2CoverageWhenHeadCorrect": 0.543859649122807,
+            "pairHits": 69,
+            "pairAccuracy": 0.10043668122270742
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "headCorrectRaces": 228,
+            "secondHitsWhenHeadCorrect": 68,
+            "secondAccuracyWhenHeadCorrect": 0.2982456140350877,
+            "secondTop2HitsWhenHeadCorrect": 125,
+            "secondTop2CoverageWhenHeadCorrect": 0.5482456140350878,
+            "pairHits": 68,
+            "pairAccuracy": 0.09898107714701601
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 687,
+            "headCorrect": 228,
+            "headAccuracy": 0.3318777292576419,
+            "headCorrectRaces": 228,
+            "secondHitsWhenHeadCorrect": 67,
+            "secondAccuracyWhenHeadCorrect": 0.29385964912280704,
+            "secondTop2HitsWhenHeadCorrect": 126,
+            "secondTop2CoverageWhenHeadCorrect": 0.5526315789473685,
+            "pairHits": 67,
+            "pairAccuracy": 0.0975254730713246
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 312,
+          "headCorrect": 112,
+          "headAccuracy": 0.358974358974359,
+          "headCorrectRaces": 112,
+          "secondHitsWhenHeadCorrect": 35,
+          "secondAccuracyWhenHeadCorrect": 0.3125,
+          "secondTop2HitsWhenHeadCorrect": 58,
+          "secondTop2CoverageWhenHeadCorrect": 0.5178571428571429,
+          "pairHits": 35,
+          "pairAccuracy": 0.11217948717948718
+        },
+        "periodCandidate": {
+          "races": 312,
+          "headCorrect": 112,
+          "headAccuracy": 0.358974358974359,
+          "headCorrectRaces": 112,
+          "secondHitsWhenHeadCorrect": 37,
+          "secondAccuracyWhenHeadCorrect": 0.33035714285714285,
+          "secondTop2HitsWhenHeadCorrect": 59,
+          "secondTop2CoverageWhenHeadCorrect": 0.5267857142857143,
+          "pairHits": 37,
+          "pairAccuracy": 0.11858974358974358
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.01785714285714285,
+        "secondTop2CoverageDelta": 0.008928571428571397,
+        "pairAccuracyDelta": 0.006410256410256401,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "suminoe",
+      "venueCode": "12",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-08-04",
+      "selectedProfile": {
+        "name": "ST_3RATE",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.0,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "headCorrectRaces": 213,
+            "secondHitsWhenHeadCorrect": 58,
+            "secondAccuracyWhenHeadCorrect": 0.27230046948356806,
+            "secondTop2HitsWhenHeadCorrect": 118,
+            "secondTop2CoverageWhenHeadCorrect": 0.5539906103286385,
+            "pairHits": 58,
+            "pairAccuracy": 0.07332490518331226
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "headCorrectRaces": 213,
+            "secondHitsWhenHeadCorrect": 56,
+            "secondAccuracyWhenHeadCorrect": 0.26291079812206575,
+            "secondTop2HitsWhenHeadCorrect": 118,
+            "secondTop2CoverageWhenHeadCorrect": 0.5539906103286385,
+            "pairHits": 56,
+            "pairAccuracy": 0.07079646017699115
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "headCorrectRaces": 213,
+            "secondHitsWhenHeadCorrect": 56,
+            "secondAccuracyWhenHeadCorrect": 0.26291079812206575,
+            "secondTop2HitsWhenHeadCorrect": 116,
+            "secondTop2CoverageWhenHeadCorrect": 0.5446009389671361,
+            "pairHits": 56,
+            "pairAccuracy": 0.07079646017699115
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 791,
+            "headCorrect": 213,
+            "headAccuracy": 0.2692793931731985,
+            "headCorrectRaces": 213,
+            "secondHitsWhenHeadCorrect": 56,
+            "secondAccuracyWhenHeadCorrect": 0.26291079812206575,
+            "secondTop2HitsWhenHeadCorrect": 115,
+            "secondTop2CoverageWhenHeadCorrect": 0.539906103286385,
+            "pairHits": 56,
+            "pairAccuracy": 0.07079646017699115
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 348,
+          "headCorrect": 111,
+          "headAccuracy": 0.31896551724137934,
+          "headCorrectRaces": 111,
+          "secondHitsWhenHeadCorrect": 33,
+          "secondAccuracyWhenHeadCorrect": 0.2972972972972973,
+          "secondTop2HitsWhenHeadCorrect": 68,
+          "secondTop2CoverageWhenHeadCorrect": 0.6126126126126126,
+          "pairHits": 33,
+          "pairAccuracy": 0.09482758620689655
+        },
+        "periodCandidate": {
+          "races": 348,
+          "headCorrect": 111,
+          "headAccuracy": 0.31896551724137934,
+          "headCorrectRaces": 111,
+          "secondHitsWhenHeadCorrect": 35,
+          "secondAccuracyWhenHeadCorrect": 0.3153153153153153,
+          "secondTop2HitsWhenHeadCorrect": 67,
+          "secondTop2CoverageWhenHeadCorrect": 0.6036036036036037,
+          "pairHits": 35,
+          "pairAccuracy": 0.10057471264367816
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": 0.018018018018018,
+        "secondTop2CoverageDelta": -0.009009009009008917,
+        "pairAccuracyDelta": 0.005747126436781616,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tamagawa",
+      "venueCode": "05",
+      "calibrationLastDate": "2026-08-02",
+      "holdoutFirstDate": "2026-08-03",
+      "selectedProfile": {
+        "name": "BALANCED",
+        "stW": 4.5,
+        "fW": 0.05,
+        "lW": 0.12,
+        "abilityW": 0.04,
+        "threeW": 0.35
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "headCorrectRaces": 220,
+            "secondHitsWhenHeadCorrect": 71,
+            "secondAccuracyWhenHeadCorrect": 0.32272727272727275,
+            "secondTop2HitsWhenHeadCorrect": 123,
+            "secondTop2CoverageWhenHeadCorrect": 0.5590909090909091,
+            "pairHits": 71,
+            "pairAccuracy": 0.08819875776397515
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "headCorrectRaces": 220,
+            "secondHitsWhenHeadCorrect": 70,
+            "secondAccuracyWhenHeadCorrect": 0.3181818181818182,
+            "secondTop2HitsWhenHeadCorrect": 121,
+            "secondTop2CoverageWhenHeadCorrect": 0.55,
+            "pairHits": 70,
+            "pairAccuracy": 0.08695652173913043
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "headCorrectRaces": 220,
+            "secondHitsWhenHeadCorrect": 69,
+            "secondAccuracyWhenHeadCorrect": 0.31363636363636366,
+            "secondTop2HitsWhenHeadCorrect": 124,
+            "secondTop2CoverageWhenHeadCorrect": 0.5636363636363636,
+            "pairHits": 69,
+            "pairAccuracy": 0.08571428571428572
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 805,
+            "headCorrect": 220,
+            "headAccuracy": 0.2732919254658385,
+            "headCorrectRaces": 220,
+            "secondHitsWhenHeadCorrect": 69,
+            "secondAccuracyWhenHeadCorrect": 0.31363636363636366,
+            "secondTop2HitsWhenHeadCorrect": 123,
+            "secondTop2CoverageWhenHeadCorrect": 0.5590909090909091,
+            "pairHits": 69,
+            "pairAccuracy": 0.08571428571428572
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 360,
+          "headCorrect": 110,
+          "headAccuracy": 0.3055555555555556,
+          "headCorrectRaces": 110,
+          "secondHitsWhenHeadCorrect": 33,
+          "secondAccuracyWhenHeadCorrect": 0.3,
+          "secondTop2HitsWhenHeadCorrect": 56,
+          "secondTop2CoverageWhenHeadCorrect": 0.509090909090909,
+          "pairHits": 33,
+          "pairAccuracy": 0.09166666666666666
+        },
+        "periodCandidate": {
+          "races": 360,
+          "headCorrect": 110,
+          "headAccuracy": 0.3055555555555556,
+          "headCorrectRaces": 110,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+          "secondTop2HitsWhenHeadCorrect": 55,
+          "secondTop2CoverageWhenHeadCorrect": 0.5,
+          "pairHits": 30,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.027272727272727282,
+        "secondTop2CoverageDelta": -0.009090909090909038,
+        "pairAccuracyDelta": -0.008333333333333331,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "toda",
+      "venueCode": "02",
+      "calibrationLastDate": "2026-07-25",
+      "holdoutFirstDate": "2026-07-26",
+      "selectedProfile": {
+        "name": "ST_FL",
+        "stW": 4.0,
+        "fW": 0.06,
+        "lW": 0.14,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "headCorrectRaces": 215,
+            "secondHitsWhenHeadCorrect": 66,
+            "secondAccuracyWhenHeadCorrect": 0.30697674418604654,
+            "secondTop2HitsWhenHeadCorrect": 115,
+            "secondTop2CoverageWhenHeadCorrect": 0.5348837209302325,
+            "pairHits": 66,
+            "pairAccuracy": 0.09510086455331412
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "headCorrectRaces": 215,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.3023255813953488,
+            "secondTop2HitsWhenHeadCorrect": 114,
+            "secondTop2CoverageWhenHeadCorrect": 0.5302325581395348,
+            "pairHits": 65,
+            "pairAccuracy": 0.0936599423631124
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "headCorrectRaces": 215,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.3023255813953488,
+            "secondTop2HitsWhenHeadCorrect": 112,
+            "secondTop2CoverageWhenHeadCorrect": 0.5209302325581395,
+            "pairHits": 65,
+            "pairAccuracy": 0.0936599423631124
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 694,
+            "headCorrect": 215,
+            "headAccuracy": 0.30979827089337175,
+            "headCorrectRaces": 215,
+            "secondHitsWhenHeadCorrect": 64,
+            "secondAccuracyWhenHeadCorrect": 0.29767441860465116,
+            "secondTop2HitsWhenHeadCorrect": 113,
+            "secondTop2CoverageWhenHeadCorrect": 0.5255813953488372,
+            "pairHits": 64,
+            "pairAccuracy": 0.09221902017291066
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 295,
+          "headCorrect": 110,
+          "headAccuracy": 0.3728813559322034,
+          "headCorrectRaces": 110,
+          "secondHitsWhenHeadCorrect": 30,
+          "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+          "secondTop2HitsWhenHeadCorrect": 56,
+          "secondTop2CoverageWhenHeadCorrect": 0.509090909090909,
+          "pairHits": 30,
+          "pairAccuracy": 0.1016949152542373
+        },
+        "periodCandidate": {
+          "races": 295,
+          "headCorrect": 110,
+          "headAccuracy": 0.3728813559322034,
+          "headCorrectRaces": 110,
+          "secondHitsWhenHeadCorrect": 29,
+          "secondAccuracyWhenHeadCorrect": 0.2636363636363636,
+          "secondTop2HitsWhenHeadCorrect": 61,
+          "secondTop2CoverageWhenHeadCorrect": 0.5545454545454546,
+          "pairHits": 29,
+          "pairAccuracy": 0.09830508474576272
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.009090909090909094,
+        "secondTop2CoverageDelta": 0.045454545454545525,
+        "pairAccuracyDelta": -0.0033898305084745783,
+        "safeJoinCoverageAmongSecondCandidates": 0.9966101694915255,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 5
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokoname",
+      "venueCode": "08",
+      "calibrationLastDate": "2026-07-23",
+      "holdoutFirstDate": "2026-07-24",
+      "selectedProfile": {
+        "name": "ST_ABILITY",
+        "stW": 4.0,
+        "fW": 0.04,
+        "lW": 0.1,
+        "abilityW": 0.05,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "headCorrectRaces": 312,
+            "secondHitsWhenHeadCorrect": 116,
+            "secondAccuracyWhenHeadCorrect": 0.3717948717948718,
+            "secondTop2HitsWhenHeadCorrect": 190,
+            "secondTop2CoverageWhenHeadCorrect": 0.6089743589743589,
+            "pairHits": 116,
+            "pairAccuracy": 0.1280353200883002
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_LIGHT",
+            "stW": 2.0,
+            "fW": 0.02,
+            "lW": 0.05,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "headCorrectRaces": 312,
+            "secondHitsWhenHeadCorrect": 115,
+            "secondAccuracyWhenHeadCorrect": 0.3685897435897436,
+            "secondTop2HitsWhenHeadCorrect": 189,
+            "secondTop2CoverageWhenHeadCorrect": 0.6057692307692307,
+            "pairHits": 115,
+            "pairAccuracy": 0.12693156732891833
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "headCorrectRaces": 312,
+            "secondHitsWhenHeadCorrect": 114,
+            "secondAccuracyWhenHeadCorrect": 0.36538461538461536,
+            "secondTop2HitsWhenHeadCorrect": 190,
+            "secondTop2CoverageWhenHeadCorrect": 0.6089743589743589,
+            "pairHits": 114,
+            "pairAccuracy": 0.12582781456953643
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 906,
+            "headCorrect": 312,
+            "headAccuracy": 0.3443708609271523,
+            "headCorrectRaces": 312,
+            "secondHitsWhenHeadCorrect": 114,
+            "secondAccuracyWhenHeadCorrect": 0.36538461538461536,
+            "secondTop2HitsWhenHeadCorrect": 189,
+            "secondTop2CoverageWhenHeadCorrect": 0.6057692307692307,
+            "pairHits": 114,
+            "pairAccuracy": 0.12582781456953643
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 396,
+          "headCorrect": 132,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 132,
+          "secondHitsWhenHeadCorrect": 38,
+          "secondAccuracyWhenHeadCorrect": 0.2878787878787879,
+          "secondTop2HitsWhenHeadCorrect": 77,
+          "secondTop2CoverageWhenHeadCorrect": 0.5833333333333334,
+          "pairHits": 38,
+          "pairAccuracy": 0.09595959595959595
+        },
+        "periodCandidate": {
+          "races": 396,
+          "headCorrect": 132,
+          "headAccuracy": 0.3333333333333333,
+          "headCorrectRaces": 132,
+          "secondHitsWhenHeadCorrect": 36,
+          "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+          "secondTop2HitsWhenHeadCorrect": 75,
+          "secondTop2CoverageWhenHeadCorrect": 0.5681818181818182,
+          "pairHits": 36,
+          "pairAccuracy": 0.09090909090909091
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.015151515151515194,
+        "secondTop2CoverageDelta": -0.015151515151515138,
+        "pairAccuracyDelta": -0.005050505050505041,
+        "safeJoinCoverageAmongSecondCandidates": 0.9994949494949495,
+        "joinMiss": {
+          "NO_REGISTRATION_MATCH": 1
+        }
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tokuyama",
+      "venueCode": "18",
+      "calibrationLastDate": "2026-07-30",
+      "holdoutFirstDate": "2026-07-31",
+      "selectedProfile": {
+        "name": "ST_FL",
+        "stW": 4.0,
+        "fW": 0.06,
+        "lW": 0.14,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "headCorrectRaces": 294,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.22108843537414966,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.47278911564625853,
+            "pairHits": 65,
+            "pairAccuracy": 0.07775119617224881
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "headCorrectRaces": 294,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.22108843537414966,
+            "secondTop2HitsWhenHeadCorrect": 136,
+            "secondTop2CoverageWhenHeadCorrect": 0.46258503401360546,
+            "pairHits": 65,
+            "pairAccuracy": 0.07775119617224881
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "headCorrectRaces": 294,
+            "secondHitsWhenHeadCorrect": 65,
+            "secondAccuracyWhenHeadCorrect": 0.22108843537414966,
+            "secondTop2HitsWhenHeadCorrect": 135,
+            "secondTop2CoverageWhenHeadCorrect": 0.45918367346938777,
+            "pairHits": 65,
+            "pairAccuracy": 0.07775119617224881
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 836,
+            "headCorrect": 294,
+            "headAccuracy": 0.35167464114832536,
+            "headCorrectRaces": 294,
+            "secondHitsWhenHeadCorrect": 64,
+            "secondAccuracyWhenHeadCorrect": 0.21768707482993196,
+            "secondTop2HitsWhenHeadCorrect": 139,
+            "secondTop2CoverageWhenHeadCorrect": 0.47278911564625853,
+            "pairHits": 64,
+            "pairAccuracy": 0.07655502392344497
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 372,
+          "headCorrect": 112,
+          "headAccuracy": 0.3010752688172043,
+          "headCorrectRaces": 112,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.2767857142857143,
+          "secondTop2HitsWhenHeadCorrect": 52,
+          "secondTop2CoverageWhenHeadCorrect": 0.4642857142857143,
+          "pairHits": 31,
+          "pairAccuracy": 0.08333333333333333
+        },
+        "periodCandidate": {
+          "races": 372,
+          "headCorrect": 112,
+          "headAccuracy": 0.3010752688172043,
+          "headCorrectRaces": 112,
+          "secondHitsWhenHeadCorrect": 27,
+          "secondAccuracyWhenHeadCorrect": 0.24107142857142858,
+          "secondTop2HitsWhenHeadCorrect": 50,
+          "secondTop2CoverageWhenHeadCorrect": 0.44642857142857145,
+          "pairHits": 27,
+          "pairAccuracy": 0.07258064516129033
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.035714285714285726,
+        "secondTop2CoverageDelta": -0.01785714285714285,
+        "pairAccuracyDelta": -0.010752688172043001,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "tsu",
+      "venueCode": "09",
+      "calibrationLastDate": "2026-07-27",
+      "holdoutFirstDate": "2026-07-28",
+      "selectedProfile": {
+        "name": "BALANCED_STRONG",
+        "stW": 6.0,
+        "fW": 0.07,
+        "lW": 0.16,
+        "abilityW": 0.06,
+        "threeW": 0.5
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "BALANCED_STRONG",
+            "stW": 6.0,
+            "fW": 0.07,
+            "lW": 0.16,
+            "abilityW": 0.06,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 91,
+            "secondAccuracyWhenHeadCorrect": 0.29449838187702265,
+            "secondTop2HitsWhenHeadCorrect": 166,
+            "secondTop2CoverageWhenHeadCorrect": 0.5372168284789643,
+            "pairHits": 91,
+            "pairAccuracy": 0.0988056460369164
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.2912621359223301,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.540453074433657,
+            "pairHits": 90,
+            "pairAccuracy": 0.09771986970684039
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.2912621359223301,
+            "secondTop2HitsWhenHeadCorrect": 167,
+            "secondTop2CoverageWhenHeadCorrect": 0.540453074433657,
+            "pairHits": 90,
+            "pairAccuracy": 0.09771986970684039
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_3RATE",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.0,
+            "threeW": 0.5
+          },
+          "metrics": {
+            "races": 921,
+            "headCorrect": 309,
+            "headAccuracy": 0.3355048859934853,
+            "headCorrectRaces": 309,
+            "secondHitsWhenHeadCorrect": 90,
+            "secondAccuracyWhenHeadCorrect": 0.2912621359223301,
+            "secondTop2HitsWhenHeadCorrect": 166,
+            "secondTop2CoverageWhenHeadCorrect": 0.5372168284789643,
+            "pairHits": 90,
+            "pairAccuracy": 0.09771986970684039
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 397,
+          "headCorrect": 132,
+          "headAccuracy": 0.33249370277078083,
+          "headCorrectRaces": 132,
+          "secondHitsWhenHeadCorrect": 36,
+          "secondAccuracyWhenHeadCorrect": 0.2727272727272727,
+          "secondTop2HitsWhenHeadCorrect": 64,
+          "secondTop2CoverageWhenHeadCorrect": 0.48484848484848486,
+          "pairHits": 36,
+          "pairAccuracy": 0.0906801007556675
+        },
+        "periodCandidate": {
+          "races": 397,
+          "headCorrect": 132,
+          "headAccuracy": 0.33249370277078083,
+          "headCorrectRaces": 132,
+          "secondHitsWhenHeadCorrect": 33,
+          "secondAccuracyWhenHeadCorrect": 0.25,
+          "secondTop2HitsWhenHeadCorrect": 66,
+          "secondTop2CoverageWhenHeadCorrect": 0.5,
+          "pairHits": 33,
+          "pairAccuracy": 0.08312342569269521
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.022727272727272707,
+        "secondTop2CoverageDelta": 0.015151515151515138,
+        "pairAccuracyDelta": -0.007556675062972293,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    },
+    {
+      "slug": "wakamatsu",
+      "venueCode": "20",
+      "calibrationLastDate": "2026-08-03",
+      "holdoutFirstDate": "2026-08-07",
+      "selectedProfile": {
+        "name": "ST_MED",
+        "stW": 4.0,
+        "fW": 0.03,
+        "lW": 0.08,
+        "abilityW": 0.0,
+        "threeW": 0.0
+      },
+      "calibrationTopProfiles": [
+        {
+          "profile": {
+            "name": "ST_MED",
+            "stW": 4.0,
+            "fW": 0.03,
+            "lW": 0.08,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 108,
+            "secondAccuracyWhenHeadCorrect": 0.3898916967509025,
+            "secondTop2HitsWhenHeadCorrect": 179,
+            "secondTop2CoverageWhenHeadCorrect": 0.6462093862815884,
+            "pairHits": 108,
+            "pairAccuracy": 0.14210526315789473
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_ABILITY",
+            "stW": 4.0,
+            "fW": 0.04,
+            "lW": 0.1,
+            "abilityW": 0.05,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 108,
+            "secondAccuracyWhenHeadCorrect": 0.3898916967509025,
+            "secondTop2HitsWhenHeadCorrect": 179,
+            "secondTop2CoverageWhenHeadCorrect": 0.6462093862815884,
+            "pairHits": 108,
+            "pairAccuracy": 0.14210526315789473
+          }
+        },
+        {
+          "profile": {
+            "name": "BALANCED",
+            "stW": 4.5,
+            "fW": 0.05,
+            "lW": 0.12,
+            "abilityW": 0.04,
+            "threeW": 0.35
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 108,
+            "secondAccuracyWhenHeadCorrect": 0.3898916967509025,
+            "secondTop2HitsWhenHeadCorrect": 178,
+            "secondTop2CoverageWhenHeadCorrect": 0.6425992779783394,
+            "pairHits": 108,
+            "pairAccuracy": 0.14210526315789473
+          }
+        },
+        {
+          "profile": {
+            "name": "ST_FL",
+            "stW": 4.0,
+            "fW": 0.06,
+            "lW": 0.14,
+            "abilityW": 0.0,
+            "threeW": 0.0
+          },
+          "metrics": {
+            "races": 760,
+            "headCorrect": 277,
+            "headAccuracy": 0.36447368421052634,
+            "headCorrectRaces": 277,
+            "secondHitsWhenHeadCorrect": 107,
+            "secondAccuracyWhenHeadCorrect": 0.3862815884476534,
+            "secondTop2HitsWhenHeadCorrect": 178,
+            "secondTop2CoverageWhenHeadCorrect": 0.6425992779783394,
+            "pairHits": 107,
+            "pairAccuracy": 0.14078947368421052
+          }
+        }
+      ],
+      "holdout": {
+        "baseline": {
+          "races": 322,
+          "headCorrect": 116,
+          "headAccuracy": 0.36024844720496896,
+          "headCorrectRaces": 116,
+          "secondHitsWhenHeadCorrect": 34,
+          "secondAccuracyWhenHeadCorrect": 0.29310344827586204,
+          "secondTop2HitsWhenHeadCorrect": 73,
+          "secondTop2CoverageWhenHeadCorrect": 0.6293103448275862,
+          "pairHits": 34,
+          "pairAccuracy": 0.10559006211180125
+        },
+        "periodCandidate": {
+          "races": 322,
+          "headCorrect": 116,
+          "headAccuracy": 0.36024844720496896,
+          "headCorrectRaces": 116,
+          "secondHitsWhenHeadCorrect": 31,
+          "secondAccuracyWhenHeadCorrect": 0.2672413793103448,
+          "secondTop2HitsWhenHeadCorrect": 72,
+          "secondTop2CoverageWhenHeadCorrect": 0.6206896551724138,
+          "pairHits": 31,
+          "pairAccuracy": 0.09627329192546584
+        },
+        "headAccuracyDelta": 0.0,
+        "secondAccuracyDelta": -0.025862068965517238,
+        "secondTop2CoverageDelta": -0.008620689655172376,
+        "pairAccuracyDelta": -0.009316770186335407,
+        "safeJoinCoverageAmongSecondCandidates": 1.0,
+        "joinMiss": {}
+      },
+      "firstPredictionFrozen": true,
+      "productionChanged": false,
+      "promotionEligible": false
+    }
+  ]
+}

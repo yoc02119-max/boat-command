@@ -1,0 +1,71 @@
+name: Racer period second-place audit v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/racer-period-second-place-audit-v1.yml'
+      - 'scripts/racer-period-second-place-audit-v1.py'
+      - 'rich-history-24/**'
+      - 'racer-period-24/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run second-place-only holdout audit
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/racer-period-second-place-audit-v1.py
+          python3 scripts/racer-period-second-place-audit-v1.py
+          python3 - <<'PY'
+          import json
+          x=json.load(open('research/racer-period-second-place-audit-v1.json',encoding='utf-8'))
+          assert x['schema']=='boat-command-racer-period-second-place-audit-v1'
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['hardLockChanged'] is False
+          assert x['promotionEligible'] is False
+          assert x['featureBoundary']['firstPredictionFrozen'] is True
+          assert x['featureBoundary']['courseSpecificStatsUsed'] is False
+          assert x['featureBoundary']['resultsUsedForFeatureSelection'] is False
+          assert x['summary']['venues']==24
+          assert x['summary']['holdoutRaces']>5000
+          assert abs(x['summary']['headAccuracyDelta']) < 1e-12
+          print('SECOND_PLACE_AUDIT_BOUNDARY_PASS',x['summary'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: racer-period-second-place-audit-v1
+          path: research/racer-period-second-place-audit-v1.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Save research report to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          cp research/racer-period-second-place-audit-v1.json /tmp/racer-period-second-place-audit-v1.json
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p research
+          cp /tmp/racer-period-second-place-audit-v1.json research/
+          git config user.name 'boat-command-second-place-research'
+          git config user.email 'boat-command-second-place-research@users.noreply.github.com'
+          git add research/racer-period-second-place-audit-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'analysis(research): store second-place period audit [skip ci]'
+          git push origin "HEAD:$HEAD_REF"
