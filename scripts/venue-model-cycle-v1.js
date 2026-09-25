@@ -254,10 +254,14 @@ function standardState(e,config,readiness,prev){
   const previousEvidenceThrough=prev?.cycleId===cycleId&&dateOk(prev?.mainline?.evidenceThroughDate)
     ? prev.mainline.evidenceThroughDate
     : null;
-  const reviewSnapshotFrozen=previousEvidenceThrough&&['REVIEW_READY','APPROVED_PENDING_DEPLOYMENT','REVIEW_BLOCKED'].includes(previousPhase);
+  // Keep a candidate review immutable, but do not freeze a day-30 KEEP_CURRENT
+  // checkpoint: a newly validated candidate must still be eligible on day 31+.
+  const frozenCandidateReview=previousPhase==='REVIEW_READY'&&prev?.recommendation?.state==='CANDIDATE_ELIGIBLE';
+  const reviewSnapshotFrozen=previousEvidenceThrough&&
+    (frozenCandidateReview||['APPROVED_PENDING_DEPLOYMENT','REVIEW_BLOCKED'].includes(previousPhase));
   const evidenceThrough=reviewSnapshotFrozen
     ? previousEvidenceThrough
-    : previousPhase==='EVIDENCE_EXTENSION'
+    : previousPhase==='EVIDENCE_EXTENSION'||(previousPhase==='REVIEW_READY'&&!frozenCandidateReview)
       ? EFFECTIVE_DATE
       : (EFFECTIVE_DATE<end?EFFECTIVE_DATE:end);
   const evidence=discoverEvidence(e.slug,start,evidenceThrough);
@@ -266,6 +270,7 @@ function standardState(e,config,readiness,prev){
   // Early review is stricter than legacy day-30 config tolerances: no metric
   // regression and explicit registered historical evidence are mandatory.
   const earlySelected=candidates.find(c=>c.gates.eligible&&c.gates.historicalEvidencePassed&&
+    c.pairedRaces>=Math.max(DEFAULT_MIN_RACES,c.gates.minimumPairedRaces||0)&&
     c.deltas.hitRateDelta>=0&&c.deltas.roiDelta>=0)||null;
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
