@@ -9,18 +9,18 @@
   "evaluationRule": "Only immutable >=3min PRE-RACE shadow + verified POST result",
   "summary": {
     "snapshots": 144,
-    "evaluated": 73,
-    "firstCorrect": 18,
+    "evaluated": 76,
+    "firstCorrect": 19,
     "baselineSecondHits": 6,
-    "candidateSecondHits": 10,
-    "baselineTop2Hits": 12,
-    "candidateTop2Hits": 12,
-    "changedEvaluated": 33,
-    "baselineSecondAccuracyWhenFirstCorrect": 0.3333333333333333,
-    "candidateSecondAccuracyWhenFirstCorrect": 0.5555555555555556,
-    "secondAccuracyDelta": 0.2222222222222222,
-    "baselineTop2CoverageWhenFirstCorrect": 0.6666666666666666,
-    "candidateTop2CoverageWhenFirstCorrect": 0.6666666666666666,
+    "candidateSecondHits": 11,
+    "baselineTop2Hits": 13,
+    "candidateTop2Hits": 13,
+    "changedEvaluated": 35,
+    "baselineSecondAccuracyWhenFirstCorrect": 0.3157894736842105,
+    "candidateSecondAccuracyWhenFirstCorrect": 0.5789473684210527,
+    "secondAccuracyDelta": 0.2631578947368421,
+    "baselineTop2CoverageWhenFirstCorrect": 0.6842105263157895,
+    "candidateTop2CoverageWhenFirstCorrect": 0.6842105263157895,
     "top2CoverageDelta": 0.0
   },
   "venues": [
@@ -61,19 +61,19 @@
     {
       "slug": "biwako",
       "snapshots": 12,
-      "evaluated": 7,
-      "firstCorrect": 2,
+      "evaluated": 8,
+      "firstCorrect": 3,
       "baselineSecondHits": 0,
-      "candidateSecondHits": 0,
-      "baselineTop2Hits": 1,
-      "candidateTop2Hits": 0,
-      "changedEvaluated": 4,
+      "candidateSecondHits": 1,
+      "baselineTop2Hits": 2,
+      "candidateTop2Hits": 1,
+      "changedEvaluated": 5,
       "baselineSecondAccuracyWhenFirstCorrect": 0.0,
-      "candidateSecondAccuracyWhenFirstCorrect": 0.0,
-      "secondAccuracyDelta": 0.0,
-      "baselineTop2CoverageWhenFirstCorrect": 0.5,
-      "candidateTop2CoverageWhenFirstCorrect": 0.0,
-      "top2CoverageDelta": -0.5
+      "candidateSecondAccuracyWhenFirstCorrect": 0.3333333333333333,
+      "secondAccuracyDelta": 0.3333333333333333,
+      "baselineTop2CoverageWhenFirstCorrect": 0.6666666666666666,
+      "candidateTop2CoverageWhenFirstCorrect": 0.3333333333333333,
+      "top2CoverageDelta": -0.3333333333333333
     },
     {
       "slug": "fukuoka",
@@ -163,7 +163,7 @@
     {
       "slug": "tokoname",
       "snapshots": 12,
-      "evaluated": 7,
+      "evaluated": 8,
       "firstCorrect": 2,
       "baselineSecondHits": 2,
       "candidateSecondHits": 2,
@@ -197,13 +197,13 @@
     {
       "slug": "tsu",
       "snapshots": 12,
-      "evaluated": 7,
+      "evaluated": 8,
       "firstCorrect": 1,
       "baselineSecondHits": 1,
       "candidateSecondHits": 1,
       "baselineTop2Hits": 1,
       "candidateTop2Hits": 1,
-      "changedEvaluated": 4,
+      "changedEvaluated": 5,
       "baselineSecondAccuracyWhenFirstCorrect": 1.0,
       "candidateSecondAccuracyWhenFirstCorrect": 1.0,
       "secondAccuracyDelta": 0.0,
@@ -515,6 +515,17 @@
       "firstCorrect": false,
       "baselinePair": "3-4",
       "candidatePair": "3-4"
+    },
+    {
+      "slug": "biwako",
+      "date": "2026-09-25",
+      "race": 8,
+      "gate": true,
+      "changed": true,
+      "actual": "2-1-3",
+      "firstCorrect": true,
+      "baselinePair": "2-3",
+      "candidatePair": "2-1"
     },
     {
       "slug": "fukuoka",
@@ -836,6 +847,17 @@
       "candidatePair": "5-2"
     },
     {
+      "slug": "tokoname",
+      "date": "2026-09-25",
+      "race": 8,
+      "gate": false,
+      "changed": false,
+      "actual": "1-4-2",
+      "firstCorrect": false,
+      "baselinePair": "2-4",
+      "candidatePair": "2-4"
+    },
+    {
       "slug": "tokuyama",
       "date": "2026-09-25",
       "race": 1,
@@ -1032,6 +1054,17 @@
       "firstCorrect": false,
       "baselinePair": "5-3",
       "candidatePair": "5-3"
+    },
+    {
+      "slug": "tsu",
+      "date": "2026-09-25",
+      "race": 8,
+      "gate": true,
+      "changed": true,
+      "actual": "2-6-1",
+      "firstCorrect": false,
+      "baselinePair": "6-2",
+      "candidatePair": "6-2"
     }
   ]
 }
