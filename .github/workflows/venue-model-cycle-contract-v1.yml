@@ -116,6 +116,10 @@ jobs:
           assert fleet['venues']==24
           policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
           assert policy['cycleDays']==30
+          assert policy['reviewTiming']['earlyReviewEnabled'] is True
+          assert policy['reviewTiming']['minimumCalendarDaysForEligibleCandidate']==0
+          assert policy['reviewTiming']['earlyRequiresNoHitRateRegression'] is True
+          assert policy['reviewTiming']['earlyRequiresNoRoiRegression'] is True
           assert policy['scope']=='24_INDEPENDENT_VENUE_CYCLES'
           assert policy['invariants']['crossVenueWeightReuse'] is False
           assert policy['invariants']['autoPromotion'] is False
@@ -155,10 +159,10 @@ jobs:
           assert "return standardState(e,config,readiness,prev);" in s
           assert 'GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349' in s
           assert 'id="venueModelCycle"' in v
-          assert 'venue-model-cycle-v1.js?v=2' in v
+          assert 'venue-model-cycle-v1.js?v=3' in v
           assert 'ensureVenueModelCycle()' in v
           assert 'data-venue-model-cycle="gamagori"' in i
-          assert 'venue-model-cycle-v1.js?v=3527' in i
+          assert 'venue-model-cycle-v1.js?v=3528' in i
           assert 'ほか23場の重みや成績は使用しません' in ui
           assert 'data-cycle-action="approve"' in ui
           assert 'data-cycle-action="reject"' in ui
@@ -166,6 +170,6 @@ jobs:
           assert 'data-cycle-action="activate"' in ui
           assert '自動昇格はしません。承認後も配置確認が必要です。' in ui
           assert 'BOAT COMMANDにはGitHub秘密鍵を保存しない' in ui
-          assert '30日評価完了後にここへ承認操作を表示します。' in ui
+          assert '必要な履歴・FORWARD検証を満たせば、30日を待たずにここへ承認操作を表示します。' in ui
           print('VENUE_MODEL_CYCLE_UI_SAFETY_PASS')
           PY
