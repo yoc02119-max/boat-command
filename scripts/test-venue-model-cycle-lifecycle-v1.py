@@ -687,4 +687,33 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-early-review-") as t
     assert approved["mainline"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
     assert_others_same(repo, others)
 
+# Day 30 with no candidate is a checkpoint, NOT a frozen research cutoff.
+# A valid, PRE-frozen candidate registered later must still reach review.
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-post30-evidence-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
+    mutate_kiryu_to_live(repo)
+    # Isolate the synthetic timeline from newly collected real-world dates.
+    shutil.rmtree(repo / "live/kiryu", ignore_errors=True)
+    install_synthetic_forward(repo)
+    run(repo, "--action", "refresh", "--date", "2026-10-21")
+    day30 = state(repo)
+    assert day30["phase"] == "REVIEW_READY"
+    assert day30["recommendation"]["state"] == "KEEP_CURRENT"
+    run(repo, "--action", "refresh", "--date", "2026-10-22")
+    continued = state(repo)
+    assert continued["mainline"]["evidenceThroughDate"] == "2026-10-22"
+    assert continued["recommendation"]["state"] == "KEEP_CURRENT"
+    install_candidate_registry(repo)
+    before_approval = snapshot_others(repo)
+    run(repo, "--action", "refresh", "--date", "2026-10-23")
+    ready = state(repo)
+    assert ready["phase"] == "REVIEW_READY"
+    assert ready["recommendation"]["state"] == "CANDIDATE_ELIGIBLE"
+    assert ready["recommendation"]["candidateId"] == CANDIDATE_ID
+    assert ready["mainline"]["evidenceThroughDate"] == "2026-10-23"
+    assert_others_same(repo, before_approval)
+    run(repo, "--action", "refresh", "--date", "2026-10-24")
+    assert state(repo)["mainline"]["evidenceThroughDate"] == "2026-10-23"
+
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
