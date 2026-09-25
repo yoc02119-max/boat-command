@@ -124,7 +124,7 @@ jobs:
           assert gamagori['mainline']['modelVersion']=='GAMAGORI-MAIN-MODEL-V0.32.0'
           assert gamagori['mainline']['integrity']=='OK', gamagori['mainline']
           assert gamagori['mainline']['evaluation']['races']>=12, gamagori['mainline']['evaluation']  # historical fixtures may acquire additional valid rows
-          assert gamagori['source']['evaluationAdapter']=='GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349'
+          assert gamagori['source']['evaluationAdapter']==json.load(open('venues/gamagori/config-v1.json',encoding='utf-8'))['operationPolicy']['evaluationAdapter']
           fleet=json.load(open('/tmp/model-cycle-contract/venue-model-cycle-fleet-v1.json',encoding='utf-8'))
           assert fleet['venues']==24
           policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
