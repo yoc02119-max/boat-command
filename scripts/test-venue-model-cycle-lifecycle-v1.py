@@ -404,13 +404,14 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-extension-") as td:
     assert ready["mainline"]["evaluation"]["races"] == 60
     assert ready["mainline"]["evidenceThroughDate"] == "2026-10-22"
 
-    # Once review-ready, freeze the evidence snapshot so later dates do not
-    # move the review target underneath the human decision.
+    # A day-30 KEEP_CURRENT checkpoint must remain open to later evidence.
+    # Only an eligible candidate's pending review freezes its comparison.
     run(repo, "--action", "refresh", "--date", "2026-10-23")
-    frozen = state(repo)
-    assert frozen["phase"] == "REVIEW_READY", frozen
-    assert frozen["mainline"]["evaluation"]["races"] == 60
-    assert frozen["mainline"]["evidenceThroughDate"] == "2026-10-22"
+    continued = state(repo)
+    assert continued["phase"] == "REVIEW_READY", continued
+    assert continued["recommendation"]["state"] == "KEEP_CURRENT"
+    assert continued["mainline"]["evaluation"]["races"] == 60
+    assert continued["mainline"]["evidenceThroughDate"] == "2026-10-23"
 
 with tempfile.TemporaryDirectory(prefix="boat-command-cycle-continue-") as td:
     repo = pathlib.Path(td) / "repo"
