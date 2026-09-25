@@ -280,11 +280,15 @@ function standardState(e,config,readiness,prev){
   const drift=lockedVersion
     ? expectedVersionMissing||(firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==lockedVersion))
     : observedVersionSet.length>1;
+  // A registered, historically validated candidate may request review as soon as
+  // sufficient same-venue MAIN and paired FORWARD evidence exists. The 30-day
+  // checkpoint remains a fallback for no-candidate/insufficient-evidence review.
+  const earlyCandidateReady=mainEnough&&!!selected;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
   if(drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:[expectedVersionMissing?'MAINLINE_EXPECTED_VERSION_NOT_OBSERVED':'MAINLINE_MODEL_DRIFT_DETECTED']}}
+  else if(earlyCandidateReady){phase='REVIEW_READY';rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
-  else if(elapsed>=CYCLE_DAYS&&selected){rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS){rec={state:'KEEP_CURRENT',candidateId:null,reasons:['NO_REGISTERED_CANDIDATE_PASSED_ALL_GATES']}}
   const review=prev?.cycleId===cycleId?(prev.review||reviewTemplate()):reviewTemplate();
   if(review.humanDecision==='APPROVE_CANDIDATE')phase='APPROVED_PENDING_DEPLOYMENT';
@@ -294,6 +298,8 @@ function standardState(e,config,readiness,prev){
     isolation:baseIsolation(e),
     mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:observedVersionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
     candidates,recommendation:rec,review,
+    reviewTrigger:previousPhase==='REVIEW_READY'&&prev?.reviewTrigger?prev.reviewTrigger:
+      (earlyCandidateReady&&elapsed<CYCLE_DAYS?'EARLY_EVIDENCE_READY':elapsed>=CYCLE_DAYS?'DAY30_CHECKPOINT':null),
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
     source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null,evaluationAdapter:config?.operationPolicy?.evaluationAdapter||'RESEARCH_EVALUATION_V1'},
     retention:{sourceDataPreserved:true,cycleHistoryPreserved:true}
@@ -417,7 +423,7 @@ function main(){
     results.push(state);
     if(!DRY_RUN)writeJson(cycleOutputPath(e.slug),state);
   }
-  const summary={schema:'boat-command-model-cycle-fleet-v1',version:VERSION,generatedAt:isoNow(),effectiveDate:EFFECTIVE_DATE,venues:results.length,active:results.filter(x=>x.phase==='ACTIVE').length,reviewReady:results.filter(x=>x.phase==='REVIEW_READY').length,waiting:results.filter(x=>x.phase==='WAITING_FOR_MAINLINE').length,blocked:results.filter(x=>['REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(x.phase)).length,venueStates:results.map(x=>({code:x.venueCode,slug:x.slug,cycleId:x.cycleId,phase:x.phase,day:x.cycleDay,daysRemaining:x.daysRemaining,modelVersion:x.mainline?.modelVersion||null,recommendation:x.recommendation?.state||null}))};
+  const summary={schema:'boat-command-model-cycle-fleet-v1',version:VERSION,generatedAt:isoNow(),effectiveDate:EFFECTIVE_DATE,venues:results.length,active:results.filter(x=>x.phase==='ACTIVE').length,reviewReady:results.filter(x=>x.phase==='REVIEW_READY').length,waiting:results.filter(x=>x.phase==='WAITING_FOR_MAINLINE').length,blocked:results.filter(x=>['REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(x.phase)).length,venueStates:results.map(x=>({code:x.venueCode,slug:x.slug,cycleId:x.cycleId,phase:x.phase,day:x.cycleDay,daysRemaining:x.daysRemaining,modelVersion:x.mainline?.modelVersion||null,recommendation:x.recommendation?.state||null,reviewTrigger:x.reviewTrigger||null}))};
   if(!DRY_RUN)writeJson(path.join(OUTPUT_ROOT,'venue-model-cycle-fleet-v1.json'),summary);
   console.log(JSON.stringify(summary,null,2));
   console.log('VENUE_MODEL_CYCLE_24_INDEPENDENT_PASS');
