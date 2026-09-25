@@ -166,7 +166,7 @@ function attachCandidatePolicy(slug,candidates,config){
     return {
       id:c.id,mode:c.mode,modelVersion:c.modelVersion,registered:!!reg,registry:reg?{status:reg.status||'SHADOW',artifact:reg.artifact||null,activationEvidencePath:reg.activationEvidencePath||null}:null,
       evaluation:c.evaluation,pairedMain:c.pairedMain,pairedRaces:c.pairedRaces,deltas:c.deltas,
-      gates:{minimumPairedRaces:minPaired,maxAllowedHitRateRegression:maxHitRegression,maxAllowedRoiRegression:maxRoiRegression,forwardEligible,historicalRequired,historicalOk,eligible,reasons}
+      gates:{minimumPairedRaces:minPaired,maxAllowedHitRateRegression:maxHitRegression,maxAllowedRoiRegression:maxRoiRegression,forwardEligible,historicalRequired,historicalOk,historicalEvidencePassed:hist?.passed===true,eligible,reasons}
     };
   }).sort((a,b)=>(Number(b.gates.eligible)-Number(a.gates.eligible))||((b.deltas.roiDelta??-999)-(a.deltas.roiDelta??-999))||((b.deltas.hitRateDelta??-999)-(a.deltas.hitRateDelta??-999)));
 }
@@ -262,6 +262,10 @@ function standardState(e,config,readiness,prev){
   const evidence=discoverEvidence(e.slug,start,evidenceThrough);
   const candidates=attachCandidatePolicy(e.slug,evidence.candidates,config);
   const selected=selection(candidates);
+  // Early review is stricter than legacy day-30 config tolerances: no metric
+  // regression and explicit registered historical evidence are mandatory.
+  const earlySelected=candidates.find(c=>c.gates.eligible&&c.gates.historicalEvidencePassed&&
+    c.deltas.hitRateDelta>=0&&c.deltas.roiDelta>=0)||null;
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
   const configuredVersion=config?.operationPolicy?.mainModelVersion||null;
@@ -283,12 +287,13 @@ function standardState(e,config,readiness,prev){
   // A registered, historically validated candidate may request review as soon as
   // sufficient same-venue MAIN and paired FORWARD evidence exists. The 30-day
   // checkpoint remains a fallback for no-candidate/insufficient-evidence review.
-  const earlyCandidateReady=mainEnough&&!!selected;
+  const earlyCandidateReady=mainEnough&&!!earlySelected;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
   if(drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:[expectedVersionMissing?'MAINLINE_EXPECTED_VERSION_NOT_OBSERVED':'MAINLINE_MODEL_DRIFT_DETECTED']}}
-  else if(earlyCandidateReady){phase='REVIEW_READY';rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
+  else if(earlyCandidateReady){phase='REVIEW_READY';rec={state:'CANDIDATE_ELIGIBLE',candidateId:earlySelected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
+  else if(elapsed>=CYCLE_DAYS&&selected){rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS){rec={state:'KEEP_CURRENT',candidateId:null,reasons:['NO_REGISTERED_CANDIDATE_PASSED_ALL_GATES']}}
   const review=prev?.cycleId===cycleId?(prev.review||reviewTemplate()):reviewTemplate();
   if(review.humanDecision==='APPROVE_CANDIDATE')phase='APPROVED_PENDING_DEPLOYMENT';
