@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "TSU",
+  "venueCode": "09",
+  "slug": "tsu",
+  "date": "2026-09-26",
+  "race": 4,
+  "generatedAt": "2026-09-25T19:14:52.734Z",
+  "deadline": "11:57",
+  "modelVersion": "TSU-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-3-2",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.045732,
+    "holdoutSecondDeltaVsTop": 0.02439,
+    "holdoutExactDeltaVsTop": 0.006547,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/tsu/2026-09-26/program/race-4.json",
+    "programSha256": "9ddbe6b2ee8dcb5ed8e3e8449ce84da78a0f43b4571080883af364b9b58c57f5",
+    "historyPath": "tsu-history-bootstrap-v1.json",
+    "baselinePath": "tsu-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    0.26261422542497964,
+    1.6298899205060677,
+    -0.22101081291830432,
+    0.6723857538144197,
+    -2.550318683492238,
+    0.2064395966650746
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
