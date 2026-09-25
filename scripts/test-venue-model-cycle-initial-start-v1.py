@@ -111,6 +111,13 @@ with tempfile.TemporaryDirectory(prefix="boat-command-initial-start-fleet-") as 
     repo = pathlib.Path(td) / "repo"
     shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
 
+    # Fixture isolation: live data now includes real observations on the
+    # synthetic future start date. Exclude only that day for the WAITING
+    # venues so this scenario still verifies an empty new-cycle day 1.
+    # Production data and runtime collection are never changed.
+    for slug in WAITING:
+        (repo / f"live/{slug}/{START_DATE}/research-evaluation-v1.json").unlink(missing_ok=True)
+
     reset_waiting_configs(repo, WAITING)
     run(repo, "--action", "refresh", "--date", EFFECTIVE_DATE)
     fleet0 = read_json(repo / "venue-model-cycle-fleet-v1.json")
