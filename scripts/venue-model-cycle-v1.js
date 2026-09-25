@@ -49,7 +49,8 @@ function rowMetric(pred,row,date){
   const payout100=Number(row.payout100);
   if(!Number.isFinite(payout100)||payout100<0)return null;
   const picks=pred.picks.map(String);
-  const hit=pred.hit===true||picks.includes(actual);
+  // Score from frozen tickets and verified POST labels, not a stored hit flag.
+  const hit=picks.includes(actual);
   const stake=picks.length*STAKE_PER_PICK_YEN;
   const returns=hit?payout100:0;
   return {date,race:Number(row.race),modelVersion:String(pred.modelVersion),picks,actual,payout100,hit,stake,returns,profit:returns-stake};
