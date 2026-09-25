@@ -1,0 +1,43 @@
+name: Gamagori winning pattern gate v0.33.7
+on:
+  push:
+    branches: [shadow/gamagori-candidate-v21-v0335]
+    paths:
+      - 'scripts/gamagori-winning-pattern-gate-v0337.js'
+      - '.github/workflows/gamagori-winning-pattern-gate-v0337.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-winning-pattern-gate-v0337.js'
+      - '.github/workflows/gamagori-winning-pattern-gate-v0337.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax
+        run: node --check scripts/gamagori-winning-pattern-gate-v0337.js
+      - name: Freeze DESIGN gate and evaluate HOLDOUT once
+        run: node scripts/gamagori-winning-pattern-gate-v0337.js /tmp/gamagori-winning-pattern-gate-v0337.json
+      - name: Contract
+        run: |
+          node - <<'NODE'
+          const r=require('/tmp/gamagori-winning-pattern-gate-v0337.json');
+          if(r.status!=='SHADOW_ONLY') throw new Error('NOT_SHADOW');
+          if(r.baseline.design.races!==180||r.baseline.holdout.races!==180) throw new Error('SPLIT_INVALID');
+          if(!String(r.boundary).includes('frozen before result')) throw new Error('LEAKAGE_GUARD_MISSING');
+          if(r.decision.promoteLive!==false) throw new Error('LIVE_PROMOTION_FORBIDDEN');
+          console.log('PASS frozen DESIGN-only winning-pattern gate');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamagori-winning-pattern-gate-v0337
+          path: /tmp/gamagori-winning-pattern-gate-v0337.json
+          retention-days: 30

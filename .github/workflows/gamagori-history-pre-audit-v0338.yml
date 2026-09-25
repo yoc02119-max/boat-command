@@ -1,0 +1,43 @@
+name: Gamagori historical PRE source audit v0.33.8
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/gamagori-history-pre-audit-v0338.py'
+      - '.github/workflows/gamagori-history-pre-audit-v0338.yml'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: Official B archive date YYYYMMDD
+        required: false
+        default: '20251215'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LZH extractor
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+      - name: Audit official B PRE layout only
+        run: |
+          mkdir -p out
+          DATE="${{ github.event.inputs.date || '20251215' }}"
+          python3 scripts/gamagori-history-pre-audit-v0338.py --date "$DATE" | tee out/gamagori-history-pre-audit-v0338.json
+      - name: Contract - result archive must stay unopened
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('out/gamagori-history-pre-audit-v0338.json'))
+          assert x['sourceKind']=='OFFICIAL_B_PROGRAM_ONLY'
+          assert x['resultArchiveOpened'] is False
+          assert x['gamagoriMarkers'] > 0
+          print('PASS PRE-only historical source audit')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gamagori-history-pre-audit-v0338
+          path: out/gamagori-history-pre-audit-v0338.json
+          retention-days: 30
