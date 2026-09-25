@@ -654,4 +654,37 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-drift-") as td:
     assert drifted["recommendation"]["reasons"] == ["MAINLINE_EXPECTED_VERSION_NOT_OBSERVED"]
     assert_others_same(repo, before_others)
 
+# A high-quality, historically validated candidate can request owner review on
+# day five. This must NOT unlock an early deployment or mutate the other 23 venues.
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-early-review-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
+    mutate_kiryu_to_live(repo)
+    install_candidate_registry(repo)
+    install_synthetic_forward(repo)  # 12 frozen pairs/day, reaches 60 on day five
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    first = state(repo)
+    assert first["phase"] == "ACTIVE" and first["mainline"]["evaluation"]["races"] == 12
+    run(repo, "--action", "refresh", "--date", "2026-09-26")
+    early = state(repo)
+    assert early["phase"] == "REVIEW_READY", early
+    assert early["cycleDay"] == 5 and early["daysRemaining"] == 25
+    assert early["reviewTrigger"] == "EARLY_EVIDENCE_READY"
+    assert early["mainline"]["evaluation"]["races"] == 60
+    assert early["recommendation"]["candidateId"] == CANDIDATE_ID
+    assert early["promotion"]["autoPromotion"] is False
+    assert early["mainline"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
+    run(repo, "--action", "refresh", "--date", "2026-09-27")
+    frozen = state(repo)
+    assert frozen["phase"] == "REVIEW_READY"
+    assert frozen["mainline"]["evidenceThroughDate"] == "2026-09-26"
+    assert frozen["recommendation"]["candidateId"] == CANDIDATE_ID
+    others = snapshot_others(repo)
+    run(repo, "--action", "approve", "--venue", KIRYU,
+        "--candidate", CANDIDATE_ID, "--date", "2026-09-27")
+    approved = state(repo)
+    assert approved["phase"] == "APPROVED_PENDING_DEPLOYMENT"
+    assert approved["mainline"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
+    assert_others_same(repo, others)
+
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")
