@@ -404,13 +404,14 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-extension-") as td:
     assert ready["mainline"]["evaluation"]["races"] == 60
     assert ready["mainline"]["evidenceThroughDate"] == "2026-10-22"
 
-    # Once review-ready, freeze the evidence snapshot so later dates do not
-    # move the review target underneath the human decision.
+    # A day-30 KEEP_CURRENT checkpoint must remain open to later evidence.
+    # Only an eligible candidate's pending review freezes its comparison.
     run(repo, "--action", "refresh", "--date", "2026-10-23")
-    frozen = state(repo)
-    assert frozen["phase"] == "REVIEW_READY", frozen
-    assert frozen["mainline"]["evaluation"]["races"] == 60
-    assert frozen["mainline"]["evidenceThroughDate"] == "2026-10-22"
+    continued = state(repo)
+    assert continued["phase"] == "REVIEW_READY", continued
+    assert continued["recommendation"]["state"] == "KEEP_CURRENT"
+    assert continued["mainline"]["evaluation"]["races"] == 60
+    assert continued["mainline"]["evidenceThroughDate"] == "2026-10-23"
 
 with tempfile.TemporaryDirectory(prefix="boat-command-cycle-continue-") as td:
     repo = pathlib.Path(td) / "repo"
@@ -653,5 +654,70 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-drift-") as td:
     assert drifted["recommendation"]["state"] == "BLOCKED"
     assert drifted["recommendation"]["reasons"] == ["MAINLINE_EXPECTED_VERSION_NOT_OBSERVED"]
     assert_others_same(repo, before_others)
+
+# A high-quality, historically validated candidate can request owner review on
+# day five. This must NOT unlock an early deployment or mutate the other 23 venues.
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-early-review-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
+    mutate_kiryu_to_live(repo)
+    install_candidate_registry(repo)
+    install_synthetic_forward(repo)  # 12 frozen pairs/day, reaches 60 on day five
+    run(repo, "--action", "refresh", "--date", "2026-09-22")
+    first = state(repo)
+    assert first["phase"] == "ACTIVE" and first["mainline"]["evaluation"]["races"] == 12
+    run(repo, "--action", "refresh", "--date", "2026-09-26")
+    early = state(repo)
+    assert early["phase"] == "REVIEW_READY", early
+    assert early["cycleDay"] == 5 and early["daysRemaining"] == 25
+    assert early["reviewTrigger"] == "EARLY_EVIDENCE_READY"
+    assert early["mainline"]["evaluation"]["races"] == 60
+    assert early["recommendation"]["candidateId"] == CANDIDATE_ID
+    assert early["promotion"]["autoPromotion"] is False
+    assert early["mainline"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
+    run(repo, "--action", "refresh", "--date", "2026-09-27")
+    frozen = state(repo)
+    assert frozen["phase"] == "REVIEW_READY"
+    assert frozen["mainline"]["evidenceThroughDate"] == "2026-09-26"
+    assert frozen["recommendation"]["candidateId"] == CANDIDATE_ID
+    others = snapshot_others(repo)
+    run(repo, "--action", "approve", "--venue", KIRYU,
+        "--candidate", CANDIDATE_ID, "--date", "2026-09-27")
+    approved = state(repo)
+    assert approved["phase"] == "APPROVED_PENDING_DEPLOYMENT"
+    assert approved["mainline"]["modelVersion"] == "KIRYU-RESEARCH-MODEL-V1"
+    assert_others_same(repo, others)
+
+# Day 30 with no candidate is a checkpoint, NOT a frozen research cutoff.
+# A valid, PRE-frozen candidate registered later must still reach review.
+with tempfile.TemporaryDirectory(prefix="boat-command-cycle-post30-evidence-") as td:
+    repo = pathlib.Path(td) / "repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
+    mutate_kiryu_to_live(repo)
+    # Isolate the synthetic timeline from newly collected real-world dates.
+    shutil.rmtree(repo / "live/kiryu", ignore_errors=True)
+    install_synthetic_forward(repo)
+    run(repo, "--action", "refresh", "--date", "2026-10-21")
+    day30 = state(repo)
+    assert day30["phase"] == "REVIEW_READY"
+    assert day30["recommendation"]["state"] == "KEEP_CURRENT"
+    run(repo, "--action", "refresh", "--date", "2026-10-22")
+    continued = state(repo)
+    assert continued["mainline"]["evidenceThroughDate"] == "2026-10-22"
+    assert continued["recommendation"]["state"] == "KEEP_CURRENT"
+    run(repo, "--action", "refresh", "--date", "2026-10-23")
+    assert state(repo)["recommendation"]["state"] == "KEEP_CURRENT"
+    before_approval = snapshot_others(repo)
+    install_candidate_registry(repo)
+    # Same simulated date: only registration changed, not another venue's clock.
+    run(repo, "--action", "refresh", "--date", "2026-10-23")
+    ready = state(repo)
+    assert ready["phase"] == "REVIEW_READY"
+    assert ready["recommendation"]["state"] == "CANDIDATE_ELIGIBLE"
+    assert ready["recommendation"]["candidateId"] == CANDIDATE_ID
+    assert ready["mainline"]["evidenceThroughDate"] == "2026-10-23"
+    assert_others_same(repo, before_approval)
+    run(repo, "--action", "refresh", "--date", "2026-10-24")
+    assert state(repo)["mainline"]["evidenceThroughDate"] == "2026-10-23"
 
 print("VENUE_MODEL_CYCLE_LIFECYCLE_SIMULATION_PASS")

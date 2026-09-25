@@ -11,6 +11,7 @@ on:
       - 'venue-model-cycle-policy-v1.json'
       - 'venue.html'
       - 'index.html'
+      - 'portal.html'
       - 'venues/**/model-candidates-v1.json'
       - 'venues/**/config-v1.json'
       - 'venues/**/model-cycle-v1.json'
@@ -28,6 +29,7 @@ on:
       - 'venue-model-cycle-policy-v1.json'
       - 'venue.html'
       - 'index.html'
+      - 'portal.html'
       - 'venues/_template/model-candidates-v1.json'
       - 'venues/**/config-v1.json'
       - 'venues/**/model-cycle-v1.json'
@@ -50,6 +52,17 @@ jobs:
           set -euo pipefail
           node --check scripts/venue-model-cycle-v1.js
           node --check venue-model-cycle-v1.js
+
+      - name: Parse portal inline scripts without running them
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          const html=fs.readFileSync('portal.html','utf8');
+          const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).filter(x=>x.trim());
+          if(!scripts.length)throw new Error('PORTAL_INLINE_SCRIPT_MISSING');
+          scripts.forEach((s,i)=>new vm.Script(s,{filename:'portal-inline-'+i+'.js'}));
+          console.log('PORTAL_INLINE_SYNTAX_PASS',scripts.length);
+          NODE
 
       - name: Generate isolated 24-venue fixture from repository evidence
         run: |
@@ -110,12 +123,17 @@ jobs:
           assert gamagori['startDate']=='2026-09-18' and gamagori['endDate']=='2026-10-17'
           assert gamagori['mainline']['modelVersion']=='GAMAGORI-MAIN-MODEL-V0.32.0'
           assert gamagori['mainline']['integrity']=='OK', gamagori['mainline']
-          assert gamagori['mainline']['evaluation']['races']==12, gamagori['mainline']['evaluation']
-          assert gamagori['source']['evaluationAdapter']=='GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349'
+          assert gamagori['mainline']['evaluation']['races']>=12, gamagori['mainline']['evaluation']  # historical fixtures may acquire additional valid rows
+          assert gamagori['source']['evaluationAdapter']==json.load(open('venues/gamagori/config-v1.json',encoding='utf-8'))['operationPolicy']['evaluationAdapter']
           fleet=json.load(open('/tmp/model-cycle-contract/venue-model-cycle-fleet-v1.json',encoding='utf-8'))
           assert fleet['venues']==24
           policy=json.load(open('venue-model-cycle-policy-v1.json',encoding='utf-8'))
           assert policy['cycleDays']==30
+          assert policy['reviewTiming']['earlyReviewEnabled'] is True
+          assert policy['reviewTiming']['minimumCalendarDaysForEligibleCandidate']==0
+          assert policy['reviewTiming']['earlyRequiresNoHitRateRegression'] is True
+          assert policy['reviewTiming']['earlyRequiresNoRoiRegression'] is True
+          assert policy['reviewTiming']['earlyHistoricalValidationRequired'] is True
           assert policy['scope']=='24_INDEPENDENT_VENUE_CYCLES'
           assert policy['invariants']['crossVenueWeightReuse'] is False
           assert policy['invariants']['autoPromotion'] is False
@@ -146,6 +164,7 @@ jobs:
           v=Path('venue.html').read_text(encoding='utf-8')
           i=Path('index.html').read_text(encoding='utf-8')
           ui=Path('venue-model-cycle-v1.js').read_text(encoding='utf-8')
+          portal=Path('portal.html').read_text(encoding='utf-8')
           assert "MODEL_CYCLE_DECISION_TOO_EARLY" in s
           assert "MODEL_CYCLE_NOT_REVIEW_READY" in s
           assert "MODEL_CYCLE_NOT_APPROVED_FOR_DEPLOYMENT" in s
@@ -155,17 +174,23 @@ jobs:
           assert "return standardState(e,config,readiness,prev);" in s
           assert 'GAMAGORI_PRE_FROZEN_ALL_RACE_GATE_V0349' in s
           assert 'id="venueModelCycle"' in v
-          assert 'venue-model-cycle-v1.js?v=2' in v
+          assert 'venue-model-cycle-v1.js?v=3' in v
           assert 'ensureVenueModelCycle()' in v
           assert 'data-venue-model-cycle="gamagori"' in i
-          assert 'venue-model-cycle-v1.js?v=3527' in i
+          assert 'venue-model-cycle-v1.js?v=3528' in i
           assert 'ほか23場の重みや成績は使用しません' in ui
           assert 'data-cycle-action="approve"' in ui
           assert 'data-cycle-action="reject"' in ui
           assert 'data-cycle-action="continue"' in ui
           assert 'data-cycle-action="activate"' in ui
           assert '自動昇格はしません。承認後も配置確認が必要です。' in ui
+          assert "EARLY_EVIDENCE_READY" in s
+          assert "earlySelected=candidates.find" in s
+          assert 'const hit=picks.includes(actual);' in s
+          assert 'id="cyclePromotionPanel"' in portal
+          assert "v.phase==='REVIEW_READY'&&v.recommendation==='CANDIDATE_ELIGIBLE'" in portal
+          assert "if(!developerAuthenticated){panel.hidden=true;return;}" in portal
           assert 'BOAT COMMANDにはGitHub秘密鍵を保存しない' in ui
-          assert '30日評価完了後にここへ承認操作を表示します。' in ui
+          assert '必要な履歴・FORWARD検証を満たせば、30日を待たずにここへ承認操作を表示します。' in ui
           print('VENUE_MODEL_CYCLE_UI_SAFETY_PASS')
           PY

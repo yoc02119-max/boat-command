@@ -1,6 +1,6 @@
 {
   "schema": "boat-command-venue-model-cycle-policy-v1",
-  "version": "VENUE-MODEL-CYCLE-POLICY-V1.1",
+  "version": "VENUE-MODEL-CYCLE-POLICY-V1.2",
   "cycleDays": 30,
   "clock": "JST_CALENDAR_DAYS",
   "scope": "24_INDEPENDENT_VENUE_CYCLES",
@@ -38,5 +38,16 @@
     "modelDrift": "REVIEW_BLOCKED",
     "approval": "APPROVED_PENDING_DEPLOYMENT",
     "activation": "VERIFY_DEPLOYED_MODEL_VERSION_THEN_START_NEXT_30_DAY_CYCLE"
+  },
+  "reviewTiming": {
+    "earlyReviewEnabled": true,
+    "minimumCalendarDaysForEligibleCandidate": 0,
+    "earlyHistoricalValidationRequired": true,
+    "earlyRequiresNoHitRateRegression": true,
+    "earlyRequiresNoRoiRegression": true,
+    "earlyRequiresExistingMainlineAndPairedForwardSampleGates": true,
+    "day30Role": "FALLBACK_CHECKPOINT_ONLY_NOT_EARLY_REVIEW_GATE",
+    "humanApprovalRequired": true,
+    "activationEvidenceRequired": true
   }
 }

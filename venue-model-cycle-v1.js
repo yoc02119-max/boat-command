@@ -5,7 +5,7 @@ const DECISION_WORKFLOW='https://github.com/yoc02119-max/boat-command/actions/wo
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pct=v=>Number.isFinite(Number(v))?(Number(v)*100).toFixed(1)+'%':'—';
 const signed=v=>Number.isFinite(Number(v))?(Number(v)>0?'+':'')+(Number(v)*100).toFixed(1)+'pt':'—';
-const phaseLabel=p=>({ACTIVE:'30日検証中',WAITING_FOR_MAINLINE:'本線準備待ち',REVIEW_READY:'30日評価待ち',EVIDENCE_EXTENSION:'証拠延長中',REVIEW_BLOCKED:'評価ブロック',APPROVED_PENDING_DEPLOYMENT:'昇格承認・反映待ち'})[p]||p||'—';
+const phaseLabel=p=>({ACTIVE:'検証中',WAITING_FOR_MAINLINE:'本線準備待ち',REVIEW_READY:'昇格審査待ち',EVIDENCE_EXTENSION:'証拠延長中',REVIEW_BLOCKED:'評価ブロック',APPROVED_PENDING_DEPLOYMENT:'昇格承認・反映待ち'})[p]||p||'—';
 const recommendationLabel=s=>({WAIT:'収集中',WAITING_FOR_MAINLINE:'準備待ち',EXTEND_EVIDENCE:'検証継続',BLOCKED:'要修正',CANDIDATE_ELIGIBLE:'昇格候補あり',KEEP_CURRENT:'現本線継続候補',HUMAN_REVIEW:'人間レビュー待ち'})[s]||s||'—';
 function install(){
  if(document.getElementById('bcModelCycleStyle'))return;
@@ -38,13 +38,13 @@ function decisionPayload(x,action,candidate){
 }
 function reviewHtml(x,candidate){
  const phase=String(x?.phase||''),rec=String(x?.recommendation?.state||'');
- if(phase==='ACTIVE')return '<div class="mc-review"><h3>人間承認 · 待機中</h3><p>30日評価完了後にここへ承認操作を表示します。検証中は本線変更できません。</p></div>';
+ if(phase==='ACTIVE')return '<div class="mc-review"><h3>人間承認 · 待機中</h3><p>必要な履歴・FORWARD検証を満たせば、30日を待たずにここへ承認操作を表示します。検証中は本線変更できません。</p></div>';
  if(phase==='EVIDENCE_EXTENSION')return '<div class="mc-review"><h3>人間承認</h3><p>証拠が不足しているため自動で延長収集中です。承認操作はまだ出しません。</p></div>';
  if(phase==='REVIEW_BLOCKED')return '<div class="mc-review"><h3>人間承認</h3><p>評価ブロック中です。原因を解消するまで承認・次Cycle開始はできません。</p></div>';
  if(phase==='APPROVED_PENDING_DEPLOYMENT')return '<div class="mc-review"><h3>人間承認 · 承認済み</h3><p>候補の本線配置証拠を確認してからCycleを切り替えます。承認だけでは本線は変わりません。</p><div class="mc-review-actions"><button class="mc-review-btn activate" type="button" data-cycle-action="activate">反映確認 → 次Cycle開始</button></div><div class="mc-review-status" data-cycle-review-status>候補配置前に押しても安全側で失敗します。</div></div>';
  if(phase!=='REVIEW_READY')return '';
- if(rec==='CANDIDATE_ELIGIBLE'&&candidate?.gates?.eligible===true)return '<div class="mc-review"><h3>人間承認</h3><p>30日評価と昇格ゲートを通過した候補です。ここから人間判断を行います。</p><div class="mc-review-actions"><button class="mc-review-btn approve" type="button" data-cycle-action="approve">候補を承認</button><button class="mc-review-btn reject" type="button" data-cycle-action="reject">候補を却下して現本線継続</button></div><div class="mc-review-status" data-cycle-review-status>自動昇格はしません。承認後も配置確認が必要です。</div></div>';
- if(rec==='KEEP_CURRENT')return '<div class="mc-review"><h3>人間承認</h3><p>昇格条件を満たす候補はありません。現本線のまま次の30日へ進む操作だけを出します。</p><div class="mc-review-actions"><button class="mc-review-btn" type="button" data-cycle-action="continue">現本線で次Cycleへ</button></div><div class="mc-review-status" data-cycle-review-status>旧Cycleは履歴保存されます。</div></div>';
+ if(rec==='CANDIDATE_ELIGIBLE'&&candidate?.gates?.eligible===true)return '<div class="mc-review"><h3>人間承認</h3><p>登録済みの昇格ゲートを通過した候補です。ここから人間判断を行います。</p><div class="mc-review-actions"><button class="mc-review-btn approve" type="button" data-cycle-action="approve">候補を承認</button><button class="mc-review-btn reject" type="button" data-cycle-action="reject">候補を却下して現本線継続</button></div><div class="mc-review-status" data-cycle-review-status>自動昇格はしません。承認後も配置確認が必要です。</div></div>';
+ if(rec==='KEEP_CURRENT')return '<div class="mc-review"><h3>人間承認</h3><p>30日点検時点では昇格候補なし。現本線の研究は継続し、新たな候補が条件を満たしたら随時通知します。今の評価を区切る場合のみ次Cycleへ進めます。</p><div class="mc-review-actions"><button class="mc-review-btn" type="button" data-cycle-action="continue">現本線で次Cycleへ</button></div><div class="mc-review-status" data-cycle-review-status>旧Cycleは履歴保存されます。</div></div>';
  return '<div class="mc-review"><h3>人間承認</h3><p>この場は現在の評価経路では共通の候補承認IDがありません。現本線継続のみ実行できます。</p><div class="mc-review-actions"><button class="mc-review-btn" type="button" data-cycle-action="continue">現本線で次Cycleへ</button></div><div class="mc-review-status" data-cycle-review-status>候補昇格は共通候補レジストリ接続後に有効化します。</div></div>';
 }
 async function beginDecision(root,x,action,candidate){
@@ -72,8 +72,8 @@ function render(root,x){
  if(candidate){
    candidateHtml='<div class="mc-candidate"><div class="mc-candidate-row"><b>'+esc(candidate.modelVersion)+'</b><span>比較 '+(candidate.pairedRaces||0)+'R</span><span>的中差 '+signed(candidate.deltas?.hitRateDelta)+'</span><span>ROI差 '+signed(candidate.deltas?.roiDelta)+'</span></div><div class="'+(candidate.gates?.eligible?'mc-ok':'mc-warn')+'">'+(candidate.gates?.eligible?'昇格ゲート通過・人間承認待ち':'SHADOW継続 · '+esc((candidate.gates?.reasons||[]).slice(0,2).join(' / ')))+'</div></div>';
  }
- const period=x.startDate?esc(x.startDate)+'〜'+esc(x.endDate)+' · 残り'+x.daysRemaining+'日 · ':'';
- root.innerHTML='<section class="mc-card"><div class="mc-head"><div><h2>30日モデル更新サイクル · '+esc(x.venueName)+'</h2><p>この場だけの本線・候補・評価履歴で独立更新。ほか23場の重みや成績は使用しません。</p></div><span class="mc-phase">'+esc(phaseLabel(x.phase))+'</span></div><div class="mc-kpis"><div class="mc-kpi"><small>CYCLE</small><b>'+(x.cycleNumber||1)+' · '+day+'/30日</b></div><div class="mc-kpi"><small>本線MODEL</small><b>'+esc(x.mainline?.modelVersion||'準備中')+'</b></div><div class="mc-kpi"><small>評価</small><b>'+(m.races||0)+'R / '+(m.hits||0)+'的中</b></div><div class="mc-kpi"><small>的中率 / ROI</small><b>'+pct(m.hitRate)+' / '+pct(m.roi)+'</b></div><div class="mc-kpi"><small>判定</small><b>'+esc(recommendationLabel(x.recommendation?.state))+'</b></div></div><div class="mc-progress"><i style="width:'+progress.toFixed(1)+'%"></i></div>'+candidateHtml+reviewHtml(x,candidate)+'<div class="mc-note">'+period+'30日中は本線固定。候補はSHADOWのみ。自動昇格なし・人間承認必須・実金なし。旧サイクルと元データは削除しません。</div></section>';wireReview(root,x,candidate);
+ const period=x.startDate?'開始 '+esc(x.startDate)+(x.daysRemaining>0?' · 30日点検まで'+x.daysRemaining+'日 · ':' · 30日点検済み・継続評価中 · '):'';
+ root.innerHTML='<section class="mc-card"><div class="mc-head"><div><h2>モデル昇格審査 · '+esc(x.venueName)+'</h2><p>この場だけの本線・候補・評価履歴で独立更新。ほか23場の重みや成績は使用しません。</p></div><span class="mc-phase">'+esc(phaseLabel(x.phase))+'</span></div><div class="mc-kpis"><div class="mc-kpi"><small>CYCLE</small><b>'+(x.cycleNumber||1)+' · '+day+'/30日</b></div><div class="mc-kpi"><small>本線MODEL</small><b>'+esc(x.mainline?.modelVersion||'準備中')+'</b></div><div class="mc-kpi"><small>評価</small><b>'+(m.races||0)+'R / '+(m.hits||0)+'的中</b></div><div class="mc-kpi"><small>的中率 / ROI</small><b>'+pct(m.hitRate)+' / '+pct(m.roi)+'</b></div><div class="mc-kpi"><small>判定</small><b>'+esc(recommendationLabel(x.recommendation?.state))+'</b></div></div><div class="mc-progress"><i style="width:'+progress.toFixed(1)+'%"></i></div>'+candidateHtml+reviewHtml(x,candidate)+'<div class="mc-note">'+period+'本線は昇格承認と配置確認まで固定。30日は定期点検の目安であり、合格候補は随時通知。候補はSHADOWのみ・自動昇格なし・実金なし。旧サイクルと元データは削除しません。</div></section>';wireReview(root,x,candidate);
 }
 async function mount({root,slug}={}){
  const el=typeof root==='string'?document.querySelector(root):root;if(!el||!slug)return null;

@@ -49,7 +49,8 @@ function rowMetric(pred,row,date){
   const payout100=Number(row.payout100);
   if(!Number.isFinite(payout100)||payout100<0)return null;
   const picks=pred.picks.map(String);
-  const hit=pred.hit===true||picks.includes(actual);
+  // Score from frozen tickets and verified POST labels, not a stored hit flag.
+  const hit=picks.includes(actual);
   const stake=picks.length*STAKE_PER_PICK_YEN;
   const returns=hit?payout100:0;
   return {date,race:Number(row.race),modelVersion:String(pred.modelVersion),picks,actual,payout100,hit,stake,returns,profit:returns-stake};
@@ -166,7 +167,7 @@ function attachCandidatePolicy(slug,candidates,config){
     return {
       id:c.id,mode:c.mode,modelVersion:c.modelVersion,registered:!!reg,registry:reg?{status:reg.status||'SHADOW',artifact:reg.artifact||null,activationEvidencePath:reg.activationEvidencePath||null}:null,
       evaluation:c.evaluation,pairedMain:c.pairedMain,pairedRaces:c.pairedRaces,deltas:c.deltas,
-      gates:{minimumPairedRaces:minPaired,maxAllowedHitRateRegression:maxHitRegression,maxAllowedRoiRegression:maxRoiRegression,forwardEligible,historicalRequired,historicalOk,eligible,reasons}
+      gates:{minimumPairedRaces:minPaired,maxAllowedHitRateRegression:maxHitRegression,maxAllowedRoiRegression:maxRoiRegression,forwardEligible,historicalRequired,historicalOk,historicalEvidencePassed:hist?.passed===true,eligible,reasons}
     };
   }).sort((a,b)=>(Number(b.gates.eligible)-Number(a.gates.eligible))||((b.deltas.roiDelta??-999)-(a.deltas.roiDelta??-999))||((b.deltas.hitRateDelta??-999)-(a.deltas.hitRateDelta??-999)));
 }
@@ -253,15 +254,24 @@ function standardState(e,config,readiness,prev){
   const previousEvidenceThrough=prev?.cycleId===cycleId&&dateOk(prev?.mainline?.evidenceThroughDate)
     ? prev.mainline.evidenceThroughDate
     : null;
-  const reviewSnapshotFrozen=previousEvidenceThrough&&['REVIEW_READY','APPROVED_PENDING_DEPLOYMENT','REVIEW_BLOCKED'].includes(previousPhase);
+  // Keep a candidate review immutable, but do not freeze a day-30 KEEP_CURRENT
+  // checkpoint: a newly validated candidate must still be eligible on day 31+.
+  const frozenCandidateReview=previousPhase==='REVIEW_READY'&&prev?.recommendation?.state==='CANDIDATE_ELIGIBLE';
+  const reviewSnapshotFrozen=previousEvidenceThrough&&
+    (frozenCandidateReview||['APPROVED_PENDING_DEPLOYMENT','REVIEW_BLOCKED'].includes(previousPhase));
   const evidenceThrough=reviewSnapshotFrozen
     ? previousEvidenceThrough
-    : previousPhase==='EVIDENCE_EXTENSION'
+    : previousPhase==='EVIDENCE_EXTENSION'||(previousPhase==='REVIEW_READY'&&!frozenCandidateReview)
       ? EFFECTIVE_DATE
       : (EFFECTIVE_DATE<end?EFFECTIVE_DATE:end);
   const evidence=discoverEvidence(e.slug,start,evidenceThrough);
   const candidates=attachCandidatePolicy(e.slug,evidence.candidates,config);
   const selected=selection(candidates);
+  // Early review is stricter than legacy day-30 config tolerances: no metric
+  // regression and explicit registered historical evidence are mandatory.
+  const earlySelected=candidates.find(c=>c.gates.eligible&&c.gates.historicalEvidencePassed&&
+    c.pairedRaces>=Math.max(DEFAULT_MIN_RACES,c.gates.minimumPairedRaces||0)&&
+    c.deltas.hitRateDelta>=0&&c.deltas.roiDelta>=0)||null;
   const elapsed=Math.max(0,(daysBetween(start,EFFECTIVE_DATE)||0)+1),day=Math.min(CYCLE_DAYS,elapsed),daysRemaining=Math.max(0,CYCLE_DAYS-day);
   const p=config?.promotionPolicy||{},minMain=Number(p.targetReviewRaces||DEFAULT_MIN_RACES);
   const configuredVersion=config?.operationPolicy?.mainModelVersion||null;
@@ -280,9 +290,14 @@ function standardState(e,config,readiness,prev){
   const drift=lockedVersion
     ? expectedVersionMissing||(firstCurrent>=0&&ordered.slice(firstCurrent).some(x=>x.modelVersion!==lockedVersion))
     : observedVersionSet.length>1;
+  // A registered, historically validated candidate may request review as soon as
+  // sufficient same-venue MAIN and paired FORWARD evidence exists. The 30-day
+  // checkpoint remains a fallback for no-candidate/insufficient-evidence review.
+  const earlyCandidateReady=mainEnough&&!!earlySelected;
   let phase=elapsed<CYCLE_DAYS?'ACTIVE':'REVIEW_READY';
   let rec={state:'WAIT',candidateId:null,reasons:['CYCLE_IN_PROGRESS']};
   if(drift){phase='REVIEW_BLOCKED';rec={state:'BLOCKED',candidateId:null,reasons:[expectedVersionMissing?'MAINLINE_EXPECTED_VERSION_NOT_OBSERVED':'MAINLINE_MODEL_DRIFT_DETECTED']}}
+  else if(earlyCandidateReady){phase='REVIEW_READY';rec={state:'CANDIDATE_ELIGIBLE',candidateId:earlySelected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS&&!mainEnough){phase='EVIDENCE_EXTENSION';rec={state:'EXTEND_EVIDENCE',candidateId:null,reasons:['MAINLINE_'+minMain+'_RACES_NOT_READY']}}
   else if(elapsed>=CYCLE_DAYS&&selected){rec={state:'CANDIDATE_ELIGIBLE',candidateId:selected.id,reasons:[]}}
   else if(elapsed>=CYCLE_DAYS){rec={state:'KEEP_CURRENT',candidateId:null,reasons:['NO_REGISTERED_CANDIDATE_PASSED_ALL_GATES']}}
@@ -294,6 +309,8 @@ function standardState(e,config,readiness,prev){
     isolation:baseIsolation(e),
     mainline:{modelVersion:effectiveVersion,frozen:true,integrity:drift?'DRIFT_DETECTED':'OK',versionsObserved:observedVersionSet,evaluation:mainEvaluation,minimumReviewRaces:minMain,evidenceReady:mainEnough,evidenceThroughDate:evidenceThrough},
     candidates,recommendation:rec,review,
+    reviewTrigger:previousPhase==='REVIEW_READY'&&prev?.reviewTrigger?prev.reviewTrigger:
+      (earlyCandidateReady&&elapsed<CYCLE_DAYS?'EARLY_EVIDENCE_READY':elapsed>=CYCLE_DAYS?'DAY30_CHECKPOINT':null),
     promotion:{humanReviewRequired:true,autoPromotion:false,autoTryEnable:false,realMoneyEnable:false,activationRequiresEvidence:true},
     source:{configPath:'venues/'+e.slug+'/config-v1.json',readinessPath:'venues/'+e.slug+'/readiness-v1.json',latestReadinessPhase:readiness?.phase||null,evaluationAdapter:config?.operationPolicy?.evaluationAdapter||'RESEARCH_EVALUATION_V1'},
     retention:{sourceDataPreserved:true,cycleHistoryPreserved:true}
@@ -417,7 +434,7 @@ function main(){
     results.push(state);
     if(!DRY_RUN)writeJson(cycleOutputPath(e.slug),state);
   }
-  const summary={schema:'boat-command-model-cycle-fleet-v1',version:VERSION,generatedAt:isoNow(),effectiveDate:EFFECTIVE_DATE,venues:results.length,active:results.filter(x=>x.phase==='ACTIVE').length,reviewReady:results.filter(x=>x.phase==='REVIEW_READY').length,waiting:results.filter(x=>x.phase==='WAITING_FOR_MAINLINE').length,blocked:results.filter(x=>['REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(x.phase)).length,venueStates:results.map(x=>({code:x.venueCode,slug:x.slug,cycleId:x.cycleId,phase:x.phase,day:x.cycleDay,daysRemaining:x.daysRemaining,modelVersion:x.mainline?.modelVersion||null,recommendation:x.recommendation?.state||null}))};
+  const summary={schema:'boat-command-model-cycle-fleet-v1',version:VERSION,generatedAt:isoNow(),effectiveDate:EFFECTIVE_DATE,venues:results.length,active:results.filter(x=>x.phase==='ACTIVE').length,reviewReady:results.filter(x=>x.phase==='REVIEW_READY').length,waiting:results.filter(x=>x.phase==='WAITING_FOR_MAINLINE').length,blocked:results.filter(x=>['REVIEW_BLOCKED','EVIDENCE_EXTENSION','APPROVED_PENDING_DEPLOYMENT'].includes(x.phase)).length,venueStates:results.map(x=>({code:x.venueCode,slug:x.slug,cycleId:x.cycleId,phase:x.phase,day:x.cycleDay,daysRemaining:x.daysRemaining,modelVersion:x.mainline?.modelVersion||null,recommendation:x.recommendation?.state||null,reviewTrigger:x.reviewTrigger||null}))};
   if(!DRY_RUN)writeJson(path.join(OUTPUT_ROOT,'venue-model-cycle-fleet-v1.json'),summary);
   console.log(JSON.stringify(summary,null,2));
   console.log('VENUE_MODEL_CYCLE_24_INDEPENDENT_PASS');
