@@ -704,8 +704,11 @@ with tempfile.TemporaryDirectory(prefix="boat-command-cycle-post30-evidence-") a
     continued = state(repo)
     assert continued["mainline"]["evidenceThroughDate"] == "2026-10-22"
     assert continued["recommendation"]["state"] == "KEEP_CURRENT"
-    install_candidate_registry(repo)
+    run(repo, "--action", "refresh", "--date", "2026-10-23")
+    assert state(repo)["recommendation"]["state"] == "KEEP_CURRENT"
     before_approval = snapshot_others(repo)
+    install_candidate_registry(repo)
+    # Same simulated date: only registration changed, not another venue's clock.
     run(repo, "--action", "refresh", "--date", "2026-10-23")
     ready = state(repo)
     assert ready["phase"] == "REVIEW_READY"
