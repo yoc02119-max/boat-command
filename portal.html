@@ -749,6 +749,8 @@ async function refreshAllResearchBuildStatus(){
  for(const v of venues.filter(x=>x.code!=='07'&&x.readinessPath))await refreshResearchBuildStatus(v.code);
 }
 refreshCycleFleetSourceOfTruth().then(refreshAllResearchBuildStatus).then(refreshVenueCalendarStatus);
+// Read-only refresh: surface newly eligible venue reviews without a page reload.
+setInterval(refreshCycleFleetSourceOfTruth,5*60*1000);
 document.getElementById('todayTryFilter')?.addEventListener('change',applyTodayTryVenueFilter);
 refreshDeveloperMode().then(renderPromotionQueue);
 setInterval(()=>{renderPromotionQueue();refreshCycleFleetSourceOfTruth();},60000);
