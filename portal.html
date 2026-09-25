@@ -192,6 +192,10 @@ body{background-color:#02080d}
  <div class="promotion-head"><b>昇格候補があります</b><span>OWNER DECISION</span></div>
  <div id="promotionList" class="promotion-list"></div>
 </section>
+<section id="cyclePromotionPanel" class="promotion-panel" hidden aria-live="polite">
+ <div class="promotion-head"><b>24場モデルの昇格審査通知</b><span>OWNER REVIEW</span></div>
+ <div id="cyclePromotionList" class="promotion-list"></div>
+</section>
 <section class="today-overview" id="todayOverview" aria-label="今日のまとめ">
  <div class="today-overview-head"><b>今日のまとめ</b><span id="todayOverviewDate">読み込み中…</span></div>
  <div class="today-overview-grid">
@@ -256,6 +260,7 @@ function applyDeveloperUi(){
  if(sideLab)sideLab.hidden=!developerAuthenticated;
  if(toggle){toggle.textContent=developerAuthenticated?'開発者モードをロック':'開発者モードを解除';toggle.classList.toggle('lock',developerAuthenticated);toggle.classList.toggle('unlock',!developerAuthenticated);}
  if(!developerAuthenticated){const panel=document.getElementById('promotionPanel');if(panel)panel.hidden=true;}
+ renderCyclePromotionNotices();
 }
 async function loadDeveloperLockConfig(){
  if(developerLockConfig)return developerLockConfig;
@@ -567,6 +572,30 @@ async function renderSharedPortfolioStats(){
  }
 }
 let cycleFleetByCode=new Map();
+function renderCyclePromotionNotices(){
+ const panel=document.getElementById('cyclePromotionPanel'),list=document.getElementById('cyclePromotionList');
+ if(!panel||!list)return;
+ list.replaceChildren();
+ if(!developerAuthenticated){panel.hidden=true;return;}
+ const ready=[...cycleFleetByCode.values()].filter(v=>
+  v.phase==='REVIEW_READY'&&v.recommendation==='CANDIDATE_ELIGIBLE');
+ panel.hidden=!ready.length;
+ for(const row of ready){
+  const meta=venues.find(v=>String(v.code).padStart(2,'0')===String(row.code).padStart(2,'0'));
+  if(!meta)continue;
+  const card=document.createElement('div');card.className='promotion-card';
+  const label=document.createElement('strong');label.textContent=meta.name+' · 昇格審査準備完了';
+  const note=document.createElement('small');note.textContent='過去検証・FORWARDの登録済み昇格条件を通過。承認前に成績を確認してください。';
+  const actions=document.createElement('div');actions.className='promotion-actions';
+  const btn=document.createElement('button');btn.type='button';btn.textContent='審査画面を開く';
+  btn.addEventListener('click',()=>{
+   const route=window.BOAT_COMMAND_VENUE_REGISTRY?.routeFor?.(meta)||
+    './venue.html?jcd='+encodeURIComponent(meta.code);
+   location.href=route;
+  });
+  actions.appendChild(btn);card.append(label,note,actions);list.appendChild(card);
+ }
+}
 function cyclePhaseIsOperational(phase){
  return ['ACTIVE','REVIEW_READY','EVIDENCE_EXTENSION','REVIEW_BLOCKED','APPROVED_PENDING_DEPLOYMENT'].includes(String(phase||''));
 }
@@ -581,6 +610,7 @@ async function refreshCycleFleetSourceOfTruth(){
   const x=await r.json();
   if(Number(x?.venues)!==24||!Array.isArray(x?.venueStates))throw new Error('FLEET_INVALID');
   cycleFleetByCode=new Map(x.venueStates.map(v=>[String(v.code).padStart(2,'0'),v]));
+  renderCyclePromotionNotices();
   for(const meta of venues){
    const card=document.querySelector(`.venue[data-venue="${meta.code}"]`);
    if(!card)continue;
@@ -589,7 +619,7 @@ async function refreshCycleFleetSourceOfTruth(){
    card.classList.remove('active','prep','building','offday');
    card.classList.add('operational');
    const small=card.querySelector('small');
-   if(small)small.innerHTML='<span class="live-dot"></span>運用中 · 30日';
+   if(small)small.innerHTML='<span class="live-dot"></span>運用中 · 随時審査';
    const live=card.querySelector('.venue-live');
    if(live){live.className='venue-live';live.innerHTML='<b>予想・AUTO TRY 接続済み</b>'}
   }
@@ -600,7 +630,7 @@ venues.forEach(v=>{
  const btn=document.createElement('button'),active=v.state==='LIVE'||v.state==='LIVE_SIMULATION',building=!active&&v.state!=='ENTRY_OPEN';
  btn.className='venue '+(active?'operational':building?'prep building':'prep');
  btn.dataset.venue=v.code;
- const opTop=v.code==='07'?gs.top:'運用中 · 30日';
+ const opTop=v.code==='07'?gs.top:'運用中 · 随時審査';
  const opDetail=v.code==='07'?gs.detail:'予想・AUTO TRY 接続済み';
  const venueVisual=`<svg class="venue-photo" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="./venue-thumbnails-v1.svg?v=2#v${v.code}"></use></svg><span class="venue-photo-shade"></span><span class="venue-badge">LIVE VIEW</span>`;
  btn.innerHTML=active
@@ -721,7 +751,7 @@ async function refreshAllResearchBuildStatus(){
 refreshCycleFleetSourceOfTruth().then(refreshAllResearchBuildStatus).then(refreshVenueCalendarStatus);
 document.getElementById('todayTryFilter')?.addEventListener('change',applyTodayTryVenueFilter);
 refreshDeveloperMode().then(renderPromotionQueue);
-setInterval(renderPromotionQueue,60000);
+setInterval(()=>{renderPromotionQueue();refreshCycleFleetSourceOfTruth();},60000);
 renderTodayOverview();
 renderSharedPortfolioStats();
 renderActiveTryList();
