@@ -53,6 +53,17 @@ jobs:
           node --check scripts/venue-model-cycle-v1.js
           node --check venue-model-cycle-v1.js
 
+      - name: Parse portal inline scripts without running them
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          const html=fs.readFileSync('portal.html','utf8');
+          const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).filter(x=>x.trim());
+          if(!scripts.length)throw new Error('PORTAL_INLINE_SCRIPT_MISSING');
+          scripts.forEach((s,i)=>new vm.Script(s,{filename:'portal-inline-'+i+'.js'}));
+          console.log('PORTAL_INLINE_SYNTAX_PASS',scripts.length);
+          NODE
+
       - name: Generate isolated 24-venue fixture from repository evidence
         run: |
           set -euo pipefail
@@ -175,6 +186,7 @@ jobs:
           assert '自動昇格はしません。承認後も配置確認が必要です。' in ui
           assert "EARLY_EVIDENCE_READY" in s
           assert "earlySelected=candidates.find" in s
+          assert 'const hit=picks.includes(actual);' in s
           assert 'id="cyclePromotionPanel"' in portal
           assert "v.phase==='REVIEW_READY'&&v.recommendation==='CANDIDATE_ELIGIBLE'" in portal
           assert "if(!developerAuthenticated){panel.hidden=true;return;}" in portal
