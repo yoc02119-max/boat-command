@@ -37,8 +37,9 @@ jobs:
       - name: Offline isolation and correctness tests
         run: |
           set -euo pipefail
-          python -m py_compile scripts/boatracecsv-inverse-join-v1.py
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py
           python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
         env:
@@ -68,10 +69,31 @@ jobs:
           print('INVERSE_RESEARCH_SAMPLE_AUDIT',json.dumps(x['summary']))
           PY
 
+      - name: Analyze outcome-first venue hypotheses (NOT validated predictions)
+        run: |
+          set -euo pipefail
+          python scripts/inverse-outcome-patterns-v1.py \
+            --input /tmp/boat-command-inverse-join-sample-v1.json \
+            --output /tmp/boat-command-inverse-patterns-sample-v1.json \
+            --min-group-races 20
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/boat-command-inverse-patterns-sample-v1.json'))
+          y=json.load(open('/tmp/boat-command-inverse-join-sample-v1.json'))
+          assert x['researchOnly'] is True and x['productionChanged'] is False
+          assert x['autoPromotion'] is False
+          assert x['claimLevel']=='IN_SAMPLE_DESCRIPTIVE_ASSOCIATIONS_ONLY'
+          assert x['totals']['acceptedLabeledRaces']==y['summary']['accepted']
+          assert x['totals']['venuesWithAcceptedRaces']>0
+          print('INVERSE_PATTERNS_SAMPLE_AUDIT',json.dumps(x['totals']))
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: inverse-research-one-day-sample
-          path: /tmp/boat-command-inverse-join-sample-v1.json
+          path: |
+            /tmp/boat-command-inverse-join-sample-v1.json
+            /tmp/boat-command-inverse-patterns-sample-v1.json
           retention-days: 10
           if-no-files-found: ignore
