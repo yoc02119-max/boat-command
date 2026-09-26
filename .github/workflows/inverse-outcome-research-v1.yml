@@ -1,0 +1,77 @@
+name: Inverse outcome research v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/inverse-outcome-research-v1.yml'
+      - 'scripts/boatracecsv-inverse-join-v1.py'
+      - 'scripts/inverse-outcome-patterns-v1.py'
+      - 'tests/test_boatracecsv_inverse_v1.py'
+      - 'tests/test_inverse_outcome_patterns_v1.py'
+      - 'research/inverse-v1/DEVELOPMENT-PLAN.md'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Research date YYYY-MM-DD within existing rich history'
+        type: string
+        default: '2026-09-01'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inverse-research-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Offline isolation and correctness tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py
+          python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
+
+      - name: Execute one-day third-party join outside the app
+        env:
+          TARGET_DATE: ${{ inputs.date || '2026-09-01' }}
+        run: |
+          set -euo pipefail
+          python scripts/boatracecsv-inverse-join-v1.py \
+            --date "$TARGET_DATE" \
+            --output /tmp/boat-command-inverse-join-sample-v1.json
+          python - <<'PY'
+          import json
+          p='/tmp/boat-command-inverse-join-sample-v1.json'
+          x=json.load(open(p,encoding='utf-8'))
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['prePostSeparated'] is True
+          assert x['summary']['targetRaces']>0
+          assert x['summary']['sourceFileCountOK']>=5
+          # No eventual race results or actual starts in the feature/pre section.
+          for race in x['races']:
+              if 'pre' not in race: continue
+              assert 'post' not in race['pre']
+              assert 'actualCourseStart' not in race['pre']
+              assert 'decisionRaw' not in race['pre']
+          print('INVERSE_RESEARCH_SAMPLE_AUDIT',json.dumps(x['summary']))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inverse-research-one-day-sample
+          path: /tmp/boat-command-inverse-join-sample-v1.json
+          retention-days: 10
+          if-no-files-found: ignore
