@@ -1,0 +1,114 @@
+name: Inverse outcome research bounded backfill v1
+
+# Research data lives on data/inverse-research-v1, NEVER on main.
+# No PR execution, no live prediction/TRY/production writes.
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        required: false
+        type: string
+        default: '2026-03-24'
+      end:
+        required: false
+        type: string
+        default: '2026-09-22'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inverse-research-backfill-v1.yml'
+  schedule:
+    # Four modest batches daily; no dependency on official-history completion.
+    - cron: '13 1,7,13,19 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: inverse-research-data-branch-v1
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Read already archived research days
+        run: |
+          set -euo pipefail
+          git fetch origin data/inverse-research-v1
+          git ls-tree -r --name-only origin/data/inverse-research-v1 research/inverse-v1/days |
+            sed -nE 's#^research/inverse-v1/days/([0-9]{4}-[0-9]{2}-[0-9]{2})\\.json$#\\1#p' \
+            > /tmp/inverse-existing-days.txt
+          echo "Already archived: $(wc -l < /tmp/inverse-existing-days.txt)"
+
+      - name: Bounded third-party join; never write into live or main
+        id: batch
+        env:
+          START: ${{ inputs.start || '2026-03-24' }}
+          END: ${{ inputs.end || '2026-09-22' }}
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py'
+          python scripts/inverse-research-batch-v1.py \
+            --start "$START" --end "$END" --limit 8 \
+            --existing-list /tmp/inverse-existing-days.txt \
+            --output-dir /tmp/inverse-new-days \
+            --status-out /tmp/inverse-batch-status-v1.json
+          python - <<'PY'
+          import json,os
+          x=json.load(open('/tmp/inverse-batch-status-v1.json'))
+          assert x['researchOnly'] is True and x['productionChanged'] is False
+          assert x['newFiles']<=8
+          for f in x['completedDates']:
+              d=json.load(open('/tmp/inverse-new-days/'+f['date']+'.json'))
+              assert d['researchOnly'] is True and d['productionChanged'] is False
+              assert d['prePostSeparated'] is True
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fp:
+              fp.write('new_count='+str(x['newFiles'])+'\n')
+          print('BOUNDED_RESEARCH_BATCH_AUDIT',json.dumps(x))
+          PY
+
+      - name: Update ONLY dedicated research-data branch
+        if: steps.batch.outputs.new_count != '0'
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/boat-command-inverse-data origin/data/inverse-research-v1
+          DATA=/tmp/boat-command-inverse-data
+          mkdir -p "$DATA/research/inverse-v1/days" "$DATA/research/inverse-v1/patterns"
+          cp /tmp/inverse-new-days/*.json "$DATA/research/inverse-v1/days/"
+          cp /tmp/inverse-batch-status-v1.json "$DATA/research/inverse-v1/backfill-status-v1.json"
+
+          # Analyze the entire archived set; never validate a model on training rows.
+          args=()
+          while IFS= read -r -d '' item; do
+            args+=(--input "$item")
+          done < <(find "$DATA/research/inverse-v1/days" -maxdepth 1 -name '*.json' -print0 | sort -z)
+          python scripts/inverse-outcome-patterns-v1.py "${args[@]}" \
+            --output "$DATA/research/inverse-v1/patterns/latest.json"
+
+          cd "$DATA"
+          git config user.name "boat-command-inverse-research"
+          git config user.email "boat-command-inverse-research@users.noreply.github.com"
+          git add research/inverse-v1/days research/inverse-v1/patterns/latest.json \
+            research/inverse-v1/backfill-status-v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'data(research): archive bounded third-party inverse join [skip ci]'
+          git push origin HEAD:data/inverse-research-v1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inverse-research-bounded-batch
+          path: |
+            /tmp/inverse-batch-status-v1.json
+            /tmp/inverse-new-days/*.json
+          retention-days: 7
+          if-no-files-found: ignore
