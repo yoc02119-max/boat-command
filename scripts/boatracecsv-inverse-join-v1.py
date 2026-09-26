@@ -284,6 +284,9 @@ def build_day(root: Path, date: str, fetcher=None) -> dict:
     if not targets:
         return {"schema": "boat-command-inverse-join-v1", "date": date,
                 "researchOnly": True, "productionChanged": False,
+                "predictionInputChanged": False, "tryChanged": False,
+                "sourcePolicy": "THIRD_PARTY_PROVISIONAL_RESEARCH_AUTHORITY",
+                "prePostSeparated": True, "strictCardTimeValid": False,
                 "status": "NO_EXISTING_TARGETS", "sourceAudit": {},
                 "summary": {"targetRaces": 0, "accepted": 0}, "races": []}
     sources, audits = {}, {}
