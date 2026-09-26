@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "MARUGAME",
+  "venueCode": "15",
+  "slug": "marugame",
+  "date": "2026-09-27",
+  "race": 11,
+  "generatedAt": "2026-09-26T19:09:21.913Z",
+  "deadline": "19:54",
+  "modelVersion": "MARUGAME-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-4",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-4",
+  "periodCandidateOrder": "1-2-4",
+  "selectedPreset": "ST_GLOBAL",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.02449,
+    "holdoutSecondDeltaVsTop": 0.008163,
+    "holdoutExactDeltaVsTop": 0.002257,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/marugame/2026-09-27/program/race-11.json",
+    "programSha256": "cc9542fc787763722c246c69f2af73c4e4ee24c68d855bb174ca16d4aa04d632",
+    "historyPath": "marugame-history-bootstrap-v1.json",
+    "baselinePath": "marugame-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    1.0127619996532686,
+    1.1188280168312508,
+    -1.876498474405192,
+    -0.32580222019798044,
+    0.39651289831663517,
+    -0.32580222019798044
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
