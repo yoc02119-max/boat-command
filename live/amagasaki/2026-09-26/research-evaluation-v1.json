@@ -4,7 +4,7 @@
   "venueCode": "13",
   "slug": "amagasaki",
   "date": "2026-09-26",
-  "generatedAt": "2026-09-26T05:30:43.307Z",
+  "generatedAt": "2026-09-26T06:09:17.525Z",
   "rows": [
     {
       "race": 1,
@@ -374,28 +374,69 @@
           "baselinePath": "amagasaki-baseline-backtest-v1.json"
         }
       }
+    },
+    {
+      "race": 10,
+      "actual": "1-4-3",
+      "payout100": 860,
+      "classBaseline": {
+        "generatedAt": "2026-09-25T19:09:34.837Z",
+        "picks": [
+          "1-3-4",
+          "1-2-4",
+          "1-2-5",
+          "1-3-2"
+        ],
+        "hit": false,
+        "modelVersion": "AMAGASAKI-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/amagasaki/2026-09-26/program/race-10.json",
+          "programSha256": "aaa294d3b59278db888f94d3e9b6a8c24238b76849baed2b912b29a85146dc82",
+          "programFetchedAt": "2026-09-26T04:08:44.835296+09:00",
+          "historyPath": "amagasaki-history-bootstrap-v1.json",
+          "baselinePath": "amagasaki-baseline-backtest-v1.json"
+        }
+      },
+      "programOnly": {
+        "generatedAt": "2026-09-25T19:09:34.837Z",
+        "picks": [
+          "1-3-4",
+          "1-2-4",
+          "1-2-3",
+          "1-4-3"
+        ],
+        "hit": true,
+        "modelVersion": "AMAGASAKI-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/amagasaki/2026-09-26/program/race-10.json",
+          "programSha256": "aaa294d3b59278db888f94d3e9b6a8c24238b76849baed2b912b29a85146dc82",
+          "programFetchedAt": "2026-09-26T04:08:44.835296+09:00",
+          "historyPath": "amagasaki-history-bootstrap-v1.json",
+          "baselinePath": "amagasaki-baseline-backtest-v1.json"
+        }
+      }
     }
   ],
   "summary": {
     "classBaseline": {
-      "evaluated": 9,
+      "evaluated": 10,
       "hits": 2,
-      "hitRate": 0.2222222222222222,
-      "stake": 3600,
+      "hitRate": 0.2,
+      "stake": 4000,
       "returns": 3750,
-      "roi": 1.0416666666666667
+      "roi": 0.9375
     },
     "programOnly": {
-      "evaluated": 9,
-      "hits": 4,
-      "hitRate": 0.4444444444444444,
-      "stake": 3600,
-      "returns": 6390,
-      "roi": 1.775
+      "evaluated": 10,
+      "hits": 5,
+      "hitRate": 0.5,
+      "stake": 4000,
+      "returns": 7250,
+      "roi": 1.8125
     },
-    "paired": 9,
-    "hitRateDelta": 0.2222222222222222,
-    "roiDelta": 0.7333333333333332
+    "paired": 10,
+    "hitRateDelta": 0.3,
+    "roiDelta": 0.875
   },
   "fundingScope": "NONE_RESEARCH_ONLY",
   "bankrollAffected": false,
