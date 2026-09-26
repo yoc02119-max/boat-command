@@ -1,0 +1,131 @@
+name: Inverse outcome research v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/inverse-outcome-research-v1.yml'
+      - 'scripts/boatracecsv-inverse-join-v1.py'
+      - 'scripts/inverse-outcome-patterns-v1.py'
+      - 'tests/test_boatracecsv_inverse_v1.py'
+      - 'tests/test_inverse_outcome_patterns_v1.py'
+      - 'scripts/inverse-research-batch-v1.py'
+      - 'tests/test_inverse_research_batch_v1.py'
+      - '.github/workflows/inverse-research-backfill-v1.yml'
+      - 'research/inverse-v1/LAB-IMPORT-CONTRACT.md'
+      - 'research/inverse-v1/DEVELOPMENT-PLAN.md'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Research date YYYY-MM-DD within existing rich history'
+        type: string
+        default: '2026-09-01'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inverse-research-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Offline isolation and correctness tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py
+          python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py' -v
+
+      - name: Execute one-day third-party join outside the app
+        env:
+          TARGET_DATE: ${{ inputs.date || '2026-09-01' }}
+        run: |
+          set -euo pipefail
+          python scripts/boatracecsv-inverse-join-v1.py \
+            --date "$TARGET_DATE" \
+            --output /tmp/boat-command-inverse-join-sample-v1.json
+          python - <<'PY'
+          import json
+          p='/tmp/boat-command-inverse-join-sample-v1.json'
+          x=json.load(open(p,encoding='utf-8'))
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['predictionInputChanged'] is False
+          assert x['tryChanged'] is False
+          assert x['prePostSeparated'] is True
+          assert x['summary']['targetRaces']>0
+          assert x['summary']['sourceFileCountOK']>=5
+          # No eventual race results or actual starts in the feature/pre section.
+          for race in x['races']:
+              if 'pre' not in race: continue
+              assert 'post' not in race['pre']
+              assert 'actualCourseStart' not in race['pre']
+              assert 'decisionRaw' not in race['pre']
+          print('INVERSE_RESEARCH_SAMPLE_AUDIT',json.dumps(x['summary']))
+          PY
+
+      - name: Analyze outcome-first venue hypotheses (NOT validated predictions)
+        run: |
+          set -euo pipefail
+          python scripts/inverse-outcome-patterns-v1.py \
+            --input /tmp/boat-command-inverse-join-sample-v1.json \
+            --output /tmp/boat-command-inverse-patterns-sample-v1.json \
+            --min-group-races 20
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/boat-command-inverse-patterns-sample-v1.json'))
+          y=json.load(open('/tmp/boat-command-inverse-join-sample-v1.json'))
+          assert x['researchOnly'] is True and x['productionChanged'] is False
+          assert x['autoPromotion'] is False
+          assert x['claimLevel']=='IN_SAMPLE_DESCRIPTIVE_ASSOCIATIONS_ONLY'
+          assert x['totals']['acceptedLabeledRaces']==y['summary']['accepted']
+          assert x['totals']['venuesWithAcceptedRaces']>0
+          print('INVERSE_PATTERNS_SAMPLE_AUDIT',json.dumps(x['totals']))
+          PY
+
+      - name: Verify bounded multi-day research and cumulative descriptive analysis
+        run: |
+          set -euo pipefail
+          python scripts/inverse-research-batch-v1.py \
+            --start 2026-09-01 --end 2026-09-03 --limit 3 \
+            --output-dir /tmp/inverse-batch-three-days \
+            --status-out /tmp/inverse-three-day-status.json
+          args=()
+          for item in /tmp/inverse-batch-three-days/*.json; do
+            args+=(--input "$item")
+          done
+          python scripts/inverse-outcome-patterns-v1.py "${args[@]}" \
+            --output /tmp/inverse-multiday-patterns-v1.json
+          python - <<'PY'
+          import json
+          b=json.load(open('/tmp/inverse-three-day-status.json'))
+          p=json.load(open('/tmp/inverse-multiday-patterns-v1.json'))
+          assert b['researchOnly'] and not b['productionChanged']
+          assert b['newFiles']==3
+          assert p['researchOnly'] and not p['productionChanged']
+          assert p['autoPromotion'] is False
+          assert p['totals']['acceptedLabeledRaces']>0
+          print('MULTI_DAY_RESEARCH_AUDIT',json.dumps({'batch':b,'patterns':p['totals']}))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inverse-research-one-day-sample
+          path: |
+            /tmp/boat-command-inverse-join-sample-v1.json
+            /tmp/boat-command-inverse-patterns-sample-v1.json
+            /tmp/inverse-three-day-status.json
+            /tmp/inverse-multiday-patterns-v1.json
+          retention-days: 10
+          if-no-files-found: ignore
