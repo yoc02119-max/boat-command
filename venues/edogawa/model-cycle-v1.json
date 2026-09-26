@@ -5,11 +5,11 @@
   "venueName": "江戸川",
   "venueCode": "03",
   "slug": "edogawa",
-  "generatedAt": "2026-09-26T00:30:28.681Z",
+  "generatedAt": "2026-09-26T04:24:21.843Z",
   "cycleNumber": 1,
   "cycleId": "edogawa-cycle-001-2026-09-20",
   "cycleDays": 30,
-  "phase": "ACTIVE",
+  "phase": "REVIEW_BLOCKED",
   "startDate": "2026-09-20",
   "endDate": "2026-10-19",
   "cycleDay": 7,
@@ -26,9 +26,10 @@
   "mainline": {
     "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
     "frozen": true,
-    "integrity": "OK",
+    "integrity": "DRIFT_DETECTED",
     "versionsObserved": [
-      "EDOGAWA-RESEARCH-MODEL-V2"
+      "EDOGAWA-RESEARCH-MODEL-V2",
+      "EDOGAWA-RESEARCH-MODEL-V1"
     ],
     "evaluation": {
       "races": 36,
@@ -52,26 +53,74 @@
       "registered": false,
       "registry": null,
       "evaluation": {
-        "races": 12,
-        "hits": 1,
-        "hitRate": 0.08333333333333333,
-        "stakeYenAt100PerPick": 4800,
-        "returnYenAt100PerPick": 1490,
-        "profitYenAt100PerPick": -3310,
-        "roi": 0.3104166666666667,
+        "races": 17,
+        "hits": 3,
+        "hitRate": 0.17647058823529413,
+        "stakeYenAt100PerPick": 6800,
+        "returnYenAt100PerPick": 4630,
+        "profitYenAt100PerPick": -2170,
+        "roi": 0.6808823529411765,
+        "observedDays": 2
+      },
+      "pairedMain": {
+        "races": 17,
+        "hits": 3,
+        "hitRate": 0.17647058823529413,
+        "stakeYenAt100PerPick": 6800,
+        "returnYenAt100PerPick": 4630,
+        "profitYenAt100PerPick": -2170,
+        "roi": 0.6808823529411765,
+        "observedDays": 2
+      },
+      "pairedRaces": 17,
+      "deltas": {
+        "hitRateDelta": 0,
+        "roiDelta": 0
+      },
+      "gates": {
+        "minimumPairedRaces": 30,
+        "maxAllowedHitRateRegression": 0.02,
+        "maxAllowedRoiRegression": 0.1,
+        "forwardEligible": false,
+        "historicalRequired": true,
+        "historicalOk": false,
+        "historicalEvidencePassed": false,
+        "eligible": false,
+        "reasons": [
+          "PAIRED_FORWARD_RACES_30_NOT_READY",
+          "NO_FORWARD_METRIC_IMPROVEMENT",
+          "HISTORICAL_VALIDATION_NOT_REGISTERED_OR_FAILED",
+          "CANDIDATE_NOT_REGISTERED"
+        ]
+      }
+    },
+    {
+      "id": "fullPre:EDOGAWA-RESEARCH-MODEL-V1",
+      "mode": "fullPre",
+      "modelVersion": "EDOGAWA-RESEARCH-MODEL-V1",
+      "registered": false,
+      "registry": null,
+      "evaluation": {
+        "races": 5,
+        "hits": 2,
+        "hitRate": 0.4,
+        "stakeYenAt100PerPick": 2000,
+        "returnYenAt100PerPick": 3140,
+        "profitYenAt100PerPick": 1140,
+        "roi": 1.57,
         "observedDays": 1
       },
       "pairedMain": {
-        "races": 12,
-        "hits": 1,
-        "hitRate": 0.08333333333333333,
-        "stakeYenAt100PerPick": 4800,
-        "returnYenAt100PerPick": 1490,
-        "profitYenAt100PerPick": -3310,
-        "roi": 0.3104166666666667,
+        "races": 5,
+        "hits": 2,
+        "hitRate": 0.4,
+        "stakeYenAt100PerPick": 2000,
+        "returnYenAt100PerPick": 3140,
+        "profitYenAt100PerPick": 1140,
+        "roi": 1.57,
         "observedDays": 1
       },
-      "pairedRaces": 12,
+      "pairedRaces": 5,
       "deltas": {
         "hitRateDelta": 0,
         "roiDelta": 0
@@ -143,10 +192,10 @@
     }
   ],
   "recommendation": {
-    "state": "WAIT",
+    "state": "BLOCKED",
     "candidateId": null,
     "reasons": [
-      "CYCLE_IN_PROGRESS"
+      "MAINLINE_MODEL_DRIFT_DETECTED"
     ]
   },
   "review": {
