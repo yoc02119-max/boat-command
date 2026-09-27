@@ -67,7 +67,7 @@ jobs:
           import json,os
           x=json.load(open('/tmp/inverse-batch-status-v1.json'))
           assert x['researchOnly'] is True and x['productionChanged'] is False
-          assert x['newFiles']<=8
+          assert x['newFiles']<=16
           for f in x['completedDates']:
               d=json.load(open('/tmp/inverse-new-days/'+f['date']+'.json'))
               assert d['researchOnly'] is True and d['productionChanged'] is False

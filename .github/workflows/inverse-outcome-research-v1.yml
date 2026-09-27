@@ -12,6 +12,7 @@ on:
       - 'scripts/inverse-research-coverage-v1.py'
       - 'tests/test_inverse_research_coverage_v1.py'
       - 'tests/test_inverse_research_batch_v1.py'
+      - 'tests/test_inverse_research_workflow_capacity_v1.py'
       - '.github/workflows/inverse-research-backfill-v1.yml'
       - 'research/inverse-v1/LAB-IMPORT-CONTRACT.md'
       - 'research/inverse-v1/DEVELOPMENT-PLAN.md'
@@ -47,6 +48,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_research_workflow_capacity_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
