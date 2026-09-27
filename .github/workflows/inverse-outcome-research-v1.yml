@@ -94,6 +94,14 @@ jobs:
           assert x['autoPromotion'] is False
           assert x['claimLevel']=='IN_SAMPLE_DESCRIPTIVE_ASSOCIATIONS_ONLY'
           assert x['totals']['acceptedLabeledRaces']==y['summary']['accepted']
+          for g in x['conditionalPatterns']:
+              dev=g['developmentEvidence']
+              n=g['denominatorAllMatchingRaces']
+              assert dev['denominatorAllMatchingRaces']==n
+              assert sum(dev['recordedWinningTechniqueCounts'].values())==n
+              assert sum(dev['winningActualCourseCounts'].values())==n
+              assert sum(dev['minimumActualSTBoatCounts'].values())==n
+              assert 0<=dev['outsideBoatWon']['races']<=n
           assert x['totals']['venuesWithAcceptedRaces']>0
           print('INVERSE_PATTERNS_SAMPLE_AUDIT',json.dumps(x['totals']))
           PY

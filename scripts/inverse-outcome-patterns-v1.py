@@ -12,6 +12,7 @@ import collections
 import hashlib
 import json
 import math
+import re
 import statistics
 from pathlib import Path
 
@@ -82,14 +83,39 @@ def load_documents(paths):
 
 
 def classify_post(post):
-    """Actual course and result labels only: never invent visual race movements."""
+    """Record actual outcomes only, with UNKNOWN for incomplete start evidence."""
     start = post.get("actualCourseStart") or []
-    first_course = next((x["course"] for x in start
-                         if x.get("boat") == post.get("winningBoat")), None)
+    try:
+        courses = [int(x["course"]) for x in start]
+        boats = [int(x["boat"]) for x in start]
+    except (KeyError, TypeError, ValueError):
+        courses, boats = [], []
+    full_entry = (len(start) == 6 and set(courses) == set(range(1, 7))
+                  and set(boats) == set(range(1, 7)))
+    winner = post.get("winningBoat")
+    first_course = (next((int(x["course"]) for x in start
+                          if int(x["boat"]) == winner), None)
+                    if full_entry else None)
+    # ST is POST-race evidence, never a feature for THIS race.
+    # Reject missing, flying, invalid or tied times instead of guessing.
+    first_st_boat = None
+    if full_entry and all(str(x.get("flyingRaw") or "") in ("", "0") for x in start):
+        times = [numeric(x.get("actualST")) for x in start]
+        if all(x is not None and 0 <= x <= 1 for x in times):
+            min_st = min(times)
+            fastest = [i for i, x in enumerate(times) if abs(x - min_st) < 1e-8]
+            if len(fastest) == 1:
+                first_st_boat = int(start[fastest[0]]["boat"])
+    actual = str(post.get("actual") or "")
+    top3 = actual.split("-") if re.fullmatch(r"[1-6]-[1-6]-[1-6]", actual) else []
+    decision = re.sub(r"\s+", "", str(post.get("decisionRaw") or ""))
     return {
-        "winningBoat": post.get("winningBoat"),
+        "winningBoat": winner,
         "winningActualCourse": first_course,
-        "decisionRaw": post.get("decisionRaw") or "UNKNOWN",
+        "decisionRaw": decision or "UNKNOWN",
+        "minimumActualSTBoat": first_st_boat,
+        "outsideBoatWon": winner in (4, 5, 6),
+        "outsideBoatPodium": bool(top3 and any(x in ("4", "5", "6") for x in top3)),
     }
 
 
@@ -128,7 +154,7 @@ def summarize(rows, min_support=20):
             values.append(("WIND_AND_FAST", wind + "|boat" + str(fast)))
         for dimension, condition in values:
             groups[(venue, dimension, condition)].append(
-                (actual, post["payout100"]))
+                (actual, post["payout100"], c))
 
     supported = []
     unsupported = collections.Counter()
@@ -137,11 +163,20 @@ def summarize(rows, min_support=20):
         if denominator < min_support:
             unsupported[dimension] += 1
             continue
-        counts = collections.Counter(actual for actual, _ in events)
+        counts = collections.Counter(actual for actual, _, _ in events)
+        decision_counts = collections.Counter(event["decisionRaw"] for _, _, event in events)
+        winner_course_counts = collections.Counter(
+            str(event["winningActualCourse"]) if event["winningActualCourse"] is not None
+            else "UNKNOWN" for _, _, event in events)
+        fastest_st_counts = collections.Counter(
+            str(event["minimumActualSTBoat"]) if event["minimumActualSTBoat"] is not None
+            else "UNKNOWN" for _, _, event in events)
+        outside_wins = sum(bool(event["outsideBoatWon"]) for _, _, event in events)
+        outside_podiums = sum(bool(event["outsideBoatPodium"]) for _, _, event in events)
         # In-sample descriptive outcomes: payout-only observed ROI is NOT predictive ROI.
         outcome_rows = []
         for order, count in counts.most_common():
-            winnings = [pay for actual, pay in events if actual == order]
+            winnings = [pay for actual, pay, _ in events if actual == order]
             outcome_rows.append({
                 "order": order, "historicalHits": count,
                 "denominatorAllMatchingRaces": denominator,
@@ -154,6 +189,19 @@ def summarize(rows, min_support=20):
             "venue": venue, "dimension": dimension, "preCondition": condition,
             "denominatorAllMatchingRaces": denominator,
             "outcomes": outcome_rows,
+            "developmentEvidence": {
+                "denominatorAllMatchingRaces": denominator,
+                "recordedWinningTechniqueCounts": dict(decision_counts),
+                "winningActualCourseCounts": dict(winner_course_counts),
+                "minimumActualSTBoatCounts": dict(fastest_st_counts),
+                "outsideBoatWon": {
+                    "races": outside_wins,
+                    "observedFrequency": round(outside_wins / denominator, 6)},
+                "outsideBoatPodium": {
+                    "races": outside_podiums,
+                    "observedFrequency": round(outside_podiums / denominator, 6)},
+                "evidenceRole": "POST_RACE_DESCRIPTIVE_NOT_SAME_RACE_PREDICTOR",
+            },
             "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED",
         })
 
