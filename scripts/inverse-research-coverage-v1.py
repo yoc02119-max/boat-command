@@ -58,6 +58,7 @@ def load_history(history_dir: Path) -> tuple[dict, dict]:
 
 def build_coverage(history_dir: Path, days_dir: Path) -> dict:
     venues, _ = load_history(history_dir)
+    venue_by_code = {v["venueCode"]: slug for slug, v in venues.items()}
     seen = set()
     dates = set()
     no_target_days = []
@@ -87,12 +88,18 @@ def build_coverage(history_dir: Path, days_dir: Path) -> dict:
                 raise ValueError(f"EMPTY_DAY_NOT_EXPLAINED: {day}")
             no_target_days.append(day)
         for row in races:
-            rc = row["raceCode"]
-            venue = row.get("venue")
+            rc = str(row["raceCode"])
+            if (len(rc) != 12 or not rc.isdigit() or
+                    not rc.startswith(day.replace("-", ""))):
+                raise ValueError(f"INVALID_ARCHIVED_RACE_CODE: {rc} {day}")
+            # Rejected join rows intentionally contain only raceCode and status.
+            # Derive their venue from original code rather than losing failed races.
+            venue = venue_by_code.get(rc[8:10])
             if rc in seen:
                 raise ValueError(f"DUPLICATE_ARCHIVED_RACE: {rc}")
-            if venue not in venues or rc not in venues[venue]["_expected"]:
-                raise ValueError(f"ORPHAN_ARCHIVED_RACE: {rc} {venue}")
+            if (venue is None or rc not in venues[venue]["_expected"] or
+                    row.get("venue") not in (None, venue)):
+                raise ValueError(f"ORPHAN_ARCHIVED_RACE: {rc} {row.get('venue')}")
             seen.add(rc)
             v = venues[venue]
             v["_archived"].add(rc)
