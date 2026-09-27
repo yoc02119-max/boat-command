@@ -57,8 +57,9 @@ jobs:
         run: |
           set -euo pipefail
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py'
+          python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py'
           python scripts/inverse-research-batch-v1.py \
-            --start "$START" --end "$END" --limit 8 --newest-first \
+            --start "$START" --end "$END" --limit 16 --newest-first \
             --existing-list /tmp/inverse-existing-days.txt \
             --output-dir /tmp/inverse-new-days \
             --status-out /tmp/inverse-batch-status-v1.json
@@ -95,11 +96,19 @@ jobs:
             --output /tmp/boat-command-inverse-latest-patterns.json
           cp /tmp/boat-command-inverse-latest-patterns.json "$DATA/research/inverse-v1/patterns/latest.json"
 
+          # Exactly track how many source races each of 24 venues has actually visited.
+          # Archive the audit alongside immutable days, on the data branch only.
+          python scripts/inverse-research-coverage-v1.py \
+            --history-dir rich-history-24 \
+            --days-dir "$DATA/research/inverse-v1/days" \
+            --output /tmp/boat-command-inverse-coverage.json
+          cp /tmp/boat-command-inverse-coverage.json "$DATA/research/inverse-v1/coverage-v1.json"
+
           cd "$DATA"
           git config user.name "boat-command-inverse-research"
           git config user.email "boat-command-inverse-research@users.noreply.github.com"
           git add research/inverse-v1/days research/inverse-v1/patterns/latest.json \
-            research/inverse-v1/backfill-status-v1.json
+            research/inverse-v1/backfill-status-v1.json research/inverse-v1/coverage-v1.json
           git diff --cached --quiet && exit 0
           git commit -m 'data(research): archive bounded third-party inverse join [skip ci]'
           git push origin HEAD:data/inverse-research-v1
