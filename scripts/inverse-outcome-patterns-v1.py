@@ -60,8 +60,28 @@ def pre_features(row):
     return {"fastExhibitionBoat": fast, "windBucket": wind}
 
 
-def load_documents(paths):
+def load_documents(paths, fallback_file=None):
+    """Rehydrate vendor-missing *labels only* without modifying archive or PRE.
+
+    Optional overlay must originate from the same immutable archive day files.
+    Unknown/conflicting/partially present vendor rows may NEVER be overridden.
+    """
     seen, rows, dates, sources = set(), [], set(), []
+    overlays, archive_hashes = {}, {}
+    if fallback_file is not None:
+        raw = Path(fallback_file).read_bytes()
+        artifact = json.loads(raw)
+        if not (artifact.get("schema") == "boat-command-legacy-label-overlay-v1"
+                and artifact.get("researchOnly") is True
+                and artifact.get("productionChanged") is False
+                and artifact.get("immutableOriginalDaysPreserved") is True):
+            raise ValueError("UNSAFE_FALLBACK_ARTIFACT")
+        overlays = artifact.get("overrides") or {}
+        archive_hashes = {v["date"]: v["sha256"]
+                          for v in artifact.get("archiveDaySources") or []}
+        sources.append({"path": str(fallback_file), "sha256": hashlib.sha256(raw).hexdigest(),
+                        "role": "LABEL_ONLY_VENDOR_ABSENT_FALLBACK"})
+    applied = set()
     for path in paths:
         raw = Path(path).read_bytes()
         doc = json.loads(raw)
@@ -71,14 +91,49 @@ def load_documents(paths):
                 and doc.get("productionChanged") is False
                 and doc.get("prePostSeparated") is True):
             raise ValueError(f"UNSAFE_INPUT_CONTRACT: {path}")
-        sources.append({"path": str(path), "sha256": hashlib.sha256(raw).hexdigest()})
+        digest = hashlib.sha256(raw).hexdigest()
+        if fallback_file is not None and archive_hashes.get(doc.get("date")) != digest:
+            raise ValueError(f"ARCHIVE_CHANGED_SINCE_FALLBACK: {path}")
+        sources.append({"path": str(path), "sha256": digest})
         dates.add(doc.get("date"))
         for row in doc.get("races", []):
             rc = row.get("raceCode")
             if not rc or rc in seen:
                 raise ValueError(f"MISSING_OR_DUPLICATE_RACE_CODE: {rc}")
             seen.add(rc)
+            if rc in overlays:
+                entry = overlays[rc]
+                avail = row.get("labelAvailability") or {}
+                if not (
+                    row.get("status") == "LABEL_INCOMPLETE" and
+                    row.get("identityMatch") is True and
+                    row.get("legacyLabelAvailable") is True and
+                    not row.get("conflicts") and
+                    row.get("pre") is not None and
+                    isinstance(row.get("labelAvailability"), dict) and
+                    avail.get("resultRowPresent") is False and
+                    avail.get("payoutRowPresent") is False and
+                    entry.get("archivedDaySha256") == digest and
+                    entry.get("raceCode") == rc and
+                    entry.get("venue") == row.get("venue") and
+                    entry.get("labelSource") == "EXISTING_HISTORY_ONLY_WHEN_BOTH_VENDOR_ROWS_ABSENT" and
+                    isinstance(entry.get("post"), dict)
+                ):
+                    raise ValueError(f"INVALID_OR_UNSAFE_LABEL_FALLBACK: {rc}")
+                post = entry["post"]
+                if (not re.fullmatch(r"[1-6]-[1-6]-[1-6]", str(post.get("actual") or ""))
+                    or len(set(str(post["actual"]).split("-"))) != 3
+                    or type(post.get("payout100")) is not int or post["payout100"] <= 0
+                    or post.get("decisionRaw") is not None
+                    or post.get("actualCourseStart") != []):
+                    raise ValueError(f"FALLBACK_CANNOT_FABRICATE_RACE_DEVELOPMENT: {rc}")
+                row = {**row, "status": "ACCEPTED",
+                       "post": dict(post),
+                       "labelSource": "EXISTING_HISTORY_FALLBACK"}
+                applied.add(rc)
             rows.append(row)
+    if set(overlays) != applied:
+        raise ValueError(f"FALLBACK_REFERENCES_UNLOADED_RACES: {len(set(overlays) - applied)}")
     return rows, sorted(dates), sources
 
 
@@ -224,6 +279,8 @@ def summarize(rows, min_support=20):
         "sampleGate": {"minGroupRaces": min_support, "noCausalClaims": True},
         "totals": {
             "inputRows": len(rows), "acceptedLabeledRaces": len(accepted),
+            "thirdPartyLabelRaces": sum(r.get("labelSource") != "EXISTING_HISTORY_FALLBACK" for r in accepted),
+            "legacyFallbackLabelRaces": sum(r.get("labelSource") == "EXISTING_HISTORY_FALLBACK" for r in accepted),
             "excludedNonAccepted": len(rows) - len(accepted),
             "venuesWithAcceptedRaces": len(venue_total),
             "supportedGroups": len(supported),
@@ -241,6 +298,8 @@ def main():
                      help="Repeat for multiple independent joined day snapshots")
     cli.add_argument("--output", required=True, type=Path)
     cli.add_argument("--min-group-races", type=int, default=20)
+    cli.add_argument("--legacy-fallback-file", type=Path,
+                     help="Optional immutable vendor-absent-only label overlay; POST only")
     args = cli.parse_args()
     root = Path(__file__).resolve().parents[1]
     out = args.output.resolve()
@@ -250,7 +309,7 @@ def main():
         cli.error("RESEARCH_OUTPUT_ONLY")
     if out.exists():
         cli.error("IMMUTABLE_OUTPUT_ALREADY_EXISTS")
-    rows, dates, sources = load_documents(args.input)
+    rows, dates, sources = load_documents(args.input, args.legacy_fallback_file)
     report = summarize(rows, args.min_group_races)
     report["inputDates"] = dates
     report["inputSources"] = sources
