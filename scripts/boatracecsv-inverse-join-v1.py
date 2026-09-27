@@ -14,6 +14,7 @@ import hashlib
 import io
 import json
 import re
+import time
 import urllib.error
 import urllib.request
 from collections import Counter
@@ -124,9 +125,22 @@ def fetch_source(source: str, date: str, fetcher=None) -> tuple[dict, dict]:
     url = f"{BASE}/{SOURCES[source]}/{y}/{m}/{d}.csv"
     if fetcher is None:
         def fetcher(url):
-            req = urllib.request.Request(url, headers={"User-Agent": "BOAT-COMMAND-RESEARCH-ONLY/1.0"})
-            with urllib.request.urlopen(req, timeout=35) as response:
-                return response.read()
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "BOAT-COMMAND-RESEARCH-ONLY/1.0"})
+            # Only transient HTTP/transport failures qualify; a true 404 must
+            # remain missing and should never masquerade as a complete day.
+            for attempt in range(3):
+                try:
+                    with urllib.request.urlopen(req, timeout=35) as response:
+                        return response.read()
+                except urllib.error.HTTPError as exc:
+                    if exc.code not in (429, 500, 502, 503, 504) or attempt == 2:
+                        raise
+                except (urllib.error.URLError, TimeoutError):
+                    if attempt == 2:
+                        raise
+                time.sleep(1 + attempt)
+            raise RuntimeError("UNREACHABLE_DOWNLOAD_RETRY_STATE")
     try:
         raw = fetcher(url)
     except urllib.error.HTTPError as exc:
