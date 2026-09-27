@@ -1,0 +1,77 @@
+name: Inverse venue probability prototype v1
+
+# Isolated research: READ the immutable data branch; never commit a generated
+# model, modify original predictions, or touch LAB/TRY/production artifacts.
+on:
+  pull_request:
+    paths:
+      - 'scripts/inverse-venue-prototype-v1.py'
+      - 'tests/test_inverse_venue_prototype_v1.py'
+      - '.github/workflows/inverse-venue-prototype-v1.yml'
+      - 'research/inverse-v1/VENUE-PROTOTYPE-v1.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inverse-venue-prototype-pr
+  cancel-in-progress: true
+
+jobs:
+  isolated-24-venue-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify independent model and pre/post safety
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/inverse-venue-prototype-v1.py
+          python -m unittest discover -s tests -p test_inverse_venue_prototype_v1.py -v
+      - name: Pin and read ONLY the independent research data branch
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin data/inverse-research-v1
+          mkdir -p /tmp/boat-inverse-prototype
+          git worktree add --detach /tmp/boat-inverse-prototype/snap FETCH_HEAD
+          git -C /tmp/boat-inverse-prototype/snap rev-parse HEAD > /tmp/boat-inverse-prototype/data-sha
+          echo "Pinned data revision: $(cat /tmp/boat-inverse-prototype/data-sha)"
+      - name: Run 24 independent chronological holdouts; no payouts or odds used
+        run: |
+          set -euo pipefail
+          DATA=/tmp/boat-inverse-prototype/snap/research/inverse-v1
+          python scripts/inverse-venue-prototype-v1.py \
+            --days-dir "$DATA/days" \
+            --coverage "$DATA/coverage-v1.json" \
+            --data-sha "$(cat /tmp/boat-inverse-prototype/data-sha)" \
+            --output /tmp/boat-inverse-prototype/venue-prototype-report-v1.json
+          python - <<'PY'
+          import json
+          report=json.load(open("/tmp/boat-inverse-prototype/venue-prototype-report-v1.json"))
+          assert report["researchOnly"] and not report["productionChanged"]
+          assert not report["predictionInputChanged"] and not report["tryChanged"]
+          assert not report["autoPromotion"]
+          assert report["summary"]["venueCount"]==24 and len(report["venues"])==24
+          assert report["archivedDayFilesVerified"]>=1
+          assert report["holdoutStartInclusive"]==report["trainEndExclusive"]
+          for item in report["venues"]:
+              if item.get("metrics"):
+                  assert item["trainRaces"]>=100 and item["holdoutRaces"]>=30
+                  for name in ("venuePrior","candidate"):
+                      assert 0<=item["metrics"][name]["top1Hits"]<=item["holdoutRaces"]
+                      assert 0<=item["metrics"][name]["top8Hits"]<=item["holdoutRaces"]
+          print("PROTOTYPE_ISOLATION_PASS",report["summary"])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-24-venue-chronological-holdout
+          path: /tmp/boat-inverse-prototype/venue-prototype-report-v1.json
+          retention-days: 10
+          if-no-files-found: ignore
