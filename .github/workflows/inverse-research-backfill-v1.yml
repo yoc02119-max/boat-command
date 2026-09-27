@@ -61,6 +61,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_legacy_label_overlay_v1.py'
+          python -m unittest discover -s tests -p 'test_inverse_vendor_retry_v1.py'
           python scripts/inverse-research-batch-v1.py \
             --start "$START" --end "$END" --limit 16 --newest-first \
             --existing-list /tmp/inverse-existing-days.txt \
