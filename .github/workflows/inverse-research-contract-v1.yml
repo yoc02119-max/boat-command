@@ -41,7 +41,7 @@ jobs:
           assert '"post": outcome' in src
           assert '"pre": {' in src
           workflow=pathlib.Path('.github/workflows/inverse-research-contract-v1.yml').read_text()
-          assert 'schedule:' not in workflow
+          assert not any(line.startswith('  schedule:') for line in workflow.splitlines())
           assert 'contents: read' in workflow
           print('RESEARCH_ONLY_BOUNDARY_PASS')
           PY
