@@ -1,0 +1,87 @@
+name: Prospective original-source HASH-only PRE research v1
+
+# Adds NO schedule, NO production writes, NO raw official HTML redistribution.
+# Manual live capture is disabled unless the operator explicitly acknowledges
+# that applicable source access/use and terms have been reviewed.
+on:
+  pull_request:
+    paths:
+      - 'scripts/research-prospective-raw-pre-v1.py'
+      - 'tests/test_research_prospective_raw_pre_v1.py'
+      - '.github/workflows/research-prospective-hash-pre-v1.yml'
+      - 'research/inverse-v1/PROSPECTIVE-HASH-PRE-v1.md'
+  workflow_dispatch:
+    inputs:
+      confirm_authorized_use:
+        description: 'I verified permission and responsible rate limits for official source access (manual trial only)'
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and validate strict PRE negative controls without network
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research-prospective-raw-pre-v1.py
+          python -m unittest discover -s tests -p test_research_prospective_raw_pre_v1.py -v
+
+  approved-manual-prospective-capture:
+    if: github.event_name == 'workflow_dispatch' && inputs.confirm_authorized_use == true
+    needs: offline-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh original LIVE input from latest main without modifying remote
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: At most four live official two-page requests; keep only hashes and tiny metadata
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/boat-existing-hash-pre
+          python scripts/research-prospective-raw-pre-v1.py \
+            --archived-root /tmp/boat-existing-hash-pre \
+            --output-root /tmp/boat-hash-pre-observations \
+            --max-fetch 4
+          python - <<'PY'
+          from pathlib import Path
+          import importlib.util,json
+          spec=importlib.util.spec_from_file_location(
+            "h",Path("scripts/research-prospective-raw-pre-v1.py"))
+          h=importlib.util.module_from_spec(spec);spec.loader.exec_module(h)
+          n=0
+          for p in Path("/tmp/boat-hash-pre-observations").rglob("*.json"):
+              x=json.loads(p.read_text(encoding="utf8"))
+              assert h.validate_snapshot(x)
+              assert not x["originalHtmlRedistributed"]
+              assert not x["independentServerPublicationProved"]
+              assert not x["strictModelUseEnabled"] and not x["productionChanged"]
+              assert "gzipBase64OriginalBytes" not in p.read_text(encoding="utf8")
+              n+=1
+          print("PROSPECTIVE_HASH_ONLY_MANUAL_CAPTURE_AUDIT",n)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: authorized-hash-only-pre-observation-manual-trial
+          path: /tmp/boat-hash-pre-observations/
+          retention-days: 7
+          if-no-files-found: ignore
