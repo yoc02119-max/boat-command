@@ -66,6 +66,49 @@ class OutcomePatternsTest(unittest.TestCase):
         self.assertAlmostEqual(hit["observedConditionalFrequency"], 2 / 3, places=6)
         self.assertEqual(report["claimLevel"], "IN_SAMPLE_DESCRIPTIVE_ASSOCIATIONS_ONLY")
 
+    def test_development_conditions_count_wins_misses_and_unknown_st(self):
+        rows = [
+            sample(code="202609012101"),
+            sample(actual="1-2-3", payoff=200, code="202609012102"),
+            sample(code="202609012103"),
+        ]
+        rows[1]["post"]["decisionRaw"] = "逃　げ"
+        report = patterns.summarize(rows, min_support=3)
+        group = next(x for x in report["conditionalPatterns"]
+                     if x["dimension"] == "WIND_AND_FAST"
+                     and x["preCondition"] == "2-3m|boat6")
+        dev = group["developmentEvidence"]
+        self.assertEqual(dev["denominatorAllMatchingRaces"], 3)
+        self.assertEqual(dev["recordedWinningTechniqueCounts"]["まくり差し"], 2)
+        self.assertEqual(dev["recordedWinningTechniqueCounts"]["逃げ"], 1)
+        self.assertEqual(dev["winningActualCourseCounts"]["6"], 2)
+        self.assertEqual(dev["winningActualCourseCounts"]["1"], 1)
+        self.assertEqual(dev["minimumActualSTBoatCounts"]["UNKNOWN"], 3)
+        self.assertEqual(dev["outsideBoatWon"]["races"], 2)
+        self.assertEqual(dev["outsideBoatPodium"]["races"], 2)
+        self.assertAlmostEqual(dev["outsideBoatWon"]["observedFrequency"], 2/3, places=6)
+        self.assertEqual(dev["evidenceRole"],
+                         "POST_RACE_DESCRIPTIVE_NOT_SAME_RACE_PREDICTOR")
+
+    def test_actual_st_evidence_rejects_flying_partial_and_tied(self):
+        row = sample()
+        start = row["post"]["actualCourseStart"]
+        for v in start:
+            v["actualST"] = "0.20"
+        start[4]["actualST"] = "0.03"
+        classified = patterns.classify_post(row["post"])
+        self.assertEqual(classified["minimumActualSTBoat"], 5)
+        self.assertEqual(classified["winningActualCourse"], 6)
+        start[4]["flyingRaw"] = "F"
+        self.assertIsNone(patterns.classify_post(row["post"])["minimumActualSTBoat"])
+        start[4]["flyingRaw"] = ""
+        start[3]["actualST"] = "0.03"
+        self.assertIsNone(patterns.classify_post(row["post"])["minimumActualSTBoat"])
+        start.pop()
+        partial = patterns.classify_post(row["post"])
+        self.assertIsNone(partial["winningActualCourse"])
+        self.assertIsNone(partial["minimumActualSTBoat"])
+
     def test_group_requires_min_sample(self):
         report = patterns.summarize([sample()], min_support=20)
         self.assertEqual(report["totals"]["supportedGroups"], 0)
