@@ -24,6 +24,14 @@ class WorkflowCapacityTest(unittest.TestCase):
         self.assertIn("1 <= rounds <= 2", script)
         self.assertIn("assert x['maxSelectedDatesThisRun']<=32", text)
 
+    def test_automatic_range_end_tracks_original_rich_history(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("END: ${{ inputs.end || '' }}", text)
+        self.assertIn('rich-history-24/*-rich-history-v1.json', text)
+        self.assertIn('max(r["d"]', text)
+        self.assertIn('--start "$START" --end "$END"', text)
+        self.assertNotIn("END: ${{ inputs.end || '2026-09-22' }}", text)
+
     def test_research_output_branch_and_official_collector_independent(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("git push origin HEAD:data/inverse-research-v1", text)
