@@ -1,0 +1,47 @@
+name: Inverse research contract v1
+on:
+  pull_request:
+    paths:
+      - 'scripts/boatracecsv-inverse-join-v1.py'
+      - 'scripts/inverse-outcome-analysis-v1.py'
+      - 'tests/test_boatracecsv_inverse_join_v1.py'
+      - 'tests/test_inverse_outcome_analysis_v1.py'
+      - '.github/workflows/inverse-research-contract-v1.yml'
+      - 'research/inverse-v1/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-research-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax and offline fixtures
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/boatracecsv-inverse-join-v1.py
+          python3 -m unittest discover -s tests -p 'test_boatracecsv_inverse_join_v1.py' -v
+          if [ -f scripts/inverse-outcome-analysis-v1.py ]; then
+            python3 -m py_compile scripts/inverse-outcome-analysis-v1.py
+          fi
+          if [ -f tests/test_inverse_outcome_analysis_v1.py ]; then
+            python3 -m unittest discover -s tests -p 'test_inverse_outcome_analysis_v1.py' -v
+          fi
+      - name: Research-only write boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          src=pathlib.Path('scripts/boatracecsv-inverse-join-v1.py').read_text()
+          assert 'OUTPUT_MUST_NOT_TOUCH_PRODUCTION_OR_EXISTING_HISTORY' in src
+          assert '"post": outcome' in src
+          assert '"pre": {' in src
+          workflow=pathlib.Path('.github/workflows/inverse-research-contract-v1.yml').read_text()
+          assert 'schedule:' not in workflow
+          assert 'contents: read' in workflow
+          print('RESEARCH_ONLY_BOUNDARY_PASS')
+          PY
