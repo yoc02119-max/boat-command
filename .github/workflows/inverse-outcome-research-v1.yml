@@ -10,7 +10,9 @@ on:
       - 'tests/test_inverse_outcome_patterns_v1.py'
       - 'scripts/inverse-research-batch-v1.py'
       - 'scripts/inverse-research-coverage-v1.py'
+      - 'scripts/inverse-research-exceptions-v1.py'
       - 'tests/test_inverse_research_coverage_v1.py'
+      - 'tests/test_inverse_research_exceptions_v1.py'
       - 'tests/test_inverse_research_batch_v1.py'
       - 'tests/test_inverse_research_workflow_capacity_v1.py'
       - '.github/workflows/inverse-research-backfill-v1.yml'
@@ -44,12 +46,13 @@ jobs:
       - name: Offline isolation and correctness tests
         run: |
           set -euo pipefail
-          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py scripts/inverse-research-coverage-v1.py
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py scripts/inverse-research-coverage-v1.py scripts/inverse-research-exceptions-v1.py
           python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_workflow_capacity_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
         env:
@@ -150,6 +153,22 @@ jobs:
           print('INVERSE_COVERAGE_PILOT_PASS',c['summary'])
           PY
 
+      - name: Verify exception audit and denominator match on pilot
+        run: |
+          set -euo pipefail
+          python scripts/inverse-research-exceptions-v1.py \
+            --days-dir /tmp/inverse-batch-three-days \
+            --output /tmp/inverse-pilot-exceptions-v1.json
+          python - <<'PY'
+          import json
+          report=json.load(open('/tmp/inverse-pilot-exceptions-v1.json'))
+          coverage=json.load(open('/tmp/inverse-pilot-coverage-v1.json'))
+          assert report['researchOnly'] is True and report['productionChanged'] is False
+          assert report['summary']['unacceptedRaces']==coverage['summary']['nonAcceptedArchivedRaces']
+          assert report['summary']['visitedRaces']==coverage['summary']['archivedTargetRaces']
+          print('INVERSE_PILOT_EXCEPTION_PASS',report['summary'])
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -160,5 +179,6 @@ jobs:
             /tmp/inverse-three-day-status.json
             /tmp/inverse-multiday-patterns-v1.json
             /tmp/inverse-pilot-coverage-v1.json
+            /tmp/inverse-pilot-exceptions-v1.json
           retention-days: 10
           if-no-files-found: ignore

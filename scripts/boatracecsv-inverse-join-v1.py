@@ -239,6 +239,17 @@ def join_race(target: dict, sources: dict) -> dict:
     payout_order = normalize_order(payout_row.get("3連単_組番")) if payout_row else None
     payout = normalize_money(payout_row.get("3連単_払戻金")) if payout_row else None
     legacy = target["legacyLabels"]
+    # Never silently discard why a race lacks an accepted trifecta. A non-standard
+    # result can legitimately be cancelled/refunded, not a scraper failure.
+    availability = {
+        "resultRowPresent": actual_row is not None,
+        "resultTrifectaUsable": actual is not None,
+        "payoutRowPresent": payout_row is not None,
+        "payoutTrifectaUsable": payout_order is not None,
+        "payoutYenUsable": payout is not None,
+        "originalOutcomePresent": legacy["actual"] is not None,
+        "originalPayoutPresent": legacy["payout100"] is not None,
+    }
     conflicts = []
     if actual and payout_order and actual != payout_order:
         conflicts.append("THIRD_PARTY_RESULT_VS_PAYOUT_ORDER")
@@ -265,6 +276,7 @@ def join_race(target: dict, sources: dict) -> dict:
         "venueCode": target["venueCode"], "race": target["race"],
         "status": status, "identityMatch": True,
         "conflicts": conflicts,
+        "labelAvailability": availability,
         "deadlineJst": deadline.isoformat() if deadline else None,
         "predictionCutoffJst": cutoff.isoformat() if cutoff else None,
         "pre": {

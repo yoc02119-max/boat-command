@@ -163,6 +163,10 @@ class InverseJoinV1Tests(unittest.TestCase):
             report = research.build_day(fake_root(Path(temp)), DATE, missing_payout)
         self.assertEqual(report["races"][0]["status"], "LABEL_INCOMPLETE")
         self.assertEqual(report["summary"]["sourceFileCountOK"], 5)
+        availability = report["races"][0]["labelAvailability"]
+        self.assertTrue(availability["resultTrifectaUsable"])
+        self.assertFalse(availability["payoutRowPresent"])
+        self.assertFalse(availability["payoutYenUsable"])
 
 
 if __name__ == "__main__":
