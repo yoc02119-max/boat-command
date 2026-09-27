@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,15 @@ def verify_case(repo, slug, code, date, race, source, gh, seen, max_revisions=40
         try:
             raw = gh.git(repo, "show", f"{sha}:{filename}")
             doc = json.loads(raw)
+        except subprocess.CalledProcessError as exc:
+            # git log -- <path> includes deletion commits. Prove that the
+            # commit object exists before skipping just the absent path.
+            try:
+                gh.git(repo, "cat-file", "-e", sha)
+            except subprocess.CalledProcessError as missing:
+                raise RuntimeError("INCOMPLETE_GIT_HISTORY") from missing
+            diagnostics["FILE_ABSENT_AT_HISTORICAL_COMMIT"] += 1
+            continue
         except (OSError, ValueError, json.JSONDecodeError):
             diagnostics["UNREADABLE_COMMITTED_VERSION"] += 1
             continue
