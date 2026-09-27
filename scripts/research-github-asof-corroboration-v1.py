@@ -37,7 +37,7 @@ def git(repo, *args):
     return subprocess.run(["git", "-C", str(repo), *args],
                           capture_output=True, text=True, check=True).stdout
 
-def revisions(repo, relative_path, max_count=10):
+def revisions(repo, relative_path, max_count=40):
     result = git(repo, "log", "--format=%H", "--", relative_path)
     return result.splitlines()[:max_count]
 
@@ -80,7 +80,7 @@ def github_seen_before(api_base, repository, token, sha, cutoff, cache=None):
     cutoff_utc = cutoff.astimezone(dt.timezone.utc)
     return next((date for date in cache[sha] if date <= cutoff_utc), None)
 
-def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=10):
+def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=40):
     """Find historical versions; a current rewritten program is NOT used."""
     pfile = f"live/{slug}/{date}/program/race-{race}.json"
     qfile = f"live/{slug}/{date}/pre-rich/race-{race}.json"
@@ -92,7 +92,6 @@ def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=
     for q_sha in q_versions:
         try:
             pre = at_revision(repo, q_sha, qfile)
-            base = source.audit_live_pair  # reuse exact timestamp/identity policy
             cutoff = source.cutoff_for(date, pre.get("deadline"))
             pre_stamp = source.observed(pre.get("fetchedAt"))
             if (pre.get("date") != date or pre.get("race") != race
@@ -146,8 +145,8 @@ def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=
 def scan_repo(repo, source, seen, candidate_limit):
     roster, results = collections.Counter(), {}
     all_cases = []
-    # Only the already identified timestamp-compatible current pairs. Older
-    # overwritten program files are a separate recovery phase.
+    # Include current files overwritten after the cutoff: search their earlier
+    # committed versions without trusting the currently displayed pack.
     for code, slug in source.VENUES.items():
         for qfile in sorted((repo / "live" / slug).glob(
                 "????-??-??/pre-rich/race-*.json")):
@@ -159,13 +158,24 @@ def scan_repo(repo, source, seen, candidate_limit):
                 pfile = qfile.parent.parent / "program" / qfile.name
                 program = source.load(pfile) if pfile.is_file() else None
                 result = source.audit_live_pair(program, pre, date, race)
-                if result["status"] != "RELATIVE_TIMES_COMPATIBLE_UNPROVEN":
+                if result["status"] not in (
+                        "RELATIVE_TIMES_COMPATIBLE_UNPROVEN",
+                        "CURRENT_PROGRAM_IS_LATER_THAN_PRE_RICH"):
                     continue
                 all_cases.append((slug, date, race))
                 roster[slug] += 1
             except (ValueError, OSError, KeyError):
                 continue
-    for slug, date, race in all_cases[:candidate_limit]:
+    # Fair bounded pilot: do not spend the whole allowance on the first venues.
+    groups = collections.defaultdict(list)
+    for slug, date, race in all_cases:
+        groups[slug].append((slug, date, race))
+    sampled = []
+    while len(sampled) < candidate_limit and any(groups.values()):
+        for slug in source.VENUES.values():
+            if groups[slug] and len(sampled) < candidate_limit:
+                sampled.append(groups[slug].pop(0))
+    for slug, date, race in sampled:
         item = candidate_research_pair(repo, slug, date, race, source, seen)
         results.setdefault(slug, []).append({
             "date": date, "race": race, **item,
