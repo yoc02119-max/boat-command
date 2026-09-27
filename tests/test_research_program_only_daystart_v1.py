@@ -125,6 +125,31 @@ class DaystartTests(unittest.TestCase):
         self.assertIsNone(program.safe_card(wrong, "kiryu", "01",
                                              "2026-09-26", 1, source))
 
+    def test_deleted_program_commit_is_not_an_empty_proof_or_a_crash(self):
+        # git log -- <path> returns the DELETE commit too; git show SHA:path
+        # correctly fails for that revision, while an older version survives.
+        relative = str(self.file.relative_to(self.repo))
+        git(self.repo, "rm", relative)
+        git(self.repo, "commit", "-qm", "temporary historical deletion")
+        self.save(pack("2026-09-26T22:00:00+09:00"))
+        result = self.verify(lambda sha, cutoff: None)
+        self.assertEqual(result["status"], "PROGRAM_SERVER_ASOF_NOT_CORROBORATED")
+        self.assertEqual(result["diagnostics"]["FILE_ABSENT_AT_HISTORICAL_COMMIT"], 1)
+        recovered = self.verify(self.seen_early)
+        self.assertEqual(recovered["status"], program.PASS)
+        self.assertEqual(recovered["commit"], self.early_sha)
+
+    def test_missing_commit_object_fails_closed(self):
+        from unittest import mock
+        original = gh.git
+        def corrupted_history(repo, *args):
+            if args[0] == "show" or args[:2] == ("cat-file", "-e"):
+                raise subprocess.CalledProcessError(128, ["git", *args])
+            return original(repo, *args)
+        with mock.patch.object(gh, "git", side_effect=corrupted_history):
+            with self.assertRaisesRegex(RuntimeError, "INCOMPLETE_GIT_HISTORY"):
+                self.verify()
+
     def test_absent_pre_filter_and_complete_all_venues_metadata(self):
         report = program.scan(self.repo, source, gh, self.seen_early, cap=1)
         self.assertEqual(report["eligibleCurrentNoPreRichProgramRows"], 1)
