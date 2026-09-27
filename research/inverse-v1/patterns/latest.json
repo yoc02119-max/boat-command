@@ -1,0 +1,4712 @@
+{
+  "schema": "boat-command-inverse-patterns-v1",
+  "researchOnly": true,
+  "productionChanged": false,
+  "predictionInputChanged": false,
+  "autoPromotion": false,
+  "claimLevel": "IN_SAMPLE_DESCRIPTIVE_ASSOCIATIONS_ONLY",
+  "strictPredictorSources": [
+    "pre.tkz.ELIGIBLE_T_MINUS_3",
+    "pre.sui.ELIGIBLE_T_MINUS_3"
+  ],
+  "excludedUntilTimeValidated": [
+    "pre.boats",
+    "pre.cardTiming",
+    "post",
+    "payout",
+    "actualCourseStart",
+    "decisionRaw"
+  ],
+  "sampleGate": {
+    "minGroupRaces": 20,
+    "noCausalClaims": true
+  },
+  "totals": {
+    "inputRows": 858,
+    "acceptedLabeledRaces": 836,
+    "excludedNonAccepted": 22,
+    "venuesWithAcceptedRaces": 19,
+    "supportedGroups": 17,
+    "insufficientSampleGroupCounts": {
+      "VENUE_ONLY": 2
+    },
+    "preMissing": {
+      "noEligibleFastExhibition": 836,
+      "noEligibleWindBucket": 836
+    }
+  },
+  "venues": [
+    {
+      "venue": "amagasaki",
+      "acceptedRaces": 59,
+      "decisionObserved": {
+        "差　し": 9,
+        "逃　げ": 37,
+        "まくり": 7,
+        "まくり差し": 6
+      },
+      "winningBoatObserved": {
+        "5": 3,
+        "3": 5,
+        "1": 37,
+        "2": 7,
+        "4": 6,
+        "6": 1
+      }
+    },
+    {
+      "venue": "ashiya",
+      "acceptedRaces": 63,
+      "decisionObserved": {
+        "抜　き": 7,
+        "逃　げ": 35,
+        "差　し": 7,
+        "まくり": 9,
+        "恵まれ": 1,
+        "まくり差し": 4
+      },
+      "winningBoatObserved": {
+        "4": 7,
+        "1": 38,
+        "2": 9,
+        "3": 5,
+        "5": 3,
+        "6": 1
+      }
+    },
+    {
+      "venue": "fukuoka",
+      "acceptedRaces": 12,
+      "decisionObserved": {
+        "まくり": 2,
+        "まくり差し": 1,
+        "逃　げ": 9
+      },
+      "winningBoatObserved": {
+        "2": 2,
+        "3": 1,
+        "1": 9
+      }
+    },
+    {
+      "venue": "gamagori",
+      "acceptedRaces": 32,
+      "decisionObserved": {
+        "逃　げ": 22,
+        "まくり差し": 3,
+        "まくり": 4,
+        "抜　き": 1,
+        "恵まれ": 1,
+        "差　し": 1
+      },
+      "winningBoatObserved": {
+        "2": 3,
+        "6": 2,
+        "1": 22,
+        "4": 4,
+        "3": 1
+      }
+    },
+    {
+      "venue": "hamanako",
+      "acceptedRaces": 32,
+      "decisionObserved": {
+        "抜　き": 3,
+        "逃　げ": 19,
+        "まくり差し": 3,
+        "まくり": 4,
+        "差　し": 3
+      },
+      "winningBoatObserved": {
+        "3": 7,
+        "1": 19,
+        "6": 2,
+        "2": 1,
+        "5": 1,
+        "4": 2
+      }
+    },
+    {
+      "venue": "heiwajima",
+      "acceptedRaces": 48,
+      "decisionObserved": {
+        "まくり差し": 6,
+        "逃　げ": 23,
+        "まくり": 9,
+        "差　し": 8,
+        "恵まれ": 1,
+        "抜　き": 1
+      },
+      "winningBoatObserved": {
+        "3": 6,
+        "1": 23,
+        "5": 5,
+        "4": 8,
+        "6": 1,
+        "2": 5
+      }
+    },
+    {
+      "venue": "karatsu",
+      "acceptedRaces": 39,
+      "decisionObserved": {
+        "逃　げ": 23,
+        "まくり": 3,
+        "まくり差し": 1,
+        "抜　き": 5,
+        "恵まれ": 2,
+        "差　し": 5
+      },
+      "winningBoatObserved": {
+        "1": 26,
+        "4": 4,
+        "5": 3,
+        "2": 4,
+        "3": 2
+      }
+    },
+    {
+      "venue": "kojima",
+      "acceptedRaces": 60,
+      "decisionObserved": {
+        "逃　げ": 40,
+        "恵まれ": 1,
+        "まくり": 4,
+        "まくり差し": 4,
+        "差　し": 8,
+        "抜　き": 3
+      },
+      "winningBoatObserved": {
+        "1": 42,
+        "2": 9,
+        "4": 4,
+        "5": 1,
+        "3": 4
+      }
+    },
+    {
+      "venue": "marugame",
+      "acceptedRaces": 24,
+      "decisionObserved": {
+        "まくり差し": 8,
+        "逃　げ": 8,
+        "抜　き": 3,
+        "差　し": 3,
+        "まくり": 2
+      },
+      "winningBoatObserved": {
+        "4": 5,
+        "5": 1,
+        "1": 9,
+        "2": 4,
+        "3": 5
+      }
+    },
+    {
+      "venue": "mikuni",
+      "acceptedRaces": 61,
+      "decisionObserved": {
+        "逃　げ": 31,
+        "差　し": 12,
+        "まくり": 11,
+        "抜　き": 2,
+        "まくり差し": 4,
+        "恵まれ": 1
+      },
+      "winningBoatObserved": {
+        "1": 32,
+        "2": 13,
+        "4": 6,
+        "3": 7,
+        "5": 3
+      }
+    },
+    {
+      "venue": "miyajima",
+      "acceptedRaces": 53,
+      "decisionObserved": {
+        "まくり": 8,
+        "まくり差し": 8,
+        "逃　げ": 30,
+        "抜　き": 3,
+        "差　し": 3,
+        "恵まれ": 1
+      },
+      "winningBoatObserved": {
+        "5": 3,
+        "4": 9,
+        "1": 30,
+        "2": 3,
+        "3": 5,
+        "6": 3
+      }
+    },
+    {
+      "venue": "omura",
+      "acceptedRaces": 48,
+      "decisionObserved": {
+        "差　し": 7,
+        "まくり差し": 7,
+        "逃　げ": 25,
+        "まくり": 6,
+        "抜　き": 3
+      },
+      "winningBoatObserved": {
+        "3": 6,
+        "1": 26,
+        "4": 6,
+        "6": 3,
+        "2": 5,
+        "5": 2
+      }
+    },
+    {
+      "venue": "shimonoseki",
+      "acceptedRaces": 56,
+      "decisionObserved": {
+        "差　し": 9,
+        "抜　き": 5,
+        "逃　げ": 28,
+        "まくり差し": 6,
+        "まくり": 8
+      },
+      "winningBoatObserved": {
+        "4": 6,
+        "6": 2,
+        "1": 30,
+        "3": 6,
+        "2": 7,
+        "5": 5
+      }
+    },
+    {
+      "venue": "suminoe",
+      "acceptedRaces": 12,
+      "decisionObserved": {
+        "差　し": 4,
+        "まくり": 2,
+        "逃　げ": 4,
+        "抜　き": 2
+      },
+      "winningBoatObserved": {
+        "5": 1,
+        "2": 3,
+        "4": 1,
+        "1": 4,
+        "6": 1,
+        "3": 2
+      }
+    },
+    {
+      "venue": "tamagawa",
+      "acceptedRaces": 48,
+      "decisionObserved": {
+        "まくり差し": 8,
+        "逃　げ": 20,
+        "抜　き": 4,
+        "差　し": 4,
+        "まくり": 12
+      },
+      "winningBoatObserved": {
+        "3": 7,
+        "6": 1,
+        "5": 3,
+        "1": 22,
+        "2": 9,
+        "4": 6
+      }
+    },
+    {
+      "venue": "toda",
+      "acceptedRaces": 60,
+      "decisionObserved": {
+        "逃　げ": 20,
+        "差　し": 9,
+        "まくり": 16,
+        "まくり差し": 9,
+        "抜　き": 6
+      },
+      "winningBoatObserved": {
+        "1": 20,
+        "2": 16,
+        "3": 10,
+        "5": 6,
+        "4": 6,
+        "6": 2
+      }
+    },
+    {
+      "venue": "tokoname",
+      "acceptedRaces": 48,
+      "decisionObserved": {
+        "逃　げ": 20,
+        "差　し": 6,
+        "抜　き": 6,
+        "まくり": 13,
+        "まくり差し": 3
+      },
+      "winningBoatObserved": {
+        "1": 23,
+        "2": 13,
+        "4": 5,
+        "3": 3,
+        "5": 2,
+        "6": 2
+      }
+    },
+    {
+      "venue": "tokuyama",
+      "acceptedRaces": 48,
+      "decisionObserved": {
+        "逃　げ": 31,
+        "まくり差し": 8,
+        "差　し": 4,
+        "まくり": 5
+      },
+      "winningBoatObserved": {
+        "1": 31,
+        "4": 4,
+        "3": 8,
+        "5": 1,
+        "2": 4
+      }
+    },
+    {
+      "venue": "tsu",
+      "acceptedRaces": 33,
+      "decisionObserved": {
+        "逃　げ": 19,
+        "差　し": 6,
+        "まくり": 2,
+        "まくり差し": 4,
+        "抜　き": 2
+      },
+      "winningBoatObserved": {
+        "1": 20,
+        "3": 4,
+        "5": 3,
+        "4": 2,
+        "2": 4
+      }
+    }
+  ],
+  "conditionalPatterns": [
+    {
+      "venue": "amagasaki",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 59,
+      "outcomes": [
+        {
+          "order": "1-3-2",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.067797,
+          "observedMeanPayout100Yen": 1152.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.781356
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.067797,
+          "observedMeanPayout100Yen": 1645,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.115254
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.067797,
+          "observedMeanPayout100Yen": 1225,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.830508
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.067797,
+          "observedMeanPayout100Yen": 967.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.655932
+        },
+        {
+          "order": "2-4-1",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.050847,
+          "observedMeanPayout100Yen": 14523.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.384746
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.050847,
+          "observedMeanPayout100Yen": 1186.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.60339
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 2255,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.764407
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 3005,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.018644
+        },
+        {
+          "order": "1-6-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 13735,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.655932
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 1070,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.362712
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 875,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.29661
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 1080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.366102
+        },
+        {
+          "order": "1-6-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 8185,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.774576
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 845,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.286441
+        },
+        {
+          "order": "3-2-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.033898,
+          "observedMeanPayout100Yen": 10020,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.39661
+        },
+        {
+          "order": "5-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 12470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.113559
+        },
+        {
+          "order": "3-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 3520,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.59661
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1200,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.20339
+        },
+        {
+          "order": "3-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.30339
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.138983
+        },
+        {
+          "order": "3-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.183051
+        },
+        {
+          "order": "2-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 2670,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.452542
+        },
+        {
+          "order": "4-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 2510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.425424
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1330,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.225424
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 39580,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.708475
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 9220,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.562712
+        },
+        {
+          "order": "5-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 7710,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.30678
+        },
+        {
+          "order": "5-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 3360,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.569492
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.189831
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 1100,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.186441
+        },
+        {
+          "order": "4-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 10250,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.737288
+        },
+        {
+          "order": "4-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 12300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.084746
+        },
+        {
+          "order": "6-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 5860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.99322
+        },
+        {
+          "order": "4-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 59,
+          "observedConditionalFrequency": 0.016949,
+          "observedMeanPayout100Yen": 29840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.057627
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "ashiya",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 63,
+      "outcomes": [
+        {
+          "order": "1-3-2",
+          "historicalHits": 7,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.111111,
+          "observedMeanPayout100Yen": 1205.71,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.339683
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.079365,
+          "observedMeanPayout100Yen": 1332,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.057143
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.063492,
+          "observedMeanPayout100Yen": 922.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.585714
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.063492,
+          "observedMeanPayout100Yen": 1830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.161905
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.063492,
+          "observedMeanPayout100Yen": 4147.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.633333
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.047619,
+          "observedMeanPayout100Yen": 690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.328571
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.047619,
+          "observedMeanPayout100Yen": 1263.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.601587
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.031746,
+          "observedMeanPayout100Yen": 4500,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.428571
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.031746,
+          "observedMeanPayout100Yen": 6820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.165079
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.031746,
+          "observedMeanPayout100Yen": 3700,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.174603
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.031746,
+          "observedMeanPayout100Yen": 540,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.171429
+        },
+        {
+          "order": "4-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 2800,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.444444
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 25290,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.014286
+        },
+        {
+          "order": "4-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 4440,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.704762
+        },
+        {
+          "order": "4-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 28750,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.563492
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 6930,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.1
+        },
+        {
+          "order": "3-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 3560,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.565079
+        },
+        {
+          "order": "5-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 62830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 9.973016
+        },
+        {
+          "order": "4-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.080952
+        },
+        {
+          "order": "4-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 16200,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.571429
+        },
+        {
+          "order": "6-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 4970,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.788889
+        },
+        {
+          "order": "5-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 25930,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.115873
+        },
+        {
+          "order": "5-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 30630,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.861905
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 7660,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.215873
+        },
+        {
+          "order": "3-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 20150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.198413
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 2350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.373016
+        },
+        {
+          "order": "3-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 36400,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.777778
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 5530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.877778
+        },
+        {
+          "order": "4-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 7930,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.25873
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 8090,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.284127
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 3720,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.590476
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 2420,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.384127
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 1960,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.311111
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 1260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.2
+        },
+        {
+          "order": "3-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 1940,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.307937
+        },
+        {
+          "order": "2-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 63,
+          "observedConditionalFrequency": 0.015873,
+          "observedMeanPayout100Yen": 32910,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.22381
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "gamagori",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 32,
+      "outcomes": [
+        {
+          "order": "1-2-3",
+          "historicalHits": 7,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.21875,
+          "observedMeanPayout100Yen": 882.86,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.93125
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.09375,
+          "observedMeanPayout100Yen": 2400,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.25
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 2655,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.659375
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 1370,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.85625
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 10650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.65625
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 1095,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.684375
+        },
+        {
+          "order": "2-5-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 18840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.8875
+        },
+        {
+          "order": "6-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 6100,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.90625
+        },
+        {
+          "order": "4-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 8790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.746875
+        },
+        {
+          "order": "3-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 5980,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.86875
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 1460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.45625
+        },
+        {
+          "order": "2-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 9640,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.0125
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 6300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.96875
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 3910,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.221875
+        },
+        {
+          "order": "6-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 33180,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.36875
+        },
+        {
+          "order": "1-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 5800,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.8125
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.25625
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.228125
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 9860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.08125
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 3920,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.225
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "hamanako",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 32,
+      "outcomes": [
+        {
+          "order": "1-6-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.09375,
+          "observedMeanPayout100Yen": 3243.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.040625
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.09375,
+          "observedMeanPayout100Yen": 556.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.521875
+        },
+        {
+          "order": "3-4-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 7845,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.903125
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 2305,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.440625
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 565,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.353125
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 1320,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.825
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 960,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.3
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 1130,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.353125
+        },
+        {
+          "order": "6-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 3380,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.05625
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.271875
+        },
+        {
+          "order": "2-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 40170,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 12.553125
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 1760,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.55
+        },
+        {
+          "order": "5-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 5750,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.796875
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 5470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.709375
+        },
+        {
+          "order": "3-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 1520,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.475
+        },
+        {
+          "order": "6-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 15850,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.953125
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 6580,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.05625
+        },
+        {
+          "order": "1-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 9520,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.975
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 2610,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.815625
+        },
+        {
+          "order": "4-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 1450,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.453125
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.240625
+        },
+        {
+          "order": "3-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 12550,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.921875
+        },
+        {
+          "order": "3-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 3900,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.21875
+        },
+        {
+          "order": "3-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 32,
+          "observedConditionalFrequency": 0.03125,
+          "observedMeanPayout100Yen": 3310,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.034375
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "heiwajima",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 48,
+      "outcomes": [
+        {
+          "order": "1-3-4",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.104167,
+          "observedMeanPayout100Yen": 1288,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.341667
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 980,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.6125
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 6135,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.55625
+        },
+        {
+          "order": "4-5-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 23430,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 9.7625
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 27500,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 11.458333
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.358333
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1900,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.791667
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 885,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.36875
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3515,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.464583
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3005,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.252083
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 7030,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.929167
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.395833
+        },
+        {
+          "order": "3-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3520,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.733333
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.522917
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 5970,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.24375
+        },
+        {
+          "order": "6-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.347917
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4780,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.995833
+        },
+        {
+          "order": "3-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 7080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.475
+        },
+        {
+          "order": "2-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 16220,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.379167
+        },
+        {
+          "order": "5-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 24450,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.09375
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2610,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.54375
+        },
+        {
+          "order": "5-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.441667
+        },
+        {
+          "order": "3-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 5590,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.164583
+        },
+        {
+          "order": "4-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2850,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.59375
+        },
+        {
+          "order": "5-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 15780,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.2875
+        },
+        {
+          "order": "4-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1900,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.395833
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.360417
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.514583
+        },
+        {
+          "order": "4-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 5290,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.102083
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.65
+        },
+        {
+          "order": "4-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6050,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.260417
+        },
+        {
+          "order": "2-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 34210,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.127083
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "karatsu",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 39,
+      "outcomes": [
+        {
+          "order": "1-5-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.076923,
+          "observedMeanPayout100Yen": 3743.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.879487
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.076923,
+          "observedMeanPayout100Yen": 2996.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.305128
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.076923,
+          "observedMeanPayout100Yen": 3306.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.54359
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.076923,
+          "observedMeanPayout100Yen": 1720,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.323077
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.076923,
+          "observedMeanPayout100Yen": 2183.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.679487
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.051282,
+          "observedMeanPayout100Yen": 950,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.487179
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.051282,
+          "observedMeanPayout100Yen": 6150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.153846
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.051282,
+          "observedMeanPayout100Yen": 2600,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.333333
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.051282,
+          "observedMeanPayout100Yen": 7020,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.6
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.051282,
+          "observedMeanPayout100Yen": 1775,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.910256
+        },
+        {
+          "order": "4-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 40600,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.410256
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 2540,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.651282
+        },
+        {
+          "order": "5-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 25510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.541026
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 1650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.423077
+        },
+        {
+          "order": "4-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 3440,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.882051
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 1730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.44359
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 3010,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.771795
+        },
+        {
+          "order": "2-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 5270,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.351282
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 1940,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.497436
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 31690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 8.125641
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 15690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.023077
+        },
+        {
+          "order": "5-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 6040,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.548718
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 18210,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.669231
+        },
+        {
+          "order": "3-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 39,
+          "observedConditionalFrequency": 0.025641,
+          "observedMeanPayout100Yen": 4950,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.269231
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "kojima",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 60,
+      "outcomes": [
+        {
+          "order": "1-3-4",
+          "historicalHits": 6,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.1,
+          "observedMeanPayout100Yen": 2025,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.025
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.083333,
+          "observedMeanPayout100Yen": 4080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.4
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.066667,
+          "observedMeanPayout100Yen": 585,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.39
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.066667,
+          "observedMeanPayout100Yen": 932.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.621667
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.066667,
+          "observedMeanPayout100Yen": 1295,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.863333
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.05,
+          "observedMeanPayout100Yen": 1056.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.528333
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.05,
+          "observedMeanPayout100Yen": 2303.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.151667
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.05,
+          "observedMeanPayout100Yen": 2756.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.378333
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.05,
+          "observedMeanPayout100Yen": 2713.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.356667
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 11100,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.7
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 665,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.221667
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 6680,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.226667
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 1260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.42
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 795,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.265
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 8120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.353333
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 5060,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.843333
+        },
+        {
+          "order": "5-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 7150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.191667
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.243333
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1640,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.273333
+        },
+        {
+          "order": "3-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 5860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.976667
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1720,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.286667
+        },
+        {
+          "order": "3-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 5360,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.893333
+        },
+        {
+          "order": "4-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 10990,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.831667
+        },
+        {
+          "order": "1-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 2290,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.381667
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 8270,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.378333
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 9020,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.503333
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 15390,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.565
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 4530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.755
+        },
+        {
+          "order": "3-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 14500,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.416667
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "marugame",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 24,
+      "outcomes": [
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.125,
+          "observedMeanPayout100Yen": 1086.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.358333
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.083333,
+          "observedMeanPayout100Yen": 4455,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.7125
+        },
+        {
+          "order": "4-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 4810,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.004167
+        },
+        {
+          "order": "4-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 4630,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.929167
+        },
+        {
+          "order": "5-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 7450,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.104167
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 6040,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.516667
+        },
+        {
+          "order": "2-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 10840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.516667
+        },
+        {
+          "order": "4-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.6125
+        },
+        {
+          "order": "2-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 7530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.1375
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 17910,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.4625
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 14500,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.041667
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 7010,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.920833
+        },
+        {
+          "order": "3-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 10230,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.2625
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 26390,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.995833
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 5470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.279167
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1330,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.554167
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 940,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.391667
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2060,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.858333
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.358333
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1740,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.725
+        },
+        {
+          "order": "3-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 24,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 10640,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.433333
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "mikuni",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 61,
+      "outcomes": [
+        {
+          "order": "1-5-2",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.081967,
+          "observedMeanPayout100Yen": 5968,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.891803
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.081967,
+          "observedMeanPayout100Yen": 1474,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.208197
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.065574,
+          "observedMeanPayout100Yen": 4230,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.77377
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.065574,
+          "observedMeanPayout100Yen": 4132.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.709836
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.04918,
+          "observedMeanPayout100Yen": 4936.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.427869
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.04918,
+          "observedMeanPayout100Yen": 570,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.280328
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 1205,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.395082
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 9400,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.081967
+        },
+        {
+          "order": "2-4-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 2270,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.744262
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 6415,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.103279
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 3790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.242623
+        },
+        {
+          "order": "4-6-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 15825,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.188525
+        },
+        {
+          "order": "3-1-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.032787,
+          "observedMeanPayout100Yen": 1415,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.463934
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 780,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.127869
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 5580,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.914754
+        },
+        {
+          "order": "4-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 16980,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.783607
+        },
+        {
+          "order": "4-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 10660,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.747541
+        },
+        {
+          "order": "2-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 12580,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.062295
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 3620,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.593443
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 1510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.247541
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 2110,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.345902
+        },
+        {
+          "order": "3-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 4210,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.690164
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 1470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.240984
+        },
+        {
+          "order": "5-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 5550,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.909836
+        },
+        {
+          "order": "5-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 6900,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.131148
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 11730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.922951
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 1770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.290164
+        },
+        {
+          "order": "1-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 2760,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.452459
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 2420,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.396721
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 8820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.445902
+        },
+        {
+          "order": "2-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 9570,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.568852
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 1360,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.222951
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.137705
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 2030,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.332787
+        },
+        {
+          "order": "3-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 40530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.644262
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 61,
+          "observedConditionalFrequency": 0.016393,
+          "observedMeanPayout100Yen": 5150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.844262
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "miyajima",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 53,
+      "outcomes": [
+        {
+          "order": "1-3-2",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.075472,
+          "observedMeanPayout100Yen": 1805,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.362264
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.056604,
+          "observedMeanPayout100Yen": 18593.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.524528
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.056604,
+          "observedMeanPayout100Yen": 3066.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.735849
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.056604,
+          "observedMeanPayout100Yen": 1743.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.986792
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.056604,
+          "observedMeanPayout100Yen": 943.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.533962
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.056604,
+          "observedMeanPayout100Yen": 2486.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.407547
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.037736,
+          "observedMeanPayout100Yen": 2870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.083019
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.037736,
+          "observedMeanPayout100Yen": 3920,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.479245
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.037736,
+          "observedMeanPayout100Yen": 2435,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.918868
+        },
+        {
+          "order": "6-5-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.037736,
+          "observedMeanPayout100Yen": 52850,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 19.943396
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.037736,
+          "observedMeanPayout100Yen": 3485,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.315094
+        },
+        {
+          "order": "5-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 3650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.688679
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 2320,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.437736
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 3820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.720755
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 2960,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.558491
+        },
+        {
+          "order": "2-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 8970,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.692453
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 21020,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.966038
+        },
+        {
+          "order": "4-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 6560,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.237736
+        },
+        {
+          "order": "3-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 1690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.318868
+        },
+        {
+          "order": "4-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 4000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.754717
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 4040,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.762264
+        },
+        {
+          "order": "3-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 25590,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.828302
+        },
+        {
+          "order": "3-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 6390,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.20566
+        },
+        {
+          "order": "1-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 2740,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.516981
+        },
+        {
+          "order": "4-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 12280,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.316981
+        },
+        {
+          "order": "5-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 8370,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.579245
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 8900,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.679245
+        },
+        {
+          "order": "6-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 53670,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.126415
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 1730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.326415
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 630,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.118868
+        },
+        {
+          "order": "4-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 1730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.326415
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 2230,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.420755
+        },
+        {
+          "order": "1-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 4860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.916981
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 3190,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.601887
+        },
+        {
+          "order": "4-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 53,
+          "observedConditionalFrequency": 0.018868,
+          "observedMeanPayout100Yen": 2040,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.384906
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "omura",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 48,
+      "outcomes": [
+        {
+          "order": "1-2-3",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.104167,
+          "observedMeanPayout100Yen": 1044,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.0875
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.104167,
+          "observedMeanPayout100Yen": 742,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.772917
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 1880,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.175
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3525,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.46875
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.479167
+        },
+        {
+          "order": "6-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3745,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.560417
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2130,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.8875
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1110,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.4625
+        },
+        {
+          "order": "3-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 5620,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.170833
+        },
+        {
+          "order": "3-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.597917
+        },
+        {
+          "order": "4-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6180,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.2875
+        },
+        {
+          "order": "3-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.85
+        },
+        {
+          "order": "4-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.170833
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 490,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.102083
+        },
+        {
+          "order": "1-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1440,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.3
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2760,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.575
+        },
+        {
+          "order": "4-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2420,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.504167
+        },
+        {
+          "order": "3-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.3125
+        },
+        {
+          "order": "3-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 51080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.641667
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 53140,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 11.070833
+        },
+        {
+          "order": "2-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.352083
+        },
+        {
+          "order": "5-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3050,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.635417
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1270,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.264583
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1700,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.354167
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.31875
+        },
+        {
+          "order": "6-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 35730,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.44375
+        },
+        {
+          "order": "4-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.43125
+        },
+        {
+          "order": "4-5-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2600,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.541667
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4280,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.891667
+        },
+        {
+          "order": "5-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 7770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.61875
+        },
+        {
+          "order": "2-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 12650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.635417
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3630,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.75625
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1640,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.341667
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "shimonoseki",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 56,
+      "outcomes": [
+        {
+          "order": "1-3-2",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.089286,
+          "observedMeanPayout100Yen": 1508,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.346429
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.053571,
+          "observedMeanPayout100Yen": 1300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.696429
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.053571,
+          "observedMeanPayout100Yen": 1103.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.591071
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.053571,
+          "observedMeanPayout100Yen": 5400,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.892857
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.053571,
+          "observedMeanPayout100Yen": 580,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.310714
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.053571,
+          "observedMeanPayout100Yen": 2106.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.128571
+        },
+        {
+          "order": "4-2-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.035714,
+          "observedMeanPayout100Yen": 17990,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.425
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.035714,
+          "observedMeanPayout100Yen": 1830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.653571
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.035714,
+          "observedMeanPayout100Yen": 1130,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.403571
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.035714,
+          "observedMeanPayout100Yen": 950,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.339286
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.035714,
+          "observedMeanPayout100Yen": 6630,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.367857
+        },
+        {
+          "order": "6-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 181840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 32.471429
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 6030,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.076786
+        },
+        {
+          "order": "3-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 2350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.419643
+        },
+        {
+          "order": "2-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 19970,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.566071
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 1650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.294643
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 35000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.25
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 4340,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.775
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 2390,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.426786
+        },
+        {
+          "order": "5-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 12770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.280357
+        },
+        {
+          "order": "2-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 5170,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.923214
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 2030,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.3625
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 4200,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.75
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 4150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.741071
+        },
+        {
+          "order": "5-6-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 6000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.071429
+        },
+        {
+          "order": "3-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 7110,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.269643
+        },
+        {
+          "order": "2-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 7520,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.342857
+        },
+        {
+          "order": "3-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 5840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.042857
+        },
+        {
+          "order": "5-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 27590,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.926786
+        },
+        {
+          "order": "4-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 21460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.832143
+        },
+        {
+          "order": "3-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 33650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.008929
+        },
+        {
+          "order": "6-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 25570,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.566071
+        },
+        {
+          "order": "5-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 8790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.569643
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 1860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.332143
+        },
+        {
+          "order": "4-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 20350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.633929
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 4380,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.782143
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 56,
+          "observedConditionalFrequency": 0.017857,
+          "observedMeanPayout100Yen": 1300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.232143
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "tamagawa",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 48,
+      "outcomes": [
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 2700,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.6875
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 780,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.4875
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 663.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.414583
+        },
+        {
+          "order": "3-5-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 9470,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.945833
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.6
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1565,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.652083
+        },
+        {
+          "order": "4-5-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3940,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.641667
+        },
+        {
+          "order": "1-5-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2750,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.145833
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3555,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.48125
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 5025,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.09375
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1100,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.458333
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 8460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.525
+        },
+        {
+          "order": "6-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 8540,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.779167
+        },
+        {
+          "order": "5-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 32680,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.808333
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.164583
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.28125
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2060,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.429167
+        },
+        {
+          "order": "4-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.441667
+        },
+        {
+          "order": "2-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 12770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.660417
+        },
+        {
+          "order": "5-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4070,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.847917
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1090,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.227083
+        },
+        {
+          "order": "3-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.422917
+        },
+        {
+          "order": "4-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.352083
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4740,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.9875
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3210,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.66875
+        },
+        {
+          "order": "3-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 5800,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.208333
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2040,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.425
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.239583
+        },
+        {
+          "order": "3-4-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2240,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.466667
+        },
+        {
+          "order": "4-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.720833
+        },
+        {
+          "order": "5-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3640,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.758333
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 8540,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.779167
+        },
+        {
+          "order": "2-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 46560,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 9.7
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "toda",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 60,
+      "outcomes": [
+        {
+          "order": "1-2-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.066667,
+          "observedMeanPayout100Yen": 1350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.9
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.066667,
+          "observedMeanPayout100Yen": 2360,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.573333
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.05,
+          "observedMeanPayout100Yen": 3283.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.641667
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 2575,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.858333
+        },
+        {
+          "order": "3-4-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 3680,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.226667
+        },
+        {
+          "order": "2-4-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 9695,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.231667
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 1150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.383333
+        },
+        {
+          "order": "4-3-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 18910,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.303333
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 2820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.94
+        },
+        {
+          "order": "5-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 8185,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.728333
+        },
+        {
+          "order": "2-3-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 5080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.693333
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 4355,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.451667
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.033333,
+          "observedMeanPayout100Yen": 995,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.331667
+        },
+        {
+          "order": "3-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 4240,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.706667
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.311667
+        },
+        {
+          "order": "3-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 2000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.333333
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 2000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.333333
+        },
+        {
+          "order": "5-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 43600,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.266667
+        },
+        {
+          "order": "2-6-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 9510,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.585
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1620,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.27
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 1460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.243333
+        },
+        {
+          "order": "5-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 23650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.941667
+        },
+        {
+          "order": "2-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 61370,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.228333
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 3340,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.556667
+        },
+        {
+          "order": "4-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 2590,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.431667
+        },
+        {
+          "order": "6-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 39990,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.665
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 590,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.098333
+        },
+        {
+          "order": "5-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 7870,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.311667
+        },
+        {
+          "order": "2-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 4830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.805
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 3600,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.6
+        },
+        {
+          "order": "3-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 5260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.876667
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 11610,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.935
+        },
+        {
+          "order": "3-5-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 8830,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.471667
+        },
+        {
+          "order": "4-2-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 13260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.21
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 4230,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.705
+        },
+        {
+          "order": "3-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 7480,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.246667
+        },
+        {
+          "order": "2-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 2340,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.39
+        },
+        {
+          "order": "5-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 7150,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.191667
+        },
+        {
+          "order": "4-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 26960,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.493333
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 810,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.135
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 3690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.615
+        },
+        {
+          "order": "6-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 60,
+          "observedConditionalFrequency": 0.016667,
+          "observedMeanPayout100Yen": 95290,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 15.881667
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "tokoname",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 48,
+      "outcomes": [
+        {
+          "order": "1-2-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.083333,
+          "observedMeanPayout100Yen": 880,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.733333
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 5716.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.572917
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 4290,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.68125
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 846.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.529167
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 1016.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.635417
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1795,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.747917
+        },
+        {
+          "order": "2-5-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 9285,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.86875
+        },
+        {
+          "order": "2-6-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 23350,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 9.729167
+        },
+        {
+          "order": "4-1-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2890,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.204167
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2130,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.8875
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1760,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.366667
+        },
+        {
+          "order": "2-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 14360,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.991667
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 14280,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.975
+        },
+        {
+          "order": "2-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 13080,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.725
+        },
+        {
+          "order": "5-2-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 30680,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 6.391667
+        },
+        {
+          "order": "2-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2690,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.560417
+        },
+        {
+          "order": "3-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 850,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.177083
+        },
+        {
+          "order": "2-3-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 15300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.1875
+        },
+        {
+          "order": "6-4-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 13460,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.804167
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 390,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.08125
+        },
+        {
+          "order": "4-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 4250,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.885417
+        },
+        {
+          "order": "4-5-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 8530,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.777083
+        },
+        {
+          "order": "2-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 11670,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.43125
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 790,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.164583
+        },
+        {
+          "order": "5-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 15770,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.285417
+        },
+        {
+          "order": "1-5-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3090,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.64375
+        },
+        {
+          "order": "3-6-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 10380,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.1625
+        },
+        {
+          "order": "2-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1120,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.233333
+        },
+        {
+          "order": "6-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1860,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.3875
+        },
+        {
+          "order": "2-3-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1100,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.229167
+        },
+        {
+          "order": "4-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.2625
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 6400,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.333333
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "tokuyama",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 48,
+      "outcomes": [
+        {
+          "order": "1-3-2",
+          "historicalHits": 6,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.125,
+          "observedMeanPayout100Yen": 1465,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.83125
+        },
+        {
+          "order": "1-2-3",
+          "historicalHits": 5,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.104167,
+          "observedMeanPayout100Yen": 1052,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.095833
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.083333,
+          "observedMeanPayout100Yen": 3005,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.504167
+        },
+        {
+          "order": "1-2-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 3753.33,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.345833
+        },
+        {
+          "order": "1-4-6",
+          "historicalHits": 3,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.0625,
+          "observedMeanPayout100Yen": 11336.67,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.085417
+        },
+        {
+          "order": "1-6-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 10140,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.225
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 3265,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.360417
+        },
+        {
+          "order": "1-6-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 5245,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.185417
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 855,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.35625
+        },
+        {
+          "order": "3-5-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 38670,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 16.1125
+        },
+        {
+          "order": "4-3-1",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 25005,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 10.41875
+        },
+        {
+          "order": "2-1-3",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 1650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.6875
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.041667,
+          "observedMeanPayout100Yen": 2275,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.947917
+        },
+        {
+          "order": "1-3-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 750,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.15625
+        },
+        {
+          "order": "4-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1820,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.379167
+        },
+        {
+          "order": "3-2-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 13260,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 2.7625
+        },
+        {
+          "order": "5-4-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2280,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.475
+        },
+        {
+          "order": "4-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 56700,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 11.8125
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 1750,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.364583
+        },
+        {
+          "order": "2-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 35420,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.379167
+        },
+        {
+          "order": "3-6-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 27300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 5.6875
+        },
+        {
+          "order": "3-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3450,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.71875
+        },
+        {
+          "order": "2-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 3540,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.7375
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 48,
+          "observedConditionalFrequency": 0.020833,
+          "observedMeanPayout100Yen": 2170,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.452083
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    },
+    {
+      "venue": "tsu",
+      "dimension": "VENUE_ONLY",
+      "preCondition": "all",
+      "denominatorAllMatchingRaces": 33,
+      "outcomes": [
+        {
+          "order": "1-2-3",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.121212,
+          "observedMeanPayout100Yen": 682.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.827273
+        },
+        {
+          "order": "1-2-4",
+          "historicalHits": 4,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.121212,
+          "observedMeanPayout100Yen": 717.5,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.869697
+        },
+        {
+          "order": "1-3-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.060606,
+          "observedMeanPayout100Yen": 2180,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.321212
+        },
+        {
+          "order": "1-3-5",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.060606,
+          "observedMeanPayout100Yen": 685,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.415152
+        },
+        {
+          "order": "1-4-2",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.060606,
+          "observedMeanPayout100Yen": 7220,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 4.375758
+        },
+        {
+          "order": "2-1-4",
+          "historicalHits": 2,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.060606,
+          "observedMeanPayout100Yen": 5880,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.563636
+        },
+        {
+          "order": "1-5-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 47380,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 14.357576
+        },
+        {
+          "order": "3-1-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1300,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.393939
+        },
+        {
+          "order": "3-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 5090,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.542424
+        },
+        {
+          "order": "5-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1320,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.4
+        },
+        {
+          "order": "4-1-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 12330,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.736364
+        },
+        {
+          "order": "4-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1780,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.539394
+        },
+        {
+          "order": "2-1-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 760,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.230303
+        },
+        {
+          "order": "1-4-3",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1070,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.324242
+        },
+        {
+          "order": "1-4-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 2000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.606061
+        },
+        {
+          "order": "3-2-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 10990,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 3.330303
+        },
+        {
+          "order": "5-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 3000,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.909091
+        },
+        {
+          "order": "3-1-4",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 4650,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 1.409091
+        },
+        {
+          "order": "5-1-6",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 25840,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 7.830303
+        },
+        {
+          "order": "1-2-5",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1130,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.342424
+        },
+        {
+          "order": "2-3-1",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 29200,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 8.848485
+        },
+        {
+          "order": "1-5-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 1160,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.351515
+        },
+        {
+          "order": "1-3-2",
+          "historicalHits": 1,
+          "denominatorAllMatchingRaces": 33,
+          "observedConditionalFrequency": 0.030303,
+          "observedMeanPayout100Yen": 910,
+          "inSamplePayoutOnlyRoiIfBetEveryMatchingRace": 0.275758
+        }
+      ],
+      "purpose": "HYPOTHESIS_DISCOVERY_ONLY_NOT_FORWARD_VALIDATED"
+    }
+  ],
+  "inputDates": [
+    "2026-03-24",
+    "2026-03-25",
+    "2026-03-26",
+    "2026-03-27",
+    "2026-03-28",
+    "2026-03-29",
+    "2026-03-30",
+    "2026-03-31"
+  ],
+  "inputSources": [
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-24.json",
+      "sha256": "1d64a18fccb903c69f42bb21caf5276605a494b3d023d88f4829651133fe0f01"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-25.json",
+      "sha256": "0280715a4eeea2859df029ad9edd000ad35b94cbb608fe0b9d68154dd960935d"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-26.json",
+      "sha256": "9791929a5e894473b7eba6946adcaf39eed7445d10047d45d3f7ff28df411d41"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-27.json",
+      "sha256": "9f9901359df3a48966ddefb4a26d4cf6ffdbc8e5a8a8b50672e1e00452478636"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-28.json",
+      "sha256": "2f8a2d05cb0892de5350037e11d4d0d02bb388f72f66eb2fa29810c01fef16d4"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-29.json",
+      "sha256": "243f4f84e11e6162ae2075bf22a70e635ebe26d738b57fde9afaf587358e21e3"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-30.json",
+      "sha256": "d5e6f0acdcb0cb210771dcd0b853184b6b132a93be6890b45fdf8fc149a95bcb"
+    },
+    {
+      "path": "/tmp/boat-command-inverse-data/research/inverse-v1/days/2026-03-31.json",
+      "sha256": "c3c43ae5d255618158f214c4939289e2d4d995200cc22a5741cec3e34e26a781"
+    }
+  ]
+}
