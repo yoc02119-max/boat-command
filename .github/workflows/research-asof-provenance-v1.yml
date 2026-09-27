@@ -7,6 +7,8 @@ on:
     paths:
       - 'scripts/research-asof-provenance-v1.py'
       - 'tests/test_research_asof_provenance_v1.py'
+      - 'scripts/research-github-asof-corroboration-v1.py'
+      - 'tests/test_research_github_asof_corroboration_v1.py'
       - '.github/workflows/research-asof-provenance-v1.yml'
       - 'research/inverse-v1/ASOF-PROVENANCE-v1.md'
   workflow_dispatch:
@@ -60,5 +62,49 @@ jobs:
         with:
           name: 24-venue-asof-provenance-evidence
           path: /tmp/boat-research-asof-v1.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  github-hosted-asof-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prove immutable Git object and hosted-time gates offline
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research-github-asof-corroboration-v1.py
+          python -m unittest discover -s tests -p test_research_github_asof_corroboration_v1.py -v
+      - name: Bounded 24-venue server-corroboration pilot on committed original snapshots
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/research-github-asof-corroboration-v1.py \
+            --limit 100 \
+            --output /tmp/boat-github-asof-corroboration-v1.json
+          python - <<'PY'
+          import json
+          report=json.load(open('/tmp/boat-github-asof-corroboration-v1.json'))
+          assert report['researchOnly'] and not report['productionChanged']
+          assert not report['predictionInputChanged'] and not report['automaticModelImport']
+          assert report['vendorUntimedCardFieldsReleased']==0
+          assert report['scannedPairs']<=100
+          assert report['candidateCurrentCompatiblePairs']>=report['scannedPairs']
+          print('SERVER_ASOF_PILOT_PASS',report['byStatus'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: github-hosted-pre-snapshot-asof-pilot
+          path: /tmp/boat-github-asof-corroboration-v1.json
           retention-days: 14
           if-no-files-found: ignore
