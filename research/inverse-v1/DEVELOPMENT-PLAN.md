@@ -1,6 +1,6 @@
 # BOAT COMMAND — Inverse-outcome research plan v1 (2026-09-26)
 
-Status: **research-only proposal branch**; do not change production prediction inputs, UI, live scheduling, bankroll, or automatic model promotion as part of this plan.
+Status: **research-only foundation already merged on main, historical backfill still incomplete**. This document's five internal setup stages are NOT the user's five product milestones. Report product progress only against `research/inverse-v1/PRODUCT-MILESTONES.md` (currently 0/5); never call internal CI setup 'all 5 complete'. No production prediction, UI, live scheduling, bankroll or automatic promotion changes.
 
 ## One authoritative objective
 Learn venue-specific, pre-race **probabilities** of race developments and trifecta outcomes, starting from recorded outcomes, decisional results, and actual payouts. Select races/picks only after **out-of-sample** validation and when contemporaneous pre-close odds make expected value defensible. Do not assume that a model showing historical improvements must be profitable.
@@ -46,3 +46,6 @@ Learn venue-specific, pre-race **probabilities** of race developments and trifec
 
 ## Post-pilot efficiency adjustment (2026-09-27)
 The first independent eight-day March backfill archived 858 target races / 836 accepted, but zero strict T-minus-three eligible preview sections because historical timestamps were absent or unverifiable on those days. Continue archiving them as descriptive outcome evidence. The production research backfill selects **newest unarchived days first** within the same full historical period to prioritize later, timestamp-eligible preview observations; already archived days remain immutable and older dates are still eventually collected. This does not alter official acquisition or application predictions.
+
+## Per-venue archival audit
+Each bounded batch also runs `scripts/inverse-research-coverage-v1.py` and writes `research/inverse-v1/coverage-v1.json` on the isolated data branch. This reports the actual number of visited vs unvisited source races, accepted vs incomplete or conflicting labels, and strictly timestamp-qualified pre-observation counts separately for all 24 venues. The backfill batches are bounded to at most 16 dates/run; this does not relax data or promotion gates. The product's data integration stage is NOT complete while source targets remain unvisited.
