@@ -32,3 +32,20 @@ The isolated workflow `research-program-only-daystart-v1.yml` runs 7 provenance 
 - Extend the bounded coverage to the remaining program-only candidates without changing provenance gates, making each batch and source HEAD immutable.
 - For future races, prospectively archive **raw official source response bytes+SHA256** with source-read timestamp and original program snapshot, then verify before race cutoff. That additional proof cannot be retroactively fabricated for old races.
 - Model development is independently gated on timestamp-safe PRE observations, preserved 24-venue isolation, previously frozen predictions and genuinely unseen prospective SHADOW/FORWARD. No uplift, calibration or expected ROI is claimed by this file.
+
+## Verified first production-repository read-only pilot — 2026-09-27
+
+- Green Actions run: https://github.com/yoc02119-max/boat-command/actions/runs/36318623200
+- Source checkout HEAD inside the GitHub pull-request run: `f87741a850324b54eb410f9ad1cbf819830b6a67` (PR merge ref; NOT an additional main commit). This pilot did not read the external third-party data branch.
+- Across 24 venues the pinned checkout had exactly **1,034 current program-only rows** with no corresponding current PRE-rich file. The bounded, round-robin first pass reviewed **120** of those, leaving **914 unexamined**.
+- **0/120** records met the strong independent **GitHub-hosted before race-day midnight JST** proof.
+- **76/120** records had independently hosted app program files before the program's **own** recorded T−3. Those are **NOT proven by an independent deadline reference**, so they remain excluded from strict model inputs.
+- **44/120** could not establish server as-of proof even against the program's own cutoff. Lack of proof should not be misreported as proof the data did not exist.
+- Offline tests: 7 existing timestamp/isolation + 6 existing GitHub-history gates + 8 new program-only gates = **21 passed**; live read-only pilot succeeded. An initial failure exposed real deleted-and-readded Git paths: `git log -- <path>` includes deletion commits even when `git show SHA:path` cannot read the absent file. The final implementation verifies the commit object then skips only the pathless deletion; an actually missing Git object fails closed. The temporary test fixture also recreates a folder after `git rm`. Keep both negative regression tests.
+- **No historical model input was released, no POST files were read and no production collector or scheduled workflow was modified.** For all positive app snapshots the original upstream raw HTTP body is still missing.
+
+### Recommended next implementation priority
+
+Do **not** count the 76 self-reported-cutoff rows as proven safe or automatically fetch 914 more just to boost superficial coverage. The first 24-venue sample yielded **zero** stronger previous-day corroborations. Instead prototype a **prospective research-only raw official response capture** that records original bytes (or losslessly compressed original bytes), a SHA256 source hash, source URL, local acquisition time, original Git/host publication evidence, verified racer identity, and deadline. Write only an independent append-only research branch, never rewrite LIVE packs or the legacy history. Freeze a raw observation before the race and gate the whole feature record at T−3. Add unit tests for race-day clock rollover, late download, inconsistent deadline, result-path contamination, duplicate/rewritten observations and Github push conflict.
+
+Then evaluate whether any of the 914 unexamined older program rows warrant selective independent investigation (e.g., particular 24-venue gaps); do not bypass provenance gates to increase accepted sample size. PR #126 remains the dependency for this stacked research PR #127; recheck both heads and main immediately before any merge.
