@@ -55,6 +55,8 @@ class DaystartTests(unittest.TestCase):
         self.early_sha = git(self.repo, "rev-parse", "HEAD")
 
     def save(self, obj):
+        # git rm may remove the last file AND its parent directory.
+        self.file.parent.mkdir(parents=True, exist_ok=True)
         self.file.write_text(json.dumps(obj, ensure_ascii=False)+"\n", encoding="utf-8")
         git(self.repo, "add", str(self.file.relative_to(self.repo)))
         git(self.repo, "commit", "-qm", "snapshot")
