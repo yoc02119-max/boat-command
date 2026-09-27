@@ -72,6 +72,24 @@ class CoverageTest(unittest.TestCase):
         self.assertEqual(toda["nextPendingDay"], "2026-09-02")
         self.assertFalse(toda["cardFieldsStrictlyTimeVerified"])
 
+    def test_sparse_rejected_row_keeps_venue_denominator(self):
+        # NO_CARD and SIX_RACER_IDENTITY_REJECTED may be recorded with
+        # only raceCode + status. Infer venue from trusted original history.
+        self.incomplete = {"raceCode": "202609010202", "status": "NO_CARD"}
+        self.write_doc(self.file, [self.good, self.incomplete])
+        result = coverage.build_coverage(self.history, self.days)
+        toda = next(x for x in result["venues"] if x["venue"] == "toda")
+        self.assertEqual(toda["archivedTargetRaces"], 2)
+        self.assertEqual(toda["acceptedJoinedRaces"], 1)
+        self.assertEqual(toda["statusReasons"]["NO_CARD"], 1)
+        self.assertEqual(result["summary"]["nonAcceptedArchivedRaces"], 1)
+
+    def test_declared_venue_conflicting_with_race_code_is_rejected(self):
+        self.incomplete["venue"] = "kiryu"
+        self.write_doc(self.file, [self.good, self.incomplete])
+        with self.assertRaisesRegex(ValueError, "ORPHAN_ARCHIVED_RACE"):
+            coverage.build_coverage(self.history, self.days)
+
     def test_empty_day_can_be_archived_without_network(self):
         self.write_doc(self.days / "2026-09-03.json", [], "NO_EXISTING_TARGETS")
         a = coverage.build_coverage(self.history, self.days)
