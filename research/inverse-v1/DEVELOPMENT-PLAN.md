@@ -43,3 +43,6 @@ Learn venue-specific, pre-race **probabilities** of race developments and trifec
 - Classify results by actual race evidence, not confident reconstruction of unobserved moves. An absent decision/course is unknown, never guessed.
 - Compare 24 venues separately. Compare hits, per-pick cost, payout-only return (label it), realized odds availability, and worst losing streak; include controls and sample sizes.
 - Never automatically buy, activate TRY, change virtual ¥100,000 bookkeeping, or auto-promote from this pipeline.
+
+## Post-pilot efficiency adjustment (2026-09-27)
+The first independent eight-day March backfill archived 858 target races / 836 accepted, but zero strict T-minus-three eligible preview sections because historical timestamps were absent or unverifiable on those days. Continue archiving them as descriptive outcome evidence. The production research backfill selects **newest unarchived days first** within the same full historical period to prioritize later, timestamp-eligible preview observations; already archived days remain immutable and older dates are still eventually collected. This does not alter official acquisition or application predictions.

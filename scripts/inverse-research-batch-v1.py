@@ -20,19 +20,19 @@ join = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(join)
 
 
-def candidates(start: str, end: str, done: set[str], limit: int) -> list[str]:
+def candidates(start: str, end: str, done: set[str], limit: int, newest_first: bool = False) -> list[str]:
     a, b = dt.date.fromisoformat(start), dt.date.fromisoformat(end)
     if b < a or (b - a).days > 366:
         raise ValueError("INVALID_OR_EXCESSIVE_DATE_RANGE")
     if not isinstance(limit, int) or not 1 <= limit <= 16:
         raise ValueError("MAX_DATES_PER_JOB_IS_16")
     eligible = []
-    day = a
-    while day <= b and len(eligible) < limit:
+    day = b if newest_first else a
+    while (day >= a if newest_first else day <= b) and len(eligible) < limit:
         iso = day.isoformat()
         if iso not in done:
             eligible.append(iso)
-        day += dt.timedelta(days=1)
+        day += dt.timedelta(days=-1 if newest_first else 1)
     return eligible
 
 
@@ -94,6 +94,8 @@ def main():
     p.add_argument("--end", required=True)
     p.add_argument("--existing-list", type=Path)
     p.add_argument("--limit", type=int, default=8)
+    p.add_argument("--newest-first", action="store_true",
+                   help="Prioritize recent available pre-race observations; archive older days later")
     p.add_argument("--output-dir", type=Path, required=True)
     p.add_argument("--status-out", type=Path, required=True)
     args = p.parse_args()
@@ -104,7 +106,8 @@ def main():
     for dest in (output, status_out):
         if any(dest == folder or folder in dest.parents for folder in blocked):
             p.error("RESEARCH_OUTPUT_ONLY")
-    chosen = candidates(args.start, args.end, existing_dates(args.existing_list), args.limit)
+    chosen = candidates(args.start, args.end, existing_dates(args.existing_list),
+                        args.limit, newest_first=args.newest_first)
     status = bounded_backfill(ROOT, output, chosen)
     status_out.parent.mkdir(parents=True, exist_ok=True)
     status_out.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n",
