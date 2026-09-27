@@ -15,6 +15,7 @@ on:
       - 'tests/test_inverse_research_coverage_v1.py'
       - 'tests/test_inverse_research_exceptions_v1.py'
       - 'tests/test_inverse_legacy_label_overlay_v1.py'
+      - 'tests/test_inverse_vendor_retry_v1.py'
       - 'tests/test_inverse_research_batch_v1.py'
       - 'tests/test_inverse_research_workflow_capacity_v1.py'
       - '.github/workflows/inverse-research-backfill-v1.yml'
@@ -56,6 +57,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_legacy_label_overlay_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_vendor_retry_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
         env:
