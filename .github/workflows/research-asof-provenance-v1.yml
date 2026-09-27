@@ -1,0 +1,64 @@
+name: Research as-of PRE provenance audit v1
+
+# All outputs go to temporary Actions artifacts; never touch LIVE records,
+# historical originals, the dedicated data branch, LAB, SHADOW, or bankroll.
+on:
+  pull_request:
+    paths:
+      - 'scripts/research-asof-provenance-v1.py'
+      - 'tests/test_research_asof_provenance_v1.py'
+      - '.github/workflows/research-asof-provenance-v1.yml'
+      - 'research/inverse-v1/ASOF-PROVENANCE-v1.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety-and-24-venue-asof-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate research-only as-of classification
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research-asof-provenance-v1.py
+          python -m unittest discover -s tests -p test_research_asof_provenance_v1.py -v
+      - name: Pin untouched archived third-party research data
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin data/inverse-research-v1
+          git worktree add --detach /tmp/boat-research-asof-data FETCH_HEAD
+          git -C /tmp/boat-research-asof-data rev-parse HEAD >/tmp/boat-research-asof-sha
+      - name: Audit as-of availability without reading target results
+        run: |
+          set -euo pipefail
+          DATA=/tmp/boat-research-asof-data/research/inverse-v1
+          python scripts/research-asof-provenance-v1.py \
+            --vendor-data-root "$DATA" \
+            --vendor-sha "$(cat /tmp/boat-research-asof-sha)" \
+            --output /tmp/boat-research-asof-v1.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/boat-research-asof-v1.json'))
+          assert x['researchOnly'] and not x['productionChanged']
+          assert not x['predictionInputChanged'] and not x['hardLockChanged']
+          assert not x['autoPromotion'] and x['strictHistoricalCardFieldsReleased']==0
+          assert x['summary']['venues']==24 and len(x['venues'])==24
+          assert x['summary']['vendorEligibleAllThreePreviewAccepted'] \
+            ==x['vendorSourceTotals']['preStrictTMinus3']['allThree']
+          assert x['summary']['vendorUntimedJoinedCards']>0
+          assert x['summary']['historicalOfficialRacePages']>0
+          print('ASOF_24_VENUE_RESEARCH_AUDIT_PASS',x['summary'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 24-venue-asof-provenance-evidence
+          path: /tmp/boat-research-asof-v1.json
+          retention-days: 14
+          if-no-files-found: ignore
