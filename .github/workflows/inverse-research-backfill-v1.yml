@@ -60,6 +60,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py'
+          python -m unittest discover -s tests -p 'test_inverse_legacy_label_overlay_v1.py'
           python scripts/inverse-research-batch-v1.py \
             --start "$START" --end "$END" --limit 16 --newest-first \
             --existing-list /tmp/inverse-existing-days.txt \
@@ -94,8 +95,16 @@ jobs:
           while IFS= read -r -d '' item; do
             args+=(--input "$item")
           done < <(find "$DATA/research/inverse-v1/days" -maxdepth 1 -name '*.json' -print0 | sort -z)
+          # Retain vendor-absent-only original outcome labels in a separate overlay.
+          # Original archived days remain strictly immutable.
+          python scripts/inverse-legacy-label-overlay-v1.py \
+            --history-dir rich-history-24 \
+            --days-dir "$DATA/research/inverse-v1/days" \
+            --output /tmp/boat-command-inverse-legacy-overlay.json
           python scripts/inverse-outcome-patterns-v1.py "${args[@]}" \
+            --legacy-fallback-file /tmp/boat-command-inverse-legacy-overlay.json \
             --output /tmp/boat-command-inverse-latest-patterns.json
+          cp /tmp/boat-command-inverse-legacy-overlay.json "$DATA/research/inverse-v1/legacy-label-overlay-v1.json"
           cp /tmp/boat-command-inverse-latest-patterns.json "$DATA/research/inverse-v1/patterns/latest.json"
 
           # Exactly track how many source races each of 24 venues has actually visited.
@@ -114,6 +123,15 @@ jobs:
           issues=json.load(open('/tmp/boat-command-inverse-exceptions.json'))
           assert coverage['summary']['archivedTargetRaces']==issues['summary']['visitedRaces']
           assert coverage['summary']['nonAcceptedArchivedRaces']==issues['summary']['unacceptedRaces']
+          overlay=json.load(open('/tmp/boat-command-inverse-legacy-overlay.json'))
+          patterns=json.load(open('/tmp/boat-command-inverse-latest-patterns.json'))
+          assert overlay['researchOnly'] and not overlay['productionChanged']
+          assert patterns['totals']['thirdPartyLabelRaces']==coverage['summary']['acceptedJoinedRaces']
+          assert (patterns['totals']['legacyFallbackLabelRaces']
+                  ==overlay['summary']['researchOnlyFallbackLabels'])
+          assert (patterns['totals']['acceptedLabeledRaces']
+                  ==coverage['summary']['acceptedJoinedRaces']
+                    +overlay['summary']['researchOnlyFallbackLabels'])
           print('EXCEPTION_COVERAGE_RECONCILED',issues['summary'])
           PY
           cp /tmp/boat-command-inverse-exceptions.json "$DATA/research/inverse-v1/exceptions-v1.json"
@@ -123,7 +141,7 @@ jobs:
           git config user.email "boat-command-inverse-research@users.noreply.github.com"
           git add research/inverse-v1/days research/inverse-v1/patterns/latest.json \
             research/inverse-v1/backfill-status-v1.json research/inverse-v1/coverage-v1.json \
-            research/inverse-v1/exceptions-v1.json
+            research/inverse-v1/exceptions-v1.json research/inverse-v1/legacy-label-overlay-v1.json
           git diff --cached --quiet && exit 0
           git commit -m 'data(research): archive bounded third-party inverse join [skip ci]'
           git push origin HEAD:data/inverse-research-v1
@@ -136,5 +154,6 @@ jobs:
             /tmp/inverse-batch-status-v1.json
             /tmp/inverse-new-days/*.json
             /tmp/boat-command-inverse-exceptions.json
+            /tmp/boat-command-inverse-legacy-overlay.json
           retention-days: 7
           if-no-files-found: ignore
