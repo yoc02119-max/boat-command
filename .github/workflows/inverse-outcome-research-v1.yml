@@ -11,8 +11,10 @@ on:
       - 'scripts/inverse-research-batch-v1.py'
       - 'scripts/inverse-research-coverage-v1.py'
       - 'scripts/inverse-research-exceptions-v1.py'
+      - 'scripts/inverse-legacy-label-overlay-v1.py'
       - 'tests/test_inverse_research_coverage_v1.py'
       - 'tests/test_inverse_research_exceptions_v1.py'
+      - 'tests/test_inverse_legacy_label_overlay_v1.py'
       - 'tests/test_inverse_research_batch_v1.py'
       - 'tests/test_inverse_research_workflow_capacity_v1.py'
       - '.github/workflows/inverse-research-backfill-v1.yml'
@@ -46,13 +48,14 @@ jobs:
       - name: Offline isolation and correctness tests
         run: |
           set -euo pipefail
-          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py scripts/inverse-research-coverage-v1.py scripts/inverse-research-exceptions-v1.py
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py scripts/inverse-research-coverage-v1.py scripts/inverse-research-exceptions-v1.py scripts/inverse-legacy-label-overlay-v1.py
           python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_workflow_capacity_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_legacy_label_overlay_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
         env:
@@ -169,6 +172,36 @@ jobs:
           print('INVERSE_PILOT_EXCEPTION_PASS',report['summary'])
           PY
 
+      - name: Independently test vendor-incomplete actual history and label-only fallback
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/inverse-vendor-gap
+          python scripts/boatracecsv-inverse-join-v1.py \
+            --date 2026-08-29 \
+            --output /tmp/inverse-vendor-gap/2026-08-29.json
+          python scripts/inverse-legacy-label-overlay-v1.py \
+            --days-dir /tmp/inverse-vendor-gap \
+            --output /tmp/inverse-vendor-gap-overlay.json
+          python scripts/inverse-outcome-patterns-v1.py \
+            --input /tmp/inverse-vendor-gap/2026-08-29.json \
+            --legacy-fallback-file /tmp/inverse-vendor-gap-overlay.json \
+            --output /tmp/inverse-vendor-gap-patterns.json
+          python - <<'PY'
+          import json
+          original=json.load(open('/tmp/inverse-vendor-gap/2026-08-29.json'))
+          overlay=json.load(open('/tmp/inverse-vendor-gap-overlay.json'))
+          patterns=json.load(open('/tmp/inverse-vendor-gap-patterns.json'))
+          assert overlay['researchOnly'] and not overlay['productionChanged']
+          assert patterns['totals']['thirdPartyLabelRaces']==original['summary']['accepted']
+          assert patterns['totals']['legacyFallbackLabelRaces']==overlay['summary']['researchOnlyFallbackLabels']
+          assert (patterns['totals']['acceptedLabeledRaces']
+                  ==original['summary']['accepted']+overlay['summary']['researchOnlyFallbackLabels'])
+          for item in overlay['overrides'].values():
+              assert item['post']['decisionRaw'] is None
+              assert item['post']['actualCourseStart']==[]
+          print('VENDOR_GAP_RESEARCH_FALLBACK_PASS', overlay['summary'])
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -180,5 +213,7 @@ jobs:
             /tmp/inverse-multiday-patterns-v1.json
             /tmp/inverse-pilot-coverage-v1.json
             /tmp/inverse-pilot-exceptions-v1.json
+            /tmp/inverse-vendor-gap-overlay.json
+            /tmp/inverse-vendor-gap-patterns.json
           retention-days: 10
           if-no-files-found: ignore
