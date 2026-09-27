@@ -12,7 +12,7 @@ on:
       end:
         required: false
         type: string
-        default: '2026-09-22'
+        default: '' # Empty follows the latest date actually in rich-history-24
   push:
     branches: [main]
     paths:
@@ -54,9 +54,15 @@ jobs:
         id: batch
         env:
           START: ${{ inputs.start || '2026-03-24' }}
-          END: ${{ inputs.end || '2026-09-22' }}
+          END: ${{ inputs.end || '' }}
         run: |
           set -euo pipefail
+          # Never silently stop gathering if rich-history-24 gains newer dates.
+          # Only this checked-in original history defines the archival scope.
+          if [ -z "$END" ]; then
+            END="$(python -c 'import glob,json; print(max(r["d"] for p in glob.glob("rich-history-24/*-rich-history-v1.json") for r in json.load(open(p,encoding="utf-8"))["races"]))')"
+          fi
+          echo "Original historical source target ends: $END"
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_research_exceptions_v1.py'
