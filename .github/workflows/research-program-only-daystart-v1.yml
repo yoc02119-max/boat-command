@@ -1,0 +1,67 @@
+name: Research program-only previous-day provenance v1
+
+# Separate read-only research job; never alter existing collectors, live
+# model cycles, HARD LOCK, LAB, SHADOW, FORWARD, or data branch.
+on:
+  pull_request:
+    paths:
+      - 'scripts/research-program-only-daystart-v1.py'
+      - 'tests/test_research_program_only_daystart_v1.py'
+      - '.github/workflows/research-program-only-daystart-v1.yml'
+      - 'research/inverse-v1/PROGRAM-ONLY-DAYSTART-v1.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  original-program-daystart-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline upstream dependency and negative tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research-asof-provenance-v1.py \
+            scripts/research-github-asof-corroboration-v1.py \
+            scripts/research-program-only-daystart-v1.py
+          python -m unittest discover -s tests -p test_research_asof_provenance_v1.py -v
+          python -m unittest discover -s tests -p test_research_github_asof_corroboration_v1.py -v
+          python -m unittest discover -s tests -p test_research_program_only_daystart_v1.py -v
+      - name: Bounded round-robin 24-venue previous-day inventory
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/research-program-only-daystart-v1.py \
+            --limit 120 --output /tmp/boat-program-daystart-v1.json
+          python - <<'PY'
+          import json
+          x=json.load(open("/tmp/boat-program-daystart-v1.json"))
+          assert x["researchOnly"] and not x["productionChanged"]
+          assert not x["predictionInputChanged"] and not x["postFieldsRead"]
+          assert not x["autoPromotion"] and x["strictHistoricalModelImportCount"]==0
+          assert x["strictVendorCardFieldsReleased"]==0
+          assert x["scanned"]<=120
+          assert sum(x["byStatus"].values())==x["scanned"]
+          assert x["eligibleCurrentNoPreRichProgramRows"] == x["scanned"]+x["notScanned"]
+          for rows in x["perVenue"].values():
+              for row in rows:
+                  assert not row.get("eligibleForStrictHistoricalModel", False)
+                  assert not row["importedToModel"]
+          print("PROGRAM_DAYSTART_ISOLATION_PASS",x["byStatus"])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: program-only-before-daystart-pilot
+          path: /tmp/boat-program-daystart-v1.json
+          retention-days: 14
+          if-no-files-found: ignore
