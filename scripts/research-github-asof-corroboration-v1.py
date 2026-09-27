@@ -98,13 +98,15 @@ def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=
                     or pre.get("source", {}).get("program") != "stored result-free program pack"
                     or pre.get("resultEndpointsIncluded") is not False
                     or pre.get("payoutEndpointsIncluded") is not False
+                    or pre.get("predictionEnabled") is not False
+                    or pre.get("hardLockEnabled") is not False
                     or cutoff is None or pre_stamp is None or pre_stamp > cutoff):
                 continue
             if source.six_identity(pre) is None:
                 continue
             # No early GitHub-hosted run for this exact PRE commit => not proven.
             first_seen = seen(q_sha, cutoff)
-            if first_seen is None:
+            if first_seen is None or first_seen < pre_stamp.astimezone(dt.timezone.utc):
                 continue
             q_candidates.append((q_sha, pre, cutoff, first_seen))
         except (json.JSONDecodeError, ValueError, KeyError):
@@ -116,11 +118,14 @@ def candidate_research_pair(repo, slug, date, race, source, seen, max_revisions=
         for p_sha in p_versions:
             try:
                 program = at_revision(repo, p_sha, pfile)
+                if program.get("source") != "BOAT RACE official racelist":
+                    continue
                 check = source.audit_live_pair(program, pre, date, race)
                 if check["status"] != "RELATIVE_TIMES_COMPATIBLE_UNPROVEN":
                     continue
                 seen_at = seen(p_sha, cutoff)
-                if seen_at is None:
+                if (seen_at is None or seen_at < source.observed(
+                        program["fetchedAt"]).astimezone(dt.timezone.utc)):
                     continue
                 if source.observed(program["fetchedAt"]) > pre_stamp:
                     continue
@@ -202,8 +207,8 @@ def main():
     out = args.output.resolve()
     if out == repo or repo in out.parents or out.exists():
         p.error("NEW_OUTPUT_OUTSIDE_REPO_ONLY")
-    if not 1 <= args.limit <= 100:
-        p.error("MAX_100_CURRENT_COMPATIBLE_PAIRS")
+    if not 1 <= args.limit <= 300:
+        p.error("MAX_300_CURRENT_COMPATIBLE_PAIRS")
     if not re.fullmatch(r"[\w.-]+/[\w.-]+", args.github_repo):
         p.error("INVALID_GITHUB_REPO")
     token = os.environ.get("GH_READ_TOKEN")
