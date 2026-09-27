@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "ASHIYA",
+  "venueCode": "21",
+  "slug": "ashiya",
+  "date": "2026-09-28",
+  "race": 3,
+  "generatedAt": "2026-09-27T15:29:57.250Z",
+  "deadline": "09:36",
+  "modelVersion": "ASHIYA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-3-2",
+  "periodCandidateOrder": "1-3-2",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.020067,
+    "holdoutSecondDeltaVsTop": 0.040134,
+    "holdoutExactDeltaVsTop": 0.01938,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/ashiya/2026-09-28/program/race-3.json",
+    "programSha256": "9cf260386ea3e92311af3dabee2b3b5c86dda424180cbe1a403cf28da5772781",
+    "historyPath": "ashiya-history-bootstrap-v1.json",
+    "baselinePath": "ashiya-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    0.7294153275556726,
+    -0.031704918286311515,
+    0.8114104514763669,
+    -1.6317748978369948,
+    1.739188182939567,
+    -1.6165341458483025
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
