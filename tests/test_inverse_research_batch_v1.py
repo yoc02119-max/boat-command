@@ -33,6 +33,57 @@ class BatchTests(unittest.TestCase):
                                  {"2026-09-08"}, 3, newest_first=True)
         self.assertEqual(dates, ["2026-09-07", "2026-09-06", "2026-09-05"])
 
+    def test_two_rounds_skip_transient_failed_day_until_next_run(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            called = []
+            def sometimes_fails(date):
+                called.append(date)
+                if date == "2026-09-08":
+                    raise ValueError("transient HTTP 503")
+                return safe_report(date)
+            report = batch.bounded_backfill_rounds(
+                base, base / "days", "2026-09-01", "2026-09-08",
+                set(), limit=3, rounds=2, newest_first=True,
+                builder=sometimes_fails)
+            self.assertEqual(report["roundsExecuted"], 2)
+            self.assertEqual(report["selectedDates"],
+                             ["2026-09-08", "2026-09-07", "2026-09-06",
+                              "2026-09-05", "2026-09-04", "2026-09-03"])
+            self.assertEqual(report["newFiles"], 5)
+            self.assertEqual([x["date"] for x in report["failedDates"]],
+                             ["2026-09-08"])
+            self.assertEqual(called.count("2026-09-08"), 1)
+            self.assertFalse((base / "days" / "2026-09-08.json").exists())
+            again = batch.bounded_backfill_rounds(
+                base, base / "days", "2026-09-01", "2026-09-08",
+                set(c["date"] for c in report["completedDates"]),
+                limit=3, rounds=1, newest_first=True,
+                builder=lambda date: safe_report(date))
+            self.assertEqual(again["selectedDates"][0], "2026-09-08")
+            self.assertEqual(again["newFiles"], 3)
+
+    def test_two_round_limit_enforced(self):
+        with tempfile.TemporaryDirectory() as d:
+            with self.assertRaisesRegex(ValueError, "MAX_TWO"):
+                batch.bounded_backfill_rounds(
+                    Path(d), Path(d) / "out", "2026-09-01",
+                    "2026-09-02", set(), rounds=3)
+            with self.assertRaisesRegex(ValueError, "MAX_DATES"):
+                batch.bounded_backfill_rounds(
+                    Path(d), Path(d) / "out", "2026-09-01",
+                    "2026-09-19", set(), limit=17, rounds=1)
+
+    def test_no_dates_left_creates_no_files_or_requests(self):
+        with tempfile.TemporaryDirectory() as d:
+            report = batch.bounded_backfill_rounds(
+                Path(d), Path(d) / "out", "2026-09-01", "2026-09-02",
+                {"2026-09-01", "2026-09-02"}, 2, 2,
+                builder=lambda _: self.fail("unexpected fetch"))
+            self.assertEqual(report["roundsExecuted"], 0)
+            self.assertEqual(report["newFiles"], 0)
+            self.assertEqual(report["selectedDates"], [])
+
     def test_reject_excessive_capacity_and_span(self):
         with self.assertRaisesRegex(ValueError, "MAX_DATES"):
             batch.candidates("2026-09-01", "2026-09-02", set(), 17)

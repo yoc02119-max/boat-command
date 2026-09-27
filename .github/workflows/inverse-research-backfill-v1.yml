@@ -50,7 +50,7 @@ jobs:
             > /tmp/inverse-existing-days.txt
           echo "Already archived: $(wc -l < /tmp/inverse-existing-days.txt)"
 
-      - name: Bounded third-party join; never write into live or main
+      - name: Two bounded 16-day passes; never write into live or main
         id: batch
         env:
           START: ${{ inputs.start || '2026-03-24' }}
@@ -63,7 +63,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_inverse_legacy_label_overlay_v1.py'
           python -m unittest discover -s tests -p 'test_inverse_vendor_retry_v1.py'
           python scripts/inverse-research-batch-v1.py \
-            --start "$START" --end "$END" --limit 16 --newest-first \
+            --start "$START" --end "$END" --limit 16 --rounds 2 --newest-first \
             --existing-list /tmp/inverse-existing-days.txt \
             --output-dir /tmp/inverse-new-days \
             --status-out /tmp/inverse-batch-status-v1.json
@@ -71,7 +71,9 @@ jobs:
           import json,os
           x=json.load(open('/tmp/inverse-batch-status-v1.json'))
           assert x['researchOnly'] is True and x['productionChanged'] is False
-          assert x['newFiles']<=16
+          assert x['newFiles']<=32
+          assert x['roundsExecuted']<=2
+          assert x['maxSelectedDatesThisRun']<=32
           for f in x['completedDates']:
               d=json.load(open('/tmp/inverse-new-days/'+f['date']+'.json'))
               assert d['researchOnly'] is True and d['productionChanged'] is False

@@ -24,6 +24,9 @@ The coverage ledger below is dynamic; this text is NOT an automated success clai
 - Existing LAB/SHADOW/FORWARD programs remain operational but are NOT yet connected to this new inverse-outcome candidate.
 - Closing a task requires an independently runnable artifact and verifiable evaluation output, not only a commit, CI unit tests, or an internal setup milestone.
 
+## Bounded completion acceleration
+- Existing archival workflow now runs **at most two** isolated passes of 16 dates per scheduled run (maximum 32 days); this is still research-only, with a per-run audit and immutable saved days. A transiently failed date is skipped for the second pass, but retried in the next scheduled execution. Higher throughput does **not** change the five product milestones or mean stage 1 has been completed.
+
 ## Safety boundary
 No automatic model activation, no live prediction or production UI mutation,
 no alteration of shared virtual bankroll. Official historical pre-race backfill

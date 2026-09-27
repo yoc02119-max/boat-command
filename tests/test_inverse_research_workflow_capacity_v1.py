@@ -12,13 +12,17 @@ class WorkflowCapacityTest(unittest.TestCase):
     def test_runtime_guard_matches_cli_requested_capacity(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         script = SCRIPT.read_text(encoding="utf-8")
-        cap = re.search(r'--start "\$START".*--limit (\d+) --newest-first', text)
+        cap = re.search(r'--start "\$START".*--limit (\d+) --rounds (\d+) --newest-first', text)
         guard = re.search(r"assert x\['newFiles'\]\s*<=\s*(\d+)", text)
         self.assertIsNotNone(cap)
         self.assertIsNotNone(guard)
-        self.assertEqual(cap.group(1), guard.group(1))
-        self.assertTrue(1 <= int(cap.group(1)) <= 16)
+        per_round, rounds = int(cap.group(1)), int(cap.group(2))
+        self.assertEqual(per_round * rounds, int(guard.group(1)))
+        self.assertTrue(1 <= per_round <= 16)
+        self.assertTrue(1 <= rounds <= 2)
         self.assertIn("1 <= limit <= 16", script)
+        self.assertIn("1 <= rounds <= 2", script)
+        self.assertIn("assert x['maxSelectedDatesThisRun']<=32", text)
 
     def test_research_output_branch_and_official_collector_independent(self):
         text = WORKFLOW.read_text(encoding="utf-8")
