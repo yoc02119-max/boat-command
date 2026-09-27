@@ -59,3 +59,11 @@ Nine venues with **zero pairs** in this table are NOT nine venues missing third-
 
 ## Technical state / handoff
 Base main at creation: `f6542fc033c8aa603229db003dbe25bd9b240f18`; main observed at this final audit review: `464ce073f90caf986e6b97e5ab8cbdea0d53f487`. Main auto-updates; refresh before any merge, conflict handling or follow-on writes. Draft branch `research/asof-provenance-audit-v1`. Changed files before this report were **only** two new read-only research scripts, two new offline test files, one new isolated Action workflow and one research documentation file. No existing production scripts or workflows altered; no publishing of external URL UI changes required. The untrusted third-party full-day race card remains strict-PRE disallowed.
+
+## Artifact byte-level verification (while GitHub retains it)
+
+The full 296-case machine-readable CI artifact is attached to the successful run above as `github-hosted-pre-snapshot-asof-pilot` (GitHub artifact ID `10931432470`). It includes each successful pair's exact program/pre-rich commit SHA, both GitHub-hosted observation times, source fetch times and race-specific cutoff. Keep a copy before the Action retention period ends; after that the aggregate Markdown report and reproducible audit scripts remain, but missing historical GitHub run logs cannot be reconstructed by assumption.
+
+- Downloaded ZIP SHA256: `55f97e6867f75b213b37efd0d67ebe54aa3626327aac3f8e61b48226d30a51df`.
+- Contained `boat-github-asof-corroboration-v1.json` uncompressed SHA256: `983100deeb6c3b6ecde95651168919c4e68b1f802c9b80e4d548f3c190b1dad9`.
+- These fingerprints attest only to the saved research report's byte-for-byte identity, **not** to the original official HTTP bytes (not archived for these races) and never authorize live model use.
