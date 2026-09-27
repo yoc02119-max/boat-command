@@ -58,7 +58,7 @@ jobs:
           set -euo pipefail
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py'
           python scripts/inverse-research-batch-v1.py \
-            --start "$START" --end "$END" --limit 8 \
+            --start "$START" --end "$END" --limit 8 --newest-first \
             --existing-list /tmp/inverse-existing-days.txt \
             --output-dir /tmp/inverse-new-days \
             --status-out /tmp/inverse-batch-status-v1.json
