@@ -28,6 +28,11 @@ class BatchTests(unittest.TestCase):
                                  {"2026-09-01", "2026-09-02"}, 3)
         self.assertEqual(dates, ["2026-09-03", "2026-09-04", "2026-09-05"])
 
+    def test_newest_first_prioritizes_recent_and_skips_existing(self):
+        dates = batch.candidates("2026-09-01", "2026-09-08",
+                                 {"2026-09-08"}, 3, newest_first=True)
+        self.assertEqual(dates, ["2026-09-07", "2026-09-06", "2026-09-05"])
+
     def test_reject_excessive_capacity_and_span(self):
         with self.assertRaisesRegex(ValueError, "MAX_DATES"):
             batch.candidates("2026-09-01", "2026-09-02", set(), 17)
