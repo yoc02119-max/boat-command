@@ -29,6 +29,7 @@ def payloads():
         "date":"2026-09-26","race":1,"deadline":"10:47",
         "fetchedAt":"2026-09-25T21:26:54+09:00",
         "resultEndpointsIncluded":False,"resultIncluded":False,
+        "source":"BOAT RACE official racelist",
         "boats":[{"lane":n,"registration":5000+n,"class":"A1","motor":n+10}
                  for n in range(1,7)],
     }
@@ -37,6 +38,8 @@ def payloads():
     pre.pop("resultIncluded")
     pre["payoutEndpointsIncluded"]=False
     pre["source"]={"program":"stored result-free program pack"}
+    pre["predictionEnabled"]=False
+    pre["hardLockEnabled"]=False
     return prog,pre
 
 
@@ -92,6 +95,14 @@ class GitHistoryProofTests(unittest.TestCase):
             lambda sha,cutoff: (self.server_seen(sha,cutoff)
                                 if sha==self.qsha else None))
         self.assertEqual(item["status"],"PROGRAM_NO_MATCHING_SERVER_ASOF_PROOF")
+
+    def test_server_claim_before_actual_fetch_is_not_accepted(self):
+        def impossible_pre(sha,cutoff):
+            value=self.server_seen(sha,cutoff)
+            return value-dt.timedelta(hours=2) if sha==self.qsha else value
+        item=m.candidate_research_pair(
+            self.root,"toda","2026-09-26",1,p,impossible_pre)
+        self.assertEqual(item["status"],"PRE_RICH_NO_SERVER_ASOF_PROOF")
 
     def test_earlier_program_version_recoverable_after_current_rewrite(self):
         changed,_=payloads()
