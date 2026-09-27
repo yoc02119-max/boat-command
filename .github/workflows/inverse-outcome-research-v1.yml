@@ -9,6 +9,8 @@ on:
       - 'tests/test_boatracecsv_inverse_v1.py'
       - 'tests/test_inverse_outcome_patterns_v1.py'
       - 'scripts/inverse-research-batch-v1.py'
+      - 'scripts/inverse-research-coverage-v1.py'
+      - 'tests/test_inverse_research_coverage_v1.py'
       - 'tests/test_inverse_research_batch_v1.py'
       - '.github/workflows/inverse-research-backfill-v1.yml'
       - 'research/inverse-v1/LAB-IMPORT-CONTRACT.md'
@@ -41,10 +43,11 @@ jobs:
       - name: Offline isolation and correctness tests
         run: |
           set -euo pipefail
-          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py
+          python -m py_compile scripts/boatracecsv-inverse-join-v1.py scripts/inverse-outcome-patterns-v1.py scripts/inverse-research-batch-v1.py scripts/inverse-research-coverage-v1.py
           python -m unittest discover -s tests -p 'test_boatracecsv_inverse_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_outcome_patterns_v1.py' -v
           python -m unittest discover -s tests -p 'test_inverse_research_batch_v1.py' -v
+          python -m unittest discover -s tests -p 'test_inverse_research_coverage_v1.py' -v
 
       - name: Execute one-day third-party join outside the app
         env:
@@ -118,6 +121,25 @@ jobs:
           print('MULTI_DAY_RESEARCH_AUDIT',json.dumps({'batch':b,'patterns':p['totals']}))
           PY
 
+      - name: Verify honest full-archive coverage with 24 venue rows
+        run: |
+          set -euo pipefail
+          python scripts/inverse-research-coverage-v1.py \
+            --days-dir /tmp/inverse-batch-three-days \
+            --output /tmp/inverse-pilot-coverage-v1.json
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/inverse-pilot-coverage-v1.json'))
+          b=json.load(open('/tmp/inverse-three-day-status.json'))
+          assert c['researchOnly'] and not c['productionChanged']
+          assert c['summary']['venues']==24
+          assert c['summary']['sourceRaces']>=27000
+          assert c['summary']['archivedTargetRaces']==b['targetRaces']
+          assert c['summary']['acceptedJoinedRaces']==b['accepted']
+          assert not c['summary']['allSourceTargetsVisited']
+          print('INVERSE_COVERAGE_PILOT_PASS',c['summary'])
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -127,5 +149,6 @@ jobs:
             /tmp/boat-command-inverse-patterns-sample-v1.json
             /tmp/inverse-three-day-status.json
             /tmp/inverse-multiday-patterns-v1.json
+            /tmp/inverse-pilot-coverage-v1.json
           retention-days: 10
           if-no-files-found: ignore
