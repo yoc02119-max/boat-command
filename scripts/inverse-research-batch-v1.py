@@ -88,12 +88,62 @@ def bounded_backfill(root: Path, output_dir: Path, selected: list[str],
     }
 
 
+def aggregate_rounds(reports: list[dict]) -> dict:
+    """Keep the existing status schema while reporting every attempt honestly."""
+    completed = [item for report in reports for item in report["completedDates"]]
+    failed = [item for report in reports for item in report["failedDates"]]
+    selected = [date for report in reports for date in report["selectedDates"]]
+    if len(selected) != len(set(selected)):
+        raise ValueError("DUPLICATE_DATE_ATTEMPT_IN_ONE_RUN")
+    return {
+        "schema": "boat-command-inverse-batch-status-v1",
+        "researchOnly": True, "productionChanged": False,
+        "selectedDates": selected, "completedDates": completed,
+        "failedDates": failed, "newFiles": len(completed),
+        "targetRaces": sum(item["targetRaces"] for item in completed),
+        "accepted": sum(item["accepted"] for item in completed),
+        "roundsExecuted": len(reports),
+        "maxSelectedDatesThisRun": len(selected),
+    }
+
+
+def bounded_backfill_rounds(root: Path, output_dir: Path, start: str, end: str,
+                            existing: set[str], limit: int = 8, rounds: int = 1,
+                            newest_first: bool = False, builder=None) -> dict:
+    """At most two separately bounded 16-day passes; rate/timeout safety gate.
+
+    The next pass skips ALL dates already attempted in this run, including
+    transiently failed days, so one 503 cannot starve older dates. Failed days
+    remain eligible on the next independent scheduled execution.
+    """
+    if type(rounds) is not int or not 1 <= rounds <= 2:
+        raise ValueError("MAX_TWO_BOUNDED_ROUNDS")
+    if not isinstance(existing, set):
+        raise TypeError("EXISTING_DATES_MUST_BE_SET")
+    attempted = set(existing)
+    reports = []
+    for _ in range(rounds):
+        chosen = candidates(start, end, attempted, limit, newest_first)
+        if not chosen:
+            break
+        # Never reattempt a failed date within the same workflow run.
+        attempted.update(chosen)
+        result = bounded_backfill(root, output_dir, chosen, builder=builder)
+        reports.append(result)
+    report = aggregate_rounds(reports)
+    if len(report["selectedDates"]) > 32:
+        raise ValueError("EXCEEDED_32_DATE_RUN_LIMIT")
+    return report
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--start", required=True)
     p.add_argument("--end", required=True)
     p.add_argument("--existing-list", type=Path)
     p.add_argument("--limit", type=int, default=8)
+    p.add_argument("--rounds", type=int, default=1,
+                   help="1 or 2 bounded 16-date passes per workflow, never more")
     p.add_argument("--newest-first", action="store_true",
                    help="Prioritize recent available pre-race observations; archive older days later")
     p.add_argument("--output-dir", type=Path, required=True)
@@ -106,15 +156,15 @@ def main():
     for dest in (output, status_out):
         if any(dest == folder or folder in dest.parents for folder in blocked):
             p.error("RESEARCH_OUTPUT_ONLY")
-    chosen = candidates(args.start, args.end, existing_dates(args.existing_list),
-                        args.limit, newest_first=args.newest_first)
-    status = bounded_backfill(ROOT, output, chosen)
+    status = bounded_backfill_rounds(
+        ROOT, output, args.start, args.end, existing_dates(args.existing_list),
+        args.limit, rounds=args.rounds, newest_first=args.newest_first)
     status_out.parent.mkdir(parents=True, exist_ok=True)
     status_out.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")
     print("INVERSE_BATCH", json.dumps(status, ensure_ascii=False))
     # If selected records all fail, CI should not silently mark a batch successful.
-    if chosen and not status["completedDates"]:
+    if status["selectedDates"] and not status["completedDates"]:
         raise SystemExit("INVERSE_BATCH_ALL_SELECTED_DATES_FAILED")
 
 
