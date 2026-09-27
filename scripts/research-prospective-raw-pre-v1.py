@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Prospective official raw PRE capture: research only, zero model imports.
 
-Fetch only the ORIGINAL official racelist and beforeinfo page for an
-imminent race. Persist their actual bytes + SHA256 and acquire timestamps.
+Fetch only the official racelist and beforeinfo page for an imminent race.
+Hash source bytes IN MEMORY; persist only SHA256, source times and minimal
+structured diagnostic counts. Do not publish original official HTML content.
 A runner's wall clock is NOT independent GitHub publication evidence:
 snapshots remain ineligible until a separate server-hosted before-cutoff audit.
 Neither LIVE nor any existing prediction/TRY/finance data is ever written.
@@ -10,13 +11,10 @@ Neither LIVE nor any existing prediction/TRY/finance data is ever written.
 from __future__ import annotations
 
 import argparse
-import base64
 import datetime as dt
-import gzip
 import hashlib
 import importlib.util
 import json
-import os
 import re
 import urllib.parse
 import urllib.request
@@ -97,16 +95,16 @@ def decode(raw):
 
 
 def as_captured(raw, url, started, ended):
+    # Official HTML may not be redistributed. Hash actual response bytes in
+    # memory and discard them after deriving minimal research metadata.
     raw = valid_bytes(raw)
     return {
         "url": url, "byteLength": len(raw),
         "sha256OriginalBytes": hashlib.sha256(raw).hexdigest(),
-        "gzipBase64OriginalBytes": base64.b64encode(
-            gzip.compress(raw, mtime=0)).decode("ascii"),
+        "originalBytesRetained": False,
         "fetchStartedAt": valid_clock(started).isoformat(),
         "fetchCompletedAt": valid_clock(ended).isoformat(),
     }
-
 
 def runner_fetch(url):
     # No URL input from a saved document can reach this function.
@@ -207,14 +205,15 @@ def capture_one(saved, code, slug, date, race, *,
                     ("exhibitionTimes", "startDisplayRows", "weatherFields"))):
         raise RejectedObservation("UNVERIFIED_BEFOREINFO_BODY")
     snapshot = {
-        "schema": "boat-command-prospective-raw-pre-v1",
+        "schema": "boat-command-prospective-hash-pre-v1",
         "researchOnly": True, "productionChanged": False,
         "predictionInputChanged": False, "resultEndpointsIncluded": False,
         "payoutEndpointsIncluded": False, "hardLockChanged": False,
         "tryChanged": False, "autoPromotion": False,
         "strictModelUseEnabled": False,
         "independentServerPublicationProved": False,
-        "evidenceTier": "RUNNER_CAPTURED_UNATTESTED_UNTIL_SERVER_PUBLISHED",
+        "evidenceTier": "RUNNER_HASH_OBSERVED_UNATTESTED_UNTIL_SERVER_PUBLISHED",
+        "originalHtmlRedistributed": False,
         "venueCode": code, "venue": slug, "date": date, "race": race,
         "deadlineJst": fresh["deadline"], "cutoffJst": target_cutoff.isoformat(),
         "registrations": [b["registration"] for b in sorted(fresh["boats"],
@@ -223,20 +222,23 @@ def capture_one(saved, code, slug, date, race, *,
         "officialRacelist": as_captured(first, official_list, t1, t2),
         "officialBeforeinfo": as_captured(second, official_pre, t3, t4),
         "sourceTimestampNote": (
-            "Runner clock and raw source bytes are archived; independently "
-            "verify GitHub artifact or commit publication before target T-3. "
-            "This snapshot is NOT yet an approved historical PRE input."),
+            "Original official bytes are hashed in memory and not retained "
+            "or redistributed; archive only source digests and timestamps. "
+            "GitHub publication must be independently verified before T-3, "
+            "and a digest alone does not make raw content independently "
+            "replayable or establish source authorization."),
     }
     validate_snapshot(snapshot)
     return snapshot
 
 
 def validate_snapshot(item):
-    if (item.get("schema") != "boat-command-prospective-raw-pre-v1"
+    if (item.get("schema") != "boat-command-prospective-hash-pre-v1"
             or item.get("researchOnly") is not True
             or item.get("productionChanged") is not False
             or item.get("strictModelUseEnabled") is not False
             or item.get("independentServerPublicationProved") is not False
+            or item.get("originalHtmlRedistributed") is not False
             or item.get("resultEndpointsIncluded") is not False
             or item.get("payoutEndpointsIncluded") is not False):
         raise RejectedObservation("UNSAFE_PROSPECTIVE_SNAPSHOT")
@@ -251,10 +253,12 @@ def validate_snapshot(item):
         if (parsed.scheme != "https" or parsed.hostname != "www.boatrace.jp"
                 or parsed.path != expected_path):
             raise RejectedObservation("UNSAFE_SOURCE_URL")
-        data = gzip.decompress(base64.b64decode(obj["gzipBase64OriginalBytes"]))
-        if (len(data) != obj["byteLength"]
-                or hashlib.sha256(data).hexdigest() != obj["sha256OriginalBytes"]):
-            raise RejectedObservation("RAW_BYTES_HASH_MISMATCH")
+        if (obj.get("originalBytesRetained") is not False
+                or "gzipBase64OriginalBytes" in obj
+                or not isinstance(obj.get("byteLength"), int)
+                or not 1 <= obj["byteLength"] <= MAX_RAW_BYTES
+                or not re.fullmatch(r"[a-f0-9]{64}", str(obj.get("sha256OriginalBytes")))):
+            raise RejectedObservation("INVALID_SOURCE_HASH_OR_COPY_POLICY")
         begun = valid_clock(dt.datetime.fromisoformat(obj["fetchStartedAt"]))
         ended = valid_clock(dt.datetime.fromisoformat(obj["fetchCompletedAt"]))
         if begun > ended or ended > window-PUBLICATION_BUFFER:
