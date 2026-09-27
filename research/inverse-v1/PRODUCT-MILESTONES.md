@@ -20,6 +20,7 @@ The coverage ledger below is dynamic; this text is NOT an automated success clai
 - \`scripts/inverse-outcome-patterns-v1.py\` produces **in-sample** exploratory conditional patterns, not validated model probabilities.
 - \`scripts/inverse-research-coverage-v1.py\` gives trustworthy source-vs-archived-vs-accepted totals per venue and PRE field status. An archival scan can be complete even when fields lack trusted observation timestamps, so count those separately.
 - `scripts/inverse-research-exceptions-v1.py` records each rejected race's exact code, reason and provenance without changing original snapshots; missing diagnostic details in older immutable days are explicitly marked unknown. The report must reconcile exactly with the 24-venue coverage report.
+- `scripts/inverse-legacy-label-overlay-v1.py` supplies existing original outcome/payout labels **only when both vendor result and payout rows are demonstrably absent**, without rewriting the vendor day archive; provenance and unknown decision/course/ST remain explicit. Its recovered count is distinct from third-party-complete counts.
 - Existing LAB/SHADOW/FORWARD programs remain operational but are NOT yet connected to this new inverse-outcome candidate.
 - Closing a task requires an independently runnable artifact and verifiable evaluation output, not only a commit, CI unit tests, or an internal setup milestone.
 
