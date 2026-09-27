@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: research-asof-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   safety-and-24-venue-asof-audit:
     runs-on: ubuntu-latest
@@ -89,7 +93,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/research-github-asof-corroboration-v1.py \
-            --limit 100 \
+            --limit 300 \
             --output /tmp/boat-github-asof-corroboration-v1.json
           python - <<'PY'
           import json
@@ -97,7 +101,7 @@ jobs:
           assert report['researchOnly'] and not report['productionChanged']
           assert not report['predictionInputChanged'] and not report['automaticModelImport']
           assert report['vendorUntimedCardFieldsReleased']==0
-          assert report['scannedPairs']<=100
+          assert report['scannedPairs']<=300
           assert report['candidateCurrentCompatiblePairs']>=report['scannedPairs']
           print('SERVER_ASOF_PILOT_PASS',report['byStatus'])
           PY
