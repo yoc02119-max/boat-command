@@ -208,9 +208,9 @@ body{background-color:#02080d}
  </div>
 </section>
 <section class="money-strip" aria-label="資金と収支">
-<div class="money-card"><i class="matrix-icon">◎</i><span>24場共通 運用資金</span><strong id="portalBankroll">¥100,000</strong><small id="portalBankrollNote">開始10万円 · 確定損益を継続反映 · 自動リセットなし</small></div>
-<div class="money-card"><i class="matrix-icon">↗</i><span>累計確定収支</span><strong id="portalProfit" class="flat">¥0</strong><small>入金を除くレース損益</small></div>
-<div class="money-card"><i class="matrix-icon">◫</i><span>今日の確定収支</span><strong id="portalTodayProfit" class="flat">¥0</strong><small id="portalTodayLabel">本日LIVE</small></div>
+<div class="money-card"><i class="matrix-icon">◎</i><span>24場共通 運用資金</span><strong id="portalBankroll">確認中</strong><small id="portalBankrollNote">台帳を取得中</small></div>
+<div class="money-card"><i class="matrix-icon">↗</i><span>累計確定収支</span><strong id="portalProfit" class="flat">—</strong><small>入金を除くレース損益</small></div>
+<div class="money-card"><i class="matrix-icon">◫</i><span>今日の確定収支</span><strong id="portalTodayProfit" class="flat">—</strong><small id="portalTodayLabel">本日LIVE</small></div>
 <div class="money-card"><i class="matrix-icon">▥</i><span>今日の回収率</span><strong id="portalTodayRoi" class="flat">—</strong><small>本日払戻 ÷ 本日投資</small></div>
 <div class="money-card"><i class="matrix-icon">◉</i><span>トータル回収率</span><strong id="portalTotalRoi" class="flat">—</strong><small>累計払戻 ÷ 累計投資</small></div>
 </section>
@@ -557,7 +557,7 @@ async function renderSharedPortfolioStats(){
    const confirmed=Number(x.confirmedBankrollYen??(Number(x.startingBankrollYen||START_BANKROLL)+Number(x.profitYen||0)));
    const available=Number(x.availableBankrollYen??x.bankrollYen??confirmed);
    const pending=Number(x.pendingStakeYen)||0;
-   b.textContent=money(confirmed);b.className='flat';
+   b.textContent=money(confirmed);b.className='flat';b.dataset.verified='true';
    bn.textContent=`開始 ${money(Number(x.startingBankrollYen||START_BANKROLL))} · 未精算予約 ${money(pending)} · 利用可能 ${money(available)} · 24場共通`;
    p.textContent=signed(Number(x.profitYen)||0);p.className=cls(Number(x.profitYen)||0);
    t.textContent=signed(dayProfit);t.className=cls(dayProfit);
@@ -566,9 +566,11 @@ async function renderSharedPortfolioStats(){
    rr.textContent=totalRoi==null?'—':`${totalRoi.toFixed(1)}%`;rr.className=roiCls(totalRoi);
    renderVenue30dStats(x);
  }catch{
-   b.textContent=money(START_BANKROLL);bn.textContent='24場共通10万円 · 確定損益を継続反映 · 自動リセットなし';
-   p.textContent='¥0';t.textContent='¥0';l.textContent=`${todayJst()} · 運用準備`;tr.textContent='—';rr.textContent='—';
-   renderVenue30dStats({byVenue:{}});
+   // Never display fictitious reset capital on a temporary network failure.
+   // Retain the last verified financial figures and retry on the existing minute timer.
+   bn.textContent=b.dataset.verified==='true'
+     ?'最新台帳の再取得待ち · 表示値は直前の確認済みデータ'
+     :'台帳を取得できません · 自動で再試行します';
  }
 }
 let cycleFleetByCode=new Map();
@@ -798,7 +800,7 @@ function refreshMatrixClock(){
 refreshMatrixClock();setInterval(refreshMatrixClock,1000);
 document.getElementById('homeNav')?.classList.add('active');
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
-setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
+setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderTodayOverview();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
 </script>
 <script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script></body>
 </html>
