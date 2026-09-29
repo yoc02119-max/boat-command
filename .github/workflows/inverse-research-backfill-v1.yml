@@ -13,8 +13,15 @@ on:
         required: false
         type: string
         default: '' # Empty follows the latest date actually in rich-history-24
-  # PAUSED BY USER: no push or scheduled research until explicitly resumed.
-  # Manual dispatch is retained solely for a later deliberate restart.
+  # Authorized restart 2026-09-29: bound isolated research collection to once daily.
+  # The one-time push trigger performs the initial restart after merging this change.
+  # Research writes ONLY data/inverse-research-v1; never production or live files.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inverse-research-backfill-v1.yml'
+  schedule:
+    - cron: '37 17 * * *' # 02:37 JST; max two 16-day passes/day
 
 permissions:
   contents: write
