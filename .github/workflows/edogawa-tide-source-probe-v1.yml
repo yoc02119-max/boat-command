@@ -36,9 +36,9 @@ jobs:
           p=Path('.github/workflows/edogawa-tide-source-probe-v1.yml')
           s=p.read_text(encoding='utf-8')
           lines=s.splitlines()
-          starts=[i for i,line in enumerate(lines) if line == "          python3 - <<'PY'"]
+          starts=[i for i,line in enumerate(lines) if line.rstrip().endswith("python3 - <<'PY'")]
           parts=[chr(10).join(lines[i+1:lines.index('          PY',i+1)]) for i in starts]
-          assert len(parts)>=3,len(parts)
+          assert len(parts)>=4,len(parts)
           for block in parts:
               code=textwrap.dedent(block)
               compile(code,str(p),'exec')
