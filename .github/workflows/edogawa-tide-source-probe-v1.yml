@@ -2,6 +2,9 @@ name: Edogawa tide source probe v1
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/edogawa-tide-source-probe-v1.yml'
   workflow_run:
     workflows: ["Edogawa PRE-RACE collector v1"]
     types: [completed]
@@ -19,8 +22,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+      - name: Compile every embedded Python audit/probe block
+        run: |
+          python3 - <<'CONTRACT'
+          from pathlib import Path
+          import re, textwrap
+          p=Path('.github/workflows/edogawa-tide-source-probe-v1.yml')
+          s=p.read_text(encoding='utf-8')
+          parts=re.findall(r"(?ms)^          python3 - <<'PY'\\n(.*?)^          PY$",s)
+          assert len(parts)>=3,len(parts)
+          for block in parts:
+              code=textwrap.dedent(block)
+              compile(code,str(p),'exec')
+          assert "echo \"target=$TARGET\" >> \"$GITHUB_OUTPUT\"" in s
+          assert s.count('steps.probe.outputs.target')>=2
+          print('EDOGAWA_TIDE_WORKFLOW_PYTHON_SYNTAX_PASS',len(parts))
+          CONTRACT
+
   probe:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -175,16 +201,23 @@ jobs:
           TARGET="live/edogawa/$DATE/pre/race-$RACE-tide-source.json"
           if [ ! -f "$TARGET" ]; then echo 'wrote=false' >> "$GITHUB_OUTPUT"; exit 0; fi
           echo 'wrote=true' >> "$GITHUB_OUTPUT"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
 
       - name: Safety audit
         if: steps.probe.outputs.wrote == 'true'
+        env:
+          TARGET: ${{ steps.probe.outputs.target }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import glob,json
-          files=sorted(glob.glob('live/edogawa/*/pre/race-*-tide-source.json'))
-          assert files
-          x=json.load(open(files[-1],encoding='utf-8'))
+          import json,os,pathlib,re
+          target=os.environ['TARGET']
+          assert re.fullmatch(r'live/edogawa/\d{4}-\d{2}-\d{2}/pre/race-(?:[1-9]|1[0-2])-tide-source\.json',target)
+          path=pathlib.Path(target)
+          assert path.is_file()
+          x=json.loads(path.read_text(encoding='utf-8'))
+          assert x['date']==path.parts[2]
+          assert x['race']==int(path.stem.split('-')[1])
           assert x['venue']=='EDOGAWA' and x['venueCode']=='03'
           assert x['markerVerified'] is True
           assert x['mapping']['status'] in {'EXPLICIT_TEXT_ONLY','UNMAPPED_NO_EXPLICIT_TEXT'}
@@ -196,19 +229,13 @@ jobs:
 
       - name: Commit source mapping evidence
         if: steps.probe.outputs.wrote == 'true'
+        env:
+          TARGET: ${{ steps.probe.outputs.target }}
         run: |
           set -euo pipefail
           DATE=$(TZ=Asia/Tokyo date +%F)
-          RACE=$(python3 - <<'PY'
-          import glob,re
-          fs=sorted(glob.glob('live/edogawa/*/pre/race-*-tide-source.json'))
-          if fs:
-              m=re.search(r'race-(\d+)-tide-source\.json,fs[-1])
-              print(m.group(1) if m else '')
-          PY
-          )
-          [ -n "$RACE" ] || { echo 'NO_EDOGAWA_TIDE_TARGET'; exit 0; }
-          FILE="live/edogawa/$DATE/pre/race-$RACE-tide-source.json"
+          FILE="$TARGET"
+          [[ "$FILE" =~ ^live/edogawa/$DATE/pre/race-([1-9]|1[0-2])-tide-source\.json$ ]] || { echo 'INVALID_EDOGAWA_TIDE_TARGET'; exit 1; }
           cp "$FILE" /tmp/edogawa-tide-source.json
 
           git config user.name 'boat-command-edogawa-tide'
@@ -217,6 +244,7 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin main
             git reset --hard origin/main
+            if [ -f "$FILE" ]; then echo 'EDOGAWA_TIDE_EVIDENCE_ALREADY_ARCHIVED'; exit 0; fi
             mkdir -p "live/edogawa/$DATE/pre"
             cp /tmp/edogawa-tide-source.json "$FILE"
             git add "$FILE"
