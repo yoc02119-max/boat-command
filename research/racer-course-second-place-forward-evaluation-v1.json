@@ -9,19 +9,19 @@
   "evaluationRule": "Only immutable >=3min PRE-RACE shadow + verified POST result",
   "summary": {
     "snapshots": 883,
-    "evaluated": 835,
-    "firstCorrect": 272,
+    "evaluated": 849,
+    "firstCorrect": 273,
     "baselineSecondHits": 86,
     "candidateSecondHits": 108,
     "baselineTop2Hits": 157,
     "candidateTop2Hits": 169,
-    "changedEvaluated": 477,
-    "baselineSecondAccuracyWhenFirstCorrect": 0.3161764705882353,
-    "candidateSecondAccuracyWhenFirstCorrect": 0.39705882352941174,
-    "secondAccuracyDelta": 0.08088235294117647,
-    "baselineTop2CoverageWhenFirstCorrect": 0.5772058823529411,
-    "candidateTop2CoverageWhenFirstCorrect": 0.6213235294117647,
-    "top2CoverageDelta": 0.04411764705882353
+    "changedEvaluated": 483,
+    "baselineSecondAccuracyWhenFirstCorrect": 0.315018315018315,
+    "candidateSecondAccuracyWhenFirstCorrect": 0.3956043956043956,
+    "secondAccuracyDelta": 0.08058608058608059,
+    "baselineTop2CoverageWhenFirstCorrect": 0.575091575091575,
+    "candidateTop2CoverageWhenFirstCorrect": 0.6190476190476191,
+    "top2CoverageDelta": 0.04395604395604396
   },
   "venues": [
     {
@@ -112,24 +112,24 @@
     {
       "slug": "gamagori",
       "snapshots": 24,
-      "evaluated": 12,
-      "firstCorrect": 5,
+      "evaluated": 17,
+      "firstCorrect": 6,
       "baselineSecondHits": 1,
       "candidateSecondHits": 2,
       "baselineTop2Hits": 3,
       "candidateTop2Hits": 3,
-      "changedEvaluated": 6,
-      "baselineSecondAccuracyWhenFirstCorrect": 0.2,
-      "candidateSecondAccuracyWhenFirstCorrect": 0.4,
-      "secondAccuracyDelta": 0.2,
-      "baselineTop2CoverageWhenFirstCorrect": 0.6,
-      "candidateTop2CoverageWhenFirstCorrect": 0.6,
+      "changedEvaluated": 10,
+      "baselineSecondAccuracyWhenFirstCorrect": 0.16666666666666666,
+      "candidateSecondAccuracyWhenFirstCorrect": 0.3333333333333333,
+      "secondAccuracyDelta": 0.16666666666666666,
+      "baselineTop2CoverageWhenFirstCorrect": 0.5,
+      "candidateTop2CoverageWhenFirstCorrect": 0.5,
       "top2CoverageDelta": 0.0
     },
     {
       "slug": "hamanako",
       "snapshots": 12,
-      "evaluated": 7,
+      "evaluated": 12,
       "firstCorrect": 3,
       "baselineSecondHits": 0,
       "candidateSecondHits": 0,
@@ -299,13 +299,13 @@
     {
       "slug": "tamagawa",
       "snapshots": 72,
-      "evaluated": 68,
+      "evaluated": 72,
       "firstCorrect": 19,
       "baselineSecondHits": 8,
       "candidateSecondHits": 6,
       "baselineTop2Hits": 12,
       "candidateTop2Hits": 12,
-      "changedEvaluated": 39,
+      "changedEvaluated": 41,
       "baselineSecondAccuracyWhenFirstCorrect": 0.42105263157894735,
       "candidateSecondAccuracyWhenFirstCorrect": 0.3157894736842105,
       "secondAccuracyDelta": -0.10526315789473684,
@@ -3283,6 +3283,61 @@
       "candidatePair": "1-2"
     },
     {
+      "slug": "gamagori",
+      "date": "2026-09-30",
+      "race": 1,
+      "gate": true,
+      "changed": true,
+      "actual": "4-5-6",
+      "firstCorrect": true,
+      "baselinePair": "4-6",
+      "candidatePair": "4-1"
+    },
+    {
+      "slug": "gamagori",
+      "date": "2026-09-30",
+      "race": 2,
+      "gate": true,
+      "changed": true,
+      "actual": "1-2-3",
+      "firstCorrect": false,
+      "baselinePair": "3-2",
+      "candidatePair": "3-2"
+    },
+    {
+      "slug": "gamagori",
+      "date": "2026-09-30",
+      "race": 3,
+      "gate": true,
+      "changed": false,
+      "actual": "1-5-6",
+      "firstCorrect": false,
+      "baselinePair": "6-1",
+      "candidatePair": "6-1"
+    },
+    {
+      "slug": "gamagori",
+      "date": "2026-09-30",
+      "race": 4,
+      "gate": true,
+      "changed": true,
+      "actual": "1-6-5",
+      "firstCorrect": false,
+      "baselinePair": "3-6",
+      "candidatePair": "3-6"
+    },
+    {
+      "slug": "gamagori",
+      "date": "2026-09-30",
+      "race": 5,
+      "gate": true,
+      "changed": true,
+      "actual": "1-5-2",
+      "firstCorrect": false,
+      "baselinePair": "3-4",
+      "candidatePair": "3-4"
+    },
+    {
       "slug": "hamanako",
       "date": "2026-09-30",
       "race": 1,
@@ -3292,6 +3347,39 @@
       "firstCorrect": false,
       "baselinePair": "6-3",
       "candidatePair": "6-3"
+    },
+    {
+      "slug": "hamanako",
+      "date": "2026-09-30",
+      "race": 10,
+      "gate": false,
+      "changed": false,
+      "actual": "4-6-5",
+      "firstCorrect": false,
+      "baselinePair": "6-1",
+      "candidatePair": "6-1"
+    },
+    {
+      "slug": "hamanako",
+      "date": "2026-09-30",
+      "race": 11,
+      "gate": false,
+      "changed": false,
+      "actual": "2-1-4",
+      "firstCorrect": false,
+      "baselinePair": "3-2",
+      "candidatePair": "3-2"
+    },
+    {
+      "slug": "hamanako",
+      "date": "2026-09-30",
+      "race": 12,
+      "gate": false,
+      "changed": false,
+      "actual": "1-4-3",
+      "firstCorrect": false,
+      "baselinePair": "2-3",
+      "candidatePair": "2-3"
     },
     {
       "slug": "hamanako",
@@ -3358,6 +3446,28 @@
       "firstCorrect": false,
       "baselinePair": "6-5",
       "candidatePair": "6-5"
+    },
+    {
+      "slug": "hamanako",
+      "date": "2026-09-30",
+      "race": 8,
+      "gate": false,
+      "changed": false,
+      "actual": "1-2-3",
+      "firstCorrect": false,
+      "baselinePair": "4-1",
+      "candidatePair": "4-1"
+    },
+    {
+      "slug": "hamanako",
+      "date": "2026-09-30",
+      "race": 9,
+      "gate": false,
+      "changed": false,
+      "actual": "1-6-4",
+      "firstCorrect": false,
+      "baselinePair": "4-6",
+      "candidatePair": "4-6"
     },
     {
       "slug": "heiwajima",
@@ -7157,6 +7267,39 @@
     {
       "slug": "tamagawa",
       "date": "2026-09-30",
+      "race": 10,
+      "gate": true,
+      "changed": true,
+      "actual": "1-4-2",
+      "firstCorrect": false,
+      "baselinePair": "4-5",
+      "candidatePair": "4-5"
+    },
+    {
+      "slug": "tamagawa",
+      "date": "2026-09-30",
+      "race": 11,
+      "gate": true,
+      "changed": false,
+      "actual": "2-1-6",
+      "firstCorrect": false,
+      "baselinePair": "6-3",
+      "candidatePair": "6-3"
+    },
+    {
+      "slug": "tamagawa",
+      "date": "2026-09-30",
+      "race": 12,
+      "gate": true,
+      "changed": true,
+      "actual": "1-3-2",
+      "firstCorrect": false,
+      "baselinePair": "4-3",
+      "candidatePair": "4-3"
+    },
+    {
+      "slug": "tamagawa",
+      "date": "2026-09-30",
       "race": 2,
       "gate": true,
       "changed": true,
@@ -7230,6 +7373,17 @@
       "firstCorrect": false,
       "baselinePair": "1-4",
       "candidatePair": "1-4"
+    },
+    {
+      "slug": "tamagawa",
+      "date": "2026-09-30",
+      "race": 9,
+      "gate": true,
+      "changed": false,
+      "actual": "3-1-4",
+      "firstCorrect": false,
+      "baselinePair": "4-2",
+      "candidatePair": "4-2"
     },
     {
       "slug": "toda",
