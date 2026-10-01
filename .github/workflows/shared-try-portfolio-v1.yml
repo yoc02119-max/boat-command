@@ -23,6 +23,9 @@ on:
   schedule:
     # Freeze daily TRY selections at 07:30 JST, after early Karatsu PRE-RACE snapshots.
     - cron: '30 22 * * *'
+    # Independent reconciliation if a collector completion event is delayed or missed.
+    # Existing TRY selections are immutable; only POST-derived settlement is rebuilt.
+    - cron: '15,35,55 0-15 * * *'
   workflow_run:
     workflows:
       - 'Venue POST-RACE batch generic v1'
