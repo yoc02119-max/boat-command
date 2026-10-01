@@ -9,8 +9,9 @@ on:
       - 'scripts/test-venue-result-coverage.py'
       - '.github/workflows/venue-result-batch-generic-v1.yml'
   schedule:
-    # 09:05-23:05 JST, hourly. Covers daytime and night venues without per-venue poll duplication.
-    - cron: '5 0-14 * * *'
+    # 09:05-23:45 JST, every 20 minutes. Reduces completed-race result wait.
+    # POST files remain immutable; shared TRY recalculation follows successful collection.
+    - cron: '5,25,45 0-14 * * *'
 
 permissions:
   contents: write
