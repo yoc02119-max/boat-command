@@ -6,8 +6,8 @@ on:
     paths:
       - '.github/workflows/edogawa-result-collector-v1.yml'
   schedule:
-    # Stagger collection from busy :00/:30 Actions slots; allow late POST-RACE recovery (10:12-20:42 JST).
-    - cron: '12,42 1-11 * * *'
+    # Stagger collection from busy :00/:30 slots and recover late 12R results through 21:42 JST.
+    - cron: '12,42 1-12 * * *'
 
 permissions:
   contents: write
