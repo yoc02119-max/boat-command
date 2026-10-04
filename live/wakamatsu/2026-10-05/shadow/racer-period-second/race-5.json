@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "WAKAMATSU",
+  "venueCode": "20",
+  "slug": "wakamatsu",
+  "date": "2026-10-05",
+  "race": 5,
+  "generatedAt": "2026-10-04T16:00:30.854Z",
+  "deadline": "19:56",
+  "modelVersion": "WAKAMATSU-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.031949,
+    "holdoutSecondDeltaVsTop": 0.044728,
+    "holdoutExactDeltaVsTop": 0.009009,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/wakamatsu/2026-10-05/program/race-5.json",
+    "programSha256": "fb9ae60cd173130125220e347577dfeb47cabaf3e0e8c7ea75bf4ad383030f17",
+    "historyPath": "wakamatsu-history-bootstrap-v1.json",
+    "baselinePath": "wakamatsu-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    2.706156648711708,
+    1.4354486920562162,
+    -3.3243504831265005,
+    1.3735988338381686,
+    -1.9412831484378248,
+    -0.24957054304176096
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
