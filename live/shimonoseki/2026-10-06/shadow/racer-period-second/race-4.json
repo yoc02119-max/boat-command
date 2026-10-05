@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "SHIMONOSEKI",
+  "venueCode": "19",
+  "slug": "shimonoseki",
+  "date": "2026-10-06",
+  "race": 4,
+  "generatedAt": "2026-10-05T15:15:45.159Z",
+  "deadline": "16:47",
+  "modelVersion": "SHIMONOSEKI-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.75,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": -0.02994,
+    "holdoutSecondDeltaVsTop": -0.008982,
+    "holdoutExactDeltaVsTop": -0.003774,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/shimonoseki/2026-10-06/program/race-4.json",
+    "programSha256": "684af6d980aa45383882a3c45efb4b1718ab4281aa8bbe9953e3359162822600",
+    "historyPath": "shimonoseki-history-bootstrap-v1.json",
+    "baselinePath": "shimonoseki-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    2.165528793924153,
+    1.7237444061563794,
+    -0.7503301227516304,
+    0.890011874953343,
+    -4.380969627470156,
+    0.3520146751879101
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
