@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "SUMINOE",
+  "venueCode": "12",
+  "slug": "suminoe",
+  "date": "2026-10-13",
+  "race": 10,
+  "generatedAt": "2026-10-12T19:21:59.529Z",
+  "deadline": "19:23",
+  "modelVersion": "SUMINOE-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.041958,
+    "holdoutSecondDeltaVsTop": 0.059441,
+    "holdoutExactDeltaVsTop": 0.001812,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/suminoe/2026-10-13/program/race-10.json",
+    "programSha256": "33e7b033d950c04aee3b44a1f2af729a799f8fae04224b2ed5584d18e87ca2a8",
+    "historyPath": "suminoe-history-bootstrap-v1.json",
+    "baselinePath": "suminoe-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    1.7446570134754993,
+    2.4943494769011414,
+    -2.857174525921255,
+    -1.7564247316386299,
+    0.6542055037715725,
+    -0.2796127365883198
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
