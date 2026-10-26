@@ -76,4 +76,19 @@ with tempfile.TemporaryDirectory() as tmp:
     subprocess.run(command, check=True, capture_output=True)
     assert json.loads((day / 'research-evaluation-v1.json').read_text())['rows'] == []
     assert json.loads((root / 'kojima-shadow-evaluation-v1.json').read_text())['pairedRaces'] == 0
+    # Historical recovery is POST-only and limited to immutable selected races.
+    write(root / 'live/portfolio' / DATE / 'try-selection-v1.json',
+          dict(immutableAfterFirstWrite=True, selected=[dict(slug='kojima',venueCode='16',venue='KOJIMA',race=5)]))
+    old_cwd=os.getcwd()
+    try:
+        os.chdir(root)
+        later=NOW+datetime.timedelta(days=2)
+        args=['collector','--slug','kojima','--venue','KOJIMA','--code','16','--date',DATE,'--recover-pending']
+        with patch.object(sys,'argv',args), patch.object(collector,'now_jst',return_value=later), patch.object(collector.requests,'get',return_value=Response()) as get:
+            collector.main();assert get.call_count==1
+            collector.main();assert get.call_count==1
+        assert not (day / 'shadow/program-only/race-5.json').exists()
+        assert json.loads((day / 'post/race-5-result.json').read_text())['evaluationEligible'] is False
+    finally:
+        os.chdir(old_cwd)
 print('PASS: result coverage, immutable results, no prediction backfill, deadline, paired evaluation, stale count clearing')

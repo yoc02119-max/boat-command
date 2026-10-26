@@ -19,7 +19,14 @@ for(const a of adapters){
   const code=String(a.venueCode||'').padStart(2,'0');
   const slug=String(a.slug||'');
   if(!/^\d{2}$/.test(code)||!slug)continue;
-  if(code==='07')continue; // Gamagori uses its older dedicated collector stack.
+  if(!fs.existsSync(`.github/workflows/${slug}-program-snapshot-v1.yml`)){
+    const workflows=fs.readdirSync('.github/workflows');
+    const entry=`code: '${code}', key: ${a.venue}, slug: ${slug}`;
+    assert.ok(workflows.filter(x=>/^venue-program-batch-/.test(x)).some(x=>read('.github/workflows/'+x).includes(entry)),`${slug}: PROGRAM_BATCH_MISSING`);
+    assert.ok(workflows.filter(x=>/^venue-shadow-batch-/.test(x)).some(x=>read('.github/workflows/'+x).includes(entry)),`${slug}: SHADOW_BATCH_MISSING`);
+    assert.ok(read('.github/workflows/venue-result-batch-generic-v1.yml').includes(`${code}:${a.venue}:${slug}`),`${slug}: RESULT_BATCH_MISSING`);
+    checked.push({slug,code});continue;
+  }
 
   const programPath=`.github/workflows/${slug}-program-snapshot-v1.yml`;
   const resultPath=`.github/workflows/${slug}-result-collector-v1.yml`;

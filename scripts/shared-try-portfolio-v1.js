@@ -61,7 +61,7 @@ function safeProgramShadow(adapter,date,race){
   const pickProbs=picks.map(k=>map.get(k));
   if(pickProbs.some(v=>!Number.isFinite(v)||v<0))return null;
   const generated=Date.parse(x.generatedAt||''),ddl=deadlineEpoch(date,x.deadline);
-  if(!Number.isFinite(generated)||!Number.isFinite(ddl)||generated>=ddl)return null;
+  if(!Number.isFinite(generated)||!Number.isFinite(ddl)||generated>=ddl||generated>NOW_MS)return null;
   return {
     venueCode:adapter.venueCode,venue:adapter.venue,slug:adapter.slug,date,race,
     deadline:x.deadline,deadlineEpoch:ddl,generatedAt:x.generatedAt,
@@ -100,6 +100,7 @@ function withinOperationWindow(date){
   const target=Date.parse(String(date)+'T00:00:00+09:00');
   if(!Number.isFinite(start)||!Number.isFinite(target))return false;
   const day=Math.floor((target-start)/86400000);
+  if(config.operationMode==='CONTINUOUS'&&date>=String(config.continuousEffectiveDate||'9999-12-31'))return day>=0;
   return day>=0&&day<Number(config.operationWindowDays||30);
 }
 function priorPortfolio(){
@@ -113,6 +114,7 @@ function buildSelection(date,available){
     if(prior?.immutableAfterFirstWrite===true)return prior;
     throw new Error('EXISTING_SELECTION_NOT_IMMUTABLE');
   }
+  if(date!==jstDate(NOW_MS)&&!exists(outPath))throw new Error('NEW_SELECTION_MUST_BE_TODAY');
   if(!withinOperationWindow(date)){
     const payload={schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',date,generatedAt:new Date(NOW_MS).toISOString(),selected:[],selectedCount:0,candidateCount:0,totalCommittedStakeYen:0,resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,status:'OUTSIDE_30_DAY_WINDOW'};
     fs.mkdirSync(path.dirname(outPath),{recursive:true});fs.writeFileSync(outPath,JSON.stringify(payload,null,2)+'\n');return payload;
@@ -160,6 +162,8 @@ function buildSelection(date,available){
     resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,
     status:available<=0?'BANKRUPT_NO_NEW_TRY':selected.length?'TRY_FROZEN':'NO_ELIGIBLE_PRE_RACE_CANDIDATES'
   };
+  // Do not permanently freeze an empty day before PRE-RACE data arrives.
+  if(!selected.length&&available>0)return payload;
   fs.mkdirSync(path.dirname(outPath),{recursive:true});
   fs.writeFileSync(outPath,JSON.stringify(payload,null,2)+'\n');
   return payload;
@@ -224,7 +228,7 @@ function rebuildPortfolio(){
   const out={
     schema:'boat-command-shared-try-portfolio-v1',version:'SHARED-TRY-PORTFOLIO-V1',
     generatedAt:new Date(NOW_MS).toISOString(),realMoney:false,fundingScope:'ALL_24_VENUES_SHARED',
-    operationWindowDays:Number(config.operationWindowDays)||30,
+    operationWindowDays:Number(config.operationWindowDays)||30,operationMode:config.operationMode||'FIXED_WINDOW',continuousEffectiveDate:config.continuousEffectiveDate||null,
     startingBankrollYen:start,
     confirmedBankrollYen:confirmedBankroll,
     availableBankrollYen:availableBankroll,

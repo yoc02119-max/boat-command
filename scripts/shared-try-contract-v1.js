@@ -14,6 +14,7 @@ if(!Number.isFinite(Number(cfg.startingBankrollYen))||Number(cfg.startingBankrol
 if(Number(cfg.startingBankrollYen)!==100000)throw new Error('SHARED_100K_LOCK');
 if(cfg.fundingScope!=='ALL_24_VENUES_SHARED')throw new Error('FUNDING_SCOPE');
 if(cfg.resetPolicy!=='NEVER_AUTOMATICALLY_RESET'||cfg.preserveSettledHistory!==true)throw new Error('RESET_POLICY');
+if(cfg.operationMode!=='CONTINUOUS'||cfg.activeAdapters.length!==24||new Set(cfg.activeAdapters.map(x=>x.venueCode)).size!==24)throw new Error('CONTINUOUS_24_SCOPE');
 if(cfg.operationStartDate!=='2026-09-20'||cfg.operationWindowDays!==30)throw new Error('WINDOW');
 if(sel.resultInput!==false||sel.payoutInput!==false||sel.realMoney!==false||sel.immutableAfterFirstWrite!==true)throw new Error('SELECTION_BOUNDARY');
 if(!(sel.selectedCount>0))throw new Error('NO_TRY_SELECTED');

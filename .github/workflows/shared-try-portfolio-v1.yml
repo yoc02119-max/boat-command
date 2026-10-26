@@ -59,6 +59,29 @@ jobs:
         with:
           node-version: '22'
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover only missing POST results for frozen pending TRY
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests beautifulsoup4
+          python - <<'PYCODE'
+          import json,subprocess,pathlib,shutil
+          p=json.load(open('shared-try-portfolio-v1.json'))
+          rows=[x for x in p.get('ledger',[]) if not x.get('settled')]
+          for date,code,venue in sorted({(x['date'],x['venueCode'],x['venue']) for x in rows}):
+              cfg=json.load(open('shared-try-config-v1.json'))
+              adapter=next(a for a in cfg['activeAdapters'] if a['venueCode']==code)
+              subprocess.run(['python','scripts/venue-post-result-v1.py','--slug',adapter['slug'],'--venue',venue,'--code',code,'--date',date,'--recover-pending'],check=True)
+          for row in rows:
+              adapter=next(a for a in cfg['activeAdapters'] if a['venueCode']==row['venueCode'])
+              src=pathlib.Path('live')/adapter['slug']/row['date']/'post'/f"race-{row['race']}-result.json"
+              if src.exists():
+                  dst=pathlib.Path('/tmp/recovered-post')/src
+                  dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
+          PYCODE
+
       - name: Build immutable TRY selection and settle shared virtual bankroll
         run: |
           set -euo pipefail
@@ -101,12 +124,30 @@ jobs:
           for i in 1 2 3 4; do
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/shared-try-portfolio-v1.json shared-try-portfolio-v1.json
+            # Restore only newly recovered immutable POST; rebuild against latest main.
+            python - <<'PYCODE'
+          import pathlib,shutil
+          for src in pathlib.Path('/tmp/recovered-post').rglob('race-*-result.json'):
+              dst=pathlib.Path(src.relative_to('/tmp/recovered-post'))
+              if dst.exists():
+                  if dst.read_bytes()!=src.read_bytes():raise SystemExit('POST_IMMUTABILITY_CONFLICT:'+str(dst))
+              else:
+                  dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
+          PYCODE
             if [ -d /tmp/portfolio-day ]; then
               mkdir -p "live/portfolio/$(TZ=Asia/Tokyo date +%F)"
-              cp -R /tmp/portfolio-day/. "live/portfolio/$(TZ=Asia/Tokyo date +%F)/"
+              DST="live/portfolio/$(TZ=Asia/Tokyo date +%F)/try-selection-v1.json"
+              SRC=/tmp/portfolio-day/try-selection-v1.json
+              if [ -f "$SRC" ]; then
+                if [ -f "$DST" ]; then cmp -s "$SRC" "$DST" || { echo SELECTION_IMMUTABILITY_CONFLICT; exit 1; }
+                else cp "$SRC" "$DST"; fi
+              fi
             fi
+            node scripts/shared-try-portfolio-v1.js
             git add shared-try-portfolio-v1.json live/portfolio
+            if [ -d /tmp/recovered-post ]; then
+              while IFS= read -r src; do git add "${src#/tmp/recovered-post/}"; done < <(find /tmp/recovered-post -name 'race-*-result.json')
+            fi
             if git diff --cached --quiet; then exit 0; fi
             git commit -m 'sim: update shared virtual TRY portfolio'
             if git push origin HEAD:main; then exit 0; fi

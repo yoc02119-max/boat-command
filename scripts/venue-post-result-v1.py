@@ -42,13 +42,20 @@ def main():
     ap.add_argument('--venue',required=True)
     ap.add_argument('--code',required=True)
     ap.add_argument('--date',default=None)
+    ap.add_argument('--recover-pending',action='store_true',help='POST only: retry frozen pending TRY races; never create predictions')
     args=ap.parse_args()
     if not re.fullmatch(r'[a-z0-9-]+',args.slug) or not re.fullmatch(r'[A-Z0-9_]+',args.venue) or not re.fullmatch(r'\d{2}',args.code):
         raise SystemExit('VENUE_ARGS_INVALID')
 
     now=now_jst()
     date=args.date or now.date().isoformat()
-    if date!=now.date().isoformat():
+    pending_races=None
+    if args.recover_pending:
+        if not args.date or date>now.date().isoformat():raise RuntimeError('RECOVERY_DATE_INVALID')
+        selection=read(pathlib.Path('live/portfolio')/date/'try-selection-v1.json')
+        if not selection or selection.get('immutableAfterFirstWrite') is not True:raise RuntimeError('RECOVERY_REQUIRES_FROZEN_SELECTION')
+        pending_races={int(x['race']) for x in selection.get('selected',[]) if x.get('slug')==args.slug and x.get('venueCode')==args.code and x.get('venue')==args.venue}
+    if date!=now.date().isoformat() and not args.recover_pending:
         print('VENUE_RESULT_DATE_NOT_TODAY',args.slug,date,now.date().isoformat());return 0
     hd=date.replace('-','')
     base=pathlib.Path('live')/args.slug/date
@@ -61,6 +68,7 @@ def main():
     headers={'User-Agent':f'Mozilla/5.0 BOAT-COMMAND-{args.venue}-SHADOW/1.0'}
 
     for race in range(1,13):
+        if pending_races is not None and race not in pending_races:continue
         pp=program_dir/f'race-{race}.json'
         cp=shadow_dir/'class-baseline'/f'race-{race}.json'
         apath=shadow_dir/'program-only'/f'race-{race}.json'
@@ -71,15 +79,15 @@ def main():
         if program.get('venue')!=args.venue or program.get('venueCode')!=args.code or program.get('date')!=date or int(program.get('race',0))!=race:continue
         if program.get('resultEndpointsIncluded') is not False or program.get('resultIncluded') is not False or program.get('exhibitionIncluded') is not False:
             raise RuntimeError('VENUE_RESULT_PROGRAM_BOUNDARY')
-        if cp.exists() and not validate_shadow(c,args.venue,args.code,args.slug,date,race,'CLASS_BASELINE'):
+        if not args.recover_pending and cp.exists() and not validate_shadow(c,args.venue,args.code,args.slug,date,race,'CLASS_BASELINE'):
             raise RuntimeError('VENUE_RESULT_CLASS_SHADOW_INVALID')
-        if apath.exists() and not validate_shadow(a,args.venue,args.code,args.slug,date,race,'PROGRAM_ONLY'):
+        if not args.recover_pending and apath.exists() and not validate_shadow(a,args.venue,args.code,args.slug,date,race,'PROGRAM_ONLY'):
             raise RuntimeError('VENUE_RESULT_PROGRAM_SHADOW_INVALID')
         deadline=minutes(program.get('deadline'))
-        if deadline is None or now.hour*60+now.minute < deadline:
+        if deadline is None or (date==now.date().isoformat() and now.hour*60+now.minute < deadline):
             continue
 
-        evidence_ready=timely_shadow(c,date,deadline) and timely_shadow(a,date,deadline)
+        evidence_ready=validate_shadow(c,args.venue,args.code,args.slug,date,race,'CLASS_BASELINE') and validate_shadow(a,args.venue,args.code,args.slug,date,race,'PROGRAM_ONLY') and timely_shadow(c,date,deadline) and timely_shadow(a,date,deadline)
         path=outdir/f'race-{race}-result.json'
         if path.exists():
             x=read(path)
