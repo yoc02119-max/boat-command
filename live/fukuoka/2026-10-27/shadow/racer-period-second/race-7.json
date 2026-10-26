@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "FUKUOKA",
+  "venueCode": "22",
+  "slug": "fukuoka",
+  "date": "2026-10-27",
+  "race": 7,
+  "generatedAt": "2026-10-26T19:34:40.053Z",
+  "deadline": "14:00",
+  "modelVersion": "FUKUOKA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-3-4",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-3-4",
+  "periodCandidateOrder": "1-2-4",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0,
+    "holdoutSecondDeltaVsTop": 0.031579,
+    "holdoutExactDeltaVsTop": 0.003195,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/fukuoka/2026-10-27/program/race-7.json",
+    "programSha256": "1f272f3c2c453f508dd1a4b7ede9d820ca4caccda25972b2a71946c1ef477eff",
+    "historyPath": "fukuoka-history-bootstrap-v1.json",
+    "baselinePath": "fukuoka-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    3.82257665619111,
+    -0.03719271012144104,
+    -1.7692304252687678,
+    -0.744688332647997,
+    -1.8908933512902333,
+    0.6194281631373254
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
