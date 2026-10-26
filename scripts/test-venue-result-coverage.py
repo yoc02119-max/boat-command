@@ -91,4 +91,10 @@ with tempfile.TemporaryDirectory() as tmp:
         assert json.loads((day / 'post/race-5-result.json').read_text())['evaluationEligible'] is False
     finally:
         os.chdir(old_cwd)
+compare_spec=importlib.util.spec_from_file_location('compare',SCRIPTS/'immutable-post-compare-v1.py')
+compare=importlib.util.module_from_spec(compare_spec);compare_spec.loader.exec_module(compare)
+a=dict(schema='boat-command-live-result-v1',venue='KOJIMA',venueCode='16',date=DATE,race=1,trifecta='1-2-3',payout100=1000,fetchedAt='first')
+assert compare.equivalent(a,dict(a,fetchedAt='second'))
+assert not compare.equivalent(a,dict(a,payout100=2000))
+assert not compare.equivalent(a,dict(a,venueCode='17'))
 print('PASS: result coverage, immutable results, no prediction backfill, deadline, paired evaluation, stale count clearing')

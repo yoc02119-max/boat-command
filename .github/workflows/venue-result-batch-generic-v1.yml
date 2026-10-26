@@ -7,6 +7,7 @@ on:
     paths:
       - 'scripts/venue-post-result-v1.py'
       - 'scripts/test-venue-result-coverage.py'
+      - 'scripts/immutable-post-compare-v1.py'
       - '.github/workflows/venue-result-batch-generic-v1.yml'
   schedule:
     # 09:05-23:45 JST, every 20 minutes. Reduces completed-race result wait.
@@ -152,7 +153,7 @@ jobs:
               rel="${src#/tmp/new-results/}"
               dst="$rel"
               if [ -f "$dst" ]; then
-                cmp -s "$src" "$dst" || { echo "RESULT_IMMUTABILITY_CONFLICT $dst" >&2; exit 1; }
+                cmp -s "$src" "$dst" || python3 scripts/immutable-post-compare-v1.py "$src" "$dst"
                 continue
               fi
               mkdir -p "$(dirname "$dst")"

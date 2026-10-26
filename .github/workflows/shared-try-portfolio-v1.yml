@@ -126,11 +126,11 @@ jobs:
             git reset --hard origin/main
             # Restore only newly recovered immutable POST; rebuild against latest main.
             python - <<'PYCODE'
-          import pathlib,shutil
+          import pathlib,shutil,subprocess
           for src in pathlib.Path('/tmp/recovered-post').rglob('race-*-result.json'):
               dst=pathlib.Path(src.relative_to('/tmp/recovered-post'))
               if dst.exists():
-                  if dst.read_bytes()!=src.read_bytes():raise SystemExit('POST_IMMUTABILITY_CONFLICT:'+str(dst))
+                  if dst.read_bytes()!=src.read_bytes():subprocess.run(['python','scripts/immutable-post-compare-v1.py',str(src),str(dst)],check=True)
               else:
                   dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
           PYCODE
