@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "KIRYU",
+  "venueCode": "01",
+  "slug": "kiryu",
+  "date": "2026-10-28",
+  "race": 10,
+  "generatedAt": "2026-10-27T22:58:01.185Z",
+  "deadline": "19:47",
+  "modelVersion": "KIRYU-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-3-5",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.003663,
+    "holdoutSecondDeltaVsTop": 0.014652,
+    "holdoutExactDeltaVsTop": 0.005792,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/kiryu/2026-10-28/program/race-10.json",
+    "programSha256": "b99d5bccf2c9635304726160c8abe98eb12488ba055fc1e079c6c1c951c137b1",
+    "historyPath": "kiryu-history-bootstrap-v1.json",
+    "baselinePath": "kiryu-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    0.578518005830886,
+    -0.5258218900598473,
+    3.2496714077361584,
+    -1.4994087957474846,
+    1.2644283065044242,
+    -3.0673870342641374
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
