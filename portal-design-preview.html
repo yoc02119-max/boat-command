@@ -109,6 +109,7 @@
   </div>
 </div>
 <nav class="bottom"><div class="nav" id="homeNav" style="cursor:pointer"><b>⌂</b>ホーム</div><a class="nav" id="performanceNav" href="./performance.html?v=202609231015" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">▥</b>成績</a><a class="nav" id="dailyLabNav" hidden href="./daily-lab.html" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">◈</b>LAB</a><a class="nav" id="aiChatNav" href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer" style="cursor:pointer;text-decoration:none"><b style="color:#8097aa">✦</b>AIチャット</a><div class="nav" id="otherNav" style="cursor:pointer"><b style="color:#8097aa">☰</b>その他</div></nav>
+<script src="promotion-delivery-v1.js?v=1"></script>
 <script src="github-live-data-v1.js?v=3"></script>
 <script src="venue-registry-v1.js?v=6"></script>
 <script>
@@ -192,28 +193,38 @@ function parseMinutes(hm){const m=String(hm||'').match(/(\d{1,2}):(\d{2})/);retu
 function gamagoriStatus(){const day=todayJst(),now=parseMinutes(nowJstHM()),live=sessions().find(s=>s&&s.runType==='LIVE'&&!s.retestMode&&s.date===day),active=SERIES.find(([a,b])=>a<=day&&day<=b);if(active){const races=Array.isArray(live?.races)?live.races:[],timed=races.map(r=>({race:Number(r.race),deadline:r?.livePreRace?.deadline||r?.deadline||'',settled:!!r?.settled})).filter(x=>x.race>=1&&x.race<=12&&parseMinutes(x.deadline)!==null).sort((a,b)=>a.race-b.race),next=timed.find(x=>parseMinutes(x.deadline)>=now&&!x.settled);if(next)return{top:'開催中',detail:`次 ${next.race}R　締切 ${next.deadline}`,live:true};if(timed.length&&timed.every(x=>x.settled||parseMinutes(x.deadline)<now))return{top:'本日終了',detail:'12R終了後',live:false};return{top:'開催中',detail:'LIVE時刻取得待ち',live:true}}const next=SERIES.find(([a])=>a>day);if(next){const tomorrow=new Date(Date.now()+86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});return{top:next[0]===tomorrow?'明日開催':'次回開催',detail:next[0].slice(5).replace('-','/'),live:false}}return{top:'利用可能',detail:'次回日程確認待ち',live:false}}
 const promotionVariantLabel={RANK6:'順位6点',RANK8:'順位8点',HEAD6:'1着筋拡張',SECOND6:'2着筋拡張',THIRD6:'3着筋拡張'};
 async function sendPromotionDecision(row,decision,card){
+ if(location.hostname.endsWith('.github.io')){
+  const status=card.querySelector('.promotion-status');
+  try{
+   const link=document.createElement('a');link.href=BoatPromotionDelivery.issueUrl(row,decision);link.target='_blank';link.rel='noopener noreferrer';
+   link.textContent='GitHubで本人確認して送信';
+   if(status){status.replaceChildren(document.createTextNode('未送信：GitHubで内容を確認し「Submit new issue」を押してください。処理結果はこの画面を更新して確認できます。 '),link);}
+   link.click();
+  }catch{if(status)status.textContent='候補情報を取得し直すため画面を更新してください。';}
+  return;
+ }
  const buttons=card.querySelectorAll('button'),status=card.querySelector('.promotion-status');buttons.forEach(b=>b.disabled=true);
  if(status)status.textContent=decision==='approve'?'承認を送信中…':'見送りを送信中…';
  try{
   const r=await fetch('/api/jarvis/github',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'venue_expansion_decision',decision,venue:row.slug,variant:row.candidateVariant})});
   const x=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(x?.error||('HTTP_'+r.status));
-  if(status)status.textContent=decision==='approve'?'承認しました。翌日から反映します。':'見送りました。BASE4を継続します。';
+  if(!r.ok||x.ok!==true||x.status!=='QUEUED')throw new Error(x?.error||('HTTP_'+r.status));
+  if(status)status.textContent=decision==='approve'?'承認依頼を受け付けました。処理完了後、翌日から反映します。':'見送り依頼を受け付けました。処理完了を待っています。';
   setTimeout(renderPromotionQueue,5000);
  }catch(e){
   buttons.forEach(b=>b.disabled=false);
-  if(status)status.textContent='送信できませんでした。時間をおいて再試行してください。';
+  if(status)status.textContent=e.message==='DEVELOPER_AUTH_REQUIRED'?'認証の有効期限が切れています。設定から開発者コードを再入力してください。':e.message==='EXPANSION_DECISION_NOT_CURRENT'?'候補が更新されています。画面を更新してください。':'送信できませんでした（'+String(e.message||'NETWORK_ERROR')+'）。再試行してください。';
  }
 }
 async function renderPromotionQueue(){
  const panel=document.getElementById('promotionPanel'),list=document.getElementById('promotionList');if(!panel||!list)return;
  if(!developerAuthenticated){panel.hidden=true;list.innerHTML='';return;}
  try{
-  const r=await fetch('./daily-lab/venue-expansion-policy-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('WAIT');
+  const r=await fetch((location.hostname.endsWith('.github.io')?'https://raw.githubusercontent.com/yoc02119-max/boat-command/main/':'./')+'daily-lab/venue-expansion-policy-v1.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('WAIT');
   const x=await r.json(),rows=(x.venues||[]).filter(v=>v.decision==='AWAITING_HUMAN_REVIEW'&&v.humanReviewPending===true);
   panel.hidden=!rows.length;
   list.innerHTML=rows.map(v=>`<div class="promotion-card" data-promotion-code="${v.code}"><strong>${v.name} · ${promotionVariantLabel[v.candidateVariant]||v.candidateVariant}</strong><small>FORWARD ${v.forward?.races||0}/${v.forward?.target||120}R通過 · 的中率差 ${Number.isFinite(Number(v.forward?.hitRateDelta))?(Number(v.forward.hitRateDelta)*100).toFixed(1)+'pt':'—'} · ROI差 ${Number.isFinite(Number(v.forward?.roiDelta))?(Number(v.forward.roiDelta)*100).toFixed(1)+'pt':'—'}</small><div class="promotion-actions"><button class="yes" type="button" data-promotion-action="approve">はい</button><button class="no" type="button" data-promotion-action="reject">いいえ</button></div><div class="promotion-status">昇格するかだけ選んでください。</div></div>`).join('');
-  rows.forEach(v=>{const card=list.querySelector('[data-promotion-code="'+v.code+'"]');if(!card)return;card.querySelectorAll('[data-promotion-action]').forEach(btn=>btn.addEventListener('click',()=>sendPromotionDecision(v,btn.dataset.promotionAction,card)))});
+  rows.forEach(v=>{v.candidateVersion=x.candidateVersion;const card=list.querySelector('[data-promotion-code="'+v.code+'"]');if(!card)return;card.querySelectorAll('[data-promotion-action]').forEach(btn=>btn.addEventListener('click',()=>sendPromotionDecision(v,btn.dataset.promotionAction,card)))});
  }catch{panel.hidden=true;list.innerHTML=''}
 }
 async function renderTodayTryPerformance(){

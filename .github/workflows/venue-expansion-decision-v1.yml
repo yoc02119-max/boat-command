@@ -1,6 +1,8 @@
 name: Venue expansion owner decision v1
 
 on:
+  issues:
+    types: [opened]
   workflow_dispatch:
     inputs:
       action:
@@ -26,6 +28,7 @@ concurrency:
 
 jobs:
   decide:
+    if: github.event_name == 'workflow_dispatch' || (github.event.issue.user.login == 'yoc02119-max' && github.event.sender.login == 'yoc02119-max' && startsWith(github.event.issue.title, '[BOAT COMMAND 昇格判断]'))
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -35,15 +38,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply guarded owner decision
+      - name: Resolve authenticated owner request
+        id: request
         env:
-          ACTION: ${{ inputs.action }}
-          VENUE: ${{ inputs.venue }}
-          VARIANT: ${{ inputs.variant }}
+          MANUAL_ACTION: ${{ inputs.action }}
+          MANUAL_VENUE: ${{ inputs.venue }}
+          MANUAL_VARIANT: ${{ inputs.variant }}
         run: |
           set -euo pipefail
           git fetch origin main
           git reset --hard origin/main
+          node scripts/daily-lab-forward-gate-v1.js
+          node scripts/venue-expansion-policy-v1.js
+          node - <<'NODE'
+          const fs=require('fs');
+          let x;
+          if(process.env.GITHUB_EVENT_NAME==='issues'){
+            const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+            const policy=JSON.parse(fs.readFileSync('daily-lab/venue-expansion-policy-v1.json','utf8'));
+            x=require('./promotion-delivery-v1.js').validateIssue(event,policy);
+          }else x={decision:process.env.MANUAL_ACTION,venue:process.env.MANUAL_VENUE,variant:process.env.MANUAL_VARIANT};
+          if(!['approve','reject'].includes(x.decision)||!/^[-a-z0-9]+$/.test(x.venue)||!['RANK6','RANK8','HEAD6','SECOND6','THIRD6'].includes(x.variant))throw Error('INVALID_OWNER_INPUT');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`action=${x.decision}\nvenue=${x.venue}\nvariant=${x.variant}\n`);
+          NODE
+      - name: Apply guarded owner decision
+        env:
+          ACTION: ${{ steps.request.outputs.action }}
+          VENUE: ${{ steps.request.outputs.venue }}
+          VARIANT: ${{ steps.request.outputs.variant }}
+        run: |
+          set -euo pipefail
           node --check scripts/daily-lab-forward-gate-v1.js
           node --check scripts/venue-expansion-decision-v1.js
           node --check scripts/venue-expansion-policy-v1.js
@@ -65,7 +89,7 @@ jobs:
           git config user.email 'boat-command-owner-decision@users.noreply.github.com'
           git add daily-lab/forward-gate-v1.json daily-lab/venue-expansion-decisions-v1.json daily-lab/venue-expansion-policy-v1.json
           git diff --cached --quiet && { echo 'OWNER_DECISION_CURRENT'; exit 0; }
-          git commit -m "decision: venue expansion ${{ inputs.action }} ${{ inputs.venue }}"
+          git commit -m "decision: venue expansion ${{ steps.request.outputs.action }} ${{ steps.request.outputs.venue }}"
           for i in 1 2 3 4 5; do
             git pull --rebase origin main
             git push origin HEAD:main && exit 0
