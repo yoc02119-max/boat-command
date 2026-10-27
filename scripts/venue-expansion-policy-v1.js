@@ -14,19 +14,20 @@ const venues=gate.venues.map(v=>{
   const approved=approval?.decision==='APPROVE',rejected=approval?.decision==='REJECT';
   const effective=approved&&String(approval.effectiveDate||'')<=today;
   const active=candidate&&v.reviewEligible===true&&approved&&effective;
-  const suspended=candidate&&approved&&effective&&v.reviewEligible!==true;
+  const suspended=candidate&&approved&&v.reviewEligible!==true;
   let decision;
   if(!candidate)decision='KEEP_BASE4';
   else if(rejected)decision='REJECTED_KEEP_BASE4';
   else if(active)decision='APPROVED_ACTIVE';
-  else if(approved&&!effective)decision='APPROVED_NEXT_DAY';
   else if(suspended)decision='APPROVED_SUSPENDED_GATE';
+  else if(approved&&!effective)decision='APPROVED_NEXT_DAY';
   else if(!forwardReady)decision='COLLECT_FORWARD';
   else if(v.reviewEligible!==true)decision='FORWARD_NOT_CONFIRMED';
   else decision='AWAITING_HUMAN_REVIEW';
   return {
     code:v.code,slug:v.slug,name:v.name,baseVariant:'BASE4',candidateVariant:candidate?v.variant:null,decision,
     forward:{races:Number(v.forwardRaces)||0,target:Number(v.targetRaces)||120,progress:Number(v.progress)||0,hitRateDelta:v.hitRateDelta,roiDelta:v.roiDelta,addedHits:v.addedHits,recent:v.recent,robustness:v.robustness,reviewEligible:v.reviewEligible===true},
+    profitability:v.profitability||null,
     approval:approval?{decision:approval.decision,decidedAt:approval.decidedAt,decidedBy:approval.decidedBy,effectiveDate:approval.effectiveDate}:null,
     humanReviewRequired:candidate,humanReviewPending:decision==='AWAITING_HUMAN_REVIEW',
     humanApproved:approved,integrationReady:active,applyToPrediction:active,productionEnabled:active,
@@ -34,10 +35,11 @@ const venues=gate.venues.map(v=>{
   };
 });
 const output={
-  schema:'boat-command-venue-expansion-policy-v1',version:'VENUE-EXPANSION-POLICY-V1.1',
+  schema:'boat-command-venue-expansion-policy-v1',version:'VENUE-EXPANSION-POLICY-V1.2',
   generatedFrom:'daily-lab/forward-gate-v1.json',candidateVersion:gate.candidateVersion,
   forwardStartDate:gate.forwardStartDate,evaluatedThrough:gate.evaluatedThrough,policyPurpose:'OWNER_DECISION_GATE',
   researchOnly:false,automaticPromotion:false,requiresExplicitHumanApproval:true,
+  profitPolicy:gate.profitPolicy||null,
   activationStartsNextJstDay:true,automaticRollbackOnGateFailure:true,bankrollChanged:false,
   summary:{
     venues:venues.length,keepBase4:venues.filter(v=>v.decision==='KEEP_BASE4').length,

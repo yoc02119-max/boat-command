@@ -2,7 +2,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),os=require('node:os'),path=require('node:path'),cp=require('node:child_process');
 const delivery=require('../promotion-delivery-v1.js');
 const policy=JSON.parse(fs.readFileSync('daily-lab/venue-expansion-policy-v1.json'));
-const rows=policy.venues.filter(v=>v.humanReviewPending===true);
+// Delivery is tested with synthetic eligible rows, independent of live profitability.
+const rows=policy.venues.filter(v=>v.candidateVariant).slice(0,2).map(v=>({...v,decision:'AWAITING_HUMAN_REVIEW',humanReviewPending:true}));
+policy.venues=rows;
 assert.ok(rows.length>0);
 for(const row of rows)for(const decision of ['approve','reject']){
  const u=new URL(delivery.issueUrl({...row,candidateVersion:policy.candidateVersion},decision));
@@ -18,6 +20,9 @@ for(const row of rows)for(const decision of ['approve','reject']){
   fs.mkdirSync(path.join(temp,'scripts'));fs.mkdirSync(path.join(temp,'daily-lab'));
   fs.copyFileSync('scripts/venue-expansion-decision-v1.js',path.join(temp,'scripts/venue-expansion-decision-v1.js'));
   for(const f of ['forward-gate-v1.json','venue-expansion-decisions-v1.json'])fs.copyFileSync('daily-lab/'+f,path.join(temp,'daily-lab',f));
+  const gatePath=path.join(temp,'daily-lab/forward-gate-v1.json'),gate=JSON.parse(fs.readFileSync(gatePath));
+  const fixture=gate.venues.find(v=>v.slug===row.slug);fixture.reviewEligible=true;fixture.status='REVIEW_READY';
+  fs.writeFileSync(gatePath,JSON.stringify(gate));
   cp.execFileSync(process.execPath,[path.join(temp,'scripts/venue-expansion-decision-v1.js'),'--action',x.decision,'--venue',x.venue,'--variant',x.variant]);
   const ledger=JSON.parse(fs.readFileSync(path.join(temp,'daily-lab/venue-expansion-decisions-v1.json')));
   const entry=ledger.decisions.find(v=>v.slug===row.slug&&v.variant===row.candidateVariant);assert.equal(entry.decision,decision.toUpperCase());
@@ -36,5 +41,5 @@ for(const row of rows)for(const decision of ['approve','reject']){
   ctx.location.hostname='example.vercel.app';ctx.fetch=async()=>({ok:false,json:async()=>({error:'DEVELOPER_AUTH_REQUIRED'})});await ctx.sendPromotionDecision(row,'approve',card);assert.match(status.textContent,/認証/);assert.equal(buttons[0].disabled,false);
   ctx.fetch=async()=>({ok:true,json:async()=>({ok:true,status:'QUEUED'})});await ctx.sendPromotionDecision(row,'approve',card);assert.match(status.textContent,/依頼/);assert.doesNotMatch(status.textContent,/承認しました/);
  }
- console.log('PROMOTION_DELIVERY_PASS: owner identity, stale/tampered requests, both real pending venues, approve/reject isolated ledger, Pages no-API route, API auth/queue, inline syntax');
+ console.log('PROMOTION_DELIVERY_PASS: owner identity, stale/tampered requests, synthetic eligible venues, approve/reject isolated ledger, Pages no-API route, API auth/queue, inline syntax');
 })().catch(e=>{console.error(e);process.exitCode=1;});

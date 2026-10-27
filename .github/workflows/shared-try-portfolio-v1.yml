@@ -102,7 +102,13 @@ jobs:
           if(p.boundaries?.resultInputForSelection!==false||p.boundaries?.payoutInputForSelection!==false)throw new Error('SELECTION_LEAKAGE');
           for(const row of p.ledger||[]){
             if(!Array.isArray(row.picks)||![4,6,8].includes(row.picks.length))throw new Error('TRY_PICKS');
-            if(Number(row.stakeYen)!==row.picks.length*Number(cfg.stakePerPickYen||500))throw new Error('VARIABLE_STAKE_IDENTITY');
+            const selection=JSON.parse(fs.readFileSync(`live/portfolio/${row.date}/try-selection-v1.json`,'utf8'));
+            const frozen=selection.selected.find(x=>x.venueCode===row.venueCode&&Number(x.race)===Number(row.race));
+            if(!frozen||JSON.stringify(row.picks)!==JSON.stringify(frozen.picks)||Number(row.stakeYen)!==Number(frozen.stakeYen)||Number(row.stakeYen)!==row.picks.length*Number(frozen.stakePerPickYen)||Number(frozen.stakePerPickYen)<100||Number(frozen.stakePerPickYen)%100!==0)throw new Error('VARIABLE_STAKE_IDENTITY');
+            if(selection.riskBudget){
+              const b=selection.riskBudget,total=selection.selected.reduce((s,x)=>s+Number(x.stakeYen),0);
+              if(total!==selection.totalCommittedStakeYen||total>b.dailyLimitYen||Number(row.stakeYen)>b.raceLimitYen||b.dailyLimitYen>Math.floor(b.capitalBasisYen*b.maxDailyBankrollFraction)||b.raceLimitYen>Math.min(b.maxRaceStakeYen,Math.floor(b.capitalBasisYen*b.maxRaceBankrollFraction)))throw new Error('RISK_BUDGET_EXCEEDED');
+            }
           }
           console.log('SHARED_TRY_PORTFOLIO_BOUNDARY_PASS');
           NODE

@@ -8,6 +8,8 @@ if(candidates.schema!=='boat-command-daily-lab-forward-candidates-v1'||candidate
 const target=Number(candidates.forwardTargetRacesPerVenue)||120;
 const recentTarget=Math.min(60,target);
 const minAddedHits=3,minHitRateDelta=0.01,minRoiDelta=0.05,maxSingleAddedReturnShare=0.70;
+// Fixed before observing this new window. Earlier observations remain descriptive only.
+const profitPolicy={version:'PROFIT_FIRST_V1',validationStartDate:'2026-10-28',minRaces:120,minDates:12,equalRaceBudgetYen:2400,minRoi:1.05,minRecentRoi:1,minRoiWithoutLargestReturn:1};
 const start=String(candidates.forwardStartDate);
 const validDate=x=>/^\d{4}-\d{2}-\d{2}$/.test(x);
 if(!validDate(start))throw Error('FORWARD_START_DATE_INVALID');
@@ -41,6 +43,23 @@ function metrics(rows,variant){
     addedHits:candidate.hits-base.hits
   };
 }
+function equalBudgetMetrics(rows,variant){
+  const returns=rows.map(r=>{const picks=r.variants[variant].picks;return picks.includes(r.actual)?Number(r.payout100)*profitPolicy.equalRaceBudgetYen/(100*picks.length):0;});
+  const stakeYen=rows.length*profitPolicy.equalRaceBudgetYen,returnYen=returns.reduce((a,b)=>a+b,0),largestReturnYen=Math.max(0,...returns);
+  return {races:rows.length,stakeYen,returnYen,profitYen:returnYen-stakeYen,roi:stakeYen?returnYen/stakeYen:null,largestReturnYen,roiWithoutLargestReturn:stakeYen?(returnYen-largestReturnYen)/stakeYen:null};
+}
+function profitEvidence(rows,variant){
+  const validation=rows.filter(r=>r.__date>=profitPolicy.validationStartDate);
+  const base=equalBudgetMetrics(validation,'BASE4'),candidate=equalBudgetMetrics(validation,variant);
+  const recent=equalBudgetMetrics(validation.slice(-recentTarget),variant);
+  const dates=new Set(validation.map(r=>r.__date)).size;
+  const gates={newWindowReady:validation.length>=profitPolicy.minRaces&&dates>=profitPolicy.minDates,
+    absoluteProfitReady:candidate.roi!==null&&candidate.roi>=profitPolicy.minRoi,
+    recentProfitReady:recent.races>=recentTarget&&recent.roi!==null&&recent.roi>profitPolicy.minRecentRoi,
+    equalBudgetImprovementReady:candidate.profitYen>base.profitYen,
+    largestReturnStressReady:candidate.roiWithoutLargestReturn!==null&&candidate.roiWithoutLargestReturn>profitPolicy.minRoiWithoutLargestReturn};
+  return {policyVersion:profitPolicy.version,validationStartDate:profitPolicy.validationStartDate,dates,base,candidate,recent,gates,eligible:Object.values(gates).every(Boolean),scope:'ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST'};
+}
 const venues=candidates.venues.map(c=>{
   const raceRows=[];let datesUsed=0,lastDate=null;
   for(const report of reports){
@@ -64,7 +83,9 @@ const venues=candidates.venues.map(c=>{
   const singleAddedReturnShare=addedReturnTotal>0?maxAddedReturn/addedReturnTotal:null;
   const candidateMode=c.mode==='EXPANSION_CANDIDATE';
   const ready=all.base.races>=target;
+  const profitability=profitEvidence(raceRows,c.variant);
   const gates={
+    profitValidationReady:profitability.eligible,
     targetRacesReady:ready,
     addedHitsReady:all.addedHits>=minAddedHits,
     hitRateDeltaReady:all.hitRateDelta!=null&&all.hitRateDelta>=minHitRateDelta,
@@ -83,7 +104,7 @@ const venues=candidates.venues.map(c=>{
     base:all.base,candidate:all.candidate,hitRateDelta:all.hitRateDelta,roiDelta:all.roiDelta,addedHits:all.addedHits,
     recent:{targetRaces:recentTarget,...recent},
     robustness:{addedReturnTotal100:addedReturnTotal,maxAddedReturn100:maxAddedReturn,singleAddedReturnShare},
-    gates,reasons,
+    profitability,gates,reasons,
     status:!candidateMode?'BASE4_CONTROL':ready?'REVIEW_READY':'COLLECTING',
     reviewEligible:candidateMode&&uplift===true,
     candidateUplift:ready&&candidateMode?uplift:null,
@@ -92,11 +113,12 @@ const venues=candidates.venues.map(c=>{
 });
 const evaluatedDates=reports.filter(r=>Number(r.totals?.evaluatedRaces)>0).map(r=>r.date);
 const output={
-  schema:'boat-command-daily-lab-forward-gate-v1',version:'DAILY-LAB-FORWARD-GATE-V1.1',
+  schema:'boat-command-daily-lab-forward-gate-v1',version:'DAILY-LAB-FORWARD-GATE-V1.2',
   candidateVersion:candidates.version,frozenAt:candidates.frozenAt,sourceWindow:candidates.sourceWindow,
   forwardStartDate:start,evaluatedThrough:evaluatedDates.length?evaluatedDates.sort().at(-1):null,
   liveCaptureOnly:true,strictReplayExcluded:true,researchOnly:true,automaticPromotion:false,
   productionChanged:false,tryChanged:false,bankrollChanged:false,targetRacesPerVenue:target,
+  profitPolicy,
   gatePolicy:{recentTargetRaces:recentTarget,minAddedHits,minHitRateDelta,minRoiDelta,maxSingleAddedReturnShare,requireFullAndRecentNonRegression:true},
   summary:{
     venues:venues.length,

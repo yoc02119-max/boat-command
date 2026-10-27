@@ -1,6 +1,6 @@
 {
   "schema": "boat-command-venue-expansion-policy-v1",
-  "version": "VENUE-EXPANSION-POLICY-V1.1",
+  "version": "VENUE-EXPANSION-POLICY-V1.2",
   "generatedFrom": "daily-lab/forward-gate-v1.json",
   "candidateVersion": "DAILY-LAB-FORWARD-CANDIDATES-V1",
   "forwardStartDate": "2026-09-23",
@@ -9,6 +9,16 @@
   "researchOnly": false,
   "automaticPromotion": false,
   "requiresExplicitHumanApproval": true,
+  "profitPolicy": {
+    "version": "PROFIT_FIRST_V1",
+    "validationStartDate": "2026-10-28",
+    "minRaces": 120,
+    "minDates": 12,
+    "equalRaceBudgetYen": 2400,
+    "minRoi": 1.05,
+    "minRecentRoi": 1,
+    "minRoiWithoutLargestReturn": 1
+  },
   "activationStartsNextJstDay": true,
   "automaticRollbackOnGateFailure": true,
   "bankrollChanged": false,
@@ -16,11 +26,11 @@
     "venues": 24,
     "keepBase4": 6,
     "collecting": 1,
-    "forwardNotConfirmed": 14,
-    "awaitingHumanReview": 1,
-    "approvedNextDay": 2,
+    "forwardNotConfirmed": 15,
+    "awaitingHumanReview": 0,
+    "approvedNextDay": 0,
     "active": 0,
-    "suspended": 0,
+    "suspended": 2,
     "rejected": 0
   },
   "venues": [
@@ -66,6 +76,47 @@
           "singleAddedReturnShare": 0.36801132342533616
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -119,6 +170,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
@@ -171,6 +263,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -186,7 +319,7 @@
       "name": "平和島",
       "baseVariant": "BASE4",
       "candidateVariant": "RANK6",
-      "decision": "APPROVED_NEXT_DAY",
+      "decision": "APPROVED_SUSPENDED_GATE",
       "forward": {
         "races": 216,
         "target": 120,
@@ -221,7 +354,48 @@
           "maxAddedReturn100": 22180,
           "singleAddedReturnShare": 0.3020563802260656
         },
-        "reviewEligible": true
+        "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": {
         "decision": "APPROVE",
@@ -235,7 +409,7 @@
       "integrationReady": false,
       "applyToPrediction": false,
       "productionEnabled": false,
-      "automaticRollbackToBase4": false
+      "automaticRollbackToBase4": true
     },
     {
       "code": "05",
@@ -279,6 +453,47 @@
           "singleAddedReturnShare": 0.1836829836829837
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -332,6 +547,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -383,6 +639,47 @@
           "singleAddedReturnShare": null
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": false,
@@ -436,6 +733,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -487,6 +825,47 @@
           "singleAddedReturnShare": null
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": false,
@@ -540,6 +919,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": false,
       "humanReviewPending": false,
@@ -591,6 +1011,47 @@
           "singleAddedReturnShare": 0.19431736094389598
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -644,6 +1105,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -696,6 +1198,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -711,7 +1254,7 @@
       "name": "鳴門",
       "baseVariant": "BASE4",
       "candidateVariant": "RANK8",
-      "decision": "APPROVED_NEXT_DAY",
+      "decision": "APPROVED_SUSPENDED_GATE",
       "forward": {
         "races": 222,
         "target": 120,
@@ -746,7 +1289,48 @@
           "maxAddedReturn100": 16190,
           "singleAddedReturnShare": 0.21641491779173908
         },
-        "reviewEligible": true
+        "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": {
         "decision": "APPROVE",
@@ -760,7 +1344,7 @@
       "integrationReady": false,
       "applyToPrediction": false,
       "productionEnabled": false,
-      "automaticRollbackToBase4": false
+      "automaticRollbackToBase4": true
     },
     {
       "code": "15",
@@ -768,7 +1352,7 @@
       "name": "丸亀",
       "baseVariant": "BASE4",
       "candidateVariant": "SECOND6",
-      "decision": "AWAITING_HUMAN_REVIEW",
+      "decision": "FORWARD_NOT_CONFIRMED",
       "forward": {
         "races": 178,
         "target": 120,
@@ -803,11 +1387,52 @@
           "maxAddedReturn100": 4020,
           "singleAddedReturnShare": 0.16308316430020284
         },
-        "reviewEligible": true
+        "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
-      "humanReviewPending": true,
+      "humanReviewPending": false,
       "humanApproved": false,
       "integrationReady": false,
       "applyToPrediction": false,
@@ -856,6 +1481,47 @@
           "singleAddedReturnShare": null
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": false,
@@ -909,6 +1575,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -960,6 +1667,47 @@
           "singleAddedReturnShare": 0.30686198920585966
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -1013,6 +1761,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -1064,6 +1853,47 @@
           "singleAddedReturnShare": 0.3317442512619181
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -1117,6 +1947,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -1168,6 +2039,47 @@
           "singleAddedReturnShare": 0.23340040241448692
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": true,
@@ -1221,6 +2133,47 @@
         },
         "reviewEligible": false
       },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
+      },
       "approval": null,
       "humanReviewRequired": true,
       "humanReviewPending": false,
@@ -1272,6 +2225,47 @@
           "singleAddedReturnShare": null
         },
         "reviewEligible": false
+      },
+      "profitability": {
+        "policyVersion": "PROFIT_FIRST_V1",
+        "validationStartDate": "2026-10-28",
+        "dates": 0,
+        "base": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "candidate": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "recent": {
+          "races": 0,
+          "stakeYen": 0,
+          "returnYen": 0,
+          "profitYen": 0,
+          "roi": null,
+          "largestReturnYen": 0,
+          "roiWithoutLargestReturn": null
+        },
+        "gates": {
+          "newWindowReady": false,
+          "absoluteProfitReady": false,
+          "recentProfitReady": false,
+          "equalBudgetImprovementReady": false,
+          "largestReturnStressReady": false
+        },
+        "eligible": false,
+        "scope": "ALL_CAPTURED_RACES_EQUAL_BUDGET_NOT_TRY_BACKTEST"
       },
       "approval": null,
       "humanReviewRequired": false,

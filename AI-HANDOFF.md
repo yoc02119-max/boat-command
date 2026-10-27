@@ -1,3 +1,20 @@
+# Profit-first policy change — 2026-10-27 JST
+
+Owner explicitly authorized policy changes after reviewing the current negative virtual TRY performance. Baseline main: 9f0b172f8e8c69416dbca87a634db50f30bb2688. This is a risk/eligibility change, not evidence of improved predictive ability.
+
+- Existing selections, PRE/POST, decisions and capital history remain intact. No model weights or predictions changed.
+- Promotion now additionally requires an unseen window starting 2026-10-28: at least 120 races over 12 venue dates, equal-budget return >=105%, last 60 races >100%, positive equal-budget improvement, and return >100% after removing the largest winning return while retaining all stakes. Earlier data still shown but cannot satisfy the new gate. These are prespecified conservative screening choices, NOT empirically optimized thresholds or proof of future profit. Equal budget is 2400 yen/race (divisible by 4/6/8 picks in 100-yen units); this is an all-captured-races comparison, not a TRY-policy backtest.
+- Existing owner approvals remain in the ledger. Eligibility failure suspends application even before the scheduled effective day; no new approval is invented or deleted. Both current approvals are held pending new evidence.
+- From 2026-10-28, paper TRY daily commitment <=5% of available capital at selection, per-race <=2% and <=2000 yen. Per-pick allocations round down to 100 yen. Zero TRY is allowed when no valid allocation fits. These caps reduce exposure; they do not turn a negative expectation positive. A nonempty selection remains HARD LOCKed; the budget cannot refill later that day.
+
+New regression suite: scripts/test-profit-first-v1.js (synthetic red-profit candidate, single-jackpot dependency, fresh-window isolation, equal budgets, preserved approval, 24 venues, expansion stakes, settlement using actual allocated stake, HARD LOCK, no allocation). Shared contract workflow runs it. Promotion-delivery test now uses explicit eligible fixtures because no live candidate is expected to be eligible; stale/unauthorized delivery checks remain.
+
+Local validation PASS: profit-first regression including the real workflow boundary audit (4/6/8-point allocations and tamper rejection), existing continuous/24-venue test, shared capital contract (52650 yen unchanged), point-expansion preservation, Daily LAB boundary test, PRE-RACE freeze test, promotion-delivery tests, and git diff --check. Public Actions and next-day behavior must be verified separately. Latest main incorporated before publication: 2448988a21b5d43fc127a6f42bc7939e6e915b8f.
+
+Next research: freeze a separate SHADOW protocol comparing the actual TRY selector under identical total budgets, calibrated probabilities and timestamped ~3-minute odds; keep skipped races and all trials. Current selector still ranks relative coverage without odds/positive-EV filtering. Do not advertise the new promotion gate as validation of TRY profitability or claim the EV selector exists. No need to retune thresholds after viewing future data; if changed, start another unused validation period. Inspect new-date selection and public production data after 2026-10-28 before claiming next-day end-to-end verification.
+
+Recovery: revert only this policy's code/config if necessary, rebuild derived gate/policy from latest data. NEVER roll back decision ledger, selections, results or shared portfolio. Historical baseline and earlier handoff follow below.
+
 # 24-venue continuous operations repair — 2026-10-26 JST
 
 Owner authorized 24-venue fully automatic operation on 2026-10-26. This supersedes the development pause only for this repair; no model tuning or promotion is authorized by this patch.

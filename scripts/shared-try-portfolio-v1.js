@@ -138,17 +138,24 @@ function buildSelection(date,available){
   const fraction=Math.max(0,Math.min(1,Number(config.selectionFraction)||0.25));
   const desired=Math.min(Number(config.maxTryRacesPerDay)||8,Math.max(candidates.length?1:0,Math.ceil(candidates.length*fraction)));
   const stakePerPick=Number(config.stakePerPickYen)||500,picksPerTry=Number(config.picksPerTry)||4;
-  const selected=[];let remaining=Math.max(0,Number(available)||0);
+  const risk=config.riskBudget&&date>=config.riskBudget.effectiveDate?config.riskBudget:null;
+  if(risk&&(!Number.isFinite(risk.maxDailyBankrollFraction)||risk.maxDailyBankrollFraction<=0||risk.maxDailyBankrollFraction>1||!Number.isFinite(risk.maxRaceBankrollFraction)||risk.maxRaceBankrollFraction<=0||risk.maxRaceBankrollFraction>risk.maxDailyBankrollFraction||risk.stakeUnitYen!==100||!Number.isFinite(risk.maxRaceStakeYen)||risk.maxRaceStakeYen<100))throw Error('RISK_BUDGET_INVALID');
+  const capital=Math.max(0,Number(available)||0);
+  const dailyLimit=risk?Math.floor(capital*risk.maxDailyBankrollFraction):capital;
+  const raceLimit=risk?Math.min(risk.maxRaceStakeYen,Math.floor(capital*risk.maxRaceBankrollFraction)):Infinity;
+  const selected=[];let remaining=Math.min(capital,dailyLimit);
   for(const x of candidates){
     if(selected.length>=desired)break;
-    const stakePerRace=stakePerPick*x.picks.length;
-    if(stakePerRace>remaining)continue;
+    const unit=risk?risk.stakeUnitYen:100;
+    const allocatedStakePerPick=risk?Math.floor(Math.min(stakePerPick,raceLimit/x.picks.length,remaining/x.picks.length)/unit)*unit:stakePerPick;
+    const stakePerRace=allocatedStakePerPick*x.picks.length;
+    if(allocatedStakePerPick<unit||stakePerRace>remaining)continue;
     selected.push({
       rank:selected.length+1,venueCode:x.venueCode,venue:x.venue,slug:x.slug,date:x.date,race:x.race,
       deadline:x.deadline,generatedAt:x.generatedAt,modelVersion:x.modelVersion,sourcePolicy:x.sourcePolicy,
       predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,picks:x.picks,expansionVariant:x.expansionVariant||null,
       pickCoverage:x.pickCoverage,venueMedianCoverage:x.venueMedianCoverage,relativeConfidence:x.relativeConfidence,
-      stakePerPickYen:stakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
+      stakePerPickYen:allocatedStakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
     });
     remaining-=stakePerRace;
   }
@@ -157,10 +164,11 @@ function buildSelection(date,available){
     date,generatedAt:new Date(NOW_MS).toISOString(),
     startingBankrollYen:Number(config.startingBankrollYen)||100000,bankrollBeforeSelectionYen:available,
     policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,basePicksPerTry:picksPerTry,variablePicksByVenuePolicy:true,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
+    riskBudget:risk?{...risk,capitalBasisYen:capital,dailyLimitYen:dailyLimit,raceLimitYen:raceLimit}:null,
     candidateCount:candidates.length,selectedCount:selected.length,selected,
     totalCommittedStakeYen:selected.reduce((s,x)=>s+x.stakeYen,0),
     resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,
-    status:available<=0?'BANKRUPT_NO_NEW_TRY':selected.length?'TRY_FROZEN':'NO_ELIGIBLE_PRE_RACE_CANDIDATES'
+    status:available<=0?'BANKRUPT_NO_NEW_TRY':selected.length?'TRY_FROZEN':risk&&candidates.length?'RISK_BUDGET_NO_TRY':'NO_ELIGIBLE_PRE_RACE_CANDIDATES'
   };
   // Do not permanently freeze an empty day before PRE-RACE data arrives.
   if(!selected.length&&available>0)return payload;
