@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import argparse, datetime, json, pathlib, re
+import argparse, datetime, hashlib, json, pathlib, re
+from urllib.parse import urlparse, parse_qs
 from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
@@ -97,6 +98,12 @@ def main():
                 raise RuntimeError('VENUE_RESULT_EXISTING_BOUNDARY')
             continue
 
+        status_path=outdir/f'race-{race}-status.json'
+        if args.recover_pending and status_path.exists():
+            status=read(status_path)
+            if not status or status.get('schema')!='boat-command-race-status-v1' or status.get('venueCode')!=args.code or status.get('date')!=date or status.get('race')!=race or status.get('status')!='CANCELLED' or status.get('immutableAfterFirstWrite') is not True or status.get('selectionMutation') is not False:
+                raise RuntimeError('VENUE_CANCELLATION_EXISTING_INVALID')
+            continue
         url=f'https://www.boatrace.jp/owpc/pc/race/raceresult?hd={hd}&jcd={args.code}&rno={race}'
         try:
             res=requests.get(url,headers=headers,timeout=20);res.raise_for_status()
@@ -119,7 +126,17 @@ def main():
                 m=re.search(r'([1-6])',raw_pick)
                 if m and pm:win=m.group(1);win_payout=int(pm.group(1).replace(',',''))
         if not trifecta or payout is None:
-            print('VENUE_RESULT_WAIT_RESULT',args.slug,race);continue
+            # Only explicit race-level cancellation on the requested official result page.
+            # Navigation text, a missing payout, and a cancelled neighbouring race are not evidence.
+            final=urlparse(getattr(res,'url',''));query=parse_qs(final.query)
+            source_matches=final.scheme=='https' and final.netloc=='www.boatrace.jp' and final.path=='/owpc/pc/race/raceresult' and query.get('hd')==[hd] and query.get('jcd')==[args.code] and query.get('rno')==[str(race)]
+            cancelled=any(''.join(tag.stripped_strings)=='レース中止' for tag in soup.find_all(['h2','h3','h4']))
+            if args.recover_pending and source_matches and cancelled and not trifecta:
+                status={'schema':'boat-command-race-status-v1','version':'RACE-CANCELLATION-V1','venue':args.venue,'venueCode':args.code,'slug':args.slug,'date':date,'race':race,'status':'CANCELLED','officialSource':url,'fetchedAt':now_jst().isoformat(),'evidenceHeading':'レース中止','sourceSha256':hashlib.sha256(res.content).hexdigest(),'preRaceDataIncluded':False,'resultEndpointsIncluded':True,'selectionMutation':False,'immutableAfterFirstWrite':True}
+                status_path.write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+                print('VENUE_RACE_CANCELLED',args.slug,race)
+            else:print('VENUE_RESULT_WAIT_RESULT',args.slug,race)
+            continue
 
         finish=[]
         for tr in soup.find_all('tr'):

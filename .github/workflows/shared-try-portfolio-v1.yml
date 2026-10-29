@@ -8,6 +8,7 @@ on:
     paths:
       - 'shared-try-config-v1.json'
       - 'scripts/shared-try-portfolio-v1.js'
+      - 'scripts/venue-post-result-v1.py'
       - 'daily-lab/venue-expansion-policy-v1.json'
       - '.github/workflows/shared-try-portfolio-v1.yml'
       - 'venue-registry-v1.js'
@@ -66,6 +67,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet requests beautifulsoup4
+          python scripts/test-partial-cancellation-v1.py
           python - <<'PYCODE'
           import json,subprocess,pathlib,shutil
           p=json.load(open('shared-try-portfolio-v1.json'))
@@ -76,10 +78,11 @@ jobs:
               subprocess.run(['python','scripts/venue-post-result-v1.py','--slug',adapter['slug'],'--venue',venue,'--code',code,'--date',date,'--recover-pending'],check=True)
           for row in rows:
               adapter=next(a for a in cfg['activeAdapters'] if a['venueCode']==row['venueCode'])
-              src=pathlib.Path('live')/adapter['slug']/row['date']/'post'/f"race-{row['race']}-result.json"
-              if src.exists():
-                  dst=pathlib.Path('/tmp/recovered-post')/src
-                  dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
+              for suffix in ('result','status'):
+                  src=pathlib.Path('live')/adapter['slug']/row['date']/'post'/f"race-{row['race']}-{suffix}.json"
+                  if src.exists():
+                      dst=pathlib.Path('/tmp/recovered-post')/src
+                      dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
           PYCODE
 
       - name: Build immutable TRY selection and settle shared virtual bankroll
@@ -133,7 +136,7 @@ jobs:
             # Restore only newly recovered immutable POST; rebuild against latest main.
             python - <<'PYCODE'
           import pathlib,shutil,subprocess
-          for src in pathlib.Path('/tmp/recovered-post').rglob('race-*-result.json'):
+          for src in pathlib.Path('/tmp/recovered-post').rglob('race-*.json'):
               dst=pathlib.Path(src.relative_to('/tmp/recovered-post'))
               if dst.exists():
                   if dst.read_bytes()!=src.read_bytes():subprocess.run(['python','scripts/immutable-post-compare-v1.py',str(src),str(dst)],check=True)
@@ -152,7 +155,7 @@ jobs:
             node scripts/shared-try-portfolio-v1.js
             git add shared-try-portfolio-v1.json live/portfolio
             if [ -d /tmp/recovered-post ]; then
-              while IFS= read -r src; do git add "${src#/tmp/recovered-post/}"; done < <(find /tmp/recovered-post -name 'race-*-result.json')
+              while IFS= read -r src; do git add "${src#/tmp/recovered-post/}"; done < <(find /tmp/recovered-post -name 'race-*.json')
             fi
             if git diff --cached --quiet; then exit 0; fi
             git commit -m 'sim: update shared virtual TRY portfolio'

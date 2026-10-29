@@ -1,3 +1,19 @@
+# Resume verification and partial cancellation repair — 2026-10-29 JST
+
+Resumed at main 35037ba7248e452109a6b696f64579fe4f28df35. Prior change 6f93b896e3a87b938a6d13e3f8d1d3991a3472ed is deployed. Original contract 40513077982, collector-boundary 40513077979, portfolio 40513078150, LAB 40513078021 all succeeded. Latest observed portfolio 40839104447, LAB 40839104315, Pages deployment 40839248142 succeeded. Public Pages JSON returned policy V1.2 with active=0/suspended=2 and risk budget 5%/2%, effective 2026-10-28.
+
+Actual locked selections on Oct 28 and 29 each contain 3 TRY at 800 yen/race, 2400 yen total, within their saved day/race limits (2632/1053 and 2512/1005). Existing decisions, selections and PRE records have not been changed. This confirms budget activation, not profitability. Profit gate still has zero eligible venues; no thresholds changed after observing the new data.
+
+Discovered blocker: Oct 28 Edogawa 8/9/12 remained PENDING because the recovery collector only understood normal payouts; settlement previously only understood full-day cancellation. Official Edogawa news and individual BOAT RACE result pages confirm 6R onward cancelled. Sources: https://www.boatrace-edogawa.com/modules/news/?if=1 and https://www.boatrace.jp/owpc/pc/race/raceresult?hd=20261028&jcd=03&rno=8 (also rno=9/12).
+
+Repair: historical frozen-TRY recovery writes immutable per-race POST status only when the requested official URL identity matches and a result-page heading says レース中止. Unknown result, navigation text or another race's redirect stays pending. No fabricated result or payout, no whole-day cancellation. Settlement releases only that race's reserved stake, excluded from hit/ROI denominator. A simultaneous valid result and cancellation stops settlement. Workflow publication retains recovered status files across latest-main retries; duplicate comparison preserves the first file but rejects semantic conflicts.
+
+Tests PASS: test-partial-cancellation-v1.py, test-venue-result-coverage.py, test-profit-first-v1.js, test-shared-try-continuous-v1.js, venue-collector-boundary-contract-v1.js, exact workflow boundary audit, diff check. Real official collector created only Oct 28 Edogawa race-8/9/12-status.json. Local rebuild against the observed ledger changes pending 4->1, voided 6->9, available 47850->50250; confirmed 51050 and profit -48950 stay unchanged. Actual published reconciliation must be verified after this repair's commit. The remaining pending row at this snapshot is Oct 29 Gamagori 7R, deadline 18:04 JST, not yet due at the 17:00 test clock.
+
+Next research remains SHADOW expected-value selection with timestamped pre-race odds and probability calibration; it is NOT implemented. Also investigate early daily freeze: Oct 28 locked at 03:20 JST with only 12 available candidates; Oct 29 at 02:15 with 84. The workflow comment mentions 07:30, but event-triggered runs can select earlier. Do not alter either existing HARD LOCK record. Audit candidate readiness and define a future-only selection protocol before changing this behavior.
+
+Recovery: revert repair code/workflow only if needed. Never delete official cancellation evidence, historic selections, decisions or ledger. New cancellation test runs in the shared-portfolio workflow before live collection.
+
 # Profit-first policy change — 2026-10-27 JST
 
 Owner explicitly authorized policy changes after reviewing the current negative virtual TRY performance. Baseline main: 9f0b172f8e8c69416dbca87a634db50f30bb2688. This is a risk/eligibility change, not evidence of improved predictive ability.

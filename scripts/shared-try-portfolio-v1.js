@@ -193,6 +193,12 @@ function resultFor(x){
   return r;
 }
 function cancellationFor(x){
+  const racePath=path.join(ROOT,'live',x.slug,x.date,'post',`race-${x.race}-status.json`);
+  const r=read(racePath);
+  if(r&&r.schema==='boat-command-race-status-v1'&&String(r.venueCode)===x.venueCode&&String(r.date)===x.date&&Number(r.race)===Number(x.race)&&r.status==='CANCELLED'&&r.immutableAfterFirstWrite===true&&r.selectionMutation===false&&r.preRaceDataIncluded===false&&r.resultEndpointsIncluded===true){
+    if(resultFor(x))throw new Error('RESULT_CANCELLATION_CONFLICT');
+    return r;
+  }
   const p=path.join(ROOT,'live',x.slug,x.date,'post','day-status.json');
   const s=read(p);if(!s)return null;
   if(s.schema!=='boat-command-day-status-v1'||String(s.venueCode)!==x.venueCode||String(s.date)!==x.date)return null;
