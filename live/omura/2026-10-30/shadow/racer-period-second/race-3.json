@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "OMURA",
+  "venueCode": "24",
+  "slug": "omura",
+  "date": "2026-10-30",
+  "race": 3,
+  "generatedAt": "2026-10-29T15:59:57.044Z",
+  "deadline": "16:24",
+  "modelVersion": "OMURA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-6-3",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 1,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.022222,
+    "holdoutSecondDeltaVsTop": 0.022222,
+    "holdoutExactDeltaVsTop": 0.014545,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/omura/2026-10-30/program/race-3.json",
+    "programSha256": "2206c20acf7b01cdd2113567ea35b126089c16513bf724a95335e8b6b96aedf5",
+    "historyPath": "omura-history-bootstrap-v1.json",
+    "baselinePath": "omura-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    -0.43783519733878895,
+    -1.221627002886031,
+    0.2875461261296758,
+    0.7103802143999198,
+    -1.2413263895544007,
+    1.9028622492496274
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
