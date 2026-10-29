@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "KIRYU",
+  "venueCode": "01",
+  "slug": "kiryu",
+  "date": "2026-10-30",
+  "race": 6,
+  "generatedAt": "2026-10-29T16:02:45.024Z",
+  "deadline": "17:51",
+  "modelVersion": "KIRYU-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "GLOBAL_MIX",
+  "selectedLambda": 0.15,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.003663,
+    "holdoutSecondDeltaVsTop": 0.014652,
+    "holdoutExactDeltaVsTop": 0.005792,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/kiryu/2026-10-30/program/race-6.json",
+    "programSha256": "f936bbc6e67f4df39ee972c54b6cd997304cbd461888cbf056fa7e2afb2c0957",
+    "historyPath": "kiryu-history-bootstrap-v1.json",
+    "baselinePath": "kiryu-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    1.4691340822477126,
+    -2.0676115626860465,
+    -0.6482034544592546,
+    1.655982940296124,
+    -2.432849070559849,
+    2.023547065161317
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
