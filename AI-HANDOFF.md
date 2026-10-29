@@ -14,6 +14,8 @@ Next research remains SHADOW expected-value selection with timestamped pre-race 
 
 Recovery: revert repair code/workflow only if needed. Never delete official cancellation evidence, historic selections, decisions or ledger. New cancellation test runs in the shared-portfolio workflow before live collection.
 
+Post-publication verified: repair f2bf87eb6c588e27fb782cb770c04ddda1b7e1e3; shared portfolio 40841985103, contract 40841985282 and generic POST 40841985197 SUCCESS. Dataset 40841985293 initially lost a concurrent-main push race; rerun attempt 2 SUCCESS. Both main ledger and public Pages JSON (generated 2026-10-29T08:27:58.126Z) confirm confirmed=51050, available=50250, pending=1, voided=9, profit=-48950. The three Oct 28 Edogawa stakes were released, not counted as winnings. Existing Edogawa safety audit 40841985222 still fails its SHADOW evaluation boundary assertion (job 123340286636); not repaired or reported green. Early freeze/readiness and odds-aware SHADOW remain the next separate tasks above.
+
 # Profit-first policy change — 2026-10-27 JST
 
 Owner explicitly authorized policy changes after reviewing the current negative virtual TRY performance. Baseline main: 9f0b172f8e8c69416dbca87a634db50f30bb2688. This is a risk/eligibility change, not evidence of improved predictive ability.
