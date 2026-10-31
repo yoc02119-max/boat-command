@@ -1,0 +1,55 @@
+name: TRY odds observer v1
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/try-odds-observer-v1.py'
+      - 'scripts/test-try-odds-observer-v1.py'
+      - '.github/workflows/try-odds-observer-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/try-odds-observer-v1.py'
+      - 'scripts/test-try-odds-observer-v1.py'
+      - '.github/workflows/try-odds-observer-v1.yml'
+  schedule:
+    - cron: '*/5 0-13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: try-odds-observer-v1-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/try-odds-observer-v1.py
+            /scripts/test-try-odds-observer-v1.py
+            /shared-try-config-v1.json
+      - name: PRE boundary, source parser and immutability tests
+        run: python3 scripts/test-try-odds-observer-v1.py
+      - name: Load only today's PRE predictions
+        if: github.event_name != 'pull_request'
+        run: |
+          DATE=$(TZ=Asia/Tokyo date +%F)
+          git sparse-checkout set --no-cone '/scripts/try-odds-observer-v1.py' '/scripts/test-try-odds-observer-v1.py' '/shared-try-config-v1.json' "/live/*/$DATE/shadow/program-only/"
+      - name: Passive capture outside repository
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/try-odds-observer-v1.py --output "$RUNNER_TEMP/try-odds-observation"
+      - name: Save observation and raw evidence
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: try-odds-observation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/try-odds-observation/
+          retention-days: 90
+          if-no-files-found: error
