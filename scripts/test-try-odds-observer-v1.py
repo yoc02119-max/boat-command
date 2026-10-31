@@ -66,6 +66,8 @@ class Contract(unittest.TestCase):
         r=self.run_capture();self.assertEqual(r['capturedCount'],1)
         self.assertEqual(r['venues'][0]['races'][0]['uncalibratedExpectedGrossReturnPerYen'],1)
         self.assertEqual(r['venues'][1]['races'][0]['status'],'MISSING_PREDICTION')
+        self.assertEqual(self.run_capture(mutate=lambda x:x.pop('slug'))['capturedCount'],1)
+        self.assertEqual(self.run_capture(mutate=lambda x:x.update(slug='wrong'))['capturedCount'],0)
 
     def test_reject_closed_wrong_identity_late_and_contamination(self):
         for bad in [page()+ '締切時オッズ'.encode(),page().replace(b'jcd=01',b'jcd=02'),b'no data']:

@@ -72,7 +72,7 @@ def parse_odds(raw):
 
 
 def valid_prediction(x, code, slug, date, race, now):
-    if (x.get('venueCode'), x.get('slug'), x.get('date'), x.get('race')) != (code, slug, date, race):
+    if (x.get('venueCode'), x.get('slug', slug), x.get('date'), x.get('race')) != (code, slug, date, race):
         raise ValueError('PREDICTION_IDENTITY')
     if x.get('resultInput') is not False or x.get('payoutInput') is not False or x.get('immutableAfterFirstWrite') is not True:
         raise ValueError('PREDICTION_BOUNDARY')
