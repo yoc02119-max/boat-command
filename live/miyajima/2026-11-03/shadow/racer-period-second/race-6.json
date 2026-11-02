@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "MIYAJIMA",
+  "venueCode": "17",
+  "slug": "miyajima",
+  "date": "2026-11-03",
+  "race": 6,
+  "generatedAt": "2026-11-02T19:09:49.451Z",
+  "deadline": "12:42",
+  "modelVersion": "MIYAJIMA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-2-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-3-2",
+  "periodCandidateOrder": "1-3-2",
+  "selectedPreset": "COURSE_MIX",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.050179,
+    "holdoutSecondDeltaVsTop": 0.09319,
+    "holdoutExactDeltaVsTop": 0.001976,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/miyajima/2026-11-03/program/race-6.json",
+    "programSha256": "78a67a66d4cac04eb86caf020e4f9a3a37a5574058644aa421f5ce0df9971386",
+    "historyPath": "miyajima-history-bootstrap-v1.json",
+    "baselinePath": "miyajima-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    2.414943631210247,
+    0.0834178145857728,
+    1.2035523139301105,
+    -0.20232533045221665,
+    -0.7855954395557255,
+    -2.71399298971819
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
