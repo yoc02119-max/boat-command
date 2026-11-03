@@ -33,6 +33,12 @@ for(const a of adapters){
   const historyPath=`.github/workflows/${slug}-history-bootstrap-v1.yml`;
   const program=read(programPath),result=read(resultPath),history=read(historyPath);
 
+  if(['mikuni','tokuyama','ashiya'].includes(slug)){
+    assert.ok(program.includes('workflows: ["24 venue next-race calendar v1"]'),`${slug}: MORNING_CALENDAR_CHAIN_MISSING`);
+    assert.ok(program.includes("github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')"),`${slug}: MORNING_CHAIN_MUST_BE_SUCCESSFUL_MAIN`);
+    assert.ok(program.includes("cron: '1 0-8,19-23 * * *'"),`${slug}: EXISTING_EARLY_SCHEDULE_CHANGED`);
+  }
+
   const programJcd=uniq([...program.matchAll(/jcd=(\d{2})/g)].map(m=>m[1]));
   const resultJcd=uniq([...result.matchAll(/jcd=(\d{2})/g)].map(m=>m[1]));
   assert.deepEqual(programJcd,[code],`${slug}: PROGRAM_JCD_LEAK ${programJcd}`);

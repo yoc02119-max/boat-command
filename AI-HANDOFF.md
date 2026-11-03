@@ -1,3 +1,11 @@
+# Morning collector recovery chain — 2026-11-04 JST
+
+Timing repair 8c1ccbfcd5662675a0c5e56bc9cb4d652da0617a published. Shared contract41683567548, collector boundary41683567356, and portfolio41683567673 SUCCESS. Actual job126083256442 logs WAITING_DAILY_SELECTION_TIME at02:23 JST, selected0, capital52870, pending0, settled176. This confirms overnight gate and settlement, not morning07:30 behavior or improved hit rate.
+
+Missing morning PRE investigation: Actions schedule query from2026-11-02T19:00Z through2026-11-03T02:00Z returns97 total runs,25 schedule runs. Only one scheduled program run for each of Mikuni/Ashiya/Tokuyama appears, created10:27-10:29 JST; all succeeded. Their saved race6 PRE sources confirm initial program fetched10:28-10:30, after the first races' deadlines. Why the earlier configured cron dispatches are absent is UNCONFIRMED; do not claim a parser failure or GitHub outage. Existing calendar run was created06:43 JST in the same window.
+
+Second repair baseline main667a0e4966affccf1dc8cd6f1c8b0c9041f4f769: add successful-main calendar workflow completion as another trigger for those three existing collectors. Existing schedule, parser, official URLs, model, SHADOW freeze and POST logic unchanged. Collector completion already triggers each venue's existing SHADOW workflow. This adds a redundant path; external scheduler timing is still not guaranteed. Collector-boundary CI asserts chain, successful-main gating and unchanged early cron. YAML and unchanged collector-body comparison pass locally. Verify actual new runs after this second repair; fresh morning predictions remain required evidence.
+
 # BOAT COMMAND focus and overnight TRY repair — 2026-11-04 JST
 
 Owner explicitly requested concentrating on BOAT COMMAND prediction accuracy and dependable 24-venue TRY eligibility for an eventual sellable app. This NEW instruction authorizes this scoped operations repair and subsequent isolated prediction research; do not resume unrelated projects or the entire old backlog.
