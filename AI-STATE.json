@@ -1,10 +1,10 @@
 {
   "schema": "boat-command-ai-state-v1",
-  "currentHead": "a099e761dca04e6ae66ed21a95fd710a68e8c85b",
+  "currentHead": "472db8a2b3970da25d946eae90cfe2064c789b95",
   "currentHeadMeaning": "main observed immediately before this evidence-file commit",
   "currentBranch": "main",
-  "lastVerifiedAt": "2026-11-03T17:35:19.433Z",
-  "currentTask": "Verify morning PRE recovery, then pursue isolated prediction/TRY improvement",
+  "lastVerifiedAt": "2026-11-03T17:36:09.499Z",
+  "currentTask": "Verify actual >=07:30 JST selection across venue pool; continue isolated accuracy and ROI research",
   "codeCommits": {
     "selectionTiming": "8c1ccbfcd5662675a0c5e56bc9cb4d652da0617a",
     "morningCollectorRecovery": "bea1f2b4a1866a18b4f96e04541636291bdae4b0"
@@ -16,10 +16,10 @@
     "Regression suites plus real-ledger replay preserve45 historical locks and52870 yen capital",
     "Timing repair shared contract, collector boundary and actual portfolio Actions succeeded; runtime WAITING confirmed",
     "Second repair three rapid-build contracts and collector-boundary Actions succeeded",
-    "Three actual program-collection Actions succeeded; Mikuni Nov4 manifest confirms12/12 at02:33 JST"
+    "Three actual program-collection Actions succeeded; Mikuni Nov4 manifest confirms12/12 at02:33 JST",
+    "Mikuni and Ashiya Nov4 program-only PRE12/12 saved on main; successful child SHADOW runs. Mikuni generated02:34:23 JST before1R08:47; Ashiya generated02:34:59 JST before1R08:35. Snapshot identity and PRE/POST/immutable flags checked on races1 and12; workflow audits covered all generated snapshots."
   ],
   "nextTasks": [
-    "Confirm Mikuni and Ashiya Nov4 program-only PRE snapshots12/12, correct identity and deadlines, and successful SHADOW child runs",
     "Verify first real Nov4 TRY freeze >=07:30 JST and record which venues were available",
     "Observe calendar-completion trigger itself; push-triggered recovery does not prove that event path ran",
     "Investigate remaining24-venue collection gaps; no historical prediction backfill",
@@ -61,6 +61,16 @@
       "id": 41684936546,
       "name": "Tokuyama program collection",
       "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41684936546"
+    },
+    {
+      "id": 41685350428,
+      "name": "Mikuni SHADOW after program recovery",
+      "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41685350428"
+    },
+    {
+      "id": 41685469531,
+      "name": "Ashiya SHADOW after program recovery",
+      "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41685469531"
     }
   ],
   "protectedSystems": [
@@ -78,8 +88,9 @@
     "timingRuntimeVerified": true,
     "all24VenueEndToEndVerified": false,
     "predictionImprovementVerified": false,
-    "morningPreChildVerification": "in progress",
-    "salesReadiness": "not established"
+    "morningPreChildVerification": "verified for Mikuni and Ashiya on2026-11-04,12/12 each",
+    "salesReadiness": "not established",
+    "calendarEventPathObserved": false
   },
   "modifiedFiles": [
     "shared-try-config-v1.json",
@@ -94,5 +105,59 @@
     ".github/workflows/tokuyama-program-snapshot-v1.yml",
     ".github/workflows/ashiya-program-snapshot-v1.yml",
     "scripts/venue-collector-boundary-contract-v1.js"
+  ],
+  "morningPreEvidence": [
+    {
+      "slug": "mikuni",
+      "count": 12,
+      "samples": [
+        {
+          "race": 1,
+          "venueCode": "10",
+          "date": "2026-11-04",
+          "generatedAt": "2026-11-03T17:34:23.950Z",
+          "deadline": "08:47",
+          "resultInput": false,
+          "payoutInput": false,
+          "immutable": true
+        },
+        {
+          "race": 12,
+          "venueCode": "10",
+          "date": "2026-11-04",
+          "generatedAt": "2026-11-03T17:34:23.950Z",
+          "deadline": "14:29",
+          "resultInput": false,
+          "payoutInput": false,
+          "immutable": true
+        }
+      ]
+    },
+    {
+      "slug": "ashiya",
+      "count": 12,
+      "samples": [
+        {
+          "race": 1,
+          "venueCode": "21",
+          "date": "2026-11-04",
+          "generatedAt": "2026-11-03T17:34:59.826Z",
+          "deadline": "08:35",
+          "resultInput": false,
+          "payoutInput": false,
+          "immutable": true
+        },
+        {
+          "race": 12,
+          "venueCode": "21",
+          "date": "2026-11-04",
+          "generatedAt": "2026-11-03T17:34:59.826Z",
+          "deadline": "14:11",
+          "resultInput": false,
+          "payoutInput": false,
+          "immutable": true
+        }
+      ]
+    }
   ]
 }
