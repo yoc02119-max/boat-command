@@ -3,7 +3,9 @@
  'use strict';
  const root=document.getElementById('deliveryProgress'); if(!root)return;
  const BASE='https://raw.githubusercontent.com/yoc02119-max/boat-command/main/';
- const EVERY=30000, STALE=90000;
+ const EVERY=30000, STALE=120000, VERIFY_AFTER=65000;
+ const PLAN_API='https://api.github.com/repos/yoc02119-max/boat-command/contents/docs/delivery-roadmap-v1.json?ref=main';
+ let lastOriginCheck=0, originWarning=false;
  const $=id=>document.getElementById(id);
  let busy=false, lastGood=0, plan=null, fingerprint='', workFingerprint='', controller=null;
  const time=v=>{if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' JST（日付のみ）';const n=typeof v==='number'?v:Date.parse(v);return Number.isFinite(n)?new Date(n).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',hour12:false})+' JST':'未記録';};
@@ -19,6 +21,18 @@
  async function read(path){
   const response=await fetch(BASE+path+'?progress='+Date.now(),{cache:'no-store',credentials:'omit',signal:controller.signal});
   if(!response.ok)throw Error('HTTP '+response.status);return response.json();
+ }
+ async function readPlan(){
+  // Raw main can return older CDN content. Periodically check the repository directly.
+  // At 30s polling this uses at most ~40 anonymous API requests/hour per visible client.
+  if(!lastOriginCheck||Date.now()-lastOriginCheck>=VERIFY_AFTER){
+   try{
+    const response=await fetch(PLAN_API+'&progress='+Date.now(),{cache:'no-store',credentials:'omit',headers:{Accept:'application/vnd.github.raw+json'},signal:controller.signal});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const p=validate(await response.json());lastOriginCheck=Date.now();originWarning=false;return p;
+   }catch{lastOriginCheck=Date.now();originWarning=true;}
+  }
+  return read('docs/delivery-roadmap-v1.json');
  }
  function renderPlan(p){
   plan=p;$('dpCurrent').textContent=p.current;$('dpVersion').textContent='v'+p.version;
@@ -58,11 +72,11 @@
  async function refresh(){
   if(busy)return;busy=true;$('dpRefresh').disabled=true;controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),12000);
   try{
-   const results=await Promise.allSettled([read('docs/delivery-roadmap-v1.json'),read('shared-try-portfolio-v1.json'),read('research/racer-period-second-forward-evaluation-v1.json'),read('AI-STATE.json')]);
-   if(results[0].status!=='fulfilled')throw Error('計画取得失敗');const p=validate(results[0].value);const key=JSON.stringify(p);
+   const results=await Promise.allSettled([readPlan(),read('shared-try-portfolio-v1.json'),read('research/racer-period-second-forward-evaluation-v1.json'),read('AI-STATE.json')]);
+   if(results[0].status!=='fulfilled')throw Error('計画取得失敗');const received=validate(results[0].value);const p=plan&&Date.parse(received.updatedAt)<Date.parse(plan.updatedAt)?plan:received;const key=JSON.stringify(p);
    if(key!==fingerprint){renderPlan(p);fingerprint=key;}
    const live=results.slice(1), liveKey=JSON.stringify(live);if(liveKey!==workFingerprint){renderLive(live);workFingerprint=liveKey;}
-   lastGood=Date.now();$('dpSync').textContent='最新計画を取得 · '+time(lastGood)+' · 表示中は30秒ごとに確認';$('dpSync').classList.remove('dp-warning');
+   lastGood=Date.now();$('dpSync').textContent='計画データ取得 · '+time(lastGood)+' · 30秒ごと取得 / 最新版の直接照合は約90秒ごと'+(originWarning?' · 保存元の直接照合は失敗、配信データを表示中':'');$('dpSync').classList.remove('dp-warning');if(originWarning)$('dpSync').classList.add('dp-warning');
    $('dpHomeCurrent').textContent=p.current+' · v'+p.version;
    $('dpHomeSync').textContent='計画更新 '+time(p.updatedAt);
   }catch{

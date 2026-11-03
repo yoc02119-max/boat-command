@@ -159,7 +159,7 @@ body{background-color:#02080d}
 }
 </style>
 <link rel="stylesheet" href="home-reference-v4.css?v=20260923-5">
-<link rel="stylesheet" href="delivery-progress-v1.css?v=1">
+<link rel="stylesheet" href="delivery-progress-v1.css?v=2">
 </head>
 <body class="reference-home"><div class="matrix-rain" aria-hidden="true"></div>
 <aside class="matrix-side" aria-label="BOAT COMMAND navigation">
@@ -202,7 +202,7 @@ body{background-color:#02080d}
   <h4>最新の運用・研究データ</h4><p class="dp-muted">以下は保存データの自動取得です。工程の完了判定とは分けています。生成日時が古い場合は、その時点の記録です。</p><div id="dpLive" class="dp-observations"></div>
   <h4>6工程と完了条件</h4><div id="dpStages"></div>
   <h4>計画の変更履歴</h4><ol id="dpHistory"></ol><p id="dpOptional" class="dp-muted"></p>
-  <div id="dpEvidence"></div><p class="dp-muted">検証・変更の記録を保存すると、表示中は30秒ごと、アプリへ戻った時にも確認します。チャット内だけの未保存作業は表示されません。取得失敗はこの画面に表示します。</p>
+  <div id="dpEvidence"></div><p class="dp-muted">検証・変更の記録を保存すると、表示中は30秒ごと、アプリへ戻った時にも確認し、保存元の最新版を約90秒ごとに直接照合します。チャット内だけの未保存作業は表示されません。取得失敗はこの画面に表示します。</p>
  </div></details>
 </section>
 <section id="promotionPanel" class="promotion-panel" hidden aria-live="polite">
@@ -830,5 +830,5 @@ document.getElementById('homeNav')?.classList.add('active');
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
 setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderTodayOverview();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
 </script>
-<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=1" defer></script></body>
+<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=2" defer></script></body>
 </html>
