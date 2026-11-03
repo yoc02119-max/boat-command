@@ -1,3 +1,23 @@
+# BOAT COMMAND focus and overnight TRY repair — 2026-11-04 JST
+
+Owner explicitly requested concentrating on BOAT COMMAND prediction accuracy and dependable 24-venue TRY eligibility for an eventual sellable app. This NEW instruction authorizes this scoped operations repair and subsequent isolated prediction research; do not resume unrelated projects or the entire old backlog.
+
+Implementation baseline: 7dcb9f9e9ad812a73aa0e238ea1bfa4155cc3b12. An open-PR query returned zero before work. Latest inspected program batch C and course-second FORWARD runs succeeded; success does not prove all races captured.
+
+Confirmed blocker: immutable daily selections were created by overnight completion events before the workflow's intended 07:30 JST selection schedule. Nov 1 froze at 01:00 JST with only 24 candidates; 143 valid >=3min PRE snapshots in the current checkout have generatedAt AFTER that freeze, across 12 venues. Generated-before-freeze does not prove publication-before-freeze. This is selection-pool bias, not evidence that changing the time improves ROI.
+
+Repair effective Nov 4: enforce selectionTiming.notBeforeJst=07:30 inside the builder for NEW daily selections only. Return retryable WAITING_DAILY_SELECTION_TIME without writing a lock before that time. Existing HARD LOCK takes precedence. POST recovery/settlement continue overnight. Existing rank formula, picks, risk budget, max 8 daily TRY, approval contract, models, initial 100000 and capital/history are unchanged. All 24 remain candidates, not guaranteed wagers. If files arrive after 07:30 they can still miss the daily pool; this patch does not solve that separate problem or promise all 24 are selected.
+
+Coverage audit: scripts/try-selection-coverage-v1.js is read-only unless --write (writes research report only). research/try-selection-coverage-v1.json records all 24 venues and eight freeze dates ending Nov 3. Nov 3: program files 156 across 13 venues, valid PRE 142, POST files 156. Missing PRE: Mikuni 1-4, Tokuyama 1-5, Ashiya 1-5 (14 total). Other venues without files are UNKNOWN historical開催, not assumed non開催. All-captured 4-pick x100 replay 32/142, returns42680/stakes56800 (75.14%); NOT actual TRY performance, independent improvement evidence, or a model promotion basis. Actual saved ledger: 52 hits/176 settled, ROI85.735%, confirmed52870, pending0, profit-47130 at generatedAt 2026-11-03T16:19:44.599Z. No demonstrated predictive improvement in this patch.
+
+Validation PASS: new timing regression (overnight event, UTC/JST boundary, 24-venue pool, immutable lock, overnight POST settlement, invalid clock, pre-effective behavior), existing continuous and profit-first suites, shared TRY contract, collector boundary, partial cancellation, result coverage, YAML parse and diff check. Isolated replay using the real ledger and copied POST preserved all 45 lock files byte-for-byte, capital52870 and176 settled, returned WAITING without a Nov4 lock. Python tests initially could not import requests; installed requests/bs4/PyYAML only into scratch test deps, then both passed. Shared contract temporarily rebuilds local portfolio; restored its generated JSON. No operational data are in this repair.
+
+Publication/Actions: check the commit and run links recorded in the chat after publication. At authoring not yet published. The Nov4 07:30 actual selection and public next-day behavior remain unobserved; do not report 24-venue completion or improved hit rate from synthetic tests.
+
+Next: see AI-NEXT-TASK.md. Recovery: revert only timing code/config/CI addition if necessary; NEVER revert/delete selections, PRE/POST, capital ledger or approvals. Keep audit evidence.
+
+---
+
 # Resume verification and partial cancellation repair — 2026-10-29 JST
 
 Resumed at main 35037ba7248e452109a6b696f64579fe4f28df35. Prior change 6f93b896e3a87b938a6d13e3f8d1d3991a3472ed is deployed. Original contract 40513077982, collector-boundary 40513077979, portfolio 40513078150, LAB 40513078021 all succeeded. Latest observed portfolio 40839104447, LAB 40839104315, Pages deployment 40839248142 succeeded. Public Pages JSON returned policy V1.2 with active=0/suspended=2 and risk budget 5%/2%, effective 2026-10-28.

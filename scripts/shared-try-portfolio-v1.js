@@ -115,6 +115,16 @@ function buildSelection(date,available){
     throw new Error('EXISTING_SELECTION_NOT_IMMUTABLE');
   }
   if(date!==jstDate(NOW_MS)&&!exists(outPath))throw new Error('NEW_SELECTION_MUST_BE_TODAY');
+  // Event-triggered reconciliation runs overnight too. Keep settlement running,
+  // but do not lock the day from the first incomplete overnight candidate batch.
+  // Existing immutable selections above always take precedence, including old days.
+  const timing=config.selectionTiming;
+  if(timing){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(timing.effectiveDate||''))||!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(timing.notBeforeJst||'')))throw new Error('SELECTION_TIMING_INVALID');
+    if(date>=timing.effectiveDate&&NOW_MS<deadlineEpoch(date,timing.notBeforeJst)){
+      return {schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',date,generatedAt:new Date(NOW_MS).toISOString(),selected:[],selectedCount:0,candidateCount:null,totalCommittedStakeYen:0,resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:false,status:'WAITING_DAILY_SELECTION_TIME',selectionNotBefore:`${date}T${timing.notBeforeJst}:00+09:00`};
+    }
+  }
   if(!withinOperationWindow(date)){
     const payload={schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',date,generatedAt:new Date(NOW_MS).toISOString(),selected:[],selectedCount:0,candidateCount:0,totalCommittedStakeYen:0,resultInput:false,payoutInput:false,realMoney:false,immutableAfterFirstWrite:true,status:'OUTSIDE_30_DAY_WINDOW'};
     fs.mkdirSync(path.dirname(outPath),{recursive:true});fs.writeFileSync(outPath,JSON.stringify(payload,null,2)+'\n');return payload;
@@ -163,7 +173,7 @@ function buildSelection(date,available){
     schema:'boat-command-shared-try-selection-v1',version:'SHARED-TRY-SELECTION-V1',
     date,generatedAt:new Date(NOW_MS).toISOString(),
     startingBankrollYen:Number(config.startingBankrollYen)||100000,bankrollBeforeSelectionYen:available,
-    policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,basePicksPerTry:picksPerTry,variablePicksByVenuePolicy:true,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5},
+    policy:{selectionPolicy:config.selectionPolicy,selectionFraction:fraction,maxTryRacesPerDay:Number(config.maxTryRacesPerDay)||8,stakePerPickYen:stakePerPick,basePicksPerTry:picksPerTry,variablePicksByVenuePolicy:true,deadlineSafetyMinutes:Number(config.deadlineSafetyMinutes)||5,...(timing&&date>=timing.effectiveDate?{selectionNotBeforeJst:timing.notBeforeJst}:{})},
     riskBudget:risk?{...risk,capitalBasisYen:capital,dailyLimitYen:dailyLimit,raceLimitYen:raceLimit}:null,
     candidateCount:candidates.length,selectedCount:selected.length,selected,
     totalCommittedStakeYen:selected.reduce((s,x)=>s+x.stakeYen,0),
