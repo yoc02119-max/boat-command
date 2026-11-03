@@ -1,6 +1,6 @@
 # App progress integration — roadmap v1.1
 
-Owner requests app-first progress tracking. Follow AGENTS.md progress writeback contract. UI-03 is implemented; public verification is pending. Keep OP/AN/EX completion states unchanged until separately verified. At each future task start/result/blocker, update docs/delivery-roadmap-v1.json (lastWork, updatedAt, evidence) and matching Markdown. App reads main every30s/resume, independent of Pages shell sync. Plan changes require version/changelog update; downloaded SVG derives from the fetched plan.
+Owner requests app-first progress tracking. Follow AGENTS.md progress writeback contract. UI-03 public content is verified on Pages run41691269914; saved-plan auto-refresh verification is in progress. Existing failures are recorded in QA-02: regex syntax and developer-auth expectation reproduce on baseline; Edogawa schema glob mismatch and model candidate DRIFT data are baseline-identical. Do not weaken safety gates or claim full CI green. Keep OP/AN/EX completion states unchanged until separately verified. At each future task start/result/blocker, update docs/delivery-roadmap-v1.json (lastWork, updatedAt, evidence) and matching Markdown. App reads main every30s/resume, independent of Pages shell sync. Plan changes require version/changelog update; downloaded SVG derives from the fetched plan.
 
 ---
 

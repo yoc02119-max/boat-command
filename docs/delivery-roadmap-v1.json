@@ -113,16 +113,26 @@
         },
         {
           "id": "UI-03",
-          "status": "実装済み・公開確認待ち",
+          "status": "公開表示確認済み・自動反映を確認中",
           "state": "in_progress",
-          "task": "ホームに開発ロードマップを追加。mainの計画・変更履歴・保存された運用証拠を30秒ごとに取得。計画変更の反映、失敗表示、画像保存を確認する。"
+          "task": "ホームに開発ロードマップを追加。mainの計画・変更履歴・保存された運用証拠を30秒ごとに取得。計画変更の反映、失敗表示、画像保存を確認する。",
+          "evidence": [
+            {
+              "label": "進捗画面の実装",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/80ccfe805b311428fd1ddc1bb0957034953bf649"
+            },
+            {
+              "label": "Pages公開成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41691269914"
+            }
+          ]
         }
       ]
     },
     {
       "id": "05",
       "title": "利用者へ渡す前に総点検する",
-      "status": "未完了",
+      "status": "既存検証4件が要確認",
       "color": "slate",
       "lines": [
         "Macと利用端末で、予想・締切・結果・収支を確認",
@@ -137,8 +147,27 @@
         },
         {
           "id": "QA-02",
-          "status": "未完了",
-          "task": "非開催、欠損、取得遅延、選抜0件、日付跨ぎ、競合更新を反証条件として確認。PRE/POST、HARD LOCK、独立24場モデル、共有資金、過去履歴と承認を保護。"
+          "status": "既存検証の不整合を確認・未解消",
+          "task": "非開催、欠損、取得遅延、選抜0件、日付跨ぎ、競合更新を反証条件として確認。PRE/POST、HARD LOCK、独立24場モデル、共有資金、過去履歴と承認を保護。 今回の既存Actionsでは4件失敗。画面契約の正規表現構文、開発者認証の文字列期待、江戸川SHADOWの別スキーマ混在、江戸川モデル候補のDRIFT_DETECTEDを確認。前2件は変更前のコードでも失敗を再現。後2件の対象データも変更前のSHAと一致。運用・モデルは本対応では変更していない。",
+          "verifiedAt": "2026-11-03T18:13:44+00:00",
+          "evidence": [
+            {
+              "label": "画面契約の失敗",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41691075163"
+            },
+            {
+              "label": "開発者認証契約の失敗",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41691075101"
+            },
+            {
+              "label": "江戸川SHADOW監査の失敗",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41691075174"
+            },
+            {
+              "label": "モデル候補の整合性監査の失敗",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/41691075100"
+            }
+          ]
         },
         {
           "id": "QA-03",
@@ -194,10 +223,10 @@
     "重大な計画変更はv2.0以降、軽微な変更はv1.1以降。過去版はgitに保持する。"
   ],
   "completionNote": "日程は未確定。安定運用と予測改善は別判定。収益は保証しない。",
-  "updatedAt": "2026-11-03T18:08:08+00:00",
+  "updatedAt": "2026-11-03T18:13:44+00:00",
   "lastWork": {
-    "updatedAt": "2026-11-03T18:08:08+00:00",
-    "summary": "開発進捗画面を実装。公開反映と自動更新の実画面確認を進めています。"
+    "updatedAt": "2026-11-03T18:13:44+00:00",
+    "summary": "開発進捗画面を公開し、6工程・確認項目・運用データの表示を確認済み。保存した変更の自動反映を最終確認中。既存の検証4件の失敗は別の残課題として記録しました。"
   },
   "evidence": [
     {
