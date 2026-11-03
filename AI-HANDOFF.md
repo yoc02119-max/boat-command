@@ -1,3 +1,15 @@
+# App-first delivery progress — 2026-11-04 JST
+
+Feature commits80ccfe805b311428fd1ddc1bb0957034953bf649 /8a6f3f65abc77eb7f0b597ccc9cb2f70ef2b0da0 /0ba8b0770813beb385c2822474efb49a9f0d1383. Pages41692925495 completed successfully. Public portal.html#deliveryProgress displays the six stages, stable checks, evidence times, source observations, changes and SVG download. Initial source reads and SVG download/XML are verified in browser. Latest module v2 uses raw30s plus contents API about90s; rate-limit warning/fallback and older-updatedAt rollback rejection tested. Final saved-plan auto-update probe is in progress. Do not mark full app complete.
+
+Root AGENTS.md requires progress writeback at task start/result/blocker, not chat-only reporting. Canonical plan docs/delivery-roadmap-v1.json, detailed docs/DELIVERY-ROADMAP.md, image renderer scripts/render-delivery-roadmap-v1.py. UI-01/02 and operations/research completion states remain unchanged. UI-03 is the only new check. All original inline scripts and DOM IDs were preserved. No model, betting, bankroll, history, Workflow or existing data router changed.
+
+Existing CI failures: portal regex syntax; developer-mode daily-lab string expectation (both reproduced on baseline). Edogawa safety glob includes course-second-place schema (source file identical to baseline). Model-cycle audit's isolated date2026-09-22 fixture has Edogawa mainline DRIFT_DETECTED V1/V2 (reproduced using existing generator into scratch, not production). Prior wording that the candidate ledger had drift is corrected. Details and run URLs in QA-02. Do not weaken safety tests to turn them green. Additional progress regression and four existing TRY UI contracts passed. Mac/iPhone actual-device acceptance not yet complete.
+
+Rollback only this feature's portal hunks and new progress JS/CSS with a latest-main lease; preserve bot-updated operational files. Baseline portal is at ce5cd12e6f56275b820ca36023065fde50c6ad07. No Library identifiers or private details are required in public source.
+
+---
+
 # Morning collector recovery chain — 2026-11-04 JST
 
 Timing repair 8c1ccbfcd5662675a0c5e56bc9cb4d652da0617a published. Shared contract41683567548, collector boundary41683567356, and portfolio41683567673 SUCCESS. Actual job126083256442 logs WAITING_DAILY_SELECTION_TIME at02:23 JST, selected0, capital52870, pending0, settled176. This confirms overnight gate and settlement, not morning07:30 behavior or improved hit rate.
