@@ -1,3 +1,11 @@
+# Delivery roadmap — v1.0, 2026-11-04 JST
+
+Canonical plan: [docs/DELIVERY-ROADMAP.md](docs/DELIVERY-ROADMAP.md). Machine-readable status and image source: [docs/delivery-roadmap-v1.json](docs/delivery-roadmap-v1.json). Image renderer: scripts/render-delivery-roadmap-v1.py (Pillow + Japanese font). On every progress review, report stable check IDs, evidence/time and remaining blockers. When scope/order/completion conditions change, bump roadmap version, record why, regenerate and give the owner the latest image. Preserve prior versions in git. Do not treat this documentation change as new operational verification or predictive improvement.
+
+Next checks: OP-01 actual >=07:30 JST freeze; OP-02 all24 venue coverage; OP-03 morning/calendar event path; OP-04 real-data settlement/UI/capital agreement; AN-01 equal-budget baseline. Tax page remains optional future scope. No production code/model/UI changed by this roadmap.
+
+---
+
 # Delivery brief — owner clarification, 2026-11-04 JST
 
 - Recipient: one experienced BOAT RACE customer, not a mass-market beginner audience. The customer has high expectations; prioritize a dependable, evidence-backed handover.
