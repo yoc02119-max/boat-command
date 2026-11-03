@@ -159,6 +159,7 @@ body{background-color:#02080d}
 }
 </style>
 <link rel="stylesheet" href="home-reference-v4.css?v=20260923-5">
+<link rel="stylesheet" href="delivery-progress-v1.css?v=1">
 </head>
 <body class="reference-home"><div class="matrix-rain" aria-hidden="true"></div>
 <aside class="matrix-side" aria-label="BOAT COMMAND navigation">
@@ -168,6 +169,7 @@ body{background-color:#02080d}
   <a href="#homeAnchor"><span class="side-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>競艇場選択</a>
   <a href="./performance-v2.html?v=202609231310"><span class="side-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 16v-4m4 4V7m4 9v-6"/></svg></span>成績</a>
   <a href="https://chatgpt.com/?q=BOAT%20COMMAND%E3%81%AE24%E5%A0%B4%E4%BA%88%E6%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E5%88%86%E6%9E%90%E3%81%97%E3%81%9F%E3%81%84" target="_blank" rel="noopener noreferrer"><span class="side-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg></span>AIチャット</a>
+  <a href="#deliveryProgress" data-open-progress><span class="side-ico" aria-hidden="true">◷</span>開発進捗</a>
   <a id="dailyLabNavSide" hidden href="./daily-lab.html"><span class="side-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 17h4m6-10v4"/></svg></span>LAB</a>
   <button id="sideOtherNav" type="button"><span class="side-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 3-1 3-3 1 1 3-2 2 2 2-1 3 3 1 1 3h6l1-3 3-1-1-3 2-2-2-2 1-3-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></span>設定</button>
  </nav>
@@ -187,6 +189,21 @@ body{background-color:#02080d}
  <div class="hero-copy-right">FASTER<br>SMARTER<br>HIGHER WINRATE</div>
  <div class="hero-speedlines" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
  <div class="hero-hud-corner" aria-hidden="true">LIVE MATRIX / AUTO TRY</div>
+</section>
+<section id="deliveryProgress" aria-label="開発ロードマップと進捗">
+ <div class="dp-home"><div><strong>開発ロードマップ・進捗</strong><p id="dpHomeCurrent">最新計画を読み込み中…</p><small id="dpHomeSync">通信・更新状況は詳細に表示します</small></div><a class="dp-open" href="#deliveryProgress" data-open-progress>進捗を見る</a></div>
+ <details id="dpDetails"><summary>6工程・確認項目・変更履歴を開く</summary><div class="dp-content">
+  <div class="dp-heading"><div><h3>完成までのロードマップ <span id="dpVersion">—</span></h3><p class="dp-muted">進捗は検証の記録です。処理の成功だけで完成扱いにはしません。</p></div></div>
+  <p id="dpSync" class="dp-sync" role="status" aria-live="polite">最新計画の取得待ち</p>
+  <div class="dp-meta"><span id="dpUpdated">計画更新：未取得</span><span id="dpVerified">運用証拠の確認：未取得</span></div>
+  <div class="dp-actions"><button id="dpRefresh" type="button">今すぐ更新</button><button id="dpDownload" type="button" disabled>最新ロードマップ画像を保存</button></div>
+  <div class="dp-current"><h4 id="dpCurrent">現在地を確認中…</h4><p id="dpLastWork"></p><small id="dpLastWorkAt"></small></div>
+  <h4>次に確認すること</h4><ul id="dpNext"></ul>
+  <h4>最新の運用・研究データ</h4><p class="dp-muted">以下は保存データの自動取得です。工程の完了判定とは分けています。生成日時が古い場合は、その時点の記録です。</p><div id="dpLive" class="dp-observations"></div>
+  <h4>6工程と完了条件</h4><div id="dpStages"></div>
+  <h4>計画の変更履歴</h4><ol id="dpHistory"></ol><p id="dpOptional" class="dp-muted"></p>
+  <div id="dpEvidence"></div><p class="dp-muted">検証・変更の記録を保存すると、表示中は30秒ごと、アプリへ戻った時にも確認します。チャット内だけの未保存作業は表示されません。取得失敗はこの画面に表示します。</p>
+ </div></details>
 </section>
 <section id="promotionPanel" class="promotion-panel" hidden aria-live="polite">
  <div class="promotion-head"><b>昇格候補があります</b><span>OWNER DECISION</span></div>
@@ -813,5 +830,5 @@ document.getElementById('homeNav')?.classList.add('active');
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
 setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderTodayOverview();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
 </script>
-<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script></body>
+<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=1" defer></script></body>
 </html>

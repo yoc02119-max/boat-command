@@ -1,3 +1,9 @@
+# App progress integration — roadmap v1.1
+
+Owner requests app-first progress tracking. Follow AGENTS.md progress writeback contract. UI-03 is implemented; public verification is pending. Keep OP/AN/EX completion states unchanged until separately verified. At each future task start/result/blocker, update docs/delivery-roadmap-v1.json (lastWork, updatedAt, evidence) and matching Markdown. App reads main every30s/resume, independent of Pages shell sync. Plan changes require version/changelog update; downloaded SVG derives from the fetched plan.
+
+---
+
 # Delivery roadmap — v1.0, 2026-11-04 JST
 
 Canonical plan: [docs/DELIVERY-ROADMAP.md](docs/DELIVERY-ROADMAP.md). Machine-readable status and image source: [docs/delivery-roadmap-v1.json](docs/delivery-roadmap-v1.json). Image renderer: scripts/render-delivery-roadmap-v1.py (Pillow + Japanese font). On every progress review, report stable check IDs, evidence/time and remaining blockers. When scope/order/completion conditions change, bump roadmap version, record why, regenerate and give the owner the latest image. Preserve prior versions in git. Do not treat this documentation change as new operational verification or predictive improvement.
