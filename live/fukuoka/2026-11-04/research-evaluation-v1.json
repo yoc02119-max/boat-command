@@ -4,7 +4,7 @@
   "venueCode": "22",
   "slug": "fukuoka",
   "date": "2026-11-04",
-  "generatedAt": "2026-11-04T07:07:10.629Z",
+  "generatedAt": "2026-11-04T11:47:45.485Z",
   "rows": [
     {
       "race": 1,
@@ -456,28 +456,69 @@
           "baselinePath": "fukuoka-baseline-backtest-v1.json"
         }
       }
+    },
+    {
+      "race": 12,
+      "actual": "1-2-4",
+      "payout100": 730,
+      "classBaseline": {
+        "generatedAt": "2026-11-03T16:32:55.703Z",
+        "picks": [
+          "1-3-4",
+          "1-2-3",
+          "1-2-6",
+          "1-4-6"
+        ],
+        "hit": false,
+        "modelVersion": "FUKUOKA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/fukuoka/2026-11-04/program/race-12.json",
+          "programSha256": "cbd19ae8ada93b1c2f32ffe3b7218ccce97d8a381f612cd91ac40e5b768d5ecd",
+          "programFetchedAt": "2026-11-04T01:30:41.107825+09:00",
+          "historyPath": "fukuoka-history-bootstrap-v1.json",
+          "baselinePath": "fukuoka-baseline-backtest-v1.json"
+        }
+      },
+      "programOnly": {
+        "generatedAt": "2026-11-03T16:32:55.703Z",
+        "picks": [
+          "1-2-4",
+          "1-3-4",
+          "1-2-3",
+          "1-2-5"
+        ],
+        "hit": true,
+        "modelVersion": "FUKUOKA-RESEARCH-MODEL-V1",
+        "source": {
+          "programPath": "live/fukuoka/2026-11-04/program/race-12.json",
+          "programSha256": "cbd19ae8ada93b1c2f32ffe3b7218ccce97d8a381f612cd91ac40e5b768d5ecd",
+          "programFetchedAt": "2026-11-04T01:30:41.107825+09:00",
+          "historyPath": "fukuoka-history-bootstrap-v1.json",
+          "baselinePath": "fukuoka-baseline-backtest-v1.json"
+        }
+      }
     }
   ],
   "summary": {
     "classBaseline": {
-      "evaluated": 11,
+      "evaluated": 12,
       "hits": 3,
-      "hitRate": 0.2727272727272727,
-      "stake": 4400,
+      "hitRate": 0.25,
+      "stake": 4800,
       "returns": 5260,
-      "roi": 1.1954545454545455
+      "roi": 1.0958333333333334
     },
     "programOnly": {
-      "evaluated": 11,
-      "hits": 3,
-      "hitRate": 0.2727272727272727,
-      "stake": 4400,
-      "returns": 5260,
-      "roi": 1.1954545454545455
+      "evaluated": 12,
+      "hits": 4,
+      "hitRate": 0.3333333333333333,
+      "stake": 4800,
+      "returns": 5990,
+      "roi": 1.2479166666666666
     },
-    "paired": 11,
-    "hitRateDelta": 0,
-    "roiDelta": 0
+    "paired": 12,
+    "hitRateDelta": 0.08333333333333331,
+    "roiDelta": 0.15208333333333313
   },
   "fundingScope": "NONE_RESEARCH_ONLY",
   "bankrollAffected": false,
