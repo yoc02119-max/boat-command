@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "BIWAKO",
+  "venueCode": "11",
+  "slug": "biwako",
+  "date": "2026-11-05",
+  "race": 6,
+  "generatedAt": "2026-11-04T19:06:05.844Z",
+  "deadline": "12:33",
+  "modelVersion": "BIWAKO-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-5-4",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-4",
+  "periodCandidateOrder": "1-5-4",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.055556,
+    "holdoutSecondDeltaVsTop": 0.059028,
+    "holdoutExactDeltaVsTop": 0,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/biwako/2026-11-05/program/race-6.json",
+    "programSha256": "7196c185f85d31db0b6893d82ee3c9b3754db931af050b9895f425edf863a31f",
+    "historyPath": "biwako-history-bootstrap-v1.json",
+    "baselinePath": "biwako-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    1.1835370926991489,
+    -1.3778331802846508,
+    0.023475743735772325,
+    0.6248862426630762,
+    1.2289134285060623,
+    -1.682979327319408
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
