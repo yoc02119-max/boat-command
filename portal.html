@@ -159,7 +159,7 @@ body{background-color:#02080d}
 }
 </style>
 <link rel="stylesheet" href="home-reference-v4.css?v=20260923-5">
-<link rel="stylesheet" href="delivery-progress-v1.css?v=2">
+<link rel="stylesheet" href="delivery-progress-v1.css?v=3">
 </head>
 <body class="reference-home"><div class="matrix-rain" aria-hidden="true"></div>
 <aside class="matrix-side" aria-label="BOAT COMMAND navigation">
@@ -192,7 +192,17 @@ body{background-color:#02080d}
 </section>
 <section id="deliveryProgress" aria-label="開発ロードマップと進捗">
  <div class="dp-home"><div><strong>開発ロードマップ・進捗</strong><p id="dpHomeCurrent">最新計画を読み込み中…</p><small id="dpHomeSync">通信・更新状況は詳細に表示します</small></div><a class="dp-open" href="#deliveryProgress" data-open-progress>進捗を見る</a></div>
- <details id="dpDetails"><summary>6工程・確認項目・変更履歴を開く</summary><div class="dp-content">
+ <section class="dp-at-a-glance" aria-label="進み具合の要約">
+ <h3>今、どこまで進んだ？</h3>
+ <p id="dpProgressVerdict" role="status">進捗の記録を確認中…</p>
+ <div class="dp-summary-grid">
+  <article><h4>✓ 完了したこと</h4><ul id="dpDoneSimple"></ul><small id="dpDoneCount"></small></article>
+  <article><h4>→ 次に終わらせること</h4><p>全24場の運用確認</p><small>開催中の会場で、予想 → TRY判定 → 結果 → 精算まで確かめる。</small></article>
+  <article><h4>! 運用・成績の確認状況</h4><small id="dpProductEvidence"></small></article>
+ </div>
+ <p id="dpWorkSimple"></p><small>通信時刻が更新されても、開発の完了件数が増えたことにはなりません。</small>
+</section>
+<details id="dpDetails"><summary>6工程・確認項目・変更履歴を開く</summary><div class="dp-content">
   <div class="dp-heading"><div><h3>完成までのロードマップ <span id="dpVersion">—</span></h3><p class="dp-muted">進捗は検証の記録です。処理の成功だけで完成扱いにはしません。</p></div></div>
   <p id="dpSync" class="dp-sync" role="status" aria-live="polite">最新計画の取得待ち</p>
   <div class="dp-meta"><span id="dpUpdated">計画更新：未取得</span><span id="dpVerified">運用証拠の確認：未取得</span></div>
@@ -830,5 +840,5 @@ document.getElementById('homeNav')?.classList.add('active');
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
 setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderTodayOverview();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
 </script>
-<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=2" defer></script></body>
+<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=3" defer></script></body>
 </html>

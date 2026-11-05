@@ -34,7 +34,20 @@
   }
   return read('docs/delivery-roadmap-v1.json');
  }
+ function renderSummary(p){
+  const all=p.stages.flatMap(s=>s.checks);
+  const done=all.filter(c=>c.state==='verified'||c.status==='確認済み');
+  const latest=done.map(c=>Date.parse(c.verifiedAt)).filter(Number.isFinite).sort((a,b)=>b-a)[0];
+  $('dpProgressVerdict').textContent=latest?'最後に完了を確認した作業：'+time(latest)+(Date.now()-latest>86400000?'。24時間以上、新しい完了記録はありません。':'。'):'完了を確認できる記録はありません。';
+  const list=$('dpDoneSimple');list.replaceChildren();
+  for(const c of done)list.append(node('li',c.id==='UI-03'?'ロードマップのアプリ追加・自動反映を確認':c.id+'：'+c.task));
+  if(!done.length)list.append(node('li','まだ確認済みの項目はありません'));
+  $('dpDoneCount').textContent='確認済み '+done.length+'件 / 全'+all.length+'項目（作業の重さは異なります。完成率ではありません）';
+  $('dpProductEvidence').textContent='24場運用：'+p.stages[0].status+'。予測改善：'+p.stages[2].status+'。運用の検証記録：'+time(p.evidenceLastVerifiedAt);
+  $('dpWorkSimple').textContent='最後に記録した作業：'+(p.lastWork?.summary||'未記録')+'（'+time(p.lastWork?.updatedAt)+'）';
+ }
  function renderPlan(p){
+  renderSummary(p);
   plan=p;$('dpCurrent').textContent=p.current;$('dpVersion').textContent='v'+p.version;
   $('dpUpdated').textContent='計画更新：'+time(p.updatedAt);
   $('dpVerified').textContent='運用証拠の確認：'+time(p.evidenceLastVerifiedAt);
@@ -66,6 +79,7 @@
   target.append(liveCard('保存された検証状態','AI-STATE.json',results[2],x=>'24場の一連動作：'+(x.deploymentState?.all24VenueEndToEndVerified===true?'確認済み':'未確認')+' / 予測改善：'+(x.deploymentState?.predictionImprovementVerified===true?'確認済み':'未確認')));
  }
  function freshness(){
+  if(plan)renderSummary(plan);
   if(!lastGood){$('dpSync').textContent='最新計画の取得待ち';return;}
   if(!navigator.onLine||Date.now()-lastGood>STALE){$('dpSync').textContent='更新を確認できていません · 最後の取得 '+time(lastGood);$('dpSync').classList.add('dp-warning');}
  }
