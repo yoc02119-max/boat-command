@@ -202,6 +202,7 @@ body{background-color:#02080d}
  </div>
  <p id="dpWorkSimple"></p><small>通信時刻が更新されても、開発の完了件数が増えたことにはなりません。</small>
 </section>
+<section id="dpVenueAudit" class="dp-at-a-glance" aria-label="24場ごとの確認状況"></section>
 <details id="dpDetails"><summary>6工程・確認項目・変更履歴を開く</summary><div class="dp-content">
   <div class="dp-heading"><div><h3>完成までのロードマップ <span id="dpVersion">—</span></h3><p class="dp-muted">進捗は検証の記録です。処理の成功だけで完成扱いにはしません。</p></div></div>
   <p id="dpSync" class="dp-sync" role="status" aria-live="polite">最新計画の取得待ち</p>
@@ -840,5 +841,5 @@ document.getElementById('homeNav')?.classList.add('active');
 setInterval(()=>refreshAllResearchBuildStatus().then(refreshVenueCalendarStatus),300000);
 setInterval(()=>{const card=document.querySelector('.venue[data-venue="07"]');if(card){const s=gamagoriStatus();card.querySelector('small').innerHTML=`<span class="live-dot"></span>${s.top}`;card.querySelector('.venue-live').className=`venue-live ${s.live?'':'wait'}`;card.querySelector('.venue-live').innerHTML=`<b>${s.detail}</b>`}refreshVenueCalendarStatus();renderTodayOverview();renderSharedPortfolioStats();renderActiveTryList();renderTodayTryPerformance()},60000);
 </script>
-<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=3" defer></script></body>
+<script src="browser-controls-v1.js?v=3"></script><script src="home-reference-v4.js?v=20260923-3"></script><script src="delivery-progress-v1.js?v=4" defer></script></body>
 </html>

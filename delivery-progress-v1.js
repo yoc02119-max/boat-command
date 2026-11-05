@@ -46,7 +46,23 @@
   $('dpProductEvidence').textContent='24場運用：'+p.stages[0].status+'。予測改善：'+p.stages[2].status+'。運用の検証記録：'+time(p.evidenceLastVerifiedAt);
   $('dpWorkSimple').textContent='最後に記録した作業：'+(p.lastWork?.summary||'未記録')+'（'+time(p.lastWork?.updatedAt)+'）';
  }
+ function renderVenueAudit(p){
+  const target=$('dpVenueAudit');if(!target)return;target.replaceChildren();
+  target.append(node('h3','24場ごとの確認状況'));
+  const audit=p.venueAudit;if(!audit){target.append(node('p','場別の監査記録は未保存です。'));return;}
+  target.append(node('p',audit.date+'分 / 監査 '+time(audit.checkedAt)));
+  target.append(node('p',audit.scope,'dp-muted'));
+  target.append(node('p','当日の選抜時刻：'+time(audit.selectionGeneratedAt)+'。早朝の対象レースが揃っていたかは別途確認が必要です。'));
+  for(const r of audit.rows){
+   const box=node('details',undefined,'dp-stage'),title=node('summary');
+   title.append(node('strong',r.name+'｜'+r.status));box.append(title);
+   const body=node('div',undefined,'dp-stage-body');
+   body.append(node('p','確認した保存数：出走表 '+r.program+'/12R、事前予想 '+r.pre+'/12R（締切3分前 '+r.preBefore3m+'R）、結果 '+r.post+'/12R、TRY選抜 '+r.selected+'R'));
+   body.append(node('p','なぜ残っているか：'+r.reason),node('p','次の対応：'+r.next),node('p','改善・確認の見通し：'+r.eta),safeLink('この判定の保存データ',r.evidence));box.append(body);target.append(box);
+  }
+ }
  function renderPlan(p){
+  renderVenueAudit(p);
   renderSummary(p);
   plan=p;$('dpCurrent').textContent=p.current;$('dpVersion').textContent='v'+p.version;
   $('dpUpdated').textContent='計画更新：'+time(p.updatedAt);
