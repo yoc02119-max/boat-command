@@ -1,0 +1,43 @@
+name: B over A isolated SHADOW selector v1
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/b-over-a-shadow-v1.py'
+      - 'scripts/test-b-over-a-shadow-v1.py'
+      - '.github/workflows/b-over-a-shadow-v1.yml'
+permissions:
+  contents: write
+concurrency:
+  group: b-over-a-shadow-v1
+  cancel-in-progress: false
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify selection boundaries
+        run: python scripts/test-b-over-a-shadow-v1.py
+      - name: Publish isolated research only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name boat-command-b-over-a-shadow
+          git config user.email boat-command-b-over-a-shadow@users.noreply.github.com
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git checkout -B b-over-a-work origin/main
+            task_date=$(TZ=Asia/Tokyo date +%F)
+            python scripts/b-over-a-shadow-v1.py --repo . --ref HEAD --date "$task_date" --output research/b-over-a-latest-v1.json --forward-dir research/b-over-a-forward-v1
+            git add research/b-over-a-latest-v1.json
+            if test -d research/b-over-a-forward-v1; then git add research/b-over-a-forward-v1; fi
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'research: update isolated B-over-A candidates'
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
