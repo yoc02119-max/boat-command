@@ -91,8 +91,8 @@
         },
         {
           "id": "EX-04",
-          "status": "候補記録は動作確認済み／金額と収支を追加・公開確認中",
-          "task": "A/B混合で、最も高いB個艇のモデル1着点数が最大A個艇を上回るレースを選抜。同点は見送り。オッズと未使用期間の4点同資金比較で採否を判断。級別だけで高配当と断定しない。",
+          "status": "画面・自動記録・受け渡しを確認／金額と結果は待ち",
+          "task": "A級とB級が一緒に走るレースで、いちばん点が高いB級が、いちばん点が高いA級を上回れば候補。同点は見送り。先に候補を記録し、各4通り・各100円の同じ金額で、当たりと戻った金額を比べる。B級なら高配当とは決めつけない。まだ金額を使った絞り込みは行わない。",
           "evidence": [
             {
               "label": "検証用候補データ",
@@ -113,9 +113,33 @@
             {
               "label": "候補画面",
               "url": "https://yoc02119-max.github.io/boat-command/b-upset-v1.html"
+            },
+            {
+              "label": "結果・金額の集計とやさしい画面の追加",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/b4e02b64d67df188acf4eb6ba3d65105499be87f"
+            },
+            {
+              "label": "17テスト・自動集計の成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42255358644"
+            },
+            {
+              "label": "既存の金額観測→受け取り→保存を実行して成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42255864274"
+            },
+            {
+              "label": "古い表示への対策",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/5b1f867e66d4afedd92d6d398c748e680184cf99"
+            },
+            {
+              "label": "新しい画面の公開成功・18候補の実画面確認",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42256174914"
+            },
+            {
+              "label": "98レースの元情報の差を調査",
+              "url": "https://github.com/yoc02119-max/boat-command/blob/main/research/b-over-a-source-audit-v1.json"
             }
           ],
-          "verifiedAt": "2026-11-06T15:09:14.175Z"
+          "verifiedAt": "2026-11-06T16:56:48.702Z"
         }
       ]
     },
@@ -265,10 +289,10 @@
     "重大な計画変更はv2.0以降、軽微な変更はv1.1以降。過去版はgitに保持する。"
   ],
   "completionNote": "日程は未確定。安定運用と予測改善は別判定。収益は保証しない。",
-  "updatedAt": "2026-11-06T16:45:10.118Z",
+  "updatedAt": "2026-11-06T16:56:48.702Z",
   "lastWork": {
-    "updatedAt": "2026-11-06T16:45:10.118Z",
-    "summary": "3つを同時に作業：候補探し／戻る金額の受け渡し／結果と収支の集計。候補画面の説明をやさしく変更。新しい集計の10テストと既存選抜7テストは成功。公開画面と自動処理は確認中。"
+    "updatedAt": "2026-11-06T16:56:48.702Z",
+    "summary": "同時に進めた3つを反映：候補の自動記録／金額情報の受け渡し／結果と収支の自動集計。公開画面で候補18R・金額0件・結果待ち18Rを確認。古い2Rが出る配信遅延への対策も確認。結果が出る前なので収支は未判定。"
   },
   "evidence": [
     {
