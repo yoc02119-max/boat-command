@@ -1,1 +1,25 @@
-<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>B級がA級を上回る候補｜BOAT COMMAND</title><style>body{background:#091626;color:#e7f1f8;font:16px/1.7 system-ui;margin:0}main{max-width:960px;margin:auto;padding:24px}a{color:#86dce8}h1{font-size:26px}article{border:1px solid #34556e;border-radius:12px;padding:16px;margin:16px 0;background:#11283a}.note{color:#b7c8d8}.warn{color:#ffd486}button{font:inherit;padding:8px 14px;background:#143e50;color:white;border:1px solid #6ebbc7;border-radius:8px}strong{color:#7ce5cf}small{display:block}</style><main><a href="./portal.html">←ホーム</a><h1>B級がA級を上回る候補</h1><p>検証用の選抜です。買い推奨・高配当確定・利益の証明ではありません。</p><p class="note">A級・B級が混在し、B級選手の1着点数が最も高いA級選手を上回るレースを抽出。同点は見送り。点数はモデル内の推定で、実的中率の校正は未検証です。</p><button id="refresh">更新</button><p id="status" role="status">読み込み中…</p><p id="counts"></p><p id="excluded" class="note"></p><p id="fresh" class="warn"></p><div id="list"></div><p class="note">オッズはまだ選抜に使っていません。級別だけで高配当とは判断しません。締切3分前を過ぎた候補は現在の候補として扱いません。期間外・入力変更・欠損は除外します。自動処理は15分間隔の予定で、実行や配信の遅延があります。</p></main><script src="b-upset-v1.js?v=1"></script></html>
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B級の勝ち候補｜BOAT COMMAND</title>
+<style>
+*{box-sizing:border-box}body{background:#091626;color:#e7f1f8;font:16px/1.7 system-ui;margin:0}main{max-width:960px;margin:auto;padding:24px}a{color:#86dce8}h1{font-size:28px;line-height:1.4}h2{font-size:21px}h3{margin:0 0 8px}article,.panel{border:1px solid #34556e;border-radius:12px;padding:18px;margin:16px 0;background:#11283a}.note,small{color:#b7c8d8}.warn{color:#ffd486}button{font:inherit;padding:8px 14px;background:#143e50;color:white;border:1px solid #6ebbc7;border-radius:8px;cursor:pointer}strong{color:#7ce5cf}small{display:block}summary{cursor:pointer}.work{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.work p{margin:8px 0}.work .panel{margin:0}article p{overflow-wrap:anywhere}.total{font-size:22px;color:#7ce5cf}details{margin:16px 0}@media(max-width:600px){main{padding:16px}.work{grid-template-columns:1fr}h1{font-size:25px}}
+</style>
+<main><a href="./portal.html">←ホーム</a>
+<h1>A級に勝てそうなB級を探す</h1>
+<p>まず候補を記録し、レース後に「当たったか」「何円戻ったか」を比べます。今は試している段階です。</p>
+<div class="work" aria-label="今の進み具合">
+<section class="panel"><h2>① 候補を探す</h2><p id="work-candidates">記録を読み込んでいます</p></section>
+<section class="panel"><h2>② 戻る金額を調べる</h2><p id="work-odds">取得状況を読み込んでいます</p></section>
+<section class="panel"><h2>③ 結果を比べる</h2><p id="work-results">集計を読み込んでいます</p></section>
+</div>
+<p class="note">この3つは同時に進めます。レースが終わるまで、結果は出せません。</p>
+<button id="refresh">最新の記録を見る</button><p id="status" role="status">読み込み中…</p><p id="fresh" class="warn"></p>
+<section class="panel"><h2>試した結果</h2><div id="results">集計を読み込んでいます</div><small>お金は使っていません。B級を1着にした4通りと、A級を1着にした4通りを、それぞれ100円ずつ買ったとして比べます。</small></section>
+<h2>これからの候補</h2><p id="counts"></p><div id="list"></div>
+<details><summary>候補の選び方・表示できない理由</summary>
+<p>同じレースのB級とA級を、今の予想方法で比べます。いちばん点が高いB級が、いちばん点が高いA級を上回れば候補にします。同じ点なら見送ります。</p>
+<p>予想点は「当たる確率」ではありません。B級だから高配当とは限らず、1号艇のB級が人気になる場合もあります。配当を使った絞り込みはまだ行っていません。</p>
+<p id="excluded"></p><p>情報のない枠には、開催予定のない会場分も含まれます。この数だけで取得の失敗とは判断できません。元の情報が変わった場合も安全のため表示から外します。</p>
+<p>締切3分前を過ぎたレースは、これからの候補に表示しません。自動の候補探しは15分間隔の設定ですが、実行・画面への反映が遅れることがあります。金額の情報は締切3〜8分前に取れたものだけを使います。</p>
+</details>
+</main><script src="b-upset-v1.js?v=2"></script></html>

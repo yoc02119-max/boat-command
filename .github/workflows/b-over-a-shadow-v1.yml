@@ -1,6 +1,9 @@
 name: B over A isolated SHADOW selector v1
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ['TRY odds observer v1']
+    types: [completed]
   schedule:
     - cron: '*/15 * * * *'
   push:
@@ -8,14 +11,18 @@ on:
     paths:
       - 'scripts/b-over-a-shadow-v1.py'
       - 'scripts/test-b-over-a-shadow-v1.py'
+      - 'scripts/b-over-a-review-v1.py'
+      - 'scripts/test-b-over-a-review-v1.py'
       - '.github/workflows/b-over-a-shadow-v1.yml'
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: b-over-a-shadow-v1
   cancel-in-progress: false
 jobs:
   select:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +30,21 @@ jobs:
           fetch-depth: 0
       - name: Verify selection boundaries
         run: python scripts/test-b-over-a-shadow-v1.py
+      - name: Verify result and odds boundaries
+        run: python scripts/test-b-over-a-review-v1.py
+      - name: Receive existing odds observer evidence
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: try-odds-observation-*
+          merge-multiple: true
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/b-over-a-observer
       - name: Publish isolated research only
         shell: bash
+        env:
+          ODDS_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
           git config user.name boat-command-b-over-a-shadow
@@ -34,8 +54,16 @@ jobs:
             git checkout -B b-over-a-work origin/main
             task_date=$(TZ=Asia/Tokyo date +%F)
             python scripts/b-over-a-shadow-v1.py --repo . --ref HEAD --date "$task_date" --output research/b-over-a-latest-v1.json --forward-dir research/b-over-a-forward-v1
+            if test -n "$ODDS_RUN_ID"; then
+              python scripts/b-over-a-review-v1.py --repo . --output research/b-over-a-review-latest-v1.json --artifacts "$RUNNER_TEMP/b-over-a-observer" --run-id "$ODDS_RUN_ID"
+            else
+              python scripts/b-over-a-review-v1.py --repo . --output research/b-over-a-review-latest-v1.json
+            fi
             git add research/b-over-a-latest-v1.json
             if test -d research/b-over-a-forward-v1; then git add research/b-over-a-forward-v1; fi
+            git add research/b-over-a-review-latest-v1.json
+            if test -d research/b-over-a-odds-v1; then git add research/b-over-a-odds-v1; fi
+            if test -f research/b-over-a-odds-receipt-v1.json; then git add research/b-over-a-odds-receipt-v1.json; fi
             if git diff --cached --quiet; then exit 0; fi
             git commit -m 'research: update isolated B-over-A candidates'
             if git push origin HEAD:main; then exit 0; fi
