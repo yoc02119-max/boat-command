@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "TODA",
+  "venueCode": "02",
+  "slug": "toda",
+  "date": "2026-11-08",
+  "race": 5,
+  "generatedAt": "2026-11-07T16:43:35.667Z",
+  "deadline": "12:33",
+  "modelVersion": "TODA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "4-5-6",
+  "baselineFirst": 4,
+  "marginalSecondOrder": "4-1-2",
+  "periodCandidateOrder": "4-1-2",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.06962,
+    "holdoutSecondDeltaVsTop": 0.094937,
+    "holdoutExactDeltaVsTop": 0.004608,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/toda/2026-11-08/program/race-5.json",
+    "programSha256": "8233d63ab58fbec4b1d7fca95ecb49b3f293e664faa8b5dcd30b8e98220457b1",
+    "historyPath": "toda-history-bootstrap-v1.json",
+    "baselinePath": "toda-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    0.8419602197297997,
+    0.404248776804161,
+    0.542365214485669,
+    1.4694553564939516,
+    -2.5155080055003864,
+    -0.742521562013196
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
