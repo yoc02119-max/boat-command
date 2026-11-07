@@ -77,7 +77,7 @@
     {
       "id": "03",
       "title": "改善案を本番から隔離して試す",
-      "status": "B級狙いへ切替済み・成績確認中",
+      "status": "B級TRY運用・自動研究が初回稼働",
       "color": "blue",
       "lines": [
         "条件を先に固定し、未使用データとFORWARDで比較",
@@ -174,8 +174,47 @@
         },
         {
           "id": "EX-05",
-          "status": "実装済み／自動処理と公開確認中",
-          "task": "会場別に毎日、仮説作成・未来レースの比較・結果と見送り理由の記録・修正案・未確定TRYへの接続を自動化。確定済みの予想・資金上限・24場モデルの承認は保持。"
+          "status": "自動処理・TRY接続・画面を確認／改善案はデータ待ち",
+          "task": "会場別に毎日、仮説作成・未来レースの比較・結果と見送り理由の記録・修正案・未確定TRYへの接続を自動化。確定済みの予想・資金上限・24場モデルの承認は保持。",
+          "verifiedAt": "2026-11-07T00:49:14.747Z",
+          "evidence": [
+            {
+              "label": "実験前の比較条件の固定",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/8ff46d7834d1e7739a014e0a33758e239c0384fa"
+            },
+            {
+              "label": "自動研究とTRY接続の実装",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/ca66856ac14238428073acc9fd04bdf3d0e36536"
+            },
+            {
+              "label": "研究13試験・TRY境界の成功と研究初回実行",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42319937326"
+            },
+            {
+              "label": "研究完了→通常TRY処理の自動接続成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42319972749"
+            },
+            {
+              "label": "採用ルールが4点評価で絞り込む試験",
+              "url": "https://github.com/yoc02119-max/boat-command/commit/6da9446605ef0bf5f19238b35985605d12d62982"
+            },
+            {
+              "label": "通常TRY処理・追加接続試験の成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42320297841"
+            },
+            {
+              "label": "既存TRY契約の成功",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42319937382"
+            },
+            {
+              "label": "公開成功・自動研究欄と会場別の待ち理由を実画面確認",
+              "url": "https://github.com/yoc02119-max/boat-command/actions/runs/42320058218"
+            },
+            {
+              "label": "最新の研究記録",
+              "url": "https://github.com/yoc02119-max/boat-command/blob/main/research/b-over-a-auto-report-v1.json"
+            }
+          ]
         }
       ]
     },
@@ -325,10 +364,10 @@
     "重大な計画変更はv2.0以降、軽微な変更はv1.1以降。過去版はgitに保持する。"
   ],
   "completionNote": "日程は未確定。安定運用と予測改善は別判定。収益は保証しない。",
-  "updatedAt": "2026-11-07T00:43:13.398Z",
+  "updatedAt": "2026-11-07T00:49:14.747Z",
   "lastWork": {
-    "updatedAt": "2026-11-07T00:43:13.398Z",
-    "summary": "B級自動研究を実装。会場別の案作り・未使用レースでの比較・採否と全試行の保存・翌日以降のTRY接続まで追加。13件の研究試験、TRY接続、既存運用・資金・中止精算の試験を通過。実データ88R、24場とも結果収集中。自動処理と公開画面は確認中。"
+    "updatedAt": "2026-11-07T00:49:14.747Z",
+    "summary": "B級の自動研究が初回成功。案作り→未来レース比較→採用/見送り→次の案→翌日以降の未確定TRYへの接続を実装・試験。公開画面で待ち理由を確認。100R保存、朝07:30までの比較対象88R、24場ともデータ収集中・採用0。現在のTRY・全台帳・資金は不変。"
   },
   "evidence": [
     {
