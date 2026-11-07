@@ -1,0 +1,53 @@
+{
+  "schema": "b-over-a-auto-research-policy-v1",
+  "version": 1,
+  "enabled": true,
+  "ownerAuthorization": {
+    "dateJst": "2026-11-07",
+    "scope": "B級研究の仮説生成・独立検証・結果記録・修正案と次回未確定TRYへの自動接続。既存24場モデル承認、資金上限、確定済み予想は変更しない。"
+  },
+  "effectiveDate": "2026-11-08",
+  "training": {
+    "minimumRaces": 50,
+    "minimumDays": 5
+  },
+  "validation": {
+    "minimumPairedRaces": 100,
+    "minimumDays": 20,
+    "minimumCandidateRoi": 1.05,
+    "bootstrapSamples": 2000,
+    "familyAlpha": 0.01,
+    "requirePositiveProfitWithoutBestDay": true
+  },
+  "comparison": {
+    "picks": 4,
+    "stakePerPick": 100,
+    "maximumRacesPerVenueDay": 3,
+    "equalRaceCountEachDay": true,
+    "missingResults": "WAIT_DO_NOT_COUNT_AS_LOSS"
+  },
+  "search": {
+    "marginQuantiles": [
+      0,
+      0.5,
+      0.75
+    ],
+    "coverageQuantiles": [
+      0,
+      0.5,
+      0.75
+    ],
+    "rankings": [
+      "margin",
+      "coverage"
+    ],
+    "maximumVariantsPerRound": 18
+  },
+  "promotion": {
+    "scope": "VENUE_SELECTION_FILTER_AND_RANKING_ONLY",
+    "effective": "NEXT_JST_DAY",
+    "changeFrozenSelection": false,
+    "changeModels": false,
+    "changeFunds": false
+  }
+}
