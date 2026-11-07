@@ -62,7 +62,12 @@ function safeProgramShadow(adapter,date,race){
   if(bMode){
     const programPath=path.join(ROOT,'live',adapter.slug,date,'program',`race-${race}.json`);
     if(!exists(programPath))return null;
-    bChoice=require('./shared-try-b-over-a-v1.js')(x,fs.readFileSync(programPath));if(!bChoice)return null;
+    const autoRule=exists(path.join(ROOT,'research/b-over-a-active-rules-v1.json'))?require('./shared-try-b-auto-rule-v1.js')(ROOT,adapter.venueCode,date,NOW_MS):null;
+    if(autoRule){
+      const recorded=read(path.join(ROOT,'research/b-over-a-forward-v1',date,adapter.slug,`race-${race}.json`));
+      if(!recorded||recorded.predictionSha256!==sha256(raw)||!Number.isFinite(Date.parse(recorded.recordedAt))||Date.parse(recorded.recordedAt)>deadlineEpoch(date,'07:30'))return null;
+    }
+    bChoice=require('./shared-try-b-over-a-v1.js')(x,fs.readFileSync(programPath),autoRule);if(!bChoice)return null;
     picks=bChoice.picks;expansionVariant=null;
   }
   const map=new Map(ranked.map(z=>[String(z.order),Number(z.probability)]));
@@ -76,7 +81,7 @@ function safeProgramShadow(adapter,date,race){
     predictionPath:path.relative(ROOT,p).replace(/\\/g,'/'),predictionSha256:sha256(raw),
     modelVersion:x.modelVersion||null,picks,expansionVariant,
     pickCoverage:pickProbs.reduce((s,v)=>s+v,0),topProbability:Math.max(...pickProbs),
-    ...(bChoice?{bClass:bChoice.bClass,bLane:bChoice.bLane,bScore:bChoice.bScore,aScore:bChoice.aScore}:{}),
+    ...(bChoice?{bClass:bChoice.bClass,bLane:bChoice.bLane,bScore:bChoice.bScore,aScore:bChoice.aScore,...(bChoice.selectionExperimentId?{selectionExperimentId:bChoice.selectionExperimentId,autoRank:bChoice.autoRank}:{})}:{}),
     sourcePolicy:bChoice?'B_OVER_A_PROGRAM_ONLY_SHADOW_V1':expansionVariant?'PROGRAM_ONLY_SHADOW_APPROVED_EXPANSION':'PROGRAM_ONLY_SHADOW',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true
   };
 }
@@ -158,7 +163,7 @@ function buildSelection(date,available){
       venue.push(x);
     }
     const med=median(venue.map(x=>x.pickCoverage));
-    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:config.selectionPolicy==='B_OVER_A_V1'&&date>=String(config.selectionPolicyEffectiveDate||'9999-12-31')?x.bScore-x.aScore:med>0?x.pickCoverage/med:0});
+    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:config.selectionPolicy==='B_OVER_A_V1'&&date>=String(config.selectionPolicyEffectiveDate||'9999-12-31')?(x.autoRank??(x.bScore-x.aScore)):med>0?x.pickCoverage/med:0});
   }
   candidates.sort((a,b)=>b.relativeConfidence-a.relativeConfidence||(Number(b.pickCoverage)||0)-(Number(a.pickCoverage)||0)||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
   const fraction=Math.max(0,Math.min(1,Number(config.selectionFraction)||0.25));
@@ -179,7 +184,7 @@ function buildSelection(date,available){
     selected.push({
       rank:selected.length+1,venueCode:x.venueCode,venue:x.venue,slug:x.slug,date:x.date,race:x.race,
       deadline:x.deadline,generatedAt:x.generatedAt,modelVersion:x.modelVersion,sourcePolicy:x.sourcePolicy,
-      predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,...(x.bLane?{bLane:x.bLane,bClass:x.bClass,bScore:x.bScore,aScore:x.aScore}:{}),picks:x.picks,expansionVariant:x.expansionVariant||null,
+      predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,...(x.bLane?{bLane:x.bLane,bClass:x.bClass,bScore:x.bScore,aScore:x.aScore,...(x.selectionExperimentId?{selectionExperimentId:x.selectionExperimentId}:{})}:{}),picks:x.picks,expansionVariant:x.expansionVariant||null,
       pickCoverage:x.pickCoverage,venueMedianCoverage:x.venueMedianCoverage,relativeConfidence:x.relativeConfidence,
       stakePerPickYen:allocatedStakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
     });

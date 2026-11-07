@@ -1,6 +1,6 @@
 'use strict';
 const crypto=require('crypto');
-module.exports=function chooseB(pre,raw){
+module.exports=function chooseB(pre,raw,rule=null){
  const p=JSON.parse(raw.toString());
  if(p.resultIncluded!==false||p.resultEndpointsIncluded!==false||pre.resultInput!==false||pre.payoutInput!==false||pre.immutableAfterFirstWrite!==true)return null;
  if(['date','race','venueCode','deadline'].some(k=>String(p[k])!==String(pre[k])))return null;
@@ -13,5 +13,8 @@ module.exports=function chooseB(pre,raw){
  if(seen.size!==120||Math.abs(weights.reduce((s,x)=>s+x,0)-1)>1e-5)return null;
  const best=xs=>xs.slice().sort((x,y)=>weights[y.lane]-weights[x.lane]||x.lane-y.lane)[0],bb=best(b),aa=best(a);
  if(weights[bb.lane]<=weights[aa.lane])return null;
- return {bLane:bb.lane,bClass:bb.class,bScore:weights[bb.lane],aScore:weights[aa.lane],picks:ranked.filter(x=>Number(x.order[0])===bb.lane).sort((x,y)=>y.probability-x.probability||x.order.localeCompare(y.order)).slice(0,4).map(x=>x.order)};
+ const chosen=ranked.filter(x=>Number(x.order[0])===bb.lane).sort((x,y)=>y.probability-x.probability||x.order.localeCompare(y.order)).slice(0,4);
+ const coverage=chosen.reduce((sum,x)=>sum+x.probability,0),margin=weights[bb.lane]-weights[aa.lane];
+ if(rule&&(margin<rule.minMargin||coverage<rule.minCoverage))return null;
+ return {bLane:bb.lane,bClass:bb.class,bScore:weights[bb.lane],aScore:weights[aa.lane],picks:chosen.map(x=>x.order),...(rule?{autoRank:rule.ranking==='coverage'?coverage:margin,selectionExperimentId:rule.experimentId}:{})};
 };

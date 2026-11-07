@@ -2,7 +2,7 @@ name: B over A isolated SHADOW selector v1
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['TRY odds observer v1']
+    workflows: ['TRY odds observer v1', 'Venue POST-RACE batch generic v1', 'Toda POST-RACE result collector v1', 'Edogawa POST-RACE result collector v1', 'Karatsu POST-RACE result collector v1', 'Mikuni POST-RACE result collector v1', 'Naruto POST-RACE result collector v1', 'Tokuyama POST-RACE result collector v1', 'Ashiya POST-RACE result collector v1']
     types: [completed]
   schedule:
     - cron: '*/15 * * * *'
@@ -11,6 +11,9 @@ on:
     paths:
       - 'scripts/b-over-a-shadow-v1.py'
       - 'scripts/test-b-over-a-shadow-v1.py'
+      - 'scripts/b-over-a-auto-research-v1.py'
+      - 'scripts/test-b-over-a-auto-research-v1.py'
+      - 'research/b-over-a-auto-policy-v1.json'
       - 'scripts/b-over-a-review-v1.py'
       - 'scripts/test-b-over-a-review-v1.py'
       - '.github/workflows/b-over-a-shadow-v1.yml'
@@ -32,8 +35,12 @@ jobs:
         run: python scripts/test-b-over-a-shadow-v1.py
       - name: Verify result and odds boundaries
         run: python scripts/test-b-over-a-review-v1.py
+      - name: Verify autonomous research and TRY boundaries
+        run: |
+          python scripts/test-b-over-a-auto-research-v1.py
+          node scripts/test-shared-try-b-auto-rule-v1.js
       - name: Receive existing odds observer evidence
-        if: github.event_name == 'workflow_run'
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'TRY odds observer v1'
         uses: actions/download-artifact@v4
         with:
           pattern: try-odds-observation-*
@@ -44,7 +51,7 @@ jobs:
       - name: Publish isolated research only
         shell: bash
         env:
-          ODDS_RUN_ID: ${{ github.event.workflow_run.id }}
+          ODDS_RUN_ID: ${{ github.event.workflow_run.name == 'TRY odds observer v1' && github.event.workflow_run.id || '' }}
         run: |
           set -euo pipefail
           git config user.name boat-command-b-over-a-shadow
@@ -59,6 +66,9 @@ jobs:
             else
               python scripts/b-over-a-review-v1.py --repo . --output research/b-over-a-review-latest-v1.json
             fi
+            python scripts/b-over-a-auto-research-v1.py --repo .
+            git add research/b-over-a-auto-state-v1.json research/b-over-a-auto-report-v1.json research/b-over-a-active-rules-v1.json research/b-over-a-auto-daily-v1
+            if test -d research/b-over-a-auto-history-v1; then git add research/b-over-a-auto-history-v1; fi
             git add research/b-over-a-latest-v1.json
             if test -d research/b-over-a-forward-v1; then git add research/b-over-a-forward-v1; fi
             git add research/b-over-a-review-latest-v1.json

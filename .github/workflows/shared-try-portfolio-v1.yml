@@ -9,6 +9,9 @@ on:
       - 'shared-try-config-v1.json'
       - 'scripts/shared-try-portfolio-v1.js'
       - 'scripts/shared-try-b-over-a-v1.js'
+      - 'scripts/shared-try-b-auto-rule-v1.js'
+      - 'scripts/test-shared-try-b-auto-rule-v1.js'
+      - 'research/b-over-a-active-rules-v1.json'
       - 'scripts/test-shared-try-b-over-a-v1.js'
       - 'scripts/venue-post-result-v1.py'
       - 'daily-lab/venue-expansion-policy-v1.json'
@@ -31,6 +34,7 @@ on:
     - cron: '15,35,55 0-15 * * *'
   workflow_run:
     workflows:
+      - 'B over A isolated SHADOW selector v1'
       - 'Venue POST-RACE batch generic v1'
       - 'Toda POST-RACE result collector v1'
       - 'Edogawa POST-RACE result collector v1'
@@ -90,6 +94,7 @@ jobs:
       - name: Build immutable TRY selection and settle shared virtual bankroll
         run: |
           set -euo pipefail
+          node scripts/test-shared-try-b-auto-rule-v1.js
           node scripts/test-shared-try-b-over-a-v1.js
           node --check scripts/shared-try-portfolio-v1.js
           node scripts/shared-try-portfolio-v1.js
