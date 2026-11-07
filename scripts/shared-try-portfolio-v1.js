@@ -6,6 +6,7 @@ const ROOT=path.join(__dirname,'..');
 const CONFIG_PATH=path.join(ROOT,'shared-try-config-v1.json');
 const OUTPUT_PATH=path.join(ROOT,'shared-try-portfolio-v1.json');
 const EXPANSION_POLICY_PATH=path.join(ROOT,'daily-lab','venue-expansion-policy-v1.json');
+const chooseB=require('./shared-try-b-over-a-v1.js');
 const config=JSON.parse(fs.readFileSync(CONFIG_PATH,'utf8'));
 const JST_OFFSET=9*60*60*1000;
 const NOW_MS=process.env.BOAT_COMMAND_NOW_ISO?Date.parse(process.env.BOAT_COMMAND_NOW_ISO):Date.now();
@@ -50,13 +51,21 @@ function safeProgramShadow(adapter,date,race){
   if(basePicks.length!==Number(config.picksPerTry||4))return null;
   let picks=basePicks,expansionVariant=null;
   const policy=activeExpansion(adapter.venueCode,date);
-  if(policy){
+  if(policy&&config.selectionPolicy!=='B_OVER_A_V1'){
     const expanded=x.pointExpansion?.variants?.[policy.candidateVariant];
     if(!Array.isArray(expanded)||![6,8].includes(expanded.length)||expanded.some(v=>!validPick(v)))return null;
     if(JSON.stringify(expanded.slice(0,basePicks.length))!==JSON.stringify(basePicks))return null;
     picks=[...expanded];expansionVariant=policy.candidateVariant;
   }
   const ranked=Array.isArray(x.pointExpansion?.ranked)?x.pointExpansion.ranked:(Array.isArray(x.probabilities)?x.probabilities:[]);
+  const bMode=config.selectionPolicy==='B_OVER_A_V1'&&date>=String(config.selectionPolicyEffectiveDate||'9999-12-31');
+  let bChoice=null;
+  if(bMode){
+    const programPath=path.join(ROOT,'live',adapter.slug,date,'program',`race-${race}.json`);
+    if(!exists(programPath))return null;
+    bChoice=chooseB(x,fs.readFileSync(programPath));if(!bChoice)return null;
+    picks=bChoice.picks;expansionVariant=null;
+  }
   const map=new Map(ranked.map(z=>[String(z.order),Number(z.probability)]));
   const pickProbs=picks.map(k=>map.get(k));
   if(pickProbs.some(v=>!Number.isFinite(v)||v<0))return null;
@@ -68,7 +77,8 @@ function safeProgramShadow(adapter,date,race){
     predictionPath:path.relative(ROOT,p).replace(/\\/g,'/'),predictionSha256:sha256(raw),
     modelVersion:x.modelVersion||null,picks,expansionVariant,
     pickCoverage:pickProbs.reduce((s,v)=>s+v,0),topProbability:Math.max(...pickProbs),
-    sourcePolicy:expansionVariant?'PROGRAM_ONLY_SHADOW_APPROVED_EXPANSION':'PROGRAM_ONLY_SHADOW',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true
+    ...(bChoice?{bClass:bChoice.bClass,bLane:bChoice.bLane,bScore:bChoice.bScore,aScore:bChoice.aScore}:{}),
+    sourcePolicy:bChoice?'B_OVER_A_PROGRAM_ONLY_SHADOW_V1':expansionVariant?'PROGRAM_ONLY_SHADOW_APPROVED_EXPANSION':'PROGRAM_ONLY_SHADOW',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true
   };
 }
 function safeGamagoriGate(adapter,date){
@@ -108,10 +118,17 @@ function priorPortfolio(){
   return read(OUTPUT_PATH)||{startingBankrollYen:start,confirmedBankrollYen:start,availableBankrollYen:start,bankrollYen:start};
 }
 function buildSelection(date,available){
-  const outPath=selectionPath(date);
+  const outPath=selectionPath(date);let superseded=null,supersededRaw=null;
+  const change=config.selectionPolicyChange;
   if(exists(outPath)){
     const prior=read(outPath);
-    if(prior?.immutableAfterFirstWrite===true)return prior;
+    if(prior?.immutableAfterFirstWrite===true){
+      const raw=fs.readFileSync(outPath);
+      const authorized=config.selectionPolicy==='B_OVER_A_V1'&&change?.approvedByOwner===true&&change.date===date&&date===jstDate(NOW_MS)&&sha256(raw)===change.supersedesSelectionSha256;
+      if(!authorized)return prior;
+      if(!prior.selected?.length||prior.selected.some(x=>NOW_MS>=deadlineEpoch(date,x.deadline)-(Number(config.deadlineSafetyMinutes)||5)*60000||resultFor(x)||cancellationFor(x)))throw Error('POLICY_SWITCH_REQUIRES_ALL_OLD_TRY_BEFORE_CUTOFF');
+      superseded=prior;supersededRaw=raw;available+=Number(prior.totalCommittedStakeYen);
+    }else
     throw new Error('EXISTING_SELECTION_NOT_IMMUTABLE');
   }
   if(date!==jstDate(NOW_MS)&&!exists(outPath))throw new Error('NEW_SELECTION_MUST_BE_TODAY');
@@ -142,7 +159,7 @@ function buildSelection(date,available){
       venue.push(x);
     }
     const med=median(venue.map(x=>x.pickCoverage));
-    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:med>0?x.pickCoverage/med:0});
+    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:config.selectionPolicy==='B_OVER_A_V1'?x.bScore-x.aScore:med>0?x.pickCoverage/med:0});
   }
   candidates.sort((a,b)=>b.relativeConfidence-a.relativeConfidence||(Number(b.pickCoverage)||0)-(Number(a.pickCoverage)||0)||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
   const fraction=Math.max(0,Math.min(1,Number(config.selectionFraction)||0.25));
@@ -163,7 +180,7 @@ function buildSelection(date,available){
     selected.push({
       rank:selected.length+1,venueCode:x.venueCode,venue:x.venue,slug:x.slug,date:x.date,race:x.race,
       deadline:x.deadline,generatedAt:x.generatedAt,modelVersion:x.modelVersion,sourcePolicy:x.sourcePolicy,
-      predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,picks:x.picks,expansionVariant:x.expansionVariant||null,
+      predictionPath:x.predictionPath,predictionSha256:x.predictionSha256,...(x.bLane?{bLane:x.bLane,bClass:x.bClass,bScore:x.bScore,aScore:x.aScore}:{}),picks:x.picks,expansionVariant:x.expansionVariant||null,
       pickCoverage:x.pickCoverage,venueMedianCoverage:x.venueMedianCoverage,relativeConfidence:x.relativeConfidence,
       stakePerPickYen:allocatedStakePerPick,stakeYen:stakePerRace,resultInput:false,payoutInput:false
     });
@@ -181,7 +198,13 @@ function buildSelection(date,available){
     status:available<=0?'BANKRUPT_NO_NEW_TRY':selected.length?'TRY_FROZEN':risk&&candidates.length?'RISK_BUDGET_NO_TRY':'NO_ELIGIBLE_PRE_RACE_CANDIDATES'
   };
   // Do not permanently freeze an empty day before PRE-RACE data arrives.
-  if(!selected.length&&available>0)return payload;
+  if(!selected.length&&available>0)return superseded||payload;
+  if(superseded){
+    const archive=path.join(path.dirname(outPath),'selection-history',`before-b-over-a-${change.supersedesSelectionSha256}.json`);
+    fs.mkdirSync(path.dirname(archive),{recursive:true});
+    if(exists(archive)){if(!fs.readFileSync(archive).equals(supersededRaw))throw Error('SELECTION_ARCHIVE_CONFLICT')}else fs.writeFileSync(archive,supersededRaw,{flag:'wx'});
+    payload.supersedes={sha256:change.supersedesSelectionSha256,archivePath:path.relative(ROOT,archive),reason:'OWNER_REQUESTED_IMMEDIATE_B_OVER_A_SWITCH',approvedAt:change.approvedAt,replacedAt:new Date(NOW_MS).toISOString()};
+  }
   fs.mkdirSync(path.dirname(outPath),{recursive:true});
   fs.writeFileSync(outPath,JSON.stringify(payload,null,2)+'\n');
   return payload;

@@ -1,0 +1,7 @@
+'use strict';
+const assert=require('assert'),crypto=require('crypto'),choose=require('./shared-try-b-over-a-v1.js');
+function fixture(){const p={date:'2026-11-07',race:1,venueCode:'02',deadline:'12:00',fetchedAt:'2026-11-06T22:00:00Z',resultIncluded:false,resultEndpointsIncluded:false,boats:[1,2,3,4,5,6].map(lane=>({lane,class:lane===1?'B1':'A1'}))};const raw=Buffer.from(JSON.stringify(p)),s={...p,generatedAt:'2026-11-06T22:01:00Z',resultInput:false,payoutInput:false,immutableAfterFirstWrite:true,sources:{programSha256:crypto.createHash('sha256').update(raw).digest('hex')},pointExpansion:{ranked:[]}};const w=[.4,.3,.1,.08,.07,.05];for(let i=1;i<=6;i++)for(let j=1;j<=6;j++)for(let k=1;k<=6;k++)if(new Set([i,j,k]).size===3)s.pointExpansion.ranked.push({order:`${i}-${j}-${k}`,probability:w[i-1]/20});return{p,raw,s}}
+let {raw,s}=fixture();assert.strictEqual(choose(s,raw).bLane,1);assert(choose(s,raw).picks.every(x=>x.startsWith('1-')));
+for(const mutate of [x=>x.resultInput=true,x=>x.sources.programSha256='bad',x=>x.deadline='13:00',x=>x.pointExpansion.ranked.pop(),x=>x.pointExpansion.ranked[0].probability=NaN,x=>x.generatedAt='2026-11-06T21:00:00Z']){const f=fixture();mutate(f.s);assert.strictEqual(choose(f.s,f.raw),null)}
+({raw,s}=fixture());s.pointExpansion.ranked.forEach(x=>{const lane=Number(x.order[0]);if(lane===1)x.probability=.3/20;if(lane===2)x.probability=.4/20});assert.strictEqual(choose(s,raw),null);
+console.log('B_OVER_A_8_BOUNDARIES_PASS');
