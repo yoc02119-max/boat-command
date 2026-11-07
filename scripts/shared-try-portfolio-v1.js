@@ -6,7 +6,6 @@ const ROOT=path.join(__dirname,'..');
 const CONFIG_PATH=path.join(ROOT,'shared-try-config-v1.json');
 const OUTPUT_PATH=path.join(ROOT,'shared-try-portfolio-v1.json');
 const EXPANSION_POLICY_PATH=path.join(ROOT,'daily-lab','venue-expansion-policy-v1.json');
-const chooseB=require('./shared-try-b-over-a-v1.js');
 const config=JSON.parse(fs.readFileSync(CONFIG_PATH,'utf8'));
 const JST_OFFSET=9*60*60*1000;
 const NOW_MS=process.env.BOAT_COMMAND_NOW_ISO?Date.parse(process.env.BOAT_COMMAND_NOW_ISO):Date.now();
@@ -51,7 +50,7 @@ function safeProgramShadow(adapter,date,race){
   if(basePicks.length!==Number(config.picksPerTry||4))return null;
   let picks=basePicks,expansionVariant=null;
   const policy=activeExpansion(adapter.venueCode,date);
-  if(policy&&config.selectionPolicy!=='B_OVER_A_V1'){
+  if(policy&&!(config.selectionPolicy==='B_OVER_A_V1'&&date>=String(config.selectionPolicyEffectiveDate||'9999-12-31'))){
     const expanded=x.pointExpansion?.variants?.[policy.candidateVariant];
     if(!Array.isArray(expanded)||![6,8].includes(expanded.length)||expanded.some(v=>!validPick(v)))return null;
     if(JSON.stringify(expanded.slice(0,basePicks.length))!==JSON.stringify(basePicks))return null;
@@ -63,7 +62,7 @@ function safeProgramShadow(adapter,date,race){
   if(bMode){
     const programPath=path.join(ROOT,'live',adapter.slug,date,'program',`race-${race}.json`);
     if(!exists(programPath))return null;
-    bChoice=chooseB(x,fs.readFileSync(programPath));if(!bChoice)return null;
+    bChoice=require('./shared-try-b-over-a-v1.js')(x,fs.readFileSync(programPath));if(!bChoice)return null;
     picks=bChoice.picks;expansionVariant=null;
   }
   const map=new Map(ranked.map(z=>[String(z.order),Number(z.probability)]));
@@ -159,7 +158,7 @@ function buildSelection(date,available){
       venue.push(x);
     }
     const med=median(venue.map(x=>x.pickCoverage));
-    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:config.selectionPolicy==='B_OVER_A_V1'?x.bScore-x.aScore:med>0?x.pickCoverage/med:0});
+    for(const x of venue)candidates.push({...x,venueMedianCoverage:med,relativeConfidence:config.selectionPolicy==='B_OVER_A_V1'&&date>=String(config.selectionPolicyEffectiveDate||'9999-12-31')?x.bScore-x.aScore:med>0?x.pickCoverage/med:0});
   }
   candidates.sort((a,b)=>b.relativeConfidence-a.relativeConfidence||(Number(b.pickCoverage)||0)-(Number(a.pickCoverage)||0)||a.venueCode.localeCompare(b.venueCode)||a.race-b.race);
   const fraction=Math.max(0,Math.min(1,Number(config.selectionFraction)||0.25));
