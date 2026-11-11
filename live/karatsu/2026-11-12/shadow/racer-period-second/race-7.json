@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "KARATSU",
+  "venueCode": "23",
+  "slug": "karatsu",
+  "date": "2026-11-12",
+  "race": 7,
+  "generatedAt": "2026-11-11T15:05:14.249Z",
+  "deadline": "11:37",
+  "modelVersion": "KARATSU-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-5-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-5-3",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.3,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.029046,
+    "holdoutSecondDeltaVsTop": 0.037344,
+    "holdoutExactDeltaVsTop": 0.011468,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/karatsu/2026-11-12/program/race-7.json",
+    "programSha256": "00edfc8c2e15fb88ed8973c9ff61d800f465aa0900c34dc312a2df5b5c38ed0b",
+    "historyPath": "karatsu-history-bootstrap-v1.json",
+    "baselinePath": "karatsu-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    0.1383321546086123,
+    -0.23391813115642013,
+    -0.1482277628778258,
+    0.022395715579549058,
+    2.18627165485133,
+    -1.9648536310052465
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}

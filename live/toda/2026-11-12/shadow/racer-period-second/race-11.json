@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "TODA",
+  "venueCode": "02",
+  "slug": "toda",
+  "date": "2026-11-12",
+  "race": 11,
+  "generatedAt": "2026-11-11T15:05:14.249Z",
+  "deadline": "15:23",
+  "modelVersion": "TODA-RESEARCH-MODEL-V1",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-4-2",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-2-3",
+  "periodCandidateOrder": "1-2-3",
+  "selectedPreset": "TOP3_GLOBAL",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.06962,
+    "holdoutSecondDeltaVsTop": 0.094937,
+    "holdoutExactDeltaVsTop": 0.004608,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/toda/2026-11-12/program/race-11.json",
+    "programSha256": "943a0a5d2ce56531a705d6fb8b4486378fcff9e91f46dfead4a6aeddc14681b9",
+    "historyPath": "toda-history-bootstrap-v1.json",
+    "baselinePath": "toda-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    1.0847740282678258,
+    0.1904933983883866,
+    -1.9432368044310162,
+    0.09373211554717137,
+    -0.8359279502094938,
+    1.410165212437125
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
