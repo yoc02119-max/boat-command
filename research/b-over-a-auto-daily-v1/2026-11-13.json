@@ -1,0 +1,1599 @@
+{
+  "sourceHead": "ce5f09003bd6689d4825e7be4b1f1099521b9151",
+  "analysisCodeSha256": "7381e486de62843ccac2e99fde623f8176d45d48f52f8e0a9a99ae1a9a0c929c",
+  "schema": "b-over-a-auto-report-v1",
+  "generatedAt": "2026-11-12T15:36:56.888101+00:00",
+  "date": "2026-11-13",
+  "policy": {
+    "schema": "b-over-a-auto-research-policy-v1",
+    "version": 1,
+    "enabled": true,
+    "ownerAuthorization": {
+      "dateJst": "2026-11-07",
+      "scope": "B級研究の仮説生成・独立検証・結果記録・修正案と次回未確定TRYへの自動接続。既存24場モデル承認、資金上限、確定済み予想は変更しない。"
+    },
+    "effectiveDate": "2026-11-08",
+    "training": {
+      "minimumRaces": 50,
+      "minimumDays": 5
+    },
+    "validation": {
+      "minimumPairedRaces": 100,
+      "minimumDays": 20,
+      "minimumCandidateRoi": 1.05,
+      "bootstrapSamples": 2000,
+      "familyAlpha": 0.01,
+      "requirePositiveProfitWithoutBestDay": true
+    },
+    "comparison": {
+      "picks": 4,
+      "stakePerPick": 100,
+      "maximumRacesPerVenueDay": 3,
+      "equalRaceCountEachDay": true,
+      "missingResults": "WAIT_DO_NOT_COUNT_AS_LOSS",
+      "decisionTimeJst": "07:30",
+      "requireFirstRecordedBeforeDecision": true
+    },
+    "search": {
+      "marginQuantiles": [
+        0,
+        0.5,
+        0.75
+      ],
+      "coverageQuantiles": [
+        0,
+        0.5,
+        0.75
+      ],
+      "rankings": [
+        "margin",
+        "coverage"
+      ],
+      "maximumVariantsPerRound": 18
+    },
+    "promotion": {
+      "scope": "VENUE_SELECTION_FILTER_AND_RANKING_ONLY",
+      "effective": "NEXT_JST_DAY",
+      "changeFrozenSelection": false,
+      "changeModels": false,
+      "changeFunds": false
+    }
+  },
+  "policySha256": "01b938d8228f1a3c4e32897fb76dcda808f410f75d2dd36b8d4c03b700fbf225",
+  "venues": [
+    {
+      "venueCode": "01",
+      "phase": "COLLECTING",
+      "recorded": 24,
+      "availableAtMorningDecision": 24,
+      "closedResults": 8,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 42,
+      "trainingRemainingDays": 3,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "02",
+      "phase": "COLLECTING",
+      "recorded": 43,
+      "availableAtMorningDecision": 43,
+      "closedResults": 13,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 37,
+      "trainingRemainingDays": 1,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "03",
+      "phase": "COLLECTING",
+      "recorded": 23,
+      "availableAtMorningDecision": 23,
+      "closedResults": 5,
+      "resultMissing": 1,
+      "trainingRemainingRaces": 45,
+      "trainingRemainingDays": 3,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "04",
+      "phase": "COLLECTING",
+      "recorded": 31,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "05",
+      "phase": "COLLECTING",
+      "recorded": 59,
+      "availableAtMorningDecision": 35,
+      "closedResults": 19,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 31,
+      "trainingRemainingDays": 2,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "06",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "07",
+      "phase": "COLLECTING",
+      "recorded": 46,
+      "availableAtMorningDecision": 22,
+      "closedResults": 11,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 39,
+      "trainingRemainingDays": 3,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "08",
+      "phase": "COLLECTING",
+      "recorded": 43,
+      "availableAtMorningDecision": 23,
+      "closedResults": 8,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 42,
+      "trainingRemainingDays": 3,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "09",
+      "phase": "COLLECTING",
+      "recorded": 28,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "10",
+      "phase": "COLLECTING",
+      "recorded": 45,
+      "availableAtMorningDecision": 45,
+      "closedResults": 20,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 30,
+      "trainingRemainingDays": 1,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "11",
+      "phase": "COLLECTING",
+      "recorded": 46,
+      "availableAtMorningDecision": 46,
+      "closedResults": 14,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 36,
+      "trainingRemainingDays": 1,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "12",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "13",
+      "phase": "COLLECTING",
+      "recorded": 11,
+      "availableAtMorningDecision": 11,
+      "closedResults": 6,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 44,
+      "trainingRemainingDays": 4,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "14",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "15",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "16",
+      "phase": "COLLECTING",
+      "recorded": 21,
+      "availableAtMorningDecision": 11,
+      "closedResults": 5,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 45,
+      "trainingRemainingDays": 4,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "17",
+      "phase": "COLLECTING",
+      "recorded": 43,
+      "availableAtMorningDecision": 31,
+      "closedResults": 12,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 38,
+      "trainingRemainingDays": 2,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "18",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "19",
+      "phase": "COLLECTING",
+      "recorded": 62,
+      "availableAtMorningDecision": 62,
+      "closedResults": 23,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 27,
+      "trainingRemainingDays": 0,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "20",
+      "phase": "COLLECTING",
+      "recorded": 0,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "21",
+      "phase": "COLLECTING",
+      "recorded": 54,
+      "availableAtMorningDecision": 54,
+      "closedResults": 10,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 40,
+      "trainingRemainingDays": 0,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "22",
+      "phase": "COLLECTING",
+      "recorded": 35,
+      "availableAtMorningDecision": 35,
+      "closedResults": 17,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 33,
+      "trainingRemainingDays": 2,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "23",
+      "phase": "COLLECTING",
+      "recorded": 41,
+      "availableAtMorningDecision": 22,
+      "closedResults": 11,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 39,
+      "trainingRemainingDays": 3,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    },
+    {
+      "venueCode": "24",
+      "phase": "COLLECTING",
+      "recorded": 23,
+      "availableAtMorningDecision": 0,
+      "closedResults": 0,
+      "resultMissing": 0,
+      "trainingRemainingRaces": 50,
+      "trainingRemainingDays": 5,
+      "activeRule": {
+        "minMargin": 0.0,
+        "minCoverage": 0.0,
+        "ranking": "margin"
+      },
+      "nextRule": null
+    }
+  ],
+  "excluded": {},
+  "recorded": 678,
+  "profitability": "NOT_PROVEN",
+  "productionModelsChanged": false,
+  "ruleSearch": "PREDECLARED_MARGIN_COVERAGE_RANKING_ONLY",
+  "dailyHypotheses": [
+    {
+      "venueCode": "01",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.052201,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.052201,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.198406,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.198406,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0.052201,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0.052201,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0.198406,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.303186,
+          "minCoverage": 0.198406,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "02",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.083967,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.083967,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.119143,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.119143,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0.083967,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0.083967,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0.119143,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.021616,
+          "minCoverage": 0.119143,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "03",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.061682,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.061682,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.088739,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.088739,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "04",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "05",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.161038,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.161038,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.178733,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.178733,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0.161038,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0.161038,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0.178733,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.165099,
+          "minCoverage": 0.178733,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0.161038,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0.161038,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0.178733,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.234483,
+          "minCoverage": 0.178733,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "06",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "07",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.179688,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.179688,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.188966,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.188966,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0.179688,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0.179688,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0.188966,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.246901,
+          "minCoverage": 0.188966,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0.179688,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0.179688,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0.188966,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.31455,
+          "minCoverage": 0.188966,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "08",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.059477,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.059477,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.188155,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.188155,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0.059477,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0.059477,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0.188155,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.250376,
+          "minCoverage": 0.188155,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "09",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "10",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.053923,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.053923,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.190118,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.190118,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0.053923,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0.053923,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0.190118,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.293222,
+          "minCoverage": 0.190118,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "11",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.073449,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.073449,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.15626,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.15626,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0.073449,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0.073449,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0.15626,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.232105,
+          "minCoverage": 0.15626,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "12",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "13",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.159804,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.159804,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.171373,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.171373,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0.159804,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0.159804,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0.171373,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.212563,
+          "minCoverage": 0.171373,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0.159804,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0.159804,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0.171373,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.261256,
+          "minCoverage": 0.171373,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "14",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "15",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "16",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.062325,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.062325,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.164204,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.164204,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0.062325,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0.062325,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0.164204,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.222701,
+          "minCoverage": 0.164204,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "17",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.044673,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.044673,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.152456,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.152456,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0.044673,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0.044673,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0.152456,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.264751,
+          "minCoverage": 0.152456,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "18",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "19",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.041076,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.041076,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.240471,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.240471,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0.041076,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0.041076,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0.240471,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.45089,
+          "minCoverage": 0.240471,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "20",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "21",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.044241,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.044241,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.056281,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.056281,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "22",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.073477,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.073477,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.265094,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.265094,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0.073477,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0.073477,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0.265094,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.39088,
+          "minCoverage": 0.265094,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "23",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.060664,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.060664,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.213874,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0.213874,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0.060664,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0.060664,
+          "ranking": "coverage"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0.213874,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0.315242,
+          "minCoverage": 0.213874,
+          "ranking": "coverage"
+        }
+      ]
+    },
+    {
+      "venueCode": "24",
+      "ideas": [
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "margin"
+        },
+        {
+          "minMargin": 0,
+          "minCoverage": 0,
+          "ranking": "coverage"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "COLLECTING": 24
+  }
+}
