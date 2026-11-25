@@ -1,0 +1,61 @@
+{
+  "schema": "boat-command-racer-period-forward-shadow-v1",
+  "version": "RACER-PERIOD-FORWARD-SHADOW-V1",
+  "venue": "EDOGAWA",
+  "venueCode": "03",
+  "slug": "edogawa",
+  "date": "2026-11-26",
+  "race": 10,
+  "generatedAt": "2026-11-25T20:53:04.475Z",
+  "deadline": "14:59",
+  "modelVersion": "EDOGAWA-RESEARCH-MODEL-V2",
+  "firstPlaceSource": "FROZEN_EXISTING_VENUE_MODEL_TOP_ORDER",
+  "firstPlaceMutation": false,
+  "baselineTopOrder": "1-4-3",
+  "baselineFirst": 1,
+  "marginalSecondOrder": "1-4-3",
+  "periodCandidateOrder": "1-4-3",
+  "selectedPreset": "START_COURSE",
+  "selectedLambda": 0.5,
+  "selectedFromHistoricalDesign": "2026_H1_ONLY",
+  "historicalEvidence": {
+    "strongModelDistributionHoldoutReport": "research/racer-period-second-place-shadow-v1.json",
+    "mixedSimplifiedRankingReport": "research/racer-period-second-place-audit-v1.json",
+    "ticketExpansionReport": "research/period-second-expansion-v1.json",
+    "holdoutSecondDeltaVsMarginal": 0.041958,
+    "holdoutSecondDeltaVsTop": 0.027972,
+    "holdoutExactDeltaVsTop": 0.005435,
+    "forwardValidationRequired": true
+  },
+  "sources": {
+    "programPath": "live/edogawa/2026-11-26/program/race-10.json",
+    "programSha256": "9c410bea5e8ee4dddfe419e4ad4f62815d5b16c0d6242528da91387ae8ba1b81",
+    "historyPath": "edogawa-history-bootstrap-v1.json",
+    "baselinePath": "edogawa-baseline-backtest-v1.json",
+    "periodPackPath": "racer-period-24/2026-2.json",
+    "parameterReportPath": "research/racer-period-second-place-shadow-v1.json"
+  },
+  "periodJoin": {
+    "policy": "RACE_DATE_PERIOD + REGISTRATION + CLASS_MATCH_REQUIRED",
+    "allSixMatched": true,
+    "period": "2026-2"
+  },
+  "candidateFeatureScoreByLane": [
+    3.9253397005345647,
+    -1.491065755201807,
+    -2.898353885812401,
+    0.42445104475051565,
+    0.41301512097441834,
+    -0.37338622524528653
+  ],
+  "resultInput": false,
+  "payoutInput": false,
+  "researchOnly": true,
+  "productionEnabled": false,
+  "tryEnabled": false,
+  "cashNeutral": true,
+  "hardLockEnabled": false,
+  "bankrollMutation": false,
+  "immutableAfterFirstWrite": true,
+  "promotionEligible": false
+}
